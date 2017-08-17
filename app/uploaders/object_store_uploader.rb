@@ -98,7 +98,7 @@ class ObjectStoreUploader < CarrierWave::Uploader::Base
   end
 
   def fog_directory
-    self.class.object_store_options.remote_directory
+    self.class.object_store_options.object_store.remote_directory
   end
 
   def fog_credentials
