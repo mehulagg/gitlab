@@ -159,6 +159,10 @@ class CommitStatus < ActiveRecord::Base
     false
   end
 
+  def finished?
+    !finished_at.nil?
+  end
+
   def auto_canceled?
     canceled? && auto_canceled_by_id?
   end

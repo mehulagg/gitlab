@@ -58,6 +58,41 @@ describe ArtifactUploader do
     it { is_expected.to end_with('/tmp/work') }
   end
 
+  describe 'migration to object storage' do
+    context 'with object storage disabled' do
+      it "is skipped" do
+        expect(ObjectStorageUploadWorker).not_to receive(:perform_async)
+
+        job
+      end
+    end
+
+    context 'with object storage enabled' do
+      before do
+        stub_artifacts_object_storage
+      end
+
+      it 'is scheduled to run after creation' do
+        expect(ObjectStorageUploadWorker).to receive(:perform_async).with(described_class.name, 'Ci::Build', :artifacts_file, kind_of(Numeric))
+        expect(ObjectStorageUploadWorker).to receive(:perform_async).with(described_class.name, 'Ci::Build', :artifacts_metadata, kind_of(Numeric))
+
+        job
+      end
+    end
+
+    context 'with object storage unlicenced' do
+      before do
+        stub_artifacts_object_storage(licensed: false)
+      end
+
+      it 'is skipped' do
+        expect(ObjectStorageUploadWorker).not_to receive(:perform_async)
+
+        job
+      end
+    end
+  end
+
   describe '#filename' do
     # we need to use uploader, as this makes to use mounter
     # which initialises uploader.file object

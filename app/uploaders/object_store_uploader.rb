@@ -118,12 +118,13 @@ class ObjectStoreUploader < CarrierWave::Uploader::Base
           raise e
         end
 
+
         old_file.delete
       end
     end
   end
 
-  def schedule_migration_to_object_storage(new_file)
+  def schedule_migration_to_object_storage(*)
     if self.class.object_store_enabled? && licensed? && file_storage?
       ObjectStorageUploadWorker.perform_async(self.class.name, subject.class.name, field, subject.id)
     end

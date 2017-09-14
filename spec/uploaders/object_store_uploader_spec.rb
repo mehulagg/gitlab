@@ -152,6 +152,8 @@ describe ObjectStoreUploader do
 
         before do
           stub_artifacts_object_storage
+          allow(Gitlab.config.artifacts.object_store)
+            .to receive(:background_upload).and_return(false)
         end
 
         it "local file does not exist" do

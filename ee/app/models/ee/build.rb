@@ -8,6 +8,16 @@ module EE
 
     included do
       after_save :stick_build_if_status_changed
+      after_commit :schedule_migration_to_object_storage
+    end
+
+    # Doing it after the commit circumvents the scheduling of jobs for sidekiq
+    # in a transaction
+    def schedule_migration_to_object_storage
+      if finished?
+        artifacts_file.schedule_migration_to_object_storage
+        artifacts_metadata.schedule_migration_to_object_storage
+      end
     end
 
     def shared_runners_minutes_limit_enabled?
