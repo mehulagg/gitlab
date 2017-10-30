@@ -9,7 +9,7 @@
     * [Modify Headers](https://addons.mozilla.org/en-US/firefox/addon/modify-headers/) Firefox extension
     * `curl --header 'X-Profile-Token: <token>' https://gitlab.example.com/group/project`
 1. Once request is finished (which will take a little longer than usual), you can
-view the profiling output from `Monitoring > Requests Profiles` admin page.
+view the profiling output from `Monitoring > Requests Profiles` admin page by clicking the link of relevant timestamp when the profiling was taken.
 ![Profiling output](img/request_profile_result.png)
 
 ## Cleaning up
