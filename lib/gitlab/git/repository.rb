@@ -93,9 +93,29 @@ module Gitlab
       end
 
       def rugged
-        @rugged ||= circuit_breaker.perform do
-          Rugged::Repository.new(path, alternates: alternate_object_directories)
+        return @rugged if @rugged
+
+        @rugged = Rugged::Repository.new(path, alternates: alternate_object_directories)
+        @rugged.class_eval do
+          [:fetch_attributes, :merge_bases, :workdir=, :merge_analysis,
+           :merge_commits, :ref, :index, :revert_commit, :path_ignored?, :lookup,
+           :ahead_behind, :each_id, :reset_path, :checkout_index, :namespace, :checkout_tree,
+           :cherrypick_commit, :attributes, :create_branch, :references, :cherrypick, :default_signature,
+           :branches, :empty?, :reset, :head, :ref_names, :last_commit, :exists?, :refs,
+           :config, :submodules, :merge_base, :checkout_head, :read, :write, :rev_parse,
+           :checkout, :default_notes_ref, :remotes, :each_note, :head_detached?, :head_unborn?,
+           :rev_parse_oid, :blob_at, :head=, :index=, :diff_workdir, :walk, :status, :path,
+           :namespace=, :expand_oids, :descendant_of?, :read_header, :config=, :workdir,
+           :close, :ident, :ident=, :bare?, :shallow?, :tags, :fetch, :diff, :push].each do |meth|
+             define_method meth do |*args|
+               puts '-+-' * 20
+               puts caller[0..3]
+               puts '-+-' * 20
+               super(*args)
+             end
+           end
         end
+        @rugged
       rescue Rugged::RepositoryError, Rugged::OSError
         raise NoRepository.new('no repository for such path')
       end
