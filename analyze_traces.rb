@@ -1,7 +1,7 @@
 require 'json'
 require 'net/http'
 
-PIPELINE_ID = 
+PIPELINE_ID = 14800909
 MARKER = '-+-' * 20
 OCCURANCES = Hash.new { |hash, key| hash[key] = 0 }
 
@@ -27,9 +27,14 @@ def analyze_trace(id)
 end
 
 def job_ids
+  pipeline_json = Net::HTTP.get(URI("https://gitlab.com/gitlab-org/gitlab-ee/pipelines/#{PIPELINE_ID}"))
+  json = JSON.parse(pipeline_json)
+
+  # :vomit-rocket:
+  json['details']['stages'][2]['groups'].flat_map { |g| g['jobs'].map { |j| j['id'] } }
 end
 
-JOB_IDS.map { |id| analyze_trace(id) }
+job_ids.map { |id| analyze_trace(id) }
 
 OCCURANCES.sort_by { |_, v| v }.each do |trace, count|
   puts trace
