@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Geo::RepositorySyncService do
   include ::EE::GeoHelpers
 
-  set(:primary) { create(:geo_node, :primary, host: 'primary-geo-node', relative_url_root: '/gitlab') }
+  set(:primary) { create(:geo_node, :primary) }
   set(:secondary) { create(:geo_node) }
 
   let(:lease) { double(try_obtain: true) }
@@ -19,7 +19,7 @@ describe Geo::RepositorySyncService do
   describe '#execute' do
     let(:project) { create(:project_empty_repo) }
     let(:repository) { project.repository }
-    let(:url_to_repo) { "#{primary.url}/#{project.full_path}.git" }
+    let(:url_to_repo) { "#{primary.url}#{project.full_path}.git" }
 
     before do
       allow(Gitlab::ExclusiveLease).to receive(:new)
@@ -50,6 +50,12 @@ describe Geo::RepositorySyncService do
         subject.__send__(:lease_key), anything).and_call_original
 
       subject.execute
+    end
+
+    it 'voids the failure message when it succeeds after an error' do
+      registry = create(:geo_project_registry, project: project, last_repository_sync_failure: 'error')
+
+      expect { subject.execute }.to change { registry.reload.last_repository_sync_failure}.to(nil)
     end
 
     it 'returns the lease when sync fail' do
@@ -145,7 +151,7 @@ describe Geo::RepositorySyncService do
         let(:registry) { Geo::ProjectRegistry.find_by(project_id: project.id) }
 
         before do
-          allow(repository).to receive(:fetch_as_mirror).with(url_to_repo, forced: true) { raise Gitlab::Shell::Error }
+          allow(repository).to receive(:fetch_as_mirror).with(url_to_repo, forced: true) { raise Gitlab::Shell::Error, 'shell error' }
 
           subject.execute
         end
@@ -164,6 +170,10 @@ describe Geo::RepositorySyncService do
 
         it 'resets repository_retry_at' do
           expect(registry.repository_retry_at).to be_present
+        end
+
+        it 'sets last_repository_sync_failure' do
+          expect(registry.last_repository_sync_failure).to eq('Error syncing repository: shell error')
         end
       end
     end
@@ -223,22 +233,6 @@ describe Geo::RepositorySyncService do
         # of range" in the first update to the project registry.
         registry.reload
         expect(registry.repository_retry_at).to be_nil
-      end
-    end
-
-    context 'secondary replicates over SSH' do
-      set(:ssh_secondary) { create(:geo_node, :ssh) }
-
-      let(:url_to_repo) { "#{primary.clone_url_prefix}/#{project.full_path}.git" }
-
-      before do
-        stub_current_geo_node(ssh_secondary)
-      end
-
-      it 'fetches wiki repository over SSH' do
-        expect(repository).to receive(:fetch_as_mirror).with(url_to_repo, forced: true).once
-
-        subject.execute
       end
     end
   end

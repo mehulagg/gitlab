@@ -44,9 +44,6 @@ import './commits';
 import './compare';
 import './compare_autocomplete';
 import './confirm_danger_modal';
-import './copy_to_clipboard';
-import './diff';
-import './files_comment_button';
 import Flash, { removeFlashClickListener } from './flash';
 import './gl_dropdown';
 import './gl_field_error';
@@ -319,6 +316,8 @@ $(function () {
   const flashContainer = document.querySelector('.flash-container');
 
   if (flashContainer && flashContainer.children.length) {
-    removeFlashClickListener(flashContainer.children[0]);
+    flashContainer.querySelectorAll('.flash-alert, .flash-notice, .flash-success').forEach((flashEl) => {
+      removeFlashClickListener(flashEl);
+    });
   }
 });

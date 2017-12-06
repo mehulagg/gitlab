@@ -1,39 +1,36 @@
 class GeoNode < ActiveRecord::Base
+  include IgnorableColumn
   include Presentable
 
-  belongs_to :geo_node_key, inverse_of: :geo_node, dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
+  ignore_column :clone_protocol
+  ignore_column :geo_node_key_id
+
   belongs_to :oauth_application, class_name: 'Doorkeeper::Application', dependent: :destroy # rubocop: disable Cop/ActiveRecordDependent
 
   has_many :geo_node_namespace_links
   has_many :namespaces, through: :geo_node_namespace_links
   has_one :status, class_name: 'GeoNodeStatus'
 
-  default_values schema: lambda { Gitlab.config.gitlab.protocol },
-                 host: lambda { Gitlab.config.gitlab.host },
-                 port: lambda { Gitlab.config.gitlab.port },
-                 relative_url_root: lambda { Gitlab.config.gitlab.relative_url_root },
-                 primary: false,
-                 clone_protocol: 'http'
+  default_values url: ->(record) { record.class.current_node_url },
+                 primary: false
 
-  accepts_nested_attributes_for :geo_node_key
+  validates :url, presence: true, uniqueness: { case_sensitive: false }
+  validate :check_url_is_valid
 
-  validates :host, host: true, presence: true, uniqueness: { case_sensitive: false, scope: :port }
   validates :primary, uniqueness: { message: 'node already exists' }, if: :primary
-  validates :schema, inclusion: %w(http https)
-  validates :relative_url_root, length: { minimum: 0, allow_nil: false }
+
   validates :access_key, presence: true
   validates :encrypted_secret_access_key, presence: true
-  validates :clone_protocol, presence: true, inclusion: %w(ssh http)
 
-  validates :geo_node_key, presence: true, if: :uses_ssh_key?
   validate :check_not_adding_primary_as_secondary, if: :secondary?
 
-  after_initialize :build_dependents
   after_save :expire_cache!
   after_destroy :expire_cache!
   before_validation :update_dependents_attributes
 
   before_validation :ensure_access_keys!
+
+  scope :with_url_prefix, ->(prefix) { where('url LIKE ?', "#{prefix}%") }
 
   attr_encrypted :secret_access_key,
                  key: Gitlab::Application.secrets.db_key_base,
@@ -41,10 +38,27 @@ class GeoNode < ActiveRecord::Base
                  mode: :per_attribute_iv,
                  encode: true
 
+  class << self
+    def current_node_url
+      RequestStore.fetch('geo_node:current_node_url') do
+        cfg = Gitlab.config.gitlab
+
+        uri = URI.parse("#{cfg.protocol}://#{cfg.host}:#{cfg.port}#{cfg.relative_url_root}")
+        uri.path += '/' unless uri.path.end_with?('/')
+
+        uri.to_s
+      end
+    end
+
+    def current_node
+      return unless column_names.include?('url')
+
+      GeoNode.find_by(url: current_node_url)
+    end
+  end
+
   def current?
-    host == Gitlab.config.gitlab.host &&
-      port == Gitlab.config.gitlab.port &&
-      relative_url_root == Gitlab.config.gitlab.relative_url_root
+    self.class.current_node_url == url
   end
 
   def secondary?
@@ -55,24 +69,23 @@ class GeoNode < ActiveRecord::Base
     secondary? && clone_protocol == 'ssh'
   end
 
-  def uri
-    if relative_url_root
-      relative_url = relative_url_root.starts_with?('/') ? relative_url_root : "/#{relative_url_root}"
-    end
-
-    URI.parse(URI::Generic.build(scheme: schema, host: host, port: port, path: relative_url).normalize.to_s)
-  end
-
   def url
-    uri.to_s
+    value = read_attribute(:url)
+    value += '/' if value.present? && !value.end_with?('/')
+
+    value
   end
 
-  def url=(new_url)
-    new_uri = URI.parse(new_url)
-    self.schema = new_uri.scheme
-    self.host = new_uri.host
-    self.port = new_uri.port
-    self.relative_url_root = new_uri.path != '/' ? new_uri.path : ''
+  def url=(value)
+    value += '/'  if value.present? && !value.end_with?('/')
+
+    write_attribute(:url, value)
+
+    @uri = nil
+  end
+
+  def uri
+    @uri ||= URI.parse(url) if url.present?
   end
 
   def geo_transfers_url(file_type, file_id)
@@ -150,6 +163,17 @@ class GeoNode < ActiveRecord::Base
     end
   end
 
+  def filtered_project_registries(type = nil)
+    case type
+    when 'repository'
+      project_registries.failed_repos
+    when 'wiki'
+      project_registries.failed_wikis
+    else
+      project_registries.failed
+    end
+  end
+
   def uploads
     if restricted_project_ids
       uploads_table   = Upload.arel_table
@@ -203,7 +227,7 @@ class GeoNode < ActiveRecord::Base
   private
 
   def geo_api_url(suffix)
-    URI.join(uri, "#{uri.path}/", "api/#{API::API.version}/geo/#{suffix}").to_s
+    URI.join(uri, "#{uri.path}", "api/#{API::API.version}/geo/#{suffix}").to_s
   end
 
   def ensure_access_keys!
@@ -216,26 +240,10 @@ class GeoNode < ActiveRecord::Base
   end
 
   def url_helper_args
-    if relative_url_root
-      relative_url = relative_url_root.starts_with?('/') ? relative_url_root : "/#{relative_url_root}"
-    end
-
-    { protocol: schema, host: host, port: port, script_name: relative_url }
-  end
-
-  def build_dependents
-    build_geo_node_key if new_record? && secondary? && geo_node_key.nil?
+    { protocol: uri.scheme, host: uri.host, port: uri.port, script_name: uri.path }
   end
 
   def update_dependents_attributes
-    if primary?
-      self.geo_node_key = nil
-    elsif uses_ssh_key?
-      self.geo_node_key&.title = "Geo node: #{self.url}"
-    end
-
-    self.geo_node_key = nil unless uses_ssh_key? || geo_node_key&.persisted?
-
     if self.primary?
       self.oauth_application = nil
       update_clone_url
@@ -246,11 +254,17 @@ class GeoNode < ActiveRecord::Base
 
   # Prevent locking yourself out
   def check_not_adding_primary_as_secondary
-    if host == Gitlab.config.gitlab.host &&
-        port == Gitlab.config.gitlab.port &&
-        relative_url_root == Gitlab.config.gitlab.relative_url_root
+    if url == self.class.current_node_url
       errors.add(:base, 'Current node must be the primary node or you will be locking yourself out')
     end
+  end
+
+  def check_url_is_valid
+    if uri.present? && !%w[http https].include?(uri.scheme)
+      errors.add(:url, 'scheme must be http or https')
+    end
+  rescue URI::InvalidURIError
+    errors.add(:url,  'is invalid')
   end
 
   def update_clone_url

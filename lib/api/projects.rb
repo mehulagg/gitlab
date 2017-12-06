@@ -85,11 +85,11 @@ module API
         projects = projects.with_statistics if params[:statistics]
         projects = projects.with_issues_enabled if params[:with_issues_enabled]
         projects = projects.with_merge_requests_enabled if params[:with_merge_requests_enabled]
+        projects = paginate(projects)
 
         if current_user
-          projects = projects.includes(:route, :taggings, namespace: :route)
-          project_members = current_user.project_members
-          group_members = current_user.group_members
+          project_members = current_user.project_members.preload(:source, user: [notification_settings: :source])
+          group_members = current_user.group_members.preload(:source, user: [notification_settings: :source])
         end
 
         options = options.reverse_merge(
@@ -101,7 +101,7 @@ module API
         )
         options[:with] = Entities::BasicProjectDetails if params[:simple]
 
-        present paginate(projects), options
+        present options[:with].prepare_relation(projects, options), options
       end
     end
 
@@ -476,6 +476,17 @@ module API
         rescue ::Projects::HousekeepingService::LeaseTaken => error
           conflict!(error.message)
         end
+      end
+
+      desc 'Triggers a pull mirror operation'
+      post ":id/mirror/pull" do
+        authorize_admin_project
+
+        return render_api_error!('The project is not mirrored', 400) unless user_project.mirror?
+
+        user_project.force_import_job!
+
+        status 200
       end
     end
   end

@@ -87,16 +87,12 @@ Meanwhile, the primary node will start to notify changes to the secondary, which
 will act on those notifications immediately. Make sure the secondary instance is
 running and accessible.
 
-### Step 2. Enabling hashed storage (from GitLab 10.0)
+### Step 2. Enabling hashed storage (optional, from GitLab 10.0)
 
 >**Warning**
-Hashed storage is in **Beta**. It is considered experimental and not
-production-ready. For the latest updates, check 
-[issue](https://gitlab.com/gitlab-com/infrastructure/issues/2821).
-Hashed Storage is not required to run GitLab Geo, but in some edge cases race
-conditions can lead to errors and Geo to break. Known issues are renaming a
-project multiple times in short succession, deleting a project and recreating
-with the same name very quickly.
+Hashed storage is in **Alpha**. It is considered experimental and not
+production-ready. See [Hashed
+Storage](../administration/repository_storage_types.md) for more detail.
 
 Using hashed storage significantly improves Geo replication - project and group
 renames no longer require synchronization between nodes.
@@ -117,7 +113,14 @@ certificate from the primary and follow
 [these instructions](https://docs.gitlab.com/omnibus/settings/ssl.html)
 on the secondary.
 
-### Step 4. Managing the secondary GitLab node
+### Step 4. Enable Git access over HTTP/HTTPS
+
+GitLab Geo synchronizes repositories over HTTP/HTTPS, and so requires this clone
+method to be enabled. Navigate to **Admin Area ➔ Settings**
+(`/admin/application_settings`) on the primary node, and set
+`Enabled Git access protocols` to `Both SSH and HTTP(S)` or `Only HTTP(S)`.
+
+### Step 5. Managing the secondary GitLab node
 
 You can monitor the status of the syncing process on a secondary node
 by visiting the primary node's **Admin Area ➔ Geo Nodes** (`/admin/geo_nodes`)
@@ -173,42 +176,6 @@ relies on PostgreSQL replication, all project metadata gets replicated to
 secondary nodes, but repositories that have not been selected will be empty.
 1. Secondary nodes won't pull repositories that do not belong to the selected
 groups to be replicated.
-
-## Replicating wikis and repositories over SSH
-
->**Warning:**
-In GitLab 10.2, replicating repositories and wikis over SSH was deprecated.
-Support for SSH replication will be removed in 10.3. These instructions should
-only be used if you need to add a new secondary in the short term.
-
-1. SSH into the **secondary** node and login as root:
-
-    ```bash
-    sudo -i
-    ```
-
-1. Add the primary's SSH key fingerprint to the `known_hosts` file.
-
-    ```bash
-    sudo -u git -H ssh git@<primary-node-url>
-    ```
-
-    Replace `<primary-node-url>` with the FQDN of the primary node. You should
-    manually check the displayed fingerprint against a trusted record of the
-    expected value before accepting it!
-
-1. Generate a *passphraseless* SSH keypair for the `git` user, and capture the
-   public component:
-
-    ```bash
-    test -e ~git/.ssh/id_rsa || sudo -u git -H ssh-keygen -q -t rsa -b 4096 -f ~git/.ssh/id_rsa
-    cat ~git/.ssh/id_rsa.pub
-    ```
-
-Follow the steps above to set up the new Geo node. When you reach
-[Step 4: Enabling the secondary GitLab node](#step-4-managing-the-secondary-gitlab-node)
-select "SSH (deprecated)" instead of "HTTP/HTTPS", and populate the "Public Key"
-with the output of the previous command (beginning `ssh-rsa AAAA...`).
 
 ### Upgrading Geo
 

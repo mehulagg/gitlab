@@ -3,7 +3,7 @@ require 'spec_helper'
 RSpec.describe Geo::WikiSyncService do
   include ::EE::GeoHelpers
 
-  set(:primary) { create(:geo_node, :primary, host: 'primary-geo-node', relative_url_root: '/gitlab') }
+  set(:primary) { create(:geo_node, :primary) }
   set(:secondary) { create(:geo_node) }
 
   let(:lease) { double(try_obtain: true) }
@@ -19,7 +19,7 @@ RSpec.describe Geo::WikiSyncService do
   describe '#execute' do
     let(:project) { create(:project_empty_repo) }
     let(:repository) { project.wiki.repository }
-    let(:url_to_repo) { "#{primary.url}/#{project.full_path}.wiki.git" }
+    let(:url_to_repo) { "#{primary.url}#{project.full_path}.wiki.git" }
 
     before do
       allow(Gitlab::ExclusiveLease).to receive(:new)
@@ -42,6 +42,12 @@ RSpec.describe Geo::WikiSyncService do
         subject.__send__(:lease_key), anything).and_call_original
 
       subject.execute
+    end
+
+    it 'voids the failure message when it succeeds after an error' do
+      registry = create(:geo_project_registry, project: project, last_wiki_sync_failure: 'error')
+
+      expect { subject.execute }.to change { registry.reload.last_wiki_sync_failure}.to(nil)
     end
 
     it 'does not fetch wiki repository if cannot obtain a lease' do
@@ -117,7 +123,7 @@ RSpec.describe Geo::WikiSyncService do
         let(:registry) { Geo::ProjectRegistry.find_by(project_id: project.id) }
 
         before do
-          allow(repository).to receive(:fetch_as_mirror).with(url_to_repo, forced: true) { raise Gitlab::Shell::Error }
+          allow(repository).to receive(:fetch_as_mirror).with(url_to_repo, forced: true) { raise Gitlab::Shell::Error, 'shell error' }
 
           subject.execute
         end
@@ -129,22 +135,10 @@ RSpec.describe Geo::WikiSyncService do
         it 'resets last_wiki_successful_sync_at' do
           expect(registry.last_wiki_successful_sync_at).to be_nil
         end
-      end
-    end
 
-    context 'secondary replicates over SSH' do
-      set(:ssh_secondary) { create(:geo_node, :ssh) }
-
-      let(:url_to_repo) { "#{primary.clone_url_prefix}/#{project.full_path}.wiki.git" }
-
-      before do
-        stub_current_geo_node(ssh_secondary)
-      end
-
-      it 'fetches wiki repository over SSH' do
-        expect(repository).to receive(:fetch_as_mirror).with(url_to_repo, forced: true).once
-
-        subject.execute
+        it 'sets last_wiki_sync_failure' do
+          expect(registry.last_wiki_sync_failure).to eq('Error syncing wiki repository: shell error')
+        end
       end
     end
   end

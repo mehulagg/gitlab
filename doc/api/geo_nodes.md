@@ -24,7 +24,7 @@ Example response:
     "enabled": true,
     "files_max_capacity": 10,
     "repos_max_capacity": 25,
-    "clone_protocol": "ssh"
+    "clone_protocol": "http"
   },
   {
     "id": 2,
@@ -58,7 +58,7 @@ Example response:
   "enabled": true,
   "files_max_capacity": 10,
   "repos_max_capacity": 25,
-  "clone_protocol": "ssh"
+  "clone_protocol": "http"
 }
 ```
 
@@ -138,4 +138,39 @@ Example response:
   "cursor_last_event_timestamp": 1509681166,
   "last_successful_status_check_timestamp": 1510125268
 }
+```
+
+## Retrieve project sync failures ocurred on the current node
+
+
+```
+GET /geo_nodes/current/failures
+```
+
+| Attribute | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `type` | string | no | Type of failure (`repository`/`wiki`) |
+
+This endpoint uses [Pagination](README.md#pagination).
+
+```bash
+curl --header "PRIVATE-TOKEN: 9koXpg98eAheJpvBs5tK" https://gitlab.example.com/api/v4/geo_nodes/current/failures
+```
+
+Example response:
+
+```json
+[
+  {
+    "project_id": 3,
+    "last_repository_synced_at": "2017-10-31 14:25:55 UTC",
+    "last_repository_successful_sync_at": "2017-10-31 14:26:04 UTC",
+    "last_wiki_synced_at": "2017-10-31 14:26:04 UTC",
+    "last_wiki_successful_sync_at": "2017-10-31 14:26:11 UTC",
+    "repository_retry_count": null,
+    "wiki_retry_count": 1,
+    "last_repository_sync_failure": null,
+    "last_wiki_sync_failure": "Error syncing Wiki repository"
+  }
+]
 ```

@@ -91,21 +91,12 @@ primary in a process known as backfill. Meanwhile, the primary node will start
 to notify changes to the secondary, which will act on those notifications
 immediately. Make sure the secondary instance is running and accessible.
 
-### Step 2. Enabling hashed storage (from GitLab 10.0)
+### Step 2. Enabling hashed storage (optional, GitLab 10.0)
 
->**Note:**
-Hashed storage is in **Beta**. It is considered experimental and not
-production-ready. For the latest updates, check 
-[issue](https://gitlab.com/gitlab-com/infrastructure/issues/2821).
-Hashed Storage is not required to run GitLab Geo, but in some edge cases race
-conditions can lead to errors and Geo to break. Known issues are renaming a
-project multiple times in short succession, deleting a project and recreating
-with the same name very quickly.
-
->**Note:**
-Instances already using hashed storage are not recommended to disable hashed
-storage, since bugs affecting hashed storage would continue to affect these
-projects.
+>**Warning**
+Hashed storage is in **Alpha**. It is considered experimental and not
+production-ready. See [Hashed
+Storage](../administration/repository_storage_types.md) for more detail.
 
 Using hashed storage significantly improves Geo replication - project and group
 renames no longer require synchronization between nodes.
@@ -132,7 +123,15 @@ cp primary.geo.example.com.crt /usr/local/share/ca-certificates
 update-ca-certificates
 ```
 
-### Step 4. Managing the secondary GitLab node
+### Step 4. Enable Git access over HTTP/HTTPS
+
+GitLab Geo synchronizes repositories over HTTP/HTTPS, and so requires this clone
+method to be enabled. Navigate to **Admin Area ➔ Settings**
+(`/admin/application_settings`) on the primary node, and set
+`Enabled Git access protocols` to `Both SSH and HTTP(S)` or `Only HTTP(S)`.
+
+
+### Step 5. Managing the secondary GitLab node
 
 You can monitor the status of the syncing process on a secondary node
 by visiting the primary node's **Admin Area ➔ Geo Nodes** (`/admin/geo_nodes`)
@@ -181,10 +180,6 @@ Point your users to the ["Using a Geo Server" guide](using_a_geo_server.md).
 ## Selective replication
 
 Read [Selective replication](configuration.md#selective-replication).
-
-## Replicating wikis and repositories over SSH
-
-Read [Replicating wikis and repositories over SSH](configuration.md#replicating-wikis-and-repositories-over-ssh).
 
 ## Troubleshooting
 

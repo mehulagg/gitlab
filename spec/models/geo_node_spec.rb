@@ -4,8 +4,8 @@ describe GeoNode, type: :model do
   using RSpec::Parameterized::TableSyntax
   include ::EE::GeoHelpers
 
-  let(:new_node) { create(:geo_node, schema: 'https', host: 'localhost', port: 3000, relative_url_root: 'gitlab') }
-  let(:new_primary_node) { create(:geo_node, :primary, schema: 'https', host: 'localhost', port: 3000, relative_url_root: 'gitlab') }
+  let(:new_node) { create(:geo_node, url: 'https://localhost:3000/gitlab') }
+  let(:new_primary_node) { create(:geo_node, :primary, url: 'https://localhost:3000/gitlab') }
   let(:empty_node) { described_class.new }
   let(:primary_node) { create(:geo_node, :primary) }
   let(:node) { create(:geo_node) }
@@ -15,52 +15,28 @@ describe GeoNode, type: :model do
   let(:api_version) { API::API.version }
 
   context 'associations' do
-    it { is_expected.to belong_to(:geo_node_key).dependent(:destroy) }
     it { is_expected.to belong_to(:oauth_application).dependent(:destroy) }
 
     it { is_expected.to have_many(:geo_node_namespace_links) }
     it { is_expected.to have_many(:namespaces).through(:geo_node_namespace_links) }
   end
 
-  context 'validations' do
-    let(:ssh_node) { build(:geo_node, :ssh) }
-
-    it { expect(ssh_node).to validate_presence_of(:geo_node_key) }
-    it { expect(new_node).not_to validate_presence_of(:geo_node_key) }
-    it { expect(new_primary_node).not_to validate_presence_of(:geo_node_key) }
-  end
-
   context 'default values' do
-    let(:gitlab_host) { 'gitlabhost' }
-
     where(:attribute, :value) do
-      :schema             | 'http'
-      :host               | 'gitlabhost'
-      :port               | 80
-      :relative_url_root  | ''
+      :url                | Gitlab::Routing.url_helpers.root_url
       :primary            | false
       :repos_max_capacity | 25
       :files_max_capacity | 10
-      :clone_protocol     | 'http'
     end
 
     with_them do
-      before do
-        allow(Gitlab.config.gitlab).to receive(:host) { gitlab_host }
-      end
-
       it { expect(empty_node[attribute]).to eq(value) }
     end
   end
 
   context 'prevent locking yourself out' do
     it 'does not accept adding a non primary node with same details as current_node' do
-      node = GeoNode.new(
-        host: Gitlab.config.gitlab.host,
-        port: Gitlab.config.gitlab.port,
-        relative_url_root: Gitlab.config.gitlab.relative_url_root,
-        geo_node_key: build(:geo_node_key)
-      )
+      node = build(:geo_node, :primary, primary: false)
 
       expect(node).not_to be_valid
       expect(node.errors.full_messages.count).to eq(1)
@@ -69,33 +45,7 @@ describe GeoNode, type: :model do
   end
 
   context 'dependent models and attributes for GeoNode' do
-    let(:geo_node_key_attributes) { FactoryGirl.build(:geo_node_key).attributes }
-
-    context 'on initialize' do
-      it 'initializes a corresponding key' do
-        expect(empty_node.geo_node_key).to be_present
-      end
-
-      it 'is valid when required attributes are present' do
-        new_node.clone_protocol = 'ssh'
-        new_node.geo_node_key_attributes = geo_node_key_attributes
-        expect(new_node).to be_valid
-      end
-    end
-
     context 'on create' do
-      context 'SSH node' do
-        let(:ssh_node) { create(:geo_node, :ssh) }
-
-        it 'saves a corresponding key' do
-          expect(ssh_node.geo_node_key).to be_persisted
-        end
-      end
-
-      it 'does not save a key' do
-        expect(node.geo_node_key).to be_nil
-      end
-
       it 'saves a corresponding oauth application if it is a secondary node' do
         expect(node.oauth_application).to be_persisted
       end
@@ -106,7 +56,7 @@ describe GeoNode, type: :model do
         end
 
         it 'persists current clone_url_prefix' do
-          expect(primary_node.clone_url_prefix).to be_present
+          expect(primary_node.clone_url_prefix).to eq(Gitlab.config.gitlab_shell.ssh_path_prefix)
         end
       end
     end
@@ -129,18 +79,16 @@ describe GeoNode, type: :model do
   end
 
   describe '#current?' do
-    subject { described_class.new }
-
     it 'returns true when node is the current node' do
-      stub_current_geo_node(subject)
+      node = described_class.new(url: described_class.current_node_url)
 
-      expect(subject.current?).to eq true
+      expect(node.current?).to be_truthy
     end
 
     it 'returns false when node is not the current node' do
-      subject.port = Gitlab.config.gitlab.port + 1
+      node = described_class.new(url: 'http://another.node.com:8080/foo')
 
-      expect(subject.current?).to eq false
+      expect(node.current?).to be_falsy
     end
   end
 
@@ -150,17 +98,14 @@ describe GeoNode, type: :model do
         expect(new_node.uri).to be_a URI
       end
 
-      it 'includes schema home port and relative_url' do
+      it 'includes schema, host, port and relative_url_root with a terminating /' do
         expected_uri = URI.parse(dummy_url)
+        expected_uri.path += '/'
         expect(new_node.uri).to eq(expected_uri)
       end
     end
 
     context 'when required fields are not filled' do
-      it 'returns an initialized Geo node key' do
-        expect(empty_node.geo_node_key).not_to be_nil
-      end
-
       it 'returns an URI object' do
         expect(empty_node.uri).to be_a URI
       end
@@ -172,18 +117,18 @@ describe GeoNode, type: :model do
       expect(new_node.url).to be_a String
     end
 
-    it 'includes schema home port and relative_url' do
-      expected_url = 'https://localhost:3000/gitlab'
+    it 'includes schema home port and relative_url with a terminating /' do
+      expected_url = 'https://localhost:3000/gitlab/'
       expect(new_node.url).to eq(expected_url)
     end
 
-    it 'defaults to existing HTTPS and relative URL if present' do
+    it 'defaults to existing HTTPS and relative URL with a terminating / if present' do
       stub_config_setting(port: 443)
       stub_config_setting(protocol: 'https')
       stub_config_setting(relative_url_root: '/gitlab')
       node = GeoNode.new
 
-      expect(node.url).to eq('https://localhost/gitlab')
+      expect(node.url).to eq('https://localhost/gitlab/')
     end
   end
 
@@ -195,15 +140,15 @@ describe GeoNode, type: :model do
     end
 
     it 'sets schema field based on url' do
-      expect(subject.schema).to eq('https')
+      expect(subject.uri.scheme).to eq('https')
     end
 
     it 'sets host field based on url' do
-      expect(subject.host).to eq('localhost')
+      expect(subject.uri.host).to eq('localhost')
     end
 
     it 'sets port field based on specified by url' do
-      expect(subject.port).to eq(3000)
+      expect(subject.uri.port).to eq(3000)
     end
 
     context 'when unspecified ports' do
@@ -212,12 +157,14 @@ describe GeoNode, type: :model do
 
       it 'sets port 80 when http and no port is specified' do
         subject.url = dummy_http
-        expect(subject.port).to eq(80)
+
+        expect(subject.uri.port).to eq(80)
       end
 
       it 'sets port 443 when https and no port is specified' do
         subject.url = dummy_https
-        expect(subject.port).to eq(443)
+
+        expect(subject.uri.port).to eq(443)
       end
     end
   end
@@ -412,45 +359,6 @@ describe GeoNode, type: :model do
 
       it 'returns a value' do
         expect(subject.attachments_failed_count).to eq(0)
-      end
-    end
-  end
-
-  describe '#geo_node_key' do
-    context 'primary node' do
-      it 'cannot be set' do
-        node = new_primary_node
-
-        expect(node.geo_node_key).to be_nil
-
-        node.geo_node_key = build(:geo_node_key)
-        expect(node).to be_valid
-
-        node.save!
-
-        expect(node.geo_node_key(true)).to be_nil
-      end
-    end
-
-    context 'secondary node' do
-      it 'is not set for HTTP' do
-        node = build(:geo_node, url: 'http://example.com/')
-
-        expect(node.geo_node_key).to be_present
-
-        node.save!
-
-        expect(node.geo_node_key).to be_nil
-      end
-
-      it 'is automatically set for SSH' do
-        node = build(:geo_node, :ssh, url: 'http://example.com/')
-
-        expect(node.geo_node_key).to be_present
-
-        node.save!
-
-        expect(node.geo_node_key.title).to eq('Geo node: http://example.com/')
       end
     end
   end

@@ -86,9 +86,7 @@ class Admin::GeoNodesController < Admin::ApplicationController
       :primary,
       :namespace_ids,
       :repos_max_capacity,
-      :files_max_capacity,
-      :clone_protocol,
-      geo_node_key_attributes: [:key]
+      :files_max_capacity
     )
   end
 
@@ -110,7 +108,7 @@ class Admin::GeoNodesController < Admin::ApplicationController
   end
 
   def has_insecure_nodes?
-    GeoNode.where(schema: 'http').any?
+    GeoNode.with_url_prefix('http://').exists?
   end
 
   def flash_now(type, message)

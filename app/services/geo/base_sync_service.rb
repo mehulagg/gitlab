@@ -1,10 +1,6 @@
 require 'securerandom'
 
 module Geo
-  # The clone_url_prefix is used to build URLs for the Geo synchronization
-  # If this is missing from the primary node we raise this exception
-  EmptyCloneUrlPrefixError = Class.new(StandardError)
-
   class BaseSyncService
     include ExclusiveLeaseGuard
     include ::Gitlab::Geo::ProjectLogHelpers
@@ -53,16 +49,6 @@ module Geo
       LEASE_TIMEOUT
     end
 
-    def primary_ssh_path_prefix
-      @primary_ssh_path_prefix ||= Gitlab::Geo.primary_node.clone_url_prefix.tap do |prefix|
-        raise EmptyCloneUrlPrefixError, 'Missing clone_url_prefix in the primary node' unless prefix.present?
-      end
-    end
-
-    def primary_http_path_prefix
-      @primary_http_path_prefix ||= Gitlab::Geo.primary_node.url
-    end
-
     private
 
     def retry_count
@@ -90,25 +76,7 @@ module Geo
     end
 
     def fetch_geo_mirror(repository)
-      case current_node&.clone_protocol
-      when 'http'
-        fetch_http_geo_mirror(repository)
-      when 'ssh'
-        fetch_ssh_geo_mirror(repository)
-      else
-        raise "Unknown clone protocol: #{current_node&.clone_protocol}"
-      end
-    end
-
-    def build_repository_url(prefix, repository)
-      url = prefix
-      url += '/' unless url.end_with?('/')
-
-      url + repository.full_path + '.git'
-    end
-
-    def fetch_http_geo_mirror(repository)
-      url = build_repository_url(primary_http_path_prefix, repository)
+      url = Gitlab::Geo.primary_node.url + repository.full_path + '.git'
 
       # Fetch the repository, using a JWT header for authentication
       authorization = ::Gitlab::Geo::BaseRequest.new.authorization
@@ -117,22 +85,14 @@ module Geo
       repository.with_config(header) { repository.fetch_as_mirror(url, forced: true) }
     end
 
-    def fetch_ssh_geo_mirror(repository)
-      url = build_repository_url(primary_ssh_path_prefix, repository)
-
-      repository.fetch_as_mirror(url, forced: true)
-    end
-
     def registry
       @registry ||= Geo::ProjectRegistry.find_or_initialize_by(project_id: project.id)
     end
 
-    def update_registry(started_at: nil, finished_at: nil)
+    def update_registry!(started_at: nil, finished_at: nil, attrs: {})
       return unless started_at || finished_at
 
       log_info("Updating #{type} sync information")
-
-      attrs = {}
 
       if started_at
         attrs["last_#{type}_synced_at"] = started_at
@@ -146,6 +106,15 @@ module Geo
         attrs["#{type}_retry_count"] = nil
         attrs["#{type}_retry_at"] = nil
       end
+
+      registry.update!(attrs)
+    end
+
+    def fail_registry!(message, error, attrs = {})
+      log_error(message, error)
+
+      attrs["last_#{type}_sync_failure"] = "#{message}: #{error.message}"
+      attrs["#{type}_retry_count"] = retry_count + 1
 
       registry.update!(attrs)
     end
