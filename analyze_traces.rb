@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require 'json'
 require 'net/http'
 
@@ -27,7 +29,7 @@ def analyze_trace(id)
 end
 
 def job_ids
-  pipeline_json = Net::HTTP.get(URI("https://gitlab.com/gitlab-org/gitlab-ee/pipelines/#{PIPELINE_ID}"))
+  pipeline_json = Net::HTTP.get(URI("https://gitlab.com/gitlab-org/gitlab-ee/pipelines/#{PIPELINE_ID}.json"))
   json = JSON.parse(pipeline_json)
 
   # :vomit-rocket:
@@ -41,3 +43,5 @@ OCCURANCES.sort_by { |_, v| v }.each do |trace, count|
   puts "Occured #{count} times"
   puts
 end
+
+puts "Total occurances: #{OCCURANCES.values.sum}"
