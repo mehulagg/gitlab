@@ -124,6 +124,7 @@ describe MergeRequest do
     context 'when the target branch does not exist' do
       before do
         project.repository.rm_branch(subject.author, subject.target_branch)
+        subject.clear_memoized_shas
       end
 
       it 'returns nil' do
@@ -809,30 +810,30 @@ describe MergeRequest do
   end
 
   describe '#can_remove_source_branch?' do
-    let(:user) { create(:user) }
-    let(:user2) { create(:user) }
+    set(:user) { create(:user) }
+    set(:merge_request) { create(:merge_request, :simple) }
+
+    subject { merge_request }
 
     before do
-      subject.source_project.team << [user, :master]
-
-      subject.source_branch = "feature"
-      subject.target_branch = "master"
-      subject.save!
+      subject.source_project.add_master(user)
     end
 
     it "can't be removed when its a protected branch" do
       allow(ProtectedBranch).to receive(:protected?).and_return(true)
+
       expect(subject.can_remove_source_branch?(user)).to be_falsey
     end
 
     it "can't remove a root ref" do
-      subject.source_branch = "master"
-      subject.target_branch = "feature"
+      subject.update(source_branch: 'master', target_branch: 'feature')
 
       expect(subject.can_remove_source_branch?(user)).to be_falsey
     end
 
     it "is unable to remove the source branch for a project the user cannot push to" do
+      user2 = create(:user)
+
       expect(subject.can_remove_source_branch?(user2)).to be_falsey
     end
 
@@ -843,6 +844,7 @@ describe MergeRequest do
     end
 
     it "cannot be removed if the last commit is not also the head of the source branch" do
+      subject.clear_memoized_shas
       subject.source_branch = "lfs"
 
       expect(subject.can_remove_source_branch?(user)).to be_falsey
@@ -942,7 +944,7 @@ describe MergeRequest do
 
       before do
         project.repository.raw_repository.delete_branch(subject.target_branch)
-        subject.reload
+        subject.clear_memoized_shas
       end
 
       it 'does not crash' do
@@ -1036,20 +1038,47 @@ describe MergeRequest do
     end
   end
 
-  describe '#head_pipeline' do
-    describe 'when the source project exists' do
-      it 'returns the latest pipeline' do
-        pipeline = create(:ci_empty_pipeline, project: subject.source_project, ref: 'master', status: 'running', sha: "123abc", head_pipeline_of: subject)
+  context 'head pipeline' do
+    before do
+      allow(subject).to receive(:diff_head_sha).and_return('lastsha')
+    end
 
-        expect(subject.head_pipeline).to eq(pipeline)
+    describe '#head_pipeline' do
+      it 'returns nil for MR without head_pipeline_id' do
+        subject.update_attribute(:head_pipeline_id, nil)
+
+        expect(subject.head_pipeline).to be_nil
+      end
+
+      context 'when the source project does not exist' do
+        it 'returns nil' do
+          allow(subject).to receive(:source_project).and_return(nil)
+
+          expect(subject.head_pipeline).to be_nil
+        end
       end
     end
 
-    describe 'when the source project does not exist' do
-      it 'returns nil' do
+    describe '#actual_head_pipeline' do
+      it 'returns nil for MR with old pipeline' do
+        pipeline = create(:ci_empty_pipeline, sha: 'notlatestsha')
+        subject.update_attribute(:head_pipeline_id, pipeline.id)
+
+        expect(subject.actual_head_pipeline).to be_nil
+      end
+
+      it 'returns the pipeline for MR with recent pipeline' do
+        pipeline = create(:ci_empty_pipeline, sha: 'lastsha')
+        subject.update_attribute(:head_pipeline_id, pipeline.id)
+
+        expect(subject.actual_head_pipeline).to eq(subject.head_pipeline)
+        expect(subject.actual_head_pipeline).to eq(pipeline)
+      end
+
+      it 'returns nil when source project does not exist' do
         allow(subject).to receive(:source_project).and_return(nil)
 
-        expect(subject.head_pipeline).to be_nil
+        expect(subject.actual_head_pipeline).to be_nil
       end
     end
   end
@@ -1149,7 +1178,7 @@ describe MergeRequest do
       end
 
       shared_examples 'returning all SHA' do
-        it 'returns all SHA from all merge_request_diffs' do
+        it 'returns all SHAs from all merge_request_diffs' do
           expect(subject.merge_request_diffs.size).to eq(2)
           expect(subject.all_commit_shas).to match_array(all_commit_shas)
         end
@@ -1408,7 +1437,7 @@ describe MergeRequest do
     context 'when it is only allowed to merge when build is green' do
       context 'and a failed pipeline is associated' do
         before do
-          pipeline.update(status: 'failed')
+          pipeline.update(status: 'failed', sha: subject.diff_head_sha)
           allow(subject).to receive(:head_pipeline) { pipeline }
         end
 
@@ -1417,7 +1446,7 @@ describe MergeRequest do
 
       context 'and a successful pipeline is associated' do
         before do
-          pipeline.update(status: 'success')
+          pipeline.update(status: 'success', sha: subject.diff_head_sha)
           allow(subject).to receive(:head_pipeline) { pipeline }
         end
 
@@ -1426,7 +1455,7 @@ describe MergeRequest do
 
       context 'and a skipped pipeline is associated' do
         before do
-          pipeline.update(status: 'skipped')
+          pipeline.update(status: 'skipped', sha: subject.diff_head_sha)
           allow(subject).to receive(:head_pipeline) { pipeline }
         end
 
@@ -1605,6 +1634,16 @@ describe MergeRequest do
       expect(subject).to receive(:update_diff_discussion_positions)
 
       subject.reload_diff
+    end
+
+    context 'when using the after_update hook to update' do
+      context 'when the branches are updated' do
+        it 'uses the new heads to generate the diff' do
+          expect { subject.update!(source_branch: subject.target_branch, target_branch: subject.source_branch) }
+            .to change { subject.merge_request_diff.start_commit_sha }
+            .and change { subject.merge_request_diff.head_commit_sha }
+        end
+      end
     end
   end
 
@@ -1868,6 +1907,7 @@ describe MergeRequest do
     context 'when the target branch does not exist' do
       before do
         subject.project.repository.rm_branch(subject.author, subject.target_branch)
+        subject.clear_memoized_shas
       end
 
       it 'returns nil' do
@@ -2250,50 +2290,6 @@ describe MergeRequest do
     end
   end
 
-  describe '#base_pipeline' do
-    let!(:pipeline) { create(:ci_empty_pipeline, project: subject.project, sha: subject.diff_base_sha) }
-
-    it { expect(subject.base_pipeline).to eq(pipeline) }
-  end
-
-  describe '#base_codeclimate_artifact' do
-    before do
-      allow(subject.base_pipeline).to receive(:codeclimate_artifact)
-        .and_return(1)
-    end
-
-    it 'delegates to merge request diff' do
-      expect(subject.base_codeclimate_artifact).to eq(1)
-    end
-  end
-
-  describe '#head_codeclimate_artifact' do
-    before do
-      allow(subject.head_pipeline).to receive(:codeclimate_artifact)
-        .and_return(1)
-    end
-
-    it 'delegates to merge request diff' do
-      expect(subject.head_codeclimate_artifact).to eq(1)
-    end
-  end
-
-  describe '#has_codeclimate_data?' do
-    context 'with codeclimate artifact' do
-      before do
-        artifact = double(success?: true)
-        allow(subject.head_pipeline).to receive(:codeclimate_artifact).and_return(artifact)
-        allow(subject.base_pipeline).to receive(:codeclimate_artifact).and_return(artifact)
-      end
-
-      it { expect(subject.has_codeclimate_data?).to be_truthy }
-    end
-
-    context 'without codeclimate artifact' do
-      it { expect(subject.has_codeclimate_data?).to be_falsey }
-    end
-  end
-
   describe '#fetch_ref!' do
     it 'fetches the ref correctly' do
       expect { subject.target_project.repository.delete_refs(subject.ref_path) }.not_to raise_error
@@ -2309,6 +2305,26 @@ describe MergeRequest do
 
       expect { subject.destroy }
         .to change { project.open_merge_requests_count }.from(1).to(0)
+    end
+  end
+
+  it_behaves_like 'throttled touch' do
+    subject { create(:merge_request, updated_at: 1.hour.ago) }
+  end
+
+  context 'state machine transitions' do
+    describe '#unlock_mr' do
+      subject { create(:merge_request, state: 'locked', merge_jid: 123) }
+
+      it 'updates merge request head pipeline and sets merge_jid to nil' do
+        pipeline = create(:ci_empty_pipeline, project: subject.project, ref: subject.source_branch, sha: subject.source_branch_sha)
+
+        subject.unlock_mr
+
+        subject.reload
+        expect(subject.head_pipeline).to eq(pipeline)
+        expect(subject.merge_jid).to be_nil
+      end
     end
   end
 end

@@ -27,6 +27,7 @@ With GitLab merge requests, you can:
 - [Resolve merge conflicts from the UI](#resolve-conflicts)
 - Enable [fast-forward merge requests](#fast-forward-merge-requests)
 - Enable [semi-linear history merge requests](#semi-linear-history-merge-requests) as another security layer to guarantee the pipeline is passing in the target branch
+- [Create new merge requests by email](#create-new-merge-requests-by-email)
 
 With **[GitLab Enterprise Edition][ee]**, you can also:
 
@@ -138,6 +139,20 @@ those conflicts in the GitLab UI.
 
 [Learn more about resolving merge conflicts in the UI.](resolve_conflicts.md)
 
+## Create new merge requests by email
+
+You can create a new merge request by sending an email to a user-specific email
+address. The address can be obtained on the merge requests page by clicking on
+a **Email a new merge request to this project** button.  The subject will be
+used as the source branch name for the new merge request and the target branch
+will be the default branch for the project. The message body (if not empty)
+will be used as the merge request description. You need
+["Reply by email"](../../../administration/reply_by_email.md) enabled to use
+this feature. If it's not enabled to your instance, you may ask your GitLab
+administrator to do so.
+
+![Create new merge requests by email](img/create_from_email.png)
+
 ## Revert changes
 
 GitLab implements Git's powerful feature to revert any commit with introducing
@@ -183,6 +198,17 @@ the [Code Climate][cc] analyzer [Docker image][cd]. Going a step further, GitLab
 can show the Code Climate report right in the merge request widget area.
 
 [Read more about Code Quality reports.](code_quality_diff.md)
+
+## Static Application Security Testing
+
+> Introduced in [GitLab Enterprise Edition Ultimate][products] 10.3.
+
+If you are using [GitLab CI/CD][ci], you can analyze your source code for known
+vulnerabilities using Static Application Security Testing (SAST).
+Going a step further, GitLab can show the vulnerability report right in the
+merge request widget area.
+
+[Read more about Static Application Security Testing reports.](sast.md)
 
 ## Live preview with Review Apps
 

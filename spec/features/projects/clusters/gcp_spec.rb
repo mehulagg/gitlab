@@ -24,6 +24,7 @@ feature 'Gcp Cluster', :js do
       before do
         visit project_clusters_path(project)
 
+        click_link 'Add cluster'
         click_link 'Create on GKE'
       end
 
@@ -45,15 +46,15 @@ feature 'Gcp Cluster', :js do
         end
 
         it 'user sees a cluster details page and creation status' do
-          expect(page).to have_content('Cluster is being created on Google Container Engine...')
+          expect(page).to have_content('Cluster is being created on Google Kubernetes Engine...')
 
           Clusters::Cluster.last.provider.make_created!
 
-          expect(page).to have_content('Cluster was successfully created on Google Container Engine')
+          expect(page).to have_content('Cluster was successfully created on Google Kubernetes Engine')
         end
 
         it 'user sees a error if something worng during creation' do
-          expect(page).to have_content('Cluster is being created on Google Container Engine...')
+          expect(page).to have_content('Cluster is being created on Google Kubernetes Engine...')
 
           Clusters::Cluster.last.provider.make_errored!('Something wrong!')
 
@@ -116,7 +117,7 @@ feature 'Gcp Cluster', :js do
 
         it 'user sees creation form with the successful message' do
           expect(page).to have_content('Cluster integration was successfully removed.')
-          expect(page).to have_link('Create on GKE')
+          expect(page).to have_link('Add cluster')
         end
       end
     end
@@ -126,6 +127,7 @@ feature 'Gcp Cluster', :js do
     before do
       visit project_clusters_path(project)
 
+      click_link 'Add cluster'
       click_link 'Create on GKE'
     end
 

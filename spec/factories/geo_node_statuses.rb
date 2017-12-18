@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :geo_node_status do
     sequence(:id)
     geo_node
@@ -18,6 +18,7 @@ FactoryGirl.define do
       last_event_timestamp Time.now.to_i
       cursor_last_event_id 1
       cursor_last_event_timestamp Time.now.to_i
+      last_successful_status_check_timestamp Time.now.beginning_of_day
     end
 
     trait :unhealthy do

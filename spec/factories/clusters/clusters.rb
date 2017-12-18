@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :cluster, class: Clusters::Cluster do
     user
     name 'test-cluster'
@@ -27,6 +27,10 @@ FactoryGirl.define do
     trait :providing_by_gcp do
       provider_type :gcp
       provider_gcp factory: [:cluster_provider_gcp, :creating]
+    end
+
+    trait :disabled do
+      enabled false
     end
   end
 end

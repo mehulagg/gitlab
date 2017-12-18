@@ -8,11 +8,8 @@ class Projects::ClustersController < Projects::ApplicationController
   STATUS_POLLING_INTERVAL = 10_000
 
   def index
-    if project.cluster
-      redirect_to project_cluster_path(project, project.cluster)
-    else
-      redirect_to new_project_cluster_path(project)
-    end
+    clusters = ClustersFinder.new(project, current_user, :all).execute
+    @clusters = clusters.page(params[:page]).per(20)
   end
 
   def new
@@ -39,10 +36,20 @@ class Projects::ClustersController < Projects::ApplicationController
       .execute(cluster)
 
     if cluster.valid?
-      flash[:notice] = "Cluster was successfully updated."
-      redirect_to project_cluster_path(project, project.cluster)
+      respond_to do |format|
+        format.json do
+          head :no_content
+        end
+        format.html do
+          flash[:notice] = "Cluster was successfully updated."
+          redirect_to project_cluster_path(project, cluster)
+        end
+      end
     else
-      render :show
+      respond_to do |format|
+        format.json { head :bad_request }
+        format.html { render :show }
+      end
     end
   end
 
@@ -61,6 +68,19 @@ class Projects::ClustersController < Projects::ApplicationController
   def cluster
     @cluster ||= project.clusters.find(params[:id])
                                  .present(current_user: current_user)
+  end
+
+  def create_params
+    params.require(:cluster).permit(
+      :enabled,
+      :name,
+      :provider_type,
+      provider_gcp_attributes: [
+        :gcp_project_id,
+        :zone,
+        :num_nodes,
+        :machine_type
+      ])
   end
 
   def update_params
