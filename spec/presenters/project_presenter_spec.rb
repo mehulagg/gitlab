@@ -38,16 +38,17 @@ RSpec.describe ProjectPresenter do
       context 'when repository is empty' do
         let_it_be(:project) { create(:project_empty_repo, :public) }
 
-        it 'returns activity if user has repository access' do
+        it 'returns wiki if user has repository access and can read wiki' do
           allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(true)
+          allow(presenter).to receive(:can?).with(nil, :read_wiki, project).and_return(true)
 
-          expect(presenter.default_view).to eq('activity')
+          expect(presenter.default_view).to eq('wiki')
         end
 
-        it 'returns activity if user does not have repository access' do
+        it 'returns wiki if user does not have repository access' do
           allow(project).to receive(:can?).with(nil, :download_code, project).and_return(false)
 
-          expect(presenter.default_view).to eq('activity')
+          expect(presenter.default_view).to eq('wiki')
         end
       end
 
@@ -61,8 +62,17 @@ RSpec.describe ProjectPresenter do
           expect(presenter.default_view).to eq('files')
         end
 
-        it 'returns activity if user does not have repository access' do
+        it 'returns wiki if user does not have repository access and can read wiki' do
           allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(false)
+          allow(presenter).to receive(:can?).with(nil, :read_wiki, project).and_return(true)
+
+          expect(presenter.default_view).to eq('wiki')
+        end
+
+        it 'returns activity if project has disabled issues and wiki' do
+          project.project_feature.update_attribute(:issues_access_level, 0)
+          allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(false)
+          allow(presenter).to receive(:can?).with(nil, :read_wiki, project).and_return(false)
 
           expect(presenter.default_view).to eq('activity')
         end
