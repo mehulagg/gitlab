@@ -1,3 +1,5 @@
+import { TEST_HOST } from 'spec/test_constants';
+
 export default {
   id: 132,
   iid: 22,
@@ -230,6 +232,7 @@ export default {
     '/help/user/project/merge_requests/index#interacting-with-security-reports-ultimate',
   merge_commit_path:
     'http://localhost:3000/root/acets-app/commit/53027d060246c8f47e4a9310fb332aa52f221775',
+  ci_environments_status_path: `${TEST_HOST}/ci/environments/status`,
 };
 // Codeclimate
 export const headIssues = [
@@ -417,10 +420,8 @@ export const licenseBaseIssues = {
       dependency: {
         name: 'bundler',
         url: 'http://bundler.io',
-        description: 'The best way to manage your application\'s dependencies',
-        pathes: [
-          '.',
-        ],
+        description: "The best way to manage your application's dependencies",
+        pathes: ['.'],
       },
     },
   ],
@@ -486,9 +487,7 @@ export const licenseHeadIssues = {
         name: 'execjs',
         url: 'https://github.com/rails/execjs',
         description: 'Run JavaScript code from Ruby',
-        pathes: [
-          '.',
-        ],
+        pathes: ['.'],
       },
     },
   ],
