@@ -4,6 +4,7 @@ import axios from '~/lib/utils/axios_utils';
 import mrWidgetOptions from 'ee/vue_merge_request_widget/mr_widget_options.vue';
 import MRWidgetService from 'ee/vue_merge_request_widget/services/mr_widget_service';
 import MRWidgetStore from 'ee/vue_merge_request_widget/stores/mr_widget_store';
+import { TEST_HOST } from 'spec/test_constants';
 import mountComponent from 'spec/helpers/vue_mount_component_helper';
 import state from 'ee/vue_shared/security_reports/store/state';
 import mockData, {
@@ -774,31 +775,33 @@ describe('ee merge request widget options', () => {
         });
         vm.mr.state = 'readyToMerge';
 
-        expect(vm.shouldRenderApprovals).toBeFalsy();
+        expect(vm.shouldRenderApprovals).toBe(false);
       });
 
       it('should return false when in empty state', () => {
         vm = mountComponent(Component, {
           mrData: {
             ...mockData,
+            approvals_path: `${TEST_HOST}/approvals`,
             approvalsRequired: true,
           },
         });
         vm.mr.state = 'nothingToMerge';
 
-        expect(vm.shouldRenderApprovals).toBeFalsy();
+        expect(vm.shouldRenderApprovals).toBe(false);
       });
 
       it('should return true when requiring approvals and in non-empty state', () => {
         vm = mountComponent(Component, {
           mrData: {
             ...mockData,
+            approvals_path: `${TEST_HOST}/approvals`,
             approvalsRequired: true,
           },
         });
         vm.mr.state = 'readyToMerge';
 
-        expect(vm.shouldRenderApprovals).toBeTruthy();
+        expect(vm.shouldRenderApprovals).toBe(true);
       });
     });
   });
