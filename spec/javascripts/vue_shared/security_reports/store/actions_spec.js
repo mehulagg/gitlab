@@ -69,6 +69,7 @@ describe('security reports actions', () => {
 
   beforeEach(() => {
     mockedState = state();
+    mockedState.vulnerabilityFeedbackPath = 'vulnerabilities_path';
     mock = new MockAdapter(axios);
   });
 
