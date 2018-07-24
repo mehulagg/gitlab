@@ -7,6 +7,7 @@ import eventHub from 'ee/geo_nodes/event_hub';
 import GeoNodesStore from 'ee/geo_nodes/store/geo_nodes_store';
 import GeoNodesService from 'ee/geo_nodes/service/geo_nodes_service';
 import mountComponent from 'spec/helpers/vue_mount_component_helper';
+import { TEST_HOST } from 'spec/test_constants';
 import { NODE_ACTIONS } from 'ee/geo_nodes/constants';
 import {
   PRIMARY_VERSION,
@@ -86,7 +87,11 @@ describe('AppComponent', () => {
 
     describe('initNodeDetailsPolling', () => {
       it('initializes SmartInterval and sets it to component', () => {
-        vm.initNodeDetailsPolling(2);
+        const node = {
+          id: 2,
+          statusPath: `${TEST_HOST}/node/status/path`,
+        };
+        vm.initNodeDetailsPolling(node);
         expect(vm.nodePollingInterval).toBeDefined();
       });
     });
