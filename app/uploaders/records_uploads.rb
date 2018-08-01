@@ -20,11 +20,11 @@ module RecordsUploads
     # Called `after :store`
     def record_upload(_tempfile = nil)
       return unless model
-      return unless file && file.exists?
+      return unless file&.exists?
 
       Upload.transaction do
         uploads.where(path: upload_path).delete_all
-        upload.delete if upload
+        upload&.delete
 
         self.upload = build_upload.tap(&:save!)
       end
@@ -54,7 +54,7 @@ module RecordsUploads
     #
     # Called `before :remove`
     def destroy_upload(*args)
-      return unless file && file.exists?
+      return unless file&.exists?
 
       self.upload = nil
       uploads.where(path: upload_path).delete_all

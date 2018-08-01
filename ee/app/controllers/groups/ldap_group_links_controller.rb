@@ -12,7 +12,7 @@ class Groups::LdapGroupLinksController < Groups::ApplicationController
   def create
     ldap_group_link = @group.ldap_group_links.build(ldap_group_link_params)
     if ldap_group_link.save
-      if request.referer && request.referer.include?('admin')
+      if request.referer&.include?('admin')
         redirect_to [:admin, @group], notice: 'New LDAP link saved'
       else
         redirect_back_or_default(default: { action: 'index' }, options: { notice: 'New LDAP link saved' })

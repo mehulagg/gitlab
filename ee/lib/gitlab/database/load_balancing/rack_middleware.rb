@@ -81,7 +81,7 @@ module Gitlab
         def sticking_namespace_and_id(env)
           warden = env['warden']
 
-          if warden && warden.user
+          if warden&.user
             [:user, warden.user.id]
           elsif env[STICK_OBJECT]
             env[STICK_OBJECT]

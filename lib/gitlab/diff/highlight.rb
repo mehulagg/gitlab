@@ -46,7 +46,7 @@ module Gitlab
       private
 
       def highlight_line(diff_line)
-        return unless diff_file && diff_file.diff_refs
+        return unless diff_file&.diff_refs
 
         rich_line =
           if diff_line.unchanged? || diff_line.added?

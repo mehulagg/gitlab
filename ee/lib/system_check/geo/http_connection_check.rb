@@ -47,7 +47,7 @@ module SystemCheck
       rescue SocketError => e
         display_exception(e)
 
-        if e.cause && e.cause.message.starts_with?('getaddrinfo')
+        if e.cause&.message&.starts_with?('getaddrinfo')
           try_fixing_it(
             'Check if your machine can connect to a DNS server',
             "Check if your machine can resolve DNS for: '#{node.uri.host}'",

@@ -71,7 +71,7 @@ module ContainerRegistry
         response = redirect_response(response.headers['location'])
       end
 
-      response.body if response && response.success?
+      response.body if response&.success?
     end
 
     def redirect_response(location)

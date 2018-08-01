@@ -7,7 +7,7 @@ class Projects::LfsStorageController < Projects::GitHttpClientController
 
   def download
     lfs_object = LfsObject.find_by_oid(oid)
-    unless lfs_object && lfs_object.file.exists?
+    unless lfs_object&.file&.exists?
       render_lfs_not_found
       return
     end

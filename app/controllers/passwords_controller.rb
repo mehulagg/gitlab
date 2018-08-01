@@ -54,7 +54,7 @@ class PasswordsController < Devise::PasswordsController
   end
 
   def throttle_reset
-    return unless resource && resource.recently_sent_password_reset?
+    return unless resource&.recently_sent_password_reset?
 
     # Throttle reset attempts, but return a normal message to
     # avoid user enumeration attack.

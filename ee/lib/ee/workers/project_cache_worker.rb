@@ -20,7 +20,7 @@ module EE
       def perform_geo_secondary(project_id, refresh = [])
         project = ::Project.find_by(id: project_id)
 
-        return unless project && project.repository.exists?
+        return unless project&.repository&.exists?
 
         project.repository.refresh_method_caches(refresh.map(&:to_sym))
       end

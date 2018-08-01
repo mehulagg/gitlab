@@ -20,7 +20,7 @@ module EE
     private
 
     def group_member_lock
-      group && group.membership_lock
+      group&.membership_lock
     end
   end
 end

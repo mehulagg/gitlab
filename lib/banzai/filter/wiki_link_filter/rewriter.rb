@@ -4,7 +4,7 @@ module Banzai
       class Rewriter
         def initialize(link_string, wiki:, slug:)
           @uri = Addressable::URI.parse(link_string)
-          @wiki_base_path = wiki && wiki.wiki_base_path
+          @wiki_base_path = wiki&.wiki_base_path
           @slug = slug
         end
 

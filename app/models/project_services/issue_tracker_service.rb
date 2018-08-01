@@ -97,8 +97,7 @@ class IssueTrackerService < Service
   private
 
   def enabled_in_gitlab_config
-    Gitlab.config.issues_tracker &&
-      Gitlab.config.issues_tracker.values.any? &&
+    Gitlab.config.issues_tracker&.values&.any? &&
       issues_tracker
   end
 

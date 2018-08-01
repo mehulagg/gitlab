@@ -97,7 +97,7 @@ module Gitlab
     end
 
     def can_access_git?
-      user && user.can?(:access_git)
+      user&.can?(:access_git)
     end
 
     def protected_branch_accessible_to?(ref, action:)

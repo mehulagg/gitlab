@@ -18,7 +18,7 @@ module RunnersHelper
     display_name = truncate(runner.display_name, length: 15)
     id = "\##{runner.id}"
 
-    if current_user && current_user.admin
+    if current_user&.admin
       link_to admin_runner_path(runner) do
         display_name + id
       end

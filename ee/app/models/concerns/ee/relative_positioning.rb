@@ -8,7 +8,7 @@ module EE
     end
 
     def has_group_boards?
-      board_group && board_group.boards.any?
+      board_group&.boards&.any?
     end
 
     def parent_ids

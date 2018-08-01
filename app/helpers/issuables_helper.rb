@@ -38,7 +38,7 @@ module IssuablesHelper
   end
 
   def multi_label_name(current_labels, default_label)
-    if current_labels && current_labels.any?
+    if current_labels&.any?
       title = current_labels.first.try(:title)
       if current_labels.size > 1
         "#{title} +#{current_labels.size - 1} more"
@@ -173,15 +173,13 @@ module IssuablesHelper
   end
 
   def issuable_todo(issuable)
-    if current_user
-      current_user.todos.find_by(target: issuable, state: :pending)
-    end
+    current_user&.todos&.find_by(target: issuable, state: :pending)
   end
 
   def issuable_labels_tooltip(labels, limit: 5)
     first, last = labels.partition.with_index { |_, i| i < limit  }
 
-    if labels && labels.any?
+    if labels&.any?
       label_names = first.collect(&:name)
       label_names << "and #{last.size} more" unless last.empty?
 

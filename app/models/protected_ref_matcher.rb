@@ -28,7 +28,7 @@ class ProtectedRefMatcher
 
   # Checks if this protected ref contains a wildcard
   def wildcard?
-    @protected_ref.name && @protected_ref.name.include?('*')
+    @protected_ref.name&.include?('*')
   end
 
   protected

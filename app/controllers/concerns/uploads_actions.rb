@@ -113,7 +113,7 @@ module UploadsActions
   end
 
   def image_or_video?
-    uploader && uploader.exists? && uploader.image_or_video?
+    uploader&.exists? && uploader.image_or_video?
   end
 
   def find_model

@@ -30,7 +30,7 @@ module Oauth2
         oauth_session = Gitlab::Geo::OauthSession.new(state: params[:state])
 
         logout_token = oauth_session.extract_logout_token
-        return unless logout_token && logout_token.is_utf8?
+        return unless logout_token&.is_utf8?
 
         Doorkeeper::AccessToken.by_token(logout_token)
       end

@@ -171,7 +171,7 @@ module Banzai
       end
 
       def project_wiki_base_path
-        project_wiki && project_wiki.wiki_base_path
+        project_wiki&.wiki_base_path
       end
 
       # Ensure that a :project_wiki key exists in context

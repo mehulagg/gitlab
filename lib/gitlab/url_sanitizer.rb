@@ -85,7 +85,7 @@ module Gitlab
     end
 
     def valid_credentials?
-      credentials && credentials.is_a?(Hash) && credentials.any?
+      credentials&.is_a?(Hash) && credentials.any?
     end
 
     def encode_percent(string)

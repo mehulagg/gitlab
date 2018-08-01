@@ -26,7 +26,7 @@ describe Issues::UpdateService, :mailer do
   describe 'execute' do
     def find_note(starting_with)
       issue.notes.find do |note|
-        note && note.note.start_with?(starting_with)
+        note&.note&.start_with?(starting_with)
       end
     end
 

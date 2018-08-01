@@ -53,7 +53,7 @@ module ApplicationHelper
   # with suggestion to create MR
   def show_last_push_widget?(event)
     # Skip if event is not about added or modified non-master branch
-    return false unless event && event.last_push_to_non_root? && !event.rm_ref?
+    return false unless event&.last_push_to_non_root? && !event.rm_ref?
 
     project = event.project
 

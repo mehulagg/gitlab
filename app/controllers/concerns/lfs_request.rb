@@ -83,7 +83,7 @@ module LfsRequest
   end
 
   def deploy_token_present?
-    user && user.is_a?(DeployToken)
+    user&.is_a?(DeployToken)
   end
 
   def deploy_token

@@ -32,7 +32,7 @@ module Gitlab
     end
 
     def issues
-      if project && project.jira_tracker?
+      if project&.jira_tracker?
         if project.issues_enabled?
           @references[:all_issues] ||= references(:external_issue) + references(:issue)
         else

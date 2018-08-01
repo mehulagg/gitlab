@@ -9,7 +9,7 @@ module Gitlab
       end
 
       def supports_wildcard?
-        config.address && config.address.include?(WILDCARD_PLACEHOLDER)
+        config.address&.include?(WILDCARD_PLACEHOLDER)
       end
 
       def supports_issue_creation?

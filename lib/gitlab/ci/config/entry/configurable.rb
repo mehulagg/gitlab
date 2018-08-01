@@ -63,7 +63,7 @@ module Gitlab
                 end
 
                 define_method("#{symbol}_value") do
-                  return unless entries[symbol] && entries[symbol].valid?
+                  return unless entries[symbol]&.valid?
 
                   entries[symbol].value
                 end

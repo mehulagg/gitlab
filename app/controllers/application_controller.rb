@@ -258,7 +258,7 @@ class ApplicationController < ActionController::Base
   end
 
   def ldap_security_check
-    if current_user && current_user.requires_ldap_check?
+    if current_user&.requires_ldap_check?
       return unless current_user.try_obtain_ldap_lease
 
       unless Gitlab::Auth::LDAP::Access.allowed?(current_user)
@@ -308,7 +308,7 @@ class ApplicationController < ActionController::Base
   end
 
   def require_email
-    if current_user && current_user.temp_oauth_email? && session[:impersonator_id].nil?
+    if current_user&.temp_oauth_email? && session[:impersonator_id].nil?
       return redirect_to profile_path, notice: 'Please complete your profile with email address'
     end
   end

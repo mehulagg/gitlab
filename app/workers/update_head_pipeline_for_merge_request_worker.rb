@@ -10,7 +10,7 @@ class UpdateHeadPipelineForMergeRequestWorker
     merge_request = MergeRequest.find(merge_request_id)
     pipeline = Ci::Pipeline.where(project: merge_request.source_project, ref: merge_request.source_branch).last
 
-    return unless pipeline && pipeline.latest?
+    return unless pipeline&.latest?
 
     if merge_request.diff_head_sha != pipeline.sha
       log_error_message_for(merge_request)

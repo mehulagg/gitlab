@@ -64,7 +64,7 @@ module Gitlab
         end
 
         def labels?
-          label_names && label_names.any?
+          label_names&.any?
         end
 
         def pull_request?

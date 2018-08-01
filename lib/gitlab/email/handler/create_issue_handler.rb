@@ -10,7 +10,7 @@ module Gitlab
         def initialize(mail, mail_key)
           super(mail, mail_key)
           @project_path, @incoming_email_token =
-            mail_key && mail_key.split('+', 2)
+            mail_key&.split('+', 2)
         end
 
         def can_handle?

@@ -28,7 +28,7 @@ module StripAttribute
 
   def strip_attributes
     self.class.strip_attrs.each do |attr|
-      self[attr].strip! if self[attr] && self[attr].respond_to?(:strip!)
+      self[attr].strip! if self[attr]&.respond_to?(:strip!)
     end
   end
 end

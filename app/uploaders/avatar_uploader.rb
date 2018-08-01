@@ -7,7 +7,7 @@ class AvatarUploader < GitlabUploader
   prepend ObjectStorage::Extension::RecordsUploads
 
   def exists?
-    model.avatar.file && model.avatar.file.present?
+    model.avatar.file&.present?
   end
 
   def move_to_store

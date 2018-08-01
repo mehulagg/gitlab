@@ -434,7 +434,7 @@ module ObjectStorage
       file
     rescue => e
       # in case of failure delete new file
-      new_file.delete unless new_file.nil?
+      new_file&.delete
       # revert back to the old file
       self.object_store = from_object_store
       self.file = file_to_delete

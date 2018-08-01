@@ -123,7 +123,7 @@ module Gitlab
           # in the Service.available_services_names whitelist.
           service = project.public_send("#{underscored_service}_service") # rubocop:disable GitlabSecurity/PublicSend
 
-          if service && service.activated? && service.valid_token?(password)
+          if service&.activated? && service.valid_token?(password)
             Gitlab::Auth::Result.new(nil, project, :ci, build_authentication_abilities)
           end
         end
@@ -160,7 +160,7 @@ module Gitlab
       end
 
       def valid_oauth_token?(token)
-        token && token.accessible? && valid_scoped_token?(token, [:api])
+        token&.accessible? && valid_scoped_token?(token, [:api])
       end
 
       def valid_scoped_token?(token, scopes)

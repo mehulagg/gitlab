@@ -6,7 +6,7 @@ module Gitlab
       def initialize(project)
         @project = project
         import_data = project.import_data
-        if import_data && import_data.credentials && import_data.credentials[:password]
+        if import_data&.credentials && import_data.credentials[:password]
           @client = Client.new(import_data.credentials[:password])
           @formatter = Gitlab::ImportFormatter.new
         else
@@ -54,7 +54,7 @@ module Gitlab
 
       def gitlab_user_id(project, gitlab_id)
         user = User.joins(:identities).find_by("identities.extern_uid = ? AND identities.provider = 'gitlab'", gitlab_id.to_s)
-        (user && user.id) || project.creator_id
+        (user&.id) || project.creator_id
       end
     end
   end

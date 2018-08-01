@@ -71,7 +71,7 @@ module Projects
       message = "Unable to save #{e.record.type}: #{e.record.errors.full_messages.join(", ")} "
       fail(error: message)
     rescue => e
-      @project.errors.add(:base, e.message) if @project
+      @project&.errors&.add(:base, e.message)
       fail(error: e.message)
     end
 

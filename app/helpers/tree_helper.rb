@@ -66,7 +66,7 @@ module TreeHelper
   def tree_edit_project(project = @project)
     if can?(current_user, :push_code, project)
       project
-    elsif current_user && current_user.already_forked?(project)
+    elsif current_user&.already_forked?(project)
       current_user.fork_of(project)
     end
   end

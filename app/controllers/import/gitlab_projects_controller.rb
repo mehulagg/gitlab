@@ -29,7 +29,7 @@ class Import::GitlabProjectsController < Import::BaseController
   private
 
   def file_is_valid?
-    project_params[:file] && project_params[:file].respond_to?(:read)
+    project_params[:file]&.respond_to?(:read)
   end
 
   def verify_gitlab_project_import_enabled

@@ -15,7 +15,7 @@ module Gitlab
           def find_by_uid_and_provider(uid, provider)
             identity = ::Identity.with_extern_uid(provider, uid).take
 
-            identity && identity.user
+            identity&.user
           end
         end
 

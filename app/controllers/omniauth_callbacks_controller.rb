@@ -33,7 +33,7 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     error ||= exception.message      if exception.respond_to?(:message)
     error ||= request.env["omniauth.error.type"].to_s
 
-    error.to_s.humanize if error
+    error&.to_s&.humanize
   end
 
   def saml

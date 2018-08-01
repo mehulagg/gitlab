@@ -70,7 +70,7 @@ module QA
         gcloud_account_email = Runtime::Env.gcloud_account_email
         shell("gcloud auth activate-service-account #{gcloud_account_email} --key-file #{gcloud_account_key.path}")
       ensure
-        gcloud_account_key && gcloud_account_key.unlink
+        gcloud_account_key&.unlink
       end
     end
   end

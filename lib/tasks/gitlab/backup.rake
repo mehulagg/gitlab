@@ -74,7 +74,7 @@ namespace :gitlab do
       task create: :gitlab_environment do
         progress.puts "Dumping repositories ...".color(:blue)
 
-        if ENV["SKIP"] && ENV["SKIP"].include?("repositories")
+        if ENV["SKIP"]&.include?("repositories")
           progress.puts "[SKIPPED]".color(:cyan)
         else
           Backup::Repository.new(progress).dump
@@ -93,7 +93,7 @@ namespace :gitlab do
       task create: :gitlab_environment do
         progress.puts "Dumping database ... ".color(:blue)
 
-        if ENV["SKIP"] && ENV["SKIP"].include?("db")
+        if ENV["SKIP"]&.include?("db")
           progress.puts "[SKIPPED]".color(:cyan)
         else
           Backup::Database.new(progress).dump
@@ -112,7 +112,7 @@ namespace :gitlab do
       task create: :gitlab_environment do
         progress.puts "Dumping builds ... ".color(:blue)
 
-        if ENV["SKIP"] && ENV["SKIP"].include?("builds")
+        if ENV["SKIP"]&.include?("builds")
           progress.puts "[SKIPPED]".color(:cyan)
         else
           Backup::Builds.new(progress).dump
@@ -131,7 +131,7 @@ namespace :gitlab do
       task create: :gitlab_environment do
         progress.puts "Dumping uploads ... ".color(:blue)
 
-        if ENV["SKIP"] && ENV["SKIP"].include?("uploads")
+        if ENV["SKIP"]&.include?("uploads")
           progress.puts "[SKIPPED]".color(:cyan)
         else
           Backup::Uploads.new(progress).dump
@@ -150,7 +150,7 @@ namespace :gitlab do
       task create: :gitlab_environment do
         progress.puts "Dumping artifacts ... ".color(:blue)
 
-        if ENV["SKIP"] && ENV["SKIP"].include?("artifacts")
+        if ENV["SKIP"]&.include?("artifacts")
           progress.puts "[SKIPPED]".color(:cyan)
         else
           Backup::Artifacts.new(progress).dump
@@ -169,7 +169,7 @@ namespace :gitlab do
       task create: :gitlab_environment do
         progress.puts "Dumping pages ... ".color(:blue)
 
-        if ENV["SKIP"] && ENV["SKIP"].include?("pages")
+        if ENV["SKIP"]&.include?("pages")
           progress.puts "[SKIPPED]".color(:cyan)
         else
           Backup::Pages.new(progress).dump
@@ -188,7 +188,7 @@ namespace :gitlab do
       task create: :gitlab_environment do
         progress.puts "Dumping lfs objects ... ".color(:blue)
 
-        if ENV["SKIP"] && ENV["SKIP"].include?("lfs")
+        if ENV["SKIP"]&.include?("lfs")
           progress.puts "[SKIPPED]".color(:cyan)
         else
           Backup::Lfs.new(progress).dump
@@ -208,7 +208,7 @@ namespace :gitlab do
         progress.puts "Dumping container registry images ... ".color(:blue)
 
         if Gitlab.config.registry.enabled
-          if ENV["SKIP"] && ENV["SKIP"].include?("registry")
+          if ENV["SKIP"]&.include?("registry")
             progress.puts "[SKIPPED]".color(:cyan)
           else
             Backup::Registry.new(progress).dump

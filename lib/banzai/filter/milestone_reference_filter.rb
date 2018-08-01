@@ -46,7 +46,7 @@ module Banzai
         project_path = full_project_path(namespace_ref, project_ref)
         project = parent_from_ref(project_path)
 
-        return unless project && project.is_a?(Project)
+        return unless project&.is_a?(Project)
 
         milestone_params = milestone_params(milestone_id, milestone_name)
 

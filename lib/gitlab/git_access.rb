@@ -248,7 +248,7 @@ module Gitlab
       end
 
       if ::License.block_changes?
-        message = ::LicenseHelper.license_message(signed_in: true, is_admin: (user && user.admin?))
+        message = ::LicenseHelper.license_message(signed_in: true, is_admin: (user&.admin?))
         raise UnauthorizedError, strip_tags(message)
       end
 

@@ -63,7 +63,7 @@ module EntityDateHelper
       remaining_or_ago = is_upcoming ? _("remaining") : _("ago")
 
       "#{content} #{remaining_or_ago}".html_safe
-    elsif entity.start_date && entity.start_date.past?
+    elsif entity.start_date&.past?
       days = entity.elapsed_days
       "#{content_tag(:strong, days)} #{'day'.pluralize(days)} elapsed".html_safe
     end
