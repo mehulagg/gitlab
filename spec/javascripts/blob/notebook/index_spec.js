@@ -3,14 +3,23 @@ import axios from '~/lib/utils/axios_utils';
 import renderNotebook from '~/blob/notebook';
 
 describe('iPython notebook renderer', () => {
+  let mock;
+  let vm;
+
   preloadFixtures('static/notebook_viewer.html.raw');
 
   beforeEach(() => {
     loadFixtures('static/notebook_viewer.html.raw');
+    mock = new MockAdapter(axios);
+  });
+
+  afterEach(() => {
+    vm.$destroy();
+    mock.restore();
   });
 
   it('shows loading icon', () => {
-    renderNotebook();
+    vm = renderNotebook();
 
     expect(
       document.querySelector('.loading'),
@@ -18,10 +27,7 @@ describe('iPython notebook renderer', () => {
   });
 
   describe('successful response', () => {
-    let mock;
-
     beforeEach((done) => {
-      mock = new MockAdapter(axios);
       mock.onGet('/test').reply(200, {
         cells: [{
           cell_type: 'markdown',
@@ -37,15 +43,11 @@ describe('iPython notebook renderer', () => {
         }],
       });
 
-      renderNotebook();
+      vm = renderNotebook();
 
       setTimeout(() => {
         done();
       });
-    });
-
-    afterEach(() => {
-      mock.restore();
     });
 
     it('does not show loading icon', () => {
@@ -82,10 +84,7 @@ describe('iPython notebook renderer', () => {
   });
 
   describe('error in JSON response', () => {
-    let mock;
-
     beforeEach(done => {
-      mock = new MockAdapter(axios);
       mock
         .onGet('/test')
         .reply(() =>
@@ -93,15 +92,11 @@ describe('iPython notebook renderer', () => {
           Promise.reject({ status: 200, data: '{ "cells": [{"cell_type": "markdown"} }' }),
         );
 
-      renderNotebook();
+      vm = renderNotebook();
 
       setTimeout(() => {
         done();
       });
-    });
-
-    afterEach(() => {
-      mock.restore();
     });
 
     it('does not show loading icon', () => {
@@ -118,22 +113,16 @@ describe('iPython notebook renderer', () => {
   });
 
   describe('error getting file', () => {
-    let mock;
-
     beforeEach((done) => {
-      mock = new MockAdapter(axios);
       mock.onGet('/test').reply(500, '');
 
-      renderNotebook();
+      vm = renderNotebook();
 
       setTimeout(() => {
         done();
       });
     });
 
-    afterEach(() => {
-      mock.restore();
-    });
 
     it('does not show loading icon', () => {
       expect(
