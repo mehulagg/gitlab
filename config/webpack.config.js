@@ -7,6 +7,7 @@ const CompressionPlugin = require('compression-webpack-plugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const CircularDependencyPlugin = require('circular-dependency-plugin');
 
 const ROOT_PATH = path.resolve(__dirname, '..');
 const CACHE_PATH = process.env.WEBPACK_CACHE_PATH || path.join(ROOT_PATH, 'tmp/cache');
@@ -388,6 +389,14 @@ module.exports = {
       'process.env.IS_EE': JSON.stringify(IS_EE),
       // This one is used to check against "EE" properly in application code
       IS_EE: IS_EE ? 'window.gon && window.gon.ee' : JSON.stringify(false),
+    }),
+    new CircularDependencyPlugin({
+      // exclude detection of files based on a RegExp
+      exclude: new RegExp('/node_modules/'),
+      // add errors to webpack instead of warnings
+      failOnError: true,
+      // set the current working directory for displaying module paths
+      cwd: process.cwd(),
     }),
   ].filter(Boolean),
 

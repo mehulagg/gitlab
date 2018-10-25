@@ -56,6 +56,7 @@
     "brace-expansion": "^1.1.8",
     "cache-loader": "^4.1.0",
     "chart.js": "2.7.2",
+    "circular-dependency-plugin": "^5.2.0",
     "classlist-polyfill": "^1.2.0",
     "clipboard": "^1.7.1",
     "codesandbox-api": "^0.0.20",
