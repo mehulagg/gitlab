@@ -31,12 +31,22 @@ module EE
               uid, domain = principal.split('@', 2)
               return unless uid && domain
 
-              # In multi-forest setups, there may be several users with matching
-              # uids but differing DNs, so skip adapters configured to connect to
-              # non-matching domains
-              return unless domain.casecmp(domain_from_dn(adapter.config.base)) == 0
+              if ::Gitlab.config.kerberos.simple_ldap_linking_allowed_realms.blank?
 
-              find_by_uid(uid, adapter)
+                # In multi-forest setups, there may be several users with matching
+                # uids but differing DNs, so skip adapters configured to connect to
+                # non-matching domains
+                return unless domain.casecmp(domain_from_dn(adapter.config.base)) == 0
+
+                find_by_uid(uid, adapter)
+
+              else
+                ::Gitlab.config.kerberos.simple_ldap_linking_allowed_realms.each do |realm|
+                  if domain.casecmp(realm) == 0
+                    return find_by_uid(uid, adapter)
+                  end
+                end
+              end
             end
 
             # Extracts the rightmost unbroken set of domain components from an
