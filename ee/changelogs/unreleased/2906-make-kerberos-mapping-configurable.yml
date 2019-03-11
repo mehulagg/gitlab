@@ -1,0 +1,6 @@
+---
+title: Add simple_ldap_linking kerberos options to make the mapping between ldap and
+  kerberos configureable
+merge_request:
+author: Christopher Schenk
+type: added
