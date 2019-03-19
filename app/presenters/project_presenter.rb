@@ -69,7 +69,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
       'activity'
     elsif can?(current_user, :read_wiki, project)
       'wiki'
-    elsif feature_available?(:issues, current_user)
+    elsif can?(current_user, :read_issue, project)
       'projects/issues/issues'
     else
       'customize_workflow'
@@ -391,7 +391,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
       'files'
     elsif can?(current_user, :read_wiki, project)
       'wiki'
-    elsif feature_available?(:issues, current_user)
+    elsif can?(current_user, :read_issue, project)
       'projects/issues/issues'
     else
       'activity'
