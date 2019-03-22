@@ -93,6 +93,9 @@ module.exports = function(config) {
   const karmaConfig = {
     basePath: ROOT_PATH,
     browsers: ['ChromeHeadlessCustom'],
+    browserDisconnectTimeout: 10000,
+    browserDisconnectTolerance: 3,
+    browserNoActivityTimeout: 60000,
     client: {
       color: !process.env.CI,
     },
@@ -104,6 +107,8 @@ module.exports = function(config) {
           // chrome cannot run in sandboxed mode inside a docker container unless it is run with
           // escalated kernel privileges (e.g. docker run --cap-add=CAP_SYS_ADMIN)
           '--no-sandbox',
+          '--disable-web-security',
+          '--disable-gpu',
         ],
       },
     },
