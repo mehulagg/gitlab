@@ -8,7 +8,7 @@ import { getTimeframeForMonthsView } from 'ee/roadmap/utils/roadmap_utils';
 
 import { PRESET_TYPES, EXTEND_AS } from 'ee/roadmap/constants';
 
-import { mountComponentWithStore } from 'spec/helpers/vue_mount_component_helper';
+import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
 import {
   mockTimeframeInitialDate,
   mockGroupId,
@@ -116,8 +116,8 @@ describe('AppComponent', () => {
           .then(() => {
             const roadmapTimelineEl = vm.$el.querySelector('.roadmap-timeline-section');
 
-            spyOn(eventHub, '$emit');
-            spyOn(roadmapTimelineEl.parentElement, 'scrollBy');
+            jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
+            jest.spyOn(roadmapTimelineEl.parentElement, 'scrollBy').mockImplementation(() => {});
 
             vm.processExtendedTimeline({
               extendType: EXTEND_AS.PREPEND,
@@ -140,7 +140,7 @@ describe('AppComponent', () => {
           .then(() => {
             const roadmapTimelineEl = vm.$el.querySelector('.roadmap-timeline-section');
 
-            spyOn(eventHub, '$emit');
+            jest.spyOn(eventHub, '$emit').mockImplementation(() => {});
 
             vm.processExtendedTimeline({
               extendType: EXTEND_AS.PREPEND,
@@ -165,8 +165,8 @@ describe('AppComponent', () => {
       });
 
       it('updates the store and refreshes roadmap with extended timeline based on provided extendType', () => {
-        spyOn(vm, 'extendTimeframe');
-        spyOn(vm, 'refreshEpicDates');
+        jest.spyOn(vm, 'extendTimeframe').mockImplementation(() => {});
+        jest.spyOn(vm, 'refreshEpicDates').mockImplementation(() => {});
 
         const extendType = EXTEND_AS.PREPEND;
 
@@ -177,9 +177,9 @@ describe('AppComponent', () => {
       });
 
       it('calls `fetchEpicsForTimeframe` with extended timeframe array', done => {
-        spyOn(vm, 'extendTimeframe').and.stub();
-        spyOn(vm, 'refreshEpicDates').and.stub();
-        spyOn(vm, 'fetchEpicsForTimeframe').and.callFake(() => new Promise(() => {}));
+        jest.spyOn(vm, 'extendTimeframe').mockImplementation(() => {});
+        jest.spyOn(vm, 'refreshEpicDates').mockImplementation(() => {});
+        jest.spyOn(vm, 'fetchEpicsForTimeframe').mockImplementation(() => Promise.resolve());
 
         const extendType = EXTEND_AS.PREPEND;
 
@@ -201,7 +201,7 @@ describe('AppComponent', () => {
 
   describe('mounted', () => {
     it('binds window resize event listener', () => {
-      spyOn(window, 'addEventListener');
+      jest.spyOn(window, 'addEventListener').mockImplementation(() => {});
       const vmX = createComponent();
 
       expect(vmX.handleResizeThrottled).toBeDefined();
@@ -216,7 +216,7 @@ describe('AppComponent', () => {
 
   describe('beforeDestroy', () => {
     it('unbinds window resize event listener', () => {
-      spyOn(window, 'removeEventListener');
+      jest.spyOn(window, 'removeEventListener').mockImplementation(() => {});
       const vmX = createComponent();
       vmX.$destroy();
 
