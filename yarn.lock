@@ -806,11 +806,12 @@
     source-map "~0.6.1"
     vue-template-es2015-compiler "^1.9.0"
 
-"@vue/test-utils@^1.0.0-beta.25":
-  version "1.0.0-beta.25"
-  resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-1.0.0-beta.25.tgz#4703076de3076bac42cdd242cd53e6fb8752ed8c"
-  integrity sha512-mfvguEmEpAn0BuT4u+qm+0J1NTKgQS+ffUyWHY1QeSovIkJcy98fj1rO+PJgiZSEvGjjnDNX+qmofYFPLrofbA==
+"@vue/test-utils@^1.0.0-beta.26":
+  version "1.0.0-beta.29"
+  resolved "https://registry.yarnpkg.com/@vue/test-utils/-/test-utils-1.0.0-beta.29.tgz#c942cf25e891cf081b6a03332b4ae1ef430726f0"
+  integrity sha512-yX4sxEIHh4M9yAbLA/ikpEnGKMNBCnoX98xE1RwxfhQVcn0MaXNSj1Qmac+ZydTj6VBSEVukchBogXBTwc+9iA==
   dependencies:
+    dom-event-types "^1.0.0"
     lodash "^4.17.4"
 
 "@webassemblyjs/ast@1.7.11":
@@ -3312,6 +3313,11 @@ document-register-element@1.13.1:
   integrity sha512-92ZyLDKg9j4rOll//NNXj25f+8rAzOkYsGJonhugKwXfeqH7bzs8Ucpvey0WzZ2ZzKdrvW9RnUw3UyOZ/uhBFw==
   dependencies:
     lightercollective "^0.1.0"
+
+dom-event-types@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/dom-event-types/-/dom-event-types-1.0.0.tgz#5830a0a29e1bf837fe50a70cd80a597232813cae"
+  integrity sha512-2G2Vwi2zXTHBGqXHsJ4+ak/iP0N8Ar+G8a7LiD2oup5o4sQWytwqqrZu/O6hIMV0KMID2PL69OhpshLO0n7UJQ==
 
 dom-serialize@^2.2.0:
   version "2.2.1"
