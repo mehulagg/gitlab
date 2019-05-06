@@ -35,25 +35,6 @@ class Profiles::KeysController < Profiles::ApplicationController
     end
   end
 
-  # Get all keys of a user(params[:username]) in a text format
-  # Helpful for sysadmins to put in respective servers
-  def get_keys
-    if params[:username].present?
-      begin
-        user = UserFinder.new(params[:username]).find_by_username
-        if user.present?
-          render plain: user.all_ssh_keys.join("\n")
-        else
-          render_404
-        end
-      rescue => e
-        render html: e.message
-      end
-    else
-      render_404
-    end
-  end
-
   private
 
   def key_params
