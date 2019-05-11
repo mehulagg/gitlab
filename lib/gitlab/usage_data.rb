@@ -26,7 +26,7 @@ module Gitlab
           uuid: Gitlab::CurrentSettings.uuid,
           hostname: Gitlab.config.gitlab.host,
           version: Gitlab::VERSION,
-          installation_type: Gitlab::INSTALLATION_TYPE,
+          installation_type: installation_type,
           active_user_count: count(User.active),
           recorded_at: Time.now,
           edition: 'CE'
@@ -189,6 +189,14 @@ module Gitlab
           key = model.name.underscore.pluralize.to_sym
 
           result[key] = approx_counts[model] || -1
+        end
+      end
+
+      def installation_type
+        if Rails.env.production?
+          Gitlab::INSTALLATION_TYPE
+        else
+          "gitlab-development-kit"
         end
       end
     end
