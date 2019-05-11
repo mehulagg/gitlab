@@ -81,6 +81,7 @@ module Gitlab
             milestone_lists: count(List.milestone),
             milestones: count(Milestone),
             pages_domains: count(PagesDomain),
+            pool_repositories: count(PoolRepository),
             projects: count(Project),
             projects_imported_from_github: count(Project.where(import_type: 'github')),
             projects_with_repositories_enabled: count(ProjectFeature.where('repository_access_level > ?', ProjectFeature::DISABLED)),
