@@ -2,6 +2,9 @@ import Vue from 'vue';
 import component from 'ee/security_dashboard/components/filter.vue';
 import createStore from 'ee/security_dashboard/store';
 import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
+import { setTestTimeout } from 'helpers/timeout';
+
+setTestTimeout(500);
 
 describe('Filter component', () => {
   let vm;
