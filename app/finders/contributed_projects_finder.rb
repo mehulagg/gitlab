@@ -27,7 +27,7 @@ class ContributedProjectsFinder < UnionFinder
     if @params[:pinned]
       query = query.with_pinned
     else
-      query = query.order_updated_desc
+      query = query.order_id_desc
     end
 
     query
