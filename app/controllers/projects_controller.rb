@@ -244,6 +244,14 @@ class ProjectsController < Projects::ApplicationController
     }
   end
 
+  def toggle_pin
+    current_user.toggle_pin(@project)
+
+    render json: {
+      ok: 'ok'
+    }
+  end
+
   # rubocop: disable CodeReuse/ActiveRecord
   def refs
     find_refs = params['find']

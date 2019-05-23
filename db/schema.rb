@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190516011213) do
+ActiveRecord::Schema.define(version: 20190522232424) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -2290,6 +2290,14 @@ ActiveRecord::Schema.define(version: 20190516011213) do
     t.index ["user_id"], name: "index_personal_access_tokens_on_user_id", using: :btree
   end
 
+  create_table "pinned_projects", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "project_id", null: false
+    t.index ["project_id"], name: "index_pinned_projects_on_project_id", using: :btree
+    t.index ["user_id", "project_id"], name: "index_pinned_projects_on_user_id_and_project_id", unique: true, using: :btree
+    t.index ["user_id"], name: "index_pinned_projects_on_user_id", using: :btree
+  end
+
   create_table "plans", id: :serial, force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -3696,6 +3704,8 @@ ActiveRecord::Schema.define(version: 20190516011213) do
   add_foreign_key "path_locks", "projects", name: "fk_5265c98f24", on_delete: :cascade
   add_foreign_key "path_locks", "users"
   add_foreign_key "personal_access_tokens", "users"
+  add_foreign_key "pinned_projects", "projects", on_delete: :cascade
+  add_foreign_key "pinned_projects", "users", on_delete: :cascade
   add_foreign_key "pool_repositories", "projects", column: "source_project_id", on_delete: :nullify
   add_foreign_key "pool_repositories", "shards", on_delete: :restrict
   add_foreign_key "project_alerting_settings", "projects", on_delete: :cascade

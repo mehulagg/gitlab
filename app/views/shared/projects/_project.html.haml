@@ -8,6 +8,7 @@
 - access = max_project_member_access(project)
 - compact_mode = false unless local_assigns[:compact_mode] == true
 - show_last_commit_as_description = false unless local_assigns[:show_last_commit_as_description] == true && can_show_last_commit_in_list?(project)
+- show_pinned = local_assigns.fetch(:show_pinned, false)
 - css_class = '' unless local_assigns[:css_class]
 - css_class += " no-description" if project.description.blank? && !show_last_commit_as_description
 - cache_key = project_list_cache_key(project, pipeline_status: pipeline_status)
@@ -60,6 +61,8 @@
 
       .controls.d-flex.flex-sm-column.align-items-center.align-items-sm-end.flex-wrap.flex-shrink-0{ class: css_controls_class }
         .icon-container.d-flex.align-items-center
+          - if show_pinned
+            %span.d-flex.align-items-center.icon-wrapper.has-tooltip{ data: { container: 'body', placement: 'top' }, title: project.pinned? ? _('Unpin project') : _('Pin project'), toggle_pin_project_path: toggle_pin_project_path(project) }= sprite_icon('spam', size: 14, css_class: 'append-right-4')
           - if project.archived
             %span.d-flex.icon-wrapper.badge.badge-warning archived
           - if stars

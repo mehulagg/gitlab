@@ -55,16 +55,16 @@ class UsersController < ApplicationController
   end
 
   def projects
-    load_projects
-
     skip_pagination = Gitlab::Utils.to_boolean(params[:skip_pagination])
     skip_namespace = Gitlab::Utils.to_boolean(params[:skip_namespace])
     compact_mode = Gitlab::Utils.to_boolean(params[:compact_mode])
 
+    load_projects
+
     respond_to do |format|
       format.html { render 'show' }
       format.json do
-        pager_json("shared/projects/_list", @projects.count, projects: @projects, skip_pagination: skip_pagination, skip_namespace: skip_namespace, compact_mode: compact_mode)
+        pager_json("shared/projects/_list", @projects.count, projects: @projects, skip_pagination: skip_pagination, skip_namespace: skip_namespace, compact_mode: compact_mode, show_pinned: true)
       end
     end
   end
@@ -76,7 +76,7 @@ class UsersController < ApplicationController
       format.html { render 'show' }
       format.json do
         render json: {
-          html: view_to_html_string("shared/projects/_list", projects: @contributed_projects)
+          html: view_to_html_string("shared/projects/_list", projects: @contributed_projects, show_pinned: true)
         }
       end
     end
@@ -117,7 +117,7 @@ class UsersController < ApplicationController
   end
 
   def contributed_projects
-    ContributedProjectsFinder.new(user).execute(current_user)
+    ContributedProjectsFinder.new(user, pinned: true).execute(current_user)
   end
 
   def contributions_calendar
@@ -132,7 +132,7 @@ class UsersController < ApplicationController
 
   def load_projects
     @projects =
-      PersonalProjectsFinder.new(user).execute(current_user)
+      PersonalProjectsFinder.new(user, pinned: true).execute(current_user)
       .page(params[:page])
       .per(params[:limit])
 

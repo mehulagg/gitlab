@@ -132,6 +132,7 @@ class Project < ApplicationRecord
   belongs_to :creator, class_name: 'User'
   belongs_to :group, -> { where(type: 'Group') }, foreign_key: 'namespace_id'
   belongs_to :namespace
+  has_many :pinned_projects
   alias_method :parent, :namespace
   alias_attribute :parent_id, :namespace_id
 
@@ -419,6 +420,8 @@ class Project < ApplicationRecord
 
     where('NOT EXISTS (?)', subquery)
   end
+
+  scope :with_pinned, -> { left_joins(:pinned_projects).order('pinned_projects.id IS NULL, updated_at DESC') }
 
   enum auto_cancel_pending_pipelines: { disabled: 0, enabled: 1 }
 
@@ -2133,6 +2136,10 @@ class Project < ApplicationRecord
 
   def has_pool_repository?
     pool_repository.present?
+  end
+
+  def pinned?
+    pinned_projects.any?
   end
 
   private

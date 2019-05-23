@@ -122,6 +122,7 @@ class User < ApplicationRecord
   has_many :starred_projects, through: :users_star_projects, source: :project
   has_many :project_authorizations, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
   has_many :authorized_projects, through: :project_authorizations, source: :project
+  has_many :pinned_projects
 
   has_many :user_interacted_projects
   has_many :project_interactions, through: :user_interacted_projects, source: :project, class_name: 'Project'
@@ -1170,6 +1171,19 @@ class User < ApplicationRecord
         user_star_project.destroy
       else
         UsersStarProject.create!(project: project, user: self)
+      end
+    end
+  end
+
+  def toggle_pin(project)
+    PinnedProject.transaction do
+      pinned_project = pinned_projects
+          .where(project: project, user: self).lock(true).first
+
+      if pinned_project
+        pinned_project.destroy
+      else
+        PinnedProject.create!(project: project, user: self)
       end
     end
   end

@@ -589,6 +589,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         post :unarchive
         post :housekeeping
         post :toggle_star
+        post :toggle_pin
         post :preview_markdown
         post :export
         post :remove_export

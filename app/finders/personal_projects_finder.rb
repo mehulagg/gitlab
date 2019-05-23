@@ -15,6 +15,7 @@ class PersonalProjectsFinder < UnionFinder
   #                visible by this user.
   # params       - Optional query parameters
   #                  min_access_level: integer
+  #                  pinned: boolean
   #
   # Returns an ActiveRecord::Relation.
   # rubocop: disable CodeReuse/ActiveRecord
@@ -23,7 +24,15 @@ class PersonalProjectsFinder < UnionFinder
 
     segments = all_projects(current_user)
 
-    find_union(segments, Project).includes(:namespace).order_updated_desc
+    query = find_union(segments, Project).includes(:namespace)
+
+    if @params[:pinned]
+      query = query.with_pinned
+    else
+      query = query.order_updated_desc
+    end
+
+    query
   end
   # rubocop: enable CodeReuse/ActiveRecord
 

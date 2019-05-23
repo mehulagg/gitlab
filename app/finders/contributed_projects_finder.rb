@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class ContributedProjectsFinder < UnionFinder
-  def initialize(user)
+  def initialize(user, params = {})
     @user = user
+    @params = params
   end
 
   # Finds the projects "@user" contributed to, limited to either public projects
@@ -10,6 +11,8 @@ class ContributedProjectsFinder < UnionFinder
   #
   # current_user - When given the list of the projects is limited to those only
   #                visible by this user.
+  # params       - Optional query parameters
+  #                  pinned: boolean
   #
   # Returns an ActiveRecord::Relation.
   # rubocop: disable CodeReuse/ActiveRecord
@@ -19,7 +22,15 @@ class ContributedProjectsFinder < UnionFinder
 
     segments = all_projects(current_user)
 
-    find_union(segments, Project).includes(:namespace).order_id_desc
+    query = find_union(segments, Project).includes(:namespace)
+
+    if @params[:pinned]
+      query = query.with_pinned
+    else
+      query = query.order_updated_desc
+    end
+
+    query
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
