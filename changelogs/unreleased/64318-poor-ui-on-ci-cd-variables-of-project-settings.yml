@@ -1,0 +1,5 @@
+---
+title: Fix poor UI on CI/CD Variables of Project Settings for mobile
+merge_request: 30509
+author: Takuya Noguchi
+type: fixed

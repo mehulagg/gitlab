@@ -3808,9 +3808,6 @@ msgstr ""
 msgid "CiVariables|Specify variable values to be used in this run. The values specified in %{linkStart}CI/CD settings%{linkEnd} will be used as default"
 msgstr ""
 
-msgid "CiVariables|State"
-msgstr ""
-
 msgid "CiVariables|Type"
 msgstr ""
 
@@ -3827,6 +3824,9 @@ msgid "CiVariable|All environments"
 msgstr ""
 
 msgid "CiVariable|Create wildcard"
+msgstr ""
+
+msgid "CiVariable|Delete"
 msgstr ""
 
 msgid "CiVariable|Error occurred while saving variables"

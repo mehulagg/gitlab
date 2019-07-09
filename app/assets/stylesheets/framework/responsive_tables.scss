@@ -62,11 +62,8 @@
   }
 
   @include media-breakpoint-down(sm) {
-    display: flex;
     align-self: stretch;
-    padding: 10px;
     align-items: center;
-    min-height: 62px;
 
     &:not(:first-child) {
       border-top: 1px solid $white-normal;
