@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Gitlab
-  module BackgroundMigration
+  module Vulnerabilities
     class UpdateFingerprints
       def update_all
         find_occurrences.find_in_batches do |occurrences|

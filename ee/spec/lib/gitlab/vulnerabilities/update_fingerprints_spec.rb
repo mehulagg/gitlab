@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::UpdateFingerprints do
+describe Gitlab::Vulnerabilities::UpdateFingerprints do
   describe '#update_all' do
     it 'updates project_fingerprint on vulnerability feedback and occurrences to use the canonical method' do
       occurrence_with_feedback_metadata = {
