@@ -19,6 +19,7 @@ describe Gitlab::BackgroundMigration::UpdateFingerprints do
       )
       occurrence_without_feedback = create(:vulnerabilities_occurrence, project_fingerprint: old_fingerprint_2)
       feedback_with_occurrence = create(:vulnerability_feedback, project_fingerprint: old_fingerprint_1)
+      feedback_with_occurrence_2 = create(:vulnerability_feedback, project_fingerprint: old_fingerprint_1)
       feedback_without_occurrence = create(:vulnerability_feedback, project_fingerprint: old_fingerprint_3)
 
       Gitlab::BackgroundMigration::UpdateFingerprints.new.update_all
@@ -27,6 +28,7 @@ describe Gitlab::BackgroundMigration::UpdateFingerprints do
       expect(feedback_without_occurrence.reload.project_fingerprint).to eq(old_fingerprint_3)
       expect(occurrence_with_feedback.reload.project_fingerprint).to eq(new_fingerprint)
       expect(feedback_with_occurrence.reload.project_fingerprint).to eq(new_fingerprint)
+      expect(feedback_with_occurrence_2.reload.project_fingerprint).to eq(new_fingerprint)
     end
   end
 end
