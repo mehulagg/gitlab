@@ -4,53 +4,38 @@ module Gitlab
   module BackgroundMigration
     class UpdateFingerprints
       def update_all
-        update_occurrences
-        update_feedback
+        find_occurrences.find_in_batches do |occurrences|
+          feedback = find_feedback_batch(occurrences)
+          fingerprinted_items = (occurrences + feedback).group_by(&:project_fingerprint)
+
+          fingerprinted_items.each_value do |items|
+            occurrence = items.find { |item| item.respond_to?(:raw_metadata) }
+            metadata = JSON.parse(occurrence.raw_metadata)
+            compare_key = metadata['cve']
+            new_fingerprint = Digest::SHA1.hexdigest(compare_key)
+
+            items.each { |item| item.update(project_fingerprint: new_fingerprint) }
+          end
+        end
       end
 
       private
 
-      def update_feedback
-        data_for_update.each do |feedback|
-          metadata = JSON.parse(feedback['raw_metadata'])
-          new_fingerprint = Digest::SHA1.hexdigest(metadata['cve'])
+      def find_feedback_batch(occurrences)
+        fingerprints = occurrences.map(&:project_fingerprint)
 
-          ::Vulnerabilities::Occurrence.connection.execute(
-            <<-UPDATE
-              UPDATE vulnerability_feedback
-              SET project_fingerprint = '#{new_fingerprint}'
-              WHERE id = #{feedback['feedback_id']}
-            UPDATE
-          );
-        end
+        ::Vulnerabilities::Feedback.where(project_fingerprint: fingerprints)
       end
 
-      def update_occurrences
-        occurrences_to_update.each do |occurrence|
-          metadata = JSON.parse(occurrence['raw_metadata'])
-          new_fingerprint = Digest::SHA1.hexdigest(metadata['cve'])
-          occurrence = ::Vulnerabilities::Occurrence.find(occurrence['occurrence_id'])
-
-          occurrence.update(project_fingerprint: new_fingerprint)
-        end
+      def find_occurrences
+        ::Vulnerabilities::Occurrence.distinct
+          .joins(joins_vulnerability_feedback)
       end
 
-      def occurrences_to_update
-        data_for_update.uniq { |data| data['occurrence_id'] }
-      end
-
-      def data_for_update
-        @data ||= ::Vulnerabilities::Occurrence.connection.select_all(
-          <<-OCCURRENCES_QUERY
-            SELECT
-              vulnerability_occurrences.id AS occurrence_id,
-              vulnerability_occurrences.raw_metadata,
-              vulnerability_feedback.id AS feedback_id
-            FROM vulnerability_occurrences
-            INNER JOIN vulnerability_feedback
-            ON #{occurrence_fingerprint} = #{feedback_fingerprint}
-          OCCURRENCES_QUERY
-        ).to_hash
+      def joins_vulnerability_feedback
+        ActiveRecord::Base.sanitize_sql(
+          "INNER JOIN vulnerability_feedback ON #{occurrence_fingerprint} = #{feedback_fingerprint}"
+        )
       end
 
       def occurrence_fingerprint
