@@ -74,7 +74,10 @@ module Gitlab
                 'critical'
               else
                 safe_severity = ERB::Util.html_escape(severity)
-                raise SecurityReportParserError, "Unknown severity in container scanning report: #{safe_severity}"
+                raise(
+                  ::Gitlab::Ci::Parsers::Security::Common::SecurityReportParserError,
+                  "Unknown severity in container scanning report: #{safe_severity}"
+                )
               end
             end
 
