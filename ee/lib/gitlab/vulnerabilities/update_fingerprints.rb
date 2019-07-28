@@ -3,6 +3,9 @@
 module Gitlab
   module Vulnerabilities
     class UpdateFingerprints
+      DastFormatter = ::Gitlab::Ci::Parsers::Security::Formatters::Dast
+      ContainerScanningFormatter = ::Gitlab::Ci::Parsers::Security::Formatters::ContainerScanning
+
       def update_all
         find_occurrences.find_in_batches do |occurrences|
           feedback = find_feedback_batch(occurrences)
@@ -11,7 +14,7 @@ module Gitlab
           fingerprinted_items.each_value do |items|
             occurrence = items.find { |item| item.respond_to?(:raw_metadata) }
             metadata = JSON.parse(occurrence.raw_metadata)
-            compare_key = metadata['cve']
+            compare_key = compare_key(occurrence, metadata)
             new_fingerprint = Digest::SHA1.hexdigest(compare_key)
 
             items.each { |item| item.update(project_fingerprint: new_fingerprint) }
@@ -44,6 +47,16 @@ module Gitlab
 
       def feedback_fingerprint
         "CONCAT('\\x', vulnerability_feedback.project_fingerprint)"
+      end
+
+      def compare_key(occurrence, metadata)
+        if occurrence.dast?
+          metadata = DastFormatter.new(metadata).format({ 'uri' => '' }, '')
+        elsif occurrence.container_scanning?
+          metadata = ContainerScanningFormatter.new(metadata).format('')
+        end
+
+        metadata['cve']
       end
     end
   end
