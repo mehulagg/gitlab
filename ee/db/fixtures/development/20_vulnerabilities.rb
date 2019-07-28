@@ -94,6 +94,7 @@ class Gitlab::Seeder::Vulnerabilities
     {
       description: "The cipher does not provide data integrity update 1",
       solution: "GCM mode introduces an HMAC into the resulting encrypted data, providing integrity of the result.",
+      cve: "therealcomparekey",
       location: {
         file: "maven/src/main/java//App.java",
         start_line: line,
