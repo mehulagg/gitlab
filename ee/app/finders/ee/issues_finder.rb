@@ -24,18 +24,19 @@ module EE
 
     # rubocop: disable CodeReuse/ActiveRecord
     def by_weight(items)
-      return items unless filtered_by_weight?
-      return items if filter_by_any_weight?
+      return items unless weights?
 
       if filter_by_no_weight?
-        items.where(weight: nil)
+        items.where(weight: [-1, nil])
+      elsif filter_by_any_weight?
+        items.where.not(weight: [-1, nil])
       else
         items.where(weight: params[:weight])
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
-    def filtered_by_weight?
+    def weights?
       params[:weight].present? && params[:weight] != ::Issue::WEIGHT_ALL
     end
 

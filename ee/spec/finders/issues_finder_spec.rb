@@ -11,13 +11,12 @@ describe IssuesFinder do
       describe 'filter by weight' do
         set(:issue_with_weight_1) { create(:issue, project: project3, weight: 1) }
         set(:issue_with_weight_42) { create(:issue, project: project3, weight: 42) }
-        set(:issue_with_no_weight) { create(:issue, project: project3, weight: nil) }
 
         context 'filter issues with no weight' do
           let(:params) { { weight: Issue::WEIGHT_NONE } }
 
-          it 'returns all issues with no weight' do
-            expect(issues).to contain_exactly(issue_with_no_weight, issue1, issue2, issue3, issue4)
+          it 'returns all issues' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, issue4)
           end
         end
 
@@ -25,23 +24,15 @@ describe IssuesFinder do
           let(:params) { { weight: Issue::WEIGHT_ANY } }
 
           it 'returns all issues' do
-            expect(issues).to contain_exactly(issue_with_weight_1, issue_with_weight_42, issue_with_no_weight, issue1, issue2, issue3, issue4)
+            expect(issues).to contain_exactly(issue_with_weight_1, issue_with_weight_42)
           end
         end
 
         context 'filter issues with a specific weight' do
           let(:params) { { weight: 42 } }
 
-          it 'returns all issues with that weight' do
+          it 'returns all issues' do
             expect(issues).to contain_exactly(issue_with_weight_42)
-          end
-        end
-
-        context 'filter issues with a specific weight with no issues' do
-          let(:params) { { weight: 7 } }
-
-          it 'returns no issues' do
-            expect(issues).to be_empty
           end
         end
       end

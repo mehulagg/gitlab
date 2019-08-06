@@ -55,20 +55,9 @@ describe Boards::Issues::CreateService do
           expect(issue).to be_valid
         end
 
-        context "when board weight is 'none'" do
+        context 'when board weight is invalid' do
           it 'creates issue with nil weight' do
             board.update(weight: -1)
-
-            issue = service.execute
-
-            expect(issue.weight).to be_nil
-            expect(issue).to be_valid
-          end
-        end
-
-        context "when board weight is invalid" do
-          it 'creates issue with nil weight' do
-            board.update(weight: -6)
 
             issue = service.execute
 

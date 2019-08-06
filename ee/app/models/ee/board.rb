@@ -6,7 +6,7 @@ module EE
     extend ::Gitlab::Utils::Override
 
     # Empty state for milestones and weights.
-    EMPTY_SCOPE_STATE = [nil].freeze
+    EMPTY_SCOPE_STATE = [nil, -1].freeze
 
     prepended do
       belongs_to :milestone

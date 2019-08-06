@@ -1,59 +1,11 @@
 <script>
-import _ from 'underscore';
+/* eslint-disable vue/require-default-prop */
+
 import WeightSelect from 'ee/weight_select';
 import { GlLoadingIcon } from '@gitlab/ui';
-import { __ } from '~/locale';
 
-const ANY_WEIGHT = {
-  label: __('Any Weight'),
-  selectValue: 'Any',
-  value: null,
-  valueClass: 'text-secondary',
-};
-
-const NO_WEIGHT = {
-  label: __('No Weight'),
-  selectValue: 'None',
-  value: -1,
-};
-
-function unstringifyValue(value) {
-  if (!_.isString(value)) {
-    return value;
-  }
-  const numValue = Number(value);
-  return Number.isNaN(numValue) ? null : numValue;
-}
-
-function getWeightValueFromSelect(selectValue) {
-  switch (selectValue) {
-    case ANY_WEIGHT.selectValue:
-      return ANY_WEIGHT.value;
-    case NO_WEIGHT.selectValue:
-      return NO_WEIGHT.value;
-    case null:
-    case undefined:
-      return ANY_WEIGHT.value;
-    default:
-      return Number(selectValue);
-  }
-}
-
-function getWeightFromValue(strValue) {
-  const value = unstringifyValue(strValue);
-  switch (value) {
-    case ANY_WEIGHT.value:
-      return ANY_WEIGHT;
-    case NO_WEIGHT.value:
-      return NO_WEIGHT;
-    default:
-      return {
-        label: String(value),
-        selectValue: value,
-        value,
-      };
-  }
-}
+const ANY_WEIGHT = 'Any Weight';
+const NO_WEIGHT = 'No Weight';
 
 export default {
   components: {
@@ -67,7 +19,6 @@ export default {
     value: {
       type: [Number, String],
       required: false,
-      default: ANY_WEIGHT.value,
     },
     canEdit: {
       type: Boolean,
@@ -85,15 +36,16 @@ export default {
     };
   },
   computed: {
-    selectedWeight() {
-      return getWeightFromValue(this.value);
-    },
-
     valueClass() {
-      return this.selectedWeight.valueClass || 'bold';
+      if (this.valueText === ANY_WEIGHT) {
+        return 'text-secondary';
+      }
+      return 'bold';
     },
     valueText() {
-      return this.selectedWeight.label;
+      if (this.value > 0) return this.value;
+      if (this.value === 0) return NO_WEIGHT;
+      return ANY_WEIGHT;
     },
   },
   mounted() {
@@ -104,11 +56,17 @@ export default {
     });
   },
   methods: {
-    isSelected(weight) {
-      return this.selectedWeight.selectValue === weight;
-    },
     selectWeight(weight) {
-      this.board.weight = getWeightValueFromSelect(weight);
+      this.board.weight = this.weightInt(weight);
+    },
+    weightInt(weight) {
+      if (weight > 0) {
+        return weight;
+      }
+      if (weight === NO_WEIGHT) {
+        return 0;
+      }
+      return -1;
     },
   },
 };
@@ -140,7 +98,7 @@ export default {
           <div class="dropdown-content ">
             <ul>
               <li v-for="weight in weights" :key="weight">
-                <a :class="{ 'is-active': isSelected(weight) }" :data-id="weight" href="#">
+                <a :class="{ 'is-active': weight == valueText }" :data-id="weight" href="#">
                   {{ weight }}
                 </a>
               </li>

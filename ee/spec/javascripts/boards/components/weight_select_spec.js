@@ -4,14 +4,7 @@ import IssuableContext from '~/issuable_context';
 
 let vm;
 let board;
-
-const expectedDropdownValues = {
-  anyWeight: 'Any',
-  noWeight: 'None',
-};
-
-// see ee/app/views/shared/boards/_switcher.html.haml
-const weights = ['Any', 'None', 0, 1, 2, 3];
+const weights = ['Any Weight', 'No Weight', 1, 2, 3];
 
 function getSelectedText() {
   return vm.$el.querySelector('.value').innerText.trim();
@@ -21,16 +14,12 @@ function activeDropdownItem() {
   return vm.$el.querySelector('.is-active').innerText.trim();
 }
 
-function findDropdownItem(text) {
-  return Array.from(vm.$el.querySelectorAll('li a')).find(({ innerText }) => innerText === text);
-}
-
 describe('WeightSelect', () => {
   beforeEach(done => {
     setFixtures('<div class="test-container"></div>');
 
     board = {
-      weight: -1,
+      weight: 0,
       labels: [],
     };
 
@@ -54,31 +43,23 @@ describe('WeightSelect', () => {
       expect(getSelectedText()).toBe('Any Weight');
     });
 
-    it('displays Any Weight for null', done => {
-      vm.value = null;
+    it('displays Any Weight for value -1', done => {
+      vm.value = -1;
       Vue.nextTick(() => {
         expect(getSelectedText()).toEqual('Any Weight');
         done();
       });
     });
 
-    it('displays No Weight for -1', done => {
-      vm.value = -1;
+    it('displays No Weight', done => {
+      vm.value = 0;
       Vue.nextTick(() => {
         expect(getSelectedText()).toEqual('No Weight');
         done();
       });
     });
 
-    it('displays weight for 0', done => {
-      vm.value = 0;
-      Vue.nextTick(() => {
-        expect(getSelectedText()).toEqual('0');
-        done();
-      });
-    });
-
-    it('displays weight for 1', done => {
+    it('weight 1', done => {
       vm.value = 1;
       Vue.nextTick(() => {
         expect(getSelectedText()).toEqual('1');
@@ -92,17 +73,17 @@ describe('WeightSelect', () => {
       vm.$el.querySelector('.edit-link').click();
 
       setTimeout(() => {
-        expect(activeDropdownItem()).toEqual(expectedDropdownValues.anyWeight);
+        expect(activeDropdownItem()).toEqual('Any Weight');
         done();
       });
     });
 
     it('shows No Weight', done => {
-      vm.value = -1;
+      vm.value = 0;
       vm.$el.querySelector('.edit-link').click();
 
       setTimeout(() => {
-        expect(activeDropdownItem()).toEqual(expectedDropdownValues.noWeight);
+        expect(activeDropdownItem()).toEqual('No Weight');
         done();
       });
     });
@@ -123,12 +104,12 @@ describe('WeightSelect', () => {
       vm.$el.querySelector('.edit-link').click();
 
       setTimeout(() => {
-        findDropdownItem('2').click();
+        vm.$el.querySelectorAll('li a')[3].click();
       });
 
       setTimeout(() => {
         expect(activeDropdownItem()).toEqual('2');
-        expect(board.weight).toEqual(2);
+        expect(board.weight).toEqual('2');
         done();
       });
     });
@@ -138,26 +119,12 @@ describe('WeightSelect', () => {
       vm.$el.querySelector('.edit-link').click();
 
       setTimeout(() => {
-        findDropdownItem('Any').click();
+        vm.$el.querySelectorAll('li a')[0].click();
       });
 
       setTimeout(() => {
-        expect(activeDropdownItem()).toEqual(expectedDropdownValues.anyWeight);
-        expect(board.weight).toEqual(null);
-        done();
-      });
-    });
-
-    it('sets Any Weight if it is already selected', done => {
-      vm.value = null;
-      vm.$el.querySelector('.edit-link').click();
-
-      setTimeout(() => {
-        findDropdownItem('Any').click();
-      });
-
-      setTimeout(() => {
-        expect(board.weight).toEqual(null);
+        expect(activeDropdownItem()).toEqual('Any Weight');
+        expect(board.weight).toEqual(-1);
         done();
       });
     });
@@ -167,26 +134,12 @@ describe('WeightSelect', () => {
       vm.$el.querySelector('.edit-link').click();
 
       setTimeout(() => {
-        findDropdownItem('None').click();
+        vm.$el.querySelectorAll('li a')[1].click();
       });
 
       setTimeout(() => {
-        expect(activeDropdownItem()).toEqual(expectedDropdownValues.noWeight);
-        expect(board.weight).toEqual(-1);
-        done();
-      });
-    });
-
-    it('sets No Weight if it is already selected', done => {
-      vm.value = -1;
-      vm.$el.querySelector('.edit-link').click();
-
-      setTimeout(() => {
-        findDropdownItem('None').click();
-      });
-
-      setTimeout(() => {
-        expect(board.weight).toEqual(-1);
+        expect(activeDropdownItem()).toEqual('No Weight');
+        expect(board.weight).toEqual(0);
         done();
       });
     });

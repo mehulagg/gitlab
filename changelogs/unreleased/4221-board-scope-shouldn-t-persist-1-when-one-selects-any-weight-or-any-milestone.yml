@@ -1,5 +1,0 @@
----
-title: Properly persist -1 and null for board weight
-merge_request:
-author:
-type: changed

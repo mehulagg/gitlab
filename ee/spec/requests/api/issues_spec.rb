@@ -57,7 +57,7 @@ describe API::Issues, :mailer do
         it 'returns issues with any weight' do
           get api('/issues', user), params: { weight: 'Any', scope: 'all' }
 
-          expect_paginated_array_response([issue.id, issue3.id, issue2.id, issue1.id])
+          expect_paginated_array_response([issue3.id, issue2.id, issue1.id])
         end
       end
 

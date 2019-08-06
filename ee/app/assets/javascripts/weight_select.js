@@ -1,4 +1,4 @@
-/* eslint-disable prefer-arrow-callback, one-var, no-var, object-shorthand, no-unused-vars, no-else-return, func-names */
+/* eslint-disable prefer-arrow-callback, one-var, no-var, object-shorthand, no-shadow, no-unused-vars, no-else-return, func-names */
 
 import $ from 'jquery';
 import '~/gl_dropdown';
@@ -49,11 +49,13 @@ function WeightSelect(els, options = {}) {
         }
       },
       clicked: function(glDropdownEvt) {
-        const { e, $el } = glDropdownEvt;
-        const selected = $el.data('id');
+        const { e } = glDropdownEvt;
+        let selected = glDropdownEvt.selectedObj;
+        const inputField = $dropdown.closest('.selectbox').find(`input[name='${fieldName}']`);
 
         if (options.handleClick) {
           e.preventDefault();
+          selected = inputField.val();
           options.handleClick(selected);
         } else if ($dropdown.is('.js-issuable-form-weight')) {
           e.preventDefault();
