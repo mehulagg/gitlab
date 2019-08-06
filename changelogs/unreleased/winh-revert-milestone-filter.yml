@@ -1,0 +1,5 @@
+---
+title: Revert milestone filter behavior for "any"
+merge_request: 31524
+author:
+type: fixed
