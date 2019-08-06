@@ -17,10 +17,6 @@ function activeDropdownItem(index) {
   return items[index].innerText.trim();
 }
 
-function findDropdownItem(text) {
-  return Array.from(vm.$el.querySelectorAll('li a')).find(({ innerText }) => innerText === text);
-}
-
 const milestone = {
   id: 1,
   title: 'first milestone',
@@ -43,7 +39,7 @@ describe('Milestone select component', () => {
     const Component = Vue.extend(MilestoneSelect);
     vm = new Component({
       propsData: {
-        board: { ...boardObj },
+        board: boardObj,
         milestonePath: '/test/issue-boards/milestones.json',
         canEdit: true,
       },
@@ -76,7 +72,7 @@ describe('Milestone select component', () => {
     });
 
     it('shows No Milestone', done => {
-      vm.board.milestone_id = -1;
+      vm.board.milestone_id = 0;
       Vue.nextTick(() => {
         expect(selectedText()).toContain('No Milestone');
         done();
@@ -108,11 +104,11 @@ describe('Milestone select component', () => {
       });
 
       it('sets Any Milestone', done => {
-        vm.board.milestone_id = -1;
+        vm.board.milestone_id = 0;
         vm.$el.querySelector('.edit-link').click();
 
         setTimeout(() => {
-          findDropdownItem('Any Milestone').click();
+          vm.$el.querySelectorAll('li a')[0].click();
         });
 
         setTimeout(() => {
@@ -126,7 +122,7 @@ describe('Milestone select component', () => {
         vm.$el.querySelector('.edit-link').click();
 
         setTimeout(() => {
-          findDropdownItem('No Milestone').click();
+          vm.$el.querySelectorAll('li a')[1].click();
         });
 
         setTimeout(() => {
@@ -140,7 +136,7 @@ describe('Milestone select component', () => {
         vm.$el.querySelector('.edit-link').click();
 
         setTimeout(() => {
-          findDropdownItem('first milestone').click();
+          vm.$el.querySelectorAll('li a')[4].click();
         });
 
         setTimeout(() => {

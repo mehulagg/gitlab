@@ -95,12 +95,9 @@ class BoardsStoreEE {
     };
 
     let { milestoneTitle } = this.store.boardConfig;
-    if (this.store.boardConfig.milestoneId === -1) {
+    if (this.store.boardConfig.milestoneId === 0) {
       /* eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings */
-      milestoneTitle = 'None';
-    } else if (this.store.boardConfig.milestoneId === null) {
-      /* eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings */
-      milestoneTitle = 'Any';
+      milestoneTitle = 'No+Milestone';
     } else {
       milestoneTitle = encodeURIComponent(milestoneTitle);
     }
