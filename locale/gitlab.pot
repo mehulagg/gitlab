@@ -9393,6 +9393,9 @@ msgstr ""
 msgid "Moves this issue to %{path_to_project}."
 msgstr ""
 
+msgid "Moving this epic failed because of missing permission in group %{target_group_path}"
+msgstr ""
+
 msgid "Moving this epic failed because the group %{target_group_path} doesn't exist"
 msgstr ""
 

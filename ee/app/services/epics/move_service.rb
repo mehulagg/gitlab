@@ -17,6 +17,10 @@ module Epics
         raise MoveError, _("Moving this epic failed because the group %{target_group_path} doesn't exist") % { target_group_path: target_group_path }
       end
 
+      unless current_user.can?(:admin_epic, target_group)
+        raise MoveError, _("Moving this epic failed because of missing permission in group %{target_group_path}") % { target_group_path: target_group_path }
+      end
+
       raise NotImplementedError
     end
   end
