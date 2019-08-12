@@ -78,6 +78,17 @@ module EE
             @execution_message[:remove_parent_epic] = _('Removed parent epic %{epic_ref}.') % { epic_ref: parent_epic.to_reference(quick_action_target) }
           end
 
+          desc _('Move this epic to another group.')
+          explanation do |target_group_path|
+            _("Moves this epic to %{target_group_path}.") % { target_group_path: target_group_path }
+          end
+          params 'path/to/group'
+          types Epic
+          condition { ::Feature.enabled?(:move_epic_quick_action) && action_allowed? }
+          command :move do
+            raise NotImplementedError
+          end
+
           private
 
           def extract_epic(params)

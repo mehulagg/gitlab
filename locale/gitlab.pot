@@ -9357,6 +9357,9 @@ msgstr ""
 msgid "Move issue from one column of the board to another"
 msgstr ""
 
+msgid "Move this epic to another group."
+msgstr ""
+
 msgid "Move this issue failed because target project doesn't exists"
 msgstr ""
 
@@ -9379,6 +9382,9 @@ msgid "Moved this issue to %{path_to_project}."
 msgstr ""
 
 msgid "Moves issue to %{label} column in the board."
+msgstr ""
+
+msgid "Moves this epic to %{target_group_path}."
 msgstr ""
 
 msgid "Moves this issue to %{path_to_project}."
