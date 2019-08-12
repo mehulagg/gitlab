@@ -86,7 +86,12 @@ module EE
           types Epic
           condition { ::Feature.enabled?(:move_epic_quick_action) && action_allowed? }
           command :move do |target_group_path|
-            Epics::MoveService.new(quick_action_target, current_user).execute(target_group_path)
+            begin
+              Epics::MoveService.new(quick_action_target, current_user).execute(target_group_path)
+              @execution_message[:move] = _("Epic was moved to %{path_to_group}.") % { path_to_group: target_group_path }
+            rescue Epics::MoveService::MoveError => error
+              @execution_message[:move] = error.message
+            end
           end
 
           private

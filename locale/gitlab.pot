@@ -5540,6 +5540,9 @@ msgstr ""
 msgid "Epic"
 msgstr ""
 
+msgid "Epic was moved to %{path_to_group}."
+msgstr ""
+
 msgid "Epics"
 msgstr ""
 
@@ -9388,6 +9391,9 @@ msgid "Moves this epic to %{target_group_path}."
 msgstr ""
 
 msgid "Moves this issue to %{path_to_project}."
+msgstr ""
+
+msgid "Moving this epic failed because the group %{target_group_path} doesn't exist"
 msgstr ""
 
 msgid "Multiple issue boards"
