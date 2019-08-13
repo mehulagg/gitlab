@@ -85,8 +85,8 @@ module EE
           params 'path/to/group'
           types Epic
           condition { ::Feature.enabled?(:move_epic_quick_action) && action_allowed? }
-          command :move do
-            raise NotImplementedError
+          command :move do |target_group_path|
+            Epics::MoveService.new(quick_action_target, current_user).execute(target_group_path)
           end
 
           private
