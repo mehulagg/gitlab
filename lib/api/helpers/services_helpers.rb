@@ -248,6 +248,62 @@ module API
               desc: 'Title'
             }
           ],
+          'open-project' => [
+              {
+                  required: true,
+                  name: :closed_status_id,
+                  type: String,
+                  desc: 'Closed Status ID'
+              },
+              {
+                  required: true,
+                  name: :token,
+                  type: String,
+                  desc: 'token'
+              },
+              {
+                  required: false,
+                  name: :api_url,
+                  type: String,
+                  desc: 'API URL'
+              },
+              {
+                  required: true,
+                  name: :url,
+                  type: String,
+                  desc: 'Web URL'
+              },
+              {
+                  required: false,
+                  name: :issues_url,
+                  type: String,
+                  desc: 'Issues URL'
+              },
+              {
+                  required: false,
+                  name: :project_url,
+                  type: String,
+                  desc: 'Project URL'
+              },
+              {
+                  required: false,
+                  name: :project_identifier_code,
+                  type: String,
+                  desc: 'Project Identifier'
+              },
+              {
+                  required: false,
+                  name: :description,
+                  type: String,
+                  desc: 'Description'
+              },
+              {
+                  required: false,
+                  name: :title,
+                  type: String,
+                  desc: 'Title'
+              }
+          ],
           'buildkite' => [
             {
               required: true,
@@ -735,6 +791,7 @@ module API
           ::AssemblaService,
           ::BambooService,
           ::BugzillaService,
+          ::OpenProjectService,
           ::BuildkiteService,
           ::CampfireService,
           ::CustomIssueTrackerService,

@@ -13,6 +13,12 @@ module ProjectServicesLoggable
     logger.error(message)
   end
 
+  def log_debug(message, params = {})
+    message = build_message(message, params)
+
+    logger.debug(message)
+  end
+
   def build_message(message, params = {})
     {
       service_class: self.class.name,

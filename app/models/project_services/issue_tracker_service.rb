@@ -155,6 +155,8 @@ class IssueTrackerService < Service
     false
   end
 
+  # If the issue tracker integration supports creating cross-reference comments using commits we need to override this
+  #   method to return true if a condition (eg. active check) is met.
   def support_cross_reference?
     false
   end
@@ -178,6 +180,12 @@ class IssueTrackerService < Service
     if project.services.external_issue_trackers.where.not(id: id).any?
       errors.add(:base, _('Another issue tracker is already in use. Only one issue tracker service can be active at a time'))
     end
+  end
+
+  # If the issue tracker integration supports closing issues using commits we need to override this method to return
+  #   true if a condition (eg. active check) is met
+  def support_close_issue?
+    false
   end
 end
 

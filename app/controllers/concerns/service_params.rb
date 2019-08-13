@@ -36,6 +36,8 @@ module ServiceParams
     :issues_events,
     :issues_url,
     :jira_issue_transition_id,
+    :project_identifier_code,
+    :closed_status_id,
     :manual_configuration,
     :merge_requests_events,
     :mock_service_url,

@@ -311,6 +311,7 @@ class Service < ApplicationRecord
       hipchat
       irker
       jira
+      open_project
       mattermost
       mattermost_slash_commands
       microsoft_teams
