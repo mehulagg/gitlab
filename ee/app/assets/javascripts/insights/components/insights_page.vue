@@ -1,7 +1,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlLoadingIcon } from '@gitlab/ui';
 
 import InsightsChartError from './insights_chart_error.vue';

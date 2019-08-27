@@ -1,6 +1,6 @@
 <script>
 import { GlLink, GlTooltipDirective } from '@gitlab/ui';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __, sprintf } from '~/locale';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import popover from '~/vue_shared/directives/popover';

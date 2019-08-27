@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import '~/gl_dropdown';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __ } from '~/locale';
 
 function isValidProjectId(id) {

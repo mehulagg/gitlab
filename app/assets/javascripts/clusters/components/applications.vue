@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import helmInstallIllustration from '@gitlab/svgs/dist/illustrations/kubernetes-installation.svg';
 import { GlLoadingIcon } from '@gitlab/ui';
 import elasticsearchLogo from 'images/cluster_app_logos/elasticsearch.png';

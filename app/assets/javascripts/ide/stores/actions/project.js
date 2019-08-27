@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import flash from '~/flash';
 import { __, sprintf } from '~/locale';
 import service from '../../services';

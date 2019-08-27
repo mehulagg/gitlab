@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Deployment from './deployment.vue';
 import MrWidgetContainer from './mr_widget_container.vue';
 import MrWidgetPipeline from './mr_widget_pipeline.vue';

@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
 import LoadingButton from '~/vue_shared/components/loading_button.vue';

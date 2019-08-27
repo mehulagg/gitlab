@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 export const ROLLOUT_STRATEGY_ALL_USERS = 'default';
 export const ROLLOUT_STRATEGY_PERCENT_ROLLOUT = 'gradualRolloutUserId';

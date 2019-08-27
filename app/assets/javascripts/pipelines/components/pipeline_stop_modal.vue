@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import { GlLink } from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';

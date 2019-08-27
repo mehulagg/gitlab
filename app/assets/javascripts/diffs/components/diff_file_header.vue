@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { mapActions, mapGetters } from 'vuex';
 import { polyfillSticky, stickyMonitor } from '~/lib/utils/sticky';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';

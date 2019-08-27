@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlFormGroup, GlFormInput, GlBadge, GlButton } from '@gitlab/ui';
 import Icon from '~/vue_shared/components/icon.vue';
 import { sprintf, s__ } from '~/locale';

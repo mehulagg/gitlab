@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { getFirstCharacterCapitalized } from '~/lib/utils/text_utility';
 
 export const DEFAULT_SIZE_CLASS = 's40';

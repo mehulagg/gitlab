@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { spriteIcon } from './lib/utils/common_utils';
 
 const hideFlash = (flashEl, fadeTransition = true) => {

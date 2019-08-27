@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { scaleLinear, scaleThreshold } from 'd3-scale';
 import { select } from 'd3-selection';
 import dateFormat from 'dateformat';

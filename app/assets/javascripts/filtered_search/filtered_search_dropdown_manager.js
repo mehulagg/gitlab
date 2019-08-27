@@ -1,5 +1,5 @@
 import AvailableDropdownMappings from 'ee_else_ce/filtered_search/available_dropdown_mappings';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import DropLab from '~/droplab/drop_lab';
 import FilteredSearchContainer from './container';
 import FilteredSearchTokenKeys from './filtered_search_token_keys';

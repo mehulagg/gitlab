@@ -1,6 +1,6 @@
 <script>
 import { GlFormInput, GlButton, GlLink, GlFormGroup, GlFormRadioGroup } from '@gitlab/ui';
-import { debounce } from 'underscore';
+import { debounce } from 'lodash-es';
 import axios from '~/lib/utils/axios_utils';
 import { __, s__ } from '~/locale';
 import Icon from '~/vue_shared/components/icon.vue';

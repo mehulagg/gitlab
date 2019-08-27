@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import emojiMap from 'emojis/digests.json';
 import emojiAliases from 'emojis/aliases.json';
 

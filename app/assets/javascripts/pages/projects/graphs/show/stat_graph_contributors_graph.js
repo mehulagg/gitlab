@@ -1,7 +1,7 @@
 /* eslint-disable func-names, no-restricted-syntax, no-use-before-define, no-param-reassign, new-cap, no-underscore-dangle, no-return-assign, prefer-arrow-callback, prefer-template, no-else-return, no-shadow */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { extent, max } from 'd3-array';
 import { select, event as d3Event } from 'd3-selection';
 import { scaleTime, scaleLinear } from 'd3-scale';

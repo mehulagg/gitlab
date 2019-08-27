@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
 import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 import Icon from '~/vue_shared/components/icon.vue';

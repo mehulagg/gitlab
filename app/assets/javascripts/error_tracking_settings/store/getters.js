@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __, s__, sprintf } from '~/locale';
 import { getDisplayName } from '../utils';
 

@@ -3,7 +3,7 @@
  * Render environments table.
  */
 import { GlLoadingIcon } from '@gitlab/ui';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import environmentTableMixin from 'ee_else_ce/environments/mixins/environments_table_mixin';
 import EnvironmentItem from './environment_item.vue';
 

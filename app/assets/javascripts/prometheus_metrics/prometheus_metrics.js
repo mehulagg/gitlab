@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { s__, n__, sprintf } from '~/locale';
 import axios from '../lib/utils/axios_utils';
 import PANEL_STATE from './constants';

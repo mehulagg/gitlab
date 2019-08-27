@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __, sprintf } from '~/locale';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
 import { GlButton } from '@gitlab/ui';

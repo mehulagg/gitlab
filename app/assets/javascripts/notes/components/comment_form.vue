@@ -1,7 +1,7 @@
 <script>
 import $ from 'jquery';
 import { mapActions, mapGetters, mapState } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Autosize from 'autosize';
 import { __, sprintf } from '~/locale';
 import TimelineEntryItem from '~/vue_shared/components/notes/timeline_entry_item.vue';

@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { truncatePathMiddleToLength } from '~/lib/utils/text_utility';
 import { diffModes, diffViewerModes } from '~/ide/constants';
 import {

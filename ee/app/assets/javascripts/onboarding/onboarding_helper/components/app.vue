@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import { redirectTo } from '~/lib/utils/url_utility';
 import Tracking from '~/tracking';

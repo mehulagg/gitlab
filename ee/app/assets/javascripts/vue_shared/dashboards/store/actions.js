@@ -4,7 +4,7 @@ import axios from '~/lib/utils/axios_utils';
 import Poll from '~/lib/utils/poll';
 import createFlash from '~/flash';
 import { __, s__, n__, sprintf } from '~/locale';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import * as types from './mutation_types';
 
 const API_MINIMUM_QUERY_LENGTH = 3;

@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { mapGetters, mapState, mapActions } from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
 import { isScrolledToBottom } from '~/lib/utils/scroll_utils';

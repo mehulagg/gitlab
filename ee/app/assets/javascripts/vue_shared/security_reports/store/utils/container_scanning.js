@@ -1,7 +1,7 @@
 import { SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
 import { s__, sprintf } from '~/locale';
 import sha1 from 'sha1';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { enrichVulnerabilityWithFeedback } from '../utils';
 
 /*

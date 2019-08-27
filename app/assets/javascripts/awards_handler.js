@@ -1,7 +1,7 @@
 /* eslint-disable class-methods-use-this, @gitlab/i18n/no-non-i18n-strings */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Cookies from 'js-cookie';
 import { __ } from './locale';
 import { updateTooltipTitle } from './lib/utils/common_utils';

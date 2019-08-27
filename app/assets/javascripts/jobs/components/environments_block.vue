@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
 import { sprintf, __ } from '../../locale';
 

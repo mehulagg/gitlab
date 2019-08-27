@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { mapActions, mapState } from 'vuex';
 import createFlash from '~/flash';
 import { s__, sprintf } from '~/locale';

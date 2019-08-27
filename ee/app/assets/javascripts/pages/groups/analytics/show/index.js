@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import initGroupMemberContributions from 'ee/group_member_contributions';
 import BarChart from '~/vue_shared/components/bar_chart.vue';
 import { __ } from '~/locale';

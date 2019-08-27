@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { pixeliseValue } from '../../../lib/utils/dom_utils';
 import ImageViewer from '../../../content_viewer/viewers/image_viewer.vue';
 

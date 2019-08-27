@@ -1,6 +1,6 @@
 <script>
 import { mapState } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __ } from '~/locale';
 import {
   GlDropdown,

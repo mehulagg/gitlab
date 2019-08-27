@@ -1,7 +1,7 @@
 /* eslint-disable func-names, no-underscore-dangle, no-var, one-var, vars-on-top, no-shadow, no-cond-assign, prefer-arrow-callback, no-return-assign, no-else-return, camelcase, no-lonely-if, guard-for-in, no-restricted-syntax, consistent-return, prefer-template, no-param-reassign, no-loop-func */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import axios from './lib/utils/axios_utils';
 import { visitUrl } from './lib/utils/url_utility';

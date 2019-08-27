@@ -1,6 +1,6 @@
 <script>
 import Vue from 'vue';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlButton, GlBadge, GlTooltip, GlTooltipDirective } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';

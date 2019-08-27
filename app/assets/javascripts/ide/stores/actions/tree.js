@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __ } from '../../../locale';
 import service from '../../services';
 import * as types from '../mutation_types';

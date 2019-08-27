@@ -1,5 +1,5 @@
 /* eslint-disable no-new */
-import _ from 'underscore';
+import _ from 'lodash-es';
 import axios from './lib/utils/axios_utils';
 import Flash from './flash';
 import DropLab from './droplab/drop_lab';

@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import * as constants from '../constants';
 import { collapseSystemNotes } from './collapse_utils';
 

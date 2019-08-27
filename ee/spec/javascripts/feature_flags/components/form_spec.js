@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { createLocalVue, mount } from '@vue/test-utils';
 import Form from 'ee/feature_flags/components/form.vue';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';

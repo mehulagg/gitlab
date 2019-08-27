@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import stageColumnMixin from 'ee_else_ce/pipelines/mixins/stage_column_mixin';
 import JobItem from './job_item.vue';
 import JobGroupDropdown from './job_group_dropdown.vue';

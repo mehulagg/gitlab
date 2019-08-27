@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import SmartInterval from '~/smart_interval';
 import waitForPromises from 'spec/helpers/wait_for_promises';
 

@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __, sprintf, s__ } from '../../locale';
 import createFlash from '../../flash';
 import PipelinesService from '../services/pipelines_service';

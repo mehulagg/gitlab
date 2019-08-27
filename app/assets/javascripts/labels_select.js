@@ -3,7 +3,7 @@
 /* global ListLabel */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { sprintf, s__, __ } from './locale';
 import axios from './lib/utils/axios_utils';
 import IssuableBulkUpdateActions from './issuable_bulk_update_actions';

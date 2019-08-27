@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 import ListLabel from '../../models/label';
 

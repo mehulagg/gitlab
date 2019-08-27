@@ -1,6 +1,6 @@
 <script>
 /* eslint-disable @gitlab/vue-i18n/no-bare-strings */
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlLink, GlTooltip, GlTooltipDirective } from '@gitlab/ui';
 import { __ } from '~/locale';
 import Icon from '~/vue_shared/components/icon.vue';

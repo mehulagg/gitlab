@@ -1,6 +1,6 @@
 <script>
 import { createNamespacedHelpers } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlEmptyState, GlLoadingIcon, GlButton, GlModalDirective, GlLink } from '@gitlab/ui';
 import FeatureFlagsTable from './feature_flags_table.vue';
 import store from '../store';

@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import bp from '~/breakpoints';
 import { FREQUENT_ITEMS, HOUR_IN_MS } from './constants';
 

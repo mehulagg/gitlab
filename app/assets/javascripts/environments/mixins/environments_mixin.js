@@ -1,7 +1,7 @@
 /**
  * Common code between environmets app and folder view
  */
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Visibility from 'visibilityjs';
 import EnvironmentsStore from 'ee_else_ce/environments/stores/environments_store';
 import Poll from '../../lib/utils/poll';

@@ -1,7 +1,7 @@
 <script>
 import $ from 'jquery';
 import '~/behaviors/markdown/render_gfm';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __, sprintf } from '~/locale';
 import { stripHtml } from '~/lib/utils/text_utility';
 import Flash from '../../../flash';

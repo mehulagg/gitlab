@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import PodBox from './pod_box.vue';
 import Url from './url.vue';

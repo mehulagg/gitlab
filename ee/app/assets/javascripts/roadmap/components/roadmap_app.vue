@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 import epicsListEmpty from './epics_list_empty.vue';
 import roadmapShell from './roadmap_shell.vue';

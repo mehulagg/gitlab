@@ -1,7 +1,7 @@
 <script>
 import { sprintf, s__, n__ } from '~/locale';
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Icon from '~/vue_shared/components/icon.vue';
 import { GlButton } from '@gitlab/ui';
 import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';

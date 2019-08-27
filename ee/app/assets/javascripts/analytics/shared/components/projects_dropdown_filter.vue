@@ -1,7 +1,7 @@
 <script>
 import { sprintf, n__, s__, __ } from '~/locale';
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Icon from '~/vue_shared/components/icon.vue';
 import { GlLoadingIcon, GlButton, GlAvatar } from '@gitlab/ui';
 import Api from '~/api';

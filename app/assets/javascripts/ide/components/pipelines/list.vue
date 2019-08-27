@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlLoadingIcon } from '@gitlab/ui';
 import { sprintf, __ } from '../../../locale';
 import Icon from '../../../vue_shared/components/icon.vue';

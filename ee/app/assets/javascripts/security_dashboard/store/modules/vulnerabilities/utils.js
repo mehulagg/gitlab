@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { isEqual } from 'underscore';
+import { isEqual } from 'lodash-es';
 
 const isVulnerabilityLike = object =>
   Boolean(object && object.location && object.identifiers && object.identifiers[0]);

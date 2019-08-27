@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import FilteredSearchContainer from './container';
 import FilteredSearchTokenizer from './filtered_search_tokenizer';
 import FilteredSearchDropdownManager from './filtered_search_dropdown_manager';

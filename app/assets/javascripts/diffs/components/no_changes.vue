@@ -1,6 +1,6 @@
 <script>
 import { mapGetters } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlButton } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 

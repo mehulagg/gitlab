@@ -1,4 +1,4 @@
-import { debounce } from 'underscore';
+import { debounce } from 'lodash-es';
 import axios from '~/lib/utils/axios_utils';
 import { __ } from '~/locale';
 import Flash from '~/flash';

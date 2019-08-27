@@ -1,6 +1,6 @@
 <script>
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { s__, sprintf } from '~/locale';
 import { mouseenter, debouncedMouseleave, togglePopover } from '~/shared/popover';
 import StatusIcon from '../mr_widget_status_icon.vue';

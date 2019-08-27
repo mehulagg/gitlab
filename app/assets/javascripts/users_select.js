@@ -3,7 +3,7 @@
 /* global emitSidebarEvent */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import axios from './lib/utils/axios_utils';
 import { s__, __, sprintf } from './locale';
 import ModalStore from './boards/stores/modal_store';

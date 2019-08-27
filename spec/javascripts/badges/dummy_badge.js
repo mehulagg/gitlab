@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { PROJECT_BADGE } from '~/badges/constants';
 import { DUMMY_IMAGE_URL, TEST_HOST } from 'spec/test_constants';
 

@@ -1,5 +1,5 @@
 import sha1 from 'sha1';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import axios from 'axios';
 import { stripHtml } from '~/lib/utils/text_utility';
 import { n__, s__, sprintf } from '~/locale';

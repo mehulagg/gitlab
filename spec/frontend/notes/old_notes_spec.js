@@ -1,7 +1,7 @@
 /* eslint-disable import/no-commonjs, no-new */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import MockAdapter from 'axios-mock-adapter';
 import axios from '~/lib/utils/axios_utils';
 import * as urlUtility from '~/lib/utils/url_utility';

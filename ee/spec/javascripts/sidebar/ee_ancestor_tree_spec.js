@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { escape } from 'underscore';
+import { escape } from 'lodash-es';
 import ancestorsTree from 'ee/sidebar/components/ancestors_tree/ancestors_tree.vue';
 import mountComponent from 'spec/helpers/vue_mount_component_helper';
 

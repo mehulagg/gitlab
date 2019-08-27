@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { Manager } from 'smooshpack';
 import { listen } from 'codesandbox-api';
 import { GlLoadingIcon } from '@gitlab/ui';

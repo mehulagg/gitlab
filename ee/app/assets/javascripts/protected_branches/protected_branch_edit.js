@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import axios from '~/lib/utils/axios_utils';
 import Flash from '~/flash';
 import AccessDropdown from 'ee/projects/settings/access_dropdown';

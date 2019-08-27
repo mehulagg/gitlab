@@ -1,6 +1,6 @@
 <script>
 import { GlButton, GlFormGroup, GlFormInput, GlModal, GlModalDirective } from '@gitlab/ui';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';
 import axios from '~/lib/utils/axios_utils';

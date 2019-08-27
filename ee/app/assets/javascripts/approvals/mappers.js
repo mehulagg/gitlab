@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { RULE_TYPE_REGULAR, RULE_TYPE_FALLBACK } from './constants';
 
 export const mapApprovalRuleRequest = req => ({

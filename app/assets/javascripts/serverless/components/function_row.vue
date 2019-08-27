@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Timeago from '~/vue_shared/components/time_ago_tooltip.vue';
 import Url from './url.vue';
 import { visitUrl } from '~/lib/utils/url_utility';

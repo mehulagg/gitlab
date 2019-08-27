@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import Chart from 'chart.js';
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 import { barChartOptions, pieChartOptions } from '~/lib/utils/chart_utils';
 

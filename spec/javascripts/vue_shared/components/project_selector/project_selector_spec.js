@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
 import ProjectListItem from '~/vue_shared/components/project_selector/project_list_item.vue';
 

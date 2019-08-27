@@ -1,6 +1,6 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlButton } from '@gitlab/ui';
 import { sprintf, __ } from '~/locale';
 import ApproversList from './approvers_list.vue';

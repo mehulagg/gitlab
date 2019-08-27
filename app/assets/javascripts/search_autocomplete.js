@@ -1,7 +1,7 @@
 /* eslint-disable no-return-assign, one-var, no-var, consistent-return, prefer-template, class-methods-use-this, no-lonely-if, vars-on-top */
 
 import $ from 'jquery';
-import { escape, throttle } from 'underscore';
+import { escape, throttle } from 'lodash-es';
 import { s__, __ } from '~/locale';
 import { getIdenticonBackgroundClass, getIdenticonTitle } from '~/helpers/avatar_helper';
 import axios from './lib/utils/axios_utils';

@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import DirtySubmitForm from '~/dirty_submit/dirty_submit_form';
 import { getInputValue, setInputValue, createForm } from './helper';
 

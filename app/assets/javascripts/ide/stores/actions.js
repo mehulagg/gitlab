@@ -3,7 +3,7 @@ import Vue from 'vue';
 import { __, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
 import flash from '~/flash';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import * as types from './mutation_types';
 import { decorateFiles } from '../lib/files';
 import { stageKeys } from '../constants';

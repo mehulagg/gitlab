@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import importU2FLibrary from './util';
 import U2FError from './error';
 

@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlLoadingIcon } from '@gitlab/ui';
 
 export default {

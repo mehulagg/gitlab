@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { mapState, mapActions } from 'vuex';
 import {
   GlLoadingIcon,

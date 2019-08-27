@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Cookies from 'js-cookie';
 import { __, sprintf } from '~/locale';
 import sidebarEventHub from '~/sidebar/event_hub';

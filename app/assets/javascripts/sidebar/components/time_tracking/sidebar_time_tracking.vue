@@ -1,6 +1,6 @@
 <script>
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 import '~/smart_interval';
 

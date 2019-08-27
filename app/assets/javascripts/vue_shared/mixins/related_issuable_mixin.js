@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { sprintf, __ } from '~/locale';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import tooltip from '~/vue_shared/directives/tooltip';

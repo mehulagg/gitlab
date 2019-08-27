@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlLoadingIcon } from '@gitlab/ui';
 import StageColumnComponent from '~/pipelines/components/graph/stage_column_component.vue';
 import GraphMixin from '~/pipelines/mixins/graph_component_mixin';

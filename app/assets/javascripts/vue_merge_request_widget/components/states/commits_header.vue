@@ -1,6 +1,6 @@
 <script>
 import { GlButton } from '@gitlab/ui';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __, n__, sprintf, s__ } from '~/locale';
 import Icon from '~/vue_shared/components/icon.vue';
 

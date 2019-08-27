@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 import epicItemDetails from './epic_item_details.vue';
 import epicItemTimeline from './epic_item_timeline.vue';

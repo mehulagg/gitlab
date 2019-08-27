@@ -1,5 +1,5 @@
 <script>
-import { isUndefined } from 'underscore';
+import { isUndefined } from 'lodash-es';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
 import Filters from './filters.vue';

@@ -1,5 +1,5 @@
 import createFlash from '~/flash';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __ } from '~/locale';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';

@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import ReleaseBlock from '~/releases/components/release_block.vue';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
-import { first } from 'underscore';
+import { first } from 'lodash-es';
 import { release } from '../mock_data';
 
 describe('Release block', () => {

@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { sprintf } from '~/locale';
 import httpStatus from '~/lib/utils/http_status';
 import { TEST_HOST } from 'spec/test_constants';

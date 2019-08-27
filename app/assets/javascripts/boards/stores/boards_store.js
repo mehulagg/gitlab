@@ -2,7 +2,7 @@
 /* global List */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Vue from 'vue';
 import Cookies from 'js-cookie';
 import BoardsStoreEE from 'ee_else_ce/boards/stores/boards_store_ee';

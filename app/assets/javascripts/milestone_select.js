@@ -3,7 +3,7 @@
 /* global ListMilestone */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __ } from '~/locale';
 import '~/gl_dropdown';
 import axios from './lib/utils/axios_utils';

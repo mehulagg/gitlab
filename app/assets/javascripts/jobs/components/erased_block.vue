@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlLink } from '@gitlab/ui';
 import TimeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 

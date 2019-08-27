@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { isScrolledToBottom } from '~/lib/utils/scroll_utils';
 
 export const headerTime = state => (state.job.started ? state.job.started : state.job.created_at);

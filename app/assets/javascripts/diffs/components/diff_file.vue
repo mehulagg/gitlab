@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __, sprintf } from '~/locale';
 import createFlash from '~/flash';
 import { GlLoadingIcon } from '@gitlab/ui';

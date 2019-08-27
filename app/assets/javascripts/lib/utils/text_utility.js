@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 /**
  * Adds a , to a string composed by numbers, at every 3 chars.

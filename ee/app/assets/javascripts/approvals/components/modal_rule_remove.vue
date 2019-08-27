@@ -1,7 +1,7 @@
 <script>
 import { mapActions, mapState } from 'vuex';
 import { sprintf, n__, s__ } from '~/locale';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
 
 export default {

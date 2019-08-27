@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import DeprecatedModal from '~/vue_shared/components/deprecated_modal.vue';
 import { s__, sprintf } from '~/locale';
 

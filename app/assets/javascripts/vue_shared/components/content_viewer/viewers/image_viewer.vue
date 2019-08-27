@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { numberToHumanSize } from '../../../../lib/utils/number_utils';
 
 export default {

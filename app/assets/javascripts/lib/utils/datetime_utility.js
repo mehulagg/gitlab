@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import timeago from 'timeago.js';
 import dateFormat from 'dateformat';
 import { languageCode, s__, __, n__ } from '../../locale';

@@ -5,7 +5,7 @@ import { isScrolledToBottom, scrollDown, toggleDisableButton } from '~/lib/utils
 import LogOutputBehaviours from '~/lib/utils/logoutput_behaviours';
 import createFlash from '~/flash';
 import { __, s__ } from '~/locale';
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 export default class KubernetesPodLogs extends LogOutputBehaviours {
   constructor(container) {

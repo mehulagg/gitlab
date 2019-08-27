@@ -1,5 +1,5 @@
 <script>
-import { isUndefined } from 'underscore';
+import { isUndefined } from 'lodash-es';
 import { s__, sprintf } from '~/locale';
 import { GlEmptyState } from '@gitlab/ui';
 import Icon from '~/vue_shared/components/icon.vue';

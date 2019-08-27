@@ -3,7 +3,7 @@
  * Render modal to confirm rollback/redeploy.
  */
 
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlModal } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 

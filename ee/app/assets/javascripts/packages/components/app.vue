@@ -8,7 +8,7 @@ import {
   GlEmptyState,
   GlTable,
 } from '@gitlab/ui';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import PackageInformation from './information.vue';
 import Icon from '~/vue_shared/components/icon.vue';
 import { numberToHumanSize } from '~/lib/utils/number_utils';

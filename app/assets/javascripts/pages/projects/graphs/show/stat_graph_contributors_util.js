@@ -1,5 +1,5 @@
 /* eslint-disable func-names, no-var, one-var, camelcase, no-param-reassign, no-return-assign, prefer-arrow-callback, consistent-return, no-cond-assign, no-else-return */
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 export default {
   parse_log(log) {

@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import axios from '~/lib/utils/axios_utils';
 import createFlash from '~/flash';
 import { s__ } from '~/locale';

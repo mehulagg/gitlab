@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlLoadingIcon, GlSearchBoxByType } from '@gitlab/ui';
 import ProjectListItem from './project_list_item.vue';
 

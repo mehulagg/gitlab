@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import FilteredSearchContainer from '~/filtered_search/container';
 import FilteredSearchVisualTokens from '~/filtered_search/filtered_search_visual_tokens';
 import AjaxCache from '~/lib/utils/ajax_cache';

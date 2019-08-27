@@ -2,7 +2,7 @@
 
 import $ from 'jquery';
 import 'cropper';
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 (() => {
   // Matches everything but the file name

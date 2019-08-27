@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { editor as monacoEditor, KeyCode, KeyMod } from 'monaco-editor';
 import store from '../stores';
 import DecorationsController from './decorations/controller';

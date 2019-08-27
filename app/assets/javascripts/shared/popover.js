@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 export function togglePopover(show) {
   const isAlreadyShown = this.hasClass('js-popover-show');

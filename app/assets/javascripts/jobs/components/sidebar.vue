@@ -1,6 +1,6 @@
 <script>
 import { __, sprintf } from '~/locale';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { mapActions, mapState } from 'vuex';
 import { GlLink, GlButton } from '@gitlab/ui';
 import timeagoMixin from '~/vue_shared/mixins/timeago';

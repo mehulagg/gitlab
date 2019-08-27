@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import imageDiffMixin from 'ee_else_ce/diffs/mixins/image_diff';
 import Icon from '~/vue_shared/components/icon.vue';
 

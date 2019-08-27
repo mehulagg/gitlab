@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import eventHub from '~/ide/eventhub';
 import terminalSyncModule from '../modules/terminal_sync';
 import { isEndingStatus, isRunningStatus } from '../../utils';

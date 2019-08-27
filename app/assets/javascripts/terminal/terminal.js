@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import $ from 'jquery';
 import { Terminal } from 'xterm';
 import * as fit from 'xterm/lib/addons/fit/fit';

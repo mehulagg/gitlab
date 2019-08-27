@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import httpStatus from '~/lib/utils/http_status';
 import {
   chartKeys,

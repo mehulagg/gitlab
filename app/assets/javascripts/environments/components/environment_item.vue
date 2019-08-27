@@ -2,7 +2,7 @@
 /* eslint-disable @gitlab/vue-i18n/no-bare-strings */
 import { __, sprintf } from '~/locale';
 import Timeago from 'timeago.js';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { GlTooltipDirective } from '@gitlab/ui';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 import Icon from '~/vue_shared/components/icon.vue';

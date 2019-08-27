@@ -1,7 +1,7 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import { GlTooltipDirective, GlModalDirective, GlLink, GlButton } from '@gitlab/ui';
-import _ from 'underscore';
+import _ from 'lodash-es';
 
 import { __ } from '~/locale';
 

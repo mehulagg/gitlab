@@ -1,6 +1,6 @@
 <script>
 import { GlLink } from '@gitlab/ui';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { __, sprintf } from '~/locale';
 import icon from '../../../vue_shared/components/icon.vue';
 

@@ -1,6 +1,6 @@
 <script>
 import { GlLoadingIcon, GlEmptyState } from '@gitlab/ui';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import createFlash from '~/flash';
 import { s__, sprintf } from '~/locale';
 import DesignList from '../components/list/index.vue';

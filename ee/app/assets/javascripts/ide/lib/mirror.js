@@ -1,4 +1,4 @@
-import _ from 'underscore';
+import _ from 'lodash-es';
 import createDiff from './create_diff';
 import { getWebSocketUrl, mergeUrlParams } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';

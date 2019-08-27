@@ -11,7 +11,7 @@ old_notes_spec.js is the spec for the legacy, jQuery notes application. It has n
  */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Cookies from 'js-cookie';
 import Autosize from 'autosize';
 import 'jquery.caret'; // required by at.js

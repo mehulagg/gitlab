@@ -1,7 +1,7 @@
 /* eslint-disable func-names, no-var, one-var, camelcase, no-param-reassign, prefer-template, no-return-assign */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { n__, s__, createDateTimeFormat, sprintf } from '~/locale';
 import {
   ContributorsGraph,

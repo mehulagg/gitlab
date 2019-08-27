@@ -1,7 +1,7 @@
 /* eslint-disable func-names, no-var, consistent-return, one-var, prefer-template, no-else-return, no-param-reassign */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Cookies from 'js-cookie';
 import flash from './flash';
 import axios from './lib/utils/axios_utils';

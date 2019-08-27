@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import { mapActions } from 'vuex';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Translate from '~/vue_shared/translate';
 import ide from './components/ide.vue';
 import store from './stores';

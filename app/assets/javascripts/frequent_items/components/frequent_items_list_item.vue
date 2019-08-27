@@ -1,6 +1,6 @@
 <script>
 /* eslint-disable vue/require-default-prop */
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Identicon from '~/vue_shared/components/identicon.vue';
 import highlight from '~/lib/utils/highlight';
 import { truncateNamespace } from '~/lib/utils/text_utility';

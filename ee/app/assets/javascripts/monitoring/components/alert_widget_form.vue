@@ -1,6 +1,6 @@
 <script>
 import { __, s__ } from '~/locale';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import Vue from 'vue';
 import Translate from '~/vue_shared/translate';
 import { alertsValidator, queriesValidator } from '../validators';

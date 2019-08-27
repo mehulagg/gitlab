@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import Dropzone from 'dropzone';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import './behaviors/preview_markdown';
 import csrf from './lib/utils/csrf';
 import axios from './lib/utils/axios_utils';

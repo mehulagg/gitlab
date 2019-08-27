@@ -1,5 +1,5 @@
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import sanitize from 'sanitize-html';
 
 /**

@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import CePipelineStore from '~/pipelines/stores/pipeline_store';
 
 /**

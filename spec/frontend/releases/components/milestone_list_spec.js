@@ -2,7 +2,7 @@ import { shallowMount } from '@vue/test-utils';
 import { GlLink } from '@gitlab/ui';
 import MilestoneList from '~/releases/components/milestone_list.vue';
 import Icon from '~/vue_shared/components/icon.vue';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { milestones } from '../mock_data';
 
 describe('Milestone list', () => {

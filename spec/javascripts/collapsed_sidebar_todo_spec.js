@@ -1,5 +1,5 @@
 /* eslint-disable no-new */
-import _ from 'underscore';
+import _ from 'lodash-es';
 import MockAdapter from 'axios-mock-adapter';
 import axios from '~/lib/utils/axios_utils';
 import Sidebar from '~/right_sidebar';

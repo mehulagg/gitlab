@@ -1,7 +1,7 @@
 /* eslint-disable consistent-return, func-names, array-callback-return, prefer-arrow-callback */
 
 import $ from 'jquery';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import axios from './lib/utils/axios_utils';
 import Flash from './flash';
 import { __ } from './locale';

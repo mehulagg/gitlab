@@ -9,7 +9,7 @@
  * - Button Actions.
  * [Mockup](https://gitlab.com/gitlab-org/gitlab-foss/uploads/2f655655c0eadf655d0ae7467b53002a/environments__deploy-graphic.png)
  */
-import _ from 'underscore';
+import _ from 'lodash-es';
 import { n__, s__, sprintf } from '~/locale';
 import tooltip from '~/vue_shared/directives/tooltip';
 import deployBoardSvg from 'ee_empty_states/icons/_deploy_board.svg';

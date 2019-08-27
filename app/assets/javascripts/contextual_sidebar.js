@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import _ from 'underscore';
+import _ from 'lodash-es';
 import bp from './breakpoints';
 import { parseBoolean } from '~/lib/utils/common_utils';
 
