@@ -1,0 +1,5 @@
+---
+title: Add OpenProject Issue Tracker Integration and Add SuperClass ReferableIssueTracker for JIRA and OpenProject
+merge_request: 32481
+author: Xin Meng
+type: added
