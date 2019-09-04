@@ -95,31 +95,11 @@ rspec unit pg:
   extends: .rspec-base-pg
   parallel: 20
 
-rspec integration pg:
-  extends: .rspec-base-pg
-  parallel: 6
-
-rspec system pg:
-  extends: .rspec-base-pg
-  parallel: 24
-
 rspec unit pg-10:
   extends:
     - .rspec-base-pg-10
     - .only-schedules-master
   parallel: 20
-
-rspec integration pg-10:
-  extends:
-    - .rspec-base-pg-10
-    - .only-schedules-master
-  parallel: 6
-
-rspec system pg-10:
-  extends:
-    - .rspec-base-pg-10
-    - .only-schedules-master
-  parallel: 24
 
 rspec-fast-spec-helper:
   extends: .rspec-base-pg
@@ -334,14 +314,6 @@ coverage:
 rspec unit pg ee:
   extends: .rspec-base-pg-ee
   parallel: 7
-
-rspec integration pg ee:
-  extends: .rspec-base-pg-ee
-  parallel: 3
-
-rspec system pg ee:
-  extends: .rspec-base-pg-ee
-  parallel: 5
 
 .rspec-base-pg-geo:
   extends: .rspec-base
