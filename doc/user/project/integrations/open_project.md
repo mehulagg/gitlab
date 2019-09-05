@@ -123,7 +123,7 @@ There are currently three trigger words, and you can use either one to achieve t
 - `Closes PROJECT-1`  
 - `Fixes PROJECT-1`  
   
-where `PROJECT-1` is the issue ID of the OpenProject project.  
+Where `PROJECT-1` is the issue ID of the OpenProject project.  
 
 TIP: **Tip:**
 The closed statuses can be configured by the `Closed Status ID`, since OpenProject supports adding your own custom status. As of OpenProject v8, the default ID of Closed Status is `13`.
