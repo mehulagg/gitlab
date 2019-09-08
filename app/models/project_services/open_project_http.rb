@@ -43,7 +43,7 @@ class OpenProjectHttp
         }
     }
 
-    response = open_project_wp_http(Net::HTTP::Post, 'activities?notify=false', JSON[work_package_comment], issue)
+    open_project_wp_http(Net::HTTP::Post, 'activities?notify=false', JSON[work_package_comment], issue)
     # log_debug("Successfully posted " + response.to_s)
     "SUCCESS: Successfully send message"
   end
@@ -63,7 +63,7 @@ class OpenProjectHttp
             }
         }
     }
-    response = open_project_wp_http(Net::HTTP::Patch, '?notify=false', JSON[close_issue_body], op_id)
+    open_project_wp_http(Net::HTTP::Patch, '?notify=false', JSON[close_issue_body], op_id)
 
     # log_debug('Successfully posted ', response.to_s)
     'SUCCESS: Successfully close issue'

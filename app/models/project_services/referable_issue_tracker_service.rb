@@ -9,7 +9,7 @@ class ReferableIssueTrackerService < IssueTrackerService
   include ActionView::Helpers::AssetUrlHelper
   extend ::Gitlab::Utils::Override
 
-  GENERAL_ISSUE_FORMAT_REGEXP = /(?<issue>\b([A-Z][A-Z0-9_]+-)\d+)/
+  GENERAL_ISSUE_FORMAT_REGEXP = /(?<issue>\b([A-Z][A-Z0-9_]+-)\d+)/.freeze
 
   override :title
   def title
