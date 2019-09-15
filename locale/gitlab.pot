@@ -11332,6 +11332,57 @@ msgstr ""
 msgid "Jira integration not configured."
 msgstr ""
 
+msgid "OpenProjectService|"
+msgstr ""
+
+msgid "OpenProjectService|13 which is default for Open Project"
+msgstr ""
+
+msgid "OpenProjectService|API token"
+msgstr ""
+
+msgid "OpenProjectService|Closed Status ID"
+msgstr ""
+
+msgid "OpenProjectService|Description"
+msgstr ""
+
+msgid "OpenProjectService|Issue URL"
+msgstr ""
+
+msgid "OpenProjectService|Open Project API URL"
+msgstr ""
+
+msgid "OpenProjectService|Project Identifier"
+msgstr ""
+
+msgid "OpenProjectService|Project URL"
+msgstr ""
+
+msgid "OpenProjectService|Title"
+msgstr ""
+
+msgid "OpenProjectService|Web URL"
+msgstr ""
+
+msgid "OpenProjectService|demo"
+msgstr ""
+
+msgid "OpenProjectService|https://gitlab-integration.openproject.com"
+msgstr ""
+
+msgid "OpenProjectService|https://gitlab-integration.openproject.com/api/v3/"
+msgstr ""
+
+msgid "OpenProjectService|https://gitlab-integration.openproject.com/projects/:project_id/work_packages/:id"
+msgstr ""
+
+msgid "OpenProjectService|https://gitlab-integration.openproject.com/projects/xin"
+msgstr ""
+
+msgid "OpenProjectService|the API token for access the OpenProject API and the corresponding user will be set as the comment owner"
+msgstr ""
+
 msgid "JiraService|Events for %{noteable_model_name} are disabled."
 msgstr ""
 
