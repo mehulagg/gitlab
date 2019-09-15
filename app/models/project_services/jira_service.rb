@@ -42,12 +42,6 @@ class JiraService < ReferableIssueTrackerService
     @reference_pattern ||= /(?<issue>\b#{Gitlab::Regex.jira_issue_key_regex})/
   end
 
-  override :issue_tracker_name
-  def self.issue_tracker_name
-    "JIRA"
-  end
-
-  override :initialize_properties
   def initialize_properties
     {}
   end
@@ -96,7 +90,6 @@ class JiraService < ReferableIssueTrackerService
     end
   end
 
-  override :help
   def help
     "You need to configure Jira before enabling this service. For more details
     read the
@@ -111,19 +104,17 @@ class JiraService < ReferableIssueTrackerService
     s_('JiraService|Jira issue tracker')
   end
 
-  override :to_param
   def self.to_param
     'jira'
   end
 
-  override :fields
   def fields
     [
-      { type: 'text', name: 'url', title: s_('JiraService|Web URL'), placeholder: 'https://jira.example.com', required: true },
-      { type: 'text', name: 'api_url', title: s_('JiraService|Jira API URL'), placeholder: s_('JiraService|If different from Web URL') },
-      { type: 'text', name: 'username', title: s_('JiraService|Username or Email'), placeholder: s_('JiraService|Use a username for server version and an email for cloud version'), required: true },
-      { type: 'password', name: 'password', title: s_('JiraService|Password or API token'), placeholder: s_('JiraService|Use a password for server version and an API token for cloud version'), required: true },
-      { type: 'text', name: 'jira_issue_transition_id', title: s_('JiraService|Transition ID(s)'), placeholder: s_('JiraService|Use , or ; to separate multiple transition IDs') }
+        { type: 'text', name: 'url', title: s_('JiraService|Web URL'), placeholder: 'https://jira.example.com', required: true },
+        { type: 'text', name: 'api_url', title: s_('JiraService|Jira API URL'), placeholder: s_('JiraService|If different from Web URL') },
+        { type: 'text', name: 'username', title: s_('JiraService|Username or Email'), placeholder: s_('JiraService|Use a username for server version and an email for cloud version'), required: true },
+        { type: 'password', name: 'password', title: s_('JiraService|Password or API token'), placeholder: s_('JiraService|Use a password for server version and an API token for cloud version'), required: true },
+        { type: 'text', name: 'jira_issue_transition_id', title: s_('JiraService|Transition ID(s)'), placeholder: s_('JiraService|Use , or ; to separate multiple transition IDs') }
     ]
   end
 
@@ -150,12 +141,6 @@ class JiraService < ReferableIssueTrackerService
     # support any events.
   end
 
-  override :message_format_style
-  def message_format_style
-    "JIRA"
-  end
-
-  override :close_issue
   def close_issue(entity, external_issue)
     issue = jira_request { client.Issue.find(external_issue.iid) }
 
@@ -175,12 +160,38 @@ class JiraService < ReferableIssueTrackerService
     add_issue_solved_comment(issue, commit_id, commit_url) if has_resolution?(issue)
   end
 
-  # User JIRA client to find the JIRA issue by the mentioned id
-  def tracker_issue_by_gitlab_id(mentioned_id)
-    jira_request { client.Issue.find(mentioned_id) }
+  def create_cross_reference_note(mentioned, noteable, author)
+    unless can_cross_reference?(noteable)
+      return s_("JiraService|Events for %{noteable_model_name} are disabled.") % { noteable_model_name: noteable.model_name.plural.humanize(capitalize: false) }
+    end
+
+    jira_issue = jira_request { client.Issue.find(mentioned.id) }
+
+    return unless jira_issue.present?
+
+    noteable_id   = noteable.respond_to?(:iid) ? noteable.iid : noteable.id
+    noteable_type = noteable_name(noteable)
+    entity_url    = build_entity_url(noteable_type, noteable_id)
+
+    data = {
+        user: {
+            name: author.name,
+            url: resource_url(user_path(author))
+        },
+        project: {
+            name: project.full_path,
+            url: resource_url(namespace_project_path(project.namespace, project)) # rubocop:disable Cop/ProjectPathHelper
+        },
+        entity: {
+            name: noteable_type.humanize.downcase,
+            url: entity_url,
+            title: noteable.title
+        }
+    }
+
+    add_comment(data, jira_issue)
   end
 
-  override :test
   def test(_)
     result = test_settings
     success = result.present?
@@ -191,7 +202,6 @@ class JiraService < ReferableIssueTrackerService
 
   # Jira does not need test data.
   # We are requesting the project that belongs to the project key.
-  override :test_data
   def test_data(user = nil, project = nil)
     nil
   end
@@ -225,6 +235,14 @@ class JiraService < ReferableIssueTrackerService
 
   private
 
+  def can_cross_reference?(noteable)
+    case noteable
+    when Commit then commit_events
+    when MergeRequest then merge_requests_events
+    else true
+    end
+  end
+
   # jira_issue_transition_id can have multiple values split by , or ;
   # the issue is transitioned at the order given by the user
   # if any transition fails it will log the error message and stop the transition sequence
@@ -245,6 +263,30 @@ class JiraService < ReferableIssueTrackerService
     end
   end
 
+  def add_issue_solved_comment(issue, commit_id, commit_url)
+    link_title   = "Solved by commit #{commit_id}."
+    comment      = "Issue solved with [#{commit_id}|#{commit_url}]."
+    link_props   = build_remote_link_props(url: commit_url, title: link_title, resolved: true)
+    send_message(issue, comment, link_props)
+  end
+
+  def add_comment(data, issue)
+    user_name    = data[:user][:name]
+    user_url     = data[:user][:url]
+    entity_name  = data[:entity][:name]
+    entity_url   = data[:entity][:url]
+    entity_title = data[:entity][:title]
+    project_name = data[:project][:name]
+
+    message      = "[#{user_name}|#{user_url}] mentioned this issue in [a #{entity_name} of #{project_name}|#{entity_url}]:\n'#{entity_title.chomp}'"
+    link_title   = "#{entity_name.capitalize} - #{entity_title}"
+    link_props   = build_remote_link_props(url: entity_url, title: link_title)
+
+    unless comment_exists?(issue, message)
+      send_message(issue, message, link_props)
+    end
+  end
+
   def has_resolution?(issue)
     issue.respond_to?(:resolution) && issue.resolution.present?
   end
@@ -255,7 +297,6 @@ class JiraService < ReferableIssueTrackerService
     comments.present? && comments.any? { |comment| comment.body.include?(message) }
   end
 
-  override :send_message
   def send_message(issue, message, remote_link_props)
     return unless client_url.present?
 
@@ -286,10 +327,6 @@ class JiraService < ReferableIssueTrackerService
 
   def build_remote_link_props(url:, title:, resolved: false)
     status = {
-      resolved: resolved
-    }
-
-    {
       GlobalID: 'GitLab',
       relationship: 'mentioned on',
       object: {
