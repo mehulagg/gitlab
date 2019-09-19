@@ -84,7 +84,7 @@ export default {
         this.addItem();
       }
     },
-    handleCreateItemFormSubmit(newValue) {
+    handleCreateEpicFormSubmit(newValue) {
       this.createItem({
         itemTitle: newValue,
       });
@@ -138,7 +138,7 @@ export default {
         <create-epic-form
           v-if="showCreateEpicForm"
           :is-submitting="itemCreateInProgress"
-          @createEpicFormSubmit="handleCreateItemFormSubmit"
+          @createEpicFormSubmit="handleCreateEpicFormSubmit"
           @createItemFormCancel="handleCreateItemFormCancel"
         />
       </div>

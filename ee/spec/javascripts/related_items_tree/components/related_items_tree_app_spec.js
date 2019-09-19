@@ -105,12 +105,12 @@ describe('RelatedItemsTreeApp', () => {
       });
     });
 
-    describe('handleCreateItemFormSubmit', () => {
+    describe('handleCreateEpicFormSubmit', () => {
       it('calls `createItem` action with `itemTitle` param', () => {
         const newValue = 'foo';
         spyOn(wrapper.vm, 'createItem');
 
-        wrapper.vm.handleCreateItemFormSubmit(newValue);
+        wrapper.vm.handleCreateEpicFormSubmit(newValue);
 
         expect(wrapper.vm.createItem).toHaveBeenCalledWith({
           itemTitle: newValue,
