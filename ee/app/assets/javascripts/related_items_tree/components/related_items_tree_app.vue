@@ -139,7 +139,7 @@ export default {
           v-if="showCreateEpicForm"
           :is-submitting="itemCreateInProgress"
           @createEpicFormSubmit="handleCreateEpicFormSubmit"
-          @createItemFormCancel="handleCreateItemFormCancel"
+          @createEpicFormCancel="handleCreateItemFormCancel"
         />
       </div>
       <related-items-tree-body

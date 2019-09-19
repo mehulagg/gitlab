@@ -36,7 +36,7 @@ export default {
       this.$emit('createEpicFormSubmit', this.inputValue.trim());
     },
     onFormCancel() {
-      this.$emit('createItemFormCancel');
+      this.$emit('createEpicFormCancel');
     },
   },
 };

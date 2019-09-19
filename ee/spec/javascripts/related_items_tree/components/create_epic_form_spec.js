@@ -80,10 +80,10 @@ describe('RelatedItemsTree', () => {
       });
 
       describe('onFormCancel', () => {
-        it('emits `createItemFormCancel` event on component', () => {
+        it('emits `createEpicFormCancel` event on component', () => {
           wrapper.vm.onFormCancel();
 
-          expect(wrapper.emitted().createItemFormCancel).toBeTruthy();
+          expect(wrapper.emitted().createEpicFormCancel).toBeTruthy();
         });
       });
     });
