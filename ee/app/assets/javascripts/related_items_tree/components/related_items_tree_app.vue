@@ -94,7 +94,7 @@ export default {
       this.setPendingReferences([]);
       this.setItemInputValue('');
     },
-    handleCreateItemFormCancel() {
+    handleCreateEpicFormCancel() {
       this.toggleCreateEpicForm({ toggleState: false, actionType: this.actionType });
       this.setItemInputValue('');
     },
@@ -139,7 +139,7 @@ export default {
           v-if="showCreateEpicForm"
           :is-submitting="itemCreateInProgress"
           @createEpicFormSubmit="handleCreateEpicFormSubmit"
-          @createEpicFormCancel="handleCreateItemFormCancel"
+          @createEpicFormCancel="handleCreateEpicFormCancel"
         />
       </div>
       <related-items-tree-body

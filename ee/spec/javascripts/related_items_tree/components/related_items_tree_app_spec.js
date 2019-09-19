@@ -147,11 +147,11 @@ describe('RelatedItemsTreeApp', () => {
       });
     });
 
-    describe('handleCreateItemFormCancel', () => {
+    describe('handleCreateEpicFormCancel', () => {
       it('calls `toggleCreateEpicForm` actions with params `toggleState` and `actionType`', () => {
         spyOn(wrapper.vm, 'toggleCreateEpicForm');
 
-        wrapper.vm.handleCreateItemFormCancel();
+        wrapper.vm.handleCreateEpicFormCancel();
 
         expect(wrapper.vm.toggleCreateEpicForm).toHaveBeenCalledWith({
           toggleState: false,
@@ -162,7 +162,7 @@ describe('RelatedItemsTreeApp', () => {
       it('calls `setItemInputValue` action with empty string', () => {
         spyOn(wrapper.vm, 'setItemInputValue');
 
-        wrapper.vm.handleCreateItemFormCancel();
+        wrapper.vm.handleCreateEpicFormCancel();
 
         expect(wrapper.vm.setItemInputValue).toHaveBeenCalledWith('');
       });
