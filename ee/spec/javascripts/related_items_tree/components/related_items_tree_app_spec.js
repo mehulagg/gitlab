@@ -148,12 +148,12 @@ describe('RelatedItemsTreeApp', () => {
     });
 
     describe('handleCreateItemFormCancel', () => {
-      it('calls `toggleCreateItemForm` actions with params `toggleState` and `actionType`', () => {
-        spyOn(wrapper.vm, 'toggleCreateItemForm');
+      it('calls `toggleCreateEpicForm` actions with params `toggleState` and `actionType`', () => {
+        spyOn(wrapper.vm, 'toggleCreateEpicForm');
 
         wrapper.vm.handleCreateItemFormCancel();
 
-        expect(wrapper.vm.toggleCreateItemForm).toHaveBeenCalledWith({
+        expect(wrapper.vm.toggleCreateEpicForm).toHaveBeenCalledWith({
           toggleState: false,
           actionType: '',
         });

@@ -70,15 +70,15 @@ describe('RelatedItemsTree', () => {
           });
         });
 
-        it('calls `toggleCreateItemForm` action when provided `id` param value is not `0`', () => {
-          spyOn(wrapper.vm, 'toggleCreateItemForm');
+        it('calls `toggleCreateEpicForm` action when provided `id` param value is not `0`', () => {
+          spyOn(wrapper.vm, 'toggleCreateEpicForm');
 
           wrapper.vm.handleActionClick({
             id: 1,
             actionType,
           });
 
-          expect(wrapper.vm.toggleCreateItemForm).toHaveBeenCalledWith({
+          expect(wrapper.vm.toggleCreateEpicForm).toHaveBeenCalledWith({
             actionType,
             toggleState: true,
           });

@@ -55,7 +55,7 @@ export default {
     ...mapActions([
       'fetchItems',
       'toggleAddItemForm',
-      'toggleCreateItemForm',
+      'toggleCreateEpicForm',
       'setPendingReferences',
       'addPendingReferences',
       'removePendingReference',
@@ -95,7 +95,7 @@ export default {
       this.setItemInputValue('');
     },
     handleCreateItemFormCancel() {
-      this.toggleCreateItemForm({ toggleState: false, actionType: this.actionType });
+      this.toggleCreateEpicForm({ toggleState: false, actionType: this.actionType });
       this.setItemInputValue('');
     },
   },

@@ -32,7 +32,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['toggleAddItemForm', 'toggleCreateItemForm']),
+    ...mapActions(['toggleAddItemForm', 'toggleCreateEpicForm']),
     handleActionClick({ id, actionType }) {
       if (id === 0) {
         this.toggleAddItemForm({
@@ -40,7 +40,7 @@ export default {
           toggleState: true,
         });
       } else {
-        this.toggleCreateItemForm({
+        this.toggleCreateEpicForm({
           actionType,
           toggleState: true,
         });
