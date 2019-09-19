@@ -116,7 +116,11 @@ export default {
       }"
     >
       <related-items-tree-header :class="{ 'border-bottom-0': itemsFetchResultEmpty }" />
-      <div v-if="showAddItemForm || showCreateItemForm" class="card-body add-item-form-container">
+      <div
+        v-if="showAddItemForm || showCreateItemForm"
+        class="card-body add-item-form-container"
+        :class="{ 'border-bottom-0': itemsFetchResultEmpty }"
+      >
         <add-item-form
           v-if="showAddItemForm"
           :issuable-type="actionType"
