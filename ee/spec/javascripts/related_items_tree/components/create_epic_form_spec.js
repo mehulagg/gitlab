@@ -68,14 +68,14 @@ describe('RelatedItemsTree', () => {
 
     describe('methods', () => {
       describe('onFormSubmit', () => {
-        it('emits `createItemFormSubmit` event on component with input value as param', () => {
+        it('emits `createEpicFormSubmit` event on component with input value as param', () => {
           const value = 'foo';
           wrapper.find('input.form-control').setValue(value);
 
           wrapper.vm.onFormSubmit();
 
-          expect(wrapper.emitted().createItemFormSubmit).toBeTruthy();
-          expect(wrapper.emitted().createItemFormSubmit[0]).toEqual([value]);
+          expect(wrapper.emitted().createEpicFormSubmit).toBeTruthy();
+          expect(wrapper.emitted().createEpicFormSubmit[0]).toEqual([value]);
         });
       });
 

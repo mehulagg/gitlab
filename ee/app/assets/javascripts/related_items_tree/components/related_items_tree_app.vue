@@ -138,7 +138,7 @@ export default {
         <create-epic-form
           v-if="showCreateEpicForm"
           :is-submitting="itemCreateInProgress"
-          @createItemFormSubmit="handleCreateItemFormSubmit"
+          @createEpicFormSubmit="handleCreateItemFormSubmit"
           @createItemFormCancel="handleCreateItemFormCancel"
         />
       </div>
