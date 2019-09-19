@@ -4,7 +4,7 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
 
 import AddItemForm from 'ee/related_issues/components/add_issuable_form.vue';
-import CreateItemForm from './create_item_form.vue';
+import CreateEpicForm from './create_epic_form.vue';
 import TreeItemRemoveModal from './tree_item_remove_modal.vue';
 
 import RelatedItemsTreeHeader from './related_items_tree_header.vue';
@@ -21,7 +21,7 @@ export default {
     RelatedItemsTreeHeader,
     RelatedItemsTreeBody,
     AddItemForm,
-    CreateItemForm,
+    CreateEpicForm,
     TreeItemRemoveModal,
   },
   computed: {
@@ -135,7 +135,7 @@ export default {
           @addIssuableFormSubmit="handleAddItemFormSubmit"
           @addIssuableFormCancel="handleAddItemFormCancel"
         />
-        <create-item-form
+        <create-epic-form
           v-if="showCreateItemForm"
           :is-submitting="itemCreateInProgress"
           @createItemFormSubmit="handleCreateItemFormSubmit"
