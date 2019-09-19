@@ -733,7 +733,7 @@ describe('RelatedItemTree', () => {
       });
 
       describe('toggleCreateItemForm', () => {
-        it('should set `state.showCreateItemForm` to true', done => {
+        it('should set `state.showCreateEpicForm` to true', done => {
           testAction(
             actions.toggleCreateItemForm,
             {},

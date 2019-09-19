@@ -32,7 +32,7 @@ export default {
       'itemAddInProgress',
       'itemCreateInProgress',
       'showAddItemForm',
-      'showCreateItemForm',
+      'showCreateEpicForm',
       'autoCompleteEpics',
       'autoCompleteIssues',
       'pendingReferences',
@@ -117,7 +117,7 @@ export default {
     >
       <related-items-tree-header :class="{ 'border-bottom-0': itemsFetchResultEmpty }" />
       <div
-        v-if="showAddItemForm || showCreateItemForm"
+        v-if="showAddItemForm || showCreateEpicForm"
         class="card-body add-item-form-container"
         :class="{ 'border-bottom-0': itemsFetchResultEmpty }"
       >
@@ -136,7 +136,7 @@ export default {
           @addIssuableFormCancel="handleAddItemFormCancel"
         />
         <create-epic-form
-          v-if="showCreateItemForm"
+          v-if="showCreateEpicForm"
           :is-submitting="itemCreateInProgress"
           @createItemFormSubmit="handleCreateItemFormSubmit"
           @createItemFormCancel="handleCreateItemFormCancel"

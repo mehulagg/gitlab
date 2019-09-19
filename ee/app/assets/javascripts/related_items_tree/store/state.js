@@ -22,7 +22,7 @@ export default () => ({
   itemAddInProgress: false,
   itemCreateInProgress: false,
   showAddItemForm: false,
-  showCreateItemForm: false,
+  showCreateEpicForm: false,
   autoCompleteEpics: false,
   autoCompleteIssues: false,
   removeItemModalProps: {
