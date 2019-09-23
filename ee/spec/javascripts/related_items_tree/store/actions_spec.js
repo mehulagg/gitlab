@@ -738,7 +738,7 @@ describe('RelatedItemTree', () => {
             actions.toggleCreateEpicForm,
             {},
             {},
-            [{ type: types.TOGGLE_CREATE_ITEM_FORM, payload: {} }],
+            [{ type: types.TOGGLE_CREATE_EPIC_FORM, payload: {} }],
             [],
             done,
           );

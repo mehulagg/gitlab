@@ -126,7 +126,7 @@ export default {
     state.showCreateEpicForm = false;
   },
 
-  [types.TOGGLE_CREATE_ITEM_FORM](state, { actionType, toggleState }) {
+  [types.TOGGLE_CREATE_EPIC_FORM](state, { actionType, toggleState }) {
     state.actionType = actionType;
     state.showCreateEpicForm = toggleState;
     state.showAddItemForm = false;
