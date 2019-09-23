@@ -56,7 +56,7 @@ module.exports = {
     '^.+\\.js$': 'babel-jest',
     '^.+\\.vue$': 'vue-jest',
   },
-  transformIgnorePatterns: ['node_modules/(?!(@gitlab/ui)/)'],
+  transformIgnorePatterns: ['node_modules/(?!(@gitlab/ui|lodash-es)/)'],
   timers: 'fake',
   testEnvironment: '<rootDir>/spec/frontend/environment.js',
   testEnvironmentOptions: {
