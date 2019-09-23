@@ -1,4 +1,4 @@
-import 'underscore';
+import 'lodash-es';
 import './polyfills';
 import './jquery';
 import './bootstrap';
