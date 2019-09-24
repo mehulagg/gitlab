@@ -45,7 +45,12 @@ start_sidekiq()
     cmd="${cmd} ${chpst} -P"
   fi
 
-  ${cmd} bundle exec sidekiq -C "${sidekiq_config}" -e $RAILS_ENV -P $sidekiq_pidfile "$@"
+  timeout="25"
+  if [ $RAILS_ENV != "production" ]; then
+    timeout="5"
+  fi
+
+  ${cmd} bundle exec sidekiq -t ${timeout} -C "${sidekiq_config}" -e $RAILS_ENV -P $sidekiq_pidfile "$@"
 }
 
 load_ok()
