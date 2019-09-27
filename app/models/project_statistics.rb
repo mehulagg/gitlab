@@ -2,11 +2,14 @@
 
 class ProjectStatistics < ApplicationRecord
   include AfterCommitQueue
+  include CounterAttribute
 
   belongs_to :project
   belongs_to :namespace
 
   default_value_for :wiki_size, 0
+
+  counter_attribute :build_artifacts_size
 
   # older migrations fail due to non-existent attribute without this
   def wiki_size
@@ -16,8 +19,13 @@ class ProjectStatistics < ApplicationRecord
   before_save :update_storage_size
 
   COLUMNS_TO_REFRESH = [:repository_size, :wiki_size, :lfs_objects_size, :commit_count].freeze
-  INCREMENTABLE_COLUMNS = { build_artifacts_size: %i[storage_size], packages_size: %i[storage_size] }.freeze
   NAMESPACE_RELATABLE_COLUMNS = [:repository_size, :wiki_size, :lfs_objects_size].freeze
+
+  INCREMENTABLE_COLUMNS = {
+    build_artifacts_size: %i[storage_size],
+    packages_size: %i[storage_size],
+    storage_size: %i[]
+  }.freeze
 
   scope :for_project_ids, ->(project_ids) { where(project_id: project_ids) }
 
@@ -76,6 +84,33 @@ class ProjectStatistics < ApplicationRecord
     raise ArgumentError, "Cannot increment attribute: #{key}" unless INCREMENTABLE_COLUMNS.key?(key)
     return if amount == 0
 
+    project = Project.find_by(id: project_id)
+
+    if Feature.enabled?(:async_update_project_statistics, project) && counter_attributes.include?(key)
+      self.async_increment_statistics(project_id, key, amount)
+    else
+      self.legacy_increment_statistic(project_id, key, amount)
+    end
+  end
+
+  def self.async_increment_statistics(project_id, key, amount)
+    statistics = find_by(project_id: project_id)
+    return unless statistics
+
+    statistics.increment_counter!(key, amount)
+    # once all incrementable columns are counter attributes we could incement
+    # them all in a single call
+    # statistics.increment_counters!({ key1 => val1, ... })
+
+    # For now update dependent columns using legacy method
+    if (additional = INCREMENTABLE_COLUMNS[key])
+      additional.each do |column|
+        increment_statistic(project_id, column, amount)
+      end
+    end
+  end
+
+  def self.legacy_increment_statistic(project_id, key, amount)
     where(project_id: project_id)
       .columns_to_increment(key, amount)
   end

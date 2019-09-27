@@ -962,6 +962,13 @@
   :resource_boundary: :unknown
   :weight: 2
   :idempotent: 
+- :name: consolidate_counters
+  :feature_category: :not_owned
+  :has_external_dependencies:
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
 - :name: create_commit_signature
   :feature_category: :source_code_management
   :has_external_dependencies: 
