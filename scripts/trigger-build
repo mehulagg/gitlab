@@ -123,7 +123,7 @@ module Trigger
     end
 
     def ref
-      ENV['OMNIBUS_BRANCH'] || 'master'
+      'update-gitlab-qa-downstream-pipeline-project' # ENV['OMNIBUS_BRANCH'] || 'master'
     end
 
     def trigger_token
