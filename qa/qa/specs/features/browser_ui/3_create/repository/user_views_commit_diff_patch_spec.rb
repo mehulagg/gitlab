@@ -3,7 +3,10 @@
 module QA
   context 'Create' do
     describe 'Commit data' do
-      before(:context) do
+      before do
+        Runtime::Browser.visit(:gitlab, Page::Main::Login)
+        Page::Main::Login.perform(&:sign_in_using_credentials)
+
         # Get the user's details to confirm they're included in the email patch
         @user = Resource::User.fabricate_via_api! do |user|
           user.username = Runtime::User.username

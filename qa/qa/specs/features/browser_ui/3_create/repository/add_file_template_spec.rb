@@ -5,8 +5,17 @@ module QA
     describe 'File templates' do
       include Runtime::Fixtures
 
-      before(:all) do
-        @project = Resource::Project.fabricate_via_api! do |project|
+      def login
+        unless Page::Main::Menu.perform(&:signed_in?)
+          Runtime::Browser.visit(:gitlab, Page::Main::Login)
+          Page::Main::Login.perform(&:sign_in_using_credentials)
+        end
+      end
+
+      before do
+        login
+
+        @project = Resource::Project.fabricate! do |project|
           project.name = 'file-template-project'
           project.description = 'Add file templates via the Files view'
           project.initialize_with_readme = true

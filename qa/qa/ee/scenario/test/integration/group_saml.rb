@@ -5,9 +5,7 @@ module QA
     module Scenario
       module Test
         module Integration
-          class GroupSAML < QA::Scenario::Template
-            include QA::Scenario::Bootable
-            include QA::Scenario::SharedAttributes
+          class GroupSAML < QA::Scenario::Test::Instance::All
             tags :group_saml
           end
         end

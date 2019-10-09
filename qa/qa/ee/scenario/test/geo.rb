@@ -7,10 +7,7 @@ module QA
   module EE
     module Scenario
       module Test
-        class Geo < QA::Scenario::Template
-          include QA::Scenario::Bootable
-          include QA::Scenario::SharedAttributes
-
+        class Geo < QA::Scenario::Test::Instance::All
           tags :geo
 
           attribute :geo_primary_address, '--primary-address PRIMARY'
