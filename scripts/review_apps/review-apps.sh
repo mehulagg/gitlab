@@ -389,3 +389,5 @@ function display_deployment_debug() {
   echoinfo "Unsuccessful Jobs for release ${release}"
   kubectl get jobs --namespace "${namespace}" -lrelease=${release} --field-selector=status.successful!=1
 }
+
+# Trigger pipeline
