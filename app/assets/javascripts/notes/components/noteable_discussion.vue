@@ -17,6 +17,7 @@ import resolvable from '../mixins/resolvable';
 import eventHub from '../event_hub';
 import DiscussionNotes from './discussion_notes.vue';
 import DiscussionActions from './discussion_actions.vue';
+import DiffDiscussionHeader from './diff_discussion_header.vue';
 
 export default {
   name: 'NoteableDiscussion',
@@ -30,6 +31,7 @@ export default {
     TimelineEntryItem,
     DiscussionNotes,
     DiscussionActions,
+    DiffDiscussionHeader,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -96,6 +98,15 @@ export default {
     firstNote() {
       return this.discussion.notes.slice(0, 1)[0];
     },
+    lastUpdatedAt() {
+      const { notes } = this.discussion;
+
+      if (notes.length > 1) {
+        return notes[notes.length - 1].created_at;
+      }
+
+      return null;
+    },
     shouldShowJumpToNextDiscussion() {
       return this.showJumpToNextDiscussion(this.discussionsByDiffOrder ? 'diff' : 'discussion');
     },
@@ -149,6 +160,9 @@ export default {
       'toggleResolveNote',
       'removeConvertedDiscussion',
     ]),
+    toggleDiscussionHandler() {
+      this.toggleDiscussion({ discussionId: this.discussion.id });
+    },
     showReplyForm() {
       this.isReplying = true;
     },
