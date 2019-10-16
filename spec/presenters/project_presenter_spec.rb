@@ -41,6 +41,7 @@ RSpec.describe ProjectPresenter do
         it 'returns wiki if user has repository access and can read wiki' do
           allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(true)
           allow(presenter).to receive(:can?).with(nil, :read_wiki, project).and_return(true)
+          allow(presenter).to receive(:can?).with(nil, :read_issue, project).and_return(false)
 
           expect(presenter.default_view).to eq('wiki')
         end
@@ -70,8 +71,8 @@ RSpec.describe ProjectPresenter do
         end
 
         it 'returns activity if project has disabled issues and wiki' do
-          project.project_feature.update_attribute(:issues_access_level, 0)
           allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(false)
+          allow(presenter).to receive(:can?).with(nil, :read_issue, project).and_return(false)
           allow(presenter).to receive(:can?).with(nil, :read_wiki, project).and_return(false)
 
           expect(presenter.default_view).to eq('activity')
@@ -114,6 +115,7 @@ RSpec.describe ProjectPresenter do
 
         it 'returns customize_workflow if the user does not have the right policy' do
           allow(presenter).to receive(:can?).with(user, :read_wiki, project).and_return(false)
+          allow(presenter).to receive(:can?).with(user, :read_issue, project).and_return(false)
 
           expect(presenter.default_view).to eq('customize_workflow')
         end
@@ -122,6 +124,7 @@ RSpec.describe ProjectPresenter do
       context 'with issues as a feature available' do
         it 'return issues' do
           allow(presenter).to receive(:can?).with(user, :download_code, project).and_return(false)
+          allow(presenter).to receive(:can?).with(user, :read_issue, project).and_return(true)
           allow(presenter).to receive(:can?).with(user, :read_wiki, project).and_return(false)
 
           expect(presenter.default_view).to eq('projects/issues/issues')
@@ -133,6 +136,7 @@ RSpec.describe ProjectPresenter do
           project.project_feature.update_attribute(:issues_access_level, 0)
           allow(presenter).to receive(:can?).with(user, :download_code, project).and_return(false)
           allow(presenter).to receive(:can?).with(user, :read_wiki, project).and_return(false)
+          allow(presenter).to receive(:can?).with(user, :read_issue, project).and_return(false)
 
           expect(presenter.default_view).to eq('customize_workflow')
         end
