@@ -70,7 +70,7 @@ RSpec.describe ProjectPresenter do
           expect(presenter.default_view).to eq('wiki')
         end
 
-        it 'returns activity if project has disabled issues and wiki' do
+        it 'returns activity if user does not have repository or wiki access' do
           allow(presenter).to receive(:can?).with(nil, :download_code, project).and_return(false)
           allow(presenter).to receive(:can?).with(nil, :read_issue, project).and_return(false)
           allow(presenter).to receive(:can?).with(nil, :read_wiki, project).and_return(false)
