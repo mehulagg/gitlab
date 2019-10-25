@@ -40,6 +40,10 @@ describe GitlabSchema do
     expect(connection).to eq(Gitlab::Graphql::Connections::Keyset::Connection)
   end
 
+  GitlabSchema.types.each_value do |type_object|
+    it_behaves_like 'field connections support pagination', type_object
+  end
+
   it 'paginates ExternallyPaginatedArray using `Connections::ExternallyPaginatedArrayConnection`' do
     connection = implementations[Gitlab::Graphql::ExternallyPaginatedArray.name]
 

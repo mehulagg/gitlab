@@ -3,6 +3,18 @@
 module Gitlab
   module Graphql
     module Connections
+      extend ActiveSupport::Concern
+
+      prepended do
+        def self.supports_keyset_pagination(supported = true)
+          @supports_keyset_pagination = supported
+        end
+
+        def self.supports_keyset_pagination?
+          @supports_keyset_pagination
+        end
+      end
+
       def self.use(_schema)
         GraphQL::Relay::BaseConnection.register_connection_implementation(
           ActiveRecord::Relation,

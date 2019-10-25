@@ -12,6 +12,9 @@ module Types
 
     present_using IssuePresenter
 
+    # `true` means specs written/pass for using this type as a paginated connection
+    supports_keyset_pagination true
+
     field :iid, GraphQL::ID_TYPE, null: false,
           description: "Internal ID of the issue"
     field :title, GraphQL::STRING_TYPE, null: false,
