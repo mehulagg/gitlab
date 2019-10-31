@@ -1035,6 +1035,22 @@
   :weight: 2
   :idempotent:
   :tags: []
+- :name: pipeline_processing:build_created
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :cpu
+  :weight: 2
+  :idempotent:
+  :tags: []
+- :name: pipeline_processing:build_started
+  :feature_category: :continuous_integration
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :cpu
+  :weight: 2
+  :idempotent:
+  :tags: []
 - :name: pipeline_processing:build_finished
   :feature_category: :continuous_integration
   :has_external_dependencies:

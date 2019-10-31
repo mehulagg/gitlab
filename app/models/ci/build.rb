@@ -192,7 +192,10 @@ module Ci
     before_destroy { unscoped_project }
 
     after_create unless: :importing? do |build|
-      run_after_commit { BuildHooksWorker.perform_async(build.id) }
+      run_after_commit do
+        BuildCreatedWorker.perform_async(build.id)
+        BuildHooksWorker.perform_async(build.id)
+      end
     end
 
     class << self
@@ -305,6 +308,7 @@ module Ci
         build.run_after_commit do
           build.pipeline.persistent_ref.create
 
+          BuildStartedWorker.perform_async(id)
           BuildHooksWorker.perform_async(id)
         end
       end

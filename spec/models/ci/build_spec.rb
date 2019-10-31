@@ -49,6 +49,7 @@ RSpec.describe Ci::Build do
     context 'when running after_create callback' do
       it 'triggers asynchronous build hooks worker' do
         expect(BuildHooksWorker).to receive(:perform_async)
+        expect(BuildCreatedWorker).to receive(:perform_async)
 
         create(:ci_build)
       end
@@ -3421,6 +3422,12 @@ RSpec.describe Ci::Build do
 
         run_job_without_exception
       end
+    end
+
+    it 'queues BuildStartedWorker' do
+      expect(BuildStartedWorker).to receive(:perform_async).with(job.id)
+
+      run_job_without_exception
     end
 
     shared_examples 'saves data on transition' do
