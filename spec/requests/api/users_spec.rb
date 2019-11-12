@@ -990,7 +990,11 @@ describe API::Users do
       admin
     end
 
-    context 'when unauthenticated' do
+    context 'when current_user does not have read_user scope' do
+      before do
+        expect(Ability).to receive(:allowed?).and_return(false)
+      end
+
       it 'returns authentication error' do
         get api("/users/#{user.id}/gpg_keys")
 
