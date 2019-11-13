@@ -3,7 +3,8 @@
 require 'securerandom'
 
 module QA
-  context 'Plan' do
+  # Failure issue: https://gitlab.com/gitlab-org/gitlab/issues/36107
+  context 'Plan', :quarantine do
     describe 'Custom email', :requires_admin do
       before do
         Runtime::Browser.visit(:gitlab, Page::Main::Login)

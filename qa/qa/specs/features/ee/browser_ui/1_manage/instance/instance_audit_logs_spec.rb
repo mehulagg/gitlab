@@ -2,7 +2,8 @@
 require 'securerandom'
 
 module QA
-  context 'Manage' do
+  # Failure issue: https://gitlab.com/gitlab-org/gitlab/issues/36107
+  context 'Manage', :quarantine do
     shared_examples 'instance audit event logs' do |expected_events|
       it 'logs audit events for UI operations' do
         sign_in

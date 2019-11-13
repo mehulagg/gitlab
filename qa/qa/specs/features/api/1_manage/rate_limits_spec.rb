@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Manage with IP rate limits', :requires_admin do
+  # Failure issue: https://gitlab.com/gitlab-org/gitlab/issues/36107
+  context 'Manage with IP rate limits', :quarantine, :requires_admin do
     describe 'Users API' do
       let(:api_client) { Runtime::API::Client.new(:gitlab, ip_limits: true) }
       let(:request) { Runtime::API::Request.new(api_client, '/users') }

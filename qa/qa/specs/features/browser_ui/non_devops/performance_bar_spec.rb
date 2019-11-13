@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Performance bar' do
+  # Failure issue: https://gitlab.com/gitlab-org/gitlab/issues/36107
+  context 'Performance bar', :quarantine do
     context 'when logged in as an admin user', :requires_admin do
       before do
         Runtime::Browser.visit(:gitlab, Page::Main::Login)
