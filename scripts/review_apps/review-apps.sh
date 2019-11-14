@@ -351,7 +351,8 @@ HELM_CMD=$(cat << EOF
     --set gitlab.webservice.workhorse.image="${gitlab_workhorse_image_repository}" \
     --set gitlab.webservice.workhorse.tag="${CI_COMMIT_REF_SLUG}" \
     --set gitlab.task-runner.image.repository="${gitlab_task_runner_image_repository}" \
-    --set gitlab.task-runner.image.tag="${CI_COMMIT_REF_SLUG}"
+    --set gitlab.task-runner.image.tag="${CI_COMMIT_REF_SLUG}" \
+    --debug
 EOF
 )
 
