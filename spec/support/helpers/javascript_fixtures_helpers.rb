@@ -21,7 +21,7 @@ module JavaScriptFixturesHelpers
   end
 
   def fixture_root_path
-    'tmp/tests/frontend/fixtures' + (Gitlab.ee? ? '-ee' : '')
+    'spec/frontend-fixtures' + (Gitlab.ee? ? '-ee' : '')
   end
 
   # Public: Removes all fixture files from given directory

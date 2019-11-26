@@ -39,7 +39,7 @@ class CustomEnvironment extends JSDOMEnvironment {
       this.rejectedPromises.push(error);
     };
 
-    this.global.fixturesBasePath = `${ROOT_PATH}/tmp/tests/frontend/fixtures${IS_EE ? '-ee' : ''}`;
+    this.global.fixturesBasePath = `${ROOT_PATH}/spec/frontend-fixtures${IS_EE ? '-ee' : ''}`;
     this.global.staticFixturesBasePath = `${ROOT_PATH}/spec/frontend/fixtures`;
 
     /**

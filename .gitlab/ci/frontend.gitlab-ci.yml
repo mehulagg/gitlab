@@ -156,7 +156,8 @@ karma:
     paths:
       - chrome_debug.log
       - coverage-javascript/
-      - tmp/tests/frontend/
+      - spec/frontend-fixtures/
+      - spec/frontend-fixtures-ee/
     reports:
       junit: junit_karma.xml
 
@@ -188,7 +189,8 @@ jest:
     paths:
       - coverage-frontend/
       - junit_jest.xml
-      - tmp/tests/frontend/
+      - spec/frontend-fixtures/
+      - spec/frontend-fixtures-ee/
     reports:
       junit: junit_jest.xml
 
