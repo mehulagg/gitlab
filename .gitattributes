@@ -1,3 +1,4 @@
 VERSION merge=ours
 Dangerfile gitlab-language=ruby
+*.bmpr filter=lfs diff=lfs merge=lfs -text
 *.pdf filter=lfs diff=lfs merge=lfs -text
