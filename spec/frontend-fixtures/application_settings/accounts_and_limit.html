@@ -1,0 +1,1341 @@
+<body>
+
+
+<meta charset="utf-8">
+<meta content="IE=edge" http-equiv="X-UA-Compatible">
+<meta content="object" property="og:type">
+<meta content="GitLab" property="og:site_name">
+<meta content="General · Admin Area" property="og:title">
+<meta content="GitLab Community Edition" property="og:description">
+<meta content="http://test.host/assets/gitlab_logo-7ae504fe4f68fdebb3c2034e36621930cd36ea87924c11ff65dbcb8ed50dca58.png" property="og:image">
+<meta content="64" property="og:image:width">
+<meta content="64" property="og:image:height">
+<meta content="http://test.host/admin/application_settings/general" property="og:url">
+<meta content="summary" property="twitter:card">
+<meta content="General · Admin Area" property="twitter:title">
+<meta content="GitLab Community Edition" property="twitter:description">
+<meta content="http://test.host/assets/gitlab_logo-7ae504fe4f68fdebb3c2034e36621930cd36ea87924c11ff65dbcb8ed50dca58.png" property="twitter:image">
+
+<title>General · Admin Area · GitLab</title>
+<meta content="GitLab Community Edition" name="description">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta content="origin-when-cross-origin" name="referrer">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="#474D57" name="theme-color">
+
+
+
+
+
+<meta content="http://test.host/assets/msapplication-tile-1196ec67452f618d39cdd85e2e3a542f76574c071051ae7effbfde01710eb17d.png" name="msapplication-TileImage">
+<meta content="#30353E" name="msapplication-TileColor">
+
+
+
+
+
+
+
+
+
+
+
+<header class="navbar navbar-gitlab navbar-expand-sm js-navbar" data-qa-selector="navbar">
+<a class="sr-only gl-accessibility" href="#content-body" tabindex="1">Skip to content</a>
+<div class="container-fluid">
+<div class="header-content">
+<div class="title-container">
+<h1 class="title">
+<a title="Dashboard" id="logo" href="http://test.host/"><svg width="24" height="24" class="tanuki-logo" viewbox="0 0 36 36">
+  <path class="tanuki-shape tanuki-left-ear" fill="#e24329" d="M2 14l9.38 9v-9l-4-12.28c-.205-.632-1.176-.632-1.38 0z"></path>
+  <path class="tanuki-shape tanuki-right-ear" fill="#e24329" d="M34 14l-9.38 9v-9l4-12.28c.205-.632 1.176-.632 1.38 0z"></path>
+  <path class="tanuki-shape tanuki-nose" fill="#e24329" d="M18,34.38 3,14 33,14 Z"></path>
+  <path class="tanuki-shape tanuki-left-eye" fill="#fc6d26" d="M18,34.38 11.38,14 2,14 6,25Z"></path>
+  <path class="tanuki-shape tanuki-right-eye" fill="#fc6d26" d="M18,34.38 24.62,14 34,14 30,25Z"></path>
+  <path class="tanuki-shape tanuki-left-cheek" fill="#fca326" d="M2 14L.1 20.16c-.18.565 0 1.2.5 1.56l17.42 12.66z"></path>
+  <path class="tanuki-shape tanuki-right-cheek" fill="#fca326" d="M34 14l1.9 6.16c.18.565 0 1.2-.5 1.56L18 34.38z"></path>
+</svg>
+
+<span class="logo-text d-none d-lg-block prepend-left-8">
+<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 617 169"><path d="M315.26 2.97h-21.8l.1 162.5h88.3v-20.1h-66.5l-.1-142.4M465.89 136.95c-5.5 5.7-14.6 11.4-27 11.4-16.6 0-23.3-8.2-23.3-18.9 0-16.1 11.2-23.8 35-23.8 4.5 0 11.7.5 15.4 1.2v30.1h-.1m-22.6-98.5c-17.6 0-33.8 6.2-46.4 16.7l7.7 13.4c8.9-5.2 19.8-10.4 35.5-10.4 17.9 0 25.8 9.2 25.8 24.6v7.9c-3.5-.7-10.7-1.2-15.1-1.2-38.2 0-57.6 13.4-57.6 41.4 0 25.1 15.4 37.7 38.7 37.7 15.7 0 30.8-7.2 36-18.9l4 15.9h15.4v-83.2c-.1-26.3-11.5-43.9-44-43.9M557.63 149.1c-8.2 0-15.4-1-20.8-3.5V70.5c7.4-6.2 16.6-10.7 28.3-10.7 21.1 0 29.2 14.9 29.2 39 0 34.2-13.1 50.3-36.7 50.3m9.2-110.6c-19.5 0-30 13.3-30 13.3v-21l-.1-27.8h-21.3l.1 158.5c10.7 4.5 25.3 6.9 41.2 6.9 40.7 0 60.3-26 60.3-70.9-.1-35.5-18.2-59-50.2-59M77.9 20.6c19.3 0 31.8 6.4 39.9 12.9l9.4-16.3C114.5 6 97.3 0 78.9 0 32.5 0 0 28.3 0 85.4c0 59.8 35.1 83.1 75.2 83.1 20.1 0 37.2-4.7 48.4-9.4l-.5-63.9V75.1H63.6v20.1h38l.5 48.5c-5 2.5-13.6 4.5-25.3 4.5-32.2 0-53.8-20.3-53.8-63-.1-43.5 22.2-64.6 54.9-64.6M231.43 2.95h-21.3l.1 27.3v94.3c0 26.3 11.4 43.9 43.9 43.9 4.5 0 8.9-.4 13.1-1.2v-19.1c-3.1.5-6.4.7-9.9.7-17.9 0-25.8-9.2-25.8-24.6v-65h35.7v-17.8h-35.7l-.1-38.5M155.96 165.47h21.3v-124h-21.3v124M155.96 24.37h21.3V3.07h-21.3v21.3"></path></svg>
+
+</span>
+</a>
+</h1>
+<ul class="list-unstyled navbar-sub-nav">
+<li id="nav-projects-dropdown" class="home dropdown header-projects qa-projects-dropdown" data-track-label="projects_dropdown" data-track-event="click_dropdown" data-track-value="">
+<button class="btn" data-toggle="dropdown" type="button">
+Projects
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</button>
+<div class="dropdown-menu frequent-items-dropdown-menu">
+<div class="frequent-items-dropdown-container">
+<div class="frequent-items-dropdown-sidebar qa-projects-dropdown-sidebar">
+<ul>
+<li class=""><a class="qa-your-projects-link" href="http://test.host/dashboard/projects">Your projects
+</a></li>
+<li class=""><a href="http://test.host/dashboard/projects/starred">Starred projects
+</a></li>
+<li class=""><a href="http://test.host/explore">Explore projects
+</a></li>
+</ul>
+</div>
+<div class="frequent-items-dropdown-content">
+<div data-user-name="user9" id="js-projects-dropdown"></div>
+</div>
+</div>
+
+</div>
+</li>
+<li id="nav-groups-dropdown" class="d-none d-md-block home dropdown header-groups qa-groups-dropdown" data-track-label="groups_dropdown" data-track-event="click_dropdown" data-track-value="">
+<button class="btn" data-toggle="dropdown" type="button">
+Groups
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</button>
+<div class="dropdown-menu frequent-items-dropdown-menu">
+<div class="frequent-items-dropdown-container">
+<div class="frequent-items-dropdown-sidebar qa-groups-dropdown-sidebar">
+<ul>
+<li class=""><a class="qa-your-groups-link" href="http://test.host/dashboard/groups">Your groups
+</a></li>
+<li class=""><a href="http://test.host/explore/groups">Explore groups
+</a></li>
+</ul>
+</div>
+<div class="frequent-items-dropdown-content">
+<div data-user-name="user9" id="js-groups-dropdown"></div>
+</div>
+</div>
+
+</div>
+</li>
+<li class="header-more dropdown">
+<a data-qa-selector="more_dropdown" data-toggle="dropdown" href="#">
+More
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a>
+<div class="dropdown-menu">
+<ul>
+<li class="d-md-none">
+<a href="http://test.host/dashboard/groups">Groups
+</a>
+</li>
+<li class=""><a href="http://test.host/dashboard/activity">Activity
+</a></li>
+<li class=""><a class="dashboard-shortcuts-milestones" href="http://test.host/dashboard/milestones">Milestones
+</a></li>
+<li class=""><a class="dashboard-shortcuts-snippets" data-qa-selector="snippets_link" href="http://test.host/dashboard/snippets">Snippets
+</a></li>
+<li class="dropdown">
+
+</li>
+<li class=""><a href="http://test.host/-/instance_statistics">Instance Statistics
+</a></li>
+<li class=""><a class="admin-icon qa-admin-area-link d-xl-none" href="http://test.host/admin">Admin Area
+</a></li>
+<li class=""><a class="d-lg-none lock-open-icon" href="http://test.host/admin/session/destroy">Leave Admin Mode
+</a></li>
+</ul>
+</div>
+</li>
+<li class="d-none d-xl-block"><a class="admin-icon qa-admin-area-link" title="Admin Area" aria-label="Admin Area" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/admin"><svg class="s18"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#admin"></use></svg>
+</a></li>
+<li class="d-none d-lg-block d-xl-block"><a title="Leave Admin Mode" aria-label="Leave Admin Mode" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/admin/session/destroy"><svg class="s18"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#lock-open"></use></svg>
+</a></li>
+<li class="hidden">
+<a class="dashboard-shortcuts-projects" href="http://test.host/dashboard/projects">Projects
+</a>
+</li>
+
+</ul>
+
+</div>
+<div class="navbar-collapse collapse">
+<ul class="nav navbar-nav">
+<li class="header-new dropdown" data-track-event="click_dropdown" data-track-label="new_dropdown" data-track-value="">
+<a class="header-new-dropdown-toggle has-tooltip qa-new-menu-toggle" id="js-onboarding-new-project-link" title="New..." ref="tooltip" aria-label="New..." data-toggle="dropdown" data-placement="bottom" data-container="body" data-display="static" href="http://test.host/projects/new"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#plus-square"></use></svg>
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li><a class="qa-global-new-project-link" href="http://test.host/projects/new">New project</a></li>
+<li><a href="http://test.host/groups/new">New group</a></li>
+<li><a class="qa-global-new-snippet-link" href="http://test.host/snippets/new">New snippet</a></li>
+</ul>
+</div>
+</li>
+
+<li class="nav-item d-none d-lg-block m-auto">
+<div class="search search-form" data-track-event="activate_form_input" data-track-label="navbar_search" data-track-value="">
+<form class="form-inline" action="http://test.host/search" accept-charset="UTF-8" method="get">
+<input name="utf8" type="hidden" value="✓"><div class="search-input-container">
+<div class="search-input-wrap">
+<div class="dropdown" data-url="http://test.host/search/autocomplete">
+<input type="search" name="search" id="search" placeholder="Search or jump to…" class="search-input dropdown-menu-toggle no-outline js-search-dashboard-options" spellcheck="false" tabindex="1" autocomplete="off" data-issues-path="http://test.host/dashboard/issues" data-mr-path="http://test.host/dashboard/merge_requests" data-qa-selector="search_term_field" aria-label="Search or jump to…">
+<button class="hidden js-dropdown-search-toggle" data-toggle="dropdown" type="button"></button>
+<div class="dropdown-menu dropdown-select js-dashboard-search-options">
+<div class="dropdown-content">
+<ul>
+<li class="dropdown-menu-empty-item">
+<a>
+Loading...
+</a>
+</li>
+</ul>
+</div>
+<div class="dropdown-loading"><i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin"></i></div>
+</div>
+<svg class="s16 search-icon"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#search"></use></svg>
+<svg class="s16 clear-icon js-clear-input"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+</div>
+</div>
+</div>
+<input type="hidden" name="group_id" id="group_id" class="js-search-group-options">
+<input type="hidden" name="project_id" id="search_project_id" value="" class="js-search-project-options">
+<input type="hidden" name="repository_ref" id="repository_ref">
+<input type="hidden" name="nav_source" id="nav_source" value="navbar">
+<noscript><button name="button" type="submit">Search</button></noscript>
+<div class="search-autocomplete-opts hide" data-autocomplete-path="http://test.host/search/autocomplete"></div>
+</form>
+</div>
+
+</li>
+<li class="nav-item d-inline-block d-lg-none">
+<a title="Search" aria-label="Search" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/search"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#search"></use></svg>
+</a>
+</li>
+<li class="user-counter"><a title="Issues" class="dashboard-shortcuts-issues" aria-label="Issues" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/issues?assignee_username=user9"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#issues"></use></svg>
+<span class="badge badge-pill green-badge hidden issues-count">
+0
+</span>
+</a></li>
+<li class="user-counter"><a title="Merge requests" class="dashboard-shortcuts-merge_requests" aria-label="Merge requests" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/merge_requests?assignee_username=user9"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#git-merge"></use></svg>
+<span class="badge badge-pill hidden merge-requests-count">
+0
+</span>
+</a></li>
+<li class="user-counter"><a title="To-Do List" aria-label="To-Do List" class="shortcuts-todos" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/todos"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#todo-done"></use></svg>
+<span class="badge badge-pill hidden todos-count">
+0
+</span>
+</a></li>
+<li class="nav-item header-help dropdown d-none d-md-block">
+<a class="header-help-dropdown-toggle" data-toggle="dropdown" href="http://test.host/help"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#question"></use></svg>
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li>
+<a href="http://test.host/help">Help</a>
+</li>
+<li>
+<a href="https://about.gitlab.com/getting-help/">Support</a>
+</li>
+
+<li class="divider">
+<li>
+<a href="https://about.gitlab.com/submit-feedback">Submit feedback</a>
+</li>
+<li>
+<a target="_blank" class="text-nowrap" href="https://about.gitlab.com/contributing">Contribute to GitLab
+</a>
+</li>
+
+</ul>
+
+</div>
+</li>
+<li class="dropdown header-user nav-item" data-qa-selector="user_menu" data-track-event="click_dropdown" data-track-label="profile_dropdown" data-track-value="">
+<a class="header-user-dropdown-toggle" data-toggle="dropdown" href="http://test.host/user9"><img width="23" height="23" class="header-user-avatar qa-user-avatar lazy" data-src="https://www.gravatar.com/avatar/5c8881fc63652c86cd4b23101268cf84?s=46&amp;d=identicon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li class="current-user">
+<div class="user-name bold">
+John Doe9
+</div>
+@user9
+</li>
+<li class="divider">
+<li>
+<div class="js-set-status-modal-trigger" data-has-status="false"></div>
+</li>
+<li>
+<a class="profile-link" data-user="user9" href="http://test.host/user9">Profile</a>
+</li>
+<li>
+<a data-qa-selector="settings_link" href="http://test.host/profile">Settings</a>
+</li>
+<li class="divider d-md-none">
+<li class="d-md-none">
+<a href="http://test.host/help">Help</a>
+</li>
+<li class="d-md-none">
+<a href="https://about.gitlab.com/getting-help/">Support</a>
+</li>
+
+<li class="d-md-none">
+<a href="https://about.gitlab.com/submit-feedback">Submit feedback</a>
+</li>
+<li class="d-md-none">
+<a target="_blank" class="text-nowrap" href="https://about.gitlab.com/contributing">Contribute to GitLab
+</a>
+</li>
+
+<li class="divider">
+<li>
+<a class="sign-out-link" data-qa-selector="sign_out_link" href="http://test.host/users/sign_out">Sign out</a>
+</li>
+</ul>
+
+</div>
+</li>
+</ul>
+</div>
+<button class="navbar-toggler d-block d-sm-none" type="button">
+<span class="sr-only">Toggle navigation</span>
+<svg class="s12 more-icon js-navbar-toggle-right"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#ellipsis_h"></use></svg>
+<svg class="s12 close-icon js-navbar-toggle-left"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+</button>
+</div>
+</div>
+</header>
+<div class="js-set-status-modal-wrapper" data-current-emoji="" data-current-message=""></div>
+
+<div class="layout-page page-with-contextual-sidebar">
+<div class="nav-sidebar qa-admin-sidebar">
+<div class="nav-sidebar-inner-scroll">
+<div class="context-header">
+<a title="Admin Overview" href="http://test.host/admin"><div class="avatar-container s40 settings-avatar">
+<svg class="s24"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#admin"></use></svg>
+</div>
+<div class="sidebar-context-title">
+Admin Area
+</div>
+</a>
+</div>
+<ul class="sidebar-top-level-items" data-qa-selector="admin_sidebar_overview_submenu_content">
+<li class="home">
+<a class="shortcuts-tree" href="http://test.host/admin"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#overview"></use></svg>
+</div>
+<span class="nav-item-name">
+Overview
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/admin"><strong class="fly-out-top-item-name">
+Overview
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class="home"><a title="Overview" href="http://test.host/admin"><span>
+Dashboard
+</span>
+</a></li>
+<li class=""><a title="Projects" href="http://test.host/admin/projects"><span>
+Projects
+</span>
+</a></li>
+<li class=""><a title="Users" data-qa-selector="users_overview_link" href="http://test.host/admin/users"><span>
+Users
+</span>
+</a></li>
+<li class=""><a title="Groups" href="http://test.host/admin/groups"><span>
+Groups
+</span>
+</a></li>
+<li class=""><a title="Jobs" href="http://test.host/admin/jobs"><span>
+Jobs
+</span>
+</a></li>
+<li class=""><a title="Runners" href="http://test.host/admin/runners"><span>
+Runners
+</span>
+</a></li>
+<li class=""><a title="Gitaly Servers" href="http://test.host/admin/gitaly_servers"><span>
+Gitaly Servers
+</span>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a data-qa-selector="admin_monitoring_link" href="http://test.host/admin/system_info"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#monitor"></use></svg>
+</div>
+<span class="nav-item-name">
+Monitoring
+</span>
+</a><ul class="sidebar-sub-level-items" data-qa-selector="admin_sidebar_monitoring_submenu_content">
+<li class="fly-out-top-item"><a href="http://test.host/admin/system_info"><strong class="fly-out-top-item-name">
+Monitoring
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="System Info" href="http://test.host/admin/system_info"><span>
+System Info
+</span>
+</a></li>
+<li class=""><a title="Background Jobs" href="http://test.host/admin/background_jobs"><span>
+Background Jobs
+</span>
+</a></li>
+<li class=""><a title="Logs" href="http://test.host/admin/logs"><span>
+Logs
+</span>
+</a></li>
+<li class=""><a title="Health Check" href="http://test.host/admin/health_check"><span>
+Health Check
+</span>
+</a></li>
+<li class=""><a title="Requests Profiles" href="http://test.host/admin/requests_profiles"><span>
+Requests Profiles
+</span>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a href="http://test.host/admin/broadcast_messages"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#messages"></use></svg>
+</div>
+<span class="nav-item-name">
+Messages
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/admin/broadcast_messages"><strong class="fly-out-top-item-name">
+Messages
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a href="http://test.host/admin/hooks"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#hook"></use></svg>
+</div>
+<span class="nav-item-name">
+System Hooks
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/admin/hooks"><strong class="fly-out-top-item-name">
+System Hooks
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a href="http://test.host/admin/applications"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#applications"></use></svg>
+</div>
+<span class="nav-item-name">
+Applications
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/admin/applications"><strong class="fly-out-top-item-name">
+Applications
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a href="http://test.host/admin/abuse_reports"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#slight-frown"></use></svg>
+</div>
+<span class="nav-item-name">
+Abuse Reports
+</span>
+<span class="badge badge-pill count">0</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/admin/abuse_reports"><strong class="fly-out-top-item-name">
+Abuse Reports
+</strong>
+<span class="badge badge-pill count merge_counter js-merge-counter fly-out-badge">0</span>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a href="http://test.host/admin/clusters"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#cloud-gear"></use></svg>
+</div>
+<span class="nav-item-name">
+Kubernetes
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/admin/clusters"><strong class="fly-out-top-item-name">
+Kubernetes
+</strong>
+</a></li>
+</ul>
+</li>
+
+<li class="">
+<a href="http://test.host/admin/deploy_keys"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#key"></use></svg>
+</div>
+<span class="nav-item-name">
+Deploy Keys
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/admin/deploy_keys"><strong class="fly-out-top-item-name">
+Deploy Keys
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a href="http://test.host/admin/application_settings/services"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#template"></use></svg>
+</div>
+<span class="nav-item-name">
+Service Templates
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/admin/application_settings/services"><strong class="fly-out-top-item-name">
+Service Templates
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a href="http://test.host/admin/labels"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#labels"></use></svg>
+</div>
+<span class="nav-item-name">
+Labels
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/admin/labels"><strong class="fly-out-top-item-name">
+Labels
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a href="http://test.host/admin/appearance"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#appearance"></use></svg>
+</div>
+<span class="nav-item-name">
+Appearance
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/admin/appearance"><strong class="fly-out-top-item-name">
+Appearance
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="active">
+<a href="http://test.host/admin/application_settings"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#settings"></use></svg>
+</div>
+<span class="nav-item-name qa-admin-settings-item">
+Settings
+</span>
+</a><ul class="sidebar-sub-level-items qa-admin-sidebar-settings-submenu">
+<li class="fly-out-top-item active"><a href="http://test.host/admin/application_settings"><strong class="fly-out-top-item-name">
+Settings
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="General" class="qa-admin-settings-general-item" href="http://test.host/admin/application_settings/general"><span>
+General
+</span>
+</a></li>
+<li class=""><a title="Integrations" data-qa-selector="integration_settings_link" href="http://test.host/admin/application_settings/integrations"><span>
+Integrations
+</span>
+</a></li>
+<li class=""><a title="Repository" class="qa-admin-settings-repository-item" href="http://test.host/admin/application_settings/repository"><span>
+Repository
+</span>
+</a></li>
+<li class=""><a title="CI/CD" href="http://test.host/admin/application_settings/ci_cd"><span>
+CI/CD
+</span>
+</a></li>
+<li class=""><a title="Reporting" href="http://test.host/admin/application_settings/reporting"><span>
+Reporting
+</span>
+</a></li>
+<li class=""><a title="Metrics and profiling" class="qa-admin-settings-metrics-and-profiling-item" href="http://test.host/admin/application_settings/metrics_and_profiling"><span>
+Metrics and profiling
+</span>
+</a></li>
+<li class=""><a title="Network" data-qa-selector="admin_settings_network_item" href="http://test.host/admin/application_settings/network"><span>
+Network
+</span>
+</a></li>
+<li class=""><a title="Preferences" data-qa-selector="admin_settings_preferences_link" href="http://test.host/admin/application_settings/preferences"><span>
+Preferences
+</span>
+</a></li>
+</ul>
+</li>
+</ul>
+
+<a class="toggle-sidebar-button js-toggle-sidebar qa-toggle-sidebar rspec-toggle-sidebar" role="button" title="Toggle sidebar" type="button">
+<svg class="icon-angle-double-left"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-double-left"></use></svg>
+<svg class="icon-angle-double-right"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-double-right"></use></svg>
+<span class="collapse-text">Collapse sidebar</span>
+</a>
+<button name="button" type="button" class="close-nav-button"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+<span class="collapse-text">Close sidebar</span>
+</button>
+</div>
+</div>
+
+<div class="content-wrapper">
+
+<div class="mobile-overlay"></div>
+<div class="alert-wrapper">
+
+
+
+
+
+
+<nav class="breadcrumbs container-fluid container-limited limit-container-width" role="navigation">
+<div class="breadcrumbs-container">
+<button name="button" type="button" class="toggle-mobile-nav"><span class="sr-only">Open sidebar</span>
+<i aria-hidden="true" data-hidden="true" class="fa fa-bars"></i>
+</button><div class="breadcrumbs-links js-title-container">
+<ul class="list-unstyled breadcrumbs-list js-breadcrumbs-list">
+<li>
+<a href="http://test.host/admin">Admin Area</a><svg class="s8 breadcrumbs-list-angle"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-right"></use></svg>
+</li>
+
+<li>
+<h2 class="breadcrumbs-sub-title"><a href="http://test.host/admin/application_settings/general">General</a></h2>
+</li>
+</ul>
+</div>
+
+</div>
+</nav>
+
+<div class="d-flex"></div>
+</div>
+<div class="container-fluid container-limited limit-container-width">
+<div class="content" id="content-body">
+<div class="flash-container flash-container-page sticky">
+</div>
+
+<section class="as-visibility-access expanded no-animate settings" id="js-visibility-settings">
+<div class="settings-header">
+<h4>
+Visibility and access controls
+</h4>
+<button class="btn js-settings-toggle" type="button">
+Collapse
+</button>
+<p>
+Set default and restrict visibility levels. Configure import sources and git access protocol.
+</p>
+</div>
+<div class="settings-content">
+<form class="fieldset-form" id="edit_application_setting_1" action="http://test.host/admin/application_settings/general#js-visibility-settings" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch">
+<fieldset>
+<div class="form-group">
+<label class="label-bold" for="application_setting_default_branch_protection">Default branch protection</label>
+<select class="form-control" name="application_setting[default_branch_protection]" id="application_setting_default_branch_protection"><option value="0">Not protected: Both developers and maintainers can push new commits, force push, or delete the branch.</option>
+<option value="3">Protected against pushes: Developers cannot push new commits, but are allowed to accept merge requests to the branch. Maintainers can push to the branch.</option>
+<option value="1">Partially protected: Both developers and maintainers can push new commits, but cannot force push or delete the branch.</option>
+<option selected value="2">Fully protected: Developers cannot push new commits, but maintainers can. No-one can force push or delete the branch.</option></select>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_Default project creation protection">Default project creation protection</label>
+<select class="form-control" name="application_setting[default_project_creation]" id="application_setting_default_project_creation"><option value="0">No one</option>
+<option value="1">Maintainers</option>
+<option selected value="2">Developers + Maintainers</option></select>
+</div>
+
+<div class="form-group visibility-level-setting">
+<label class="label-bold" for="application_setting_default_project_visibility">Default project visibility</label>
+<div class="form-check">
+<input class="form-check-input" data-track-label="blank_project" data-track-event="activate_form_input" data-track-property="default_project_visibility_0" data-track-value="" data-qa-selector="private_radio" type="radio" value="0" checked name="application_setting[default_project_visibility]" id="application_setting_default_project_visibility_0">
+<label class="form-check-label" for="application_setting_default_project_visibility_0"><i aria-hidden="true" data-hidden="true" class="fa fa-lock fa-fw"></i>
+<div class="option-title">
+Private
+</div>
+<div class="option-description">
+Project access must be granted explicitly to each user.
+</div>
+</label>
+</div>
+<div class="form-check">
+<input class="form-check-input" data-track-label="blank_project" data-track-event="activate_form_input" data-track-property="default_project_visibility_10" data-track-value="" data-qa-selector="internal_radio" type="radio" value="10" name="application_setting[default_project_visibility]" id="application_setting_default_project_visibility_10">
+<label class="form-check-label" for="application_setting_default_project_visibility_10"><i aria-hidden="true" data-hidden="true" class="fa fa-shield fa-fw"></i>
+<div class="option-title">
+Internal
+</div>
+<div class="option-description">
+The project can be accessed by any logged in user.
+</div>
+</label>
+</div>
+<div class="form-check">
+<input class="form-check-input" data-track-label="blank_project" data-track-event="activate_form_input" data-track-property="default_project_visibility_20" data-track-value="" data-qa-selector="public_radio" type="radio" value="20" name="application_setting[default_project_visibility]" id="application_setting_default_project_visibility_20">
+<label class="form-check-label" for="application_setting_default_project_visibility_20"><i aria-hidden="true" data-hidden="true" class="fa fa-globe fa-fw"></i>
+<div class="option-title">
+Public
+</div>
+<div class="option-description">
+The project can be accessed without any authentication.
+</div>
+</label>
+</div>
+<div class="text-muted">
+</div>
+
+</div>
+<div class="form-group visibility-level-setting">
+<label class="label-bold" for="application_setting_default_snippet_visibility">Default snippet visibility</label>
+<div class="form-check">
+<input class="form-check-input" data-track-label="blank_project" data-track-event="activate_form_input" data-track-property="default_snippet_visibility_0" data-track-value="" data-qa-selector="private_radio" type="radio" value="0" checked name="application_setting[default_snippet_visibility]" id="application_setting_default_snippet_visibility_0">
+<label class="form-check-label" for="application_setting_default_snippet_visibility_0"><i aria-hidden="true" data-hidden="true" class="fa fa-lock fa-fw"></i>
+<div class="option-title">
+Private
+</div>
+<div class="option-description">
+The snippet is visible only to project members.
+</div>
+</label>
+</div>
+<div class="form-check">
+<input class="form-check-input" data-track-label="blank_project" data-track-event="activate_form_input" data-track-property="default_snippet_visibility_10" data-track-value="" data-qa-selector="internal_radio" type="radio" value="10" name="application_setting[default_snippet_visibility]" id="application_setting_default_snippet_visibility_10">
+<label class="form-check-label" for="application_setting_default_snippet_visibility_10"><i aria-hidden="true" data-hidden="true" class="fa fa-shield fa-fw"></i>
+<div class="option-title">
+Internal
+</div>
+<div class="option-description">
+The snippet is visible to any logged in user.
+</div>
+</label>
+</div>
+<div class="form-check">
+<input class="form-check-input" data-track-label="blank_project" data-track-event="activate_form_input" data-track-property="default_snippet_visibility_20" data-track-value="" data-qa-selector="public_radio" type="radio" value="20" name="application_setting[default_snippet_visibility]" id="application_setting_default_snippet_visibility_20">
+<label class="form-check-label" for="application_setting_default_snippet_visibility_20"><i aria-hidden="true" data-hidden="true" class="fa fa-globe fa-fw"></i>
+<div class="option-title">
+Public
+</div>
+<div class="option-description">
+The snippet can be accessed without any authentication.
+</div>
+</label>
+</div>
+<div class="text-muted">
+</div>
+
+</div>
+<div class="form-group visibility-level-setting">
+<label class="label-bold" for="application_setting_default_group_visibility">Default group visibility</label>
+<div class="form-check">
+<input class="form-check-input" data-track-label="blank_project" data-track-event="activate_form_input" data-track-property="default_group_visibility_0" data-track-value="" data-qa-selector="private_radio" type="radio" value="0" checked name="application_setting[default_group_visibility]" id="application_setting_default_group_visibility_0">
+<label class="form-check-label" for="application_setting_default_group_visibility_0"><i aria-hidden="true" data-hidden="true" class="fa fa-lock fa-fw"></i>
+<div class="option-title">
+Private
+</div>
+<div class="option-description">
+The group and its projects can only be viewed by members.
+</div>
+</label>
+</div>
+<div class="form-check">
+<input class="form-check-input" data-track-label="blank_project" data-track-event="activate_form_input" data-track-property="default_group_visibility_10" data-track-value="" data-qa-selector="internal_radio" type="radio" value="10" name="application_setting[default_group_visibility]" id="application_setting_default_group_visibility_10">
+<label class="form-check-label" for="application_setting_default_group_visibility_10"><i aria-hidden="true" data-hidden="true" class="fa fa-shield fa-fw"></i>
+<div class="option-title">
+Internal
+</div>
+<div class="option-description">
+The group and any internal projects can be viewed by any logged in user.
+</div>
+</label>
+</div>
+<div class="form-check">
+<input class="form-check-input" data-track-label="blank_project" data-track-event="activate_form_input" data-track-property="default_group_visibility_20" data-track-value="" data-qa-selector="public_radio" type="radio" value="20" name="application_setting[default_group_visibility]" id="application_setting_default_group_visibility_20">
+<label class="form-check-label" for="application_setting_default_group_visibility_20"><i aria-hidden="true" data-hidden="true" class="fa fa-globe fa-fw"></i>
+<div class="option-title">
+Public
+</div>
+<div class="option-description">
+The group and any public projects can be viewed without any authentication.
+</div>
+</label>
+</div>
+<div class="text-muted">
+</div>
+
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_restricted_visibility_levels">Restricted visibility levels</label>
+<input type="hidden" name="application_setting[restricted_visibility_levels][]" id="application_setting_restricted_visibility_levels_">
+<div class="form-check">
+<label class="" for="application_setting_visibility_level_0"><input type="checkbox" name="application_setting[restricted_visibility_levels][]" id="application_setting_visibility_level_0" value="0" autocomplete="off" aria-describedby="restricted-visibility-help" class="form-check-input"><i aria-hidden="true" data-hidden="true" class="fa fa-lock fa-fw"></i>Private</label>
+</div>
+<div class="form-check">
+<label class="" for="application_setting_visibility_level_10"><input type="checkbox" name="application_setting[restricted_visibility_levels][]" id="application_setting_visibility_level_10" value="10" autocomplete="off" aria-describedby="restricted-visibility-help" class="form-check-input"><i aria-hidden="true" data-hidden="true" class="fa fa-shield fa-fw"></i>Internal</label>
+</div>
+<div class="form-check">
+<label class="" for="application_setting_visibility_level_20"><input type="checkbox" name="application_setting[restricted_visibility_levels][]" id="application_setting_visibility_level_20" value="20" autocomplete="off" aria-describedby="restricted-visibility-help" class="form-check-input"><i aria-hidden="true" data-hidden="true" class="fa fa-globe fa-fw"></i>Public</label>
+</div>
+<span class="form-text text-muted" id="restricted-visibility-help">
+Selected levels cannot be used by non-admin users for groups, projects or snippets. If the public level is restricted, user profiles are only visible to logged in users.
+</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_import_sources">Import sources</label>
+<input type="hidden" name="application_setting[import_sources][]" id="application_setting_import_sources_">
+<div class="form-check"><label class="active" for="GitHub"><input type="checkbox" name="application_setting[import_sources][]" id="GitHub" value="github" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>GitHub</label></div>
+<div class="form-check"><label class="active" for="Bitbucket_Cloud"><input type="checkbox" name="application_setting[import_sources][]" id="Bitbucket_Cloud" value="bitbucket" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>Bitbucket Cloud</label></div>
+<div class="form-check"><label class="active" for="Bitbucket_Server"><input type="checkbox" name="application_setting[import_sources][]" id="Bitbucket_Server" value="bitbucket_server" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>Bitbucket Server</label></div>
+<div class="form-check"><label class="active" for="GitLab.com"><input type="checkbox" name="application_setting[import_sources][]" id="GitLab.com" value="gitlab" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>GitLab.com</label></div>
+<div class="form-check"><label class="active" for="Google_Code"><input type="checkbox" name="application_setting[import_sources][]" id="Google_Code" value="google_code" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>Google Code</label></div>
+<div class="form-check"><label class="active" for="FogBugz"><input type="checkbox" name="application_setting[import_sources][]" id="FogBugz" value="fogbugz" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>FogBugz</label></div>
+<div class="form-check"><label class="active" for="Repo_by_URL"><input type="checkbox" name="application_setting[import_sources][]" id="Repo_by_URL" value="git" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>Repo by URL</label></div>
+<div class="form-check"><label class="active" for="GitLab_export"><input type="checkbox" name="application_setting[import_sources][]" id="GitLab_export" value="gitlab_project" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>GitLab export</label></div>
+<div class="form-check"><label class="active" for="Gitea"><input type="checkbox" name="application_setting[import_sources][]" id="Gitea" value="gitea" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>Gitea</label></div>
+<div class="form-check"><label class="active" for="Manifest_file"><input type="checkbox" name="application_setting[import_sources][]" id="Manifest_file" value="manifest" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>Manifest file</label></div>
+<div class="form-check"><label class="active" for="Phabricator"><input type="checkbox" name="application_setting[import_sources][]" id="Phabricator" value="phabricator" autocomplete="off" aria-describedby="import-sources-help" class="form-check-input" checked>Phabricator</label></div>
+<span class="form-text text-muted" id="import-sources-help">
+Enabled sources for code import during project creation. OmniAuth must be configured for GitHub
+<a href="http://test.host/help/integration/github">(?)</a>
+, Bitbucket
+<a href="http://test.host/help/integration/bitbucket">(?)</a>
+and GitLab.com
+<a href="http://test.host/help/integration/gitlab">(?)</a>
+</span>
+</div>
+
+<div class="form-group">
+<div class="form-check">
+<input name="application_setting[project_export_enabled]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" checked name="application_setting[project_export_enabled]" id="application_setting_project_export_enabled">
+<label class="form-check-label" for="application_setting_project_export_enabled">Project export enabled
+</label>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold">Enabled Git access protocols</label>
+<select class="form-control" name="application_setting[enabled_git_access_protocol]" id="application_setting_enabled_git_access_protocol"><option value="">Both SSH and HTTP(S)</option>
+<option value="ssh">Only SSH</option>
+<option value="http">Only HTTP(S)</option></select>
+<span class="form-text text-muted" id="clone-protocol-help">
+Allow only the selected protocols to be used for Git access.
+</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_custom_http_clone_url_root">Custom Git clone URL for HTTP(S)</label>
+<input class="form-control" placeholder="https://git.example.com" aria-describedby="custom_http_clone_url_root_help_block" type="text" name="application_setting[custom_http_clone_url_root]" id="application_setting_custom_http_clone_url_root">
+<span class="form-text text-muted" id="custom_http_clone_url_root_help_block">
+Replaces the clone URL root.
+</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_rsa_key_restriction">RSA SSH keys</label>
+<select class="form-control" name="application_setting[rsa_key_restriction]" id="application_setting_rsa_key_restriction"><option selected value="0">Are allowed</option>
+<option value="1024">Must be at least 1024 bits</option>
+<option value="2048">Must be at least 2048 bits</option>
+<option value="3072">Must be at least 3072 bits</option>
+<option value="4096">Must be at least 4096 bits</option>
+<option value="-1">Are forbidden</option></select>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_dsa_key_restriction">DSA SSH keys</label>
+<select class="form-control" name="application_setting[dsa_key_restriction]" id="application_setting_dsa_key_restriction"><option selected value="0">Are allowed</option>
+<option value="1024">Must be at least 1024 bits</option>
+<option value="2048">Must be at least 2048 bits</option>
+<option value="3072">Must be at least 3072 bits</option>
+<option value="-1">Are forbidden</option></select>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_ecdsa_key_restriction">ECDSA SSH keys</label>
+<select class="form-control" name="application_setting[ecdsa_key_restriction]" id="application_setting_ecdsa_key_restriction"><option selected value="0">Are allowed</option>
+<option value="256">Must be at least 256 bits</option>
+<option value="384">Must be at least 384 bits</option>
+<option value="521">Must be at least 521 bits</option>
+<option value="-1">Are forbidden</option></select>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_ed25519_key_restriction">ED25519 SSH keys</label>
+<select class="form-control" name="application_setting[ed25519_key_restriction]" id="application_setting_ed25519_key_restriction"><option selected value="0">Are allowed</option>
+<option value="256">Must be at least 256 bits</option>
+<option value="-1">Are forbidden</option></select>
+</div>
+</fieldset>
+<input type="submit" name="commit" value="Save changes" class="btn btn-success" data-disable-with="Save changes">
+</form>
+</div>
+</section>
+<section class="as-account-limit expanded no-animate qa-account-and-limit-settings settings" id="js-account-settings">
+<div class="settings-header">
+<h4>
+Account and limit
+</h4>
+<button class="btn js-settings-toggle" type="button">
+Collapse
+</button>
+<p>
+Session expiration, projects limit and attachment size.
+</p>
+</div>
+<div class="settings-content">
+<form class="fieldset-form" id="edit_application_setting_1" action="http://test.host/admin/application_settings/general#js-account-settings" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch">
+<fieldset>
+<div class="form-group">
+<div class="form-check">
+<input name="application_setting[gravatar_enabled]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" checked name="application_setting[gravatar_enabled]" id="application_setting_gravatar_enabled">
+<label class="form-check-label" for="application_setting_gravatar_enabled">Gravatar enabled
+</label>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_default_projects_limit">Default projects limit</label>
+<input class="form-control" type="number" value="42" name="application_setting[default_projects_limit]" id="application_setting_default_projects_limit">
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_max_attachment_size">Maximum attachment size (MB)</label>
+<input class="form-control" type="number" value="10" name="application_setting[max_attachment_size]" id="application_setting_max_attachment_size">
+</div>
+
+<div class="form-group">
+<label class="label-light" for="application_setting_receive_max_input_size">Maximum push size (MB)</label>
+<input class="form-control qa-receive-max-input-size-field" type="number" name="application_setting[receive_max_input_size]" id="application_setting_receive_max_input_size">
+</div>
+<div class="form-group">
+<label class="label-light" for="application_setting_session_expire_delay">Session duration (minutes)</label>
+<input class="form-control" type="number" value="10080" name="application_setting[session_expire_delay]" id="application_setting_session_expire_delay">
+<span class="form-text text-muted" id="session_expire_delay_help_block">GitLab restart is required to apply changes</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_user_oauth_applications">User OAuth applications</label>
+<div class="form-check">
+<input name="application_setting[user_oauth_applications]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" checked name="application_setting[user_oauth_applications]" id="application_setting_user_oauth_applications">
+<label class="form-check-label" for="application_setting_user_oauth_applications">Allow users to register any application to use GitLab as an OAuth provider
+</label>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_user_default_external">New users set to external</label>
+<div class="form-check">
+<input name="application_setting[user_default_external]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" name="application_setting[user_default_external]" id="application_setting_user_default_external">
+<label class="form-check-label" for="application_setting_user_default_external">Newly registered users will by default be external
+</label>
+</div>
+<div class="prepend-top-10">
+Internal users
+</div>
+<input placeholder="Regex pattern" class="form-control prepend-top-5" type="text" name="application_setting[user_default_internal_regex]" id="application_setting_user_default_internal_regex">
+<div class="help-block">
+Specify an e-mail address regex pattern to identify default internal users.
+<a target="_blank" href="http://test.host/help/user/permissions#external-users-permissions">More information</a>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_user_show_add_ssh_key_message">Prompt users to upload SSH keys</label>
+<div class="form-check">
+<input name="application_setting[user_show_add_ssh_key_message]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" checked name="application_setting[user_show_add_ssh_key_message]" id="application_setting_user_show_add_ssh_key_message">
+<label class="form-check-label" for="application_setting_user_show_add_ssh_key_message">Inform users without uploaded SSH keys that they can't push over SSH until one is added
+</label>
+</div>
+</div>
+
+</fieldset>
+<input type="submit" name="commit" value="Save changes" class="btn btn-success qa-save-changes-button" data-disable-with="Save changes">
+</form>
+</div>
+</section>
+<section class="as-diff-limits expanded no-animate settings" id="js-merge-request-settings">
+<div class="settings-header">
+<h4>
+Diff limits
+</h4>
+<button class="btn js-settings-toggle" type="button">
+Collapse
+</button>
+<p>
+Diff content limits
+</p>
+</div>
+<div class="settings-content">
+<form class="fieldset-form" id="edit_application_setting_1" action="http://test.host/admin/application_settings/general#js-merge-request-settings" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch">
+<fieldset>
+<div class="form-group">
+<label class="label-light" for="application_setting_diff_max_patch_bytes">Maximum diff patch size (Bytes)</label>
+<input class="form-control" type="number" value="102400" name="application_setting[diff_max_patch_bytes]" id="application_setting_diff_max_patch_bytes">
+<span class="form-text text-muted">
+Diff files surpassing this limit will be presented as 'too large'
+and won't be expandable.
+<a href="http://test.host/help/user/admin_area/diff_limits#maximum-diff-patch-size"><i aria-hidden="true" data-hidden="true" class="fa fa-question-circle"></i></a>
+</span>
+</div>
+</fieldset>
+<input type="submit" name="commit" value="Save changes" class="btn btn-success" data-disable-with="Save changes">
+</form>
+</div>
+</section>
+<section class="as-signup expanded no-animate settings" id="js-signup-settings">
+<div class="settings-header">
+<h4>
+Sign-up restrictions
+</h4>
+<button class="btn js-settings-toggle" type="button">
+Collapse
+</button>
+<p>
+Configure the way a user creates a new account.
+</p>
+</div>
+<div class="settings-content">
+<form class="fieldset-form" id="edit_application_setting_1" enctype="multipart/form-data" action="http://test.host/admin/application_settings/general#js-signup-settings" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch">
+<fieldset>
+<div class="form-group">
+<div class="form-check">
+<input name="application_setting[signup_enabled]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" checked name="application_setting[signup_enabled]" id="application_setting_signup_enabled">
+<label class="form-check-label" for="application_setting_signup_enabled">Sign-up enabled
+</label>
+</div>
+</div>
+<div class="form-group">
+<div class="form-check">
+<input name="application_setting[send_user_confirmation_email]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" name="application_setting[send_user_confirmation_email]" id="application_setting_send_user_confirmation_email">
+<label class="form-check-label" for="application_setting_send_user_confirmation_email">Send confirmation email on sign-up
+</label>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_domain_whitelist">Whitelisted domains for sign-ups</label>
+<textarea placeholder="domain.com" class="form-control" rows="8" name="application_setting[domain_whitelist_raw]" id="application_setting_domain_whitelist_raw">
+</textarea>
+<div class="form-text text-muted">ONLY users with e-mail addresses that match these domain(s) will be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_domain_blacklist_enabled">Domain Blacklist</label>
+<div class="form-check">
+<input name="application_setting[domain_blacklist_enabled]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" name="application_setting[domain_blacklist_enabled]" id="application_setting_domain_blacklist_enabled">
+<label class="form-check-label" for="application_setting_domain_blacklist_enabled">Enable domain blacklist for sign ups
+</label>
+</div>
+</div>
+<div class="form-group">
+<div class="form-check">
+<input type="radio" name="blacklist_type" id="blacklist_type_file" value="file" class="form-check-input">
+<label class="form-check-label" for="blacklist_type_file"><div class="option-title">
+Upload blacklist file
+</div>
+</label>
+</div>
+<div class="form-check">
+<input type="radio" name="blacklist_type" id="blacklist_type_raw" value="raw" class="form-check-input" checked>
+<label class="form-check-label" for="blacklist_type_raw"><div class="option-title">
+Enter blacklist manually
+</div>
+</label>
+</div>
+</div>
+<div class="form-group blacklist-file">
+<label class="label-bold" for="application_setting_domain_blacklist_file">Blacklist file</label>
+<input class="form-control" accept=".txt,.conf" type="file" name="application_setting[domain_blacklist_file]" id="application_setting_domain_blacklist_file">
+<div class="form-text text-muted">Users with e-mail addresses that match these domain(s) will NOT be able to sign-up. Wildcards allowed. Use separate lines or commas for multiple entries.</div>
+</div>
+<div class="form-group blacklist-raw">
+<label class="label-bold" for="application_setting_domain_blacklist">Blacklisted domains for sign-ups</label>
+<textarea placeholder="domain.com" class="form-control" rows="8" name="application_setting[domain_blacklist_raw]" id="application_setting_domain_blacklist_raw">
+</textarea>
+<div class="form-text text-muted">Users with e-mail addresses that match these domain(s) will NOT be able to sign-up. Wildcards allowed. Use separate lines for multiple entries. Ex: domain.com, *.domain.com</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_after_sign_up_text">After sign up text</label>
+<textarea class="form-control" rows="4" name="application_setting[after_sign_up_text]" id="application_setting_after_sign_up_text">
+</textarea>
+<div class="form-text text-muted">Markdown enabled</div>
+</div>
+</fieldset>
+<input type="submit" name="commit" value="Save changes" class="btn btn-success" data-disable-with="Save changes">
+</form>
+</div>
+</section>
+<section class="as-signin expanded no-animate settings" id="js-signin-settings">
+<div class="settings-header">
+<h4>
+Sign-in restrictions
+</h4>
+<button class="btn js-settings-toggle" type="button">
+Collapse
+</button>
+<p>
+Set requirements for a user to sign-in. Enable mandatory two-factor authentication.
+</p>
+</div>
+<div class="settings-content">
+<form class="fieldset-form" id="edit_application_setting_1" action="http://test.host/admin/application_settings/general#js-signin-settings" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch">
+<fieldset>
+<div class="form-group">
+<div class="form-check">
+<input name="application_setting[password_authentication_enabled_for_web]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" checked name="application_setting[password_authentication_enabled_for_web]" id="application_setting_password_authentication_enabled_for_web">
+<label class="form-check-label" for="application_setting_password_authentication_enabled_for_web">Password authentication enabled for web interface
+<div class="form-text text-muted">
+When disabled, an external authentication provider must be used.
+</div>
+</label>
+</div>
+</div>
+<div class="form-group">
+<div class="form-check">
+<input name="application_setting[password_authentication_enabled_for_git]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" checked name="application_setting[password_authentication_enabled_for_git]" id="application_setting_password_authentication_enabled_for_git">
+<label class="form-check-label" for="application_setting_password_authentication_enabled_for_git">Password authentication enabled for Git over HTTP(S)
+<div class="form-text text-muted">
+When disabled, a Personal Access Token
+must be used to authenticate.
+</div>
+</label>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_enabled_oauth_sign_in_sources">Enabled OAuth sign-in sources</label>
+<input type="hidden" name="application_setting[enabled_oauth_sign_in_sources][]" id="application_setting_enabled_oauth_sign_in_sources_">
+<div class="btn-group" data-toggle="buttons">
+<label class="btn active" for="application_setting_enabled_oauth_sign_in_sources_"><input type="checkbox" name="application_setting[enabled_oauth_sign_in_sources][]" id="cas3" value="cas3" autocomplete="off" checked>cas3</label>
+<label class="btn active" for="application_setting_enabled_oauth_sign_in_sources_"><input type="checkbox" name="application_setting[enabled_oauth_sign_in_sources][]" id="GitHub" value="github" autocomplete="off" checked>GitHub</label>
+<label class="btn active" for="application_setting_enabled_oauth_sign_in_sources_"><input type="checkbox" name="application_setting[enabled_oauth_sign_in_sources][]" id="Bitbucket" value="bitbucket" autocomplete="off" checked>Bitbucket</label>
+<label class="btn active" for="application_setting_enabled_oauth_sign_in_sources_"><input type="checkbox" name="application_setting[enabled_oauth_sign_in_sources][]" id="GitLab.com" value="gitlab" autocomplete="off" checked>GitLab.com</label>
+<label class="btn active" for="application_setting_enabled_oauth_sign_in_sources_"><input type="checkbox" name="application_setting[enabled_oauth_sign_in_sources][]" id="Google" value="google_oauth2" autocomplete="off" checked>Google</label>
+<label class="btn active" for="application_setting_enabled_oauth_sign_in_sources_"><input type="checkbox" name="application_setting[enabled_oauth_sign_in_sources][]" id="Facebook" value="facebook" autocomplete="off" checked>Facebook</label>
+<label class="btn active" for="application_setting_enabled_oauth_sign_in_sources_"><input type="checkbox" name="application_setting[enabled_oauth_sign_in_sources][]" id="Twitter" value="twitter" autocomplete="off" checked>Twitter</label>
+<label class="btn active" for="application_setting_enabled_oauth_sign_in_sources_"><input type="checkbox" name="application_setting[enabled_oauth_sign_in_sources][]" id="Jwt" value="jwt" autocomplete="off" checked>Jwt</label>
+<label class="btn active" for="application_setting_enabled_oauth_sign_in_sources_"><input type="checkbox" name="application_setting[enabled_oauth_sign_in_sources][]" id="Auth0" value="auth0" autocomplete="off" checked>Auth0</label>
+<label class="btn active" for="application_setting_enabled_oauth_sign_in_sources_"><input type="checkbox" name="application_setting[enabled_oauth_sign_in_sources][]" id="Authentiq" value="authentiq" autocomplete="off" checked>Authentiq</label>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_two_factor_authentication">Two-factor authentication</label>
+<div class="form-check">
+<input name="application_setting[require_two_factor_authentication]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" name="application_setting[require_two_factor_authentication]" id="application_setting_require_two_factor_authentication">
+<label class="form-check-label" for="application_setting_require_two_factor_authentication">Require all users to set up Two-factor authentication
+</label>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_two_factor_authentication">Two-factor grace period (hours)</label>
+<input min="0" class="form-control" placeholder="0" type="number" value="48" name="application_setting[two_factor_grace_period]" id="application_setting_two_factor_grace_period">
+<div class="form-text text-muted">Amount of time (in hours) that users are allowed to skip forced configuration of two-factor authentication</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_home_page_url">Home page URL</label>
+<input class="form-control" placeholder="http://company.example.com" aria-describedby="home_help_block" type="text" name="application_setting[home_page_url]" id="application_setting_home_page_url">
+<span class="form-text text-muted" id="home_help_block">We will redirect non-logged in users to this page</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_after_sign_out_path">After sign out path</label>
+<input class="form-control" placeholder="http://company.example.com" aria-describedby="after_sign_out_path_help_block" type="text" name="application_setting[after_sign_out_path]" id="application_setting_after_sign_out_path">
+<span class="form-text text-muted" id="after_sign_out_path_help_block">We will redirect users to this page after they sign out</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_sign_in_text">Sign in text</label>
+<textarea class="form-control" rows="4" name="application_setting[sign_in_text]" id="application_setting_sign_in_text">
+</textarea>
+<div class="form-text text-muted">Markdown enabled</div>
+</div>
+</fieldset>
+<input type="submit" name="commit" value="Save changes" class="btn btn-success" data-disable-with="Save changes">
+</form>
+</div>
+</section>
+<section class="as-terms expanded no-animate settings" id="js-terms-settings">
+<div class="settings-header">
+<h4>
+Terms of Service and Privacy Policy
+</h4>
+<button class="btn btn-default js-settings-toggle" type="button">
+Collapse
+</button>
+<p>
+Include a Terms of Service agreement and Privacy Policy that all users must accept.
+</p>
+</div>
+<div class="settings-content">
+<form class="fieldset-form" id="edit_application_setting_1" action="http://test.host/admin/application_settings/general#js-terms-settings" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch">
+<fieldset>
+<div class="form-group">
+<div class="form-check">
+<input name="application_setting[enforce_terms]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" name="application_setting[enforce_terms]" id="application_setting_enforce_terms">
+<label class="form-check-label" for="application_setting_enforce_terms">Require all users to accept Terms of Service and Privacy Policy when they access GitLab.
+</label><div class="form-text text-muted">
+When enabled, users cannot use GitLab until the terms have been accepted.
+</div>
+</div>
+</div>
+<div class="form-group">
+<label for="application_setting_terms">Terms of Service Agreement and Privacy Policy
+</label><textarea class="form-control" rows="8" name="application_setting[terms]" id="application_setting_terms">
+</textarea>
+<div class="form-text text-muted">
+Markdown enabled
+</div>
+</div>
+</fieldset>
+<input type="submit" name="commit" value="Save changes" class="btn btn-success" data-disable-with="Save changes">
+</form>
+</div>
+</section>
+<section class="as-external-auth expanded no-animate settings" id="js-external-auth-settings">
+<div class="settings-header">
+<h4>
+External authentication
+</h4>
+<button class="btn js-settings-toggle" type="button">
+Collapse
+</button>
+<p>
+External Classification Policy Authorization
+</p>
+</div>
+<div class="settings-content">
+<form class="fieldset-form" id="edit_application_setting_1" action="http://test.host/admin/application_settings/general#js-external-auth-settings" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch">
+<fieldset>
+<div class="form-group">
+<div class="form-check">
+<input name="application_setting[external_authorization_service_enabled]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" name="application_setting[external_authorization_service_enabled]" id="application_setting_external_authorization_service_enabled">
+<label class="form-check-label" for="application_setting_external_authorization_service_enabled">Enable classification control using an external service
+</label>
+</div>
+<span class="form-text text-muted">
+If enabled, access to projects will be validated on an external service using their classification label.
+<a href="http://test.host/help/user/admin_area/settings/external_authorization"><i aria-hidden="true" data-hidden="true" class="fa fa-question-circle"></i></a>
+</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_external_authorization_service_url">Service URL</label>
+<input class="form-control" type="text" name="application_setting[external_authorization_service_url]" id="application_setting_external_authorization_service_url">
+<span class="form-text text-muted">
+When leaving the URL blank, classification labels can still be specified without disabling cross project features or performing external authorization checks.
+</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_external_authorization_service_timeout">External authorization request timeout</label>
+<input class="form-control" min="0.001" max="10" step="0.001" type="number" value="0.5" name="application_setting[external_authorization_service_timeout]" id="application_setting_external_authorization_service_timeout">
+<span class="form-text text-muted">
+Time in seconds GitLab will wait for a response from the external service. When the service does not respond in time, access will be denied.
+</span>
+<label class="label-bold" for="application_setting_external_auth_client_cert">Client authentication certificate</label>
+<textarea class="form-control" name="application_setting[external_auth_client_cert]" id="application_setting_external_auth_client_cert">
+</textarea>
+<span class="form-text text-muted">
+The X509 Certificate to use when mutual TLS is required to communicate with the external authorization service. If left blank, the server certificate is still validated when accessing over HTTPS.
+</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_external_auth_client_key">Client authentication key</label>
+<textarea class="form-control" name="application_setting[external_auth_client_key]" id="application_setting_external_auth_client_key">
+</textarea>
+<span class="form-text text-muted">
+The private key to use when a client certificate is provided. This value is encrypted at rest.
+</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_external_auth_client_key_pass">Client authentication key password</label>
+<input class="form-control" type="password" name="application_setting[external_auth_client_key_pass]" id="application_setting_external_auth_client_key_pass">
+<span class="form-text text-muted">
+The passphrase required to decrypt the private key. This is optional and the value is encrypted at rest.
+</span>
+</div>
+<div class="form-group">
+<label class="label-bold" for="application_setting_external_authorization_service_default_label">Default classification label</label>
+<input class="form-control" type="text" name="application_setting[external_authorization_service_default_label]" id="application_setting_external_authorization_service_default_label">
+</div>
+</fieldset>
+<input type="submit" name="commit" value="Save changes" class="btn btn-success" data-disable-with="Save changes">
+</form>
+</div>
+</section>
+
+<section class="as-terminal expanded no-animate settings" id="js-terminal-settings">
+<div class="settings-header">
+<h4>
+Web terminal
+</h4>
+<button class="btn btn-default js-settings-toggle" type="button">
+Collapse
+</button>
+<p>
+Set max session time for web terminal.
+</p>
+</div>
+<div class="settings-content">
+<form class="fieldset-form" id="edit_application_setting_1" action="http://test.host/admin/application_settings/general#js-terminal-settings" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch">
+<fieldset>
+<div class="form-group">
+<label class="label-bold" for="application_setting_terminal_max_session_time">Max session time</label>
+<input class="form-control" type="number" value="0" name="application_setting[terminal_max_session_time]" id="application_setting_terminal_max_session_time">
+<div class="form-text text-muted">
+Maximum time for web terminal websocket connection (in seconds).
+0 for unlimited.
+</div>
+</div>
+</fieldset>
+<input type="submit" name="commit" value="Save changes" class="btn btn-success" data-disable-with="Save changes">
+</form>
+</div>
+</section>
+<section class="expanded no-animate settings" id="js-web-ide-settings">
+<div class="settings-header">
+<h4>
+Web IDE
+</h4>
+<button class="btn btn-default js-settings-toggle" type="button">
+Collapse
+</button>
+<p>
+Manage Web IDE features
+</p>
+</div>
+<div class="settings-content">
+<form class="fieldset-form" id="edit_application_setting_1" action="http://test.host/admin/application_settings/general#%23js-web-ide-settings" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch">
+<fieldset>
+<div class="form-group">
+<div class="form-check">
+<input name="application_setting[web_ide_clientside_preview_enabled]" type="hidden" value="0"><input class="form-check-input" type="checkbox" value="1" name="application_setting[web_ide_clientside_preview_enabled]" id="application_setting_web_ide_clientside_preview_enabled">
+<label class="form-check-label" for="application_setting_web_ide_clientside_preview_enabled">Client side evaluation
+</label><span class="form-text text-muted">
+Allow live previews of JavaScript projects in the Web IDE using CodeSandbox client side evaluation.
+</span>
+</div>
+</div>
+</fieldset>
+<input type="submit" name="commit" value="Save changes" class="btn btn-success" data-disable-with="Save changes">
+</form>
+</div>
+</section>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+</body>

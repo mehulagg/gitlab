@@ -1,0 +1,1819 @@
+<body>
+
+
+<meta charset="utf-8">
+<meta content="IE=edge" http-equiv="X-UA-Compatible">
+<meta content="object" property="og:type">
+<meta content="GitLab" property="og:site_name">
+<meta content="Development · Boards · John Doe84 / project31" property="og:title">
+<meta content="GitLab Enterprise Edition" property="og:description">
+<meta content="http://test.host/assets/gitlab_logo-7ae504fe4f68fdebb3c2034e36621930cd36ea87924c11ff65dbcb8ed50dca58.png" property="og:image">
+<meta content="64" property="og:image:width">
+<meta content="64" property="og:image:height">
+<meta content="http://test.host/frontend-fixtures/boards-project/-/boards" property="og:url">
+<meta content="summary" property="twitter:card">
+<meta content="Development · Boards · John Doe84 / project31" property="twitter:title">
+<meta content="GitLab Enterprise Edition" property="twitter:description">
+<meta content="http://test.host/assets/gitlab_logo-7ae504fe4f68fdebb3c2034e36621930cd36ea87924c11ff65dbcb8ed50dca58.png" property="twitter:image">
+
+<title>Development · Boards · John Doe84 / project31 · GitLab</title>
+<meta content="GitLab Enterprise Edition" name="description">
+
+
+
+
+
+
+
+
+
+<script id="js-board-template" type="text/x-template"><div :class="{ &quot;is-draggable&quot;: !list.preset, &quot;is-expandable&quot;: list.isExpandable, &quot;is-collapsed&quot;: !list.isExpanded, &quot;board-type-assignee&quot;: list.type === &quot;assignee&quot; }" :data-id="list.id" class="board h-100 px-2 align-top ws-normal" data-qa-selector="board_list">
+<div class="board-inner d-flex flex-column position-relative h-100 rounded">
+<header :class="{ &quot;has-border&quot;: list.label &amp;&amp; list.label.color, &quot;position-relative&quot;: list.isExpanded, &quot;position-absolute position-top-0 position-left-0 w-100 h-100&quot;: !list.isExpanded }" :style="{ borderTopColor: (list.label &amp;&amp; list.label.color ? list.label.color : null) }" class="board-header" data-qa-selector="board_list_header">
+<h3 :class="{ &quot;user-can-drag&quot;: (!disabled &amp;&amp; !list.preset), &quot;border-bottom-0&quot;: !list.isExpanded }" class="board-title m-0 d-flex js-board-handle">
+<div :aria-label="caretTooltip" :title="caretTooltip" @click="toggleExpanded" aria-hidden="true" class="board-title-caret no-drag" data-placement="bottom" v-if="list.isExpandable" v-tooltip="">
+<i :class="{ &quot;fa-caret-right&quot;: list.isExpanded, &quot;fa-caret-down&quot;: !list.isExpanded }" class="fa fa-fw"></i>
+</div>
+<span v-if="list.milestone" aria-hidden="true" class="append-right-5 milestone-icon"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#timer"></use></svg></span>
+
+<a :href="list.assignee.path" class="user-avatar-link js-no-trigger" v-if="list.type === &quot;assignee&quot;">
+<img :alt="list.assignee.name" :src="list.assignee.avatar" class="avatar s20 has-tooltip" height="20" width="20">
+</a>
+<div class="board-title-text">
+<span :class="{ &#39;has-tooltip&#39;: ![&#39;backlog&#39;, &#39;closed&#39;].includes(list.type) }" :title="((list.label &amp;&amp; list.label.description) || list.title || &quot;&quot;)" class="board-title-main-text block-truncated" data-container="body" v-if="list.type !== &quot;label&quot;">
+{{ list.title }}
+</span>
+<span :title="(list.assignee &amp;&amp; list.assignee.username || &quot;&quot;)" class="board-title-sub-text prepend-left-5 has-tooltip" v-if="list.type === &quot;assignee&quot;">
+@{{ list.assignee.username }}
+</span>
+<span :style="{ backgroundColor: (list.label &amp;&amp; list.label.color ? list.label.color : null), color: (list.label &amp;&amp; list.label.textColor ? list.label.textColor : &quot;#2e2e2e&quot;) }" :title="(list.label ? list.label.description : &quot;&quot;)" class="has-tooltip badge color-label title" data-container="body" data-placement="bottom" v-if="list.type === &quot;label&quot;">
+{{ list.title }}
+</span>
+</div>
+<board-delete :list="list" inline-template="true" v-if="!list.preset &amp;&amp; list.id">
+<button :class="{ &#39;d-none&#39;: !list.isExpanded }" @click.stop="deleteBoard" aria-label="Delete list" class="board-delete no-drag p-0 border-0 has-tooltip float-right" data-placement="bottom" title="Delete list" type="button">
+<i aria-hidden="true" data-hidden="true" class="fa fa-trash"></i>
+</button>
+</board-delete>
+<div :title="counterTooltip" class="issue-count-badge pr-0 no-drag text-secondary" data-placement="top" v-if="showBoardListAndBoardInfo" v-tooltip="true">
+<span class="d-inline-flex">
+<span class="issue-count-badge-count">
+<icon class="mr-1" name="issues"></icon>
+<issue-count :issuesSize="list.issuesSize" :maxIssueCount="list.maxIssueCount"></issue-count>
+</span>
+<span class="d-inline-flex ml-2">
+<icon class="mr-1" name="weight"></icon>
+{{ list.totalWeight }}
+</span>
+
+</span>
+</div>
+<gl-button-group class="board-list-button-group pl-2" v-if="isNewIssueShown || isSettingsShown">
+<gl-button :class="{ &#39;d-none&#39;: !list.isExpanded, &#39;rounded-right&#39;: isNewIssueShown &amp;&amp; !isSettingsShown }" @click="showNewIssueForm" aria-label="New issue" class="issue-count-badge-add-button no-drag" ref="newIssueBtn" type="button" v-if="isNewIssueShown">
+<i aria-hidden="true" data-hidden="true" class="fa fa-plus"></i>
+</gl-button>
+<gl-tooltip :target="() =&gt; $refs.newIssueBtn">
+New Issue
+</gl-tooltip>
+<gl-button aria-label="List Settings" class="no-drag rounded-right" ref="settingsBtn" title="List Settings" type="button" v-if="isSettingsShown">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#settings"></use></svg>
+</gl-button>
+<gl-tooltip :target="() =&gt; $refs.settingsBtn">
+List Settings
+</gl-tooltip>
+
+</gl-button-group>
+</h3>
+</header>
+<board-list :disabled="disabled" :groupId="null" :issue-link-base="issueLinkBase" :issues="list.issues" :list="list" :loading="list.loading" :root-path="rootPath" ref="board-list" v-if="showBoardListAndBoardInfo"></board-list>
+<board-blank-state v-if="list.id == &quot;blank&quot;"></board-blank-state>
+<board-promotion-state v-if="list.id == &quot;promotion&quot;"></board-promotion-state>
+
+</div>
+</div>
+</script>
+<script id="js-board-modal-filter" type="text/x-template"><div class="issues-filters w-100">
+<div class="d-flex filtered-search-block flex-column flex-lg-row issues-details-filters" v-pre="true">
+<div class="d-flex flex-column flex-md-row flex-grow-1 mb-lg-0 mb-md-2 mb-sm-0 w-100">
+<form class="filter-form js-filter-form w-100" action="http://test.host/frontend-fixtures/boards-project/-/boards?" accept-charset="UTF-8" method="get"><input name="utf8" type="hidden" value="&#x2713;" /><div class="issues-other-filters filtered-search-wrapper d-flex flex-column flex-md-row">
+<div class="filtered-search-box">
+<div class="filtered-search-box-input-container droplab-dropdown">
+<div class="scroll-container">
+<ul class="tokens-container list-unstyled">
+<li class="input-token">
+<input autocomplete="off" class="form-control filtered-search" data-labels-endpoint="http://test.host/frontend-fixtures/boards-project/-/labels" data-milestones-endpoint="http://test.host/frontend-fixtures/boards-project/-/milestones" data-project-id="31" data-releases-endpoint="http://test.host/frontend-fixtures/boards-project/-/releases" data-runner-tags-endpoint="http://test.host/admin/runners/tag_list" id="filtered-search-boards_modal" placeholder="Search or filter results...">
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu hint-dropdown" id="js-dropdown-hint">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-action="submit">
+<button class="btn btn-link" type="button">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#search"></use></svg>
+<span>
+Press Enter or click to search
+</span>
+</button>
+</li>
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link" type="button">
+<svg>
+<use xlink:href="{{icon}}"></use>
+</svg>
+<span class="js-filter-hint">
+{{hint}}
+</span>
+<span class="js-filter-tag dropdown-light-content">
+{{tag}}
+</span>
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-author">
+<ul data-dropdown>
+<li class="filter-dropdown-item js-current-user">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="John Doe83&#39;s avatar" src="https://www.gravatar.com/avatar/3cb17c6500eac5b832d9b7fc81ced320?s=80&amp;d=identicon" class="avatar s40" title="John Doe83" />
+</div>
+<div class="dropdown-user-details">
+<span>
+John Doe83
+</span>
+<span class="dropdown-light-content">
+@user74
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="{{name}}&#39;s avatar" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{avatar_url}}" class="avatar s40 lazy" title="{{name}}" />
+</div>
+<div class="dropdown-user-details">
+<span>
+{{name}}
+</span>
+<span class="dropdown-light-content">
+@{{username}}
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-assignee">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore"></li>
+<li class="filter-dropdown-item js-current-user">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="John Doe83&#39;s avatar" src="https://www.gravatar.com/avatar/3cb17c6500eac5b832d9b7fc81ced320?s=80&amp;d=identicon" class="avatar s40" title="John Doe83" />
+</div>
+<div class="dropdown-user-details">
+<span>
+John Doe83
+</span>
+<span class="dropdown-light-content">
+@user74
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="{{name}}&#39;s avatar" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{avatar_url}}" class="avatar s40 lazy" title="{{name}}" />
+</div>
+<div class="dropdown-user-details">
+<span>
+{{name}}
+</span>
+<span class="dropdown-light-content">
+@{{username}}
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-approver">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore"></li>
+<li class="filter-dropdown-item js-current-user">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="John Doe83&#39;s avatar" src="https://www.gravatar.com/avatar/3cb17c6500eac5b832d9b7fc81ced320?s=80&amp;d=identicon" class="avatar s40" title="John Doe83" />
+</div>
+<div class="dropdown-user-details">
+<span>
+John Doe83
+</span>
+<span class="dropdown-light-content">
+@user74
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="{{name}}&#39;s avatar" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{avatar_url}}" class="avatar s40 lazy" title="{{name}}" />
+</div>
+<div class="dropdown-user-details">
+<span>
+{{name}}
+</span>
+<span class="dropdown-light-content">
+@{{username}}
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+</div>
+
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-milestone">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Upcoming">
+<button class="btn btn-link" type="button">
+Upcoming
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Started">
+<button class="btn btn-link" type="button">
+Started
+</button>
+</li>
+<li class="divider droplab-item-ignore"></li>
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link js-data-value" type="button">
+{{title}}
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-release">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore"></li>
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link js-data-value" type="button">
+{{title}}
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-label">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore"></li>
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link" type="button">
+<span class="dropdown-label-box" style="background: {{color}}"></span>
+<span class="label-title js-data-value">
+{{title}}
+</span>
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-my-reaction">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore"></li>
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link" type="button">
+<gl-emoji></gl-emoji>
+<span class="js-data-value prepend-left-10">
+{{name}}
+</span>
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-wip">
+<ul class="filter-dropdown" data-dropdown>
+<li class="filter-dropdown-item" data-capitalize data-value="yes">
+<button class="btn btn-link" type="button">
+Yes
+</button>
+</li>
+<li class="filter-dropdown-item" data-capitalize data-value="no">
+<button class="btn btn-link" type="button">
+No
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-confidential">
+<ul class="filter-dropdown" data-dropdown>
+<li class="filter-dropdown-item" data-capitalize data-value="yes">
+<button class="btn btn-link" type="button">
+Yes
+</button>
+</li>
+<li class="filter-dropdown-item" data-capitalize data-value="no">
+<button class="btn btn-link" type="button">
+No
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-target-branch">
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link js-data-value monospace">
+{{title}}
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-weight">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore"></li>
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item" data-value="{{id}}">
+<button class="btn btn-link">{{title}}</button>
+</li>
+</ul>
+</div>
+
+</div>
+<button class="clear-search hidden" type="button">
+<i aria-hidden="true" data-hidden="true" class="fa fa-times"></i>
+</button>
+</div>
+</div>
+</form></div>
+<div class="filter-dropdown-container d-flex flex-column flex-md-row">
+</div>
+</div>
+</div>
+</script>
+<script id="js-board-promotion" type="text/x-template"><div class="board-promotion-state p-3">
+<div class="svg-container center">
+<svg xmlns="http://www.w3.org/2000/svg" width="78" height="82" viewBox="0 0 78 82"><g fill="none" fill-rule="evenodd"><path fill="#F9F9F9" d="M2.12 42c-.08.99-.12 1.99-.12 3 0 20.435 16.565 37 37 37s37-16.565 37-37c0-1.01-.04-2.01-.12-3C74.353 61.032 58.425 76 39 76 19.575 76 3.647 61.032 2.12 42z"/><path fill="#EEE" fill-rule="nonzero" d="M39 78C17.46 78 0 60.54 0 39S17.46 0 39 0s39 17.46 39 39-17.46 39-39 39zm0-4c19.33 0 35-15.67 35-35S58.33 4 39 4 4 19.67 4 39s15.67 35 35 35z"/><g transform="translate(12 25)"><path fill="#E1DBF2" d="M3 0h10a3 3 0 0 1 3 3v22a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V3a3 3 0 0 1 3-3zm1 4v20h8V4H4zm2 2h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1z"/><rect width="6" height="4" x="5" y="12" fill="#6B4FBB" rx="1"/></g><g transform="translate(50 25)"><rect width="6" height="4" x="5" y="6" fill="#6B4FBB" rx="1"/><path fill="#E1DBF2" fill-rule="nonzero" d="M3 0h10a3 3 0 0 1 3 3v22a3 3 0 0 1-3 3H3a3 3 0 0 1-3-3V3a3 3 0 0 1 3-3zm1 4v20h8V4H4zm2 8h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1z"/></g><path fill="#E1DBF2" d="M34 25h10a3 3 0 0 1 3 3v28a3 3 0 0 1-3 3H34a3 3 0 0 1-3-3V28a3 3 0 0 1 3-3zm1 4v26h8V29h-8zm2 8h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1z"/><path fill="#6B4FBB" d="M37 43h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1zm0-12h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1z"/></g></svg>
+</div>
+<p>
+Improve Issue boards with GitLab Enterprise Edition.
+</p>
+<ul>
+</ul>
+<a class="btn btn-primary btn-block" href="https://customers.gitlab.com/trials/new?return_to=http%3A%2F%2Flocalhost&amp;id=dXNlcjc0QGV4YW1wbGUub3Jn">Start GitLab Ultimate trial</a>
+
+<div class="top-space">
+<button @click.stop="clearPromotionState" class="d-block mb-3 btn btn-default btn-block" href="#" id="hide-btn">
+Thanks! Don&#39;t show me this again
+</button>
+</div>
+</div>
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<meta content="origin-when-cross-origin" name="referrer">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="#474D57" name="theme-color">
+
+
+
+
+
+<meta content="http://test.host/assets/msapplication-tile-1196ec67452f618d39cdd85e2e3a542f76574c071051ae7effbfde01710eb17d.png" name="msapplication-TileImage">
+<meta content="#30353E" name="msapplication-TileColor">
+
+
+
+
+
+
+
+
+
+
+
+<header class="navbar navbar-gitlab navbar-expand-sm js-navbar" data-qa-selector="navbar">
+<a class="sr-only gl-accessibility" href="#content-body" tabindex="1">Skip to content</a>
+<div class="container-fluid">
+<div class="header-content">
+<div class="title-container">
+<h1 class="title">
+<a title="Dashboard" id="logo" href="http://test.host/"><svg width="24" height="24" class="tanuki-logo" viewbox="0 0 36 36">
+  <path class="tanuki-shape tanuki-left-ear" fill="#e24329" d="M2 14l9.38 9v-9l-4-12.28c-.205-.632-1.176-.632-1.38 0z"></path>
+  <path class="tanuki-shape tanuki-right-ear" fill="#e24329" d="M34 14l-9.38 9v-9l4-12.28c.205-.632 1.176-.632 1.38 0z"></path>
+  <path class="tanuki-shape tanuki-nose" fill="#e24329" d="M18,34.38 3,14 33,14 Z"></path>
+  <path class="tanuki-shape tanuki-left-eye" fill="#fc6d26" d="M18,34.38 11.38,14 2,14 6,25Z"></path>
+  <path class="tanuki-shape tanuki-right-eye" fill="#fc6d26" d="M18,34.38 24.62,14 34,14 30,25Z"></path>
+  <path class="tanuki-shape tanuki-left-cheek" fill="#fca326" d="M2 14L.1 20.16c-.18.565 0 1.2.5 1.56l17.42 12.66z"></path>
+  <path class="tanuki-shape tanuki-right-cheek" fill="#fca326" d="M34 14l1.9 6.16c.18.565 0 1.2-.5 1.56L18 34.38z"></path>
+</svg>
+
+<span class="logo-text d-none d-lg-block prepend-left-8">
+<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 617 169"><path d="M315.26 2.97h-21.8l.1 162.5h88.3v-20.1h-66.5l-.1-142.4M465.89 136.95c-5.5 5.7-14.6 11.4-27 11.4-16.6 0-23.3-8.2-23.3-18.9 0-16.1 11.2-23.8 35-23.8 4.5 0 11.7.5 15.4 1.2v30.1h-.1m-22.6-98.5c-17.6 0-33.8 6.2-46.4 16.7l7.7 13.4c8.9-5.2 19.8-10.4 35.5-10.4 17.9 0 25.8 9.2 25.8 24.6v7.9c-3.5-.7-10.7-1.2-15.1-1.2-38.2 0-57.6 13.4-57.6 41.4 0 25.1 15.4 37.7 38.7 37.7 15.7 0 30.8-7.2 36-18.9l4 15.9h15.4v-83.2c-.1-26.3-11.5-43.9-44-43.9M557.63 149.1c-8.2 0-15.4-1-20.8-3.5V70.5c7.4-6.2 16.6-10.7 28.3-10.7 21.1 0 29.2 14.9 29.2 39 0 34.2-13.1 50.3-36.7 50.3m9.2-110.6c-19.5 0-30 13.3-30 13.3v-21l-.1-27.8h-21.3l.1 158.5c10.7 4.5 25.3 6.9 41.2 6.9 40.7 0 60.3-26 60.3-70.9-.1-35.5-18.2-59-50.2-59M77.9 20.6c19.3 0 31.8 6.4 39.9 12.9l9.4-16.3C114.5 6 97.3 0 78.9 0 32.5 0 0 28.3 0 85.4c0 59.8 35.1 83.1 75.2 83.1 20.1 0 37.2-4.7 48.4-9.4l-.5-63.9V75.1H63.6v20.1h38l.5 48.5c-5 2.5-13.6 4.5-25.3 4.5-32.2 0-53.8-20.3-53.8-63-.1-43.5 22.2-64.6 54.9-64.6M231.43 2.95h-21.3l.1 27.3v94.3c0 26.3 11.4 43.9 43.9 43.9 4.5 0 8.9-.4 13.1-1.2v-19.1c-3.1.5-6.4.7-9.9.7-17.9 0-25.8-9.2-25.8-24.6v-65h35.7v-17.8h-35.7l-.1-38.5M155.96 165.47h21.3v-124h-21.3v124M155.96 24.37h21.3V3.07h-21.3v21.3"></path></svg>
+
+</span>
+</a>
+</h1>
+<ul class="list-unstyled navbar-sub-nav">
+<li id="nav-projects-dropdown" class="home dropdown header-projects qa-projects-dropdown" data-track-label="projects_dropdown" data-track-event="click_dropdown" data-track-value="">
+<button class="btn" data-toggle="dropdown" type="button">
+Projects
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</button>
+<div class="dropdown-menu frequent-items-dropdown-menu">
+<div class="frequent-items-dropdown-container">
+<div class="frequent-items-dropdown-sidebar qa-projects-dropdown-sidebar">
+<ul>
+<li class=""><a class="qa-your-projects-link" href="http://test.host/dashboard/projects">Your projects
+</a></li>
+<li class=""><a href="http://test.host/dashboard/projects/starred">Starred projects
+</a></li>
+<li class=""><a href="http://test.host/explore">Explore projects
+</a></li>
+</ul>
+</div>
+<div class="frequent-items-dropdown-content">
+<div data-project-id="31" data-project-name="project31" data-project-namespace="John Doe84 / project31" data-project-web-url="http://test.host/frontend-fixtures/boards-project" data-user-name="user74" id="js-projects-dropdown"></div>
+</div>
+</div>
+
+</div>
+</li>
+<li id="nav-groups-dropdown" class="d-none d-md-block home dropdown header-groups qa-groups-dropdown" data-track-label="groups_dropdown" data-track-event="click_dropdown" data-track-value="">
+<button class="btn" data-toggle="dropdown" type="button">
+Groups
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</button>
+<div class="dropdown-menu frequent-items-dropdown-menu">
+<div class="frequent-items-dropdown-container">
+<div class="frequent-items-dropdown-sidebar qa-groups-dropdown-sidebar">
+<ul>
+<li class=""><a class="qa-your-groups-link" href="http://test.host/dashboard/groups">Your groups
+</a></li>
+<li class=""><a href="http://test.host/explore/groups">Explore groups
+</a></li>
+</ul>
+</div>
+<div class="frequent-items-dropdown-content">
+<div data-user-name="user74" id="js-groups-dropdown"></div>
+</div>
+</div>
+
+</div>
+</li>
+<li class="header-more dropdown">
+<a data-qa-selector="more_dropdown" data-toggle="dropdown" href="#">
+More
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a>
+<div class="dropdown-menu">
+<ul>
+<li class="d-md-none">
+<a href="http://test.host/dashboard/groups">Groups
+</a>
+</li>
+<li class=""><a href="http://test.host/dashboard/activity">Activity
+</a></li>
+<li class=""><a class="dashboard-shortcuts-milestones" href="http://test.host/dashboard/milestones">Milestones
+</a></li>
+<li class=""><a class="dashboard-shortcuts-snippets" data-qa-selector="snippets_link" href="http://test.host/dashboard/snippets">Snippets
+</a></li>
+<li class=""><a href="http://test.host/-/analytics">Analytics
+</a></li>
+<li class="dropdown">
+
+</li>
+<li class=""><a href="http://test.host/-/instance_statistics">Instance Statistics
+</a></li>
+<li class=""><a class="admin-icon qa-admin-area-link d-xl-none" href="http://test.host/admin">Admin Area
+</a></li>
+<li class=""><a class="d-lg-none lock-open-icon" href="http://test.host/admin/session/destroy">Leave Admin Mode
+</a></li>
+</ul>
+</div>
+</li>
+<li class="d-none d-xl-block"><a class="admin-icon qa-admin-area-link" title="Admin Area" aria-label="Admin Area" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/admin"><svg class="s18"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#admin"></use></svg>
+</a></li>
+<li class="d-none d-lg-block d-xl-block"><a title="Leave Admin Mode" aria-label="Leave Admin Mode" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/admin/session/destroy"><svg class="s18"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#lock-open"></use></svg>
+</a></li>
+<li class="hidden">
+<a class="dashboard-shortcuts-projects" href="http://test.host/dashboard/projects">Projects
+</a>
+</li>
+
+</ul>
+
+</div>
+<div class="navbar-collapse collapse">
+<ul class="nav navbar-nav">
+<li class="header-new dropdown" data-track-event="click_dropdown" data-track-label="new_dropdown" data-track-value="">
+<a class="header-new-dropdown-toggle has-tooltip qa-new-menu-toggle" id="js-onboarding-new-project-link" title="New..." ref="tooltip" aria-label="New..." data-toggle="dropdown" data-placement="bottom" data-container="body" data-display="static" href="http://test.host/projects/new"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#plus-square"></use></svg>
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li class="dropdown-bold-header">
+This project
+</li>
+<li><a href="http://test.host/frontend-fixtures/boards-project/issues/new">New issue</a></li>
+<li><a href="http://test.host/frontend-fixtures/boards-project/merge_requests/new">New merge request</a></li>
+<li><a href="http://test.host/frontend-fixtures/boards-project/snippets/new">New snippet</a></li>
+<li class="divider">
+<li class="dropdown-bold-header">GitLab</li>
+<li><a class="qa-global-new-project-link" href="http://test.host/projects/new">New project</a></li>
+<li><a href="http://test.host/groups/new">New group</a></li>
+<li><a class="qa-global-new-snippet-link" href="http://test.host/snippets/new">New snippet</a></li>
+</ul>
+</div>
+</li>
+
+<li class="nav-item d-none d-lg-block m-auto">
+<div class="search search-form" data-track-event="activate_form_input" data-track-label="navbar_search" data-track-value="">
+<form class="form-inline" action="http://test.host/search" accept-charset="UTF-8" method="get">
+<input name="utf8" type="hidden" value="✓"><div class="search-input-container">
+<div class="search-input-wrap">
+<div class="dropdown" data-url="http://test.host/search/autocomplete">
+<input type="search" name="search" id="search" placeholder="Search or jump to…" class="search-input dropdown-menu-toggle no-outline js-search-dashboard-options" spellcheck="false" tabindex="1" autocomplete="off" data-issues-path="http://test.host/dashboard/issues" data-mr-path="http://test.host/dashboard/merge_requests" data-qa-selector="search_term_field" aria-label="Search or jump to…">
+<button class="hidden js-dropdown-search-toggle" data-toggle="dropdown" type="button"></button>
+<div class="dropdown-menu dropdown-select js-dashboard-search-options">
+<div class="dropdown-content">
+<ul>
+<li class="dropdown-menu-empty-item">
+<a>
+Loading...
+</a>
+</li>
+</ul>
+</div>
+<div class="dropdown-loading"><i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin"></i></div>
+</div>
+<svg class="s16 search-icon"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#search"></use></svg>
+<svg class="s16 clear-icon js-clear-input"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+</div>
+</div>
+</div>
+<input type="hidden" name="group_id" id="group_id" class="js-search-group-options">
+<input type="hidden" name="project_id" id="search_project_id" value="31" class="js-search-project-options" data-project-path="boards-project" data-name="project31" data-issues-path="http://test.host/frontend-fixtures/boards-project/issues" data-mr-path="http://test.host/frontend-fixtures/boards-project/merge_requests" data-issues-disabled="false">
+<input type="hidden" name="search_code" id="search_code" value="true">
+<input type="hidden" name="repository_ref" id="repository_ref">
+<input type="hidden" name="nav_source" id="nav_source" value="navbar">
+<noscript><button name="button" type="submit">Search</button></noscript>
+<div class="search-autocomplete-opts hide" data-autocomplete-path="http://test.host/search/autocomplete" data-autocomplete-project-id="31"></div>
+</form>
+</div>
+
+</li>
+<li class="nav-item d-inline-block d-lg-none">
+<a title="Search" aria-label="Search" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/search?project_id=31"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#search"></use></svg>
+</a>
+</li>
+<li class="user-counter"><a title="Issues" class="dashboard-shortcuts-issues" aria-label="Issues" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/issues?assignee_username=user74"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#issues"></use></svg>
+<span class="badge badge-pill green-badge hidden issues-count">
+0
+</span>
+</a></li>
+<li class="user-counter"><a title="Merge requests" class="dashboard-shortcuts-merge_requests" aria-label="Merge requests" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/merge_requests?assignee_username=user74"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#git-merge"></use></svg>
+<span class="badge badge-pill hidden merge-requests-count">
+0
+</span>
+</a></li>
+<li class="user-counter"><a title="To-Do List" aria-label="To-Do List" class="shortcuts-todos" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/todos"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#todo-done"></use></svg>
+<span class="badge badge-pill hidden todos-count">
+0
+</span>
+</a></li>
+<li class="nav-item header-help dropdown d-none d-md-block">
+<a class="header-help-dropdown-toggle" data-toggle="dropdown" href="http://test.host/help"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#question"></use></svg>
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li>
+<a href="http://test.host/help">Help</a>
+</li>
+<li>
+<a href="https://about.gitlab.com/getting-help/">Support</a>
+</li>
+
+<li class="divider">
+<li>
+<a href="https://about.gitlab.com/submit-feedback">Submit feedback</a>
+</li>
+<li>
+
+</li>
+
+</ul>
+
+</div>
+</li>
+<li class="dropdown header-user nav-item" data-qa-selector="user_menu" data-track-event="click_dropdown" data-track-label="profile_dropdown" data-track-value="">
+<a class="header-user-dropdown-toggle" data-toggle="dropdown" href="http://test.host/user74"><img width="23" height="23" class="header-user-avatar qa-user-avatar lazy" data-src="https://www.gravatar.com/avatar/3cb17c6500eac5b832d9b7fc81ced320?s=46&amp;d=identicon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li class="current-user">
+<div class="user-name bold">
+John Doe83
+</div>
+@user74
+</li>
+<li class="divider">
+<li>
+<div class="js-set-status-modal-trigger" data-has-status="false"></div>
+</li>
+<li>
+<a class="profile-link" data-user="user74" href="http://test.host/user74">Profile</a>
+</li>
+<li>
+<a data-qa-selector="settings_link" href="http://test.host/profile">Settings</a>
+</li>
+<li class="divider d-md-none">
+<li class="d-md-none">
+<a href="http://test.host/help">Help</a>
+</li>
+<li class="d-md-none">
+<a href="https://about.gitlab.com/getting-help/">Support</a>
+</li>
+
+<li class="d-md-none">
+<a href="https://about.gitlab.com/submit-feedback">Submit feedback</a>
+</li>
+<li class="d-md-none">
+
+</li>
+
+<li class="divider">
+<li>
+<a class="sign-out-link" data-qa-selector="sign_out_link" href="http://test.host/users/sign_out">Sign out</a>
+</li>
+</ul>
+
+</div>
+</li>
+</ul>
+</div>
+<button class="navbar-toggler d-block d-sm-none" type="button">
+<span class="sr-only">Toggle navigation</span>
+<svg class="s12 more-icon js-navbar-toggle-right"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#ellipsis_h"></use></svg>
+<svg class="s12 close-icon js-navbar-toggle-left"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+</button>
+</div>
+</div>
+</header>
+<div class="js-set-status-modal-wrapper" data-current-emoji="" data-current-message=""></div>
+
+<div class="layout-page page-with-contextual-sidebar">
+<div class="nav-sidebar">
+<div class="nav-sidebar-inner-scroll">
+<div class="context-header">
+<a title="project31" href="http://test.host/frontend-fixtures/boards-project"><div class="avatar-container rect-avatar s40 project-avatar">
+<div class="avatar s40 avatar-tile identicon bg4">P</div>
+</div>
+<div class="sidebar-context-title">
+project31
+</div>
+</a>
+</div>
+<ul class="sidebar-top-level-items">
+<li class="home">
+<a class="shortcuts-project rspec-project-link" data-qa-selector="project_link" href="http://test.host/frontend-fixtures/boards-project"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#home"></use></svg>
+</div>
+<span class="nav-item-name">
+Project overview
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/boards-project"><strong class="fly-out-top-item-name">
+Project overview
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="Project details" class="shortcuts-project" href="http://test.host/frontend-fixtures/boards-project"><span>Details</span>
+</a></li>
+<li class=""><a title="Activity" class="shortcuts-project-activity" data-qa-selector="activity_link" href="http://test.host/frontend-fixtures/boards-project/activity"><span>Activity</span>
+</a></li>
+<li class=""><a title="Releases" class="shortcuts-project-releases" href="http://test.host/frontend-fixtures/boards-project/-/releases"><span>Releases</span>
+</a></li>
+<li class=""><a title="Cycle Analytics" class="shortcuts-project-cycle-analytics" href="http://test.host/frontend-fixtures/boards-project/-/cycle_analytics"><span>Cycle Analytics</span>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-tree qa-project-menu-repo" href="http://test.host/frontend-fixtures/boards-project/tree/master"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#doc-text"></use></svg>
+</div>
+<span class="nav-item-name" id="js-onboarding-repo-link">
+Repository
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/boards-project/tree/master"><strong class="fly-out-top-item-name">
+Repository
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a href="http://test.host/frontend-fixtures/boards-project/tree/master">Files
+</a></li>
+<li class=""><a id="js-onboarding-commits-link" href="http://test.host/frontend-fixtures/boards-project/commits/master">Commits
+</a></li>
+<li class=""><a class="qa-branches-link" id="js-onboarding-branches-link" href="http://test.host/frontend-fixtures/boards-project/-/branches">Branches
+</a></li>
+<li class=""><a href="http://test.host/frontend-fixtures/boards-project/-/tags">Tags
+</a></li>
+<li class=""><a href="http://test.host/frontend-fixtures/boards-project/-/graphs/master">Contributors
+</a></li>
+<li class=""><a href="http://test.host/frontend-fixtures/boards-project/-/network/master">Graph
+</a></li>
+<li class=""><a href="http://test.host/frontend-fixtures/boards-project/compare?from=master&amp;to=master">Compare
+</a></li>
+<li class=""><a href="http://test.host/frontend-fixtures/boards-project/-/graphs/master/charts">Charts
+</a></li>
+<li class=""><a data-qa-selector="path_locks_link" href="http://test.host/frontend-fixtures/boards-project/path_locks">Locked Files
+</a></li>
+</ul>
+</li>
+<li class="active">
+<a class="shortcuts-issues qa-issues-item" href="http://test.host/frontend-fixtures/boards-project/issues"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#issues"></use></svg>
+</div>
+<span class="nav-item-name" id="js-onboarding-issues-link">
+Issues
+</span>
+<span class="badge badge-pill count issue_counter">
+0
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/boards-project/issues"><strong class="fly-out-top-item-name">
+Issues
+</strong>
+<span class="badge badge-pill count issue_counter fly-out-badge">
+0
+</span>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="Issues" href="http://test.host/frontend-fixtures/boards-project/issues"><span>
+List
+</span>
+</a></li>
+<li class="active"><a title="Boards" data-qa-selector="issue_boards_link" href="http://test.host/frontend-fixtures/boards-project/-/boards"><span>
+Boards
+</span>
+</a></li>
+<li class=""><a title="Labels" class="qa-labels-link" href="http://test.host/frontend-fixtures/boards-project/-/labels"><span>
+Labels
+</span>
+</a></li>
+<li class=""><a title="Milestones" class="qa-milestones-link" href="http://test.host/frontend-fixtures/boards-project/-/milestones"><span>
+Milestones
+</span>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-merge_requests" data-qa-selector="merge_requests_link" href="http://test.host/frontend-fixtures/boards-project/merge_requests"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#git-merge"></use></svg>
+</div>
+<span class="nav-item-name" id="js-onboarding-mr-link">
+Merge Requests
+</span>
+<span class="badge badge-pill count merge_counter js-merge-counter">
+0
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/boards-project/merge_requests"><strong class="fly-out-top-item-name">
+Merge Requests
+</strong>
+<span class="badge badge-pill count merge_counter js-merge-counter fly-out-badge">
+0
+</span>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-pipelines qa-link-pipelines rspec-link-pipelines" data-qa-selector="ci_cd_link" href="http://test.host/frontend-fixtures/boards-project/pipelines"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#rocket"></use></svg>
+</div>
+<span class="nav-item-name" id="js-onboarding-pipelines-link">
+CI / CD
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/boards-project/pipelines"><strong class="fly-out-top-item-name">
+CI / CD
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="Pipelines" class="shortcuts-pipelines" href="http://test.host/frontend-fixtures/boards-project/pipelines"><span>
+Pipelines
+</span>
+</a></li>
+<li class=""><a title="Jobs" class="shortcuts-builds" href="http://test.host/frontend-fixtures/boards-project/-/jobs"><span>
+Jobs
+</span>
+</a></li>
+<li class=""><a title="Artifacts" class="shortcuts-builds" href="http://test.host/frontend-fixtures/boards-project/-/artifacts"><span>
+Artifacts
+</span>
+</a></li>
+<li class=""><a title="Schedules" class="shortcuts-builds" href="http://test.host/frontend-fixtures/boards-project/pipeline_schedules"><span>
+Schedules
+</span>
+</a></li>
+<li class=""><a title="Charts" class="shortcuts-pipelines-charts" href="http://test.host/frontend-fixtures/boards-project/pipelines/charts"><span>
+Charts
+</span>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-operations qa-link-operations" href="http://test.host/frontend-fixtures/boards-project/environments/metrics"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#cloud-gear"></use></svg>
+</div>
+<span class="nav-item-name">
+Operations
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/boards-project/environments/metrics"><strong class="fly-out-top-item-name">
+Operations
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="Metrics" class="shortcuts-metrics" href="http://test.host/frontend-fixtures/boards-project/environments/metrics"><span>
+Metrics
+</span>
+</a></li>
+<li class=""><a title="Environments" class="shortcuts-environments qa-operations-environments-link" href="http://test.host/frontend-fixtures/boards-project/environments"><span>
+Environments
+</span>
+</a></li>
+<li class=""><a title="Error Tracking" class="shortcuts-tracking qa-operations-tracking-link" href="http://test.host/frontend-fixtures/boards-project/error_tracking"><span>
+Error Tracking
+</span>
+</a></li>
+<li class=""><a title="Serverless" href="http://test.host/frontend-fixtures/boards-project/serverless/functions"><span>
+Serverless
+</span>
+</a></li>
+<li class="">
+<a title="Kubernetes" class="shortcuts-kubernetes" href="http://test.host/frontend-fixtures/boards-project/clusters"><span>
+Kubernetes
+</span>
+<div class="feature-highlight js-feature-highlight" data-container="body" data-dismiss-endpoint="http://test.host/-/user_callouts" data-highlight="gke_cluster_integration" data-placement="right" data-toggle="popover" data-trigger="manual" disabled></div>
+</a><div class="feature-highlight-popover-content">
+<img class="feature-highlight-illustration" alt="Kubernetes popover" src="http://test.host/assets/illustrations/cluster_popover-889b8203a86c86d1fd3f0b181e588071d00cd9c77590fd87dba4d19035e1c0df.svg">
+<div class="feature-highlight-popover-sub-content">
+<p>Allows you to add and manage Kubernetes clusters.</p>
+<p>
+Protip:
+<a href="http://test.host/help/topics/autodevops/index.md">Auto DevOps</a>
+<span>uses Kubernetes clusters to deploy your code!</span>
+</p>
+<hr>
+<button class="btn btn-success btn-sm dismiss-feature-highlight" type="button">
+<span>Got it!</span>
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#thumb-up"></use></svg>
+</button>
+</div>
+</div>
+</li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-wiki" data-qa-selector="wiki_link" href="http://test.host/frontend-fixtures/boards-project/wikis/home"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#book"></use></svg>
+</div>
+<span class="nav-item-name">
+Wiki
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/boards-project/wikis/home"><strong class="fly-out-top-item-name">
+Wiki
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-snippets" href="http://test.host/frontend-fixtures/boards-project/snippets"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#snippet"></use></svg>
+</div>
+<span class="nav-item-name">
+Snippets
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/boards-project/snippets"><strong class="fly-out-top-item-name">
+Snippets
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-tree" href="http://test.host/frontend-fixtures/boards-project/edit"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#settings"></use></svg>
+</div>
+<span class="nav-item-name qa-settings-item" id="js-onboarding-settings-link">
+Settings
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/boards-project/edit"><strong class="fly-out-top-item-name">
+Settings
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="General" class="qa-general-settings-link" href="http://test.host/frontend-fixtures/boards-project/edit"><span>
+General
+</span>
+</a></li>
+<li class=""><a title="Members" class="qa-link-members-settings" id="js-onboarding-settings-members-link" href="http://test.host/frontend-fixtures/boards-project/-/project_members"><span>
+Members
+</span>
+</a></li>
+<li class=""><a title="Integrations" data-qa-selector="integrations_settings_link" href="http://test.host/frontend-fixtures/boards-project/-/settings/integrations"><span>
+Integrations
+</span>
+</a></li>
+<li class=""><a title="Repository" href="http://test.host/frontend-fixtures/boards-project/-/settings/repository"><span>
+Repository
+</span>
+</a></li>
+<li class=""><a title="CI / CD" href="http://test.host/frontend-fixtures/boards-project/-/settings/ci_cd"><span>
+CI / CD
+</span>
+</a></li>
+<li class=""><a title="Operations" href="http://test.host/frontend-fixtures/boards-project/-/settings/operations">Operations
+</a></li>
+<li class=""><a title="Audit Events" data-qa-selector="audit_events_settings_link" href="http://test.host/frontend-fixtures/boards-project/audit_events">Audit Events
+</a></li>
+</ul>
+</li>
+<a class="toggle-sidebar-button js-toggle-sidebar qa-toggle-sidebar rspec-toggle-sidebar" role="button" title="Toggle sidebar" type="button">
+<svg class="icon-angle-double-left"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-double-left"></use></svg>
+<svg class="icon-angle-double-right"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-double-right"></use></svg>
+<span class="collapse-text">Collapse sidebar</span>
+</a>
+<button name="button" type="button" class="close-nav-button"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+<span class="collapse-text">Close sidebar</span>
+</button>
+<li class="hidden">
+<a title="Activity" class="shortcuts-project-activity" href="http://test.host/frontend-fixtures/boards-project/activity"><span>
+Activity
+</span>
+</a>
+</li>
+<li class="hidden">
+<a title="Network" class="shortcuts-network" href="http://test.host/frontend-fixtures/boards-project/-/network/master">Graph
+</a>
+</li>
+<li class="hidden">
+<a title="Charts" class="shortcuts-repository-charts" href="http://test.host/frontend-fixtures/boards-project/-/graphs/master/charts">Charts
+</a>
+</li>
+<li class="hidden">
+<a class="shortcuts-new-issue" href="http://test.host/frontend-fixtures/boards-project/issues/new">Create a new issue
+</a>
+</li>
+<li class="hidden">
+<a title="Jobs" class="shortcuts-builds" href="http://test.host/frontend-fixtures/boards-project/-/jobs">Jobs
+</a>
+</li>
+<li class="hidden">
+<a title="Commits" class="shortcuts-commits" href="http://test.host/frontend-fixtures/boards-project/commits/master">Commits
+</a>
+</li>
+<li class="hidden">
+<a title="Issue Boards" class="shortcuts-issue-boards" href="http://test.host/frontend-fixtures/boards-project/-/boards">Issue Boards</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div class="content-wrapper">
+
+<div class="mobile-overlay"></div>
+<div class="alert-wrapper">
+
+
+
+
+
+
+<nav class="breadcrumbs container-fluid issue-boards-content js-focus-mode-board" role="navigation">
+<div class="breadcrumbs-container">
+<button name="button" type="button" class="toggle-mobile-nav"><span class="sr-only">Open sidebar</span>
+<i aria-hidden="true" data-hidden="true" class="fa fa-bars"></i>
+</button><div class="breadcrumbs-links js-title-container">
+<ul class="list-unstyled breadcrumbs-list js-breadcrumbs-list">
+<li>
+<a href="http://test.host/frontend-fixtures">John Doe84</a><svg class="s8 breadcrumbs-list-angle"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-right"></use></svg>
+</li> <li>
+<a href="http://test.host/frontend-fixtures/boards-project"><span class="breadcrumb-item-text js-breadcrumb-item-text">project31</span></a><svg class="s8 breadcrumbs-list-angle"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-right"></use></svg>
+</li>
+
+<li>
+<h2 class="breadcrumbs-sub-title"><a href="http://test.host/frontend-fixtures/boards-project/-/boards">Issue Boards</a></h2>
+</li>
+</ul>
+</div>
+
+</div>
+</nav>
+
+<div class="d-flex"></div>
+</div>
+<div class=" issue-boards-content js-focus-mode-board">
+<div class="content" id="content-body">
+<div class="flash-container flash-container-page sticky">
+</div>
+
+<div :class="{ 'is-compact': detailIssueVisible }" class="boards-app position-relative" data-board-id="1" data-boards-endpoint="http://test.host/frontend-fixtures/boards-project/-/boards" data-bulk-update-path="http://test.host/frontend-fixtures/boards-project/issues/bulk_update" data-default-avatar="http://test.host/assets/no_avatar-849f9c04a3a0d0cea2424ae97b27447dc64a7dbfae83c036c45b403392f0e8ba.png" data-disabled="false" data-focus-mode-available data-issue-link-base="http://test.host/frontend-fixtures/boards-project/issues" data-label-ids="[]" data-labels="[]" data-lists-endpoint="http://test.host/-/boards/1/lists" data-recent-boards-endpoint="http://test.host/frontend-fixtures/boards-project/-/boards/recent" data-root-path="http://test.host/" data-scoped-labels="false" data-scoped-labels-documentation-link="http://test.host/help/user/project/labels.md#scoped-labels" data-time-tracking-limit-to-hours="false" data-weight-feature-available="true" id="board-app" v-cloak="true">
+<div class="issues-filters">
+<div class="d-flex filtered-search-block flex-column flex-lg-row issues-details-filters row-content-block second-block" v-pre="false">
+<div class="d-flex flex-column flex-md-row flex-grow-1 mb-lg-0 mb-md-2 mb-sm-0 w-100">
+<div class="inline boards-switcher" data-board-base-url="http://test.host/frontend-fixtures/boards-project/-/boards" data-can-admin-board="true" data-current-board='{"id":1,"name":"Development","milestone_id":null,"weight":null,"label_ids":[],"milestone":null,"assignee":null,"labels":[]}' data-has-missing-boards="false" data-labels-path="http://test.host/frontend-fixtures/boards-project/-/labels.json?include_ancestor_groups=true&amp;include_descendant_groups=true" data-milestone-path="http://test.host/frontend-fixtures/boards-project/-/milestones.json" data-multiple-issue-boards-available="true" data-project-id="31" data-scoped-issue-board-feature-enabled="true" data-weights='["Any","None",0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20]' id="js-multiple-boards-switcher"></div>
+
+<form class="filter-form js-filter-form w-100" action="http://test.host/frontend-fixtures/boards-project/-/boards?" accept-charset="UTF-8" method="get">
+<input name="utf8" type="hidden" value="✓"><div class="issues-other-filters filtered-search-wrapper d-flex flex-column flex-md-row">
+<div class="filtered-search-box">
+<div class="filtered-search-box-input-container droplab-dropdown">
+<div class="scroll-container">
+<ul class="tokens-container list-unstyled">
+<li class="input-token">
+<input autocomplete="off" class="form-control filtered-search" data-labels-endpoint="http://test.host/frontend-fixtures/boards-project/-/labels" data-milestones-endpoint="http://test.host/frontend-fixtures/boards-project/-/milestones" data-project-id="31" data-releases-endpoint="http://test.host/frontend-fixtures/boards-project/-/releases" data-runner-tags-endpoint="http://test.host/admin/runners/tag_list" id="filtered-search-boards" placeholder="Search or filter results...">
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu hint-dropdown" id="js-dropdown-hint">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-action="submit">
+<button class="btn btn-link" type="button">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#search"></use></svg>
+<span>
+Press Enter or click to search
+</span>
+</button>
+</li>
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link" type="button">
+<svg>
+<use xlink:href="{{icon}}"></use>
+</svg>
+<span class="js-filter-hint">
+{{hint}}
+</span>
+<span class="js-filter-tag dropdown-light-content">
+{{tag}}
+</span>
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-author">
+<ul data-dropdown>
+<li class="filter-dropdown-item js-current-user">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="John Doe83's avatar" src="https://www.gravatar.com/avatar/3cb17c6500eac5b832d9b7fc81ced320?s=80&amp;d=identicon" class="avatar s40" title="John Doe83">
+</div>
+<div class="dropdown-user-details">
+<span>
+John Doe83
+</span>
+<span class="dropdown-light-content">
+@user74
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="{{name}}'s avatar" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{avatar_url}}" class="avatar s40 lazy" title="{{name}}">
+</div>
+<div class="dropdown-user-details">
+<span>
+{{name}}
+</span>
+<span class="dropdown-light-content">
+@{{username}}
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-assignee">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore">
+<li class="filter-dropdown-item js-current-user">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="John Doe83's avatar" src="https://www.gravatar.com/avatar/3cb17c6500eac5b832d9b7fc81ced320?s=80&amp;d=identicon" class="avatar s40" title="John Doe83">
+</div>
+<div class="dropdown-user-details">
+<span>
+John Doe83
+</span>
+<span class="dropdown-light-content">
+@user74
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="{{name}}'s avatar" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{avatar_url}}" class="avatar s40 lazy" title="{{name}}">
+</div>
+<div class="dropdown-user-details">
+<span>
+{{name}}
+</span>
+<span class="dropdown-light-content">
+@{{username}}
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-approver">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore">
+<li class="filter-dropdown-item js-current-user">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="John Doe83's avatar" src="https://www.gravatar.com/avatar/3cb17c6500eac5b832d9b7fc81ced320?s=80&amp;d=identicon" class="avatar s40" title="John Doe83">
+</div>
+<div class="dropdown-user-details">
+<span>
+John Doe83
+</span>
+<span class="dropdown-light-content">
+@user74
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link dropdown-user" type="button">
+<div class="avatar-container s40">
+<img alt="{{name}}'s avatar" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="{{avatar_url}}" class="avatar s40 lazy" title="{{name}}">
+</div>
+<div class="dropdown-user-details">
+<span>
+{{name}}
+</span>
+<span class="dropdown-light-content">
+@{{username}}
+</span>
+</div>
+</button>
+</li>
+
+</ul>
+</div>
+
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-milestone">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Upcoming">
+<button class="btn btn-link" type="button">
+Upcoming
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Started">
+<button class="btn btn-link" type="button">
+Started
+</button>
+</li>
+<li class="divider droplab-item-ignore">
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link js-data-value" type="button">
+{{title}}
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-release">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore">
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link js-data-value" type="button">
+{{title}}
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-label">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore">
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link" type="button">
+<span class="dropdown-label-box" style="background: {{color}}"></span>
+<span class="label-title js-data-value">
+{{title}}
+</span>
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-my-reaction">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link" type="button">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link" type="button">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore">
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link" type="button">
+<gl-emoji></gl-emoji>
+<span class="js-data-value prepend-left-10">
+{{name}}
+</span>
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-wip">
+<ul class="filter-dropdown" data-dropdown>
+<li class="filter-dropdown-item" data-capitalize data-value="yes">
+<button class="btn btn-link" type="button">
+Yes
+</button>
+</li>
+<li class="filter-dropdown-item" data-capitalize data-value="no">
+<button class="btn btn-link" type="button">
+No
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-confidential">
+<ul class="filter-dropdown" data-dropdown>
+<li class="filter-dropdown-item" data-capitalize data-value="yes">
+<button class="btn btn-link" type="button">
+Yes
+</button>
+</li>
+<li class="filter-dropdown-item" data-capitalize data-value="no">
+<button class="btn btn-link" type="button">
+No
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-target-branch">
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item">
+<button class="btn btn-link js-data-value monospace">
+{{title}}
+</button>
+</li>
+</ul>
+</div>
+<div class="filtered-search-input-dropdown-menu dropdown-menu" id="js-dropdown-weight">
+<ul data-dropdown>
+<li class="filter-dropdown-item" data-value="None">
+<button class="btn btn-link">
+None
+</button>
+</li>
+<li class="filter-dropdown-item" data-value="Any">
+<button class="btn btn-link">
+Any
+</button>
+</li>
+<li class="divider droplab-item-ignore">
+</ul>
+<ul class="filter-dropdown" data-dropdown data-dynamic>
+<li class="filter-dropdown-item" data-value="{{id}}">
+<button class="btn btn-link">{{title}}</button>
+</li>
+</ul>
+</div>
+
+</div>
+<button class="clear-search hidden" type="button">
+<i aria-hidden="true" data-hidden="true" class="fa fa-times"></i>
+</button>
+</div>
+</div>
+</form>
+</div>
+<div class="filter-dropdown-container d-flex flex-column flex-md-row">
+<div id="js-board-labels-toggle"></div>
+<div class="js-board-config" data-can-admin-list></div>
+<div class="dropdown prepend-left-10" id="js-add-list">
+<button class="btn btn-success btn-inverted js-new-board-list" data-labels="http://test.host/frontend-fixtures/boards-project/-/labels.json?include_ancestor_groups=true" data-labels-endpoint="http://test.host/frontend-fixtures/boards-project/-/labels" data-list-assignees-path="http://test.host/-/boards/1/users.json" data-list-labels-path="http://test.host/frontend-fixtures/boards-project/-/labels.json?include_ancestor_groups=true" data-list-milestone-path="http://test.host/-/boards/1/milestones.json" data-namespace-path="frontend-fixtures" data-project-path="boards-project" data-toggle="dropdown" type="button">
+Add list
+</button>
+<div class="dropdown-menu dropdown-extended-height dropdown-menu-paging dropdown-menu-right dropdown-menu-issues-board-new dropdown-menu-selectable js-tab-container-labels">
+<div class="dropdown-page-one">
+<div class="dropdown-title">
+<span>Add list</span><button class="dropdown-title-button dropdown-menu-close" aria-label="Close" type="button"><i aria-hidden="true" data-hidden="true" class="fa fa-times dropdown-menu-close-icon"></i></button>
+</div>
+<div class="issue-board-dropdown-content">
+<p class="m-0">
+Create lists from labels. Issues with that label appear in that list.
+</p>
+</div>
+<div class="dropdown-input">
+<input type="search" id="" class="dropdown-input-field qa-dropdown-input-field" placeholder="Search" autocomplete="off"><i aria-hidden="true" data-hidden="true" class="fa fa-search dropdown-input-search"></i><i aria-hidden="true" data-hidden="true" role="button" class="fa fa-times dropdown-input-clear js-dropdown-input-clear"></i>
+</div>
+<div class="dropdown-content"></div>
+<div class="dropdown-footer">
+<ul class="dropdown-footer-list">
+<li>
+<a class="dropdown-toggle-page" href="#">
+Create project label
+</a>
+</li>
+<li>
+<a data-is-link="true" href="http://test.host/frontend-fixtures/boards-project/-/labels">Manage project labels
+</a>
+</li>
+</ul>
+</div>
+<div class="dropdown-loading"><i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin"></i></div>
+</div>
+
+<div class="dropdown-page-two dropdown-new-label">
+<div class="dropdown-title">
+<button class="dropdown-title-button dropdown-menu-back" aria-label="Go back" type="button"><i aria-hidden="true" data-hidden="true" class="fa fa-arrow-left"></i></button><span>Create project label</span><button class="dropdown-title-button dropdown-menu-close" aria-label="Close" type="button"><i aria-hidden="true" data-hidden="true" class="fa fa-times dropdown-menu-close-icon"></i></button>
+</div>
+<div class="dropdown-content">
+<div class="dropdown-labels-error js-label-error"></div>
+<input class="default-dropdown-input" id="new_label_name" placeholder="Name new label" type="text">
+<div class="suggest-colors suggest-colors-dropdown">
+<div class="suggest-colors">
+<a class="has-tooltip" style="background-color: #0033CC" data-color="#0033CC" title="UA blue" href="#"></a><a class="has-tooltip" style="background-color: #428BCA" data-color="#428BCA" title="Moderate blue" href="#"></a><a class="has-tooltip" style="background-color: #44AD8E" data-color="#44AD8E" title="Lime green" href="#"></a><a class="has-tooltip" style="background-color: #A8D695" data-color="#A8D695" title="Feijoa" href="#"></a><a class="has-tooltip" style="background-color: #5CB85C" data-color="#5CB85C" title="Slightly desaturated green" href="#"></a><a class="has-tooltip" style="background-color: #69D100" data-color="#69D100" title="Bright green" href="#"></a><a class="has-tooltip" style="background-color: #004E00" data-color="#004E00" title="Very dark lime green" href="#"></a><a class="has-tooltip" style="background-color: #34495E" data-color="#34495E" title="Very dark desaturated blue" href="#"></a><a class="has-tooltip" style="background-color: #7F8C8D" data-color="#7F8C8D" title="Dark grayish cyan" href="#"></a><a class="has-tooltip" style="background-color: #A295D6" data-color="#A295D6" title="Slightly desaturated blue" href="#"></a><a class="has-tooltip" style="background-color: #5843AD" data-color="#5843AD" title="Dark moderate blue" href="#"></a><a class="has-tooltip" style="background-color: #8E44AD" data-color="#8E44AD" title="Dark moderate violet" href="#"></a><a class="has-tooltip" style="background-color: #FFECDB" data-color="#FFECDB" title="Very pale orange" href="#"></a><a class="has-tooltip" style="background-color: #AD4363" data-color="#AD4363" title="Dark moderate pink" href="#"></a><a class="has-tooltip" style="background-color: #D10069" data-color="#D10069" title="Strong pink" href="#"></a><a class="has-tooltip" style="background-color: #CC0033" data-color="#CC0033" title="Strong red" href="#"></a><a class="has-tooltip" style="background-color: #FF0000" data-color="#FF0000" title="Pure red" href="#"></a><a class="has-tooltip" style="background-color: #D9534F" data-color="#D9534F" title="Soft red" href="#"></a><a class="has-tooltip" style="background-color: #D1D100" data-color="#D1D100" title="Strong yellow" href="#"></a><a class="has-tooltip" style="background-color: #F0AD4E" data-color="#F0AD4E" title="Soft orange" href="#"></a><a class="has-tooltip" style="background-color: #AD8D43" data-color="#AD8D43" title="Dark moderate orange" href="#"></a>
+</div>
+</div>
+<div class="dropdown-label-color-input">
+<div class="dropdown-label-color-preview js-dropdown-label-color-preview"></div>
+<input class="default-dropdown-input" id="new_label_color" placeholder="Assign custom color like #FF0000" type="text">
+</div>
+<div class="d-none dropdown-label-input">
+<label>
+<input checked class="js-add-list" name="add_list" type="checkbox">
+<span>Add list</span>
+</label>
+</div>
+<div class="clearfix">
+<button class="btn btn-primary float-left js-new-label-btn" type="button">
+Create
+</button>
+<button class="btn btn-default float-right js-cancel-label-btn" type="button">
+Cancel
+</button>
+</div>
+</div>
+</div>
+
+<div class="dropdown-loading"><i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin"></i></div>
+</div>
+</div>
+
+
+<div class="prepend-left-10" data-can-admin-list id="js-add-issues-btn"></div>
+<div id="js-toggle-focus-btn"></div>
+</div>
+</div>
+</div>
+
+<div class="boards-list w-100 py-3 px-2 text-nowrap" data-qa-selector="boards_list">
+<div class="boards-app-loading w-100 text-center" v-if="loading">
+<i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin fa-2x"></i>
+</div>
+<board :board-id="boardId" :disabled="disabled" :issue-link-base="issueLinkBase" :key="list.id" :list="list" :root-path="rootPath" ref="board" v-cloak="true" v-for="list in state.lists"></board>
+</div>
+<board-sidebar :current-user='{"id":74,"name":"John Doe83","username":"user74","state":"active","avatar_url":"https://www.gravatar.com/avatar/3cb17c6500eac5b832d9b7fc81ced320?s=80\u0026d=identicon","web_url":"http://localhost/user74","status_tooltip_html":null,"path":"/user74"}' inline-template="true">
+<transition name="boards-sidebar-slide">
+<aside class="right-sidebar right-sidebar-expanded issue-boards-sidebar" v-show="showSidebar">
+<div class="issuable-sidebar">
+<div class="block issuable-sidebar-header position-relative">
+<span class="issuable-header-text hide-collapsed float-left">
+<strong class="bold">
+{{ issue.title }}
+</strong>
+<br>
+<span>
+
+#{{ issue.iid }}
+</span>
+</span>
+<a aria-label="Toggle sidebar" class="gutter-toggle position-absolute position-top-0 position-right-0" href="#" role="button">
+<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 15 15"><path d="M9,7.5l5.83-5.91a.48.48,0,0,0,0-.69L14.11.15a.46.46,0,0,0-.68,0l-5.93,6L1.57.15a.46.46,0,0,0-.68,0L.15.9a.48.48,0,0,0,0,.69L6,7.5.15,13.41a.48.48,0,0,0,0,.69l.74.75a.46.46,0,0,0,.68,0l5.93-6,5.93,6a.46.46,0,0,0,.68,0l.74-.75a.48.48,0,0,0,0-.69Z"></path></svg>
+
+</a>
+</div>
+<div class="js-issuable-update">
+<div class="block assignee" ref="assigneeBlock">
+<template v-if="issue.assignees">
+<assignee-title :editable="true" :loading="loadingAssignees" :number-of-assignees="issue.assignees.length"></assignee-title>
+<assignees :editable="true" :users="issue.assignees" class="value" root-path="http://test.host/"></assignees>
+</template>
+<div class="selectbox hide-collapsed">
+<input :data-avatar_url="assignee.avatar" :data-name="assignee.name" :data-username="assignee.username" :value="assignee.id" class="js-vue" name="issue[assignee_ids][]" type="hidden" v-for="assignee in issue.assignees" v-if="issue.assignees">
+<div class="dropdown">
+<button :data-issuable-id="issue.iid" class="dropdown-menu-toggle js-user-search js-author-search js-multiselect js-save-user-data js-issue-board-sidebar" data-current-user="true" data-dropdown-header="Assignee(s)" data-field-name="issue[assignee_ids][]" data-first-user="user74" data-multi-select="true" data-null-user="true" data-project-id="31" data-toggle="dropdown" ref="assigneeDropdown" type="button">
+Select assignee(s)
+<i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"></i>
+</button>
+<div class="dropdown-menu dropdown-select dropdown-menu-user dropdown-menu-selectable dropdown-menu-author">
+<div class="dropdown-title">
+<span>Assign to</span><button class="dropdown-title-button dropdown-menu-close" aria-label="Close" type="button"><i aria-hidden="true" data-hidden="true" class="fa fa-times dropdown-menu-close-icon"></i></button>
+</div>
+<div class="dropdown-input">
+<input type="search" id="" class="dropdown-input-field qa-dropdown-input-field" placeholder="Search users" autocomplete="off"><i aria-hidden="true" data-hidden="true" class="fa fa-search dropdown-input-search"></i><i aria-hidden="true" data-hidden="true" role="button" class="fa fa-times dropdown-input-clear js-dropdown-input-clear"></i>
+</div>
+<div class="dropdown-content"></div>
+<div class="dropdown-loading"><i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin"></i></div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="block milestone">
+<div class="title">
+Milestone
+<i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin block-loading"></i>
+<a class="js-sidebar-dropdown-toggle edit-link float-right" href="#">Edit</a>
+</div>
+<div class="value">
+<span class="no-value" v-if="!issue.milestone">
+None
+</span>
+<span class="bold has-tooltip" v-if="issue.milestone">
+{{ issue.milestone.title }}
+</span>
+</div>
+<div class="selectbox">
+<input :value="issue.milestone.id" name="issue[milestone_id]" type="hidden" v-if="issue.milestone">
+<div class="dropdown">
+<button :data-issuable-id="issue.iid" :data-selected="milestoneTitle" class="dropdown-menu-toggle js-milestone-select js-issue-board-sidebar" data-ability-name="issue" data-default-no="true" data-field-name="issue[milestone_id]" data-milestones="http://test.host/frontend-fixtures/boards-project/-/milestones.json" data-show-no="true" data-toggle="dropdown" data-use-id="true" type="button">
+Milestone
+<i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"></i>
+</button>
+<div class="dropdown-menu dropdown-select dropdown-menu-selectable">
+<div class="dropdown-title">
+<span>Assign milestone</span><button class="dropdown-title-button dropdown-menu-close" aria-label="Close" type="button"><i aria-hidden="true" data-hidden="true" class="fa fa-times dropdown-menu-close-icon"></i></button>
+</div>
+<div class="dropdown-input">
+<input type="search" id="" class="dropdown-input-field qa-dropdown-input-field" placeholder="Search milestones" autocomplete="off"><i aria-hidden="true" data-hidden="true" class="fa fa-search dropdown-input-search"></i><i aria-hidden="true" data-hidden="true" role="button" class="fa fa-times dropdown-input-clear js-dropdown-input-clear"></i>
+</div>
+<div class="dropdown-content"></div>
+<div class="dropdown-loading"><i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin"></i></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="block time-tracking">
+<time-tracker :human-time-estimate="issue.humanTimeEstimate" :human-time-spent="issue.humanTimeSpent" :limit-to-hours="timeTrackingLimitToHours" :time-estimate="issue.timeEstimate || 0" :time-spent="issue.timeSpent || 0" root-path="http://test.host/"></time-tracker>
+</div>
+
+<div class="block due_date">
+<div class="title">
+Due date
+<i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin block-loading"></i>
+<a class="js-sidebar-dropdown-toggle edit-link float-right" href="#">Edit</a>
+</div>
+<div class="value">
+<div class="value-content">
+<span class="no-value" v-if="!issue.dueDate">
+None
+</span>
+<span class="bold" v-if="issue.dueDate">
+{{ issue.dueDate | due-date }}
+</span>
+<span class="no-value js-remove-due-date-holder" v-if="issue.dueDate">
+-
+<a class="js-remove-due-date" href="#" role="button">
+remove due date
+</a>
+</span>
+</div>
+</div>
+<div class="selectbox">
+<input :value="issue.dueDate" name="issue[due_date]" type="hidden">
+<div class="dropdown">
+<button class="dropdown-menu-toggle js-due-date-select js-issue-boards-due-date" data-ability-name="issue" data-field-name="issue[due_date]" data-toggle="dropdown" type="button">
+<span class="dropdown-toggle-text">Due date</span>
+<i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"></i>
+</button>
+<div class="dropdown-menu dropdown-menu-due-date">
+<div class="dropdown-title">
+<span>Due date</span><button class="dropdown-title-button dropdown-menu-close" aria-label="Close" type="button"><i aria-hidden="true" data-hidden="true" class="fa fa-times dropdown-menu-close-icon"></i></button>
+</div>
+<div class="dropdown-content">
+<div class="js-due-date-calendar"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="block labels">
+<div class="title">
+Labels
+<i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin block-loading"></i>
+<a class="js-sidebar-dropdown-toggle edit-link float-right" href="#">Edit</a>
+</div>
+<div class="value issuable-show-labels dont-hide">
+<span class="no-value" v-if="issue.labels &amp;&amp; issue.labels.length === 0">
+None
+</span>
+<span v-for="label in issue.labels">
+<span class="d-inline-block position-relative scoped-label-wrapper" v-if="showScopedLabels(label)">
+<a href="#">
+<span :style="{ backgroundColor: label.color, color: label.textColor }" class="badge color-label label">
+{{ label.title }}
+</span>
+</a>
+<a :href="helpLink()" class="label scoped-label">
+<i :style="{ backgroundColor: label.color, color: label.textColor }" class="fa fa-question-circle"></i>
+</a>
+</span>
+<a href="#" v-else="true">
+<div :style="{ backgroundColor: label.color, color: label.textColor }" class="badge color-label has-tooltip">
+{{ label.title }}
+</div>
+</a>
+</span>
+</div>
+<div class="selectbox">
+<input :value="label.id" name="issue[label_names][]" type="hidden" v-for="label in issue.labels">
+<div class="dropdown">
+<button :data-labels="issue.assignableLabelsEndpoint" :data-selected="selectedLabels" class="dropdown-menu-toggle js-label-select js-multiselect js-issue-board-sidebar" data-field-name="issue[label_names][]" data-namespace-path="frontend-fixtures" data-project-id="31" data-project-path="boards-project" data-scoped-labels="false" data-scoped-labels-documentation-link="http://test.host/help/user/project/labels.md#scoped-labels" data-show-any="true" data-show-no="true" data-toggle="dropdown" type="button">
+<span class="dropdown-toggle-text">
+{{ labelDropdownTitle }}
+</span>
+<i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"></i>
+</button>
+<div class="dropdown-menu dropdown-select dropdown-menu-paging dropdown-menu-labels dropdown-menu-selectable dropdown-extended-height">
+<div class="dropdown-page-one">
+<div class="dropdown-title">
+<span>Assign labels</span><button class="dropdown-title-button dropdown-menu-close" aria-label="Close" type="button"><i aria-hidden="true" data-hidden="true" class="fa fa-times dropdown-menu-close-icon"></i></button>
+</div>
+<div class="dropdown-input">
+<input type="search" id="" class="dropdown-input-field qa-dropdown-input-field" placeholder="Search" autocomplete="off"><i aria-hidden="true" data-hidden="true" class="fa fa-search dropdown-input-search"></i><i aria-hidden="true" data-hidden="true" role="button" class="fa fa-times dropdown-input-clear js-dropdown-input-clear"></i>
+</div>
+<div class="dropdown-content"></div>
+<div class="dropdown-footer">
+<ul class="dropdown-footer-list">
+<li>
+<a class="dropdown-toggle-page" href="#">
+Create project label
+</a>
+</li>
+<li>
+<a data-is-link="true" href="http://test.host/frontend-fixtures/boards-project/-/labels">Manage project labels
+</a>
+</li>
+</ul>
+</div>
+<div class="dropdown-loading"><i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin"></i></div>
+</div>
+
+<div class="dropdown-page-two dropdown-new-label">
+<div class="dropdown-title">
+<button class="dropdown-title-button dropdown-menu-back" aria-label="Go back" type="button"><i aria-hidden="true" data-hidden="true" class="fa fa-arrow-left"></i></button><span>Create project label</span><button class="dropdown-title-button dropdown-menu-close" aria-label="Close" type="button"><i aria-hidden="true" data-hidden="true" class="fa fa-times dropdown-menu-close-icon"></i></button>
+</div>
+<div class="dropdown-content">
+<div class="dropdown-labels-error js-label-error"></div>
+<input class="default-dropdown-input" id="new_label_name" placeholder="Name new label" type="text">
+<div class="suggest-colors suggest-colors-dropdown">
+<div class="suggest-colors">
+<a class="has-tooltip" style="background-color: #0033CC" data-color="#0033CC" title="UA blue" href="#"></a><a class="has-tooltip" style="background-color: #428BCA" data-color="#428BCA" title="Moderate blue" href="#"></a><a class="has-tooltip" style="background-color: #44AD8E" data-color="#44AD8E" title="Lime green" href="#"></a><a class="has-tooltip" style="background-color: #A8D695" data-color="#A8D695" title="Feijoa" href="#"></a><a class="has-tooltip" style="background-color: #5CB85C" data-color="#5CB85C" title="Slightly desaturated green" href="#"></a><a class="has-tooltip" style="background-color: #69D100" data-color="#69D100" title="Bright green" href="#"></a><a class="has-tooltip" style="background-color: #004E00" data-color="#004E00" title="Very dark lime green" href="#"></a><a class="has-tooltip" style="background-color: #34495E" data-color="#34495E" title="Very dark desaturated blue" href="#"></a><a class="has-tooltip" style="background-color: #7F8C8D" data-color="#7F8C8D" title="Dark grayish cyan" href="#"></a><a class="has-tooltip" style="background-color: #A295D6" data-color="#A295D6" title="Slightly desaturated blue" href="#"></a><a class="has-tooltip" style="background-color: #5843AD" data-color="#5843AD" title="Dark moderate blue" href="#"></a><a class="has-tooltip" style="background-color: #8E44AD" data-color="#8E44AD" title="Dark moderate violet" href="#"></a><a class="has-tooltip" style="background-color: #FFECDB" data-color="#FFECDB" title="Very pale orange" href="#"></a><a class="has-tooltip" style="background-color: #AD4363" data-color="#AD4363" title="Dark moderate pink" href="#"></a><a class="has-tooltip" style="background-color: #D10069" data-color="#D10069" title="Strong pink" href="#"></a><a class="has-tooltip" style="background-color: #CC0033" data-color="#CC0033" title="Strong red" href="#"></a><a class="has-tooltip" style="background-color: #FF0000" data-color="#FF0000" title="Pure red" href="#"></a><a class="has-tooltip" style="background-color: #D9534F" data-color="#D9534F" title="Soft red" href="#"></a><a class="has-tooltip" style="background-color: #D1D100" data-color="#D1D100" title="Strong yellow" href="#"></a><a class="has-tooltip" style="background-color: #F0AD4E" data-color="#F0AD4E" title="Soft orange" href="#"></a><a class="has-tooltip" style="background-color: #AD8D43" data-color="#AD8D43" title="Dark moderate orange" href="#"></a>
+</div>
+</div>
+<div class="dropdown-label-color-input">
+<div class="dropdown-label-color-preview js-dropdown-label-color-preview"></div>
+<input class="default-dropdown-input" id="new_label_color" placeholder="Assign custom color like #FF0000" type="text">
+</div>
+<div class="dropdown-label-input">
+<label>
+<input class="js-add-list" name="add_list" type="checkbox">
+<span>Add list</span>
+</label>
+</div>
+<div class="clearfix">
+<button class="btn btn-primary float-left js-new-label-btn" type="button">
+Create
+</button>
+<button class="btn btn-default float-right js-cancel-label-btn" type="button">
+Cancel
+</button>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+<weight :editable="true" :fetching="issue.isFetching &amp;&amp; issue.isFetching.weight" :id="issue.id" :loading="issue.isLoading &amp;&amp; issue.isLoading.weight" :weight="issue.weight" :weight-options='["None", 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]' weight-none-value="None"></weight>
+
+<div class="block subscriptions">
+<subscriptions :id="issue.id" :loading="issue.isFetching &amp;&amp; issue.isFetching.subscriptions" :subscribed="issue.subscribed"></subscriptions>
+</div>
+
+<remove-btn :issue="issue" :issue-update="issue.sidebarInfoEndpoint" :list="list" v-if="canRemove"></remove-btn>
+</div>
+</div>
+</aside>
+</transition>
+</board-sidebar>
+
+<board-add-issues-modal :issue-link-base="issueLinkBase" :project-id="31" :root-path="rootPath" empty-state-svg="http://test.host/assets/illustrations/issues-b4cb30d5143b86be2f594c7a384296dfba0b25199db87382c3746b79dafd6161.svg" label-path="http://test.host/frontend-fixtures/boards-project/-/labels.json?include_ancestor_groups=true" milestone-path="http://test.host/frontend-fixtures/boards-project/-/milestones.json" new-issue-path="http://test.host/frontend-fixtures/boards-project/issues/new"></board-add-issues-modal>
+</div>
+
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+</body>

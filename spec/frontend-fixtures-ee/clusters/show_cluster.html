@@ -1,0 +1,970 @@
+<body>
+
+
+<meta charset="utf-8">
+<meta content="IE=edge" http-equiv="X-UA-Compatible">
+<meta content="object" property="og:type">
+<meta content="GitLab" property="og:site_name">
+<meta content="Kubernetes Cluster · John Doe90 / project33" property="og:title">
+<meta content="GitLab Enterprise Edition" property="og:description">
+<meta content="http://test.host/assets/gitlab_logo-7ae504fe4f68fdebb3c2034e36621930cd36ea87924c11ff65dbcb8ed50dca58.png" property="og:image">
+<meta content="64" property="og:image:width">
+<meta content="64" property="og:image:height">
+<meta content="http://test.host/frontend-fixtures/project33/clusters/3" property="og:url">
+<meta content="summary" property="twitter:card">
+<meta content="Kubernetes Cluster · John Doe90 / project33" property="twitter:title">
+<meta content="GitLab Enterprise Edition" property="twitter:description">
+<meta content="http://test.host/assets/gitlab_logo-7ae504fe4f68fdebb3c2034e36621930cd36ea87924c11ff65dbcb8ed50dca58.png" property="twitter:image">
+
+<title>Kubernetes Cluster · John Doe90 / project33 · GitLab</title>
+<meta content="GitLab Enterprise Edition" name="description">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta content="origin-when-cross-origin" name="referrer">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="#474D57" name="theme-color">
+
+
+
+
+
+<meta content="http://test.host/assets/msapplication-tile-1196ec67452f618d39cdd85e2e3a542f76574c071051ae7effbfde01710eb17d.png" name="msapplication-TileImage">
+<meta content="#30353E" name="msapplication-TileColor">
+
+
+
+
+
+
+
+
+
+
+
+<header class="navbar navbar-gitlab navbar-expand-sm js-navbar" data-qa-selector="navbar">
+<a class="sr-only gl-accessibility" href="#content-body" tabindex="1">Skip to content</a>
+<div class="container-fluid">
+<div class="header-content">
+<div class="title-container">
+<h1 class="title">
+<a title="Dashboard" id="logo" href="http://test.host/"><svg width="24" height="24" class="tanuki-logo" viewbox="0 0 36 36">
+  <path class="tanuki-shape tanuki-left-ear" fill="#e24329" d="M2 14l9.38 9v-9l-4-12.28c-.205-.632-1.176-.632-1.38 0z"></path>
+  <path class="tanuki-shape tanuki-right-ear" fill="#e24329" d="M34 14l-9.38 9v-9l4-12.28c.205-.632 1.176-.632 1.38 0z"></path>
+  <path class="tanuki-shape tanuki-nose" fill="#e24329" d="M18,34.38 3,14 33,14 Z"></path>
+  <path class="tanuki-shape tanuki-left-eye" fill="#fc6d26" d="M18,34.38 11.38,14 2,14 6,25Z"></path>
+  <path class="tanuki-shape tanuki-right-eye" fill="#fc6d26" d="M18,34.38 24.62,14 34,14 30,25Z"></path>
+  <path class="tanuki-shape tanuki-left-cheek" fill="#fca326" d="M2 14L.1 20.16c-.18.565 0 1.2.5 1.56l17.42 12.66z"></path>
+  <path class="tanuki-shape tanuki-right-cheek" fill="#fca326" d="M34 14l1.9 6.16c.18.565 0 1.2-.5 1.56L18 34.38z"></path>
+</svg>
+
+<span class="logo-text d-none d-lg-block prepend-left-8">
+<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 617 169"><path d="M315.26 2.97h-21.8l.1 162.5h88.3v-20.1h-66.5l-.1-142.4M465.89 136.95c-5.5 5.7-14.6 11.4-27 11.4-16.6 0-23.3-8.2-23.3-18.9 0-16.1 11.2-23.8 35-23.8 4.5 0 11.7.5 15.4 1.2v30.1h-.1m-22.6-98.5c-17.6 0-33.8 6.2-46.4 16.7l7.7 13.4c8.9-5.2 19.8-10.4 35.5-10.4 17.9 0 25.8 9.2 25.8 24.6v7.9c-3.5-.7-10.7-1.2-15.1-1.2-38.2 0-57.6 13.4-57.6 41.4 0 25.1 15.4 37.7 38.7 37.7 15.7 0 30.8-7.2 36-18.9l4 15.9h15.4v-83.2c-.1-26.3-11.5-43.9-44-43.9M557.63 149.1c-8.2 0-15.4-1-20.8-3.5V70.5c7.4-6.2 16.6-10.7 28.3-10.7 21.1 0 29.2 14.9 29.2 39 0 34.2-13.1 50.3-36.7 50.3m9.2-110.6c-19.5 0-30 13.3-30 13.3v-21l-.1-27.8h-21.3l.1 158.5c10.7 4.5 25.3 6.9 41.2 6.9 40.7 0 60.3-26 60.3-70.9-.1-35.5-18.2-59-50.2-59M77.9 20.6c19.3 0 31.8 6.4 39.9 12.9l9.4-16.3C114.5 6 97.3 0 78.9 0 32.5 0 0 28.3 0 85.4c0 59.8 35.1 83.1 75.2 83.1 20.1 0 37.2-4.7 48.4-9.4l-.5-63.9V75.1H63.6v20.1h38l.5 48.5c-5 2.5-13.6 4.5-25.3 4.5-32.2 0-53.8-20.3-53.8-63-.1-43.5 22.2-64.6 54.9-64.6M231.43 2.95h-21.3l.1 27.3v94.3c0 26.3 11.4 43.9 43.9 43.9 4.5 0 8.9-.4 13.1-1.2v-19.1c-3.1.5-6.4.7-9.9.7-17.9 0-25.8-9.2-25.8-24.6v-65h35.7v-17.8h-35.7l-.1-38.5M155.96 165.47h21.3v-124h-21.3v124M155.96 24.37h21.3V3.07h-21.3v21.3"></path></svg>
+
+</span>
+</a>
+</h1>
+<ul class="list-unstyled navbar-sub-nav">
+<li id="nav-projects-dropdown" class="home dropdown header-projects qa-projects-dropdown" data-track-label="projects_dropdown" data-track-event="click_dropdown" data-track-value="">
+<button class="btn" data-toggle="dropdown" type="button">
+Projects
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</button>
+<div class="dropdown-menu frequent-items-dropdown-menu">
+<div class="frequent-items-dropdown-container">
+<div class="frequent-items-dropdown-sidebar qa-projects-dropdown-sidebar">
+<ul>
+<li class=""><a class="qa-your-projects-link" href="http://test.host/dashboard/projects">Your projects
+</a></li>
+<li class=""><a href="http://test.host/dashboard/projects/starred">Starred projects
+</a></li>
+<li class=""><a href="http://test.host/explore">Explore projects
+</a></li>
+</ul>
+</div>
+<div class="frequent-items-dropdown-content">
+<div data-project-id="33" data-project-name="project33" data-project-namespace="John Doe90 / project33" data-project-web-url="http://test.host/frontend-fixtures/project33" data-user-name="user78" id="js-projects-dropdown"></div>
+</div>
+</div>
+
+</div>
+</li>
+<li id="nav-groups-dropdown" class="d-none d-md-block home dropdown header-groups qa-groups-dropdown" data-track-label="groups_dropdown" data-track-event="click_dropdown" data-track-value="">
+<button class="btn" data-toggle="dropdown" type="button">
+Groups
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</button>
+<div class="dropdown-menu frequent-items-dropdown-menu">
+<div class="frequent-items-dropdown-container">
+<div class="frequent-items-dropdown-sidebar qa-groups-dropdown-sidebar">
+<ul>
+<li class=""><a class="qa-your-groups-link" href="http://test.host/dashboard/groups">Your groups
+</a></li>
+<li class=""><a href="http://test.host/explore/groups">Explore groups
+</a></li>
+</ul>
+</div>
+<div class="frequent-items-dropdown-content">
+<div data-user-name="user78" id="js-groups-dropdown"></div>
+</div>
+</div>
+
+</div>
+</li>
+<li class="header-more dropdown">
+<a data-qa-selector="more_dropdown" data-toggle="dropdown" href="#">
+More
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a>
+<div class="dropdown-menu">
+<ul>
+<li class="d-md-none">
+<a href="http://test.host/dashboard/groups">Groups
+</a>
+</li>
+<li class=""><a href="http://test.host/dashboard/activity">Activity
+</a></li>
+<li class=""><a class="dashboard-shortcuts-milestones" href="http://test.host/dashboard/milestones">Milestones
+</a></li>
+<li class=""><a class="dashboard-shortcuts-snippets" data-qa-selector="snippets_link" href="http://test.host/dashboard/snippets">Snippets
+</a></li>
+<li class=""><a href="http://test.host/-/analytics">Analytics
+</a></li>
+<li class="dropdown">
+
+</li>
+<li class=""><a href="http://test.host/-/instance_statistics">Instance Statistics
+</a></li>
+<li class=""><a class="admin-icon qa-admin-area-link d-xl-none" href="http://test.host/admin">Admin Area
+</a></li>
+<li class=""><a class="d-lg-none lock-open-icon" href="http://test.host/admin/session/destroy">Leave Admin Mode
+</a></li>
+</ul>
+</div>
+</li>
+<li class="d-none d-xl-block"><a class="admin-icon qa-admin-area-link" title="Admin Area" aria-label="Admin Area" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/admin"><svg class="s18"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#admin"></use></svg>
+</a></li>
+<li class="d-none d-lg-block d-xl-block"><a title="Leave Admin Mode" aria-label="Leave Admin Mode" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/admin/session/destroy"><svg class="s18"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#lock-open"></use></svg>
+</a></li>
+<li class="hidden">
+<a class="dashboard-shortcuts-projects" href="http://test.host/dashboard/projects">Projects
+</a>
+</li>
+
+</ul>
+
+</div>
+<div class="navbar-collapse collapse">
+<ul class="nav navbar-nav">
+<li class="header-new dropdown" data-track-event="click_dropdown" data-track-label="new_dropdown" data-track-value="">
+<a class="header-new-dropdown-toggle has-tooltip qa-new-menu-toggle" id="js-onboarding-new-project-link" title="New..." ref="tooltip" aria-label="New..." data-toggle="dropdown" data-placement="bottom" data-container="body" data-display="static" href="http://test.host/projects/new"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#plus-square"></use></svg>
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li class="dropdown-bold-header">
+This project
+</li>
+<li><a href="http://test.host/frontend-fixtures/project33/issues/new">New issue</a></li>
+<li><a href="http://test.host/frontend-fixtures/project33/merge_requests/new">New merge request</a></li>
+<li><a href="http://test.host/frontend-fixtures/project33/snippets/new">New snippet</a></li>
+<li class="divider">
+<li class="dropdown-bold-header">GitLab</li>
+<li><a class="qa-global-new-project-link" href="http://test.host/projects/new">New project</a></li>
+<li><a href="http://test.host/groups/new">New group</a></li>
+<li><a class="qa-global-new-snippet-link" href="http://test.host/snippets/new">New snippet</a></li>
+</ul>
+</div>
+</li>
+
+<li class="nav-item d-none d-lg-block m-auto">
+<div class="search search-form" data-track-event="activate_form_input" data-track-label="navbar_search" data-track-value="">
+<form class="form-inline" action="http://test.host/search" accept-charset="UTF-8" method="get">
+<input name="utf8" type="hidden" value="✓"><div class="search-input-container">
+<div class="search-input-wrap">
+<div class="dropdown" data-url="http://test.host/search/autocomplete">
+<input type="search" name="search" id="search" placeholder="Search or jump to…" class="search-input dropdown-menu-toggle no-outline js-search-dashboard-options" spellcheck="false" tabindex="1" autocomplete="off" data-issues-path="http://test.host/dashboard/issues" data-mr-path="http://test.host/dashboard/merge_requests" data-qa-selector="search_term_field" aria-label="Search or jump to…">
+<button class="hidden js-dropdown-search-toggle" data-toggle="dropdown" type="button"></button>
+<div class="dropdown-menu dropdown-select js-dashboard-search-options">
+<div class="dropdown-content">
+<ul>
+<li class="dropdown-menu-empty-item">
+<a>
+Loading...
+</a>
+</li>
+</ul>
+</div>
+<div class="dropdown-loading"><i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin"></i></div>
+</div>
+<svg class="s16 search-icon"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#search"></use></svg>
+<svg class="s16 clear-icon js-clear-input"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+</div>
+</div>
+</div>
+<input type="hidden" name="group_id" id="group_id" class="js-search-group-options">
+<input type="hidden" name="project_id" id="search_project_id" value="33" class="js-search-project-options" data-project-path="project33" data-name="project33" data-issues-path="http://test.host/frontend-fixtures/project33/issues" data-mr-path="http://test.host/frontend-fixtures/project33/merge_requests" data-issues-disabled="false">
+<input type="hidden" name="search_code" id="search_code" value="true">
+<input type="hidden" name="repository_ref" id="repository_ref">
+<input type="hidden" name="nav_source" id="nav_source" value="navbar">
+<noscript><button name="button" type="submit">Search</button></noscript>
+<div class="search-autocomplete-opts hide" data-autocomplete-path="http://test.host/search/autocomplete" data-autocomplete-project-id="33"></div>
+</form>
+</div>
+
+</li>
+<li class="nav-item d-inline-block d-lg-none">
+<a title="Search" aria-label="Search" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/search?project_id=33"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#search"></use></svg>
+</a>
+</li>
+<li class="user-counter"><a title="Issues" class="dashboard-shortcuts-issues" aria-label="Issues" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/issues?assignee_username=user78"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#issues"></use></svg>
+<span class="badge badge-pill green-badge hidden issues-count">
+0
+</span>
+</a></li>
+<li class="user-counter"><a title="Merge requests" class="dashboard-shortcuts-merge_requests" aria-label="Merge requests" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/merge_requests?assignee_username=user78"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#git-merge"></use></svg>
+<span class="badge badge-pill hidden merge-requests-count">
+0
+</span>
+</a></li>
+<li class="user-counter"><a title="To-Do List" aria-label="To-Do List" class="shortcuts-todos" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/todos"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#todo-done"></use></svg>
+<span class="badge badge-pill hidden todos-count">
+0
+</span>
+</a></li>
+<li class="nav-item header-help dropdown d-none d-md-block">
+<a class="header-help-dropdown-toggle" data-toggle="dropdown" href="http://test.host/help"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#question"></use></svg>
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li>
+<a href="http://test.host/help">Help</a>
+</li>
+<li>
+<a href="https://about.gitlab.com/getting-help/">Support</a>
+</li>
+
+<li class="divider">
+<li>
+<a href="https://about.gitlab.com/submit-feedback">Submit feedback</a>
+</li>
+<li>
+
+</li>
+
+</ul>
+
+</div>
+</li>
+<li class="dropdown header-user nav-item" data-qa-selector="user_menu" data-track-event="click_dropdown" data-track-label="profile_dropdown" data-track-value="">
+<a class="header-user-dropdown-toggle" data-toggle="dropdown" href="http://test.host/user78"><img width="23" height="23" class="header-user-avatar qa-user-avatar lazy" data-src="https://www.gravatar.com/avatar/d3e12e6ba98d831e2ef9f7dccad98a8e?s=46&amp;d=identicon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li class="current-user">
+<div class="user-name bold">
+John Doe89
+</div>
+@user78
+</li>
+<li class="divider">
+<li>
+<div class="js-set-status-modal-trigger" data-has-status="false"></div>
+</li>
+<li>
+<a class="profile-link" data-user="user78" href="http://test.host/user78">Profile</a>
+</li>
+<li>
+<a data-qa-selector="settings_link" href="http://test.host/profile">Settings</a>
+</li>
+<li class="divider d-md-none">
+<li class="d-md-none">
+<a href="http://test.host/help">Help</a>
+</li>
+<li class="d-md-none">
+<a href="https://about.gitlab.com/getting-help/">Support</a>
+</li>
+
+<li class="d-md-none">
+<a href="https://about.gitlab.com/submit-feedback">Submit feedback</a>
+</li>
+<li class="d-md-none">
+
+</li>
+
+<li class="divider">
+<li>
+<a class="sign-out-link" data-qa-selector="sign_out_link" href="http://test.host/users/sign_out">Sign out</a>
+</li>
+</ul>
+
+</div>
+</li>
+</ul>
+</div>
+<button class="navbar-toggler d-block d-sm-none" type="button">
+<span class="sr-only">Toggle navigation</span>
+<svg class="s12 more-icon js-navbar-toggle-right"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#ellipsis_h"></use></svg>
+<svg class="s12 close-icon js-navbar-toggle-left"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+</button>
+</div>
+</div>
+</header>
+<div class="js-set-status-modal-wrapper" data-current-emoji="" data-current-message=""></div>
+
+<div class="layout-page page-with-contextual-sidebar">
+<div class="nav-sidebar">
+<div class="nav-sidebar-inner-scroll">
+<div class="context-header">
+<a title="project33" href="http://test.host/frontend-fixtures/project33"><div class="avatar-container rect-avatar s40 project-avatar">
+<div class="avatar s40 avatar-tile identicon bg6">P</div>
+</div>
+<div class="sidebar-context-title">
+project33
+</div>
+</a>
+</div>
+<ul class="sidebar-top-level-items">
+<li class="home">
+<a class="shortcuts-project rspec-project-link" data-qa-selector="project_link" href="http://test.host/frontend-fixtures/project33"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#home"></use></svg>
+</div>
+<span class="nav-item-name">
+Project overview
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/project33"><strong class="fly-out-top-item-name">
+Project overview
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="Project details" class="shortcuts-project" href="http://test.host/frontend-fixtures/project33"><span>Details</span>
+</a></li>
+<li class=""><a title="Activity" class="shortcuts-project-activity" data-qa-selector="activity_link" href="http://test.host/frontend-fixtures/project33/activity"><span>Activity</span>
+</a></li>
+<li class=""><a title="Releases" class="shortcuts-project-releases" href="http://test.host/frontend-fixtures/project33/-/releases"><span>Releases</span>
+</a></li>
+<li class=""><a title="Cycle Analytics" class="shortcuts-project-cycle-analytics" href="http://test.host/frontend-fixtures/project33/-/cycle_analytics"><span>Cycle Analytics</span>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-tree qa-project-menu-repo" href="http://test.host/frontend-fixtures/project33/tree/master"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#doc-text"></use></svg>
+</div>
+<span class="nav-item-name" id="js-onboarding-repo-link">
+Repository
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/project33/tree/master"><strong class="fly-out-top-item-name">
+Repository
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a href="http://test.host/frontend-fixtures/project33/tree/master">Files
+</a></li>
+<li class=""><a id="js-onboarding-commits-link" href="http://test.host/frontend-fixtures/project33/commits/master">Commits
+</a></li>
+<li class=""><a class="qa-branches-link" id="js-onboarding-branches-link" href="http://test.host/frontend-fixtures/project33/-/branches">Branches
+</a></li>
+<li class=""><a href="http://test.host/frontend-fixtures/project33/-/tags">Tags
+</a></li>
+<li class=""><a href="http://test.host/frontend-fixtures/project33/-/graphs/master">Contributors
+</a></li>
+<li class=""><a href="http://test.host/frontend-fixtures/project33/-/network/master">Graph
+</a></li>
+<li class=""><a href="http://test.host/frontend-fixtures/project33/compare?from=master&amp;to=master">Compare
+</a></li>
+<li class=""><a href="http://test.host/frontend-fixtures/project33/-/graphs/master/charts">Charts
+</a></li>
+<li class=""><a data-qa-selector="path_locks_link" href="http://test.host/frontend-fixtures/project33/path_locks">Locked Files
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-issues qa-issues-item" href="http://test.host/frontend-fixtures/project33/issues"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#issues"></use></svg>
+</div>
+<span class="nav-item-name" id="js-onboarding-issues-link">
+Issues
+</span>
+<span class="badge badge-pill count issue_counter">
+0
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/project33/issues"><strong class="fly-out-top-item-name">
+Issues
+</strong>
+<span class="badge badge-pill count issue_counter fly-out-badge">
+0
+</span>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="Issues" href="http://test.host/frontend-fixtures/project33/issues"><span>
+List
+</span>
+</a></li>
+<li class=""><a title="Boards" data-qa-selector="issue_boards_link" href="http://test.host/frontend-fixtures/project33/-/boards"><span>
+Boards
+</span>
+</a></li>
+<li class=""><a title="Labels" class="qa-labels-link" href="http://test.host/frontend-fixtures/project33/-/labels"><span>
+Labels
+</span>
+</a></li>
+<li class=""><a title="Milestones" class="qa-milestones-link" href="http://test.host/frontend-fixtures/project33/-/milestones"><span>
+Milestones
+</span>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-merge_requests" data-qa-selector="merge_requests_link" href="http://test.host/frontend-fixtures/project33/merge_requests"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#git-merge"></use></svg>
+</div>
+<span class="nav-item-name" id="js-onboarding-mr-link">
+Merge Requests
+</span>
+<span class="badge badge-pill count merge_counter js-merge-counter">
+0
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/project33/merge_requests"><strong class="fly-out-top-item-name">
+Merge Requests
+</strong>
+<span class="badge badge-pill count merge_counter js-merge-counter fly-out-badge">
+0
+</span>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-pipelines qa-link-pipelines rspec-link-pipelines" data-qa-selector="ci_cd_link" href="http://test.host/frontend-fixtures/project33/pipelines"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#rocket"></use></svg>
+</div>
+<span class="nav-item-name" id="js-onboarding-pipelines-link">
+CI / CD
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/project33/pipelines"><strong class="fly-out-top-item-name">
+CI / CD
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="Pipelines" class="shortcuts-pipelines" href="http://test.host/frontend-fixtures/project33/pipelines"><span>
+Pipelines
+</span>
+</a></li>
+<li class=""><a title="Jobs" class="shortcuts-builds" href="http://test.host/frontend-fixtures/project33/-/jobs"><span>
+Jobs
+</span>
+</a></li>
+<li class=""><a title="Artifacts" class="shortcuts-builds" href="http://test.host/frontend-fixtures/project33/-/artifacts"><span>
+Artifacts
+</span>
+</a></li>
+<li class=""><a title="Schedules" class="shortcuts-builds" href="http://test.host/frontend-fixtures/project33/pipeline_schedules"><span>
+Schedules
+</span>
+</a></li>
+<li class=""><a title="Charts" class="shortcuts-pipelines-charts" href="http://test.host/frontend-fixtures/project33/pipelines/charts"><span>
+Charts
+</span>
+</a></li>
+</ul>
+</li>
+<li class="active">
+<a class="shortcuts-operations qa-link-operations" href="http://test.host/frontend-fixtures/project33/environments/metrics"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#cloud-gear"></use></svg>
+</div>
+<span class="nav-item-name">
+Operations
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item active"><a href="http://test.host/frontend-fixtures/project33/environments/metrics"><strong class="fly-out-top-item-name">
+Operations
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="Metrics" class="shortcuts-metrics" href="http://test.host/frontend-fixtures/project33/environments/metrics"><span>
+Metrics
+</span>
+</a></li>
+<li class=""><a title="Environments" class="shortcuts-environments qa-operations-environments-link" href="http://test.host/frontend-fixtures/project33/environments"><span>
+Environments
+</span>
+</a></li>
+<li class=""><a title="Error Tracking" class="shortcuts-tracking qa-operations-tracking-link" href="http://test.host/frontend-fixtures/project33/error_tracking"><span>
+Error Tracking
+</span>
+</a></li>
+<li class=""><a title="Serverless" href="http://test.host/frontend-fixtures/project33/serverless/functions"><span>
+Serverless
+</span>
+</a></li>
+<li class="active">
+<a title="Kubernetes" class="shortcuts-kubernetes" href="http://test.host/frontend-fixtures/project33/clusters"><span>
+Kubernetes
+</span>
+<div class="feature-highlight js-feature-highlight" data-container="body" data-dismiss-endpoint="http://test.host/-/user_callouts" data-highlight="gke_cluster_integration" data-placement="right" data-toggle="popover" data-trigger="manual" disabled></div>
+</a><div class="feature-highlight-popover-content">
+<img class="feature-highlight-illustration" alt="Kubernetes popover" src="http://test.host/assets/illustrations/cluster_popover-889b8203a86c86d1fd3f0b181e588071d00cd9c77590fd87dba4d19035e1c0df.svg">
+<div class="feature-highlight-popover-sub-content">
+<p>Allows you to add and manage Kubernetes clusters.</p>
+<p>
+Protip:
+<a href="http://test.host/help/topics/autodevops/index.md">Auto DevOps</a>
+<span>uses Kubernetes clusters to deploy your code!</span>
+</p>
+<hr>
+<button class="btn btn-success btn-sm dismiss-feature-highlight" type="button">
+<span>Got it!</span>
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#thumb-up"></use></svg>
+</button>
+</div>
+</div>
+</li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-wiki" data-qa-selector="wiki_link" href="http://test.host/frontend-fixtures/project33/wikis/home"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#book"></use></svg>
+</div>
+<span class="nav-item-name">
+Wiki
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/project33/wikis/home"><strong class="fly-out-top-item-name">
+Wiki
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-snippets" href="http://test.host/frontend-fixtures/project33/snippets"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#snippet"></use></svg>
+</div>
+<span class="nav-item-name">
+Snippets
+</span>
+</a><ul class="sidebar-sub-level-items is-fly-out-only">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/project33/snippets"><strong class="fly-out-top-item-name">
+Snippets
+</strong>
+</a></li>
+</ul>
+</li>
+<li class="">
+<a class="shortcuts-tree" href="http://test.host/frontend-fixtures/project33/edit"><div class="nav-icon-container">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#settings"></use></svg>
+</div>
+<span class="nav-item-name qa-settings-item" id="js-onboarding-settings-link">
+Settings
+</span>
+</a><ul class="sidebar-sub-level-items">
+<li class="fly-out-top-item"><a href="http://test.host/frontend-fixtures/project33/edit"><strong class="fly-out-top-item-name">
+Settings
+</strong>
+</a></li>
+<li class="divider fly-out-top-item">
+<li class=""><a title="General" class="qa-general-settings-link" href="http://test.host/frontend-fixtures/project33/edit"><span>
+General
+</span>
+</a></li>
+<li class=""><a title="Members" class="qa-link-members-settings" id="js-onboarding-settings-members-link" href="http://test.host/frontend-fixtures/project33/-/project_members"><span>
+Members
+</span>
+</a></li>
+<li class=""><a title="Integrations" data-qa-selector="integrations_settings_link" href="http://test.host/frontend-fixtures/project33/-/settings/integrations"><span>
+Integrations
+</span>
+</a></li>
+<li class=""><a title="Repository" href="http://test.host/frontend-fixtures/project33/-/settings/repository"><span>
+Repository
+</span>
+</a></li>
+<li class=""><a title="CI / CD" href="http://test.host/frontend-fixtures/project33/-/settings/ci_cd"><span>
+CI / CD
+</span>
+</a></li>
+<li class=""><a title="Operations" href="http://test.host/frontend-fixtures/project33/-/settings/operations">Operations
+</a></li>
+<li class=""><a title="Audit Events" data-qa-selector="audit_events_settings_link" href="http://test.host/frontend-fixtures/project33/audit_events">Audit Events
+</a></li>
+</ul>
+</li>
+<a class="toggle-sidebar-button js-toggle-sidebar qa-toggle-sidebar rspec-toggle-sidebar" role="button" title="Toggle sidebar" type="button">
+<svg class="icon-angle-double-left"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-double-left"></use></svg>
+<svg class="icon-angle-double-right"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-double-right"></use></svg>
+<span class="collapse-text">Collapse sidebar</span>
+</a>
+<button name="button" type="button" class="close-nav-button"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+<span class="collapse-text">Close sidebar</span>
+</button>
+<li class="hidden">
+<a title="Activity" class="shortcuts-project-activity" href="http://test.host/frontend-fixtures/project33/activity"><span>
+Activity
+</span>
+</a>
+</li>
+<li class="hidden">
+<a title="Network" class="shortcuts-network" href="http://test.host/frontend-fixtures/project33/-/network/master">Graph
+</a>
+</li>
+<li class="hidden">
+<a title="Charts" class="shortcuts-repository-charts" href="http://test.host/frontend-fixtures/project33/-/graphs/master/charts">Charts
+</a>
+</li>
+<li class="hidden">
+<a class="shortcuts-new-issue" href="http://test.host/frontend-fixtures/project33/issues/new">Create a new issue
+</a>
+</li>
+<li class="hidden">
+<a title="Jobs" class="shortcuts-builds" href="http://test.host/frontend-fixtures/project33/-/jobs">Jobs
+</a>
+</li>
+<li class="hidden">
+<a title="Commits" class="shortcuts-commits" href="http://test.host/frontend-fixtures/project33/commits/master">Commits
+</a>
+</li>
+<li class="hidden">
+<a title="Issue Boards" class="shortcuts-issue-boards" href="http://test.host/frontend-fixtures/project33/-/boards">Issue Boards</a>
+</li>
+</ul>
+</div>
+</div>
+
+<div class="content-wrapper">
+
+<div class="mobile-overlay"></div>
+<div class="alert-wrapper">
+
+
+
+
+
+
+<nav class="breadcrumbs container-fluid container-limited limit-container-width" role="navigation">
+<div class="breadcrumbs-container">
+<button name="button" type="button" class="toggle-mobile-nav"><span class="sr-only">Open sidebar</span>
+<i aria-hidden="true" data-hidden="true" class="fa fa-bars"></i>
+</button><div class="breadcrumbs-links js-title-container">
+<ul class="list-unstyled breadcrumbs-list js-breadcrumbs-list">
+<li>
+<a href="http://test.host/frontend-fixtures">John Doe90</a><svg class="s8 breadcrumbs-list-angle"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-right"></use></svg>
+</li> <li>
+<a href="http://test.host/frontend-fixtures/project33"><span class="breadcrumb-item-text js-breadcrumb-item-text">project33</span></a><svg class="s8 breadcrumbs-list-angle"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-right"></use></svg>
+</li>
+<li>
+<a href="http://test.host/frontend-fixtures/project33/clusters">Kubernetes Clusters</a><svg class="s8 breadcrumbs-list-angle"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-right"></use></svg>
+</li>
+
+<li>
+<h2 class="breadcrumbs-sub-title"><a href="http://test.host/frontend-fixtures/project33/clusters/3">test-cluster</a></h2>
+</li>
+</ul>
+</div>
+
+</div>
+</nav>
+
+<div class="d-flex"></div>
+</div>
+<div class="container-fluid container-limited limit-container-width">
+<div class="content" id="content-body">
+<div class="flash-container flash-container-page sticky">
+</div>
+
+<div class="edit-cluster-form js-edit-cluster-form" data-cloud-run-help-path="http://test.host/help/user/project/clusters/index.md#cloud-run-on-gke" data-cluster-id="3" data-cluster-status="created" data-cluster-type="project_type" data-clusters-help-path="http://test.host/help/user/project/clusters/index.md#deploying-to-a-kubernetes-cluster" data-deploy-boards-help-path="http://test.host/help/user/project/deploy_boards.html#enabling-deploy-boards" data-environments-help-path="http://test.host/help/ci/environments#defining-environments" data-has-rbac="true" data-help-path="http://test.host/help/user/project/clusters/index.md#installing-applications" data-ingress-dns-help-path="http://test.host/help/user/project/clusters/index.md#manually-determining-the-external-endpoint" data-ingress-help-path="http://test.host/help/user/project/clusters/index.md#getting-the-external-endpoint" data-install-cert-manager-path="http://test.host/frontend-fixtures/project33/clusters/3/applications/cert_manager" data-install-crossplane-path="http://test.host/frontend-fixtures/project33/clusters/3/applications/crossplane" data-install-elastic-stack-path="http://test.host/frontend-fixtures/project33/clusters/3/applications/elastic_stack" data-install-helm-path="http://test.host/frontend-fixtures/project33/clusters/3/applications/helm" data-install-ingress-path="http://test.host/frontend-fixtures/project33/clusters/3/applications/ingress" data-install-jupyter-path="http://test.host/frontend-fixtures/project33/clusters/3/applications/jupyter" data-install-knative-path="http://test.host/frontend-fixtures/project33/clusters/3/applications/knative" data-install-prometheus-path="http://test.host/frontend-fixtures/project33/clusters/3/applications/prometheus" data-install-runner-path="http://test.host/frontend-fixtures/project33/clusters/3/applications/runner" data-manage-prometheus-path="http://test.host/frontend-fixtures/project33/-/services/prometheus/edit" data-pre-installed-knative="false" data-provider-type="gcp" data-status-path="http://test.host/frontend-fixtures/project33/clusters/3/cluster_status.json" data-toggle-status="true" data-update-knative-path="http://test.host/frontend-fixtures/project33/clusters/3/applications/knative">
+<div class="js-cluster-application-notice">
+<div class="flash-container"></div>
+</div>
+<h4>test-cluster</h4>
+<div class="hidden js-cluster-error bs-callout bs-callout-danger" role="alert">
+Something went wrong while creating your Kubernetes cluster
+<p class="js-error-reason"></p>
+</div>
+<div class="hidden js-cluster-creating bs-callout bs-callout-info" role="alert">
+<span aria-label="Loading" class="spinner spinner-dark spinner-sm"></span>
+<span class="prepend-left-4">Kubernetes cluster is being created...</span>
+</div>
+<div class="hidden row js-cluster-api-unreachable bs-callout bs-callout-warning" role="alert">
+<div class="col-11">
+Your cluster API is unreachable. Please ensure your API URL is correct.
+</div>
+<div class="col-1 p-0">
+<button class="js-close-banner close cluster-application-banner-close h-100 m-0">×</button>
+</div>
+</div>
+<div class="hidden js-cluster-authentication-failure row js-cluster-api-unreachable bs-callout bs-callout-warning" role="alert">
+<div class="col-11">
+There was a problem authenticating with your cluster. Please ensure your CA Certificate and Token are valid.
+</div>
+<div class="col-1 p-0">
+<button class="js-close-banner close cluster-application-banner-close h-100 m-0">×</button>
+</div>
+</div>
+<div class="hidden js-cluster-success bs-callout bs-callout-success" role="alert">
+Kubernetes cluster was successfully created.
+</div>
+
+<section id="cluster-integration">
+<form class="cluster_integration_form" id="edit_cluster" action="http://test.host/frontend-fixtures/project33/clusters/3" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch">
+<div class="form-group">
+<h5>Integration status</h5>
+<label class="append-bottom-0 js-cluster-enable-toggle-area">
+<button aria-label="Toggle Kubernetes cluster" class="js-project-feature-toggle project-feature-toggle is-checked " type="button">
+<input class="js-project-feature-toggle-input" type="hidden" value="true" name="cluster[enabled]" id="cluster_enabled">
+<span class="toggle-icon">
+<svg class="s16 toggle-icon-svg toggle-status-checked"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#status_success_borderless"></use></svg>
+<svg class="s16 toggle-icon-svg toggle-status-unchecked"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#status_failed_borderless"></use></svg>
+</span>
+</button>
+<div class="form-text text-muted">Enable or disable GitLab's connection to your Kubernetes cluster.</div>
+</label>
+</div>
+<div class="form-group">
+<h5>Environment scope</h5>
+<input type="text" name="environment_scope" id="environment_scope" value="*" class="col-md-6 form-control disabled" placeholder="Environment scope" disabled>
+<div class="form-text text-muted">
+<code>*</code>
+ is the default environment scope for this cluster. This means that all jobs, regardless of their environment, will use this cluster. <a href="http://test.host/help/user/project/clusters/index#base-domain" target="_blank" rel="noopener noreferrer">More information</a>
+</div>
+</div>
+<div class="form-group">
+<h5>Base domain</h5>
+<input class="col-md-6 form-control js-select-on-focus qa-base-domain" type="text" name="cluster[base_domain]" id="cluster_base_domain">
+<div class="form-text text-muted">
+Specifying a domain will allow you to use Auto Review Apps and Auto Deploy stages for <a href="http://test.host/help/topics/autodevops/index" target="_blank" rel="noopener noreferrer">Auto DevOps</a>. The domain should have a wildcard DNS configured matching the domain.
+<span class="js-ingress-domain-help-text hide">
+Alternatively
+<code class="js-ingress-domain-snippet">.nip.io</code>
+ can be used instead of a custom domain.
+</span>
+ <a href="http://test.host/help/user/project/clusters/index#pointing-your-dns-at-the-external-endpoint" target="_blank" rel="noopener noreferrer">More information</a>.
+</div>
+</div>
+<div class="form-group">
+<input type="submit" name="commit" value="Save changes" class="btn btn-success qa-save-domain" data-disable-with="Save changes">
+</div>
+</form>
+</section>
+
+<div class="cluster-applications-table" id="js-cluster-applications"></div>
+<section class="expanded settings" id="js-cluster-details">
+<div class="settings-header">
+<h4>Kubernetes cluster details</h4>
+<button class="btn js-settings-toggle" type="button">
+Collapse
+</button>
+<p>See and edit the details for your Kubernetes cluster</p>
+</div>
+<div class="settings-content">
+<form class="gl-show-field-errors" id="edit_cluster" role="form" action="http://test.host/frontend-fixtures/project33/clusters/3" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch"><div class="form-group">
+<label class="label-bold required" for="cluster_name">Kubernetes cluster name</label><div class="input-group gl-field-error-anchor">
+<input class="form-control js-select-on-focus cluster-name" required="required" title="Cluster name is required." readonly type="text" value="test-cluster" name="cluster[name]" id="cluster_name"><div class="input-group-append"><button class="btn input-group-text btn-default" data-toggle="tooltip" data-placement="bottom" data-container="body" data-title="Copy Kubernetes cluster name" data-class="input-group-text btn-default" data-clipboard-text="test-cluster" type="button" title="Copy Kubernetes cluster name" aria-label="Copy Kubernetes cluster name"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#duplicate"></use></svg></button></div>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold required" for="cluster_platform_kubernetes_attributes_api_url">API URL</label><div class="input-group gl-field-error-anchor">
+<input class="form-control js-select-on-focus" required="required" title="API URL should be a valid http/https url." readonly type="text" value="https://kubernetes.example.com" name="cluster[platform_kubernetes_attributes][api_url]" id="cluster_platform_kubernetes_attributes_api_url"><div class="input-group-append"><button class="btn input-group-text btn-default" data-toggle="tooltip" data-placement="bottom" data-container="body" data-title="Copy API URL" data-class="input-group-text btn-default" data-clipboard-text="https://kubernetes.example.com" type="button" title="Copy API URL" aria-label="Copy API URL"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#duplicate"></use></svg></button></div>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold" for="cluster_platform_kubernetes_attributes_ca_cert">CA Certificate</label><div class="input-group gl-field-error-anchor">
+<textarea class="form-control js-select-on-focus" rows="10" readonly placeholder="Certificate Authority bundle (PEM format)" name="cluster[platform_kubernetes_attributes][ca_cert]" id="cluster_platform_kubernetes_attributes_ca_cert">
+-----BEGIN CERTIFICATE-----
+MIIFtTCCA52gAwIBAgIJAOutg3Kf2y5dMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
+BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX
+aWRnaXRzIFB0eSBMdGQwHhcNMTcxMDI5MTgxOTU3WhcNMTgxMDI5MTgxOTU3WjBF
+MQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50
+ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIIC
+CgKCAgEAvQysroM3TLxaavadSPnFIltrYnxCnU4PvCR8971HMWXsq7Z4ShU4BbbE
+8yp7oUFjulSwW6DhdIvnQb8ihLKictLmrA0isQqrD/iNpKZ6/lI4DGWw4QzrvMnW
+V4yy2QZNpg9tzQHd4+xkeeIoG23RijDU/sPd5dqxF+rPHBfCVInmYvSzLvMhneNj
+Bt6gV02gU9e9hsnMatsDvEbvWKp7wcbPot0nWrfZulx2QAWyXy+zG9mJQUds6yc0
+4agAeT9JEb/xtRgR/kS0aUHSGnfSnhZiEn17s0PhTmbu7qSHgzgB+7oJrC9jPoUh
+S2Wo3n0xykAjHrA8wC/Ddw3L38S41VQ58GEfNchistPswyMmXo/Oenv9P3s/kCOI
+fndiksFNdqVo51y9Vjngj589hpOseFDyKmWPIEQZ9kxW/crjP6RZWWLHgz26KtxZ
+uJaoYL8VBbYfrk/bucw0Ma2GEOp8rTsBE7SvgejXZa78q+381Kzc/utW6VwSXqzY
+xeIitft0rXi17SZ+XoiTkIXtHn0ZwMtOXNDBADTpFmKa6wVACQilvcpOYD8gUHyH
+pB+EDRdST3M4Fiq1MBAVhk8Lj3tHSJ/1ymeF1PWSu57AnJlzerzq2fcfPotNNd37
+ZPNkPh0kxPLwxbAyrHflzx9qVVdI1irY9055mNSnhzlec4qJ9cECAwEAAaOBpzCB
+pDAdBgNVHQ4EFgQUnVa5dYPoIG/3+qXml0bX8+N16GwwdQYDVR0jBG4wbIAUnVa5
+dYPoIG/3+qXml0bX8+N16GyhSaRHMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpT
+b21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGSCCQDr
+rYNyn9suXTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4ICAQAUg4cyxXi1
+VR8ejTpaAruRyJ1pEG9Kc3kiIRXODy60z3hJXnx9LkScPkWGiuL5XacfZ2rMd4bw
+oVXIyi8U1UHWfAH8EZdrFKkU92jCiL5soHUONxLAvQEJ/FTR/qijrpzLCxXBdVQE
+xFEDWUu6rxLFyjEwzwnRTLgpjR606fdb7qXHkuAMvZ/ezJj8j97hok3Odpn4lr2H
+6hMTpK7HmDBX+kmdJJ+yBrm9hG1Pzpl7QU0dkxZ+qJNFjYMLnziiTwkv0c5ZaA9E
+NykZUcOv3Sjb6spu1A/E2BSq4WTjkIjrogFlfimE1vmUmObTRJOqUB0Vky1kHEwN
+pg7QqIJQmof1EAIaSM/YpUWXyumBwGLDUEud1JUz05In9Q4IZjEwZSJwbQW4fUia
+A93m9rk3Lw3xsFcaUdPMFIXk0rPoF1IgmV/oqb0gK95lOWRLbN+AV8qpKPpcKXOc
+TkIdFE47ZisEDhIdF6wC1izEMLeMEsPAO7/Y6MY4nRxsinSe95lRaw+yQpzx+mvJ
+Q7n1kiHI9Pd5M3+CiQda0d/GO1o5ORJnUGJRvr9HKuNmE7Lif0As/N0AlywjzE7A
+6Z8AEiWyRV1ffshu1k2UKmzvZuZeGGKRtrIjbJIRAtpRVtVZZGzhq5/sojCLoJ+u
+texqFBUo/4mFRZa4pDItUdyOlDy2/LO/ag==
+-----END CERTIFICATE-----</textarea><div class="input-group-append"><button class="btn input-group-text btn-default" data-toggle="tooltip" data-placement="bottom" data-container="body" data-title="Copy CA Certificate" data-class="input-group-text btn-default" data-clipboard-text="-----BEGIN CERTIFICATE-----
+MIIFtTCCA52gAwIBAgIJAOutg3Kf2y5dMA0GCSqGSIb3DQEBBQUAMEUxCzAJBgNV
+BAYTAkFVMRMwEQYDVQQIEwpTb21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBX
+aWRnaXRzIFB0eSBMdGQwHhcNMTcxMDI5MTgxOTU3WhcNMTgxMDI5MTgxOTU3WjBF
+MQswCQYDVQQGEwJBVTETMBEGA1UECBMKU29tZS1TdGF0ZTEhMB8GA1UEChMYSW50
+ZXJuZXQgV2lkZ2l0cyBQdHkgTHRkMIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIIC
+CgKCAgEAvQysroM3TLxaavadSPnFIltrYnxCnU4PvCR8971HMWXsq7Z4ShU4BbbE
+8yp7oUFjulSwW6DhdIvnQb8ihLKictLmrA0isQqrD/iNpKZ6/lI4DGWw4QzrvMnW
+V4yy2QZNpg9tzQHd4+xkeeIoG23RijDU/sPd5dqxF+rPHBfCVInmYvSzLvMhneNj
+Bt6gV02gU9e9hsnMatsDvEbvWKp7wcbPot0nWrfZulx2QAWyXy+zG9mJQUds6yc0
+4agAeT9JEb/xtRgR/kS0aUHSGnfSnhZiEn17s0PhTmbu7qSHgzgB+7oJrC9jPoUh
+S2Wo3n0xykAjHrA8wC/Ddw3L38S41VQ58GEfNchistPswyMmXo/Oenv9P3s/kCOI
+fndiksFNdqVo51y9Vjngj589hpOseFDyKmWPIEQZ9kxW/crjP6RZWWLHgz26KtxZ
+uJaoYL8VBbYfrk/bucw0Ma2GEOp8rTsBE7SvgejXZa78q+381Kzc/utW6VwSXqzY
+xeIitft0rXi17SZ+XoiTkIXtHn0ZwMtOXNDBADTpFmKa6wVACQilvcpOYD8gUHyH
+pB+EDRdST3M4Fiq1MBAVhk8Lj3tHSJ/1ymeF1PWSu57AnJlzerzq2fcfPotNNd37
+ZPNkPh0kxPLwxbAyrHflzx9qVVdI1irY9055mNSnhzlec4qJ9cECAwEAAaOBpzCB
+pDAdBgNVHQ4EFgQUnVa5dYPoIG/3+qXml0bX8+N16GwwdQYDVR0jBG4wbIAUnVa5
+dYPoIG/3+qXml0bX8+N16GyhSaRHMEUxCzAJBgNVBAYTAkFVMRMwEQYDVQQIEwpT
+b21lLVN0YXRlMSEwHwYDVQQKExhJbnRlcm5ldCBXaWRnaXRzIFB0eSBMdGSCCQDr
+rYNyn9suXTAMBgNVHRMEBTADAQH/MA0GCSqGSIb3DQEBBQUAA4ICAQAUg4cyxXi1
+VR8ejTpaAruRyJ1pEG9Kc3kiIRXODy60z3hJXnx9LkScPkWGiuL5XacfZ2rMd4bw
+oVXIyi8U1UHWfAH8EZdrFKkU92jCiL5soHUONxLAvQEJ/FTR/qijrpzLCxXBdVQE
+xFEDWUu6rxLFyjEwzwnRTLgpjR606fdb7qXHkuAMvZ/ezJj8j97hok3Odpn4lr2H
+6hMTpK7HmDBX+kmdJJ+yBrm9hG1Pzpl7QU0dkxZ+qJNFjYMLnziiTwkv0c5ZaA9E
+NykZUcOv3Sjb6spu1A/E2BSq4WTjkIjrogFlfimE1vmUmObTRJOqUB0Vky1kHEwN
+pg7QqIJQmof1EAIaSM/YpUWXyumBwGLDUEud1JUz05In9Q4IZjEwZSJwbQW4fUia
+A93m9rk3Lw3xsFcaUdPMFIXk0rPoF1IgmV/oqb0gK95lOWRLbN+AV8qpKPpcKXOc
+TkIdFE47ZisEDhIdF6wC1izEMLeMEsPAO7/Y6MY4nRxsinSe95lRaw+yQpzx+mvJ
+Q7n1kiHI9Pd5M3+CiQda0d/GO1o5ORJnUGJRvr9HKuNmE7Lif0As/N0AlywjzE7A
+6Z8AEiWyRV1ffshu1k2UKmzvZuZeGGKRtrIjbJIRAtpRVtVZZGzhq5/sojCLoJ+u
+texqFBUo/4mFRZa4pDItUdyOlDy2/LO/ag==
+-----END CERTIFICATE-----" type="button" title="Copy CA Certificate" aria-label="Copy CA Certificate"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#duplicate"></use></svg></button></div>
+</div>
+</div>
+<div class="form-group">
+<label class="label-bold required" for="cluster_platform_kubernetes_attributes_token">Service Token</label><div class="input-group gl-field-error-anchor">
+<input type="password" class="form-control js-select-on-focus js-cluster-token" required="required" title="Service token is required." readonly value="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" name="cluster[platform_kubernetes_attributes][token]" id="cluster_platform_kubernetes_attributes_token"><div class="input-group-append">
+<button name="button" type="button" class="js-show-cluster-token btn btn-default">Show</button><button class="btn input-group-text btn-default" data-toggle="tooltip" data-placement="bottom" data-container="body" data-title="Copy Service Token" data-class="input-group-text btn-default" data-clipboard-text="aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" type="button" title="Copy Service Token" aria-label="Copy Service Token"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#duplicate"></use></svg></button>
+</div>
+</div>
+</div>
+<div class="form-group">
+<div class="form-check form-check-inline">
+<input name="cluster[platform_kubernetes_attributes][authorization_type]" disabled type="hidden" value="abac"><input disabled class="form-check-input" type="checkbox" value="rbac" checked name="cluster[platform_kubernetes_attributes][authorization_type]" id="cluster_platform_kubernetes_attributes_authorization_type"><label class="form-check-label label-bold" for="cluster_platform_kubernetes_attributes_authorization_type">RBAC-enabled cluster</label>
+</div>
+<div class="form-text text-muted">
+Enable this setting if using role-based access control (RBAC).
+This option will allow you to install applications on RBAC clusters.
+</div>
+</div>
+<div class="form-group">
+<div class="form-check">
+<input name="cluster[managed]" type="hidden" value="0"><input class="js-gl-managed form-check-input" type="checkbox" value="1" checked name="cluster[managed]" id="cluster_managed"><label class="form-check-label label-bold" for="cluster_managed">GitLab-managed cluster</label>
+</div>
+<div class="form-text text-muted">
+Allow GitLab to manage namespace and service accounts for this cluster.
+<a target="_blank" href="http://test.host/help/user/project/clusters/index.md#gitlab-managed-clusters">More information</a>
+</div>
+</div>
+<div class="js-namespace-prefixed">
+<div class="form-group">
+<label class="label-bold" for="cluster_platform_kubernetes_attributes_namespace">Project namespace prefix (optional, unique)</label><input class="form-control" type="text" name="cluster[platform_kubernetes_attributes][namespace]" id="cluster_platform_kubernetes_attributes_namespace"><small class="form-text text-muted">Choose a prefix to be used for your namespaces. Defaults to your project path. <a target="_blank" href="http://test.host/help/user/project/clusters/index.md#gitlab-managed-clusters">More information</a></small>
+</div>
+</div>
+<div class="js-namespace hidden">
+<div class="form-group">
+<label class="label-bold" for="cluster_platform_kubernetes_attributes_namespace">Project namespace (optional, unique)</label><input disabled class="form-control" type="text" name="cluster[platform_kubernetes_attributes][namespace]" id="cluster_platform_kubernetes_attributes_namespace"><small class="form-text text-muted">The namespace associated with your project. This will be used for deploy boards, pod logs, and Web terminals.</small>
+</div>
+</div>
+
+<input type="hidden" value="1" name="cluster[platform_kubernetes_attributes][id]" id="cluster_platform_kubernetes_attributes_id"><div class="form-group">
+<input type="submit" name="commit" value="Save changes" class="btn btn-success" data-disable-with="Save changes">
+</div>
+</form>
+</div>
+</section>
+<section class="expanded no-animate settings" id="js-cluster-advanced-settings">
+<div class="settings-header">
+<h4>Advanced settings</h4>
+<button class="btn js-settings-toggle" type="button">
+Collapse
+</button>
+<p>Advanced options on this Kubernetes cluster's integration</p>
+</div>
+<div class="settings-content" id="advanced-settings-section">
+<div class="append-bottom-20">
+<label class="append-bottom-10">
+Google Kubernetes Engine
+</label>
+<p>
+Manage your Kubernetes cluster by visiting <a target="_blank" rel="noopener noreferrer" href="https://console.cloud.google.com/kubernetes/clusters/details/us-central1-a/test-cluster">Google Kubernetes Engine</a>
+</p>
+</div>
+<form class="cluster_management_form" id="edit_cluster" action="http://test.host/frontend-fixtures/project33/clusters/3" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="patch"><h5>
+Cluster management project (alpha)
+</h5>
+<div class="form-group">
+<div class="form-text text-muted"></div>
+<input type="hidden" name="cluster[management_project_id]" id="cluster_management_project_id" class="hidden-filter-value ajax-project-select" toggle_class="js-project-search js-project-filter js-filter-submit" dropdown_class="dropdown-menu-selectable dropdown-menu-project js-filter-submit" placeholder="Select project" idattribute="id" data-order-by="last_activity_at" data-idattribute="id" data-simple-filter="true" data-allow-clear="true" data-include-groups="false" data-include-projects-in-subgroups="true" data-user-id="79">
+<div class="text-muted">
+A cluster management project can be used to run deployment jobs with Kubernetes <code>cluster-admin</code> privileges.
+<a target="_blank" href="http://test.host/help/user/clusters/management_project.md">More information</a>
+</div>
+</div>
+<div class="form-group">
+<input type="submit" name="commit" value="Save changes" class="btn btn-success qa-save-domain" data-disable-with="Save changes">
+</div>
+</form>
+<div class="sub-section form-group">
+<h4>
+Clear cluster cache
+</h4>
+<p>
+Clear the local cache of namespace and service accounts. This is necessary if your integration has become out of sync. The cache is repopulated during the next CI job that requires namespace and service accounts.
+</p>
+<a class="btn btn-primary" rel="nofollow" data-method="delete" href="http://test.host/frontend-fixtures/project33/clusters/3/clear_cache">Clear cluster cache</a>
+</div>
+<div class="sub-section form-group">
+<h4 class="text-danger">
+Remove Kubernetes cluster integration
+</h4>
+<p>
+Remove this Kubernetes cluster's configuration from this project. This will not delete your actual Kubernetes cluster.
+</p>
+<a class="btn btn-danger" data-confirm="Are you sure you want to remove this Kubernetes cluster's integration? This will not delete your actual Kubernetes cluster." rel="nofollow" data-method="delete" href="http://test.host/frontend-fixtures/project33/clusters/3">Remove integration</a>
+</div>
+
+</div>
+</section>
+
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+</body>

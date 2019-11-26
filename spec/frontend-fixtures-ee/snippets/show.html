@@ -1,0 +1,914 @@
+<body>
+
+
+<meta charset="utf-8">
+<meta content="IE=edge" http-equiv="X-UA-Compatible">
+<meta content="object" property="og:type">
+<meta content="GitLab" property="og:site_name">
+<meta content="snippet.md ($1) · Snippets" property="og:title">
+<meta content="GitLab Enterprise Edition" property="og:description">
+<meta content="http://test.host/assets/gitlab_logo-7ae504fe4f68fdebb3c2034e36621930cd36ea87924c11ff65dbcb8ed50dca58.png" property="og:image">
+<meta content="64" property="og:image:width">
+<meta content="64" property="og:image:height">
+<meta content="http://test.host/snippets/1" property="og:url">
+<meta content="summary" property="twitter:card">
+<meta content="snippet.md ($1) · Snippets" property="twitter:title">
+<meta content="GitLab Enterprise Edition" property="twitter:description">
+<meta content="http://test.host/assets/gitlab_logo-7ae504fe4f68fdebb3c2034e36621930cd36ea87924c11ff65dbcb8ed50dca58.png" property="twitter:image">
+
+<title>snippet.md ($1) · Snippets · GitLab</title>
+<meta content="GitLab Enterprise Edition" name="description">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<meta content="origin-when-cross-origin" name="referrer">
+<meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+<meta content="#474D57" name="theme-color">
+
+
+
+
+
+<meta content="http://test.host/assets/msapplication-tile-1196ec67452f618d39cdd85e2e3a542f76574c071051ae7effbfde01710eb17d.png" name="msapplication-TileImage">
+<meta content="#30353E" name="msapplication-TileColor">
+
+
+
+
+
+
+
+
+
+
+
+<header class="navbar navbar-gitlab navbar-expand-sm js-navbar" data-qa-selector="navbar">
+<a class="sr-only gl-accessibility" href="#content-body" tabindex="1">Skip to content</a>
+<div class="container-fluid">
+<div class="header-content">
+<div class="title-container">
+<h1 class="title">
+<a title="Dashboard" id="logo" href="http://test.host/"><svg width="24" height="24" class="tanuki-logo" viewbox="0 0 36 36">
+  <path class="tanuki-shape tanuki-left-ear" fill="#e24329" d="M2 14l9.38 9v-9l-4-12.28c-.205-.632-1.176-.632-1.38 0z"></path>
+  <path class="tanuki-shape tanuki-right-ear" fill="#e24329" d="M34 14l-9.38 9v-9l4-12.28c.205-.632 1.176-.632 1.38 0z"></path>
+  <path class="tanuki-shape tanuki-nose" fill="#e24329" d="M18,34.38 3,14 33,14 Z"></path>
+  <path class="tanuki-shape tanuki-left-eye" fill="#fc6d26" d="M18,34.38 11.38,14 2,14 6,25Z"></path>
+  <path class="tanuki-shape tanuki-right-eye" fill="#fc6d26" d="M18,34.38 24.62,14 34,14 30,25Z"></path>
+  <path class="tanuki-shape tanuki-left-cheek" fill="#fca326" d="M2 14L.1 20.16c-.18.565 0 1.2.5 1.56l17.42 12.66z"></path>
+  <path class="tanuki-shape tanuki-right-cheek" fill="#fca326" d="M34 14l1.9 6.16c.18.565 0 1.2-.5 1.56L18 34.38z"></path>
+</svg>
+
+<span class="logo-text d-none d-lg-block prepend-left-8">
+<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 617 169"><path d="M315.26 2.97h-21.8l.1 162.5h88.3v-20.1h-66.5l-.1-142.4M465.89 136.95c-5.5 5.7-14.6 11.4-27 11.4-16.6 0-23.3-8.2-23.3-18.9 0-16.1 11.2-23.8 35-23.8 4.5 0 11.7.5 15.4 1.2v30.1h-.1m-22.6-98.5c-17.6 0-33.8 6.2-46.4 16.7l7.7 13.4c8.9-5.2 19.8-10.4 35.5-10.4 17.9 0 25.8 9.2 25.8 24.6v7.9c-3.5-.7-10.7-1.2-15.1-1.2-38.2 0-57.6 13.4-57.6 41.4 0 25.1 15.4 37.7 38.7 37.7 15.7 0 30.8-7.2 36-18.9l4 15.9h15.4v-83.2c-.1-26.3-11.5-43.9-44-43.9M557.63 149.1c-8.2 0-15.4-1-20.8-3.5V70.5c7.4-6.2 16.6-10.7 28.3-10.7 21.1 0 29.2 14.9 29.2 39 0 34.2-13.1 50.3-36.7 50.3m9.2-110.6c-19.5 0-30 13.3-30 13.3v-21l-.1-27.8h-21.3l.1 158.5c10.7 4.5 25.3 6.9 41.2 6.9 40.7 0 60.3-26 60.3-70.9-.1-35.5-18.2-59-50.2-59M77.9 20.6c19.3 0 31.8 6.4 39.9 12.9l9.4-16.3C114.5 6 97.3 0 78.9 0 32.5 0 0 28.3 0 85.4c0 59.8 35.1 83.1 75.2 83.1 20.1 0 37.2-4.7 48.4-9.4l-.5-63.9V75.1H63.6v20.1h38l.5 48.5c-5 2.5-13.6 4.5-25.3 4.5-32.2 0-53.8-20.3-53.8-63-.1-43.5 22.2-64.6 54.9-64.6M231.43 2.95h-21.3l.1 27.3v94.3c0 26.3 11.4 43.9 43.9 43.9 4.5 0 8.9-.4 13.1-1.2v-19.1c-3.1.5-6.4.7-9.9.7-17.9 0-25.8-9.2-25.8-24.6v-65h35.7v-17.8h-35.7l-.1-38.5M155.96 165.47h21.3v-124h-21.3v124M155.96 24.37h21.3V3.07h-21.3v21.3"></path></svg>
+
+</span>
+</a>
+</h1>
+<ul class="list-unstyled navbar-sub-nav">
+<li id="nav-projects-dropdown" class="home dropdown header-projects qa-projects-dropdown" data-track-label="projects_dropdown" data-track-event="click_dropdown" data-track-value="">
+<button class="btn" data-toggle="dropdown" type="button">
+Projects
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</button>
+<div class="dropdown-menu frequent-items-dropdown-menu">
+<div class="frequent-items-dropdown-container">
+<div class="frequent-items-dropdown-sidebar qa-projects-dropdown-sidebar">
+<ul>
+<li class=""><a class="qa-your-projects-link" href="http://test.host/dashboard/projects">Your projects
+</a></li>
+<li class=""><a href="http://test.host/dashboard/projects/starred">Starred projects
+</a></li>
+<li class=""><a href="http://test.host/explore">Explore projects
+</a></li>
+</ul>
+</div>
+<div class="frequent-items-dropdown-content">
+<div data-user-name="user166" id="js-projects-dropdown"></div>
+</div>
+</div>
+
+</div>
+</li>
+<li id="nav-groups-dropdown" class="d-none d-md-block home dropdown header-groups qa-groups-dropdown" data-track-label="groups_dropdown" data-track-event="click_dropdown" data-track-value="">
+<button class="btn" data-toggle="dropdown" type="button">
+Groups
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</button>
+<div class="dropdown-menu frequent-items-dropdown-menu">
+<div class="frequent-items-dropdown-container">
+<div class="frequent-items-dropdown-sidebar qa-groups-dropdown-sidebar">
+<ul>
+<li class=""><a class="qa-your-groups-link" href="http://test.host/dashboard/groups">Your groups
+</a></li>
+<li class=""><a href="http://test.host/explore/groups">Explore groups
+</a></li>
+</ul>
+</div>
+<div class="frequent-items-dropdown-content">
+<div data-user-name="user166" id="js-groups-dropdown"></div>
+</div>
+</div>
+
+</div>
+</li>
+<li class="header-more dropdown">
+<a data-qa-selector="more_dropdown" data-toggle="dropdown" href="#">
+More
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a>
+<div class="dropdown-menu">
+<ul>
+<li class="d-md-none">
+<a href="http://test.host/dashboard/groups">Groups
+</a>
+</li>
+<li class=""><a href="http://test.host/dashboard/activity">Activity
+</a></li>
+<li class=""><a class="dashboard-shortcuts-milestones" href="http://test.host/dashboard/milestones">Milestones
+</a></li>
+<li class=""><a class="dashboard-shortcuts-snippets" data-qa-selector="snippets_link" href="http://test.host/dashboard/snippets">Snippets
+</a></li>
+<li class=""><a href="http://test.host/-/analytics">Analytics
+</a></li>
+<li class="dropdown">
+
+</li>
+<li class=""><a href="http://test.host/-/instance_statistics">Instance Statistics
+</a></li>
+<li class=""><a class="admin-icon qa-admin-area-link d-xl-none" href="http://test.host/admin">Admin Area
+</a></li>
+<li class=""><a class="d-lg-none lock-open-icon" href="http://test.host/admin/session/destroy">Leave Admin Mode
+</a></li>
+</ul>
+</div>
+</li>
+<li class="d-none d-xl-block"><a class="admin-icon qa-admin-area-link" title="Admin Area" aria-label="Admin Area" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/admin"><svg class="s18"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#admin"></use></svg>
+</a></li>
+<li class="d-none d-lg-block d-xl-block"><a title="Leave Admin Mode" aria-label="Leave Admin Mode" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/admin/session/destroy"><svg class="s18"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#lock-open"></use></svg>
+</a></li>
+<li class="hidden">
+<a class="dashboard-shortcuts-projects" href="http://test.host/dashboard/projects">Projects
+</a>
+</li>
+
+</ul>
+
+</div>
+<div class="navbar-collapse collapse">
+<ul class="nav navbar-nav">
+<li class="header-new dropdown" data-track-event="click_dropdown" data-track-label="new_dropdown" data-track-value="">
+<a class="header-new-dropdown-toggle has-tooltip qa-new-menu-toggle" id="js-onboarding-new-project-link" title="New..." ref="tooltip" aria-label="New..." data-toggle="dropdown" data-placement="bottom" data-container="body" data-display="static" href="http://test.host/projects/new"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#plus-square"></use></svg>
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li><a class="qa-global-new-project-link" href="http://test.host/projects/new">New project</a></li>
+<li><a href="http://test.host/groups/new">New group</a></li>
+<li><a class="qa-global-new-snippet-link" href="http://test.host/snippets/new">New snippet</a></li>
+</ul>
+</div>
+</li>
+
+<li class="nav-item d-none d-lg-block m-auto">
+<div class="search search-form" data-track-event="activate_form_input" data-track-label="navbar_search" data-track-value="">
+<form class="form-inline" action="http://test.host/search" accept-charset="UTF-8" method="get">
+<input name="utf8" type="hidden" value="✓"><div class="search-input-container">
+<div class="search-input-wrap">
+<div class="dropdown" data-url="http://test.host/search/autocomplete">
+<input type="search" name="search" id="search" placeholder="Search or jump to…" class="search-input dropdown-menu-toggle no-outline js-search-dashboard-options" spellcheck="false" tabindex="1" autocomplete="off" data-issues-path="http://test.host/dashboard/issues" data-mr-path="http://test.host/dashboard/merge_requests" data-qa-selector="search_term_field" aria-label="Search or jump to…">
+<button class="hidden js-dropdown-search-toggle" data-toggle="dropdown" type="button"></button>
+<div class="dropdown-menu dropdown-select js-dashboard-search-options">
+<div class="dropdown-content">
+<ul>
+<li class="dropdown-menu-empty-item">
+<a>
+Loading...
+</a>
+</li>
+</ul>
+</div>
+<div class="dropdown-loading"><i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin"></i></div>
+</div>
+<svg class="s16 search-icon"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#search"></use></svg>
+<svg class="s16 clear-icon js-clear-input"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+</div>
+</div>
+</div>
+<input type="hidden" name="group_id" id="group_id" class="js-search-group-options">
+<input type="hidden" name="project_id" id="search_project_id" value="" class="js-search-project-options">
+<input type="hidden" name="snippets" id="snippets" value="true">
+<input type="hidden" name="repository_ref" id="repository_ref">
+<input type="hidden" name="nav_source" id="nav_source" value="navbar">
+<noscript><button name="button" type="submit">Search</button></noscript>
+<div class="search-autocomplete-opts hide" data-autocomplete-path="http://test.host/search/autocomplete"></div>
+</form>
+</div>
+
+</li>
+<li class="nav-item d-inline-block d-lg-none">
+<a title="Search" aria-label="Search" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/search"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#search"></use></svg>
+</a>
+</li>
+<li class="user-counter"><a title="Issues" class="dashboard-shortcuts-issues" aria-label="Issues" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/issues?assignee_username=user166"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#issues"></use></svg>
+<span class="badge badge-pill green-badge hidden issues-count">
+0
+</span>
+</a></li>
+<li class="user-counter"><a title="Merge requests" class="dashboard-shortcuts-merge_requests" aria-label="Merge requests" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/merge_requests?assignee_username=user166"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#git-merge"></use></svg>
+<span class="badge badge-pill hidden merge-requests-count">
+0
+</span>
+</a></li>
+<li class="user-counter"><a title="To-Do List" aria-label="To-Do List" class="shortcuts-todos" data-toggle="tooltip" data-placement="bottom" data-container="body" href="http://test.host/dashboard/todos"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#todo-done"></use></svg>
+<span class="badge badge-pill hidden todos-count">
+0
+</span>
+</a></li>
+<li class="nav-item header-help dropdown d-none d-md-block">
+<a class="header-help-dropdown-toggle" data-toggle="dropdown" href="http://test.host/help"><svg class="s16"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#question"></use></svg>
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li>
+<a href="http://test.host/help">Help</a>
+</li>
+<li>
+<a href="https://about.gitlab.com/getting-help/">Support</a>
+</li>
+
+<li class="divider">
+<li>
+<a href="https://about.gitlab.com/submit-feedback">Submit feedback</a>
+</li>
+<li>
+
+</li>
+
+</ul>
+
+</div>
+</li>
+<li class="dropdown header-user nav-item" data-qa-selector="user_menu" data-track-event="click_dropdown" data-track-label="profile_dropdown" data-track-value="">
+<a class="header-user-dropdown-toggle" data-toggle="dropdown" href="http://test.host/user166"><img width="23" height="23" class="header-user-avatar qa-user-avatar lazy" data-src="https://www.gravatar.com/avatar/33f6a19808e4f33675aa8b6a1faf2190?s=46&amp;d=identicon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+<svg class="caret-down"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-down"></use></svg>
+</a><div class="dropdown-menu dropdown-menu-right">
+<ul>
+<li class="current-user">
+<div class="user-name bold">
+John Doe194
+</div>
+@user166
+</li>
+<li class="divider">
+<li>
+<div class="js-set-status-modal-trigger" data-has-status="false"></div>
+</li>
+<li>
+<a class="profile-link" data-user="user166" href="http://test.host/user166">Profile</a>
+</li>
+<li>
+<a data-qa-selector="settings_link" href="http://test.host/profile">Settings</a>
+</li>
+<li class="divider d-md-none">
+<li class="d-md-none">
+<a href="http://test.host/help">Help</a>
+</li>
+<li class="d-md-none">
+<a href="https://about.gitlab.com/getting-help/">Support</a>
+</li>
+
+<li class="d-md-none">
+<a href="https://about.gitlab.com/submit-feedback">Submit feedback</a>
+</li>
+<li class="d-md-none">
+
+</li>
+
+<li class="divider">
+<li>
+<a class="sign-out-link" data-qa-selector="sign_out_link" href="http://test.host/users/sign_out">Sign out</a>
+</li>
+</ul>
+
+</div>
+</li>
+</ul>
+</div>
+<button class="navbar-toggler d-block d-sm-none" type="button">
+<span class="sr-only">Toggle navigation</span>
+<svg class="s12 more-icon js-navbar-toggle-right"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#ellipsis_h"></use></svg>
+<svg class="s12 close-icon js-navbar-toggle-left"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#close"></use></svg>
+</button>
+</div>
+</div>
+</header>
+<div class="js-set-status-modal-wrapper" data-current-emoji="" data-current-message=""></div>
+
+<div class="layout-page">
+<div class="content-wrapper">
+
+<div class="mobile-overlay"></div>
+<div class="alert-wrapper">
+
+
+
+
+
+
+<nav class="breadcrumbs container-fluid container-limited limit-container-width limited-inner-width-container" role="navigation">
+<div class="breadcrumbs-container">
+<div class="breadcrumbs-links js-title-container">
+<ul class="list-unstyled breadcrumbs-list js-breadcrumbs-list">
+<li>
+<a href="http://test.host/dashboard/snippets">Snippets</a><svg class="s8 breadcrumbs-list-angle"><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#angle-right"></use></svg>
+</li>
+
+<li>
+<h2 class="breadcrumbs-sub-title"><a href="http://test.host/snippets/1">$1</a></h2>
+</li>
+</ul>
+</div>
+
+</div>
+</nav>
+
+<div class="d-flex"></div>
+</div>
+<div class="container-fluid container-limited limit-container-width limited-inner-width-container">
+<div class="content" id="content-body">
+<div class="flash-container flash-container-page sticky">
+</div>
+
+<div class="detail-page-header">
+<div class="detail-page-header-body">
+<div class="snippet-box qa-snippet-box has-tooltip inline append-right-5" data-container="body" title="The snippet is visible only to me.">
+<span class="sr-only">
+Private
+</span>
+<i aria-hidden="true" data-hidden="true" class="fa fa-lock"></i>
+</div>
+<span class="creator">
+Authored
+<time class="js-timeago snippet_updated_ago" title="Jul 3, 2015 10:00am" datetime="2015-07-03T10:00:00Z" data-toggle="tooltip" data-placement="bottom" data-container="body">Jul 03, 2015</time>
+by <a class="author-link js-user-link  " data-user-id="166" data-username="user166" data-name="John Doe194" href="http://test.host/user166"><img width="24" class="avatar avatar-inline s24 d-none d-sm-inline lazy" alt="" data-src="https://www.gravatar.com/avatar/33f6a19808e4f33675aa8b6a1faf2190?s=48&amp;d=identicon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><span class="author item-title">John Doe194</span></a>
+
+</span>
+</div>
+<div class="detail-page-header-actions">
+<div class="d-none d-sm-block">
+<a class="btn btn-grouped" href="http://test.host/snippets/1/edit">Edit
+</a><a data-confirm="Are you sure?" class="btn btn-grouped btn-inverted btn-remove" title="Delete Snippet" rel="nofollow" data-method="delete" href="http://test.host/snippets/1">Delete
+</a><a class="btn btn-grouped btn-success btn-inverted" title="New snippet" href="http://test.host/snippets/new">New snippet
+</a>
+</div>
+<div class="d-block d-sm-none dropdown">
+<button class="btn btn-default btn-block append-bottom-0 prepend-top-5" data-toggle="dropdown">
+Options
+<i aria-hidden="true" data-hidden="true" class="fa fa-caret-down"></i>
+</button>
+<div class="dropdown-menu dropdown-menu-full-width">
+<ul>
+<li>
+<a title="New snippet" href="http://test.host/snippets/new">New snippet
+</a>
+</li>
+<li>
+<a data-confirm="Are you sure?" title="Delete Snippet" rel="nofollow" data-method="delete" href="http://test.host/snippets/1">Delete
+</a>
+</li>
+<li>
+<a href="http://test.host/snippets/1/edit">Edit
+</a>
+</li>
+</ul>
+</div>
+</div>
+
+</div>
+</div>
+<div class="snippet-header limited-header-width">
+<h2 class="snippet-title prepend-top-0 mb-3" data-qa-selector="snippet_title">
+snippet.md
+</h2>
+<div class="description" data-qa-selector="snippet_description">
+<div class="md">
+<p data-sourcepos="1:1-1:12" dir="auto">My title 100</p>
+</div>
+<textarea class="hidden js-task-list-field">My title 100</textarea>
+</div>
+</div>
+
+<div class="personal-snippets">
+<article class="file-holder snippet-file-content">
+<div class="js-file-title file-title-flex-parent">
+<div class="file-header-content">
+<i aria-hidden="true" data-hidden="true" class="fa fa-file-text-o fa-fw"></i>
+<strong class="file-title-name qa-file-title-name">
+snippet.md
+</strong>
+<button class="btn btn-clipboard btn-transparent" data-toggle="tooltip" data-placement="bottom" data-container="body" data-class="btn-clipboard btn-transparent" data-title="Copy file path" data-clipboard-text='{"text":"snippet.md","gfm":"`snippet.md`"}' type="button" title="Copy file path" aria-label="Copy file path"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#duplicate"></use></svg></button>
+<small class="mr-1">
+9 Bytes
+</small>
+</div>
+
+<div class="file-actions d-none d-sm-block">
+<div class="btn-group js-blob-viewer-switcher" role="group">
+<button aria-label="Display source" class="btn btn-default btn-sm js-blob-viewer-switch-btn has-tooltip" data-container="body" data-viewer="simple" title="Display source">
+<i aria-hidden="true" data-hidden="true" class="fa fa-code"></i>
+</button><button aria-label="Display rendered file" class="btn btn-default btn-sm js-blob-viewer-switch-btn has-tooltip" data-container="body" data-viewer="rich" title="Display rendered file">
+<i aria-hidden="true" data-hidden="true" class="fa fa-file-text-o"></i>
+</button>
+</div>
+
+<div class="btn-group" role="group">
+<button class="btn btn btn-sm js-copy-blob-source-btn" data-toggle="tooltip" data-placement="bottom" data-container="body" data-class="btn btn-sm js-copy-blob-source-btn" data-title="Copy file contents" data-clipboard-target=".blob-content[data-blob-id='1']" type="button" title="Copy file contents" aria-label="Copy file contents"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#duplicate"></use></svg></button><a class="btn btn-sm has-tooltip" target="_blank" rel="noopener noreferrer" title="Open raw" data-container="body" href="http://test.host/snippets/1/raw"><i aria-hidden="true" data-hidden="true" class="fa fa-file-code-o"></i></a><a target="_blank" rel="noopener noreferrer" class="btn btn-sm has-tooltip" title="Download" data-container="body" href="http://test.host/snippets/1/raw?inline=false"><i aria-hidden="true" data-hidden="true" class="fa fa-download"></i></a>
+</div>
+</div>
+</div>
+<div class="blob-viewer hidden" data-type="simple" data-url="http://test.host/snippets/1.json?viewer=simple">
+<div class="text-center prepend-top-default append-bottom-default">
+<i aria-hidden="true" aria-label="Loading content…" class="fa fa-spinner fa-spin fa-2x qa-spinner"></i>
+</div>
+
+</div>
+
+<div class="blob-viewer" data-rich-type="markup" data-type="rich" data-url="http://test.host/snippets/1.json?viewer=rich">
+<div class="text-center prepend-top-default append-bottom-default">
+<i aria-hidden="true" aria-label="Loading content…" class="fa fa-spinner fa-spin fa-2x qa-spinner"></i>
+</div>
+
+</div>
+
+
+
+</article>
+<div class="row-content-block top-block content-component-block">
+<div class="awards js-awards-block" data-award-url="http://test.host/snippets/1/toggle_award_emoji">
+<button class=" award-control btn has-tooltip js-emoji-btn" data-title="" type="button">
+<gl-emoji title="thumbs up sign" data-name="thumbsup" data-unicode-version="6.0">👍</gl-emoji>
+<span class="award-control-text js-counter">
+0
+</span>
+</button>
+<button class=" award-control btn has-tooltip js-emoji-btn" data-title="" type="button">
+<gl-emoji title="thumbs down sign" data-name="thumbsdown" data-unicode-version="6.0">👎</gl-emoji>
+<span class="award-control-text js-counter">
+0
+</span>
+</button>
+<div class="award-menu-holder js-award-holder">
+<button aria-label="Add reaction" class="btn award-control has-tooltip js-add-award" data-title="Add reaction" type="button">
+<span class="award-control-icon award-control-icon-neutral"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#slight-smile"></use></svg></span>
+<span class="award-control-icon award-control-icon-positive"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#smiley"></use></svg></span>
+<span class="award-control-icon award-control-icon-super-positive"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#smile"></use></svg></span>
+<i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin award-control-icon award-control-icon-loading"></i>
+</button>
+</div>
+</div>
+
+</div>
+<div class="limited-width-notes" id="notes">
+<ul class="notes main-notes-list timeline" id="notes-list">
+<li class="note note-discussion timeline-entry unstyled-comments">
+<div class="timeline-entry-inner">
+<div class="timeline-content">
+<div class="discussion js-toggle-container" data-discussion-id="0baa659183a6be6815c5fe5a1b83c4a867ebf984">
+<div class="discussion-header">
+<div class="timeline-icon">
+<a href="http://test.host/user166"><img class="avatar s40 lazy" data-src="https://www.gravatar.com/avatar/33f6a19808e4f33675aa8b6a1faf2190?s=80&amp;d=identicon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+</a>
+</div>
+<div class="discussion-actions">
+<button class="discussion-toggle-button js-toggle-button note-action-button" type="button">
+<i aria-hidden="true" data-hidden="true" class="fa fa-chevron-up"></i>
+Toggle thread
+</button>
+</div>
+<a class="author-link js-user-link  " data-user-id="166" data-username="user166" data-name="John Doe194" href="http://test.host/user166"><span class="author">John Doe194</span></a>
+<div class="inline discussion-headline-light">
+@user166
+started a thread
+<time class="js-timeago note-created-ago" title="Jul 3, 2015 10:00am" datetime="2015-07-03T10:00:00Z" data-toggle="tooltip" data-placement="bottom" data-container="body">Jul 03, 2015</time>
+</div>
+
+</div>
+<div class="discussion-body js-toggle-content">
+<div class="card">
+<div class="discussion-notes">
+<ul class="notes" data-discussion-id="0baa659183a6be6815c5fe5a1b83c4a867ebf984" data-position="null" id="discussion_0baa659183a6be6815c5fe5a1b83c4a867ebf984">
+<li class="note note-row-142 note-wrapper timeline-entry" data-author-id="166" data-editable data-note-id="142" id="note_142">
+<div class="timeline-entry-inner">
+<div class="timeline-icon">
+<a class="image-diff-avatar-link" href="http://test.host/user166">
+<img alt="" class="avatar s40 lazy" data-src="https://www.gravatar.com/avatar/33f6a19808e4f33675aa8b6a1faf2190?s=80&amp;d=identicon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+</a>
+</div>
+<div class="timeline-content">
+<div class="note-header">
+<div class="note-header-info">
+<a href="http://test.host/user166">
+<span class="note-header-author-name bold">
+John Doe194
+</span>
+
+<span class="note-headline-light">
+@user166
+</span>
+</a>
+<span class="note-headline-light note-headline-meta">
+<span class="system-note-separator">
+·
+</span>
+<a class="system-note-separator" href="#note_142"><time class="js-timeago note-created-ago" title="Jul 3, 2015 10:00am" datetime="2015-07-03T10:00:00Z" data-toggle="tooltip" data-placement="bottom" data-container="body">Jul 03, 2015</time></a>
+</span>
+</div>
+<div class="note-actions">
+<div class="note-actions-item">
+<a title="Add reaction" class="note-action-button note-emoji-button js-add-award js-note-emoji has-tooltip" data-position="right" href="#"><i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin"></i>
+<span class="link-highlight award-control-icon-neutral"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#slight-smile"></use></svg></span>
+<span class="link-highlight award-control-icon-positive"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#smiley"></use></svg></span>
+<span class="link-highlight award-control-icon-super-positive"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#smile"></use></svg></span>
+</a>
+</div>
+<div class="note-actions-item">
+<button name="button" type="submit" title="Edit comment" class="note-action-button js-note-edit has-tooltip btn btn-transparent" data-container="body"><span class="link-highlight">
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewbox="0 0 16 16"><path d="M13.02 1.293l1.414 1.414a1 1 0 0 1 0 1.414L4.119 14.436a1 1 0 0 1-.704.293l-2.407.008L1 12.316a1 1 0 0 1 .293-.71L11.605 1.292a1 1 0 0 1 1.414 0zm-1.416 1.415l-.707.707L12.31 4.83l.707-.707-1.414-1.415zM3.411 13.73l1.123-1.122H3.12v-1.415L2 12.312l.005 1.422 1.406-.005z"></path></svg>
+
+
+</span>
+</button>
+</div>
+<div class="dropdown more-actions note-actions-item">
+<button name="button" type="submit" title="More actions" class="note-action-button more-actions-toggle has-tooltip btn btn-transparent" data-toggle="dropdown" data-container="body"><span class="icon">
+<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 1600 1600"><path d="M1088 1248v192q0 40-28 68t-68 28H800q-40 0-68-28t-28-68v-192q0-40 28-68t68-28h192q40 0 68 28t28 68zm0-512v192q0 40-28 68t-68 28H800q-40 0-68-28t-28-68V736q0-40 28-68t68-28h192q40 0 68 28t28 68zm0-512v192q0 40-28 68t-68 28H800q-40 0-68-28t-28-68V224q0-40 28-68t68-28h192q40 0 68 28t28 68z"></path></svg>
+
+</span>
+</button><ul class="dropdown-menu more-actions-dropdown dropdown-open-left">
+<li>
+<button class="btn btn-clipboard" data-title="Copy reference" data-button-text="Copy link" data-class="btn-clipboard" data-hide-tooltip="true" data-hide-button-icon="true" data-clipboard-text="http://localhost/snippets/1#note_142" type="button" title="Copy reference" aria-label="Copy reference">Copy link</button>
+</li>
+<li>
+<a data-confirm="Are you sure you want to delete this comment?" class="js-note-delete" data-remote="true" rel="nofollow" data-method="delete" href="http://test.host/snippets/1/notes/142"><span class="text-danger">
+Delete comment
+</span>
+</a>
+</li>
+</ul>
+</div>
+
+
+</div>
+</div>
+<div class="js-task-list-container note-body">
+<div class="note-text md">
+<ul data-sourcepos="1:1-1:20" class="task-list" dir="auto">
+<li data-sourcepos="1:1-1:20" class="task-list-item">
+<input type="checkbox" class="task-list-item-checkbox" disabled> Task List Item</li>
+</ul>
+</div>
+
+<div class="original-note-content hidden" data-post-url="http://test.host/snippets/1/notes/142" data-target-id="1" data-target-type="personal_snippet">
+- [ ] Task List Item
+</div>
+<textarea class="hidden js-task-list-field original-task-list" data-update-url="http://test.host/snippets/1/notes/142">- [ ] Task List Item</textarea>
+
+<div class="note-awards">
+<div class="awards hidden js-awards-block" data-award-url="http://test.host/snippets/1/notes/142/toggle_award_emoji">
+<div class="award-menu-holder js-award-holder">
+<button aria-label="Add reaction" class="btn award-control has-tooltip js-add-award" data-title="Add reaction" type="button">
+<span class="award-control-icon award-control-icon-neutral"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#slight-smile"></use></svg></span>
+<span class="award-control-icon award-control-icon-positive"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#smiley"></use></svg></span>
+<span class="award-control-icon award-control-icon-super-positive"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#smile"></use></svg></span>
+<i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin award-control-icon award-control-icon-loading"></i>
+</button>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</li>
+
+</ul>
+<div class="flash-container"></div>
+<div class="discussion-reply-holder">
+<a class="user-avatar-link d-none d-sm-block" href="http://test.host/user166">
+<img alt="@user166" class="avatar s40 lazy" data-src="https://www.gravatar.com/avatar/33f6a19808e4f33675aa8b6a1faf2190?s=80&amp;d=identicon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+</a>
+<div class="discussion-with-resolve-btn">
+<button name="button" type="submit" class="btn btn-text-field js-discussion-reply-button" data-discussion-id="0baa659183a6be6815c5fe5a1b83c4a867ebf984" data-discussion-project-id="80" title="Add a reply">Reply...</button>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+</div>
+</li>
+
+
+</ul>
+<div class="note-edit-form">
+<form class="edit-note common-note-form js-quick-submit" action="#" accept-charset="UTF-8" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="_method" value="put"><input type="hidden" name="target_id" id="target_id" value="" class="js-form-target-id">
+<input type="hidden" name="target_type" id="target_type" value="" class="js-form-target-type">
+<div class="md-area position-relative">
+<div class="md-header">
+<ul class="nav nav-tabs nav-links clearfix">
+<li class="md-header-tab active">
+<button class="js-md-write-button" tabindex="-1">
+Write
+</button>
+</li>
+<li class="md-header-tab">
+<button class="js-md-preview-button" tabindex="-1">
+Preview
+</button>
+</li>
+<li class="md-header-toolbar active">
+<div class="md-header-toolbar active">
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="**" data-container="body" title="Add bold text" aria-label="Add bold text"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#bold"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="*" data-container="body" title="Add italic text" aria-label="Add italic text"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#italic"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="&gt; " data-md-prepend="true" data-container="body" title="Insert a quote" aria-label="Insert a quote"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#quote"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="`" data-md-block="```" data-container="body" title="Insert code" aria-label="Insert code"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#code"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="[{text}](url)" data-md-select="url" data-container="body" title="Add a link" aria-label="Add a link"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#link"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="* " data-md-prepend="true" data-container="body" title="Add a bullet list" aria-label="Add a bullet list"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#list-bulleted"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="1. " data-md-prepend="true" data-container="body" title="Add a numbered list" aria-label="Add a numbered list"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#list-numbered"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="* [ ] " data-md-prepend="true" data-container="body" title="Add a task list" aria-label="Add a task list"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#list-task"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="| header | header |
+| ------ | ------ |
+| cell | cell |
+| cell | cell |" data-md-prepend="true" data-container="body" title="Add a table" aria-label="Add a table"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#table"></use></svg></button>
+<button aria-label="Go full screen" class="toolbar-btn toolbar-fullscreen-btn js-zen-enter has-tooltip" data-container="body" tabindex="-1" title="Go full screen" type="button">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#screen-full"></use></svg>
+</button>
+</div>
+
+</li>
+</ul>
+</div>
+<div class="md-write-holder">
+<div class="zen-backdrop">
+<textarea name="note[note]" id="note_note" class="note-textarea js-note-text js-task-list-field js-gfm-input js-autosize markdown-area" placeholder="Write a comment or drag your files here…">
+</textarea>
+<a class="zen-control zen-control-leave js-zen-leave" href="#">
+<i aria-hidden="true" data-hidden="true" class="fa fa-compress"></i>
+</a>
+</div>
+
+<div class="comment-toolbar clearfix">
+<div class="toolbar-text">
+<a target="_blank" tabindex="-1" href="http://test.host/help/user/markdown">Markdown</a>
+is
+supported
+</div>
+<span class="uploading-container">
+<span class="uploading-progress-container hide">
+<i aria-hidden="true" data-hidden="true" class="fa fa-file-image-o toolbar-button-icon"></i>
+<span class="attaching-file-message">
+</span>
+<span class="uploading-progress">0%</span>
+<span class="uploading-spinner">
+<i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin toolbar-button-icon"></i>
+</span>
+</span>
+<span class="uploading-error-container hide">
+<span class="uploading-error-icon">
+<i aria-hidden="true" data-hidden="true" class="fa fa-file-image-o toolbar-button-icon"></i>
+</span>
+<span class="uploading-error-message">
+</span>
+<button class="retry-uploading-link" type="button">Try again</button>
+or
+<button class="attach-new-file markdown-selector" type="button">attach a new file</button>
+</span>
+<button class="markdown-selector button-attach-file btn-link" tabindex="-1" type="button">
+<i aria-hidden="true" data-hidden="true" class="fa fa-file-image-o toolbar-button-icon"></i><span class="text-attach-file">Attach a file</span></button>
+<button class="btn btn-default btn-sm hide button-cancel-uploading-files" type="button">Cancel</button>
+</span>
+</div>
+
+
+</div>
+<div class="md md-preview-holder js-md-preview hide" data-url="http://test.host/snippets/preview_markdown"></div>
+<div class="referenced-commands hide"></div>
+<div class="referenced-users hide">
+<span>
+<i aria-hidden="true" data-hidden="true" class="fa fa-exclamation-triangle"></i>
+You are about to add
+<strong>
+<span class="js-referenced-users-count">0</span>
+people
+</strong>
+to the discussion. Proceed with caution.
+</span>
+</div>
+</div>
+<div class="note-form-actions clearfix">
+<div class="settings-message note-edit-warning js-finish-edit-warning">
+Finish editing this message first!
+</div>
+<input type="submit" name="commit" value="Save comment" class="btn btn-nr btn-success js-comment-save-button" data-disable-with="Save comment">
+<button class="btn btn-nr btn-cancel note-edit-cancel" type="button">
+Cancel
+</button>
+</div>
+</form>
+</div>
+
+<div class="notes notes-form timeline">
+<div class="timeline-entry note-form">
+<div class="timeline-entry-inner">
+<div class="flash-container timeline-content"></div>
+<div class="timeline-icon d-none d-sm-none d-md-block">
+<a class="author-link" href="http://test.host/user166">
+<img alt="@user166" class="avatar s40 lazy" data-src="https://www.gravatar.com/avatar/33f6a19808e4f33675aa8b6a1faf2190?s=80&amp;d=identicon" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==">
+</a>
+</div>
+<div class="timeline-content timeline-content-form">
+<form class="new-note js-new-note-form js-quick-submit common-note-form" data-type="json" enctype="multipart/form-data" action="http://test.host/snippets/1/notes" accept-charset="UTF-8" data-remote="true" method="post">
+<input name="utf8" type="hidden" value="✓"><input type="hidden" name="view" id="view" value="inline">
+<input type="hidden" name="line_type" id="line_type">
+<input type="hidden" name="merge_request_diff_head_sha" id="merge_request_diff_head_sha">
+<input type="hidden" name="in_reply_to_discussion_id" id="in_reply_to_discussion_id">
+<input type="hidden" name="note_project_id" id="note_project_id">
+<input type="hidden" name="target_type" id="target_type" value="personal_snippet"><input type="hidden" name="target_id" id="target_id" value="1">
+<input type="hidden" value="Snippet" name="note[noteable_type]" id="note_noteable_type">
+<input type="hidden" value="1" name="note[noteable_id]" id="note_noteable_id">
+<input type="hidden" name="note[commit_id]" id="note_commit_id">
+<input type="hidden" name="note[type]" id="note_type">
+<input type="hidden" name="note[line_code]" id="note_line_code">
+<input type="hidden" name="note[position]" id="note_position">
+<div class="discussion-form-container">
+<div class="md-area position-relative">
+<div class="md-header">
+<ul class="nav nav-tabs nav-links clearfix">
+<li class="md-header-tab active">
+<button class="js-md-write-button" tabindex="-1">
+Write
+</button>
+</li>
+<li class="md-header-tab">
+<button class="js-md-preview-button" tabindex="-1">
+Preview
+</button>
+</li>
+<li class="md-header-toolbar active">
+<div class="md-header-toolbar active">
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="**" data-container="body" title="Add bold text" aria-label="Add bold text"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#bold"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="*" data-container="body" title="Add italic text" aria-label="Add italic text"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#italic"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="&gt; " data-md-prepend="true" data-container="body" title="Insert a quote" aria-label="Insert a quote"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#quote"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="`" data-md-block="```" data-container="body" title="Insert code" aria-label="Insert code"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#code"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="[{text}](url)" data-md-select="url" data-container="body" title="Add a link" aria-label="Add a link"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#link"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="* " data-md-prepend="true" data-container="body" title="Add a bullet list" aria-label="Add a bullet list"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#list-bulleted"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="1. " data-md-prepend="true" data-container="body" title="Add a numbered list" aria-label="Add a numbered list"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#list-numbered"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="* [ ] " data-md-prepend="true" data-container="body" title="Add a task list" aria-label="Add a task list"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#list-task"></use></svg></button>
+<button type="button" class="toolbar-btn js-md has-tooltip" tabindex="-1" data-md-tag="| header | header |
+| ------ | ------ |
+| cell | cell |
+| cell | cell |" data-md-prepend="true" data-container="body" title="Add a table" aria-label="Add a table"><svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#table"></use></svg></button>
+<button aria-label="Go full screen" class="toolbar-btn toolbar-fullscreen-btn js-zen-enter has-tooltip" data-container="body" tabindex="-1" title="Go full screen" type="button">
+<svg><use xlink:href="http://test.host/assets/icons-312c16d38220d2412b554d43f05ac0ffa8a701e91fb02cd4332740f6b87ebb5b.svg#screen-full"></use></svg>
+</button>
+</div>
+
+</li>
+</ul>
+</div>
+<div class="md-write-holder">
+<div class="zen-backdrop">
+<textarea class="note-textarea js-note-text js-gfm-input js-autosize markdown-area" placeholder="Write a comment or drag your files here…" dir="auto" data-supports-quick-actions="false" data-supports-autocomplete="false" name="note[note]" id="note_note">
+</textarea>
+<a class="zen-control zen-control-leave js-zen-leave" href="#">
+<i aria-hidden="true" data-hidden="true" class="fa fa-compress"></i>
+</a>
+</div>
+
+<div class="comment-toolbar clearfix">
+<div class="toolbar-text">
+<a target="_blank" tabindex="-1" href="http://test.host/help/user/markdown">Markdown</a>
+is
+supported
+</div>
+<span class="uploading-container">
+<span class="uploading-progress-container hide">
+<i aria-hidden="true" data-hidden="true" class="fa fa-file-image-o toolbar-button-icon"></i>
+<span class="attaching-file-message">
+</span>
+<span class="uploading-progress">0%</span>
+<span class="uploading-spinner">
+<i aria-hidden="true" data-hidden="true" class="fa fa-spinner fa-spin toolbar-button-icon"></i>
+</span>
+</span>
+<span class="uploading-error-container hide">
+<span class="uploading-error-icon">
+<i aria-hidden="true" data-hidden="true" class="fa fa-file-image-o toolbar-button-icon"></i>
+</span>
+<span class="uploading-error-message">
+</span>
+<button class="retry-uploading-link" type="button">Try again</button>
+or
+<button class="attach-new-file markdown-selector" type="button">attach a new file</button>
+</span>
+<button class="markdown-selector button-attach-file btn-link" tabindex="-1" type="button">
+<i aria-hidden="true" data-hidden="true" class="fa fa-file-image-o toolbar-button-icon"></i><span class="text-attach-file">Attach a file</span></button>
+<button class="btn btn-default btn-sm hide button-cancel-uploading-files" type="button">Cancel</button>
+</span>
+</div>
+
+<div class="error-alert"></div>
+
+</div>
+<div class="md md-preview-holder js-md-preview hide" data-url="http://test.host/snippets/preview_markdown"></div>
+<div class="referenced-commands hide"></div>
+<div class="referenced-users hide">
+<span>
+<i aria-hidden="true" data-hidden="true" class="fa fa-exclamation-triangle"></i>
+You are about to add
+<strong>
+<span class="js-referenced-users-count">0</span>
+people
+</strong>
+to the discussion. Proceed with caution.
+</span>
+</div>
+</div>
+<div class="note-form-actions clearfix">
+<div class="float-left btn-group append-right-10 droplab-dropdown comment-type-dropdown js-comment-type-dropdown">
+<input class="btn btn-nr btn-success js-comment-button js-comment-submit-button" type="submit" value="Comment">
+<button name="button" type="button" class="btn btn-nr dropdown-toggle btn-success js-note-new-discussion js-disable-on-submit" data-dropdown-trigger="#resolvable-comment-menu" aria-label="Open comment type dropdown"><i aria-hidden="true" data-hidden="true" class="fa fa-caret-down toggle-icon"></i>
+</button><ul class="dropdown-menu dropdown-open-top" data-dropdown id="resolvable-comment-menu">
+<li class="droplab-item-selected" data-close-text="Comment &amp; close snippet" data-reopen-text="Comment &amp; reopen snippet" data-submit-text="Comment" data-value="" id="comment">
+<button class="btn btn-transparent">
+<i aria-hidden="true" data-hidden="true" class="fa fa-check icon"></i>
+<div class="description">
+<strong>Comment</strong>
+<p>
+Add a general comment to this snippet.
+</p>
+</div>
+</button>
+</li>
+<li class="divider droplab-item-ignore">
+<li data-close-text="Start thread &amp; close snippet" data-reopen-text="Start thread &amp; reopen snippet" data-submit-text="Start thread" data-value="DiscussionNote" id="discussion">
+<button class="btn btn-transparent">
+<i aria-hidden="true" data-hidden="true" class="fa fa-check icon"></i>
+<div class="description">
+<strong>Start thread</strong>
+<p>
+Discuss a specific suggestion or question.
+</p>
+</div>
+</button>
+</li>
+</ul>
+</div>
+
+
+<a class="btn btn-cancel js-close-discussion-note-form hide" data-cancel-text="Cancel" role="button">
+Cancel
+</a>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+</div>
+<script class="js-notes-data" type="application/json">{"notesUrl":"/snippets/1/notes","notesIds":[142],"now":1435917600,"diffView":"inline","enableGFM":{"emojis":true,"members":false,"issues":false,"mergeRequests":false,"epics":false,"milestones":false,"labels":false}}</script>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+</div>
+
+
+
+
+
+
+
+</body>
