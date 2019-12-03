@@ -1,3 +1,5 @@
 rules:
   # https://gitlab.com/gitlab-org/gitlab/issues/33025
   promise/no-nesting: off
+  # https://gitlab.com/gitlab-org/gitlab/issues/32486
+  import/order: off

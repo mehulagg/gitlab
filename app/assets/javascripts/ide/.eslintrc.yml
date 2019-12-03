@@ -3,3 +3,5 @@ rules:
   import/no-cycle: off
   # https://gitlab.com/gitlab-org/gitlab/issues/33024
   promise/no-nesting: off
+  # https://gitlab.com/gitlab-org/gitlab/issues/32486
+  import/order: off

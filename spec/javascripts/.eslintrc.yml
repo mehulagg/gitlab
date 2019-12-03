@@ -37,3 +37,5 @@ rules:
       - 'fixtures/blob'
   # Temporarily disabled to facilitate an upgrade to eslint-plugin-jasmine
   jasmine/prefer-toHaveBeenCalledWith: off
+  # https://gitlab.com/gitlab-org/gitlab/issues/32486
+  import/order: off

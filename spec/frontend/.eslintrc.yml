@@ -14,3 +14,6 @@ globals:
   loadFixtures: false
   preloadFixtures: false
   setFixtures: false
+rules:
+  # https://gitlab.com/gitlab-org/gitlab/issues/32486
+  import/order: off

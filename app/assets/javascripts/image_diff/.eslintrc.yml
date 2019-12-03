@@ -1,3 +1,5 @@
 rules:
   # https://gitlab.com/gitlab-org/gitlab/issues/28719
   import/no-cycle: off
+  # https://gitlab.com/gitlab-org/gitlab/issues/32486
+  import/order: off
