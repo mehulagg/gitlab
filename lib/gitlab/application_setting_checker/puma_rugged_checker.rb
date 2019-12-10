@@ -4,6 +4,8 @@ module Gitlab
   module ApplicationSettingChecker
     class PumaRuggedChecker
       def self.check
+        return [] unless defined?(::Puma)
+
         suboptimal_config = []
         puma_max_threads = ::Puma.cli_config.options[:max_threads]
         if puma_max_threads > 1 && Gitlab::ApplicationSettingChecker::RuggedDetector.rugged_enabled?
