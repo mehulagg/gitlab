@@ -15,6 +15,9 @@ ALLOWED = [
   'lib/gitlab/git/rugged_impl/',
   'lib/gitlab/gitaly_client/storage_settings.rb',
 
+  # Needed to detect Rugged enabled: https://gitlab.com/gitlab-org/gitlab/issues/35371
+  'lib/gitlab/application_setting_checker/rugged_detector.rb',
+
   # Needed for logging
   'config/initializers/peek.rb',
   'config/initializers/lograge.rb',
