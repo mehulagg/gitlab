@@ -657,6 +657,10 @@ class Project < ApplicationRecord
 
       from_union([with_issues_enabled, with_merge_requests_enabled]).select(:id)
     end
+
+    def sample_storages()
+      Project.preload(:project_repository).limit(5).map(&:repository).map(&:storage).concat(['default'])
+    end
   end
 
   def initialize(attributes = nil)

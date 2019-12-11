@@ -4,7 +4,7 @@ module Gitlab
   module ApplicationSettingChecker
     class RuggedDetector
       def self.sample_storages
-        Project.preload(:project_repository).limit(5).map(&:repository).map(&:storage).concat(['default']).uniq
+        Project.sample_storages
       end
 
       def self.rugged_feature_keys
