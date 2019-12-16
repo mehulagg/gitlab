@@ -39,7 +39,7 @@ describe('New Project', () => {
       projectNew.bindEvents();
       $projectPath
         .val('')
-        .keyup()
+        .trigger('keyup')
         .val(dummyImportUrl);
     });
 
@@ -57,7 +57,7 @@ describe('New Project', () => {
       });
 
       it('does not change project path if it is set by user', () => {
-        $projectPath.keyup();
+        $projectPath.trigger('keyup');
 
         projectNew.deriveProjectPathFromUrl($projectImportUrl);
 
@@ -149,7 +149,7 @@ describe('New Project', () => {
   describe('deriveSlugFromProjectName', () => {
     beforeEach(() => {
       projectNew.bindEvents();
-      $projectName.val('').keyup();
+      $projectName.val('').trigger('keyup');
     });
 
     it('converts project name to lower case and dash-limited slug', () => {

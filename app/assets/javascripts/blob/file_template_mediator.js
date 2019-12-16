@@ -88,7 +88,7 @@ export default class FileTemplateMediator {
   }
 
   prepFileContentForSubmit() {
-    this.$commitForm.submit(() => {
+    this.$commitForm.on('submit', () => {
       this.$fileContent.val(this.editor.getValue());
     });
   }

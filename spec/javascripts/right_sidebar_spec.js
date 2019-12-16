@@ -45,21 +45,21 @@ describe('RightSidebar', function() {
 
     it('should expand/collapse the sidebar when arrow is clicked', function() {
       assertSidebarState('expanded');
-      $toggle.click();
+      $toggle.trigger('click');
       assertSidebarState('collapsed');
-      $toggle.click();
+      $toggle.trigger('click');
       assertSidebarState('expanded');
     });
 
     it('should float over the page and when sidebar icons clicked', function() {
-      $labelsIcon.click();
+      $labelsIcon.trigger('click');
       assertSidebarState('expanded');
     });
 
     it('should collapse when the icon arrow clicked while it is floating on page', function() {
-      $labelsIcon.click();
+      $labelsIcon.trigger('click');
       assertSidebarState('expanded');
-      $toggle.click();
+      $toggle.trigger('click');
       assertSidebarState('collapsed');
     });
 
@@ -69,7 +69,7 @@ describe('RightSidebar', function() {
 
       const todoToggleSpy = spyOnEvent(document, 'todo:toggle');
 
-      $('.issuable-sidebar-header .js-issuable-todo').click();
+      $('.issuable-sidebar-header .js-issuable-todo').trigger('click');
 
       setTimeout(() => {
         expect(todoToggleSpy.calls.count()).toEqual(1);

@@ -174,7 +174,7 @@ $(document).on('markdown-preview:hide', (e, $form) => {
 
   // toggle content
   $form.find('.md-write-holder').show();
-  $form.find('textarea.markdown-area').focus();
+  $form.find('textarea.markdown-area').trigger('focus');
   $form.find('.md-preview-holder').hide();
   markdownToolbar.addClass('active');
 

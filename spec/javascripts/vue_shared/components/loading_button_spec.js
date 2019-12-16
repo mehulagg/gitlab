@@ -92,7 +92,7 @@ describe('LoadingButton', function() {
       });
       spyOn(vm, '$emit');
 
-      vm.$el.click();
+      vm.$el.trigger('click');
 
       expect(vm.$emit).toHaveBeenCalledWith('click', jasmine.any(Object));
     });
@@ -103,7 +103,7 @@ describe('LoadingButton', function() {
       });
       spyOn(vm, '$emit');
 
-      vm.$el.click();
+      vm.$el.trigger('click');
 
       expect(vm.$emit).not.toHaveBeenCalled();
     });

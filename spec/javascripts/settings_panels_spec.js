@@ -37,7 +37,7 @@ describe('Settings Panels', () => {
 
     expect(panel.classList.contains('expanded')).toBe(true);
 
-    $(trigger).click();
+    $(trigger).trigger('click');
 
     expect(panel.classList.contains('expanded')).toBe(false);
     expect(trigger.textContent).toEqual(originalText);

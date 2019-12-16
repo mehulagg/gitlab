@@ -24,7 +24,7 @@ describe('branches delete modal', () => {
     it('does not submit if button is disabled', () => {
       $deleteButton.attr('disabled', true);
 
-      $deleteButton.click();
+      $deleteButton.trigger('click');
 
       expect(submitSpy).not.toHaveBeenCalled();
     });
@@ -32,7 +32,7 @@ describe('branches delete modal', () => {
     it('submits if button is not disabled', () => {
       $deleteButton.attr('disabled', false);
 
-      $deleteButton.click();
+      $deleteButton.trigger('click');
 
       expect(submitSpy).toHaveBeenCalled();
     });

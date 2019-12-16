@@ -55,6 +55,6 @@ $(() => {
 
     $form.requiresInput();
     hideOrShowHelpBlock($form);
-    $('.select2.js-select-namespace').change(() => hideOrShowHelpBlock($form));
+    $('.select2.js-select-namespace').on('change', () => hideOrShowHelpBlock($form));
   });
 });

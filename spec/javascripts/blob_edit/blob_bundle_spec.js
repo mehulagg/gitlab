@@ -17,13 +17,13 @@ describe('BlobBundle', () => {
   });
 
   it('removes beforeunload listener if commit button is clicked', () => {
-    $('.js-commit-button').click();
+    $('.js-commit-button').trigger('click');
 
     expect(window.onbeforeunload).toBeNull();
   });
 
   it('removes beforeunload listener when cancel link is clicked', () => {
-    $('.btn.btn-cancel').click();
+    $('.btn.btn-cancel').trigger('click');
 
     expect(window.onbeforeunload).toBeNull();
   });

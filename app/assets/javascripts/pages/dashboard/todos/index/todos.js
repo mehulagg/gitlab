@@ -64,7 +64,7 @@ export default class Todos {
         };
 
         $formEl.find(`input[name="${mutexDropdowns[fieldName]}"]`).remove();
-        $formEl.submit();
+        $formEl.trigger('submit');
       },
     });
   }

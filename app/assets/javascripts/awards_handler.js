@@ -115,12 +115,12 @@ export class AwardsHandler {
       if ($menu.is('.is-visible')) {
         $addBtn.removeClass('is-active');
         this.hideMenuElement($menu);
-        $('.js-emoji-menu-search').blur();
+        $('.js-emoji-menu-search').trigger('blur');
       } else {
         $addBtn.addClass('is-active');
         this.positionMenu($menu, $addBtn);
         this.showMenuElement($menu);
-        $('.js-emoji-menu-search').focus();
+        $('.js-emoji-menu-search').trigger('focus');
       }
     } else {
       $addBtn.addClass('is-loading is-active');
@@ -130,7 +130,7 @@ export class AwardsHandler {
         this.positionMenu($createdMenu, $addBtn);
         return setTimeout(() => {
           this.showMenuElement($createdMenu);
-          $('.js-emoji-menu-search').focus();
+          $('.js-emoji-menu-search').trigger('focus');
         }, 200);
       });
     }

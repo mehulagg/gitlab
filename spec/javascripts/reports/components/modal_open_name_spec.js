@@ -40,7 +40,7 @@ describe('Modal open name', () => {
   it('calls openModal actions when button is clicked', () => {
     spyOn(vm, 'openModal');
 
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     expect(vm.openModal).toHaveBeenCalled();
   });

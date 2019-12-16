@@ -26,7 +26,7 @@ export default class ShortcutsIssuable extends Shortcuts {
     const documentFragment = getSelectedFragment(document.querySelector('#content-body'));
 
     if (!documentFragment) {
-      $replyField.focus();
+      $replyField.trigger('focus');
       return false;
     }
 
@@ -50,7 +50,7 @@ export default class ShortcutsIssuable extends Shortcuts {
 
       // If there is no message, just select the reply field
       if (!foundMessage) {
-        $replyField.focus();
+        $replyField.trigger('focus');
         return false;
       }
     }
@@ -77,7 +77,7 @@ export default class ShortcutsIssuable extends Shortcuts {
         $replyField.get(0).dispatchEvent(event);
 
         // Focus the input field
-        $replyField.focus();
+        $replyField.trigger('focus');
 
         return false;
       })

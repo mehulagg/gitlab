@@ -329,12 +329,12 @@ describe('glDropdown', function describeDropdown() {
 
     // select item the first time
     this.dropdownButtonElement.click();
-    $item.click();
+    $item.trigger('click');
 
     expect($item).toHaveClass('is-active');
     // select item the second time
     this.dropdownButtonElement.click();
-    $item.click();
+    $item.trigger('click');
 
     expect($item).toHaveClass('is-active');
 

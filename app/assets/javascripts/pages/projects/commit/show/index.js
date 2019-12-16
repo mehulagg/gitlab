@@ -22,8 +22,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }).bindEvents();
   initNotes();
   initChangesDropdown(document.querySelector('.navbar-gitlab').offsetHeight + performanceHeight);
-  // eslint-disable-next-line no-jquery/no-load
-  $('.commit-info.branches').load(document.querySelector('.js-commit-box').dataset.commitPath);
+  $('.commit-info.branches').on(
+    'load',
+    document.querySelector('.js-commit-box').dataset.commitPath,
+  );
   fetchCommitMergeRequests();
   initDiffNotes();
 });

@@ -38,7 +38,7 @@ describe('AwardsHandler', function() {
         } else {
           $('.js-add-award')
             .eq(0)
-            .click();
+            .trigger('click');
           const $menu = $('.emoji-menu');
           $menu.one('build-emoji-menu-finish', () => {
             isEmojiMenuBuilt = true;
@@ -63,7 +63,7 @@ describe('AwardsHandler', function() {
     it('should show emoji menu when Add emoji button clicked', function(done) {
       $('.js-add-award')
         .eq(0)
-        .click();
+        .trigger('click');
       lazyAssert(done, function() {
         const $emojiMenu = $('.emoji-menu');
 
@@ -75,7 +75,7 @@ describe('AwardsHandler', function() {
     });
 
     it('should also show emoji menu for the smiley icon in notes', function(done) {
-      $('.js-add-award.note-action-button').click();
+      $('.js-add-award.note-action-button').trigger('click');
       lazyAssert(done, function() {
         const $emojiMenu = $('.emoji-menu');
 
@@ -86,10 +86,10 @@ describe('AwardsHandler', function() {
     it('should remove emoji menu when body is clicked', function(done) {
       $('.js-add-award')
         .eq(0)
-        .click();
+        .trigger('click');
       lazyAssert(done, function() {
         const $emojiMenu = $('.emoji-menu');
-        $('body').click();
+        $('body').trigger('click');
 
         expect($emojiMenu.length).toBe(1);
         expect($emojiMenu.hasClass('is-visible')).toBe(false);
@@ -100,10 +100,10 @@ describe('AwardsHandler', function() {
     it('should not remove emoji menu when search is clicked', function(done) {
       $('.js-add-award')
         .eq(0)
-        .click();
+        .trigger('click');
       lazyAssert(done, function() {
         const $emojiMenu = $('.emoji-menu');
-        $('.emoji-search').click();
+        $('.emoji-search').trigger('click');
 
         expect($emojiMenu.length).toBe(1);
         expect($emojiMenu.hasClass('is-visible')).toBe(true);
@@ -308,7 +308,7 @@ describe('AwardsHandler', function() {
 
         expect($emoji.length).toBe(1);
         expect($block.find(emojiSelector).length).toBe(0);
-        $emoji.click();
+        $emoji.trigger('click');
 
         expect($menu.hasClass('.is-visible')).toBe(false);
         expect($block.find(emojiSelector).length).toBe(1);
@@ -328,12 +328,12 @@ describe('AwardsHandler', function() {
         .then(() => {
           $('.js-add-award')
             .eq(0)
-            .click();
+            .trigger('click');
           const $block = $('.js-awards-block');
           const $emoji = $('.emoji-menu').find(
             `.emoji-menu-list:not(.frequent-emojis) ${emojiSelector}`,
           );
-          $emoji.click();
+          $emoji.trigger('click');
 
           expect($block.find(emojiSelector).length).toBe(0);
         })

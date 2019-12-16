@@ -174,7 +174,7 @@ export default class BranchGraph {
   bindEvents() {
     const { element } = this;
 
-    return $(element).scroll(() => this.renderPartialGraph());
+    return $(element).on('scroll', () => this.renderPartialGraph());
   }
 
   scrollDown() {

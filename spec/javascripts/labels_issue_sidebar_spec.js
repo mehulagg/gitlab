@@ -30,7 +30,7 @@ function testLabelClicks(labelOrder, done) {
     const randomArrayOfLabels = _.shuffle(arrayOfLabels);
     randomArrayOfLabels.forEach((label, i) => {
       if (i < saveLabelCount) {
-        $(label).click();
+        $(label).trigger('click');
       }
     });
 

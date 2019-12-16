@@ -79,7 +79,7 @@ export default {
           this.$emit('success', e);
           // Clear the selection and blur the trigger so it loses its border
           e.clearSelection();
-          $(e.trigger).blur();
+          $(e.trigger).trigger('blur');
         })
         .on('error', e => this.$emit('error', e));
     });

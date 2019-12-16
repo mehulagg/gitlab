@@ -7,7 +7,7 @@ describe('LineHighlighter', function() {
   preloadFixtures('static/line_highlighter.html');
   const clickLine = function(number, eventData = {}) {
     if ($.isEmptyObject(eventData)) {
-      return $(`#L${number}`).click();
+      return $(`#L${number}`).trigger('click');
     } else {
       const e = $.Event('click', eventData);
       return $(`#L${number}`).trigger(e);
@@ -73,8 +73,8 @@ describe('LineHighlighter', function() {
     it('handles clicking on a child icon element', function() {
       const spy = spyOn(this['class'], 'setHash').and.callThrough();
       $('#L13 i')
-        .mousedown()
-        .click();
+        .trigger('mousedown')
+        .trigger('click');
 
       expect(spy).toHaveBeenCalledWith(13);
       expect($('#LC13')).toHaveClass(this.css);

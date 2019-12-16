@@ -27,7 +27,7 @@ export default class TreeView {
   initKeyNav() {
     const li = $('tr.tree-item');
     let liSelected = null;
-    return $('body').keydown(e => {
+    return $('body').on('keydown', e => {
       let next, path;
       if ($('input:focus').length > 0 && (e.which === 38 || e.which === 40)) {
         return false;
@@ -42,7 +42,7 @@ export default class TreeView {
         } else {
           liSelected = li.eq(0).addClass('selected');
         }
-        return $(liSelected).focus();
+        return $(liSelected).trigger('focus');
       } else if (e.which === 38) {
         if (liSelected) {
           next = liSelected.prev();
@@ -53,7 +53,7 @@ export default class TreeView {
         } else {
           liSelected = li.last().addClass('selected');
         }
-        return $(liSelected).focus();
+        return $(liSelected).trigger('focus');
       } else if (e.which === 13) {
         path = $('.tree-item.selected .tree-item-file-name a').attr('href');
         if (path) {

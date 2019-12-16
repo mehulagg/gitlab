@@ -132,7 +132,7 @@ function deferredInitialisation() {
         $('.js-select2').on('select2-close', () => {
           setTimeout(() => {
             $('.select2-container-active').removeClass('select2-container-active');
-            $(':focus').blur();
+            $(':focus').trigger('blur');
           }, 1);
         });
       })
@@ -191,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // prevent default action for disabled buttons
-  $('.btn').click(function clickDisabledButtonCallback(e) {
+  $('.btn').on('click', function clickDisabledButtonCallback(e) {
     if ($(this).hasClass('disabled')) {
       e.preventDefault();
       e.stopImmediatePropagation();
@@ -207,7 +207,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('.trigger-submit').on('change', function triggerSubmitCallback() {
     $(this)
       .parents('form')
-      .submit();
+      .trigger('submit');
   });
 
   // Disable form buttons while a form is submitting
@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // eslint-disable-next-line no-jquery/no-ajax-events
-  $(document).ajaxError((e, xhrObj) => {
+  $(document).on('ajaxError', (e, xhrObj) => {
     const ref = xhrObj.status;
 
     if (ref === 401) {

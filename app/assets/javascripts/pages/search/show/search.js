@@ -87,7 +87,7 @@ export default class Search {
   }
 
   static submitSearch() {
-    return $('.js-search-form').submit();
+    return $('.js-search-form').trigger('submit');
   }
 
   searchKeyUp() {
@@ -103,7 +103,7 @@ export default class Search {
     return $(this.searchInput)
       .val('')
       .trigger('keyup')
-      .focus();
+      .trigger('focus');
   }
 
   getProjectsData(term) {

@@ -12,11 +12,11 @@ describe('ZenMode', () => {
   preloadFixtures(fixtureName);
 
   function enterZen() {
-    $('.notes-form .js-zen-enter').click();
+    $('.notes-form .js-zen-enter').trigger('click');
   }
 
   function exitZen() {
-    $('.notes-form .js-zen-leave').click();
+    $('.notes-form .js-zen-leave').trigger('click');
   }
 
   function escapeKeydown() {

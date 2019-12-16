@@ -49,7 +49,7 @@ describe('RepoTab', () => {
 
     spyOn(vm, 'openPendingTab');
 
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     vm.$nextTick(() => {
       expect(vm.openPendingTab).not.toHaveBeenCalled();
@@ -65,7 +65,7 @@ describe('RepoTab', () => {
 
     spyOn(vm, 'clickFile');
 
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     expect(vm.clickFile).toHaveBeenCalledWith(vm.tab);
   });

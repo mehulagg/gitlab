@@ -345,7 +345,7 @@ export default class LabelsSelect {
             if ($dropdown.hasClass('js-filter-submit') && (isIssueIndex || isMRIndex)) {
               Issuable.filterResults($dropdown.closest('form'));
             } else if ($dropdown.hasClass('js-filter-submit')) {
-              $dropdown.closest('form').submit();
+              $dropdown.closest('form').trigger('submit');
             } else {
               if (!$dropdown.hasClass('js-filter-bulk-update')) {
                 saveLabelData();
@@ -405,7 +405,7 @@ export default class LabelsSelect {
               return Issuable.filterResults($dropdown.closest('form'));
             }
           } else if ($dropdown.hasClass('js-filter-submit')) {
-            return $dropdown.closest('form').submit();
+            return $dropdown.closest('form').trigger('submit');
           } else if ($dropdown.hasClass('js-issue-board-sidebar')) {
             if ($el.hasClass('is-active')) {
               boardsStore.detail.issue.labels.push(

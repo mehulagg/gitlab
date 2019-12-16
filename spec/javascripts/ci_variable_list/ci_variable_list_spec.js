@@ -105,7 +105,7 @@ describe('VariableList', () => {
         expect($inputValue.hasClass(HIDE_CLASS)).toBe(true);
 
         // Reveal values
-        $wrapper.find('.js-secret-value-reveal-button').click();
+        $wrapper.find('.js-secret-value-reveal-button').trigger('click');
 
         expect($placeholder.hasClass(HIDE_CLASS)).toBe(true);
         expect($inputValue.hasClass(HIDE_CLASS)).toBe(false);
@@ -129,7 +129,7 @@ describe('VariableList', () => {
 
     it('should not add another row when editing the last rows protected checkbox', done => {
       const $row = $wrapper.find('.js-row:last-child');
-      $row.find('.ci-variable-protected-item .js-project-feature-toggle').click();
+      $row.find('.ci-variable-protected-item .js-project-feature-toggle').trigger('click');
 
       getSetTimeoutPromise()
         .then(() => {
@@ -141,7 +141,7 @@ describe('VariableList', () => {
 
     it('should not add another row when editing the last rows masked checkbox', done => {
       const $row = $wrapper.find('.js-row:last-child');
-      $row.find('.ci-variable-masked-item .js-project-feature-toggle').click();
+      $row.find('.ci-variable-masked-item .js-project-feature-toggle').trigger('click');
 
       getSetTimeoutPromise()
         .then(() => {
@@ -158,7 +158,7 @@ describe('VariableList', () => {
 
       beforeEach(() => {
         $row = $wrapper.find('.js-row:last-child');
-        $row.find('.ci-variable-masked-item .js-project-feature-toggle').click();
+        $row.find('.ci-variable-masked-item .js-project-feature-toggle').trigger('click');
       });
 
       it('has a regex provided via a data attribute', () => {

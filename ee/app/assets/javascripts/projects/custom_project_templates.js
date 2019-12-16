@@ -80,13 +80,13 @@ const bindEvents = () => {
       .removeClass('s40')
       .appendTo($selectedIcon);
 
-    $templateProjectNameInput.focus();
+    $templateProjectNameInput.trigger('focus');
     enableCustomTemplate();
 
     const $activeTabProjectName = $('.tab-pane.active #project_name');
     const $activeTabProjectPath = $('.tab-pane.active #project_path');
-    $activeTabProjectName.focus();
-    $activeTabProjectName.keyup(() =>
+    $activeTabProjectName.trigger('focus');
+    $activeTabProjectName.on('keyup', () =>
       projectNew.onProjectNameChange($activeTabProjectName, $activeTabProjectPath),
     );
 

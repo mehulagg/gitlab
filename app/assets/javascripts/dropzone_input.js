@@ -286,7 +286,7 @@ export default function dropzoneInput(form) {
     $(this)
       .closest('.gfm-form')
       .find('.div-dropzone')
-      .click();
+      .trigger('click');
     formTextarea.focus();
   });
 

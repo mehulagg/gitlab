@@ -23,7 +23,7 @@ export default class IssuableIndex {
         .then(({ data }) => {
           $('#issuable_email')
             .val(data.new_address)
-            .focus();
+            .trigger('focus');
 
           $resetToken.text(s__('EmailToken|reset it'));
         })

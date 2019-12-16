@@ -77,7 +77,7 @@ describe('File finder item spec', () => {
   it('emits event when clicked', () => {
     spyOn(vm, '$emit');
 
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     expect(vm.$emit).toHaveBeenCalledWith('click', vm.file);
   });

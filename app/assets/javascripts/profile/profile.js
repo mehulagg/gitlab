@@ -48,7 +48,7 @@ export default class Profile {
   submitForm() {
     return $(this)
       .parents('form')
-      .submit();
+      .trigger('submit');
   }
 
   onSubmitForm(e) {

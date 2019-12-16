@@ -1235,7 +1235,7 @@ export default class Notes {
     $editForm.find('.js-form-target-type').val(targetType);
     $editForm
       .find('.js-note-text')
-      .focus()
+      .trigger('focus')
       .val(originalContent);
     $editForm.find('.js-md-write-button').trigger('click');
     $editForm.find('.referenced-users').hide();

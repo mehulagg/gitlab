@@ -201,8 +201,8 @@ const bindEvents = () => {
 
     const $activeTabProjectName = $('.tab-pane.active #project_name');
     const $activeTabProjectPath = $('.tab-pane.active #project_path');
-    $activeTabProjectName.focus();
-    $activeTabProjectName.keyup(() => {
+    $activeTabProjectName.trigger('focus');
+    $activeTabProjectName.on('keyup', () => {
       onProjectNameChange($activeTabProjectName, $activeTabProjectPath);
       hasUserDefinedProjectPath = $activeTabProjectPath.val().trim().length > 0;
     });
@@ -224,7 +224,7 @@ const bindEvents = () => {
     hasUserDefinedProjectPath = $projectPath.val().trim().length > 0;
   });
 
-  $projectImportUrl.keyup(() => deriveProjectPathFromUrl($projectImportUrl));
+  $projectImportUrl.on('keyup', () => deriveProjectPathFromUrl($projectImportUrl));
 
   $('.js-import-git-toggle-button').on('click', () => {
     const $projectMirror = $('#project_mirror');

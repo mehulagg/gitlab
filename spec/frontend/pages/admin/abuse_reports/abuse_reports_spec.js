@@ -37,10 +37,10 @@ describe('Abuse Reports', () => {
 
   it('should allow clicking a truncated message to expand and collapse the full message', () => {
     const $longMessage = findMessage('LONG MESSAGE');
-    $longMessage.click();
+    $longMessage.trigger('click');
 
     expect($longMessage.data('originalMessage').length).toEqual($longMessage.text().length);
-    $longMessage.click();
+    $longMessage.trigger('click');
     assertMaxLength($longMessage);
   });
 });

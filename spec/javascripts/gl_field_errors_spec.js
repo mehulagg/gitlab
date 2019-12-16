@@ -40,15 +40,15 @@ describe('GL Style Field Errors', function() {
     this.$form
       .find('.email')
       .val('not-a-valid-email')
-      .keyup();
+      .trigger('keyup');
     this.$form
       .find('.text-required')
       .val('')
-      .keyup();
+      .trigger('keyup');
     this.$form
       .find('.alphanumberic')
       .val('?---*')
-      .keyup();
+      .trigger('keyup');
 
     const errorsShown = this.$form.find('.gl-field-error-outline');
 
@@ -59,17 +59,17 @@ describe('GL Style Field Errors', function() {
     this.$form
       .find('.email')
       .val('not-a-valid-email')
-      .keyup();
+      .trigger('keyup');
     this.$form
       .find('.text-required')
       .val('')
-      .keyup();
+      .trigger('keyup');
     this.$form
       .find('.alphanumberic')
       .val('?---*')
-      .keyup();
+      .trigger('keyup');
 
-    this.$form.submit();
+    this.$form.trigger('submit');
 
     const errorsShown = this.$form.find('.gl-field-error-outline');
 
@@ -77,7 +77,7 @@ describe('GL Style Field Errors', function() {
   });
 
   it('should properly track validity state on input after invalid submission attempt', function() {
-    this.$form.submit();
+    this.$form.trigger('submit');
 
     const emailInputModel = this.fieldErrors.state.inputs[1];
     const fieldState = emailInputModel.state;
@@ -125,7 +125,7 @@ describe('GL Style Field Errors', function() {
   });
 
   it('should properly infer error messages', function() {
-    this.$form.submit();
+    this.$form.trigger('submit');
     const trackedInputs = this.fieldErrors.state.inputs;
     const inputHasTitle = trackedInputs[1];
     const hasTitleErrorElem = inputHasTitle.inputElement.siblings('.gl-field-error');

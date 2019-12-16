@@ -47,7 +47,7 @@ describe('Activities', () => {
     (i => {
       describe(`when selecting ${getEventName(i)}`, () => {
         beforeEach(() => {
-          $(getSelector(i)).click();
+          $(getSelector(i)).trigger('click');
         });
 
         for (let x = 0; x < filters.length; x += 1) {

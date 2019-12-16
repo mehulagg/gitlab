@@ -66,7 +66,7 @@ describe('Pipelines stage component', () => {
     });
 
     it('should close the dropdown', () => {
-      component.$el.click();
+      component.$el.trigger('click');
 
       setTimeout(() => {
         expect(component.$el.classList.contains('open')).toEqual(false);

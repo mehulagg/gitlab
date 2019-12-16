@@ -8,7 +8,7 @@ describe('Quick Submit behavior', function() {
 
   beforeEach(() => {
     loadFixtures('snippets/show.html');
-    $('form').submit(e => {
+    $('form').on('submit', e => {
       // Prevent a form submit from moving us off the testing page
       e.preventDefault();
     });

@@ -187,7 +187,7 @@ export default class MilestoneSelect {
           } else if ($dropdown.hasClass('js-filter-submit') && (isIssueIndex || isMRIndex)) {
             return Issuable.filterResults($dropdown.closest('form'));
           } else if ($dropdown.hasClass('js-filter-submit')) {
-            return $dropdown.closest('form').submit();
+            return $dropdown.closest('form').trigger('submit');
           } else if ($dropdown.hasClass('js-issue-board-sidebar')) {
             if (selected.id !== -1 && isSelecting) {
               boardStoreIssueSet(

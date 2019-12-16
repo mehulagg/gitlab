@@ -32,7 +32,7 @@ describe('IDE new entry dropdown button component', () => {
   });
 
   it('emits click event', () => {
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     expect(vm.$emit).toHaveBeenCalledWith('click');
   });

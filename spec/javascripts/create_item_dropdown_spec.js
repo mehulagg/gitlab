@@ -34,7 +34,7 @@ describe('CreateItemDropdown', () => {
 
     // Create the new item
     const $createButton = $wrapperEl.find('.js-dropdown-create-new-item');
-    $createButton.click();
+    $createButton.trigger('click');
 
     // Clear out the filter
     $wrapperEl
@@ -66,7 +66,7 @@ describe('CreateItemDropdown', () => {
 
     it('should have a dropdown item for each piece of data', () => {
       // Get the data in the dropdown
-      $('.js-dropdown-menu-toggle').click();
+      $('.js-dropdown-menu-toggle').trigger('click');
 
       const $itemEls = $wrapperEl.find('.js-dropdown-content a');
 
@@ -88,7 +88,7 @@ describe('CreateItemDropdown', () => {
       });
 
       // Open the dropdown
-      $('.js-dropdown-menu-toggle').click();
+      $('.js-dropdown-menu-toggle').trigger('click');
 
       // Filter for the new item
       $wrapperEl
@@ -104,7 +104,7 @@ describe('CreateItemDropdown', () => {
     it('should update the dropdown with the newly created item', () => {
       // Create the new item
       const $createButton = $wrapperEl.find('.js-dropdown-create-new-item');
-      $createButton.click();
+      $createButton.trigger('click');
 
       expect($wrapperEl.find('.dropdown-toggle-text').text()).toEqual(NEW_ITEM_TEXT);
       expect($wrapperEl.find('input[name="variable[environment]"]').val()).toEqual(NEW_ITEM_TEXT);
@@ -144,7 +144,7 @@ describe('CreateItemDropdown', () => {
       const filterInput = $wrapperEl.find('.dropdown-input-field');
 
       // Get the data in the dropdown
-      $('.js-dropdown-menu-toggle').click();
+      $('.js-dropdown-menu-toggle').trigger('click');
 
       // Filter for an item
       filterInput.val('one').trigger('input');
@@ -181,7 +181,7 @@ describe('CreateItemDropdown', () => {
 
     it('all items go through createNewItemFromValue', () => {
       // Get the data in the dropdown
-      $('.js-dropdown-menu-toggle').click();
+      $('.js-dropdown-menu-toggle').trigger('click');
 
       createItemAndClearInput('new-item');
 

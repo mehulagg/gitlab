@@ -75,7 +75,7 @@ export default class Shortcuts {
     const $form = $target.closest('form');
 
     if ($target.hasClass('js-note-text')) {
-      $('.js-md-preview-button', $form).focus();
+      $('.js-md-preview-button', $form).trigger('focus');
     }
     $(document).triggerHandler('markdown-preview:toggle', [e]);
   }
@@ -116,7 +116,7 @@ export default class Shortcuts {
   }
 
   static focusSearch(e) {
-    $('#search').focus();
+    $('#search').trigger('focus');
 
     if (e.preventDefault) {
       e.preventDefault();

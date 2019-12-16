@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Extract the SSH Key title from its comment
     if (comment && comment.length > 1) {
-      $title.val(comment[1]).change();
+      $title.val(comment[1]).trigger('change');
     }
   });
 

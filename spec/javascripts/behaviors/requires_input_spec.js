@@ -34,28 +34,28 @@ describe('requiresInput', () => {
     $('.js-requires-input').requiresInput();
     $('#required1')
       .val('input1')
-      .change();
+      .trigger('change');
 
     expect(submitButton).toBeDisabled();
 
     $('#optional1')
       .val('input1')
-      .change();
+      .trigger('change');
 
     expect(submitButton).toBeDisabled();
 
     $('#required2')
       .val('input2')
-      .change();
+      .trigger('change');
     $('#required3')
       .val('input3')
-      .change();
+      .trigger('change');
     $('#required4')
       .val('input4')
-      .change();
+      .trigger('change');
     $('#required5')
       .val('1')
-      .change();
+      .trigger('change');
 
     expect($('.submit')).not.toBeDisabled();
   });

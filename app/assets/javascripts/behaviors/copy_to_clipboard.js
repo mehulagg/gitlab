@@ -20,7 +20,7 @@ function genericSuccess(e) {
   showTooltip(e.trigger, __('Copied'));
   // Clear the selection and blur the trigger so it loses its border
   e.clearSelection();
-  $(e.trigger).blur();
+  $(e.trigger).trigger('blur');
 }
 
 /**

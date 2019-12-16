@@ -11,7 +11,7 @@ function openConfirmDangerModal($form, $modal, text) {
   const confirmTextMatch = $('.js-confirm-danger-match', $modal).text();
   const $submit = $('.js-confirm-danger-submit', $modal);
   $submit.disable();
-  $input.focus();
+  $input.trigger('focus');
 
   $input.off('input').on('input', function handleInput() {
     const confirmText = rstrip($(this).val());
@@ -23,7 +23,7 @@ function openConfirmDangerModal($form, $modal, text) {
   });
   $('.js-confirm-danger-submit', $modal)
     .off('click')
-    .on('click', () => $form.submit());
+    .on('click', () => $form.trigger('submit'));
 }
 
 function getModal($btn) {

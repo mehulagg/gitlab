@@ -52,7 +52,7 @@ export default class Project {
     $('.project-refs-select').on('change', function() {
       return $(this)
         .parents('form')
-        .submit();
+        .trigger('submit');
     });
     $('.hide-no-ssh-message').on('click', function(e) {
       Cookies.set('hide_no_ssh_message', 'false');

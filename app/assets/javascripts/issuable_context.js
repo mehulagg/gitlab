@@ -17,10 +17,10 @@ export default class IssuableContext {
       .catch(() => {});
 
     $('.issuable-sidebar .inline-update').on('change', 'select', function onClickSelect() {
-      return $(this).submit();
+      return $(this).trigger('submit');
     });
     $('.issuable-sidebar .inline-update').on('change', '.js-assignee', function onClickAssignee() {
-      return $(this).submit();
+      return $(this).trigger('submit');
     });
     $(document)
       .off('click', '.issuable-sidebar .dropdown-content a')

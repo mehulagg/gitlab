@@ -15,5 +15,5 @@ export default () => {
   $projectName.val(nameParam);
 
   // generate slug when project name changes
-  $projectName.keyup(() => projectNew.onProjectNameChange($projectName, $projectPath));
+  $projectName.on('keyup', () => projectNew.onProjectNameChange($projectName, $projectPath));
 };

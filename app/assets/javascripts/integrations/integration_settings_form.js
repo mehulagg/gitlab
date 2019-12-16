@@ -110,14 +110,14 @@ export default class IntegrationSettingsForm {
               title: __('Save anyway'),
               clickHandler: e => {
                 e.preventDefault();
-                this.$form.submit();
+                this.$form.trigger('submit');
               },
             };
           }
 
           flash(`${data.message} ${data.service_response}`, 'alert', document, flashActions);
         } else {
-          this.$form.submit();
+          this.$form.trigger('submit');
         }
 
         this.toggleSubmitBtnState(false);

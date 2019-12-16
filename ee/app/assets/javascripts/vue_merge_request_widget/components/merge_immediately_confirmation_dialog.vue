@@ -46,7 +46,7 @@ export default {
       this.$refs.modal.hide();
     },
     focusCancelButton() {
-      this.$refs.cancelButton.$el.focus();
+      this.$refs.cancelButton.$el.trigger('focus');
     },
   },
 };

@@ -260,7 +260,7 @@ function updateText({ textArea, tag, cursorOffset, blockTag, wrap, select, tagCo
   textArea = $textArea.get(0);
   const text = $textArea.val();
   const selected = selectedText(text, textArea) || tagContent;
-  $textArea.focus();
+  $textArea.trigger('focus');
   return insertMarkdownText({
     textArea,
     text,

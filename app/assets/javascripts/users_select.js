@@ -476,7 +476,7 @@ function UsersSelect(currentUser, els, options = {}) {
         } else if ($dropdown.hasClass('js-filter-submit') && (isIssueIndex || isMRIndex)) {
           return Issuable.filterResults($dropdown.closest('form'));
         } else if ($dropdown.hasClass('js-filter-submit')) {
-          return $dropdown.closest('form').submit();
+          return $dropdown.closest('form').trigger('submit');
         } else if (!$dropdown.hasClass('js-multiselect')) {
           const selected = $dropdown
             .closest('.selectbox')

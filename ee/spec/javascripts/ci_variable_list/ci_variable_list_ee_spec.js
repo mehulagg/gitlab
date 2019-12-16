@@ -25,7 +25,7 @@ describe('VariableList (EE features)', () => {
         const $row = $wrapper.find('.js-row:last-child');
 
         // Open the dropdown
-        $row.find('.js-variable-environment-toggle').click();
+        $row.find('.js-variable-environment-toggle').trigger('click');
 
         // Filter for the new item
         $row
@@ -34,7 +34,9 @@ describe('VariableList (EE features)', () => {
           .trigger('input');
 
         // Create the new item
-        $row.find('.js-variable-environment-dropdown-wrapper .js-dropdown-create-new-item').click();
+        $row
+          .find('.js-variable-environment-dropdown-wrapper .js-dropdown-create-new-item')
+          .trigger('click');
       }
 
       it('should add another row when editing the last rows environment dropdown', done => {
@@ -59,7 +61,7 @@ describe('VariableList (EE features)', () => {
         addRowByNewEnvironment('someenv');
 
         const $row = $wrapper.find('.js-row:last-child');
-        $row.find('.js-variable-environment-toggle').click();
+        $row.find('.js-variable-environment-toggle').trigger('click');
 
         getSetTimeoutPromise()
           .then(() => {

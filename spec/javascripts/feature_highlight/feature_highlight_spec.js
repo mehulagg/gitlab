@@ -85,7 +85,7 @@ describe('feature highlight', () => {
       const popoverId = $(selector).attr('aria-describedby');
       const toggleSpy = spyOn(popover.togglePopover, 'call');
 
-      $(`#${popoverId} .dismiss-feature-highlight`).click();
+      $(`#${popoverId} .dismiss-feature-highlight`).trigger('click');
 
       expect(toggleSpy).toHaveBeenCalled();
     });

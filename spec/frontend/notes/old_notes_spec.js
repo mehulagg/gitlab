@@ -67,7 +67,7 @@ describe('Old Notes (~/notes.js)', () => {
       jest.spyOn(Notes.prototype, 'postComment');
 
       new window.Notes('', []);
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
       expect(Notes.prototype.postComment).toHaveBeenCalled();
     });
   });
@@ -140,7 +140,7 @@ describe('Old Notes (~/notes.js)', () => {
     it('autosizes after comment submission', () => {
       textarea.text('This is an example comment note');
       expect(autosizeSpy).not.toHaveBeenCalled();
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
       expect(autosizeSpy).toHaveBeenCalled();
     });
 
@@ -150,7 +150,7 @@ describe('Old Notes (~/notes.js)', () => {
       $(textarea).text('A comment with `markup`.');
 
       deferred.reject();
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
 
       expect($(textarea).val()).toBe('A comment with `markup`.');
 
@@ -189,7 +189,7 @@ describe('Old Notes (~/notes.js)', () => {
       jest.spyOn(notes, 'revertNoteEditForm');
       jest.spyOn(notes, 'setupNewNote');
 
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
 
       const $targetNote = $notesContainer.find(`#note_${noteEntity.id}`);
       const updatedNote = Object.assign({}, noteEntity);
@@ -553,7 +553,7 @@ describe('Old Notes (~/notes.js)', () => {
     it('should show placeholder note while new comment is being posted', () => {
       mockNotesPost();
 
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
 
       expect($notesContainer.find('.note.being-posted').length).toBeGreaterThan(0);
     });
@@ -561,7 +561,7 @@ describe('Old Notes (~/notes.js)', () => {
     it('should remove placeholder note when new comment is done posting', done => {
       mockNotesPost();
 
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
 
       setImmediate(() => {
         expect($notesContainer.find('.note.being-posted').length).toEqual(0);
@@ -596,7 +596,7 @@ describe('Old Notes (~/notes.js)', () => {
     it('should show actual note element when new comment is done posting', done => {
       mockNotesPost();
 
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
 
       setImmediate(() => {
         expect($notesContainer.find(`#note_${note.id}`).length).toBeGreaterThan(0);
@@ -607,7 +607,7 @@ describe('Old Notes (~/notes.js)', () => {
     it('should reset Form when new comment is done posting', done => {
       mockNotesPost();
 
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
 
       setImmediate(() => {
         expect($form.find('textarea.js-note-text').val()).toEqual('');
@@ -619,7 +619,7 @@ describe('Old Notes (~/notes.js)', () => {
       mockNotesPostError();
       jest.spyOn(notes, 'addFlash');
 
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
 
       setImmediate(() => {
         expect(notes.addFlash).toHaveBeenCalled();
@@ -709,7 +709,7 @@ describe('Old Notes (~/notes.js)', () => {
 
     it('should remove slash command placeholder when comment with slash commands is done posting', done => {
       jest.spyOn(gl.awardsHandler, 'addAwardToEmojiBar');
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
 
       expect($notesContainer.find('.system-note.being-posted').length).toEqual(1); // Placeholder shown
 
@@ -746,13 +746,13 @@ describe('Old Notes (~/notes.js)', () => {
     });
 
     it('should not render a script tag', done => {
-      $('.js-comment-button').click();
+      $('.js-comment-button').trigger('click');
 
       setImmediate(() => {
         const $noteEl = $notesContainer.find(`#note_${note.id}`);
-        $noteEl.find('.js-note-edit').click();
+        $noteEl.find('.js-note-edit').trigger('click');
         $noteEl.find('textarea.js-note-text').html(updatedComment);
-        $noteEl.find('.js-comment-save-button').click();
+        $noteEl.find('.js-comment-save-button').trigger('click');
 
         const $updatedNoteEl = $notesContainer
           .find(`#note_${note.id}`)

@@ -29,7 +29,7 @@ describe('collapsedCalendarIcon', () => {
     const click = jest.fn();
     vm.$on('click', click);
 
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     expect(click).toHaveBeenCalled();
   });

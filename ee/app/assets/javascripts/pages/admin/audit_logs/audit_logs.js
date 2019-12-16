@@ -17,11 +17,11 @@ class AuditLogs {
 
     this.initFilterDropdown($('.js-type-filter'), 'entity_type', null, () => {
       $('.hidden-filter-value').val('');
-      $('form.filter-form').submit();
+      $('form.filter-form').trigger('submit');
     });
 
     $('.project-item-select').on('click', () => {
-      $('form.filter-form').submit();
+      $('form.filter-form').trigger('submit');
     });
   }
 
@@ -32,7 +32,7 @@ class AuditLogs {
       filterable: searchFields ? true : false,
       search: { fields: searchFields },
       data: $dropdown.data('data'),
-      clicked: () => $dropdown.closest('form.filter-form').submit(),
+      clicked: () => $dropdown.closest('form.filter-form').trigger('submit'),
     };
     if (cb) {
       dropdownOptions.clicked = cb;

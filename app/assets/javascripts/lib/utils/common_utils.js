@@ -723,7 +723,7 @@ export const addSelectOnFocusBehaviour = (selector = '.js-select-on-focus') => {
   // Prevent a mouseup event from deselecting the input
   $(selector).on('focusin', function selectOnFocusCallback() {
     $(this)
-      .select()
+      .trigger('select')
       .one('mouseup', e => {
         e.preventDefault();
       });

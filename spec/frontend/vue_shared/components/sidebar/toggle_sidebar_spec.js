@@ -25,7 +25,7 @@ describe('toggleSidebar', () => {
   it('should emit toggle event when button clicked', () => {
     const toggle = jest.fn();
     vm.$on('toggle', toggle);
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     expect(toggle).toHaveBeenCalled();
   });

@@ -24,7 +24,7 @@ describe('Batch comments publish button component', () => {
   });
 
   it('dispatches publishReview on click', () => {
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     expect(vm.$store.dispatch).toHaveBeenCalledWith('batchComments/publishReview', undefined);
   });
@@ -32,7 +32,7 @@ describe('Batch comments publish button component', () => {
   it('dispatches toggleReviewDropdown when shouldPublish is false on click', () => {
     vm.shouldPublish = false;
 
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     expect(vm.$store.dispatch).toHaveBeenCalledWith(
       'batchComments/toggleReviewDropdown',

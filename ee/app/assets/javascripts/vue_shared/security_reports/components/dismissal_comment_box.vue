@@ -52,7 +52,7 @@ export default {
     this.$emit('input', this.dismissalComment);
 
     this.$emit('clearError');
-    this.$refs.dismissalComment.$el.focus();
+    this.$refs.dismissalComment.$el.trigger('focus');
   },
   methods: {
     handleKeyPress(e) {

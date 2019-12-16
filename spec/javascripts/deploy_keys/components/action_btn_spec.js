@@ -39,7 +39,7 @@ describe('Deploy keys action btn', () => {
   it('sends eventHub event with btn type', done => {
     spyOn(eventHub, '$emit');
 
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     Vue.nextTick(() => {
       expect(eventHub.$emit).toHaveBeenCalledWith('enable.key', deployKey, jasmine.anything());
@@ -49,7 +49,7 @@ describe('Deploy keys action btn', () => {
   });
 
   it('shows loading spinner after click', done => {
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     Vue.nextTick(() => {
       expect(vm.$el.querySelector('.fa')).toBeDefined();
@@ -59,7 +59,7 @@ describe('Deploy keys action btn', () => {
   });
 
   it('disables button after click', done => {
-    vm.$el.click();
+    vm.$el.trigger('click');
 
     Vue.nextTick(() => {
       expect(vm.$el.classList.contains('disabled')).toBeTruthy();
