@@ -66,7 +66,8 @@ describe('Pipelines stage component', () => {
     });
 
     it('should close the dropdown', () => {
-      component.$el.trigger('click');
+      // eslint-disable-next-line no-jquery/no-event-shorthand
+      component.$el.click();
 
       setTimeout(() => {
         expect(component.$el.classList.contains('open')).toEqual(false);

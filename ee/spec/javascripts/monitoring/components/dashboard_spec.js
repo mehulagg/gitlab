@@ -146,7 +146,8 @@ describe('Dashboard', () => {
         const submitButton = wrapper.vm.$refs.submitCustomMetricsFormBtn;
         wrapper.setData({ formIsValid: true });
         wrapper.vm.$nextTick(() => {
-          submitButton.$el.trigger('click');
+          // eslint-disable-next-line no-jquery/no-event-shorthand
+          submitButton.$el.click();
           wrapper.vm.$nextTick(() => {
             expect(Tracking.event).toHaveBeenCalledWith(
               document.body.dataset.page,

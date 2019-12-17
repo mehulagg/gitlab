@@ -92,7 +92,8 @@ describe('LoadingButton', function() {
       });
       spyOn(vm, '$emit');
 
-      vm.$el.trigger('click');
+      // eslint-disable-next-line no-jquery/no-event-shorthand
+      vm.$el.click();
 
       expect(vm.$emit).toHaveBeenCalledWith('click', jasmine.any(Object));
     });
@@ -103,7 +104,8 @@ describe('LoadingButton', function() {
       });
       spyOn(vm, '$emit');
 
-      vm.$el.trigger('click');
+      // eslint-disable-next-line no-jquery/no-event-shorthand
+      vm.$el.click();
 
       expect(vm.$emit).not.toHaveBeenCalled();
     });

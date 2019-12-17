@@ -52,7 +52,8 @@ export default {
     this.$emit('input', this.dismissalComment);
 
     this.$emit('clearError');
-    this.$refs.dismissalComment.$el.trigger('focus');
+    // eslint-disable-next-line no-jquery/no-event-shorthand
+    this.$refs.dismissalComment.$el.focus();
   },
   methods: {
     handleKeyPress(e) {

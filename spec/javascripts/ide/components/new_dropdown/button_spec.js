@@ -32,7 +32,8 @@ describe('IDE new entry dropdown button component', () => {
   });
 
   it('emits click event', () => {
-    vm.$el.trigger('click');
+    // eslint-disable-next-line no-jquery/no-event-shorthand
+    vm.$el.click();
 
     expect(vm.$emit).toHaveBeenCalledWith('click');
   });

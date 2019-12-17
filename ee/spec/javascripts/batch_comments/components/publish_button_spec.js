@@ -24,7 +24,8 @@ describe('Batch comments publish button component', () => {
   });
 
   it('dispatches publishReview on click', () => {
-    vm.$el.trigger('click');
+    // eslint-disable-next-line no-jquery/no-event-shorthand
+    vm.$el.click();
 
     expect(vm.$store.dispatch).toHaveBeenCalledWith('batchComments/publishReview', undefined);
   });
@@ -32,7 +33,8 @@ describe('Batch comments publish button component', () => {
   it('dispatches toggleReviewDropdown when shouldPublish is false on click', () => {
     vm.shouldPublish = false;
 
-    vm.$el.trigger('click');
+    // eslint-disable-next-line no-jquery/no-event-shorthand
+    vm.$el.click();
 
     expect(vm.$store.dispatch).toHaveBeenCalledWith(
       'batchComments/toggleReviewDropdown',

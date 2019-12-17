@@ -25,7 +25,8 @@ describe('toggleSidebar', () => {
   it('should emit toggle event when button clicked', () => {
     const toggle = jest.fn();
     vm.$on('toggle', toggle);
-    vm.$el.trigger('click');
+    // eslint-disable-next-line no-jquery/no-event-shorthand
+    vm.$el.click();
 
     expect(toggle).toHaveBeenCalled();
   });

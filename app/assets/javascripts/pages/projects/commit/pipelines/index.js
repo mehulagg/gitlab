@@ -6,9 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   new MiniPipelineGraph({
     container: '.js-commit-pipeline-graph',
   }).bindEvents();
-  $('.commit-info.branches').on(
-    'load',
-    document.querySelector('.js-commit-box').dataset.commitPath,
-  );
+  // eslint-disable-next-line no-jquery/no-load, no-jquery/no-event-shorthand
+  $('.commit-info.branches').load(document.querySelector('.js-commit-box').dataset.commitPath);
   initPipelines();
 });

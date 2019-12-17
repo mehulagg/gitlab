@@ -54,7 +54,8 @@ describe('Batch comments draft preview item component', () => {
 
     spyOn(vm.$store, 'dispatch').and.stub();
 
-    vm.$el.trigger('click');
+    // eslint-disable-next-line no-jquery/no-event-shorthand
+    vm.$el.click();
 
     expect(vm.$store.dispatch).toHaveBeenCalledWith('batchComments/scrollToDraft', vm.draft);
   });

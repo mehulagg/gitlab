@@ -29,7 +29,8 @@ describe('collapsedCalendarIcon', () => {
     const click = jest.fn();
     vm.$on('click', click);
 
-    vm.$el.trigger('click');
+    // eslint-disable-next-line no-jquery/no-event-shorthand
+    vm.$el.click();
 
     expect(click).toHaveBeenCalled();
   });

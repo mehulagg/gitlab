@@ -49,7 +49,8 @@ describe('RepoTab', () => {
 
     spyOn(vm, 'openPendingTab');
 
-    vm.$el.trigger('click');
+    // eslint-disable-next-line no-jquery/no-event-shorthand
+    vm.$el.click();
 
     vm.$nextTick(() => {
       expect(vm.openPendingTab).not.toHaveBeenCalled();
@@ -65,7 +66,8 @@ describe('RepoTab', () => {
 
     spyOn(vm, 'clickFile');
 
-    vm.$el.trigger('click');
+    // eslint-disable-next-line no-jquery/no-event-shorthand
+    vm.$el.click();
 
     expect(vm.clickFile).toHaveBeenCalledWith(vm.tab);
   });

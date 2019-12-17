@@ -46,7 +46,8 @@ export default {
       this.$refs.modal.hide();
     },
     focusCancelButton() {
-      this.$refs.cancelButton.$el.trigger('focus');
+      // eslint-disable-next-line no-jquery/no-event-shorthand
+      this.$refs.cancelButton.$el.focus();
     },
   },
 };
