@@ -214,7 +214,7 @@ describe('IntegrationSettingsForm', () => {
     });
 
     it('should submit form if ajax request responds without any error in test', done => {
-      spyOn(integrationSettingsForm.$form, 'submit');
+      spyOn(integrationSettingsForm.$form, 'trigger');
 
       mock.onPut(integrationSettingsForm.testEndPoint).reply(200, {
         error: false,
@@ -223,7 +223,7 @@ describe('IntegrationSettingsForm', () => {
       integrationSettingsForm
         .testSettings(formData)
         .then(() => {
-          expect(integrationSettingsForm.$form.submit).toHaveBeenCalled();
+          expect(integrationSettingsForm.$form.trigger).toHaveBeenCalledWith('submit');
 
           done();
         })
@@ -231,7 +231,7 @@ describe('IntegrationSettingsForm', () => {
     });
 
     it('should submit form when clicked on `Save anyway` action of error Flash', done => {
-      spyOn(integrationSettingsForm.$form, 'submit');
+      spyOn(integrationSettingsForm.$form, 'trigger');
 
       const errorMessage = 'Test failed.';
       mock.onPut(integrationSettingsForm.testEndPoint).reply(200, {
@@ -250,7 +250,7 @@ describe('IntegrationSettingsForm', () => {
           $flashAction.get(0).click();
         })
         .then(() => {
-          expect(integrationSettingsForm.$form.submit).toHaveBeenCalled();
+          expect(integrationSettingsForm.$form.trigger).toHaveBeenCalledWith('submit');
 
           done();
         })
