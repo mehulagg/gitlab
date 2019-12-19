@@ -52,6 +52,7 @@ rules:
   no-jquery/no-serialize: error
   promise/always-return: off
   promise/no-callback-in-promise: off
+reportUnusedDisableDirectives: true
 overrides:
   files:
     - '**/spec/**/*'
