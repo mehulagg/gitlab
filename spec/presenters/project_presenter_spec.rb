@@ -138,7 +138,7 @@ RSpec.describe ProjectPresenter do
           allow(presenter).to receive(:can?).with(user, :read_wiki, project).and_return(false)
           allow(presenter).to receive(:can?).with(user, :read_issue, project).and_return(false)
 
-          expect(presenter.default_view).to eq('customize_workflow')
+          expect(presenter.default_view).to eq('activity')
         end
       end
     end
