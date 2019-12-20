@@ -223,7 +223,7 @@ export default {
             />
           </template>
         </design-destroyer>
-        <div class="d-flex flex-column h-100 mh-100 position-relative">
+        <div class="d-flex flex-column h-100 mh-100 position-relative overflow-auto">
           <div class="p-3">
             <gl-alert v-if="errorMessage" variant="danger" @dismiss="errorMessage = null">
               {{ errorMessage }}

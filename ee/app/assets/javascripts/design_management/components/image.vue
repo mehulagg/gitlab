@@ -13,6 +13,18 @@ export default {
       required: false,
       default: '',
     },
+    scale: {
+      type: Number,
+      required: false,
+      default: 1,
+    },
+  },
+  computed: {
+    imgStyle() {
+      return {
+        transform: `scale(${this.scale})`,
+      };
+    },
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeThrottled, false);
@@ -35,13 +47,15 @@ export default {
         const naturalRatio = contentImg.naturalWidth / contentImg.naturalHeight;
         const visibleRatio = contentImg.width / contentImg.height;
 
+        const height = contentImg.clientHeight;
+        // Handling the case where img element takes more width than visible image thanks to object-fit: contain
+        const width =
+          naturalRatio < visibleRatio
+            ? contentImg.clientHeight * naturalRatio
+            : contentImg.clientWidth;
         const position = {
-          // Handling the case where img element takes more width than visible image thanks to object-fit: contain
-          width:
-            naturalRatio < visibleRatio
-              ? contentImg.clientHeight * naturalRatio
-              : contentImg.clientWidth,
-          height: contentImg.clientHeight,
+          height: height * this.scale,
+          width: width * this.scale,
         };
 
         this.$emit('setOverlayDimensions', position);
@@ -57,6 +71,7 @@ export default {
       ref="contentImg"
       :src="image"
       :alt="name"
+      :style="imgStyle"
       class="ml-auto mr-auto img-fluid mh-100 design-image"
       @load="onImgLoad"
     />
