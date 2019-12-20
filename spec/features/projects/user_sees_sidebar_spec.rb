@@ -194,13 +194,13 @@ RSpec.describe 'Projects > User sees sidebar' do
         expect(page).not_to have_selector '.project-stats'
         expect(page).not_to have_selector '.project-last-commit'
         expect(page).not_to have_selector '.project-show-files'
-        expect(page).to have_selector '.project-show-customize_workflow'
+        expect(page).to have_selector '.project-show-activity'
       end
 
       it 'shows the customize workflow when issues and wiki are disabled' do
         visit project_path(project)
 
-        expect(page).to have_selector '.project-show-customize_workflow'
+        expect(page).to have_selector '.project-show-activity'
       end
 
       it 'shows the wiki when enabled' do
