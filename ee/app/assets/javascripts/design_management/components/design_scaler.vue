@@ -32,9 +32,9 @@ export default {
 </script>
 
 <template>
-  <div class="design-scaler d-flex-center w-100 p-3">
+  <div>
     <button class="btn" @click="decrementScale">-</button>
-    <button class="btn" :disabled="zoomScale === $options.DEFAULT_SCALE" @click="resetScale">
+    <button class="btn" :disabled="scale === $options.DEFAULT_SCALE" @click="resetScale">
       Reset
     </button>
     <button class="btn" @click="incrementScale">+</button>

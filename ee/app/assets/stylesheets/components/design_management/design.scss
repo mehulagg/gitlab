@@ -88,8 +88,12 @@
 }
 
 .design-scaler {
-  position: absolute;
   bottom: 0;
   left: 0;
   z-index: 1;
+}
+
+.design-image-wrapper {
+  top:0;
+  left: 0;
 }

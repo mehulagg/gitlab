@@ -226,25 +226,32 @@ export default {
             />
           </template>
         </design-destroyer>
-        <div class="d-flex flex-column h-100 mh-100 position-relative overflow-auto">
-          <div class="p-3">
-            <gl-alert v-if="errorMessage" variant="danger" @dismiss="errorMessage = null">
-              {{ errorMessage }}
-            </gl-alert>
+
+        <div class="h-100 w-100 position-relative">
+          <div class="design-image-wrapper position-absolute w-100 overflow-auto">
+            <div class="position-relative mh-100">
+              <div class="p-3">
+                <gl-alert v-if="errorMessage" variant="danger" @dismiss="errorMessage = null">
+                  {{ errorMessage }}
+                </gl-alert>
+              </div>
+              <design-image
+                :image="design.image"
+                :name="design.filename"
+                :scale="zoomScale"
+                @setOverlayDimensions="setOverlayDimensions"
+              />
+              <design-overlay
+                :position="overlayDimensions"
+                :notes="discussionStartingNotes"
+                :current-comment-form="annotationCoordinates"
+                @openCommentForm="openCommentForm"
+              />
+            </div>
           </div>
-          <design-image
-            :image="design.image"
-            :name="design.filename"
-            :scale="zoomScale"
-            @setOverlayDimensions="setOverlayDimensions"
-          />
-          <design-overlay
-            :position="overlayDimensions"
-            :notes="discussionStartingNotes"
-            :current-comment-form="annotationCoordinates"
-            @openCommentForm="openCommentForm"
-          />
-          <design-scaler @change="zoomScale = $event" />
+          <div class="design-scaler position-absolute d-flex-center w-100 p-3">
+            <design-scaler @change="zoomScale = $event" />
+          </div>
         </div>
       </div>
       <div class="image-notes">
