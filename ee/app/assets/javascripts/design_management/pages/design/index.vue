@@ -10,6 +10,7 @@ import DesignOverlay from '../../components/design_overlay.vue';
 import DesignDiscussion from '../../components/design_notes/design_discussion.vue';
 import DesignReplyForm from '../../components/design_notes/design_reply_form.vue';
 import DesignDestroyer from '../../components/design_destroyer.vue';
+import DesignScaler from '../../components/design_scaler.vue';
 import getDesignQuery from '../../graphql/queries/getDesign.query.graphql';
 import appDataQuery from '../../graphql/queries/appData.query.graphql';
 import createImageDiffNoteMutation from '../../graphql/mutations/createImageDiffNote.mutation.graphql';
@@ -33,6 +34,7 @@ export default {
     DesignReplyForm,
     GlLoadingIcon,
     GlAlert,
+    DesignScaler,
   },
   mixins: [allVersionsMixin],
   props: {
@@ -53,6 +55,7 @@ export default {
       projectPath: '',
       issueId: '',
       errorMessage: '',
+      zoomScale: 1,
     };
   },
   apollo: {
@@ -232,6 +235,7 @@ export default {
           <design-image
             :image="design.image"
             :name="design.filename"
+            :scale="zoomScale"
             @setOverlayDimensions="setOverlayDimensions"
           />
           <design-overlay
@@ -240,6 +244,7 @@ export default {
             :current-comment-form="annotationCoordinates"
             @openCommentForm="openCommentForm"
           />
+          <design-scaler @change="zoomScale = $event" />
         </div>
       </div>
       <div class="image-notes">

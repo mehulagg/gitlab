@@ -26,6 +26,11 @@ export default {
       };
     },
   },
+  watch: {
+    scale() {
+      return this.calculateImgSize();
+    },
+  },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeThrottled, false);
   },
