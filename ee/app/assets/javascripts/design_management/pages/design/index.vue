@@ -186,6 +186,13 @@ export default {
     setOverlayDimensions(position) {
       this.overlayDimensions.width = position.width;
       this.overlayDimensions.height = position.height;
+
+      const { imgWrapper } = this.$refs;
+      if (!imgWrapper) return;
+
+      const scrollWidth = imgWrapper.scrollWidth - imgWrapper.offsetWidth;
+      const scrollHeight = imgWrapper.scrollHeight - imgWrapper.offsetHeight;
+      imgWrapper.scrollTo(scrollWidth / 2, scrollHeight / 2);
     },
     closeDesign() {
       this.$router.push({
@@ -228,13 +235,16 @@ export default {
         </design-destroyer>
 
         <div class="h-100 w-100 position-relative">
-          <div class="design-image-wrapper position-absolute w-100 overflow-auto">
-            <div class="position-relative mh-100">
-              <div class="p-3">
-                <gl-alert v-if="errorMessage" variant="danger" @dismiss="errorMessage = null">
-                  {{ errorMessage }}
-                </gl-alert>
-              </div>
+          <div class="p-3">
+            <gl-alert v-if="errorMessage" variant="danger" @dismiss="errorMessage = null">
+              {{ errorMessage }}
+            </gl-alert>
+          </div>
+          <div
+            ref="imgWrapper"
+            class="design-image-wrapper d-flex-center position-absolute h-100 w-100 overflow-auto"
+          >
+            <div class="position-relative" style="margin:auto;">
               <design-image
                 :image="design.image"
                 :name="design.filename"

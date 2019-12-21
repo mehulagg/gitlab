@@ -19,10 +19,33 @@ export default {
       default: 1,
     },
   },
+  data() {
+    return {
+      imgDimensions: {
+        height: 0,
+        width: 0,
+      },
+    };
+  },
   computed: {
+    // containerDimensions() {
+    //   const { imgContainer } = this.$refs;
+    //   if (!imgContainer)
+    //     return {
+    //       height: 0,
+    //       width: 0,
+    //     };
+
+    //   return {
+    //     height: imgContainer.height,
+    //     width: imgContainer.width,
+    //   };
+    // },
     imgStyle() {
+      if (this.imgDimensions.width === 0) return {};
       return {
-        transform: `scale(${this.scale})`,
+        width: `${this.imgDimensions.width}px`,
+        height: `${this.imgDimensions.height}px`,
       };
     },
   },
@@ -30,7 +53,15 @@ export default {
     scale() {
       return this.calculateImgSize();
     },
+    // containerDimensions(val) {
+    //   const { contentImg } = this.$refs;
+    //   this.imgDimensions = {
+    //     width: contentImg.naturalWidth * this.scale,
+    //     height: contentImg.naturalHeight * this.scale,
+    //   };
+    // },
   },
+
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeThrottled, false);
   },
@@ -39,15 +70,19 @@ export default {
     this.resizeThrottled = _.throttle(this.onImgLoad, 400);
     window.addEventListener('resize', this.resizeThrottled, false);
   },
+
   methods: {
     onImgLoad() {
       requestIdleCallback(this.calculateImgSize, { timeout: 1000 });
     },
     calculateImgSize() {
       const { contentImg } = this.$refs;
-
       if (!contentImg) return;
 
+      this.imgDimensions = {
+        width: contentImg.naturalWidth * this.scale,
+        height: contentImg.naturalHeight * this.scale,
+      };
       this.$nextTick(() => {
         const naturalRatio = contentImg.naturalWidth / contentImg.naturalHeight;
         const visibleRatio = contentImg.width / contentImg.height;
@@ -59,8 +94,8 @@ export default {
             ? contentImg.clientHeight * naturalRatio
             : contentImg.clientWidth;
         const position = {
-          height: height * this.scale,
-          width: width * this.scale,
+          height,
+          width,
         };
 
         this.$emit('setOverlayDimensions', position);
@@ -71,13 +106,13 @@ export default {
 </script>
 
 <template>
-  <div class="d-flex align-items-center h-100 w-100 p-3 overflow-hidden js-design-image">
+  <div ref="imgContainer" class="p-3 js-design-image">
     <img
       ref="contentImg"
       :src="image"
       :alt="name"
       :style="imgStyle"
-      class="ml-auto mr-auto img-fluid mh-100 design-image"
+      class="d-block ml-auto mr-auto design-image"
       @load="onImgLoad"
     />
   </div>
