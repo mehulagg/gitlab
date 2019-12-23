@@ -162,6 +162,7 @@ describe('table registry', () => {
   describe('delete registry', () => {
     beforeEach(() => {
       wrapper.setData({ selectedItems: [0] });
+      return wrapper.vm.$nextTick();
     });
 
     it('should be possible to delete a registry', () => {
@@ -317,6 +318,7 @@ describe('table registry', () => {
     describe('single tag delete', () => {
       beforeEach(() => {
         wrapper.setData({ itemsToBeDeleted: [0] });
+        return wrapper.vm.$nextTick();
       });
 
       it('send an event when delete button is clicked', () => {
@@ -345,6 +347,7 @@ describe('table registry', () => {
       beforeEach(() => {
         const items = [0, 1, 2];
         wrapper.setData({ itemsToBeDeleted: items, selectedItems: items });
+        return wrapper.vm.$nextTick();
       });
 
       it('send an event when delete button is clicked', () => {

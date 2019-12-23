@@ -110,7 +110,9 @@ describe('Design management index page', () => {
     it('renders loading icon', () => {
       createComponent({ loading: true });
 
-      expect(wrapper.element).toMatchSnapshot();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.element).toMatchSnapshot();
+      });
     });
 
     it('renders error', () => {
@@ -154,11 +156,15 @@ describe('Design management index page', () => {
     });
 
     it('renders empty text', () => {
-      expect(wrapper.element).toMatchSnapshot();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.element).toMatchSnapshot();
+      });
     });
 
     it('does not render a toolbar with buttons', () => {
-      expect(findToolbar().exists()).toBe(false);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(findToolbar().exists()).toBe(false);
+      });
     });
   });
 

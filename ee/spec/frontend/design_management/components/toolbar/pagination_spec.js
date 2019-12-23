@@ -29,6 +29,8 @@ describe('Design management pagination component', () => {
       designs: [{ id: '1' }, { id: '2' }],
     });
 
-    expect(wrapper.element).toMatchSnapshot();
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.element).toMatchSnapshot();
+    });
   });
 });

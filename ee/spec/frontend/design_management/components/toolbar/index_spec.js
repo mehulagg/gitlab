@@ -70,13 +70,15 @@ describe('Design management toolbar component', () => {
   it('links back to designs list', () => {
     createComponent();
 
-    const link = wrapper.find('a');
+    return wrapper.vm.$nextTick().then(() => {
+      const link = wrapper.find('a');
 
-    expect(link.props('to')).toEqual({
-      name: 'designs',
-      query: {
-        version: undefined,
-      },
+      expect(link.props('to')).toEqual({
+        name: 'designs',
+        query: {
+          version: undefined,
+        },
+      });
     });
   });
 

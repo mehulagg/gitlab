@@ -132,7 +132,9 @@ describe('packages_list', () => {
     it('deleteItemConfirmation emit package:delete', () => {
       wrapper.setData({ itemToBeDeleted: { id: 2 } });
       wrapper.vm.deleteItemConfirmation();
-      expect(wrapper.emitted('package:delete')).toEqual([[2]]);
+      return wrapper.vm.$nextTick(() => {
+        expect(wrapper.emitted('package:delete')).toEqual([[2]]);
+      });
     });
 
     it('deleteItemCanceled resets itemToBeDeleted', () => {
