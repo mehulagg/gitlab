@@ -34,8 +34,10 @@ describe('Configure Feature Flags Modal', () => {
 
     it('should display an error if there is a rotate error', () => {
       wrapper.setProps({ hasRotateError: true });
-      expect(wrapper.find('.text-danger')).toExist();
-      expect(wrapper.find('[name="warning"]')).toExist();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.find('.text-danger')).toExist();
+        expect(wrapper.find('[name="warning"]')).toExist();
+      });
     });
 
     it('should be hidden if the user cannot rotate tokens', () => {

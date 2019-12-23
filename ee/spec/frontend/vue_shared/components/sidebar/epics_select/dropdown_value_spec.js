@@ -36,7 +36,9 @@ describe('EpicsSelect', () => {
             epic: {},
           });
 
-          expect(wrapper.vm.hasEpic).toBe(false);
+          return wrapper.vm.$nextTick().then(() => {
+            expect(wrapper.vm.hasEpic).toBe(false);
+          });
         });
       });
     });
@@ -60,10 +62,13 @@ describe('EpicsSelect', () => {
         wrapper.setProps({
           epic: {},
         });
-        const noValueEl = wrapper.find('span.no-value');
 
-        expect(noValueEl.exists()).toBe(true);
-        expect(noValueEl.text()).toBe('None');
+        return wrapper.vm.$nextTick().then(() => {
+          const noValueEl = wrapper.find('span.no-value');
+
+          expect(noValueEl.exists()).toBe(true);
+          expect(noValueEl.text()).toBe('None');
+        });
       });
     });
   });

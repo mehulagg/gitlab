@@ -80,6 +80,7 @@ describe('Solution Card', () => {
       describe('with download patch', () => {
         beforeEach(() => {
           wrapper.setProps({ hasDownload: true });
+          return wrapper.vm.$nextTick();
         });
 
         it('renders the learn more about remediation solutions', () => {
@@ -90,7 +91,9 @@ describe('Solution Card', () => {
 
         it('does not render the download and apply solution message when there is a file download and a merge request already exists', () => {
           wrapper.setProps({ hasMr: true });
-          expect(wrapper.contains('.card-footer')).toBe(false);
+          return wrapper.vm.$nextTick().then(() => {
+            expect(wrapper.contains('.card-footer')).toBe(false);
+          });
         });
 
         it('renders the create a merge request to implement this solution message', () => {

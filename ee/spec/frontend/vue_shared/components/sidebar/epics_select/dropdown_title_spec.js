@@ -31,11 +31,13 @@ describe('EpicsSelect', () => {
           isLoading: true,
         });
 
-        const titleEl = wrapper.find('.flex-grow-1');
+        return wrapper.vm.$nextTick().then(() => {
+          const titleEl = wrapper.find('.flex-grow-1');
 
-        expect(titleEl.exists()).toBe(true);
-        expect(titleEl.find('span').classes()).toContain('align-text-top');
-        expect(titleEl.find('span').text()).toBe('Epic');
+          expect(titleEl.exists()).toBe(true);
+          expect(titleEl.find('span').classes()).toContain('align-text-top');
+          expect(titleEl.find('span').text()).toBe('Epic');
+        });
       });
 
       it('should render loading icon when `isLoading` prop is true', () => {
@@ -43,7 +45,9 @@ describe('EpicsSelect', () => {
           isLoading: true,
         });
 
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+        });
       });
 
       it('should render edit link when `canEdit` prop is true', () => {
@@ -51,11 +55,13 @@ describe('EpicsSelect', () => {
           canEdit: true,
         });
 
-        const editEl = wrapper.find(GlLink);
+        return wrapper.vm.$nextTick().then(() => {
+          const editEl = wrapper.find(GlLink);
 
-        expect(editEl.exists()).toBe(true);
-        expect(editEl.classes()).toContain('sidebar-dropdown-toggle');
-        expect(editEl.text()).toBe('Edit');
+          expect(editEl.exists()).toBe(true);
+          expect(editEl.classes()).toContain('sidebar-dropdown-toggle');
+          expect(editEl.text()).toBe('Edit');
+        });
       });
     });
   });
