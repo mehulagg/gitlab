@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require './db/fixtures/sidekiq_middleware'
+
 Gitlab::Seeder.quiet do
   dev_ops_score_metric = DevOpsScore::Metric.new(
     leader_issues: 10.2,

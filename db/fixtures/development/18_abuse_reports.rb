@@ -1,3 +1,7 @@
+# frozen_string_literal: true
+
+require './db/fixtures/sidekiq_middleware'
+
 module Db
   module Fixtures
     module Development

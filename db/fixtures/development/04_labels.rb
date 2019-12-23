@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require './db/fixtures/sidekiq_middleware'
+
 require 'digest/md5'
 
 class Gitlab::Seeder::GroupLabels

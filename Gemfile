@@ -360,9 +360,6 @@ group :development, :test do
   # Prevent occasions where minitest is not bundled in packaged versions of ruby (see #3826)
   gem 'minitest', '~> 5.11.0'
 
-  # Generate Fake data
-  gem 'ffaker', '~> 2.10'
-
   gem 'spring', '~> 2.0.0'
   gem 'spring-commands-rspec', '~> 1.0.4'
 
@@ -415,6 +412,9 @@ group :test do
   gem 'rspec_junit_formatter'
   gem 'guard-rspec'
 end
+
+# Generate Fake data
+gem 'ffaker', '~> 2.10'
 
 gem 'octokit', '~> 4.15'
 

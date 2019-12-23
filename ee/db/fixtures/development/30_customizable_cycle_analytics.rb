@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './spec/support/sidekiq_middleware'
+require './db/fixtures/sidekiq_middleware'
 
 class Gitlab::Seeder::CustomizableCycleAnalytics
   attr_reader :project, :group, :user

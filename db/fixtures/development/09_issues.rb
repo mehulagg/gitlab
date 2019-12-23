@@ -1,4 +1,6 @@
-require './spec/support/sidekiq_middleware'
+# frozen_string_literal: true
+
+require './db/fixtures/sidekiq_middleware'
 
 Gitlab::Seeder.quiet do
   Rake::Task["gitlab:seed:issues"].invoke

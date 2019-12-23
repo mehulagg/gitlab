@@ -1,4 +1,4 @@
-require './spec/support/sidekiq_middleware'
+require './db/fixtures/sidekiq_middleware'
 require './spec/support/helpers/test_env'
 
 class Gitlab::Seeder::Burndown

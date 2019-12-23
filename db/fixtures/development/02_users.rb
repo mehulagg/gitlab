@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require './db/fixtures/sidekiq_middleware'
+
 class Gitlab::Seeder::Users
   include ActionView::Helpers::NumberHelper
 

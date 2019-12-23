@@ -1,4 +1,6 @@
-require './spec/support/sidekiq_middleware'
+# frozen_string_literal: true
+
+require './db/fixtures/sidekiq_middleware'
 
 class Gitlab::Seeder::Projects
   include ActionView::Helpers::NumberHelper
@@ -109,7 +111,7 @@ class Gitlab::Seeder::Projects
         name: group_path.titleize,
         path: group_path
       )
-      group.description = FFaker::Lorem.sentence
+      group.description = ::FFaker::Lorem.sentence
       group.save!
 
       group.add_owner(User.first)
@@ -121,7 +123,7 @@ class Gitlab::Seeder::Projects
       import_url: url,
       namespace_id: group.id,
       name: project_path.titleize,
-      description: FFaker::Lorem.sentence,
+      description: ::FFaker::Lorem.sentence,
       visibility_level: Gitlab::VisibilityLevel.values.sample,
       skip_disk_validation: true
     }

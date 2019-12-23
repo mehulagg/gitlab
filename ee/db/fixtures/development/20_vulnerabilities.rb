@@ -1,4 +1,4 @@
-require './spec/support/sidekiq_middleware'
+require './db/fixtures/sidekiq_middleware'
 
 class Gitlab::Seeder::Vulnerabilities
   attr_reader :project

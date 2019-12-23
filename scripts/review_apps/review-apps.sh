@@ -306,6 +306,19 @@ EOF
   eval "${HELM_CMD}"
 }
 
+function add_review_seeds() {
+  task_runner_pod=$(get_pod "task-runner");
+  if [ -z "${task_runner_pod}" ]; then echo "Task runner pod not found" && return; fi
+
+  kubectl -n "$KUBE_NAMESPACE" exec ${task_runner_pod} -it -- gitlab-rake db:seed_fu RAILS_ENV=production FIXTURE_PATH=db/fixtures/development FILTER=03_project,14_pipelines
+
+  # kubectl -n "$KUBE_NAMESPACE" exec ${task_runner_pod} -it -- gitlab-rails runner -e production 'puts "With #{Project.count} projects"'
+
+  # kubectl -n "$KUBE_NAMESPACE" exec ${task_runner_pod} -it -- gitlab-rake db:seed_fu FIXTURE_PATH=ee/db/fixtures/development FILTER=vulnerabilities
+
+  # kubectl -n "$KUBE_NAMESPACE" exec ${task_runner_pod} -it -- gitlab-rails runner -e production 'puts "Added #{Vulnerabilities::Occurrence.count} vulnerabilities"'
+}
+
 function display_deployment_debug() {
   local namespace="${KUBE_NAMESPACE}"
   local release="${CI_ENVIRONMENT_SLUG}"

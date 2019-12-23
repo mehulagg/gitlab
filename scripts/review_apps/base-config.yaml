@@ -61,11 +61,11 @@ gitlab:
   task-runner:
     resources:
       requests:
-        cpu: 50m
-        memory: 350M
-      limits:
         cpu: 100m
-        memory: 700M
+        memory: 650M
+      limits:
+        cpu: 200m
+        memory: 1300M
   unicorn:
     resources:
       requests:

@@ -94,6 +94,21 @@ review-deploy:
     expire_in: 2 days
     when: always
 
+.review-seed-base:
+  extends: .review-workflow-base
+  stage: review
+  allow_failure: true
+  before_script:
+    - source scripts/utils.sh
+    - install_api_client_dependencies_with_apk
+    - source scripts/review_apps/review-apps.sh
+  script:
+    - add_review_seeds
+
+review-seed-data:
+  extends: .review-seed-base
+  when: manual
+
 .review-stop-base:
   extends: .review-workflow-base
   environment:

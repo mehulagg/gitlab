@@ -1,5 +1,6 @@
-require './spec/support/sidekiq_middleware'
+# frozen_string_literal: true
 
+require './db/fixtures/sidekiq_middleware'
 
 # Creating keys runs a gitlab-shell worker. Since we may not have the right
 # gitlab-shell path set (yet) we need to disable this for these fixtures.
