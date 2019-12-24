@@ -11,6 +11,7 @@ describe('KnativeDomainEditor', () => {
 
   const createComponent = (props = {}) => {
     wrapper = shallowMount(KnativeDomainEditor, {
+      sync: false,
       propsData: { ...props },
     });
   };

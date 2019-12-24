@@ -12,6 +12,7 @@ describe('LoadingButton', () => {
 
   const buildWrapper = (propsData = {}) => {
     wrapper = shallowMount(LoadingButton, {
+      sync: false,
       propsData,
     });
   };

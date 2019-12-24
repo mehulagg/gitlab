@@ -12,6 +12,8 @@ describe('Daterange component', () => {
 
   const factory = (props = defaultProps) => {
     wrapper = mount(Daterange, {
+      sync: false,
+
       propsData: {
         ...defaultProps,
         ...props,

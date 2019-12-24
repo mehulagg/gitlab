@@ -29,6 +29,7 @@ describe('PackageInformation', () => {
     };
 
     wrapper = shallowMount(PackageInformation, {
+      sync: false,
       propsData,
     });
   }

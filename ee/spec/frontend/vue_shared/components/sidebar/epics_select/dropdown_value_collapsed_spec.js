@@ -11,9 +11,12 @@ describe('EpicsSelect', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(DropdownValueCollapsed, {
+        sync: false,
+
         directives: {
           GlTooltip: {},
         },
+
         propsData: {
           epic: mockEpic1,
         },

@@ -24,6 +24,8 @@ describe('CreateEksCluster', () => {
     });
 
     vm = shallowMount(CreateEksCluster, {
+      sync: false,
+
       propsData: {
         gitlabManagedClusterHelpPath,
         accountAndExternalIdsHelpPath,
@@ -31,6 +33,7 @@ describe('CreateEksCluster', () => {
         externalLinkIcon,
         kubernetesIntegrationHelpPath,
       },
+
       localVue,
       store,
     });

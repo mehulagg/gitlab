@@ -14,6 +14,8 @@ describe('EpicsSelect', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(DropdownContents, {
+        sync: false,
+
         propsData: {
           epics,
           selectedEpic: mockEpic1,

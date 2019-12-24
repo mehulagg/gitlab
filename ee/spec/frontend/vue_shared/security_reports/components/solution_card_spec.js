@@ -20,21 +20,30 @@ describe('Solution Card', () => {
     describe('solutionText', () => {
       it('takes the value of solution', () => {
         const propsData = { solution };
-        wrapper = shallowMount(Component, { propsData });
+        wrapper = shallowMount(Component, {
+          sync: false,
+          propsData,
+        });
 
         expect(wrapper.vm.solutionText).toEqual(solution);
       });
 
       it('takes the summary from a remediation', () => {
         const propsData = { remediation };
-        wrapper = shallowMount(Component, { propsData });
+        wrapper = shallowMount(Component, {
+          sync: false,
+          propsData,
+        });
 
         expect(wrapper.vm.solutionText).toEqual(remediation.summary);
       });
 
       it('takes the summary from a remediation, if both are defined', () => {
         const propsData = { remediation, solution };
-        wrapper = shallowMount(Component, { propsData });
+        wrapper = shallowMount(Component, {
+          sync: false,
+          propsData,
+        });
 
         expect(wrapper.vm.solutionText).toEqual(remediation.summary);
       });
@@ -45,7 +54,10 @@ describe('Solution Card', () => {
     describe('with solution', () => {
       beforeEach(() => {
         const propsData = { solution };
-        wrapper = shallowMount(Component, { propsData });
+        wrapper = shallowMount(Component, {
+          sync: false,
+          propsData,
+        });
       });
 
       it('renders the solution text and label', () => {
@@ -64,7 +76,10 @@ describe('Solution Card', () => {
     describe('with remediation', () => {
       beforeEach(() => {
         const propsData = { remediation, vulnerabilityFeedbackHelpPath, hasRemediation: true };
-        wrapper = shallowMount(Component, { propsData });
+        wrapper = shallowMount(Component, {
+          sync: false,
+          propsData,
+        });
       });
 
       it('renders the solution text and label', () => {

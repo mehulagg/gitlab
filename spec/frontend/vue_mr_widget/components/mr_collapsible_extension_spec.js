@@ -10,9 +10,12 @@ describe('Merge Request Collapsible Extension', () => {
 
   const mountComponent = props => {
     wrapper = mount(MrCollapsibleSection, {
+      sync: false,
+
       propsData: {
         ...props,
       },
+
       slots: {
         default: '<div class="js-slot">Foo</div>',
       },

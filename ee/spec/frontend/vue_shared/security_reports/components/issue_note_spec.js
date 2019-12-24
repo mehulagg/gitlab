@@ -23,6 +23,7 @@ describe('Issue note', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(component, {
+        sync: false,
         propsData: { feedback },
       });
     });
@@ -45,6 +46,7 @@ describe('Issue note', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(component, {
+        sync: false,
         propsData: { feedback, project },
       });
     });
@@ -63,6 +65,8 @@ describe('Issue note', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(component, {
+        sync: false,
+
         propsData: {
           feedback,
           project: unsafeProject,

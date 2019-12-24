@@ -18,6 +18,7 @@ describe('GeoDesignTimeAgo', () => {
 
   const createComponent = () => {
     wrapper = mount(localVue.extend(GeoDesignTimeAgo), {
+      sync: false,
       localVue,
       store,
       propsData,

@@ -6,6 +6,8 @@ describe('Design management pagination component', () => {
 
   function createComponent() {
     wrapper = shallowMount(Pagination, {
+      sync: false,
+
       propsData: {
         id: '2',
       },

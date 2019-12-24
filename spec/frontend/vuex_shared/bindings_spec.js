@@ -24,6 +24,8 @@ describe('Binding utils', () => {
 
     it('set function invokes $store.dispatch', () => {
       const context = shallowMount(dummyComponent, {
+        sync: false,
+
         mocks: {
           $store: {
             dispatch: jest.fn(),
@@ -35,6 +37,8 @@ describe('Binding utils', () => {
     });
     it('get function returns $store.state[root][key]', () => {
       const context = shallowMount(dummyComponent, {
+        sync: false,
+
         mocks: {
           $store: {
             state: {

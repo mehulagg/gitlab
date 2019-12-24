@@ -13,6 +13,8 @@ describe('Package code instruction', () => {
 
   function createComponent(props = {}) {
     wrapper = mount(CodeInstruction, {
+      sync: false,
+
       propsData: {
         ...defaultProps,
         ...props,

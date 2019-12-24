@@ -50,6 +50,7 @@ describe('Visual Review App Link', () => {
   describe('renders the modal', () => {
     beforeEach(() => {
       wrapper = shallowMount(Component, {
+        sync: false,
         propsData,
         localVue,
       });

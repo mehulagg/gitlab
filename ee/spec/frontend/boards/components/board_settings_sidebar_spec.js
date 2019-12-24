@@ -30,6 +30,7 @@ describe('BoardSettingsSideBar', () => {
     });
 
     wrapper = shallowMount(BoardSettingsSidebar, {
+      sync: false,
       store,
       localVue,
     });

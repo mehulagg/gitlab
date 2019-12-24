@@ -18,6 +18,7 @@ describe('GeoDesignsEmptyState', () => {
 
   const createComponent = () => {
     wrapper = mount(localVue.extend(GeoDesignsEmptyState), {
+      sync: false,
       localVue,
       store,
       propsData,

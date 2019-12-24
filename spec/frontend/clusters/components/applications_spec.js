@@ -376,7 +376,10 @@ describe('Applications', () => {
     let knativeDomainEditor;
 
     beforeEach(() => {
-      wrapper = shallowMount(Applications, { propsData });
+      wrapper = shallowMount(Applications, {
+        sync: false,
+        propsData,
+      });
       jest.spyOn(eventHub, '$emit');
 
       knativeDomainEditor = wrapper.find(KnativeDomainEditor);
@@ -420,7 +423,10 @@ describe('Applications', () => {
 
     let wrapper;
     beforeEach(() => {
-      wrapper = shallowMount(Applications, { propsData });
+      wrapper = shallowMount(Applications, {
+        sync: false,
+        propsData,
+      });
     });
     afterEach(() => {
       wrapper.destroy();

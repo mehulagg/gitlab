@@ -6,6 +6,8 @@ describe('File row header component', () => {
 
   function createComponent(path) {
     vm = shallowMount(FileRowHeader, {
+      sync: false,
+
       propsData: {
         path,
       },

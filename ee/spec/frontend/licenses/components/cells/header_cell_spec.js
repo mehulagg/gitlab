@@ -6,6 +6,8 @@ describe('HeaderCell', () => {
 
   function createComponent() {
     wrapper = shallowMount(HeaderCell, {
+      sync: false,
+
       propsData: {
         title: 'title',
         icon: 'retry',

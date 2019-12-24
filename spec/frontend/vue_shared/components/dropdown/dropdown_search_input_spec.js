@@ -9,6 +9,7 @@ describe('DropdownSearchInputComponent', () => {
   };
   const buildVM = (propsData = defaultProps) => {
     wrapper = mount(DropdownSearchInputComponent, {
+      sync: false,
       propsData,
     });
   };
@@ -49,7 +50,9 @@ describe('DropdownSearchInputComponent', () => {
 
       wrapper.setProps({ focused: true });
 
-      expect(inputEl.focus).toHaveBeenCalled();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(inputEl.focus).toHaveBeenCalled();
+      });
     });
   });
 });

@@ -7,6 +7,8 @@ describe('ReportItem', () => {
   describe('showReportSectionStatusIcon', () => {
     it('does not render CI Status Icon when showReportSectionStatusIcon is false', () => {
       const wrapper = shallowMount(ReportItem, {
+        sync: false,
+
         propsData: {
           issue: { foo: 'bar' },
           component: componentNames.TestIssueBody,
@@ -20,6 +22,8 @@ describe('ReportItem', () => {
 
     it('shows status icon when unspecified', () => {
       const wrapper = shallowMount(ReportItem, {
+        sync: false,
+
         propsData: {
           issue: { foo: 'bar' },
           component: componentNames.TestIssueBody,

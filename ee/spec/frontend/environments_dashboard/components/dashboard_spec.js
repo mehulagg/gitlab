@@ -39,9 +39,11 @@ describe('dashboard', () => {
     };
 
     wrapper = shallowMount(Component, {
+      sync: false,
       propsData,
       localVue,
       store,
+
       methods: {
         ...actionSpies,
       },
@@ -144,7 +146,10 @@ describe('dashboard', () => {
 
       it('should get the page info from the state', () => {
         store.state.pageInfo = { totalResults: 100 };
-        expect(wrapper.find(ProjectSelector).props('totalResults')).toBe(100);
+
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.find(ProjectSelector).props('totalResults')).toBe(100);
+        });
       });
     });
   });

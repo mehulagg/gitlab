@@ -30,6 +30,7 @@ describe('SuggestionDiffRow', () => {
     const localVue = createLocalVue();
 
     wrapper = shallowMount(SuggestionDiffRow, {
+      sync: false,
       localVue,
       ...options,
     });

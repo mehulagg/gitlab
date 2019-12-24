@@ -6,6 +6,8 @@ describe('Diff viewer mode changed component', () => {
 
   beforeEach(() => {
     vm = shallowMount(ModeChanged, {
+      sync: false,
+
       propsData: {
         aMode: '123',
         bMode: '321',

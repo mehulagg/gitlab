@@ -17,7 +17,9 @@ describe('securityReportMixin', () => {
     };
 
     // Mount the component so that the mixin's computed properties are evaluated.
-    const { vm } = shallowMount(component);
+    const { vm } = shallowMount(component, {
+      sync: false,
+    });
 
     // Get the link that the mixin generated.
     const mixinLink = vm[`${key}Popover`].content; // 'key' -> 'keyPopover'

@@ -19,8 +19,10 @@ describe('GeoDesignsFilterBar', () => {
 
   const createComponent = () => {
     wrapper = mount(localVue.extend(GeoDesignsFilterBar), {
+      sync: false,
       localVue,
       store,
+
       methods: {
         ...actionSpies,
       },

@@ -17,6 +17,7 @@ describe('Expand button', () => {
     const localVue = createLocalVue();
 
     wrapper = mount(localVue.extend(ExpandButton), {
+      sync: false,
       localVue,
       ...options,
     });

@@ -8,7 +8,10 @@ describe('Repository tree page component', () => {
   let wrapper;
 
   function factory(path) {
-    wrapper = shallowMount(TreePage, { propsData: { path } });
+    wrapper = shallowMount(TreePage, {
+      sync: false,
+      propsData: { path },
+    });
   }
 
   afterEach(() => {

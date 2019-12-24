@@ -19,8 +19,10 @@ describe('GeoDesigns', () => {
 
   const createComponent = () => {
     wrapper = mount(localVue.extend(GeoDesigns), {
+      sync: false,
       localVue,
       store,
+
       methods: {
         ...actionSpies,
       },

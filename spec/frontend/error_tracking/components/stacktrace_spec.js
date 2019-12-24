@@ -18,6 +18,8 @@ describe('ErrorDetails', () => {
 
   function mountComponent(entries) {
     wrapper = shallowMount(Stacktrace, {
+      sync: false,
+
       propsData: {
         entries,
       },

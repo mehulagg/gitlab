@@ -6,12 +6,15 @@ describe('MR Popover', () => {
 
   beforeEach(() => {
     wrapper = shallowMount(MRPopover, {
+      sync: false,
+
       propsData: {
         target: document.createElement('a'),
         projectPath: 'foo/bar',
         mergeRequestIID: '1',
         mergeRequestTitle: 'MR Title',
       },
+
       mocks: {
         $apollo: {
           loading: false,
@@ -23,7 +26,9 @@ describe('MR Popover', () => {
   it('shows skeleton-loader while apollo is loading', () => {
     wrapper.vm.$apollo.loading = true;
 
-    expect(wrapper.element).toMatchSnapshot();
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.element).toMatchSnapshot();
+    });
   });
 
   describe('loaded state', () => {

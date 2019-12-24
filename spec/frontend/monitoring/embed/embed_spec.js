@@ -16,8 +16,10 @@ describe('Embed', () => {
 
   function mountComponent() {
     wrapper = shallowMount(Embed, {
+      sync: false,
       localVue,
       store,
+
       propsData: {
         dashboardUrl: TEST_HOST,
       },

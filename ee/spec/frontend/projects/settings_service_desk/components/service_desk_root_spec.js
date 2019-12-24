@@ -28,6 +28,8 @@ describe('ServiceDeskRoot', () => {
     axiosMock.onGet(endpoint).replyOnce(httpStatusCodes.OK);
 
     wrapper = shallowMount(ServiceDeskRoot, {
+      sync: false,
+
       propsData: {
         initialIsEnabled: true,
         initialIncomingEmail: '',
@@ -47,6 +49,8 @@ describe('ServiceDeskRoot', () => {
     axiosMock.onGet(endpoint).replyOnce(httpStatusCodes.OK);
 
     wrapper = shallowMount(ServiceDeskRoot, {
+      sync: false,
+
       propsData: {
         initialIsEnabled: true,
         initialIncomingEmail,
@@ -66,6 +70,8 @@ describe('ServiceDeskRoot', () => {
     axiosMock.onGet(endpoint).networkError();
 
     wrapper = shallowMount(ServiceDeskRoot, {
+      sync: false,
+
       propsData: {
         initialIsEnabled: true,
         initialIncomingEmail: '',

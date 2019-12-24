@@ -10,6 +10,8 @@ describe('EpicsSelect', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(DropdownTitle, {
+        sync: false,
+
         propsData: {
           canEdit: false,
           blockTitle: 'Epic',

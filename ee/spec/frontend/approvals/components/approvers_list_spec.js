@@ -17,6 +17,7 @@ describe('ApproversList', () => {
 
   const factory = (options = {}) => {
     wrapper = shallowMount(localVue.extend(ApproversList), {
+      sync: false,
       ...options,
       localVue,
       propsData,

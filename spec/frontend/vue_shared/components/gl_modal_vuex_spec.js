@@ -34,6 +34,7 @@ describe('GlModalVuex', () => {
     };
 
     wrapper = shallowMount(localVue.extend(GlModalVuex), {
+      sync: false,
       ...options,
       localVue,
       store,

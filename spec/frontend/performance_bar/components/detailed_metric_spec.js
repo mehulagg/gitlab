@@ -5,6 +5,8 @@ import RequestWarning from '~/performance_bar/components/request_warning.vue';
 describe('detailedMetric', () => {
   const createComponent = props =>
     shallowMount(DetailedMetric, {
+      sync: false,
+
       propsData: {
         ...props,
       },

@@ -28,6 +28,7 @@ describe('LicenseCardBody', () => {
     propsData = Object.assign({}, defaultProps, props);
 
     wrapper = shallowMount(LicenseCardBody, {
+      sync: false,
       propsData,
     });
   }

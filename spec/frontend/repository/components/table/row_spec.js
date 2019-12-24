@@ -15,15 +15,19 @@ function factory(propsData = {}) {
   };
 
   vm = shallowMount(TableRow, {
+    sync: false,
+
     propsData: {
       ...propsData,
       name: propsData.path,
       projectPath: 'gitlab-org/gitlab-ce',
       url: `https://test.com`,
     },
+
     mocks: {
       $router,
     },
+
     stubs: {
       RouterLink: RouterLinkStub,
     },

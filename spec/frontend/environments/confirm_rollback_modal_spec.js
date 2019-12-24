@@ -20,6 +20,8 @@ describe('Confirm Rollback Modal Component', () => {
 
   it('should show "Rollback" when isLastDeployment is false', () => {
     const component = shallowMount(ConfirmRollbackModal, {
+      sync: false,
+
       propsData: {
         environment: {
           ...environment,
@@ -38,6 +40,8 @@ describe('Confirm Rollback Modal Component', () => {
 
   it('should show "Re-deploy" when isLastDeployment is true', () => {
     const component = shallowMount(ConfirmRollbackModal, {
+      sync: false,
+
       propsData: {
         environment: {
           ...environment,
@@ -57,6 +61,8 @@ describe('Confirm Rollback Modal Component', () => {
   it('should emit the "rollback" event when "ok" is clicked', () => {
     environment = { ...environment, isLastDeployment: true };
     const component = shallowMount(ConfirmRollbackModal, {
+      sync: false,
+
       propsData: {
         environment,
       },

@@ -5,6 +5,8 @@ let vm;
 
 function factory(currentPath) {
   vm = shallowMount(DirectoryDownloadLinks, {
+    sync: false,
+
     propsData: {
       currentPath,
       links: [{ text: 'zip', path: 'http://test.com/' }, { text: 'tar', path: 'http://test.com/' }],

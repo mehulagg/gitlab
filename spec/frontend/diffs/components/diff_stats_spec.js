@@ -4,6 +4,8 @@ import DiffStats from '~/diffs/components/diff_stats.vue';
 describe('diff_stats', () => {
   it('does not render a group if diffFileLengths is not passed in', () => {
     const wrapper = shallowMount(DiffStats, {
+      sync: false,
+
       propsData: {
         addedLines: 1,
         removedLines: 2,
@@ -16,6 +18,8 @@ describe('diff_stats', () => {
 
   it('shows amount of files changed, lines added and lines removed when passed all props', () => {
     const wrapper = shallowMount(DiffStats, {
+      sync: false,
+
       propsData: {
         addedLines: 100,
         removedLines: 200,

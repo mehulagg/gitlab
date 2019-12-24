@@ -21,7 +21,10 @@ describe('GitLab Feature Flags Plugin', () => {
       template: `<span></span>`,
       inject: ['glFeatures'],
     };
-    const wrapper = shallowMount(component, { localVue });
+    const wrapper = shallowMount(component, {
+      sync: false,
+      localVue,
+    });
     expect(wrapper.vm.glFeatures).toEqual({
       aFeature: true,
       bFeature: false,
@@ -33,7 +36,10 @@ describe('GitLab Feature Flags Plugin', () => {
       template: `<span></span>`,
       mixins: [glFeatureFlagsMixin()],
     };
-    const wrapper = shallowMount(component, { localVue });
+    const wrapper = shallowMount(component, {
+      sync: false,
+      localVue,
+    });
     expect(wrapper.vm.glFeatures).toEqual({
       aFeature: true,
       bFeature: false,

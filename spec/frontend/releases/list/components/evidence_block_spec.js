@@ -13,6 +13,7 @@ describe('Evidence Block', () => {
     const localVue = createLocalVue();
 
     wrapper = mount(localVue.extend(EvidenceBlock), {
+      sync: false,
       localVue,
       ...options,
     });

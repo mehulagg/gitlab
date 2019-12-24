@@ -13,7 +13,9 @@ describe('error tracking settings project dropdown', () => {
 
   function mountComponent() {
     wrapper = shallowMount(ProjectDropdown, {
+      sync: false,
       localVue,
+
       propsData: {
         ..._.pick(
           defaultProps,

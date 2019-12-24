@@ -8,6 +8,7 @@ describe(`TimelineEntryItem`, () => {
     const localVue = createLocalVue();
 
     wrapper = shallowMount(TimelineEntryItem, {
+      sync: false,
       localVue,
       ...options,
     });

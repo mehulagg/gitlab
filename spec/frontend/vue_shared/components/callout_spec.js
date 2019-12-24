@@ -11,6 +11,7 @@ describe('Callout Component', () => {
 
   const factory = options => {
     wrapper = shallowMount(localVue.extend(Callout), {
+      sync: false,
       localVue,
       ...options,
     });

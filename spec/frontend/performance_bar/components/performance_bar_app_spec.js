@@ -5,6 +5,8 @@ import PerformanceBarStore from '~/performance_bar/stores/performance_bar_store'
 describe('performance bar app', () => {
   const store = new PerformanceBarStore();
   const wrapper = shallowMount(PerformanceBarApp, {
+    sync: false,
+
     propsData: {
       store,
       env: 'development',

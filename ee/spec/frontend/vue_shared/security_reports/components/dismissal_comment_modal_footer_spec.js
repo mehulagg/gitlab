@@ -55,7 +55,10 @@ describe('DismissalCommentModalFooter', () => {
         const propsData = {
           isDismissed: true,
         };
-        wrapper = mount(component, { propsData });
+        wrapper = mount(component, {
+          sync: false,
+          propsData,
+        });
       });
 
       it('should render the "Add comment and dismiss" button', () => {
@@ -78,7 +81,10 @@ describe('DismissalCommentModalFooter', () => {
           isDismissed: true,
           isEditingExistingFeedback: true,
         };
-        wrapper = mount(component, { propsData });
+        wrapper = mount(component, {
+          sync: false,
+          propsData,
+        });
       });
 
       it('should render the "Save comment" button', () => {

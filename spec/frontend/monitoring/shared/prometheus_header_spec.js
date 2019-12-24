@@ -6,6 +6,8 @@ describe('Prometheus Header component', () => {
 
   beforeEach(() => {
     prometheusHeader = shallowMount(PrometheusHeader, {
+      sync: false,
+
       propsData: {
         graphTitle: 'graph header',
       },

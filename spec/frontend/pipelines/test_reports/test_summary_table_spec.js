@@ -29,6 +29,7 @@ describe('Test reports summary table', () => {
     });
 
     wrapper = mount(SummaryTable, {
+      sync: false,
       propsData: defaultProps,
       store,
       localVue,

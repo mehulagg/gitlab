@@ -225,6 +225,8 @@ describe('Application Row', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(ApplicationRow, {
+        sync: false,
+
         propsData: {
           ...DEFAULT_APPLICATION_STATE,
         },

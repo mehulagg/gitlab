@@ -11,6 +11,7 @@ describe('packages_list_app', () => {
   const findLoadingComponent = () => wrapper.find({ name: 'gl-loading-icon' });
 
   const componentConfig = {
+    sync: false,
     stubs: {
       'package-list': {
         name: 'package-list',

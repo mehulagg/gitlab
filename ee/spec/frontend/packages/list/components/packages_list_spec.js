@@ -17,6 +17,7 @@ describe('packages_list', () => {
   const findFirstProjectColumn = () => wrapper.find({ ref: 'col-project' });
 
   const defaultShallowMountOptions = {
+    sync: false,
     stubs: {
       GlTable,
       GlSortingItem: { name: 'sorting-item-stub', template: '<div><slot></slot></div>' },

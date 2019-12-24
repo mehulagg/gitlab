@@ -3,6 +3,8 @@ import EmptyState from '~/monitoring/components/empty_state.vue';
 
 function createComponent(props) {
   return shallowMount(EmptyState, {
+    sync: false,
+
     propsData: {
       ...props,
       settingsPath: '/settingsPath',

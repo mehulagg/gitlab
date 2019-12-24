@@ -15,6 +15,7 @@ describe('error tracking settings form', () => {
 
   function mountComponent() {
     wrapper = shallowMount(ErrorTrackingForm, {
+      sync: false,
       localVue,
       store,
       propsData: defaultProps,

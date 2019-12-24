@@ -10,13 +10,17 @@ function factory(path) {
   };
 
   vm = shallowMount(ParentRow, {
+    sync: false,
+
     propsData: {
       commitRef: 'master',
       path,
     },
+
     stubs: {
       RouterLink: RouterLinkStub,
     },
+
     mocks: {
       $router,
     },

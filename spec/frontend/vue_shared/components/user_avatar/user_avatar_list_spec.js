@@ -33,6 +33,7 @@ describe('UserAvatarList', () => {
     };
 
     wrapper = shallowMount(localVue.extend(UserAvatarList), {
+      sync: false,
       ...options,
       localVue,
       propsData,
@@ -147,9 +148,12 @@ describe('UserAvatarList', () => {
 
       it('with collapse clicked, it renders avatars up to breakpoint', () => {
         clickButton();
-        const links = wrapper.findAll(UserAvatarLink);
 
-        expect(links.length).toEqual(TEST_BREAKPOINT);
+        return wrapper.vm.$nextTick(() => {
+          const links = wrapper.findAll(UserAvatarLink);
+
+          expect(links.length).toEqual(TEST_BREAKPOINT);
+        });
       });
     });
   });

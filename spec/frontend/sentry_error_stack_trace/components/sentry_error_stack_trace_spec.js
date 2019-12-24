@@ -19,9 +19,11 @@ describe('Sentry Error Stack Trace', () => {
     },
   } = {}) {
     wrapper = shallowMount(SentryErrorStackTrace, {
+      sync: false,
       localVue,
       stubs,
       store,
+
       propsData: {
         issueStackTracePath: '/stacktrace',
       },

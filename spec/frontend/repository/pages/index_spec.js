@@ -9,7 +9,9 @@ describe('Repository index page component', () => {
   let wrapper;
 
   function factory() {
-    wrapper = shallowMount(IndexPage);
+    wrapper = shallowMount(IndexPage, {
+      sync: false,
+    });
   }
 
   afterEach(() => {

@@ -12,6 +12,7 @@ describe('Cell', () => {
     const propsData = Object.assign({}, defaultProps, props);
 
     wrapper = shallowMount(Cell, {
+      sync: false,
       propsData,
       slots,
     });

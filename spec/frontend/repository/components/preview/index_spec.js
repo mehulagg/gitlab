@@ -11,9 +11,12 @@ function factory(blob) {
   };
 
   vm = shallowMount(Preview, {
+    sync: false,
+
     propsData: {
       blob,
     },
+
     mocks: {
       $apollo,
     },

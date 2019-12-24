@@ -6,6 +6,8 @@ describe('Registry Group Empty state', () => {
 
   beforeEach(() => {
     wrapper = mount(groupEmptyState, {
+      sync: false,
+
       propsData: {
         noContainersImage: 'imageUrl',
         helpPagePath: 'help',

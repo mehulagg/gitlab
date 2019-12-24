@@ -38,6 +38,7 @@ describe('Approvals ModalRuleRemove', () => {
     };
 
     wrapper = shallowMount(localVue.extend(ModalRuleRemove), {
+      sync: false,
       ...options,
       localVue,
       store,

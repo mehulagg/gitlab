@@ -9,7 +9,9 @@ describe('Security Configuration App', () => {
   let wrapper;
   const createComponent = (props = {}) => {
     wrapper = shallowMount(SecurityConfigurationApp, {
+      sync: false,
       localVue,
+
       propsData: {
         features: [],
         autoDevopsEnabled: false,

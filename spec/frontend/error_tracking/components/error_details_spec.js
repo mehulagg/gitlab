@@ -16,9 +16,11 @@ describe('ErrorDetails', () => {
 
   function mountComponent() {
     wrapper = shallowMount(ErrorDetails, {
+      sync: false,
       stubs: { LoadingButton },
       localVue,
       store,
+
       propsData: {
         issueDetailsPath: '/123/details',
         issueStackTracePath: '/stacktrace',

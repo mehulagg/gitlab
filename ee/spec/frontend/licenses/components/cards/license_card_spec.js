@@ -33,6 +33,7 @@ describe('LicenseCard', () => {
     const propsData = Object.assign({}, defaultProps, props);
 
     wrapper = shallowMount(LicenseCard, {
+      sync: false,
       store: createStore(state),
       propsData,
       localVue,

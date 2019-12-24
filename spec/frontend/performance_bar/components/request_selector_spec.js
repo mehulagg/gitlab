@@ -12,6 +12,8 @@ describe('request selector', () => {
   ];
 
   const wrapper = shallowMount(RequestSelector, {
+    sync: false,
+
     propsData: {
       requests,
       currentRequest: requests[0],

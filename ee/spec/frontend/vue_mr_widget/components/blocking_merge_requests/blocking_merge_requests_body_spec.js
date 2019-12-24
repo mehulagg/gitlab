@@ -5,6 +5,8 @@ import RelatedIssuableItem from '~/vue_shared/components/issue/related_issuable_
 describe('BlockingMergeRequestBody', () => {
   it('shows hidden merge request text if hidden MRs exist', () => {
     const wrapper = shallowMount(BlockingMergeRequestBody, {
+      sync: false,
+
       propsData: {
         issue: { hiddenCount: 10000000, id: 10 },
         status: 'string',
@@ -17,6 +19,8 @@ describe('BlockingMergeRequestBody', () => {
 
   it('does not show hidden merge request if hidden MRs do not exist', () => {
     const wrapper = shallowMount(BlockingMergeRequestBody, {
+      sync: false,
+
       propsData: {
         issue: {},
         status: 'string',

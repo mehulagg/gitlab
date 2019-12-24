@@ -19,6 +19,8 @@ describe('MemoryGraph', () => {
 
   beforeEach(() => {
     wrapper = shallowMount(Component, {
+      sync: false,
+
       propsData: {
         metrics,
         width: 100,

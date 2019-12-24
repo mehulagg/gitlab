@@ -15,8 +15,12 @@ describe('error tracking settings app', () => {
 
   function mountComponent() {
     wrapper = shallowMount(ErrorTrackingSettings, {
+      sync: false,
       localVue,
-      store, // Override the imported store
+
+      // Override the imported store
+      store,
+
       propsData: {
         initialEnabled: 'true',
         initialApiHost: TEST_HOST,
@@ -57,7 +61,9 @@ describe('error tracking settings app', () => {
     it('disables the button when saving', () => {
       store.state.settingsLoading = true;
 
-      expect(wrapper.find('.js-error-tracking-button').attributes('disabled')).toBeTruthy();
+      return wrapper.vm.$nextTick(() => {
+        expect(wrapper.find('.js-error-tracking-button').attributes('disabled')).toBeTruthy();
+      });
     });
   });
 });

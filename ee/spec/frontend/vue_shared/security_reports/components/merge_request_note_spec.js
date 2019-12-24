@@ -23,6 +23,7 @@ describe('Merge request note', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(component, {
+        sync: false,
         propsData: { feedback },
       });
     });
@@ -45,6 +46,7 @@ describe('Merge request note', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(component, {
+        sync: false,
         propsData: { feedback, project },
       });
     });
@@ -65,6 +67,8 @@ describe('Merge request note', () => {
 
     beforeEach(() => {
       wrapper = shallowMount(component, {
+        sync: false,
+
         propsData: {
           feedback,
           project: unsafeProject,

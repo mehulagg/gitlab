@@ -11,7 +11,9 @@ describe('ReplyPlaceholder', () => {
 
   beforeEach(() => {
     wrapper = shallowMount(ReplyPlaceholder, {
+      sync: false,
       localVue,
+
       propsData: {
         buttonText,
       },

@@ -11,6 +11,7 @@ describe('MrWidgetContainer', () => {
     const localVue = createLocalVue();
 
     wrapper = shallowMount(localVue.extend(MrWidgetContainer), {
+      sync: false,
       localVue,
       ...options,
     });

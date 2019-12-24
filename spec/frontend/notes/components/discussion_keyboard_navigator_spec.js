@@ -22,6 +22,7 @@ describe('notes/components/discussion_keyboard_navigator', () => {
     store = new Vuex.Store(storeOptions);
 
     wrapper = shallowMount(DiscussionKeyboardNavigator, {
+      sync: false,
       localVue,
       store,
       ...options,

@@ -28,7 +28,11 @@ describe('operation settings external dashboard component', () => {
         }),
       },
     ];
-    wrapper = shallow ? shallowMount(...config) : mount(...config);
+    wrapper = shallow
+      ? shallowMount(...config, {
+          sync: false,
+        })
+      : mount(...config);
   };
 
   beforeEach(() => {

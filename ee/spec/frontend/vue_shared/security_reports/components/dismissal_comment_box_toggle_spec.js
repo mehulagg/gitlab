@@ -7,7 +7,9 @@ describe('DismissalCommentBox', () => {
 
   describe('when the box is inactive', () => {
     beforeEach(() => {
-      wrapper = mount(component);
+      wrapper = mount(component, {
+        sync: false,
+      });
     });
 
     it('should render the placeholder text box', () => {
@@ -22,6 +24,8 @@ describe('DismissalCommentBox', () => {
   describe('when the box is active', () => {
     beforeEach(() => {
       wrapper = mount(component, {
+        sync: false,
+
         propsData: {
           isActive: true,
         },

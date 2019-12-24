@@ -22,7 +22,9 @@ const createComponent = ({
   const localVue = createLocalVue();
 
   return mount(DroplabDropdownButton, {
+    sync: false,
     localVue,
+
     propsData: {
       size,
       dropdownClass,

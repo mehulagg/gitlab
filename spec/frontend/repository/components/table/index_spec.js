@@ -27,11 +27,14 @@ const MOCK_BLOBS = [
 
 function factory({ path, isLoading = false, entries = {} }) {
   vm = shallowMount(Table, {
+    sync: false,
+
     propsData: {
       path,
       isLoading,
       entries,
     },
+
     mocks: {
       $apollo,
     },

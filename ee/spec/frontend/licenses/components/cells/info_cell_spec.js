@@ -13,6 +13,7 @@ describe('InfoCell', () => {
     const propsData = Object.assign({}, defaultProps, props);
 
     wrapper = shallowMount(InfoCell, {
+      sync: false,
       propsData,
       slots,
     });

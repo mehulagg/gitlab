@@ -15,6 +15,7 @@ describe('Image Viewer', () => {
     const data = includeRequired ? { ...requiredProps, ...props } : { ...props };
 
     wrapper = shallowMount(ImageViewer, {
+      sync: false,
       propsData: data,
     });
     imageInfo = wrapper.find('.image-info');

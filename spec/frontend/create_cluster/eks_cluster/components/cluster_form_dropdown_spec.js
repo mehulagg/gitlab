@@ -13,7 +13,9 @@ describe('ClusterFormDropdown', () => {
   const items = [firstItem, secondItem, { name: 'item 3', value: 3 }];
 
   beforeEach(() => {
-    vm = shallowMount(ClusterFormDropdown);
+    vm = shallowMount(ClusterFormDropdown, {
+      sync: false,
+    });
   });
   afterEach(() => vm.destroy());
 
@@ -216,6 +218,8 @@ describe('ClusterFormDropdown', () => {
 
     $(dropdownEl).trigger('shown.bs.dropdown');
 
-    expect(vm.find(DropdownSearchInput).props('focused')).toBe(true);
+    return vm.vm.$nextTick(() => {
+      expect(vm.find(DropdownSearchInput).props('focused')).toBe(true);
+    });
   });
 });

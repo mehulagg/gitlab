@@ -6,6 +6,8 @@ describe('AddStageButton', () => {
 
   function createComponent(props) {
     return shallowMount(AddStageButton, {
+      sync: false,
+
       propsData: {
         active,
         ...props,

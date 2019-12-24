@@ -8,7 +8,9 @@ const createComponent = () => {
   const localVue = createLocalVue();
 
   return shallowMount(DropdownSearchInput, {
+    sync: false,
     localVue,
+
     directives: {
       /**
        * We don't want any observers

@@ -6,10 +6,13 @@ let vm;
 
 function factory(currentPath, extraProps = {}) {
   vm = shallowMount(Breadcrumbs, {
+    sync: false,
+
     propsData: {
       currentPath,
       ...extraProps,
     },
+
     stubs: {
       RouterLink: RouterLinkStub,
     },

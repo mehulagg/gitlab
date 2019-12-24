@@ -5,7 +5,9 @@ describe('SkeletonHeaderCell', () => {
   let wrapper;
 
   function createComponent() {
-    wrapper = shallowMount(SkeletonHeaderCell);
+    wrapper = shallowMount(SkeletonHeaderCell, {
+      sync: false,
+    });
   }
 
   afterEach(() => {

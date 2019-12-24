@@ -20,7 +20,11 @@ describe('IDE EERightPane', () => {
       },
     });
 
-    wrapper = shallowMount(localVue.extend(EERightPane), { localVue, store });
+    wrapper = shallowMount(localVue.extend(EERightPane), {
+      sync: false,
+      localVue,
+      store,
+    });
   };
 
   beforeEach(() => {

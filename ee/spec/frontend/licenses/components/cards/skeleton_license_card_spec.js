@@ -5,7 +5,9 @@ describe('SkeletonLicenseCard', () => {
   let wrapper;
 
   function createComponent() {
-    wrapper = shallowMount(SkeletonLicenseCard);
+    wrapper = shallowMount(SkeletonLicenseCard, {
+      sync: false,
+    });
   }
 
   afterEach(() => {

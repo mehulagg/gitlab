@@ -4,6 +4,8 @@ import { metricStates } from '~/monitoring/constants';
 
 function createComponent(props) {
   return shallowMount(GroupEmptyState, {
+    sync: false,
+
     propsData: {
       ...props,
       documentationPath: '/path/to/docs',

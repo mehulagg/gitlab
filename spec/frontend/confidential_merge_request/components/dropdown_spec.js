@@ -6,6 +6,8 @@ let vm;
 
 function factory(projects = []) {
   vm = mount(Dropdown, {
+    sync: false,
+
     propsData: {
       projects,
       selectedProject: projects[0],

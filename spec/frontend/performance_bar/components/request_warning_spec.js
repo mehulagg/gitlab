@@ -6,6 +6,8 @@ describe('request warning', () => {
 
   describe('when the request has warnings', () => {
     const wrapper = shallowMount(RequestWarning, {
+      sync: false,
+
       propsData: {
         htmlId,
         warnings: ['gitaly calls: 30 over 10', 'gitaly duration: 1500 over 1000'],
@@ -20,6 +22,8 @@ describe('request warning', () => {
 
   describe('when the request does not have warnings', () => {
     const wrapper = shallowMount(RequestWarning, {
+      sync: false,
+
       propsData: {
         htmlId,
         warnings: [],

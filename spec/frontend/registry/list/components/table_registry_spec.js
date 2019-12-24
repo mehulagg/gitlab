@@ -224,6 +224,8 @@ describe('table registry', () => {
 
     beforeEach(() => {
       wrapper = mount(tableRegistry, {
+        sync: false,
+
         propsData: {
           repo,
         },

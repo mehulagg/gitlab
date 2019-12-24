@@ -31,6 +31,7 @@ describe('Test reports suite table', () => {
     });
 
     wrapper = shallowMount(SuiteTable, {
+      sync: false,
       store,
     });
   };

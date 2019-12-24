@@ -29,6 +29,7 @@ describe('AlertWidgetForm', () => {
     };
 
     wrapper = shallowMount(AlertWidgetForm, {
+      sync: false,
       propsData,
     });
   }

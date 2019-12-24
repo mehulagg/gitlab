@@ -21,6 +21,7 @@ describe('Environments', () => {
     };
 
     wrapper = mount(Component, {
+      sync: false,
       propsData,
       localVue,
     });

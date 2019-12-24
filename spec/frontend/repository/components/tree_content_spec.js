@@ -11,9 +11,12 @@ function factory(path, data = () => ({})) {
   };
 
   vm = shallowMount(TreeContent, {
+    sync: false,
+
     propsData: {
       path,
     },
+
     mocks: {
       $apollo,
     },

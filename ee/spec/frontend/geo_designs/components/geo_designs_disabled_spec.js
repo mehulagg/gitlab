@@ -23,6 +23,7 @@ describe('GeoDesignsDisabled', () => {
 
   const createComponent = () => {
     wrapper = mount(localVue.extend(GeoDesignsDisabled), {
+      sync: false,
       localVue,
       store,
       propsData,

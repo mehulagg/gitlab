@@ -21,6 +21,7 @@ describe('InstanceCardsList', () => {
 
   function createComponent(store) {
     wrapper = shallowMount(InstanceCardsList, {
+      sync: false,
       store: createStore(store),
       localVue,
     });

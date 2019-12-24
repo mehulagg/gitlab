@@ -15,6 +15,7 @@ describe('DateRangeDropdown component', () => {
     };
 
     wrapper = shallowMount(DateRangeDropdown, {
+      sync: false,
       propsData,
     });
   }

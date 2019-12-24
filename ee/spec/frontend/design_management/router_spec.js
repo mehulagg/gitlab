@@ -25,8 +25,10 @@ describe('Design management router', () => {
     router = createRouter('/');
 
     vm = mount(App, {
+      sync: false,
       localVue,
       router,
+
       mocks: {
         $apollo: {
           queries: {
@@ -70,10 +72,11 @@ describe('Design management router', () => {
     it('pushes designs detail component', () => {
       router.push('/designs/1');
 
-      const detail = vm.find(DesignDetail);
-
-      expect(detail.exists()).toBe(true);
-      expect(detail.props('id')).toEqual('1');
+      return vm.vm.$nextTick().then(() => {
+        const detail = vm.find(DesignDetail);
+        expect(detail.exists()).toBe(true);
+        expect(detail.props('id')).toEqual('1');
+      });
     });
   });
 });

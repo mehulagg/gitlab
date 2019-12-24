@@ -18,6 +18,8 @@ describe('ServiceDeskSetting', () => {
       describe('as project admin', () => {
         beforeEach(() => {
           wrapper = shallowMount(ServiceDeskSetting, {
+            sync: false,
+
             propsData: {
               isEnabled: true,
             },
@@ -87,6 +89,8 @@ describe('ServiceDeskSetting', () => {
     describe('templates dropdown', () => {
       it('renders a dropdown to choose a template', () => {
         wrapper = shallowMount(ServiceDeskSetting, {
+          sync: false,
+
           propsData: {
             isEnabled: true,
           },
@@ -188,6 +192,8 @@ describe('ServiceDeskSetting', () => {
   describe('when isEnabled=false', () => {
     beforeEach(() => {
       wrapper = shallowMount(ServiceDeskSetting, {
+        sync: false,
+
         propsData: {
           isEnabled: false,
         },

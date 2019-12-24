@@ -29,6 +29,7 @@ describe('Deployment component', () => {
       wrapper.destroy();
     }
     wrapper = mount(DeploymentComponent, {
+      sync: false,
       ...options,
     });
   };

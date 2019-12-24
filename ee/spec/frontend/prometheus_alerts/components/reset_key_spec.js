@@ -34,6 +34,7 @@ describe('ResetKey', () => {
     beforeEach(() => {
       propsData.initialAuthorizationKey = 'abcd1234';
       vm = shallowMount(Component, {
+        sync: false,
         propsData,
       });
     });
@@ -86,6 +87,7 @@ describe('ResetKey', () => {
     beforeEach(() => {
       propsData.initialAuthorizationKey = '';
       vm = shallowMount(Component, {
+        sync: false,
         propsData,
       });
     });

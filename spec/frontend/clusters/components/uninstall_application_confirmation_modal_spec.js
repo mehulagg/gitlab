@@ -9,6 +9,7 @@ describe('UninstallApplicationConfirmationModal', () => {
 
   const createComponent = (props = {}) => {
     wrapper = shallowMount(UninstallApplicationConfirmationModal, {
+      sync: false,
       propsData: { ...props },
     });
   };

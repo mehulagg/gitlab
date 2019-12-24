@@ -12,6 +12,7 @@ describe('Environment item', () => {
       wrapper.destroy();
     }
     wrapper = mount(EnvironmentItem, {
+      sync: false,
       ...options,
     });
   };

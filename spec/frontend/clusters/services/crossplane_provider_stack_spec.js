@@ -25,6 +25,7 @@ describe('CrossplaneProviderStack component', () => {
     };
 
     wrapper = shallowMount(CrossplaneProviderStack, {
+      sync: false,
       propsData,
     });
   }

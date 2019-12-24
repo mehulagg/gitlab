@@ -16,6 +16,8 @@ describe('burndown_chart', () => {
 
   const createComponent = (props = {}) => {
     wrapper = shallowMount(BurndownChart, {
+      sync: false,
+
       propsData: {
         ...defaultProps,
         ...props,

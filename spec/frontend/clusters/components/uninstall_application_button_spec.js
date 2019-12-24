@@ -10,6 +10,7 @@ describe('UninstallApplicationButton', () => {
 
   const createComponent = (props = {}) => {
     wrapper = shallowMount(UninstallApplicationButton, {
+      sync: false,
       propsData: { ...props },
     });
   };

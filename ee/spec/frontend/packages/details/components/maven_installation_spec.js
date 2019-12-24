@@ -36,6 +36,7 @@ describe('MavenInstallation', () => {
     };
 
     wrapper = mount(MavenInstallation, {
+      sync: false,
       propsData,
     });
   }
@@ -95,8 +96,10 @@ describe('MavenInstallation', () => {
     it('should track when the setup tab is clicked', () => {
       setupTab().trigger('click');
 
-      expect(eventSpy).toHaveBeenCalledWith(undefined, TrackingActions.REGISTRY_SETUP, {
-        label,
+      return wrapper.vm.$nextTick(() => {
+        expect(eventSpy).toHaveBeenCalledWith(undefined, TrackingActions.REGISTRY_SETUP, {
+          label,
+        });
       });
     });
 

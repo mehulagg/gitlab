@@ -14,8 +14,10 @@ describe('Diff no changes empty state', () => {
     extendStore(store);
 
     vm = shallowMount(localVue.extend(NoChanges), {
+      sync: false,
       localVue,
       store,
+
       propsData: {
         changesEmptyStateIllustration: '',
       },

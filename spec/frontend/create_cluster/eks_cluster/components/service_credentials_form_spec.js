@@ -30,11 +30,14 @@ describe('ServiceCredentialsForm', () => {
       },
     });
     vm = shallowMount(ServiceCredentialsForm, {
+      sync: false,
+
       propsData: {
         accountAndExternalIdsHelpPath: '',
         createRoleArnHelpPath: '',
         externalLinkIcon: '',
       },
+
       localVue,
       store,
     });

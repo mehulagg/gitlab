@@ -31,7 +31,10 @@ describe('RelatedIssuableInput', () => {
   describe('autocomplete', () => {
     describe('with autoCompleteSources', () => {
       it('shows placeholder text', () => {
-        const wrapper = shallowMount(RelatedIssuableInput, { propsData });
+        const wrapper = shallowMount(RelatedIssuableInput, {
+          sync: false,
+          propsData,
+        });
 
         expect(wrapper.find({ ref: 'input' }).element.placeholder).toBe(
           'Paste issue link or <#issue id>',
@@ -39,7 +42,10 @@ describe('RelatedIssuableInput', () => {
       });
 
       it('has GfmAutoComplete', () => {
-        const wrapper = shallowMount(RelatedIssuableInput, { propsData });
+        const wrapper = shallowMount(RelatedIssuableInput, {
+          sync: false,
+          propsData,
+        });
 
         expect(wrapper.vm.gfmAutoComplete).toBeDefined();
       });
@@ -48,6 +54,8 @@ describe('RelatedIssuableInput', () => {
     describe('with no autoCompleteSources', () => {
       it('shows placeholder text', () => {
         const wrapper = shallowMount(RelatedIssuableInput, {
+          sync: false,
+
           propsData: {
             ...propsData,
             references: ['!1', '!2'],
@@ -59,6 +67,8 @@ describe('RelatedIssuableInput', () => {
 
       it('does not have GfmAutoComplete', () => {
         const wrapper = shallowMount(RelatedIssuableInput, {
+          sync: false,
+
           propsData: {
             ...propsData,
             autoCompleteSources: {},
@@ -73,6 +83,8 @@ describe('RelatedIssuableInput', () => {
   describe('focus', () => {
     it('when clicking anywhere on the input wrapper it should focus the input', () => {
       const wrapper = shallowMount(RelatedIssuableInput, {
+        sync: false,
+
         propsData: {
           ...propsData,
           references: ['foo', 'bar'],
@@ -90,6 +102,7 @@ describe('RelatedIssuableInput', () => {
   describe('when filling in the input', () => {
     it('emits addIssuableFormInput with data', () => {
       const wrapper = shallowMount(RelatedIssuableInput, {
+        sync: false,
         propsData,
       });
 

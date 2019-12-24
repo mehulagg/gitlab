@@ -23,6 +23,8 @@ describe('Test reports summary', () => {
 
   const createComponent = props => {
     wrapper = mount(Summary, {
+      sync: false,
+
       propsData: {
         ...defaultProps,
         ...props,

@@ -10,6 +10,7 @@ describe('Deployment View App button', () => {
     const localVue = createLocalVue();
 
     wrapper = mount(localVue.extend(DeploymentViewButton), {
+      sync: false,
       localVue,
       ...options,
     });

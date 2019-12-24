@@ -25,14 +25,19 @@ describe('Design management design version dropdown component', () => {
 
   function createComponent({ maxVersions = -1, $route = MOCK_ROUTE } = {}) {
     wrapper = shallowMount(DesignVersionDropdown, {
+      sync: false,
+
       propsData: {
         projectPath: '',
         issueIid: '',
       },
+
       localVue,
+
       mocks: {
         $route,
       },
+
       stubs: ['router-link'],
     });
 

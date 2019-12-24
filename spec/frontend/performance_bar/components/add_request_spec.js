@@ -5,7 +5,9 @@ describe('add request form', () => {
   let wrapper;
 
   beforeEach(() => {
-    wrapper = shallowMount(AddRequest);
+    wrapper = shallowMount(AddRequest, {
+      sync: false,
+    });
   });
 
   afterEach(() => {

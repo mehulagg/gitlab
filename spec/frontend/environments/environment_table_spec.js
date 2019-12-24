@@ -19,6 +19,7 @@ describe('Environment table', () => {
       wrapper.destroy();
     }
     wrapper = mount(EnvironmentTable, {
+      sync: false,
       ...options,
     });
   };

@@ -41,6 +41,7 @@ describe('BlockingMergeRequestsReport', () => {
 
   const createComponent = (propsData = props) => {
     wrapper = shallowMount(BlockingMergeRequestsReport, {
+      sync: false,
       propsData,
       localVue,
     });

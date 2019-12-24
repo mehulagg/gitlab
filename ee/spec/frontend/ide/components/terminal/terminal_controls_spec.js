@@ -10,6 +10,7 @@ describe('EE IDE TerminalControls', () => {
 
   const factory = (options = {}) => {
     wrapper = shallowMount(localVue.extend(TerminalControls), {
+      sync: false,
       localVue,
       ...options,
     });

@@ -88,7 +88,9 @@ describe('Registry List', () => {
   describe('while loading data', () => {
     beforeEach(() => {
       wrapper = mount(registry, {
+        sync: false,
         propsData,
+
         computed: {
           repos() {
             return [];
@@ -97,6 +99,7 @@ describe('Registry List', () => {
             return true;
           },
         },
+
         methods,
       });
     });
@@ -110,15 +113,19 @@ describe('Registry List', () => {
   describe('invalid characters in path', () => {
     beforeEach(() => {
       wrapper = mount(registry, {
+        sync: false,
+
         propsData: {
           ...propsData,
           characterError: true,
         },
+
         computed: {
           repos() {
             return [];
           },
         },
+
         methods,
       });
     });
@@ -136,11 +143,14 @@ describe('Registry List', () => {
 
     beforeEach(() => {
       wrapper = mount(registry, {
+        sync: false,
+
         propsData: {
           ...propsData,
           endpoint: null,
           isGroupPage,
         },
+
         methods,
       });
     });

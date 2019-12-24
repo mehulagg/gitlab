@@ -26,6 +26,7 @@ describe('Test reports app', () => {
     });
 
     wrapper = shallowMount(TestReports, {
+      sync: false,
       store,
     });
   };

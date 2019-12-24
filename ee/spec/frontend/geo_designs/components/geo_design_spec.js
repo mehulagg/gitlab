@@ -23,6 +23,7 @@ describe('GeoDesignsApp', () => {
 
   const createComponent = () => {
     wrapper = shallowMount(localVue.extend(GeoDesign), {
+      sync: false,
       localVue,
       store,
       propsData,

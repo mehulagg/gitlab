@@ -13,9 +13,12 @@ describe('SidebarItemEpicsSelect', () => {
 
   beforeEach(() => {
     wrapper = shallowMount(SidebarItemEpicsSelect, {
+      sync: false,
+
       stubs: {
         'epics-select': true,
       },
+
       propsData: {
         canEdit: true,
         sidebarStore: mockSidebarStore,

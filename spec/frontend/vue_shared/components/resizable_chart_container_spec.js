@@ -14,7 +14,9 @@ describe('Resizable Chart Container', () => {
 
   beforeEach(() => {
     wrapper = mount(ResizableChartContainer, {
+      sync: false,
       attachToDocument: true,
+
       scopedSlots: {
         default: `
         <div class="slot" slot-scope="{ width, height }">

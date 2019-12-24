@@ -6,7 +6,9 @@ describe('DismissalCommentBox', () => {
   let wrapper;
 
   beforeEach(() => {
-    wrapper = mount(component);
+    wrapper = mount(component, {
+      sync: false,
+    });
   });
 
   it('should clear the text string on mount', () => {

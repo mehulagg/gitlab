@@ -22,7 +22,10 @@ describe('blocking mr input root', () => {
     getInput().vm.$emit('pendingIssuableRemoveRequest', index);
   };
   const createComponent = (propsData = {}) => {
-    wrapper = shallowMount(BlockingMrInputRoot, { propsData });
+    wrapper = shallowMount(BlockingMrInputRoot, {
+      sync: false,
+      propsData,
+    });
   };
 
   it('does not keep duplicate references', () => {
@@ -90,14 +93,18 @@ describe('blocking mr input root', () => {
         createComponent({ existingRefs: ['!1'] });
         removeRef(0);
 
-        expectShouldUpdateRefsToBe(true);
+        return wrapper.vm.$nextTick().then(() => {
+          expectShouldUpdateRefsToBe(true);
+        });
       });
 
       it('is true after a ref is added', () => {
         createComponent();
         addTokenizedInput('foo');
 
-        expectShouldUpdateRefsToBe(true);
+        return wrapper.vm.$nextTick(() => {
+          expectShouldUpdateRefsToBe(true);
+        });
       });
     });
 
@@ -129,7 +136,9 @@ describe('blocking mr input root', () => {
         makeComponentWithHiddenMrs();
         removeRef(2);
 
-        expectRemoveHiddenBlockingMergeRequestsToBe(true);
+        return wrapper.vm.$nextTick().then(() => {
+          expectRemoveHiddenBlockingMergeRequestsToBe(true);
+        });
       });
     });
   });

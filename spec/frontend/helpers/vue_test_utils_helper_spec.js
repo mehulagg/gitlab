@@ -15,6 +15,8 @@ describe('Vue test utils helpers', () => {
           },
         },
         {
+          sync: false,
+
           slots: {
             default: mockText,
             namedSlot: mockSlot,

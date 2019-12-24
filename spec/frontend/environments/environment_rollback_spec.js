@@ -37,6 +37,8 @@ describe('Rollback Component', () => {
   it('should emit a "rollback" event on button click', () => {
     const eventHubSpy = jest.spyOn(eventHub, '$emit');
     const wrapper = shallowMount(RollbackComponent, {
+      sync: false,
+
       propsData: {
         retryUrl,
         environment: {

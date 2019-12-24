@@ -16,6 +16,8 @@ describe('Stacktrace Entry', () => {
 
   function mountComponent(props) {
     wrapper = shallowMount(StackTraceEntry, {
+      sync: false,
+
       propsData: {
         filePath: 'sidekiq/util.rb',
         errorLine: 24,

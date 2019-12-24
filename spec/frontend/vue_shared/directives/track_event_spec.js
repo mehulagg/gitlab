@@ -24,6 +24,7 @@ let button;
 describe('Error Tracking directive', () => {
   beforeEach(() => {
     wrapper = shallowMount(localVue.extend(Component), {
+      sync: false,
       localVue,
     });
     button = wrapper.find('#trackable');

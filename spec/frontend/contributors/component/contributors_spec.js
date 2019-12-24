@@ -24,14 +24,18 @@ function factory() {
   store = createStore();
 
   wrapper = shallowMount(Component, {
+    sync: false,
+
     propsData: {
       endpoint,
       branch,
     },
+
     stubs: {
       GlLoadingIcon: true,
       GlAreaChart: true,
     },
+
     store,
   });
 }

@@ -35,21 +35,30 @@ describe('grafana integration component', () => {
 
   describe('default state', () => {
     it('to match the default snapshot', () => {
-      wrapper = shallowMount(GrafanaIntegration, { store });
+      wrapper = shallowMount(GrafanaIntegration, {
+        sync: false,
+        store,
+      });
 
       expect(wrapper.element).toMatchSnapshot();
     });
   });
 
   it('renders header text', () => {
-    wrapper = shallowMount(GrafanaIntegration, { store });
+    wrapper = shallowMount(GrafanaIntegration, {
+      sync: false,
+      store,
+    });
 
     expect(wrapper.find('.js-section-header').text()).toBe('Grafana Authentication');
   });
 
   describe('expand/collapse button', () => {
     it('renders as an expand button by default', () => {
-      wrapper = shallowMount(GrafanaIntegration, { store });
+      wrapper = shallowMount(GrafanaIntegration, {
+        sync: false,
+        store,
+      });
 
       const button = wrapper.find(GlButton);
 
@@ -59,7 +68,10 @@ describe('grafana integration component', () => {
 
   describe('sub-header', () => {
     it('renders descriptive text', () => {
-      wrapper = shallowMount(GrafanaIntegration, { store });
+      wrapper = shallowMount(GrafanaIntegration, {
+        sync: false,
+        store,
+      });
 
       expect(wrapper.find('.js-section-sub-header').text()).toContain(
         'Embed Grafana charts in GitLab issues.',

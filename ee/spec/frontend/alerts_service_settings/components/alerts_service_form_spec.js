@@ -24,11 +24,14 @@ describe('AlertsServiceForm', () => {
 
   const createComponent = (props = defaultProps, { methods } = {}) => {
     wrapper = shallowMount(localVue.extend(AlertsServiceForm), {
+      sync: false,
       localVue,
+
       propsData: {
         ...defaultProps,
         ...props,
       },
+
       methods,
     });
   };

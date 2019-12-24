@@ -5,7 +5,10 @@ import GraphBar from '~/branches/components/graph_bar.vue';
 let vm;
 
 function factory(propsData = {}) {
-  vm = shallowMount(DivergenceGraph, { propsData });
+  vm = shallowMount(DivergenceGraph, {
+    sync: false,
+    propsData,
+  });
 }
 
 describe('Branch divergence graph component', () => {

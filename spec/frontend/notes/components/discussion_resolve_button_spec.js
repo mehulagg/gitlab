@@ -10,6 +10,7 @@ describe('resolveDiscussionButton', () => {
   const factory = options => {
     localVue = createLocalVue();
     wrapper = shallowMount(resolveDiscussionButton, {
+      sync: false,
       localVue,
       ...options,
     });

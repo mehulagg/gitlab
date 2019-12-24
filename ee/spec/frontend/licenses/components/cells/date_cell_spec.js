@@ -12,6 +12,7 @@ describe('DateCell', () => {
     const propsData = Object.assign({}, defaultProps, props);
 
     wrapper = shallowMount(DateCell, {
+      sync: false,
       propsData,
     });
   }

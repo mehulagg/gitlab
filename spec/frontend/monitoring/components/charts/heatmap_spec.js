@@ -9,10 +9,13 @@ describe('Heatmap component', () => {
 
   beforeEach(() => {
     heatmapChart = shallowMount(Heatmap, {
+      sync: false,
+
       propsData: {
         graphData: graphDataPrometheusQueryRangeMultiTrack,
         containerWidth: 100,
       },
+
       store,
     });
   });

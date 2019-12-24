@@ -9,7 +9,9 @@ describe('EpicsSelect', () => {
     let wrapper;
 
     beforeEach(() => {
-      wrapper = shallowMount(DropdownHeader);
+      wrapper = shallowMount(DropdownHeader, {
+        sync: false,
+      });
     });
 
     afterEach(() => {

@@ -30,7 +30,9 @@ function factory(projects = mockData) {
   mock.onGet(/api\/(.*)\/projects\/gitlab-org%2Fgitlab-ce\/forks/).reply(200, projects);
 
   vm = shallowMount(ProjectFormGroup, {
+    sync: false,
     localVue,
+
     propsData: {
       namespacePath: 'gitlab-org',
       projectPath: 'gitlab-org/gitlab-ce',
