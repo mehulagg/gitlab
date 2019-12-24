@@ -129,7 +129,9 @@ describe('Feature flag table', () => {
       toggle.vm.$emit('change');
       const flag = { ...props.featureFlags[0], active: !props.featureFlags[0].active };
 
-      expect(wrapper.emitted('toggle-flag')).toEqual([[flag]]);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted('toggle-flag')).toEqual([[flag]]);
+      });
     });
   });
 

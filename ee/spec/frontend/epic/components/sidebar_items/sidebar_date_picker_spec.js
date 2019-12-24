@@ -207,7 +207,9 @@ describe('SidebarDatePicker', () => {
     createComponent({ showToggleSidebar: true });
     wrapper.find(ToggleSidebar).vm.$emit('toggle');
 
-    expect(wrapper.emitted().toggleCollapse).toBeDefined();
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.emitted().toggleCollapse).toBeDefined();
+    });
   });
 
   it('renders expected template', () => {

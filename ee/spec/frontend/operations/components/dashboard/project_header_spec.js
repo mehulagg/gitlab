@@ -56,12 +56,14 @@ describe('project header component', () => {
     it('emits project removal link on click', () => {
       wrapper.find('.js-remove-button').vm.$emit('click');
 
-      expect(wrapper.emittedByOrder()).toContainEqual(
-        expect.objectContaining({
-          name: 'remove',
-          args: [mockOneProject.remove_path],
-        }),
-      );
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emittedByOrder()).toContainEqual(
+          expect.objectContaining({
+            name: 'remove',
+            args: [mockOneProject.remove_path],
+          }),
+        );
+      });
     });
   });
 

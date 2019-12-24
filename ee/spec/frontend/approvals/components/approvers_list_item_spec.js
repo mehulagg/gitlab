@@ -53,7 +53,9 @@ describe('Approvals ApproversListItem', () => {
       const button = wrapper.find(GlButton);
       button.vm.$emit('click');
 
-      expect(wrapper.emittedByOrder()).toEqual([{ name: 'remove', args: [TEST_USER] }]);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emittedByOrder()).toEqual([{ name: 'remove', args: [TEST_USER] }]);
+      });
     });
   });
 

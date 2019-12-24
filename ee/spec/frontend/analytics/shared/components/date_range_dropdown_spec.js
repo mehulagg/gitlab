@@ -40,7 +40,10 @@ describe('DateRangeDropdown component', () => {
 
   it('emits the "selected" event with the selected item value', () => {
     findFirstDropdownElement().vm.$emit('click');
-    expect(wrapper.emitted().selected[0]).toEqual([7]);
+
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.emitted().selected[0]).toEqual([7]);
+    });
   });
 
   it('it renders the correct dropdown text when no item is selected', () => {

@@ -92,6 +92,7 @@ describe('ThreatMonitoringApp component', () => {
     describe('dismissing the alert', () => {
       beforeEach(() => {
         findAlert().vm.$emit('dismiss');
+        return wrapper.vm.$nextTick();
       });
 
       it('hides the alert', () => {
