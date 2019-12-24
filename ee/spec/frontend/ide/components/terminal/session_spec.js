@@ -66,8 +66,10 @@ describe('EE IDE TerminalSession', () => {
       const button = wrapper.find('button');
       button.trigger('click');
 
-      expect(button.text()).toEqual('Stop Terminal');
-      expect(actions.stopSession).toHaveBeenCalled();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(button.text()).toEqual('Stop Terminal');
+        expect(actions.stopSession).toHaveBeenCalled();
+      });
     });
   });
 
@@ -79,8 +81,10 @@ describe('EE IDE TerminalSession', () => {
       const button = wrapper.find('button');
       button.trigger('click');
 
-      expect(button.text()).toEqual('Restart Terminal');
-      expect(actions.restartSession).toHaveBeenCalled();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(button.text()).toEqual('Restart Terminal');
+        expect(actions.restartSession).toHaveBeenCalled();
+      });
     });
   });
 });

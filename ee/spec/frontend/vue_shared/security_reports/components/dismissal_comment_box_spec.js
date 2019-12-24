@@ -23,7 +23,9 @@ describe('DismissalCommentBox', () => {
       metaKey: true,
     });
 
-    expect(wrapper.emitted().submit).toBeTruthy();
+    return wrapper.vm.$nextTick(() => {
+      expect(wrapper.emitted().submit).toBeTruthy();
+    });
   });
 
   it('should render the error message', () => {

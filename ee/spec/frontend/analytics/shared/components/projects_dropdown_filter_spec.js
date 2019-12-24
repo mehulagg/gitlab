@@ -175,12 +175,14 @@ describe('ProjectsDropdownFilter component', () => {
           .at(0)
           .trigger('click');
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-        ]);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emittedByOrder()).toEqual([
+            {
+              name: 'selected',
+              args: [[projects[0]]],
+            },
+          ]);
+        });
       });
 
       it('should change selection when new project is clicked', () => {
@@ -188,12 +190,14 @@ describe('ProjectsDropdownFilter component', () => {
           .at(1)
           .trigger('click');
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[1]]],
-          },
-        ]);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emittedByOrder()).toEqual([
+            {
+              name: 'selected',
+              args: [[projects[1]]],
+            },
+          ]);
+        });
       });
 
       it('selection should be emptied when a project is deselected', () => {
@@ -201,16 +205,18 @@ describe('ProjectsDropdownFilter component', () => {
         project.trigger('click');
         project.trigger('click');
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-          {
-            name: 'selected',
-            args: [[]],
-          },
-        ]);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emittedByOrder()).toEqual([
+            {
+              name: 'selected',
+              args: [[projects[0]]],
+            },
+            {
+              name: 'selected',
+              args: [[]],
+            },
+          ]);
+        });
       });
 
       it('renders an avatar in the dropdown button when the project has an avatar_url', done => {
@@ -294,20 +300,26 @@ describe('ProjectsDropdownFilter component', () => {
           .at(0)
           .trigger('click');
 
-        findDropdownItems()
-          .at(1)
-          .trigger('click');
-
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-          {
-            name: 'selected',
-            args: [[projects[0], projects[1]]],
-          },
-        ]);
+        return wrapper.vm
+          .$nextTick()
+          .then(() => {
+            findDropdownItems()
+              .at(1)
+              .trigger('click');
+            return wrapper.vm.$nextTick();
+          })
+          .then(() => {
+            expect(wrapper.emittedByOrder()).toEqual([
+              {
+                name: 'selected',
+                args: [[projects[0]]],
+              },
+              {
+                name: 'selected',
+                args: [[projects[0], projects[1]]],
+              },
+            ]);
+          });
       });
 
       it('should remove from selection when clicked again', () => {
@@ -316,31 +328,36 @@ describe('ProjectsDropdownFilter component', () => {
         item.trigger('click');
         item.trigger('click');
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[projects[0]]],
-          },
-          {
-            name: 'selected',
-            args: [[]],
-          },
-        ]);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emittedByOrder()).toEqual([
+            {
+              name: 'selected',
+              args: [[projects[0]]],
+            },
+            {
+              name: 'selected',
+              args: [[]],
+            },
+          ]);
+        });
       });
 
       it('renders the correct placeholder text when multiple projects are selected', done => {
         findDropdownItems()
           .at(0)
           .trigger('click');
-
-        findDropdownItems()
-          .at(1)
-          .trigger('click');
-
-        wrapper.vm.$nextTick(() => {
-          expect(findDropdownButton().text()).toBe('2 projects selected');
-          done();
-        });
+        return wrapper.vm
+          .$nextTick()
+          .then(() => {
+            findDropdownItems()
+              .at(1)
+              .trigger('click');
+            return wrapper.vm.$nextTick();
+          })
+          .then(() => {
+            expect(findDropdownButton().text()).toBe('2 projects selected');
+            done();
+          });
       });
     });
   });

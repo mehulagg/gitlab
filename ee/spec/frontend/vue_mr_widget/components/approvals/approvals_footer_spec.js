@@ -146,7 +146,9 @@ describe('EE MRWidget approvals footer', () => {
 
         button.trigger('click');
 
-        expect(wrapper.emittedByOrder()).toEqual([{ name: 'input', args: [true] }]);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emittedByOrder()).toEqual([{ name: 'input', args: [true] }]);
+        });
       });
     });
 

@@ -57,12 +57,14 @@ describe('Daterange component', () => {
         input.setValue('2019-01-01');
         input.trigger('change');
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'change',
-            args: [{ startDate: minDate, endDate }],
-          },
-        ]);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emittedByOrder()).toEqual([
+            {
+              name: 'change',
+              args: [{ startDate: minDate, endDate }],
+            },
+          ]);
+        });
       });
     });
   });

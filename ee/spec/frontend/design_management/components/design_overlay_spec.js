@@ -53,7 +53,9 @@ describe('Design overlay component', () => {
     createComponent();
     wrapper.find('.image-diff-overlay-add-comment').trigger('click', { offsetX: 10, offsetY: 10 });
 
-    expect(wrapper.emitted('openCommentForm')).toEqual([[{ x: 10, y: 10 }]]);
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.emitted('openCommentForm')).toEqual([[{ x: 10, y: 10 }]]);
+    });
   });
 
   describe('when has notes', () => {

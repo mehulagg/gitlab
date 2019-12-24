@@ -109,6 +109,7 @@ describe('dashboard', () => {
     describe('project selector modal', () => {
       beforeEach(() => {
         wrapper.find(GlButton).trigger('click');
+        return wrapper.vm.$nextTick();
       });
 
       it('should fire the add projects action on ok', () => {

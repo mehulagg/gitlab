@@ -84,10 +84,16 @@ describe('Event Item', () => {
     it('emits the button events when clicked', () => {
       const buttons = wrapper.findAll('.action-buttons > button');
       buttons.at(0).trigger('click');
-      buttons.at(1).trigger('click');
-
-      expect(wrapper.emitted().fooEvent.length).toEqual(1);
-      expect(wrapper.emitted().barEvent.length).toEqual(1);
+      return wrapper.vm
+        .$nextTick()
+        .then(() => {
+          buttons.at(1).trigger('click');
+          return wrapper.vm.$nextTick();
+        })
+        .then(() => {
+          expect(wrapper.emitted().fooEvent.length).toEqual(1);
+          expect(wrapper.emitted().barEvent.length).toEqual(1);
+        });
     });
   });
 });

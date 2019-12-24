@@ -50,8 +50,10 @@ describe('Cycle Analytics LabelsSelector', () => {
         const elem = wrapper.findAll('.dropdown-item').at(2);
         elem.trigger('click');
 
-        expect(wrapper.emitted('selectLabel').length > 0).toBe(true);
-        expect(wrapper.emitted('selectLabel')[0]).toContain(groupLabels[1].id);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emitted('selectLabel').length > 0).toBe(true);
+          expect(wrapper.emitted('selectLabel')[0]).toContain(groupLabels[1].id);
+        });
       });
 
       it('will emit the "clearLabel" event if it is the default item', () => {
@@ -60,7 +62,9 @@ describe('Cycle Analytics LabelsSelector', () => {
         const elem = wrapper.findAll('.dropdown-item').at(0);
         elem.trigger('click');
 
-        expect(wrapper.emitted('clearLabel').length > 0).toBe(true);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emitted('clearLabel').length > 0).toBe(true);
+        });
       });
     });
   });

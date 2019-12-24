@@ -62,12 +62,14 @@ describe('StageDropdownFilter component', () => {
 
         item.trigger('click');
 
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[stages[1], stages[2]]],
-          },
-        ]);
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emittedByOrder()).toEqual([
+            {
+              name: 'selected',
+              args: [[stages[1], stages[2]]],
+            },
+          ]);
+        });
       });
     });
 
@@ -77,20 +79,26 @@ describe('StageDropdownFilter component', () => {
           .at(0)
           .trigger('click');
 
-        findDropdownItems()
-          .at(0)
-          .trigger('click');
-
-        expect(wrapper.emittedByOrder()).toEqual([
-          {
-            name: 'selected',
-            args: [[stages[1], stages[2]]],
-          },
-          {
-            name: 'selected',
-            args: [[stages[1], stages[2], stages[0]]],
-          },
-        ]);
+        return wrapper.vm
+          .$nextTick()
+          .then(() => {
+            findDropdownItems()
+              .at(0)
+              .trigger('click');
+            return wrapper.vm.$nextTick();
+          })
+          .then(() => {
+            expect(wrapper.emittedByOrder()).toEqual([
+              {
+                name: 'selected',
+                args: [[stages[1], stages[2]]],
+              },
+              {
+                name: 'selected',
+                args: [[stages[1], stages[2], stages[0]]],
+              },
+            ]);
+          });
       });
     });
   });
