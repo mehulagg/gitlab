@@ -49,7 +49,9 @@ describe('EE IDE TerminalControls', () => {
 
     buttons.at(0).vm.$emit('click');
 
-    expect(wrapper.emittedByOrder()).toEqual([{ name: 'scroll-up', args: [] }]);
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.emittedByOrder()).toEqual([{ name: 'scroll-up', args: [] }]);
+    });
   });
 
   it('emits "scroll-down" when click down button', () => {
@@ -59,6 +61,8 @@ describe('EE IDE TerminalControls', () => {
 
     buttons.at(1).vm.$emit('click');
 
-    expect(wrapper.emittedByOrder()).toEqual([{ name: 'scroll-down', args: [] }]);
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.emittedByOrder()).toEqual([{ name: 'scroll-down', args: [] }]);
+    });
   });
 });

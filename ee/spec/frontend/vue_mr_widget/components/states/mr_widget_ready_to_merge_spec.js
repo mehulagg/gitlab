@@ -239,11 +239,14 @@ describe('ReadyToMerge', () => {
 
     it('should perform the merge when the user confirms their intent to merge immediately', () => {
       factory({ preferredAutoMergeStrategy: MT_MERGE_STRATEGY });
-      clickMergeImmediately();
-
-      dialog.vm.$emit('mergeImmediately');
-
-      expect(vm.handleMergeButtonClick).toHaveBeenCalled();
+      return clickMergeImmediately()
+        .then(() => {
+          dialog.vm.$emit('mergeImmediately');
+          return wrapper.vm.$nextTick();
+        })
+        .then(() => {
+          expect(vm.handleMergeButtonClick).toHaveBeenCalled();
+        });
     });
 
     it('should not ask for confirmation in non-merge train scenarios', () => {
