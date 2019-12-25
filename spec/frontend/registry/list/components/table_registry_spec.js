@@ -97,10 +97,10 @@ describe('table registry', () => {
 
     it('selecting all checkbox should select all rows and enable delete button', done => {
       const selectAll = findSelectAllCheckbox();
-      const checkboxes = findSelectCheckboxes();
       selectAll.trigger('click');
 
       Vue.nextTick(() => {
+        const checkboxes = findSelectCheckboxes();
         const checked = checkboxes.filter(w => w.element.checked);
         expect(checked.length).toBe(checkboxes.length);
         done();
