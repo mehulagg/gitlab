@@ -93,7 +93,7 @@ describe('Project List component', () => {
 
     factory({ projects: mockProjects, stubs: { GlButton } });
 
-    getFirstRemoveButton().trigger('click');
+    getFirstRemoveButton().vm.$emit('click');
 
     return wrapper.vm.$nextTick().then(() => {
       expect(wrapper.emitted('projectRemoved')).toHaveLength(1);
