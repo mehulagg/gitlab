@@ -22,7 +22,7 @@ describe('BlockingMergeRequestBody', () => {
       sync: false,
 
       propsData: {
-        issue: {},
+        issue: { id: 10, reference: '#123' },
         status: 'string',
         isNew: true,
       },
