@@ -20,6 +20,7 @@ describe('packages_list', () => {
     sync: false,
     stubs: {
       GlTable,
+      ...GlTable.components,
       GlSortingItem: { name: 'sorting-item-stub', template: '<div><slot></slot></div>' },
     },
     computed: {
@@ -42,10 +43,6 @@ describe('packages_list', () => {
   afterEach(() => {
     Vue.config.silent = false;
     wrapper.destroy();
-  });
-
-  it('renders', () => {
-    expect(wrapper.element).toMatchSnapshot();
   });
 
   describe('when is isGroupPage', () => {
