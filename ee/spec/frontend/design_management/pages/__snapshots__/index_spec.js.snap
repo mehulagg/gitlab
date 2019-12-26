@@ -52,7 +52,7 @@ exports[`Design management index page designs does not render toolbar when there
     </ol>
   </div>
    
-  <routerview-stub
+  <router-view-stub
     name="default"
   />
 </div>
@@ -66,20 +66,20 @@ exports[`Design management index page designs renders designs list and header wi
     <div
       class="d-flex justify-content-between align-items-center w-100"
     >
-      <designversiondropdown-stub />
+      <design-version-dropdown-stub />
        
       <div
         class="d-flex qa-selector-toolbar"
       >
-        <glbutton-stub
+        <gl-button-stub
           class="mr-2 js-select-all"
           variant="link"
         >
           Select all
-        </glbutton-stub>
+        </gl-button-stub>
          
         <div>
-          <deletebutton-stub
+          <delete-button-stub
             buttonclass="btn-danger btn-inverted mr-2"
             buttonvariant=""
           >
@@ -87,10 +87,10 @@ exports[`Design management index page designs renders designs list and header wi
             Delete selected
             
             <!---->
-          </deletebutton-stub>
+          </delete-button-stub>
         </div>
          
-        <uploadbutton-stub />
+        <upload-button-stub />
       </div>
     </div>
   </header>
@@ -152,7 +152,7 @@ exports[`Design management index page designs renders designs list and header wi
     </ol>
   </div>
    
-  <routerview-stub
+  <router-view-stub
     name="default"
   />
 </div>
@@ -174,7 +174,7 @@ exports[`Design management index page designs renders error 1`] = `
     </div>
   </div>
    
-  <routerview-stub
+  <router-view-stub
     name="default"
   />
 </div>
@@ -187,14 +187,14 @@ exports[`Design management index page designs renders loading icon 1`] = `
   <div
     class="mt-4"
   >
-    <glloadingicon-stub
+    <gl-loading-icon-stub
       color="orange"
       label="Loading"
       size="md"
     />
   </div>
    
-  <routerview-stub
+  <router-view-stub
     name="default"
   />
 </div>
@@ -207,13 +207,13 @@ exports[`Design management index page when has no designs renders empty text 1`]
   <div
     class="mt-4"
   >
-    <glemptystate-stub
+    <gl-empty-state-stub
       description="Upload and view the latest designs for this issue. Consistent and easy to find, so everyone is up to date."
       title="The one place for your designs"
     />
   </div>
    
-  <routerview-stub
+  <router-view-stub
     name="default"
   />
 </div>

@@ -9,7 +9,7 @@ exports[`InstanceCardsList renders a list of license cards 1`] = `
       Instance license
     </h4>
      
-    <glbutton-stub
+    <gl-button-stub
       class="my-3 js-add-license"
       href="/newLicensePath"
       variant="success"
@@ -17,20 +17,20 @@ exports[`InstanceCardsList renders a list of license cards 1`] = `
       
       Add license
     
-    </glbutton-stub>
+    </gl-button-stub>
   </div>
    
   <ul
     class="license-list list-unstyled"
   >
     <li>
-      <licensecard-stub
+      <license-card-stub
         iscurrentlicense="true"
         license="[object Object]"
       />
     </li>
     <li>
-      <licensecard-stub
+      <license-card-stub
         license="[object Object]"
       />
     </li>
@@ -47,7 +47,7 @@ exports[`InstanceCardsList renders a message when there are no licenses 1`] = `
       Instance license
     </h4>
      
-    <glbutton-stub
+    <gl-button-stub
       class="my-3 js-add-license"
       href="/newLicensePath"
       variant="success"
@@ -55,7 +55,7 @@ exports[`InstanceCardsList renders a message when there are no licenses 1`] = `
       
       Add license
     
-    </glbutton-stub>
+    </gl-button-stub>
   </div>
    
   <ul
@@ -81,7 +81,7 @@ exports[`InstanceCardsList renders a skeleton loading card if loading licenses 1
       Instance license
     </h4>
      
-    <glbutton-stub
+    <gl-button-stub
       class="my-3 js-add-license"
       href="/newLicensePath"
       variant="success"
@@ -89,14 +89,14 @@ exports[`InstanceCardsList renders a skeleton loading card if loading licenses 1
       
       Add license
     
-    </glbutton-stub>
+    </gl-button-stub>
   </div>
    
   <ul
     class="license-list list-unstyled"
   >
     <li>
-      <skeletonlicensecard-stub />
+      <skeleton-license-card-stub />
     </li>
   </ul>
 </div>

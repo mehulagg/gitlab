@@ -16,25 +16,25 @@ exports[`LicenseCard renders license card with a delete button and license body 
       
       </h4>
        
-      <gldropdown-stub
+      <gl-dropdown-stub
         class="js-manage-license"
         right=""
         text="Manage"
       >
         <!---->
          
-        <gldropdownitem-stub
+        <gl-dropdown-item-stub
           class="js-delete-license text-danger"
         >
           
           Delete license
         
-        </gldropdownitem-stub>
-      </gldropdown-stub>
+        </gl-dropdown-item-stub>
+      </gl-dropdown-stub>
     </div>
   </div>
    
-  <licensecardbody-stub
+  <license-card-body-stub
     activeusercount="10"
     guestusercount="8"
     license="[object Object]"

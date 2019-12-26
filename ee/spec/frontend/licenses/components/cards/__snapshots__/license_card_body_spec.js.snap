@@ -10,7 +10,7 @@ exports[`LicenseCardBody renders a license card body 1`] = `
     <div
       class="license-row d-flex"
     >
-      <headercell-stub
+      <header-cell-stub
         icon="monitor"
         title="Usage"
       />
@@ -21,19 +21,19 @@ exports[`LicenseCardBody renders a license card body 1`] = `
         value="10"
       />
        
-      <infocell-stub
+      <info-cell-stub
         popovercontent="Users with a Guest role or those who don't belong to any projects or groups don't count towards seats in use."
         title="Seats currently in use"
         value="2"
       />
        
-      <infocell-stub
+      <info-cell-stub
         popovercontent="This is the maximum number of users that have existed at the same time since the license started. This is the minimum number of seats you will need to buy when you renew your license."
         title="Max seats used"
         value="20"
       />
        
-      <infocell-stub
+      <info-cell-stub
         popovercontent="GitLab allows you to continue using your license even if you exceed the number of seats you purchased. You will be required to pay for these seats when you renew your license."
         title="Users outside of license"
         value="5"
@@ -43,25 +43,25 @@ exports[`LicenseCardBody renders a license card body 1`] = `
     <div
       class="license-row d-flex"
     >
-      <headercell-stub
+      <header-cell-stub
         icon="calendar"
         title="Validity"
       />
        
-      <datecell-stub
+      <date-cell-stub
         datenow="2017/10/10"
         title="Start date"
         value="2013/10/10"
       />
        
-      <datecell-stub
+      <date-cell-stub
         datenow="2017/10/10"
         isexpirable="true"
         title="End date"
         value="2015/10/10"
       />
        
-      <datecell-stub
+      <date-cell-stub
         datenow="2017/10/10"
         title="Uploaded on"
       />
@@ -70,7 +70,7 @@ exports[`LicenseCardBody renders a license card body 1`] = `
     <div
       class="license-row d-flex"
     >
-      <headercell-stub
+      <header-cell-stub
         icon="user"
         title="Registration"
       />
@@ -107,7 +107,7 @@ exports[`LicenseCardBody renders a license card body without free user info for 
     <div
       class="license-row d-flex"
     >
-      <headercell-stub
+      <header-cell-stub
         icon="monitor"
         title="Usage"
       />
@@ -125,13 +125,13 @@ exports[`LicenseCardBody renders a license card body without free user info for 
         value="10"
       />
        
-      <infocell-stub
+      <info-cell-stub
         popovercontent="This is the maximum number of users that have existed at the same time since the license started. This is the minimum number of seats you will need to buy when you renew your license."
         title="Max seats used"
         value="20"
       />
        
-      <infocell-stub
+      <info-cell-stub
         popovercontent="GitLab allows you to continue using your license even if you exceed the number of seats you purchased. You will be required to pay for these seats when you renew your license."
         title="Users outside of license"
         value="5"
@@ -141,25 +141,25 @@ exports[`LicenseCardBody renders a license card body without free user info for 
     <div
       class="license-row d-flex"
     >
-      <headercell-stub
+      <header-cell-stub
         icon="calendar"
         title="Validity"
       />
        
-      <datecell-stub
+      <date-cell-stub
         datenow="2017/10/10"
         title="Start date"
         value="2013/10/10"
       />
        
-      <datecell-stub
+      <date-cell-stub
         datenow="2017/10/10"
         isexpirable="true"
         title="End date"
         value="2015/10/10"
       />
        
-      <datecell-stub
+      <date-cell-stub
         datenow="2017/10/10"
         title="Uploaded on"
       />
@@ -168,7 +168,7 @@ exports[`LicenseCardBody renders a license card body without free user info for 
     <div
       class="license-row d-flex"
     >
-      <headercell-stub
+      <header-cell-stub
         icon="user"
         title="Registration"
       />
@@ -226,7 +226,7 @@ exports[`LicenseCardBody renders fallback licensee values 1`] = `
     <div
       class="license-row d-flex"
     >
-      <headercell-stub
+      <header-cell-stub
         icon="monitor"
         title="Usage"
       />
@@ -237,19 +237,19 @@ exports[`LicenseCardBody renders fallback licensee values 1`] = `
         value="10"
       />
        
-      <infocell-stub
+      <info-cell-stub
         popovercontent="Users with a Guest role or those who don't belong to any projects or groups don't count towards seats in use."
         title="Seats currently in use"
         value="2"
       />
        
-      <infocell-stub
+      <info-cell-stub
         popovercontent="This is the maximum number of users that have existed at the same time since the license started. This is the minimum number of seats you will need to buy when you renew your license."
         title="Max seats used"
         value="20"
       />
        
-      <infocell-stub
+      <info-cell-stub
         popovercontent="GitLab allows you to continue using your license even if you exceed the number of seats you purchased. You will be required to pay for these seats when you renew your license."
         title="Users outside of license"
         value="5"
@@ -259,25 +259,25 @@ exports[`LicenseCardBody renders fallback licensee values 1`] = `
     <div
       class="license-row d-flex"
     >
-      <headercell-stub
+      <header-cell-stub
         icon="calendar"
         title="Validity"
       />
        
-      <datecell-stub
+      <date-cell-stub
         datenow="2017/10/10"
         title="Start date"
         value="2013/10/10"
       />
        
-      <datecell-stub
+      <date-cell-stub
         datenow="2017/10/10"
         isexpirable="true"
         title="End date"
         value="2015/10/10"
       />
        
-      <datecell-stub
+      <date-cell-stub
         datenow="2017/10/10"
         title="Uploaded on"
       />
@@ -286,7 +286,7 @@ exports[`LicenseCardBody renders fallback licensee values 1`] = `
     <div
       class="license-row d-flex"
     >
-      <headercell-stub
+      <header-cell-stub
         icon="user"
         title="Registration"
       />

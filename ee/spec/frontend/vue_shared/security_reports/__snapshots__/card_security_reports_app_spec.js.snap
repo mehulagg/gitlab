@@ -13,4 +13,8 @@ Object {
 }
 `;
 
-exports[`Card security reports app Headline renders renders branch and commit information 1`] = `"<span class=\\"js-security-dashboard-right pull-right\\"><svg aria-hidden=\\"true\\" class=\\"s16 ic-branch\\"><use xlink:href=\\"#branch\\"></use></svg> <a href=\\"http://test.host/branch\\" class=\\"monospace\\">master</a> <span class=\\"text-muted prepend-left-5 append-right-5\\">·</span> <svg aria-hidden=\\"true\\" class=\\"s16 ic-commit\\"><use xlink:href=\\"#commit\\"></use></svg> <a href=\\"http://test.host/commit\\" class=\\"monospace\\">1234adf</a></span>"`;
+exports[`Card security reports app Headline renders renders branch and commit information 1`] = `
+"<span class=\\"js-security-dashboard-right pull-right\\"><svg aria-hidden=\\"true\\" class=\\"s16 ic-branch\\"><use xlink:href=\\"#branch\\"></use></svg> <a href=\\"http://test.host/branch\\" class=\\"monospace\\">master</a> <span class=\\"text-muted prepend-left-5 append-right-5\\">·</span> <svg aria-hidden=\\"true\\" class=\\"s16 ic-commit\\">
+  <use xlink:href=\\"#commit\\"></use>
+</svg> <a href=\\"http://test.host/commit\\" class=\\"monospace\\">1234adf</a></span>"
+`;

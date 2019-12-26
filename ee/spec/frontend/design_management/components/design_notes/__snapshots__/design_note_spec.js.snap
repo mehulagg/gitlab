@@ -1,11 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Design note component should match the snapshot 1`] = `
-<timelineentryitem-stub
+<timeline-entry-item-stub
   class="design-note note-form"
   id="note_undefined"
 >
-  <useravatarlink-stub
+  <user-avatar-link-stub
     imgalt=""
     imgcssclasses=""
     imgsize="40"
@@ -50,7 +50,7 @@ exports[`Design note component should match the snapshot 1`] = `
       class="note-timestamp system-note-separator"
       href="#note_undefined"
     >
-      <timeagotooltip-stub
+      <time-ago-tooltip-stub
         cssclass=""
         time="2019-07-26T15:02:20Z"
         tooltipplacement="bottom"
@@ -62,5 +62,5 @@ exports[`Design note component should match the snapshot 1`] = `
     class="note-text md"
     data-qa-selector="note_content"
   />
-</timelineentryitem-stub>
+</timeline-entry-item-stub>
 `;

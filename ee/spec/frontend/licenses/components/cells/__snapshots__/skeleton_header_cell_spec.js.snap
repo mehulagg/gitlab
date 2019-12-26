@@ -4,7 +4,7 @@ exports[`SkeletonHeaderCell renders a skeleton cell with a single title loading 
 <cell-stub
   class="license-header-cell"
 >
-  <glskeletonloading-stub
+  <gl-skeleton-loading-stub
     class="w-75 skeleton-bar"
     lines="1"
   />

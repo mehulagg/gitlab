@@ -186,6 +186,103 @@ exports[`Design management list item component with no notes renders item with c
 </router-link-stub>
 `;
 
+exports[`Design management list item component with no notes renders item with no status icon for none event 1`] = `
+<router-link-stub
+  class="card cursor-pointer text-plain js-design-list-item design-list-item"
+  to="[object Object]"
+>
+  <div
+    class="card-body p-0 d-flex-center overflow-hidden position-relative"
+  >
+    <!---->
+     
+    <img
+      alt="test"
+      class="block ml-auto mr-auto mw-100 mh-100 design-img"
+      data-qa-selector="design_image"
+      src="http://via.placeholder.com/300"
+    />
+  </div>
+   
+  <div
+    class="card-footer d-flex w-100"
+  >
+    <div
+      class="d-flex flex-column str-truncated-100"
+    >
+      <span
+        class="bold str-truncated-100"
+        data-qa-selector="design_file_name"
+      >
+        test
+      </span>
+       
+      <span
+        class="str-truncated-100"
+      >
+        
+        Updated 
+        <timeago-stub
+          cssclass=""
+          time="01-01-2019"
+          tooltipplacement="bottom"
+        />
+      </span>
+    </div>
+     
+    <!---->
+  </div>
+</router-link-stub>
+`;
+
+exports[`Design management list item component with no notes renders loading spinner when isLoading is true 1`] = `
+<router-link-stub
+  class="card cursor-pointer text-plain js-design-list-item design-list-item"
+  to="[object Object]"
+>
+  <div
+    class="card-body p-0 d-flex-center overflow-hidden position-relative"
+  >
+    <!---->
+     
+    <gl-loading-icon-stub
+      color="orange"
+      label="Loading"
+      size="md"
+    />
+  </div>
+   
+  <div
+    class="card-footer d-flex w-100"
+  >
+    <div
+      class="d-flex flex-column str-truncated-100"
+    >
+      <span
+        class="bold str-truncated-100"
+        data-qa-selector="design_file_name"
+      >
+        test
+      </span>
+       
+      <span
+        class="str-truncated-100"
+      >
+        
+        Updated 
+        <timeago-stub
+          cssclass=""
+          time="01-01-2019"
+          tooltipplacement="bottom"
+        />
+      </span>
+    </div>
+     
+    <!---->
+  </div>
+</router-link-stub>
+`;
+
 exports[`Design management list item component with notes renders item with multiple comments 1`] = `
 <router-link-stub
   class="card cursor-pointer text-plain js-design-list-item design-list-item"
@@ -252,55 +349,6 @@ exports[`Design management list item component with notes renders item with mult
 </router-link-stub>
 `;
 
-exports[`Design management list item component with no notes renders item with no status icon for none event 1`] = `
-<router-link-stub
-  class="card cursor-pointer text-plain js-design-list-item design-list-item"
-  to="[object Object]"
->
-  <div
-    class="card-body p-0 d-flex-center overflow-hidden position-relative"
-  >
-    <!---->
-     
-    <img
-      alt="test"
-      class="block ml-auto mr-auto mw-100 mh-100 design-img"
-      data-qa-selector="design_image"
-      src="http://via.placeholder.com/300"
-    />
-  </div>
-   
-  <div
-    class="card-footer d-flex w-100"
-  >
-    <div
-      class="d-flex flex-column str-truncated-100"
-    >
-      <span
-        class="bold str-truncated-100"
-        data-qa-selector="design_file_name"
-      >
-        test
-      </span>
-       
-      <span
-        class="str-truncated-100"
-      >
-        
-        Updated 
-        <timeago-stub
-          cssclass=""
-          time="01-01-2019"
-          tooltipplacement="bottom"
-        />
-      </span>
-    </div>
-     
-    <!---->
-  </div>
-</router-link-stub>
-`;
-
 exports[`Design management list item component with notes renders item with single comment 1`] = `
 <router-link-stub
   class="card cursor-pointer text-plain js-design-list-item design-list-item"
@@ -363,54 +411,6 @@ exports[`Design management list item component with notes renders item with sing
       
       </span>
     </div>
-  </div>
-</router-link-stub>
-`;
-
-exports[`Design management list item component with no notes renders loading spinner when isLoading is true 1`] = `
-<router-link-stub
-  class="card cursor-pointer text-plain js-design-list-item design-list-item"
-  to="[object Object]"
->
-  <div
-    class="card-body p-0 d-flex-center overflow-hidden position-relative"
-  >
-    <!---->
-     
-    <glloadingicon-stub
-      color="orange"
-      label="Loading"
-      size="md"
-    />
-  </div>
-   
-  <div
-    class="card-footer d-flex w-100"
-  >
-    <div
-      class="d-flex flex-column str-truncated-100"
-    >
-      <span
-        class="bold str-truncated-100"
-        data-qa-selector="design_file_name"
-      >
-        test
-      </span>
-       
-      <span
-        class="str-truncated-100"
-      >
-        
-        Updated 
-        <timeago-stub
-          cssclass=""
-          time="01-01-2019"
-          tooltipplacement="bottom"
-        />
-      </span>
-    </div>
-     
-    <!---->
   </div>
 </router-link-stub>
 `;

@@ -55,7 +55,7 @@ exports[`Security Configuration App features table displays a given feature 1`] 
               
             </div>
              
-            <gllink-stub
+            <gl-link-stub
               aria-label="Feature documentation"
               class="d-inline-flex ml-1"
               href="link-feature-0"
@@ -65,7 +65,7 @@ exports[`Security Configuration App features table displays a given feature 1`] 
                 name="external-link"
                 size="16"
               />
-            </gllink-stub>
+            </gl-link-stub>
           </div>
            
           <div

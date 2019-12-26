@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ThreatMonitoringApp component given there is a default environment shows the alert 1`] = `
-<glalert-stub
+<gl-alert-stub
   class="my-3"
   dismissible="true"
   dismisslabel="Dismiss"
@@ -15,5 +15,5 @@ exports[`ThreatMonitoringApp component given there is a default environment show
   
     The graph below is an overview of traffic coming to your application as tracked by the Web Application Firewall (WAF). View the docs for instructions on how to access the WAF logs to see what type of malicious traffic is trying to access your app. The docs link is also accessible by clicking the "?" icon next to the title below.
   
-</glalert-stub>
+</gl-alert-stub>
 `;

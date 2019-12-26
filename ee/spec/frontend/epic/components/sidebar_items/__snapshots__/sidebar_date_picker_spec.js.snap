@@ -4,7 +4,7 @@ exports[`SidebarDatePicker renders expected template 1`] = `
 <div
   class="block date epic-date"
 >
-  <collapsedcalendaricon-stub
+  <collapsed-calendar-icon-stub
     class="sidebar-collapsed-icon"
     containerclass=""
     showicon="true"
@@ -30,14 +30,14 @@ exports[`SidebarDatePicker renders expected template 1`] = `
         tabindex="0"
       />
        
-      <glbutton-stub
+      <gl-button-stub
         class="btn-sidebar-action"
         variant="link"
       >
         
         Edit
       
-      </glbutton-stub>
+      </gl-button-stub>
        
       <!---->
     </div>

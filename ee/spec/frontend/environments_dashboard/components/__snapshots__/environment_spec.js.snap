@@ -4,7 +4,7 @@ exports[`Environment matchs the snapshot 1`] = `
 <div
   class="dashboard-card card border-0"
 >
-  <environmentheader-stub
+  <environment-header-stub
     environment="[object Object]"
     haserrors="true"
   />
@@ -18,7 +18,7 @@ exports[`Environment matchs the snapshot 1`] = `
       <div
         class="col-1 align-self-center"
       >
-        <useravatarlink-stub
+        <user-avatar-link-stub
           imgalt=""
           imgcssclasses=""
           imgsize="32"
@@ -41,14 +41,14 @@ exports[`Environment matchs the snapshot 1`] = `
             size="16"
           />
            
-          <gllink-stub
+          <gl-link-stub
             class="str-truncated"
             href="/root/minimal-ruby-app/-/jobs/1097"
           >
             
             production #1097
           
-          </gllink-stub>
+          </gl-link-stub>
         </div>
          
         <commit-stub
@@ -65,7 +65,7 @@ exports[`Environment matchs the snapshot 1`] = `
       <div
         class="col-sm-4 mt-0 pl-5 pl-sm-0 offset-1 offset-sm-0 text-sm-right align-self-center col-12 d-sm-block"
       >
-        <timeago-stub
+        <time-ago-stub
           time="2019-02-20T16:15:40.122Z"
           tooltiptext="Finished"
         />

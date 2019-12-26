@@ -56,10 +56,10 @@ exports[`DependenciesTable component given a list of dependencies (loaded) match
     </div>
   </div>
    
-  <dependenciestablerow-stub
+  <dependencies-table-row-stub
     dependency="[object Object]"
   />
-  <dependenciestablerow-stub
+  <dependencies-table-row-stub
     dependency="[object Object]"
   />
 </div>
@@ -121,11 +121,11 @@ exports[`DependenciesTable component given a list of dependencies (loading) matc
     </div>
   </div>
    
-  <dependenciestablerow-stub
+  <dependencies-table-row-stub
     dependency="[object Object]"
     isloading="true"
   />
-  <dependenciestablerow-stub
+  <dependencies-table-row-stub
     dependency="[object Object]"
     isloading="true"
   />

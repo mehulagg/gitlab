@@ -7,7 +7,7 @@ exports[`Environment Header has a failed pipeline matches the snapshot 1`] = `
   <div
     class="flex-grow-1 block-truncated"
   >
-    <gllink-stub
+    <gl-link-stub
       class="js-environment-link cgray"
       href="/enivronment/1"
       title="staging"
@@ -17,12 +17,12 @@ exports[`Environment Header has a failed pipeline matches the snapshot 1`] = `
       >
          staging
       </span>
-    </gllink-stub>
+    </gl-link-stub>
      
     <!---->
   </div>
    
-  <reviewapplink-stub
+  <review-app-link-stub
     cssclass="btn btn-default btn-sm"
     iscurrent="true"
     link="http://example.com"
@@ -37,7 +37,7 @@ exports[`Environment Header has errors matches the snapshot 1`] = `
   <div
     class="flex-grow-1 block-truncated"
   >
-    <gllink-stub
+    <gl-link-stub
       class="js-environment-link cgray"
       href="/enivronment/1"
       title="staging"
@@ -47,12 +47,12 @@ exports[`Environment Header has errors matches the snapshot 1`] = `
       >
          staging
       </span>
-    </gllink-stub>
+    </gl-link-stub>
      
     <!---->
   </div>
    
-  <reviewapplink-stub
+  <review-app-link-stub
     cssclass="btn btn-default btn-sm"
     iscurrent="true"
     link="http://example.com"
@@ -67,7 +67,7 @@ exports[`Environment Header renders name and link to app matches the snapshot 1`
   <div
     class="flex-grow-1 block-truncated"
   >
-    <gllink-stub
+    <gl-link-stub
       class="js-environment-link cgray"
       href="/enivronment/1"
       title="staging"
@@ -77,12 +77,12 @@ exports[`Environment Header renders name and link to app matches the snapshot 1`
       >
          staging
       </span>
-    </gllink-stub>
+    </gl-link-stub>
      
     <!---->
   </div>
    
-  <reviewapplink-stub
+  <review-app-link-stub
     cssclass="btn btn-default btn-sm"
     iscurrent="true"
     link="http://example.com"
@@ -97,7 +97,7 @@ exports[`Environment Header with environments grouped into a folder matches the 
   <div
     class="flex-grow-1 block-truncated"
   >
-    <gllink-stub
+    <gl-link-stub
       class="js-environment-link cgray"
       href="/enivronment/1"
       title="review/testing"
@@ -107,14 +107,14 @@ exports[`Environment Header with environments grouped into a folder matches the 
       >
          review/testing
       </span>
-    </gllink-stub>
+    </gl-link-stub>
      
-    <glbadge-stub
+    <gl-badge-stub
       class="dashboard-card-icon"
       pill="true"
     >
       5
-    </glbadge-stub>
+    </gl-badge-stub>
   </div>
    
   <icon-stub

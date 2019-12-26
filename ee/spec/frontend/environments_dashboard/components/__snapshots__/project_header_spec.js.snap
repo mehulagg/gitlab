@@ -7,13 +7,13 @@ exports[`Project Header matches the snapshot 1`] = `
   <div
     class="d-flex align-items-center"
   >
-    <projectavatar-stub
+    <project-avatar-stub
       class="flex-shrink-0"
       project="[object Object]"
       size="20"
     />
      
-    <gllink-stub
+    <gl-link-stub
       class="js-namespace-link text-secondary"
       href="/hello"
     >
@@ -22,7 +22,7 @@ exports[`Project Header matches the snapshot 1`] = `
       >
          hello 
       </span>
-    </gllink-stub>
+    </gl-link-stub>
      
     <span
       class="append-right-8"
@@ -30,13 +30,13 @@ exports[`Project Header matches the snapshot 1`] = `
       &gt;
     </span>
      
-    <projectavatar-stub
+    <project-avatar-stub
       class="flex-shrink-0"
       project="[object Object]"
       size="20"
     />
      
-    <gllink-stub
+    <gl-link-stub
       class="js-project-link text-secondary"
     >
       <span
@@ -44,7 +44,7 @@ exports[`Project Header matches the snapshot 1`] = `
       >
          world 
       </span>
-    </gllink-stub>
+    </gl-link-stub>
   </div>
    
   <div
@@ -67,7 +67,7 @@ exports[`Project Header matches the snapshot 1`] = `
       class="dropdown-menu dropdown-menu-right"
     >
       <li>
-        <glbutton-stub
+        <gl-button-stub
           class="js-remove-button"
         >
           <span
@@ -75,7 +75,7 @@ exports[`Project Header matches the snapshot 1`] = `
           >
              Remove 
           </span>
-        </glbutton-stub>
+        </gl-button-stub>
       </li>
     </ul>
   </div>

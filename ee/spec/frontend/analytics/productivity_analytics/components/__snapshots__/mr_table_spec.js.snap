@@ -36,13 +36,13 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
               Time to merge
             </span>
              
-            <gldropdown-stub
+            <gl-dropdown-stub
               class="w-100 metric-col"
               menu-class="w-100 mw-100"
               text="Time from first comment to last commit"
               toggle-class="dropdown-menu-toggle w-100"
             >
-              <gldropdownitem-stub
+              <gl-dropdown-item-stub
                 active-class="is-active"
                 class="w-100"
               >
@@ -58,8 +58,8 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                   Time from first commit until first comment
                 
                 </span>
-              </gldropdownitem-stub>
-              <gldropdownitem-stub
+              </gl-dropdown-item-stub>
+              <gl-dropdown-item-stub
                 active-class="is-active"
                 class="w-100"
               >
@@ -75,8 +75,8 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                   Time from first comment to last commit
                 
                 </span>
-              </gldropdownitem-stub>
-              <gldropdownitem-stub
+              </gl-dropdown-item-stub>
+              <gl-dropdown-item-stub
                 active-class="is-active"
                 class="w-100"
               >
@@ -92,8 +92,8 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
                   Time from last commit to merge
                 
                 </span>
-              </gldropdownitem-stub>
-            </gldropdown-stub>
+              </gl-dropdown-item-stub>
+            </gl-dropdown-stub>
           </div>
         </div>
       </div>
@@ -102,12 +102,12 @@ exports[`MergeRequestTable component matches the snapshot 1`] = `
     <div
       class="card-body py-0"
     >
-      <mergerequesttablerow-stub
+      <merge-request-table-row-stub
         mergerequest="[object Object]"
         metriclabel="Time from first comment to last commit"
         metrictype="time_to_last_commit"
       />
-      <mergerequesttablerow-stub
+      <merge-request-table-row-stub
         mergerequest="[object Object]"
         metriclabel="Time from first comment to last commit"
         metrictype="time_to_last_commit"

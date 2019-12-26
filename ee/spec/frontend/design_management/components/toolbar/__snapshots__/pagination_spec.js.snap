@@ -12,13 +12,13 @@ exports[`Design management pagination component renders pagination buttons 1`] =
   <div
     class="btn-group ml-3 mr-3"
   >
-    <paginationbutton-stub
+    <pagination-button-stub
       class="js-previous-design"
       iconname="angle-left"
       title="Go to previous design"
     />
      
-    <paginationbutton-stub
+    <pagination-button-stub
       class="js-next-design"
       design="[object Object]"
       iconname="angle-right"

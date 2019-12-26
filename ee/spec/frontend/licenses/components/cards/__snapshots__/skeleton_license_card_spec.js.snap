@@ -7,7 +7,7 @@ exports[`SkeletonLicenseCard renders a skeleton license card 1`] = `
   <div
     class="card-header d-flex justify-content-between align-items-center py-3"
   >
-    <glskeletonloading-stub
+    <gl-skeleton-loading-stub
       class="w-75 skeleton-bar"
       lines="1"
     />
@@ -22,39 +22,39 @@ exports[`SkeletonLicenseCard renders a skeleton license card 1`] = `
       <div
         class="license-row d-flex"
       >
-        <skeletonheadercell-stub />
+        <skeleton-header-cell-stub />
          
-        <skeletoncell-stub />
+        <skeleton-cell-stub />
          
-        <skeletoncell-stub />
+        <skeleton-cell-stub />
          
-        <skeletoncell-stub />
+        <skeleton-cell-stub />
          
-        <skeletoncell-stub />
+        <skeleton-cell-stub />
       </div>
        
       <div
         class="license-row d-flex"
       >
-        <skeletonheadercell-stub />
+        <skeleton-header-cell-stub />
          
-        <skeletoncell-stub />
+        <skeleton-cell-stub />
          
-        <skeletoncell-stub />
+        <skeleton-cell-stub />
          
-        <skeletoncell-stub />
+        <skeleton-cell-stub />
       </div>
        
       <div
         class="license-row d-flex"
       >
-        <skeletonheadercell-stub />
+        <skeleton-header-cell-stub />
          
-        <skeletoncell-stub />
+        <skeleton-cell-stub />
          
-        <skeletoncell-stub />
+        <skeleton-cell-stub />
          
-        <skeletoncell-stub />
+        <skeleton-cell-stub />
       </div>
     </div>
   </div>

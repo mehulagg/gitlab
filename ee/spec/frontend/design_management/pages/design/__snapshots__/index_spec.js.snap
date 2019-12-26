@@ -7,7 +7,7 @@ exports[`Design management design index page renders design index 1`] = `
   <div
     class="d-flex overflow-hidden flex-lg-grow-1 flex-column"
   >
-    <designdestroyer-stub
+    <design-destroyer-stub
       filenames="test.jpg"
       iid="1"
       projectpath=""
@@ -22,12 +22,12 @@ exports[`Design management design index page renders design index 1`] = `
         <!---->
       </div>
        
-      <designimage-stub
+      <design-image-stub
         image="test.jpg"
         name="test.jpg"
       />
        
-      <designoverlay-stub
+      <design-overlay-stub
         notes="[object Object]"
         position="[object Object]"
       />
@@ -37,7 +37,7 @@ exports[`Design management design index page renders design index 1`] = `
   <div
     class="image-notes"
   >
-    <designdiscussion-stub
+    <design-discussion-stub
       designid="1"
       discussion="[object Object]"
       discussionindex="1"
@@ -54,7 +54,7 @@ exports[`Design management design index page sets loading state 1`] = `
 <div
   class="design-detail fixed-top w-100 position-bottom-0 d-flex justify-content-center flex-column flex-lg-row"
 >
-  <glloadingicon-stub
+  <gl-loading-icon-stub
     class="align-self-center"
     color="orange"
     label="Loading"
@@ -70,7 +70,7 @@ exports[`Design management design index page with error GlAlert is rendered in c
   <div
     class="d-flex overflow-hidden flex-lg-grow-1 flex-column"
   >
-    <designdestroyer-stub
+    <design-destroyer-stub
       filenames="test.jpg"
       iid="1"
       projectpath=""
@@ -82,7 +82,7 @@ exports[`Design management design index page with error GlAlert is rendered in c
       <div
         class="p-3"
       >
-        <glalert-stub
+        <gl-alert-stub
           dismissible="true"
           dismisslabel="Dismiss"
           primarybuttonlink=""
@@ -95,15 +95,15 @@ exports[`Design management design index page with error GlAlert is rendered in c
           
             woops
           
-        </glalert-stub>
+        </gl-alert-stub>
       </div>
        
-      <designimage-stub
+      <design-image-stub
         image="test.jpg"
         name="test.jpg"
       />
        
-      <designoverlay-stub
+      <design-overlay-stub
         notes=""
         position="[object Object]"
       />

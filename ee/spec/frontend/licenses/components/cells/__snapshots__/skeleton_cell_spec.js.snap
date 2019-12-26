@@ -4,12 +4,12 @@ exports[`SkeletonCell renders a skeleton cell with a title and value loading bar
 <cell-stub
   isflexible="true"
 >
-  <glskeletonloading-stub
+  <gl-skeleton-loading-stub
     class="w-75 skeleton-bar"
     lines="1"
   />
    
-  <glskeletonloading-stub
+  <gl-skeleton-loading-stub
     class="w-50 skeleton-bar"
     lines="1"
   />

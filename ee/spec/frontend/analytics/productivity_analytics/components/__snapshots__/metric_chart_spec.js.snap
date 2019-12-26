@@ -18,13 +18,13 @@ exports[`MetricChart component template when isLoading is false and chartData is
 <div>
   <!---->
    
-  <gldropdown-stub
+  <gl-dropdown-stub
     class="mb-4 metric-dropdown"
     menu-class="w-100 mw-100"
     text="Please select a metric"
     toggle-class="dropdown-menu-toggle w-100"
   >
-    <gldropdownitem-stub
+    <gl-dropdown-item-stub
       active-class="is-active"
       class="w-100"
     >
@@ -42,8 +42,8 @@ exports[`MetricChart component template when isLoading is false and chartData is
             Time from last commit to merge
           
       </span>
-    </gldropdownitem-stub>
-    <gldropdownitem-stub
+    </gl-dropdown-item-stub>
+    <gl-dropdown-item-stub
       active-class="is-active"
       class="w-100"
     >
@@ -61,8 +61,8 @@ exports[`MetricChart component template when isLoading is false and chartData is
             Time from first comment to last commit
           
       </span>
-    </gldropdownitem-stub>
-  </gldropdown-stub>
+    </gl-dropdown-item-stub>
+  </gl-dropdown-stub>
    
   <!---->
    
@@ -76,7 +76,7 @@ exports[`MetricChart component template when isLoading is true matches the snaps
 <div>
   <!---->
    
-  <glloadingicon-stub
+  <gl-loading-icon-stub
     class="my-4 py-4"
     color="orange"
     label="Loading"
