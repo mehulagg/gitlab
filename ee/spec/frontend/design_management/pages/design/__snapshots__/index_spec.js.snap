@@ -1,5 +1,68 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Design management design index page renders design index 1`] = `
+<div
+  class="design-detail fixed-top w-100 position-bottom-0 d-flex justify-content-center flex-column flex-lg-row"
+>
+  <div
+    class="d-flex overflow-hidden flex-lg-grow-1 flex-column"
+  >
+    <designdestroyer-stub
+      filenames="test.jpg"
+      iid="1"
+      projectpath=""
+    />
+     
+    <div
+      class="d-flex flex-column h-100 mh-100 position-relative"
+    >
+      <div
+        class="p-3"
+      >
+        <!---->
+      </div>
+       
+      <designimage-stub
+        image="test.jpg"
+        name="test.jpg"
+      />
+       
+      <designoverlay-stub
+        notes="[object Object]"
+        position="[object Object]"
+      />
+    </div>
+  </div>
+   
+  <div
+    class="image-notes"
+  >
+    <designdiscussion-stub
+      designid="1"
+      discussion="[object Object]"
+      discussionindex="1"
+      markdownpreviewpath="//preview_markdown?target_type=Issue"
+      noteableid="design-id"
+    />
+     
+    <!---->
+  </div>
+</div>
+`;
+
+exports[`Design management design index page sets loading state 1`] = `
+<div
+  class="design-detail fixed-top w-100 position-bottom-0 d-flex justify-content-center flex-column flex-lg-row"
+>
+  <glloadingicon-stub
+    class="align-self-center"
+    color="orange"
+    label="Loading"
+    size="xl"
+  />
+</div>
+`;
+
 exports[`Design management design index page with error GlAlert is rendered in correct position with correct content 1`] = `
 <div
   class="design-detail fixed-top w-100 position-bottom-0 d-flex justify-content-center flex-column flex-lg-row"
@@ -58,31 +121,5 @@ exports[`Design management design index page with error GlAlert is rendered in c
       
     </h2>
   </div>
-</div>
-`;
-
-exports[`Design management design index page renders design index 1`] = `
-<div
-  class="design-detail fixed-top w-100 position-bottom-0 d-flex justify-content-center flex-column flex-lg-row"
->
-  <glloadingicon-stub
-    class="align-self-center"
-    color="orange"
-    label="Loading"
-    size="xl"
-  />
-</div>
-`;
-
-exports[`Design management design index page sets loading state 1`] = `
-<div
-  class="design-detail fixed-top w-100 position-bottom-0 d-flex justify-content-center flex-column flex-lg-row"
->
-  <glloadingicon-stub
-    class="align-self-center"
-    color="orange"
-    label="Loading"
-    size="xl"
-  />
 </div>
 `;

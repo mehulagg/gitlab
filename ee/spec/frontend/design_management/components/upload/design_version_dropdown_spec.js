@@ -50,20 +50,26 @@ describe('Design management design version dropdown component', () => {
   it('renders design version dropdown button', () => {
     createComponent();
 
-    expect(wrapper.element).toMatchSnapshot();
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.element).toMatchSnapshot();
+    });
   });
 
   it('renders design version list', () => {
     createComponent();
 
-    expect(wrapper.element).toMatchSnapshot();
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.element).toMatchSnapshot();
+    });
   });
 
   describe('selected version name', () => {
     it('has "latest" on most recent version item', () => {
       createComponent();
 
-      expect(findVersionLink(0).text()).toContain('latest');
+      return wrapper.vm.$nextTick().then(() => {
+        expect(findVersionLink(0).text()).toContain('latest');
+      });
     });
   });
 
@@ -71,29 +77,41 @@ describe('Design management design version dropdown component', () => {
     it('displays latest version text by default', () => {
       createComponent();
 
-      expect(wrapper.find(GlDropdown).attributes('text')).toBe('Showing Latest Version');
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.find(GlDropdown).attributes('text')).toBe('Showing Latest Version');
+      });
     });
 
     it('displays latest version text when only 1 version is present', () => {
       createComponent({ maxVersions: 1 });
 
-      expect(wrapper.find(GlDropdown).attributes('text')).toBe('Showing Latest Version');
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.find(GlDropdown).attributes('text')).toBe('Showing Latest Version');
+      });
     });
 
     it('displays version text when the current version is not the latest', () => {
       createComponent({ $route: designRouteFactory(PREVIOUS_VERSION_ID) });
-      expect(wrapper.find(GlDropdown).attributes('text')).toBe(`Showing Version #1`);
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.find(GlDropdown).attributes('text')).toBe(`Showing Version #1`);
+      });
     });
 
     it('displays latest version text when the current version is the latest', () => {
       createComponent({ $route: designRouteFactory(LATEST_VERSION_ID) });
-      expect(wrapper.find(GlDropdown).attributes('text')).toBe('Showing Latest Version');
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.find(GlDropdown).attributes('text')).toBe('Showing Latest Version');
+      });
     });
 
     it('should have the same length as apollo query', () => {
       createComponent();
 
-      expect(wrapper.findAll(GlDropdownItem).length).toEqual(wrapper.vm.allVersions.length);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.findAll(GlDropdownItem).length).toEqual(wrapper.vm.allVersions.length);
+      });
     });
   });
 });

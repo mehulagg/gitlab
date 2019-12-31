@@ -81,7 +81,9 @@ describe('Design management design index page', () => {
   it('sets loading state', () => {
     createComponent(true);
 
-    expect(wrapper.element).toMatchSnapshot();
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.element).toMatchSnapshot();
+    });
   });
 
   it('renders design index', () => {
@@ -91,8 +93,10 @@ describe('Design management design index page', () => {
       design,
     });
 
-    expect(wrapper.element).toMatchSnapshot();
-    expect(wrapper.find(GlAlert).exists()).toBe(false);
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.element).toMatchSnapshot();
+      expect(wrapper.find(GlAlert).exists()).toBe(false);
+    });
   });
 
   describe('when has no discussions', () => {

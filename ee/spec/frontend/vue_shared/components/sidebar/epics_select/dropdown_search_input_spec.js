@@ -72,7 +72,9 @@ describe('EpicsSelect', () => {
           query: 'foo',
         });
 
-        expect(wrapper.classes()).toContain('has-value');
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.classes()).toContain('has-value');
+        });
       });
 
       it('should render input element', () => {
@@ -89,10 +91,13 @@ describe('EpicsSelect', () => {
         wrapper.setData({
           query: 'foo',
         });
-        const iconEl = wrapper.find(Icon);
 
-        expect(iconEl.exists()).toBe(true);
-        expect(iconEl.attributes('name')).toBe('search');
+        return wrapper.vm.$nextTick().then(() => {
+          const iconEl = wrapper.find(Icon);
+
+          expect(iconEl.exists()).toBe(true);
+          expect(iconEl.attributes('name')).toBe('search');
+        });
       });
 
       it('should render input clear button', () => {

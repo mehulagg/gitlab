@@ -110,7 +110,9 @@ describe('Design management index page', () => {
     it('renders loading icon', () => {
       createComponent({ loading: true });
 
-      expect(wrapper.element).toMatchSnapshot();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.element).toMatchSnapshot();
+      });
     });
 
     it('renders error', () => {
@@ -153,13 +155,15 @@ describe('Design management index page', () => {
       createComponent();
     });
 
-    it('renders empty text', () => {
-      expect(wrapper.element).toMatchSnapshot();
-    });
+    it('renders empty text', () =>
+      wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.element).toMatchSnapshot();
+      }));
 
-    it('does not render a toolbar with buttons', () => {
-      expect(findToolbar().exists()).toBe(false);
-    });
+    it('does not render a toolbar with buttons', () =>
+      wrapper.vm.$nextTick().then(() => {
+        expect(findToolbar().exists()).toBe(false);
+      }));
   });
 
   describe('uploading designs', () => {

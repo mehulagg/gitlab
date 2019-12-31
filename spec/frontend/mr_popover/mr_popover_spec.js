@@ -42,7 +42,9 @@ describe('MR Popover', () => {
         },
       });
 
-      expect(wrapper.element).toMatchSnapshot();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.element).toMatchSnapshot();
+      });
     });
 
     it('does not show CI Icon if there is no pipeline data', () => {

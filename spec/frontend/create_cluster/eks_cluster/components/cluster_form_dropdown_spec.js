@@ -203,8 +203,10 @@ describe('ClusterFormDropdown', () => {
     vm.setProps({ items });
     vm.setData({ searchQuery });
 
-    expect(vm.findAll('.js-dropdown-item').length).toEqual(1);
-    expect(vm.find('.js-dropdown-item').text()).toEqual(secondItem.name);
+    return vm.vm.$nextTick().then(() => {
+      expect(vm.findAll('.js-dropdown-item').length).toEqual(1);
+      expect(vm.find('.js-dropdown-item').text()).toEqual(secondItem.name);
+    });
   });
 
   it('focuses dropdown search input when dropdown is displayed', () => {
