@@ -50,7 +50,9 @@ describe('LogControlButtons', () => {
 
     findRefreshBtn().vm.$emit('click');
 
-    expect(wrapper.emitted('refresh')).toHaveLength(1);
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.emitted('refresh')).toHaveLength(1);
+    });
   });
 
   describe('when scrolling actions are enabled', () => {

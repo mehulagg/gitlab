@@ -42,8 +42,10 @@ describe('burndown_chart', () => {
 
     weightButton().vm.$emit('click');
 
-    expect(issuesButton().attributes('variant')).toBe('inverted-primary');
-    expect(weightButton().attributes('variant')).toBe('primary');
+    return wrapper.vm.$nextTick().then(() => {
+      expect(issuesButton().attributes('variant')).toBe('inverted-primary');
+      expect(weightButton().attributes('variant')).toBe('primary');
+    });
   });
 
   describe('with single point', () => {

@@ -87,7 +87,10 @@ describe('Project Header', () => {
         .at(0)
         .find(GlButton)
         .vm.$emit('click');
-      expect(wrapper.emitted('remove')).toContainEqual([propsData.project.remove_path]);
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted('remove')).toContainEqual([propsData.project.remove_path]);
+      });
     });
   });
 });

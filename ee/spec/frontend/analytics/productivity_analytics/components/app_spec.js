@@ -270,6 +270,7 @@ describe('ProductivityApp component', () => {
                     beforeEach(() => {
                       jest.spyOn(store, 'dispatch');
                       findCommitBasedMetricChart().vm.$emit('metricTypeChange', 'loc_per_commit');
+                      return wrapper.vm.$nextTick();
                     });
 
                     it('should call setMetricType  when `metricTypeChange` is emitted on the metric chart', () => {
@@ -326,6 +327,7 @@ describe('ProductivityApp component', () => {
                       beforeEach(() => {
                         jest.spyOn(store, 'dispatch');
                         findScatterplotMetricChart().vm.$emit('metricTypeChange', 'loc_per_commit');
+                        return wrapper.vm.$nextTick();
                       });
 
                       it('should call setMetricType  when `metricTypeChange` is emitted on the metric chart', () => {

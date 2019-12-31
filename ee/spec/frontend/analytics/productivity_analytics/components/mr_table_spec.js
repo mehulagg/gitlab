@@ -79,7 +79,9 @@ describe('MergeRequestTable component', () => {
     it('it emits the metric key when item is selected from the dropdown', () => {
       findFirstDropdownItem().vm.$emit('click');
 
-      expect(wrapper.emitted().columnMetricChange[0]).toEqual(['time_to_first_comment']);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().columnMetricChange[0]).toEqual(['time_to_first_comment']);
+      });
     });
   });
 });

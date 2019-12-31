@@ -53,10 +53,13 @@ describe('ResetKey', () => {
 
       vm.find(GlModal).vm.$emit('ok');
 
-      return waitForPromises().then(() => {
-        expect(vm.vm.authorizationKey).toEqual('newToken');
-        expect(vm.find('#authorization-key').attributes('value')).toEqual('newToken');
-      });
+      return vm.vm
+        .$nextTick()
+        .then(waitForPromises)
+        .then(() => {
+          expect(vm.vm.authorizationKey).toEqual('newToken');
+          expect(vm.find('#authorization-key').attributes('value')).toEqual('newToken');
+        });
     });
 
     it('reset key failure shows error', () => {
@@ -64,15 +67,18 @@ describe('ResetKey', () => {
 
       vm.find(GlModal).vm.$emit('ok');
 
-      return waitForPromises().then(() => {
-        expect(vm.find('#authorization-key').attributes('value')).toEqual(
-          propsData.initialAuthorizationKey,
-        );
+      return vm.vm
+        .$nextTick()
+        .then(waitForPromises)
+        .then(() => {
+          expect(vm.find('#authorization-key').attributes('value')).toEqual(
+            propsData.initialAuthorizationKey,
+          );
 
-        expect(document.querySelector('.flash-container').innerText.trim()).toEqual(
-          'Failed to reset key. Please try again.',
-        );
-      });
+          expect(document.querySelector('.flash-container').innerText.trim()).toEqual(
+            'Failed to reset key. Please try again.',
+          );
+        });
     });
   });
 
