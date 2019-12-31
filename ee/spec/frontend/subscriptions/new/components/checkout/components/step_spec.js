@@ -1,8 +1,10 @@
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { GlButton } from '@gitlab/ui';
 import store from 'ee/subscriptions/new/store';
 import * as constants from 'ee/subscriptions/new/constants';
 import component from 'ee/subscriptions/new/components/checkout/components/step.vue';
+import StepSummary from 'ee/subscriptions/new/components/checkout/components/step_summary.vue';
 
 describe('Step', () => {
   const localVue = createLocalVue();
@@ -109,13 +111,13 @@ describe('Step', () => {
       activatePreviousStep();
       factory();
 
-      expect(wrapper.find('stepsummary-stub').exists()).toBe(true);
+      expect(wrapper.find(StepSummary).exists()).toBe(true);
     });
 
     it('does not show the summary when this step is not finished', () => {
       factory();
 
-      expect(wrapper.find('stepsummary-stub').exists()).toBe(false);
+      expect(wrapper.find(StepSummary).exists()).toBe(false);
     });
   });
 
@@ -135,13 +137,13 @@ describe('Step', () => {
     it('is disabled when this step is not valid', () => {
       factory({ isValid: false });
 
-      expect(wrapper.find('glbutton-stub').attributes('disabled')).toBe('true');
+      expect(wrapper.find(GlButton).attributes('disabled')).toBe('true');
     });
 
     it('is enabled when this step is valid', () => {
       factory();
 
-      expect(wrapper.find('glbutton-stub').attributes('disabled')).toBeUndefined();
+      expect(wrapper.find(GlButton).attributes('disabled')).toBeUndefined();
     });
   });
 });

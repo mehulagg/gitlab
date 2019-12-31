@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import MRPopover from '~/mr_popover/components/mr_popover';
+import CiIcon from '~/vue_shared/components/ci_icon.vue';
 
 describe('MR Popover', () => {
   let wrapper;
@@ -55,7 +56,9 @@ describe('MR Popover', () => {
         },
       });
 
-      expect(wrapper.contains('ciicon-stub')).toBe(false);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.contains(CiIcon)).toBe(false);
+      });
     });
   });
 });

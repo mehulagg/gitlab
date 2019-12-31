@@ -1,5 +1,7 @@
 import { shallowMount, mount } from '@vue/test-utils';
 import StageEventList from 'ee/analytics/cycle_analytics/components/stage_event_list.vue';
+import StageEventItem from 'ee/analytics/cycle_analytics/components/stage_event_item.vue';
+import StageBuildItem from 'ee/analytics/cycle_analytics/components/stage_build_item.vue';
 
 import {
   issueStage,
@@ -122,7 +124,7 @@ describe('Stage', () => {
       ${'Production'} | ${productionStage} | ${productionEvents}
     `('$name stage will render the items as StageEventItems', ({ stage, eventList }) => {
       wrapper = createComponent({ props: { events: eventList, stage }, stubs: mockStubs });
-      expect(wrapper.find('stage-event-item-stub').exists()).toBe(true);
+      expect(wrapper.find(StageEventItem).exists()).toBe(true);
     });
 
     it.each`
@@ -131,7 +133,7 @@ describe('Stage', () => {
       ${'Staging'} | ${stagingStage} | ${stagingEvents}
     `('$name stage will render the items as StageBuildItems', ({ stage, eventList }) => {
       wrapper = createComponent({ props: { events: eventList, stage }, stubs: mockStubs });
-      expect(wrapper.find('stage-build-item-stub').exists()).toBe(true);
+      expect(wrapper.find(StageBuildItem).exists()).toBe(true);
     });
 
     describe('Test stage', () => {
