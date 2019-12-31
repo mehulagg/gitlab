@@ -18,7 +18,7 @@ describe('BlockingMergeRequestBody', () => {
   it('does not show hidden merge request if hidden MRs do not exist', () => {
     const wrapper = shallowMount(BlockingMergeRequestBody, {
       propsData: {
-        issue: {},
+        issue: { id: 10, reference: '#123' },
         status: 'string',
         isNew: true,
       },
