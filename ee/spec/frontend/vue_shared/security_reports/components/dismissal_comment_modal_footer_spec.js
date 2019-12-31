@@ -31,16 +31,21 @@ describe('DismissalCommentModalFooter', () => {
     it('should emit the "addCommentAndDismiss" event when clicked', () => {
       wrapper.find(LoadingButton).trigger('click');
 
-      expect(wrapper.emitted().addCommentAndDismiss).toBeTruthy();
-      expect(Tracking.event).toHaveBeenCalledWith(
-        '_track_category_',
-        'click_add_comment_and_dismiss',
-      );
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().addCommentAndDismiss).toBeTruthy();
+        expect(Tracking.event).toHaveBeenCalledWith(
+          '_track_category_',
+          'click_add_comment_and_dismiss',
+        );
+      });
     });
 
     it('should emit the cancel event when the cancel button is clicked', () => {
       wrapper.find('.js-cancel').trigger('click');
-      expect(wrapper.emitted().cancel).toBeTruthy();
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().cancel).toBeTruthy();
+      });
     });
   });
 
@@ -60,8 +65,10 @@ describe('DismissalCommentModalFooter', () => {
       it('should emit the "addCommentAndDismiss" event when clicked', () => {
         wrapper.find(LoadingButton).trigger('click');
 
-        expect(wrapper.emitted().addDismissalComment).toBeTruthy();
-        expect(Tracking.event).toHaveBeenCalledWith('_track_category_', 'click_add_comment');
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emitted().addDismissalComment).toBeTruthy();
+          expect(Tracking.event).toHaveBeenCalledWith('_track_category_', 'click_add_comment');
+        });
       });
     });
 
@@ -81,8 +88,10 @@ describe('DismissalCommentModalFooter', () => {
       it('should emit the "addCommentAndDismiss" event when clicked', () => {
         wrapper.find(LoadingButton).trigger('click');
 
-        expect(wrapper.emitted().addDismissalComment).toBeTruthy();
-        expect(Tracking.event).toHaveBeenCalledWith('_track_category_', 'click_edit_comment');
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.emitted().addDismissalComment).toBeTruthy();
+          expect(Tracking.event).toHaveBeenCalledWith('_track_category_', 'click_edit_comment');
+        });
       });
     });
   });

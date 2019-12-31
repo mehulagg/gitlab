@@ -32,7 +32,10 @@ describe('Security Reports modal footer', () => {
 
     it('emits createIssue when create issue button is clicked', () => {
       wrapper.find(LoadingButton).trigger('click');
-      expect(wrapper.emitted().createNewIssue).toBeTruthy();
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().createNewIssue).toBeTruthy();
+      });
     });
   });
 
@@ -52,7 +55,10 @@ describe('Security Reports modal footer', () => {
 
     it('emits createMergeRequest when create merge request button is clicked', () => {
       wrapper.find(LoadingButton).trigger('click');
-      expect(wrapper.emitted().createMergeRequest).toBeTruthy();
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().createMergeRequest).toBeTruthy();
+      });
     });
   });
 
@@ -72,7 +78,10 @@ describe('Security Reports modal footer', () => {
 
     it('emits downloadPatch when download patch button is clicked', () => {
       wrapper.find(LoadingButton).trigger('click');
-      expect(wrapper.emitted().downloadPatch).toBeTruthy();
+
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().downloadPatch).toBeTruthy();
+      });
     });
   });
 

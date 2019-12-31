@@ -45,7 +45,9 @@ describe('Design reply form component', () => {
         ctrlKey: true,
       });
 
-      expect(wrapper.emitted('submitForm')).toBeFalsy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted('submitForm')).toBeFalsy();
+      });
     });
 
     it('does not emit submitForm event on textarea meta+enter keydown', () => {
@@ -53,7 +55,9 @@ describe('Design reply form component', () => {
         metaKey: true,
       });
 
-      expect(wrapper.emitted('submitForm')).toBeFalsy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted('submitForm')).toBeFalsy();
+      });
     });
   });
 
@@ -71,7 +75,9 @@ describe('Design reply form component', () => {
     it('emits submitForm event on button click', () => {
       findSubmitButton().trigger('click');
 
-      expect(wrapper.emitted('submitForm')).toBeTruthy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted('submitForm')).toBeTruthy();
+      });
     });
 
     it('emits submitForm event on textarea ctrl+enter keydown', () => {
@@ -79,7 +85,9 @@ describe('Design reply form component', () => {
         ctrlKey: true,
       });
 
-      expect(wrapper.emitted('submitForm')).toBeTruthy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted('submitForm')).toBeTruthy();
+      });
     });
 
     it('emits submitForm event on textarea meta+enter keydown', () => {
@@ -87,19 +95,25 @@ describe('Design reply form component', () => {
         metaKey: true,
       });
 
-      expect(wrapper.emitted('submitForm')).toBeTruthy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted('submitForm')).toBeTruthy();
+      });
     });
 
     it('emits input event on changing textarea content', () => {
       findTextarea().setValue('test2');
 
-      expect(wrapper.emitted('input')).toBeTruthy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted('input')).toBeTruthy();
+      });
     });
 
     it('emits cancelForm event on pressing escape button on textarea', () => {
       findTextarea().trigger('keyup.esc');
 
-      expect(wrapper.emitted('cancelForm')).toBeTruthy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted('cancelForm')).toBeTruthy();
+      });
     });
   });
 });

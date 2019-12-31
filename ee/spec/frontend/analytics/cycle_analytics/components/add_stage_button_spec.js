@@ -27,7 +27,9 @@ describe('AddStageButton', () => {
       wrapper = createComponent();
       expect(wrapper.emitted().showform).toBeUndefined();
       wrapper.trigger('click');
-      expect(wrapper.emitted().showform.length).toBe(1);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().showform.length).toBe(1);
+      });
     });
 
     it('does not have the active class', () => {

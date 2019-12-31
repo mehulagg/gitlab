@@ -61,15 +61,20 @@ describe('ClusterFormDropdown', () => {
 
     beforeEach(() => {
       vm.setProps({ items, multiple: true, value });
-      return vm.vm.$nextTick().then(() => {
-        vm.findAll('.js-dropdown-item')
-          .at(0)
-          .trigger('click');
-        vm.findAll('.js-dropdown-item')
-          .at(1)
-          .trigger('click');
-        return vm.vm.$nextTick();
-      });
+      return vm.vm
+        .$nextTick()
+        .then(() => {
+          vm.findAll('.js-dropdown-item')
+            .at(0)
+            .trigger('click');
+          return vm.vm.$nextTick();
+        })
+        .then(() => {
+          vm.findAll('.js-dropdown-item')
+            .at(1)
+            .trigger('click');
+          return vm.vm.$nextTick();
+        });
     });
 
     it('emits input event with an array of selected items', () => {

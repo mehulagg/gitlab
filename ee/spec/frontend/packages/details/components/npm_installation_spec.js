@@ -97,11 +97,17 @@ describe('NpmInstallation', () => {
 
     it('should track when the installation tab is clicked', () => {
       setupTab().trigger('click');
-      installationTab().trigger('click');
 
-      expect(eventSpy).toHaveBeenCalledWith(undefined, TrackingActions.INSTALLATION, {
-        label,
-      });
+      return wrapper.vm
+        .$nextTick()
+        .then(() => {
+          installationTab().trigger('click');
+        })
+        .then(() => {
+          expect(eventSpy).toHaveBeenCalledWith(undefined, TrackingActions.INSTALLATION, {
+            label,
+          });
+        });
     });
   });
 });

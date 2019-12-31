@@ -142,12 +142,14 @@ describe('GroupsDropdownFilter component', () => {
         .at(0)
         .trigger('click');
 
-      expect(wrapper.emittedByOrder()).toEqual([
-        {
-          name: 'selected',
-          args: [groups[0]],
-        },
-      ]);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emittedByOrder()).toEqual([
+          {
+            name: 'selected',
+            args: [groups[0]],
+          },
+        ]);
+      });
     });
 
     it('should change selection when new group is clicked', () => {
@@ -155,12 +157,14 @@ describe('GroupsDropdownFilter component', () => {
         .at(1)
         .trigger('click');
 
-      expect(wrapper.emittedByOrder()).toEqual([
-        {
-          name: 'selected',
-          args: [groups[1]],
-        },
-      ]);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emittedByOrder()).toEqual([
+          {
+            name: 'selected',
+            args: [groups[1]],
+          },
+        ]);
+      });
     });
 
     it('renders an avatar in the dropdown button when the group has an avatar_url', done => {

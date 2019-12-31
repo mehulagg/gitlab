@@ -362,6 +362,7 @@ describe('CustomStageForm', () => {
 
         return Vue.nextTick(() => {
           selectDropdownOption(wrapper, sel.endEvent, 1);
+          return Vue.nextTick();
         });
       });
 
@@ -394,10 +395,15 @@ describe('CustomStageForm', () => {
 
           selectDropdownOption(wrapper, sel.startEvent, startEventIndex);
 
-          return Vue.nextTick(() => {
-            selectDropdownOption(wrapper, sel.endEvent, stopEventIndex);
-            wrapper.find(sel.name).setValue('Cool stage');
-          });
+          return Vue.nextTick()
+            .then(() => {
+              selectDropdownOption(wrapper, sel.endEvent, stopEventIndex);
+              return Vue.nextTick();
+            })
+            .then(() => {
+              wrapper.find(sel.name).setValue('Cool stage');
+              return Vue.nextTick();
+            });
         });
 
         afterEach(() => {
@@ -437,8 +443,10 @@ describe('CustomStageForm', () => {
           ];
 
           wrapper.find(sel.submit).trigger('click');
-          event = findEvent(STAGE_ACTIONS.CREATE);
-          expect(event[0]).toEqual(res);
+          return Vue.nextTick().then(() => {
+            event = findEvent(STAGE_ACTIONS.CREATE);
+            expect(event[0]).toEqual(res);
+          });
         });
       });
     });

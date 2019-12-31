@@ -81,7 +81,9 @@ describe('RelatedIssuableInput', () => {
 
       wrapper.find('li').trigger('click');
 
-      expect(document.activeElement).toBe(wrapper.find({ ref: 'input' }).element);
+      return wrapper.vm.$nextTick().then(() => {
+        expect(document.activeElement).toBe(wrapper.find({ ref: 'input' }).element);
+      });
     });
   });
 

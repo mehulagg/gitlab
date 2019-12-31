@@ -200,7 +200,10 @@ describe('SidebarDatePicker', () => {
     createComponent({ canUpdate: true });
 
     wrapper.find('input').trigger('click');
-    expect(wrapper.emitted().toggleDateType).toStrictEqual([[true]]);
+
+    return wrapper.vm.$nextTick(() => {
+      expect(wrapper.emitted().toggleDateType).toStrictEqual([[true]]);
+    });
   });
 
   it('emits `toggleCollapse` event when toggle-sidebar emits `toggle` event', () => {
