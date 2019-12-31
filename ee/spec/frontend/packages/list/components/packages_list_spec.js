@@ -1,8 +1,8 @@
 import Vue from 'vue';
 import _ from 'underscore';
-import { shallowMount } from '@vue/test-utils';
-import { GlTable } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import PackagesList from 'ee/packages/list/components/packages_list.vue';
+import stubChildren from 'helpers/stub_children';
 import { packageList } from '../../mock_data';
 
 describe('packages_list', () => {
@@ -16,9 +16,10 @@ describe('packages_list', () => {
   const findSortingItems = () => wrapper.findAll({ name: 'sorting-item-stub' });
   const findFirstProjectColumn = () => wrapper.find({ ref: 'col-project' });
 
-  const defaultShallowMountOptions = {
+  const mountOptions = {
     stubs: {
-      GlTable,
+      ...stubChildren(PackagesList),
+      GlTable: false,
       GlSortingItem: { name: 'sorting-item-stub', template: '<div><slot></slot></div>' },
     },
     computed: {
@@ -35,7 +36,7 @@ describe('packages_list', () => {
     // This is needed due to  console.error called by vue to emit a warning that stop the tests
     // see  https://github.com/vuejs/vue-test-utils/issues/532
     Vue.config.silent = true;
-    wrapper = shallowMount(PackagesList, defaultShallowMountOptions);
+    wrapper = mount(PackagesList, mountOptions);
   });
 
   afterEach(() => {
@@ -43,16 +44,12 @@ describe('packages_list', () => {
     wrapper.destroy();
   });
 
-  it('renders', () => {
-    expect(wrapper.element).toMatchSnapshot();
-  });
-
   describe('when is isGroupPage', () => {
     beforeEach(() => {
-      wrapper = shallowMount(PackagesList, {
-        ...defaultShallowMountOptions,
+      wrapper = mount(PackagesList, {
+        ...mountOptions,
         computed: {
-          ...defaultShallowMountOptions.computed,
+          ...mountOptions.computed,
           canDestroyPackage: () => false,
           isGroupPage: () => true,
         },
@@ -86,9 +83,9 @@ describe('packages_list', () => {
 
   describe('when user can not destroy the package', () => {
     beforeEach(() => {
-      wrapper = shallowMount(PackagesList, {
-        ...defaultShallowMountOptions,
-        computed: { ...defaultShallowMountOptions.computed, canDestroyPackage: () => false },
+      wrapper = mount(PackagesList, {
+        ...mountOptions,
+        computed: { ...mountOptions.computed, canDestroyPackage: () => false },
       });
     });
 
@@ -146,8 +143,8 @@ describe('packages_list', () => {
     const findEmptySlot = () => wrapper.find({ name: 'empty-slot-stub' });
 
     beforeEach(() => {
-      wrapper = shallowMount(PackagesList, {
-        ...defaultShallowMountOptions,
+      wrapper = mount(PackagesList, {
+        ...mountOptions,
         computed: { list: () => [] },
         slots: {
           'empty-state': { name: 'empty-slot-stub', template: '<div>bar</div>' },
