@@ -52,7 +52,7 @@ describe('GeoDesigns', () => {
         });
 
         it('is hidden', () => {
-          expect(findGlPagination().html()).toBeUndefined();
+          expect(findGlPagination().isEmpty()).toBe(true);
         });
       });
 
