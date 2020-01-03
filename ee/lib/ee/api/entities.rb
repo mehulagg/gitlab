@@ -500,6 +500,11 @@ module EE
         end
       end
 
+      class ComposerPackage < Grape::Entity
+        expose :name
+        expose :versions
+      end
+
       module Analytics
         module CodeReview
           class MergeRequest < ::API::Entities::MergeRequestSimple

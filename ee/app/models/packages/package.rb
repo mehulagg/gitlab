@@ -10,10 +10,12 @@ class Packages::Package < ApplicationRecord
   has_many :tags, inverse_of: :package, class_name: 'Packages::Tag'
   has_one :conan_metadatum, inverse_of: :package
   has_one :maven_metadatum, inverse_of: :package
+  has_one :composer_metadatum, inverse_of: :package
   has_one :build_info, inverse_of: :package
 
   accepts_nested_attributes_for :conan_metadatum
   accepts_nested_attributes_for :maven_metadatum
+  accepts_nested_attributes_for :composer_metadatum
 
   delegate :recipe, :recipe_path, to: :conan_metadatum, prefix: :conan
 
@@ -30,7 +32,7 @@ class Packages::Package < ApplicationRecord
   validate :valid_npm_package_name, if: :npm?
   validate :package_already_taken, if: :npm?
 
-  enum package_type: { maven: 1, npm: 2, conan: 3, nuget: 4 }
+  enum package_type: { maven: 1, npm: 2, conan: 3, nuget: 4, composer: 5 }
 
   scope :with_name, ->(name) { where(name: name) }
   scope :with_name_like, ->(name) { where(arel_table[:name].matches(name)) }
@@ -58,6 +60,9 @@ class Packages::Package < ApplicationRecord
   scope :last_of_each_version, -> { where(id: all.select('MAX(id) AS id').group(:version)) }
   scope :limit_recent, ->(limit) { order_created_desc.limit(limit) }
   scope :select_distinct_name, -> { select(:name).distinct }
+  scope :composer_only, -> { where(package_type: 5) }
+  scope :including_project_and_namespace, -> { includes(project: :namespace) }
+  scope :with_name_and_version, -> (name, version) { where(name: name, version: version) }
 
   # Sorting
   scope :order_created, -> { reorder('created_at ASC') }
@@ -81,6 +86,10 @@ class Packages::Package < ApplicationRecord
 
   def self.only_maven_packages_with_path(path)
     joins(:maven_metadatum).where(packages_maven_metadata: { path: path })
+  end
+
+  def self.with_composer_metadata
+    joins(:composer_metadatum)
   end
 
   def self.by_name_and_file_name(name, file_name)

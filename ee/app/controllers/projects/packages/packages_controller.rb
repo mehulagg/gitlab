@@ -20,6 +20,7 @@ module Projects
         @package = project.packages.find(params[:id])
         @package_files = @package.package_files.recent
         @maven_metadatum = @package.maven_metadatum
+        @composer_metadatum = @package.composer_metadatum
       end
 
       def destroy

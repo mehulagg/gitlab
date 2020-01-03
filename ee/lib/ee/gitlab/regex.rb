@@ -47,6 +47,14 @@ module EE
           /\A[a-z]([-_a-z0-9]*[a-z0-9])?\z/
         end
 
+        def composer_package_name_regex
+          %r{\A([a-zA-Z\-\_0-9]*)\/([a-zA-Z\-\_0-9]*)\z}.freeze
+        end
+
+        def composer_package_version_regex
+          %r{(\Av?(\d{1,5})(\.\d++)?(\.\d++)?(\.\d++)?(-[a-zA-Z]*)?|\A(dev\-[a-zA-Z\-\_0-9]*))}.freeze
+        end
+
         def feature_flag_regex_message
           "can contain only lowercase letters, digits, '_' and '-'. " \
           "Must start with a letter, and cannot end with '-' or '_'"

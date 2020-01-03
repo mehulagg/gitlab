@@ -49,6 +49,18 @@ FactoryBot.define do
       end
     end
 
+    factory :composer_package do
+      composer_metadatum
+
+      name { "ochorocho/gitlab-composer" }
+      version { '2.0.0' }
+      package_type { 'composer' }
+
+      after :create do |package|
+        create :package_file, :composer, package: package
+      end
+    end
+
     factory :conan_package do
       conan_metadatum
 
@@ -178,6 +190,12 @@ FactoryBot.define do
       file_name { 'package.nupkg' }
       file_sha1 { '5fe852b2a6abd96c22c11fa1ff2fb19d9ce58b57' }
       size { 300.kilobytes }
+
+    trait(:composer) do
+      file { fixture_file_upload('ee/spec/fixtures/composer/ochorocho-gitlab-composer-2.0.0-19c3ec.tar') }
+      file_name { 'ochorocho-gitlab-composer-2.0.0-19c3ec.tar' }
+      file_sha1 { 'c775f1f5cc34f272e25c17b62e1932d0ca5087f8' }
+      file_type { 'tar' }
     end
 
     trait :object_storage do
@@ -228,5 +246,12 @@ FactoryBot.define do
   factory :packages_tag, class: 'Packages::Tag' do
     package
     sequence(:name) { |n| "tag-#{n}"}
+  end
+
+  factory :composer_metadatum, class: Packages::ComposerMetadatum do
+    package
+    name { 'ochorocho/gitlab-composer' }
+    version { '2.0.0' }
+    json { JSON.parse(File.read('ee/spec/fixtures/api/schemas/public_api/v4/packages/composer_package_version.json')) }
   end
 end

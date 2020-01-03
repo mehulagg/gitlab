@@ -1,0 +1,39 @@
+#
+# See https://github.com/ochorocho/gitlab-composer
+image: ochorocho/gitlab-composer:release-2.0.1
+build:
+  stage: build
+  when: always
+  script:
+    # In order to build composer packages runner needs to download
+    # the entire repository - there is no option for that to do so in .gitlab-ci.yml
+    - git fetch --unshallow || true
+    - git pull origin $CI_COMMIT_REF_NAME
+    - git checkout $CI_COMMIT_REF_NAME
+    # A satis file is required.
+    # satis.json will be created if it does not exist
+    # Configuration: archive -> format: tar/zip - tar may cause
+    # errors due to filename length limitations
+    - |
+      if [ ! -f "satis.json" ]; then
+        echo '{
+                "name": "gitlab/composer",
+                "homepage": "http://www.example.com",
+                "repositories": [
+                  {
+                    "type": "vcs",
+                    "url": "./"
+                  }
+                ],
+                "providers": false,
+                "output-dir": "build",
+                "output-html": false,
+                "archive": {
+                  "format": "tar",
+                  "directory": "build",
+                  "absolute-directory": "build"
+                }
+              }' > satis.json;
+      fi
+    - satis build --versions-only=$CI_COMMIT_REF_NAME
+    - satis publish-gitlab $CI_PROJECT_URL $CI_PROJECT_ID

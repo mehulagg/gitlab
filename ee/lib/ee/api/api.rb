@@ -36,6 +36,7 @@ module EE
         mount ::API::MavenPackages
         mount ::API::NpmPackages
         mount ::API::MergeTrains
+        mount ::API::ComposerPackages
         mount ::API::ProjectPackages
         mount ::API::GroupPackages
         mount ::API::GroupHooks

@@ -2979,6 +2979,16 @@ ActiveRecord::Schema.define(version: 2020_03_11_165635) do
     t.index ["pipeline_id"], name: "index_packages_build_infos_on_pipeline_id"
   end
 
+  create_table "packages_composer_metadata", force: :cascade do |t|
+    t.datetime_with_timezone "created_at", null: false
+    t.datetime_with_timezone "updated_at", null: false
+    t.bigint "package_id", null: false
+    t.string "name", limit: 255, null: false
+    t.string "version", limit: 255, null: false
+    t.jsonb "json", null: false
+    t.index ["package_id"], name: "index_packages_composer_metadata_on_package_id", unique: true
+  end
+
   create_table "packages_conan_file_metadata", force: :cascade do |t|
     t.bigint "package_file_id", null: false
     t.datetime_with_timezone "created_at", null: false
@@ -5003,6 +5013,7 @@ ActiveRecord::Schema.define(version: 2020_03_11_165635) do
   add_foreign_key "operations_strategies", "operations_feature_flags", column: "feature_flag_id", on_delete: :cascade
   add_foreign_key "packages_build_infos", "ci_pipelines", column: "pipeline_id", on_delete: :nullify
   add_foreign_key "packages_build_infos", "packages_packages", column: "package_id", on_delete: :cascade
+  add_foreign_key "packages_composer_metadata", "packages_packages", column: "package_id", on_delete: :cascade
   add_foreign_key "packages_conan_file_metadata", "packages_package_files", column: "package_file_id", on_delete: :cascade
   add_foreign_key "packages_conan_metadata", "packages_packages", column: "package_id", on_delete: :cascade
   add_foreign_key "packages_dependency_links", "packages_dependencies", column: "dependency_id", on_delete: :cascade

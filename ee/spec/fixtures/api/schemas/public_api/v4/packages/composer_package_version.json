@@ -1,0 +1,35 @@
+{
+  "name": "ochorocho/gitlab-composer",
+  "version": "2.0.0",
+  "version_normalized": "2.0.0.0",
+  "source": {
+    "type": "git",
+    "url": "http://192.168.178.42:3001/root/gitlab-composer.git",
+    "reference": "97ef90a5e0a3c6a599beef1bd9fb688ed44c8fbb"
+  },
+  "dist": {
+    "type": "tar",
+    "url": "http://192.168.178.42:3001/api/v4/projects/24/packages/composer/ochorocho/gitlab-composer/-/ochorocho-gitlab-composer-2.0.0-19c3ec.tar",
+    "reference": "97ef90a5e0a3c6a599beef1bd9fb688ed44c8fbb",
+    "shasum": "c775f1f5cc34f272e25c17b62e1932d0ca5087f8"
+  },
+  "require": {
+    "composer/satis": "^1.0",
+    "ext-json": "*",
+    "guzzlehttp/guzzle": "^6.3"
+  },
+  "time": "2019-01-03T21:35:54+00:00",
+  "bin": [
+    "bin/gitlab-composer"
+  ],
+  "type": "project",
+  "installation-source": "source",
+  "autoload": {
+    "psr-4": {
+      "Gitlab\\": "src/"
+    }
+  },
+  "license": [
+    "GPL-3.0-only"
+  ]
+}
