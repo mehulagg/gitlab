@@ -19,7 +19,7 @@ export default {
       default: '',
     },
     discussions: {
-      type: Object,
+      type: Array,
       required: true,
     },
     scale: {
