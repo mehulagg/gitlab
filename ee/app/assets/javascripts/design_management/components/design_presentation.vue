@@ -55,9 +55,9 @@ export default {
       const scrollHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
       presentationViewport.scrollTo(scrollWidth / 2, scrollHeight / 2);
     },
-    setOverlayDimensions(imgPosition) {
-      this.overlayDimensions.width = imgPosition.width;
-      this.overlayDimensions.height = imgPosition.height;
+    setOverlayDimensions({ width, height }) {
+      this.overlayDimensions.width = width;
+      this.overlayDimensions.height = height;
 
       this.centerViewportScroll();
     },
@@ -78,20 +78,21 @@ export default {
 </script>
 
 <template>
-  <div ref="presentationViewport" class="h-100 w-100 overflow-auto">
-    <div class="position-relative" style="margin:auto;">
-      <design-image
-        :image="image"
-        :name="imageName"
-        :scale="scale"
-        @setOverlayDimensions="setOverlayDimensions"
-      />
-      <design-overlay
-        :position="overlayDimensions"
-        :notes="discussionStartingNotes"
-        :current-comment-form="annotationCoordinates"
-        @openCommentForm="openCommentForm"
-      />
-    </div>
+  <div
+    ref="presentationViewport"
+    class="d-flex-center p-3 h-100 w-100 position-relative overflow-auto"
+  >
+    <design-image
+      :image="image"
+      :name="imageName"
+      :scale="scale"
+      @setOverlayDimensions="setOverlayDimensions"
+    />
+    <design-overlay
+      :position="overlayDimensions"
+      :notes="discussionStartingNotes"
+      :current-comment-form="annotationCoordinates"
+      @openCommentForm="openCommentForm"
+    />
   </div>
 </template>

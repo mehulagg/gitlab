@@ -21,49 +21,29 @@ export default {
   },
   data() {
     return {
-      imgDimensions: {
-        height: 0,
-        width: 0,
-      },
+      imageSize: null,
     };
   },
   computed: {
-    // containerDimensions() {
-    //   const { imgContainer } = this.$refs;
-    //   if (!imgContainer)
-    //     return {
-    //       height: 0,
-    //       width: 0,
-    //     };
-
-    //   return {
-    //     height: imgContainer.height,
-    //     width: imgContainer.width,
-    //   };
-    // },
     imgStyle() {
       return {
         transform: `scale(${this.scale})`,
-        'transform-origin': '0 0',
+        // transformOrigin: `50% 50%`,
       };
-      // if (this.imgDimensions.width === 0) return {};
-      // return {
-      //   width: `${this.imgDimensions.width}px`,
-      //   height: `${this.imgDimensions.height}px`,
-      // };
+    },
+    containerStyle() {
+      return {
+        width: `${this.imageSize.width}px`,
+        height: `${this.imageSize.height}px`,
+        left: `calc(50% - ${this.imageSize.width / 2}px)`,
+        top: `calc(50% - ${this.imageSize.height / 2}px)`,
+      };
     },
   },
   watch: {
     scale() {
       return this.calculateImgSize();
     },
-    // containerDimensions(val) {
-    //   const { contentImg } = this.$refs;
-    //   this.imgDimensions = {
-    //     width: contentImg.naturalWidth * this.scale,
-    //     height: contentImg.naturalHeight * this.scale,
-    //   };
-    // },
   },
 
   beforeDestroy() {
@@ -83,10 +63,6 @@ export default {
       const { contentImg } = this.$refs;
       if (!contentImg) return;
 
-      this.imgDimensions = {
-        width: contentImg.naturalWidth * this.scale,
-        height: contentImg.naturalHeight * this.scale,
-      };
       this.$nextTick(() => {
         const naturalRatio = contentImg.naturalWidth / contentImg.naturalHeight;
         const visibleRatio = contentImg.width / contentImg.height;
@@ -97,12 +73,13 @@ export default {
           naturalRatio < visibleRatio
             ? contentImg.clientHeight * naturalRatio
             : contentImg.clientWidth;
-        const position = {
-          height,
-          width,
+        const imageSize = {
+          height: height * this.scale,
+          width: width * this.scale,
         };
 
-        this.$emit('setOverlayDimensions', position);
+        this.imageSize = imageSize;
+        this.$emit('setOverlayDimensions', imageSize);
       });
     },
   },
@@ -110,13 +87,13 @@ export default {
 </script>
 
 <template>
-  <div ref="imgContainer" class="p-3 js-design-image">
+  <div class="js-design-image">
     <img
       ref="contentImg"
       :src="image"
       :alt="name"
       :style="imgStyle"
-      class="d-block ml-auto mr-auto design-image h-100 w-100"
+      class="img-fluid design-image js-design-image"
       @load="onImgLoad"
     />
   </div>
