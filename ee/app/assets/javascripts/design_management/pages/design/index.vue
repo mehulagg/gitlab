@@ -206,15 +206,14 @@ export default {
           </template>
         </design-destroyer>
 
+        <div v-if="errorMessage" class="p-3">
+          <gl-alert variant="danger" @dismiss="errorMessage = null">
+            {{ errorMessage }}
+          </gl-alert>
+        </div>
+
         <div class="h-100 w-100 position-relative">
-          <div class="p-3">
-            <gl-alert v-if="errorMessage" variant="danger" @dismiss="errorMessage = null">
-              {{ errorMessage }}
-            </gl-alert>
-          </div>
-          <div
-            class="design-image-wrapper d-flex-center position-absolute h-100 w-100 overflow-auto"
-          >
+          <div class="design-image-wrapper h-100 w-100 position-absolute">
             <design-presentation
               :image="design.image"
               :image-name="design.filename"
@@ -224,7 +223,7 @@ export default {
               @openCommentForm="openCommentForm"
             />
           </div>
-          <div class="design-scaler position-absolute d-flex-center w-100 m-3">
+          <div class="design-scaler position-absolute d-flex-center w-100 mb-3">
             <design-scaler @change="zoomScale = $event" />
           </div>
         </div>

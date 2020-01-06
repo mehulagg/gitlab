@@ -47,16 +47,19 @@ export default {
     },
   },
   methods: {
-    setOverlayDimensions(position) {
-      this.overlayDimensions.width = position.width;
-      this.overlayDimensions.height = position.height;
+    centerViewportScroll() {
+      const { presentationViewport } = this.$refs;
+      if (!presentationViewport) return;
 
-      const { imgWrapper } = this.$refs;
-      if (!imgWrapper) return;
+      const scrollWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
+      const scrollHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
+      presentationViewport.scrollTo(scrollWidth / 2, scrollHeight / 2);
+    },
+    setOverlayDimensions(imgPosition) {
+      this.overlayDimensions.width = imgPosition.width;
+      this.overlayDimensions.height = imgPosition.height;
 
-      const scrollWidth = imgWrapper.scrollWidth - imgWrapper.offsetWidth;
-      const scrollHeight = imgWrapper.scrollHeight - imgWrapper.offsetHeight;
-      imgWrapper.scrollTo(scrollWidth / 2, scrollHeight / 2);
+      this.centerViewportScroll();
     },
     openCommentForm(position) {
       const { x, y } = position;
@@ -75,18 +78,20 @@ export default {
 </script>
 
 <template>
-  <div class="position-relative" style="margin:auto;">
-    <design-image
-      :image="image"
-      :name="imageName"
-      :scale="scale"
-      @setOverlayDimensions="setOverlayDimensions"
-    />
-    <design-overlay
-      :position="overlayDimensions"
-      :notes="discussionStartingNotes"
-      :current-comment-form="annotationCoordinates"
-      @openCommentForm="openCommentForm"
-    />
+  <div ref="presentationViewport" class="h-100 w-100 overflow-auto">
+    <div class="position-relative" style="margin:auto;">
+      <design-image
+        :image="image"
+        :name="imageName"
+        :scale="scale"
+        @setOverlayDimensions="setOverlayDimensions"
+      />
+      <design-overlay
+        :position="overlayDimensions"
+        :notes="discussionStartingNotes"
+        :current-comment-form="annotationCoordinates"
+        @openCommentForm="openCommentForm"
+      />
+    </div>
   </div>
 </template>
