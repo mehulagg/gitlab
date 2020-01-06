@@ -42,11 +42,15 @@ export default {
     //   };
     // },
     imgStyle() {
-      if (this.imgDimensions.width === 0) return {};
       return {
-        width: `${this.imgDimensions.width}px`,
-        height: `${this.imgDimensions.height}px`,
+        transform: `scale(${this.scale})`,
+        'transform-origin': '0 0',
       };
+      // if (this.imgDimensions.width === 0) return {};
+      // return {
+      //   width: `${this.imgDimensions.width}px`,
+      //   height: `${this.imgDimensions.height}px`,
+      // };
     },
   },
   watch: {
@@ -112,7 +116,7 @@ export default {
       :src="image"
       :alt="name"
       :style="imgStyle"
-      class="d-block ml-auto mr-auto design-image"
+      class="d-block ml-auto mr-auto design-image h-100 w-100"
       @load="onImgLoad"
     />
   </div>

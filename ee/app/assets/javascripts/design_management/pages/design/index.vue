@@ -5,11 +5,10 @@ import { GlLoadingIcon, GlAlert } from '@gitlab/ui';
 import createFlash from '~/flash';
 import allVersionsMixin from '../../mixins/all_versions';
 import Toolbar from '../../components/toolbar/index.vue';
-import DesignImage from '../../components/image.vue';
-import DesignOverlay from '../../components/design_overlay.vue';
 import DesignDiscussion from '../../components/design_notes/design_discussion.vue';
 import DesignReplyForm from '../../components/design_notes/design_reply_form.vue';
 import DesignDestroyer from '../../components/design_destroyer.vue';
+import DesignPresentation from '../../components/design_presentation.vue';
 import DesignScaler from '../../components/design_scaler.vue';
 import getDesignQuery from '../../graphql/queries/getDesign.query.graphql';
 import appDataQuery from '../../graphql/queries/appData.query.graphql';
@@ -26,10 +25,9 @@ import {
 export default {
   components: {
     ApolloMutation,
-    DesignImage,
-    DesignOverlay,
     DesignDiscussion,
     DesignDestroyer,
+    DesignPresentation,
     Toolbar,
     DesignReplyForm,
     GlLoadingIcon,
@@ -48,10 +46,6 @@ export default {
       design: {},
       comment: '',
       annotationCoordinates: null,
-      overlayDimensions: {
-        width: 0,
-        height: 0,
-      },
       projectPath: '',
       issueId: '',
       errorMessage: '',
@@ -93,9 +87,6 @@ export default {
     },
     discussions() {
       return extractDiscussions(this.design.discussions);
-    },
-    discussionStartingNotes() {
-      return this.discussions.map(discussion => discussion.notes[0]);
     },
     markdownPreviewPath() {
       return `/${this.projectPath}/preview_markdown?target_type=Issue`;
@@ -168,31 +159,12 @@ export default {
       this.errorMessage = designDeletionError({ singular: true });
       throw e;
     },
-    openCommentForm(position) {
-      const { x, y } = position;
-      const { width, height } = this.overlayDimensions;
-      this.annotationCoordinates = {
-        ...this.annotationCoordinates,
-        x,
-        y,
-        width,
-        height,
-      };
+    openCommentForm(annotationCoordinates) {
+      this.annotationCoordinates = annotationCoordinates;
     },
     closeCommentForm() {
       this.comment = '';
       this.annotationCoordinates = null;
-    },
-    setOverlayDimensions(position) {
-      this.overlayDimensions.width = position.width;
-      this.overlayDimensions.height = position.height;
-
-      const { imgWrapper } = this.$refs;
-      if (!imgWrapper) return;
-
-      const scrollWidth = imgWrapper.scrollWidth - imgWrapper.offsetWidth;
-      const scrollHeight = imgWrapper.scrollHeight - imgWrapper.offsetHeight;
-      imgWrapper.scrollTo(scrollWidth / 2, scrollHeight / 2);
     },
     closeDesign() {
       this.$router.push({
@@ -241,29 +213,23 @@ export default {
             </gl-alert>
           </div>
           <div
-            ref="imgWrapper"
             class="design-image-wrapper d-flex-center position-absolute h-100 w-100 overflow-auto"
           >
-            <div class="position-relative" style="margin:auto;">
-              <design-image
-                :image="design.image"
-                :name="design.filename"
-                :scale="zoomScale"
-                @setOverlayDimensions="setOverlayDimensions"
-              />
-              <design-overlay
-                :position="overlayDimensions"
-                :notes="discussionStartingNotes"
-                :current-comment-form="annotationCoordinates"
-                @openCommentForm="openCommentForm"
-              />
-            </div>
+            <design-presentation
+              :image="design.image"
+              :image-name="design.filename"
+              :discussions="discussions"
+              :annotation-coordinates="annotationCoordinates"
+              :scale="zoomScale"
+              @openCommentForm="openCommentForm"
+            />
           </div>
-          <div class="design-scaler position-absolute d-flex-center w-100 p-3">
+          <div class="design-scaler position-absolute d-flex-center w-100 m-3">
             <design-scaler @change="zoomScale = $event" />
           </div>
         </div>
       </div>
+
       <div class="image-notes">
         <template v-if="renderDiscussions">
           <design-discussion
