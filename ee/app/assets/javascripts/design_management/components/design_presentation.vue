@@ -82,17 +82,12 @@ export default {
     ref="presentationViewport"
     class="d-flex-center p-3 h-100 w-100 position-relative overflow-auto"
   >
-    <design-image
-      :image="image"
-      :name="imageName"
-      :scale="scale"
-      @setOverlayDimensions="setOverlayDimensions"
-    />
-    <design-overlay
+    <design-image :image="image" :name="imageName" :scale="scale" />
+    <!-- <design-overlay
       :position="overlayDimensions"
       :notes="discussionStartingNotes"
       :current-comment-form="annotationCoordinates"
       @openCommentForm="openCommentForm"
-    />
+    /> -->
   </div>
 </template>

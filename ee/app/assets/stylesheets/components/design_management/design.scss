@@ -1,5 +1,8 @@
 .design-image {
-  object-fit: contain;
+  max-width: 100%;
+}
+
+.design-image-container {
   margin: auto;
 }
 

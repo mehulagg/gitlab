@@ -21,31 +21,22 @@ export default {
   },
   data() {
     return {
-      imageSize: null,
+      initialImageSize: null,
+      imageStyle: {},
     };
   },
-  computed: {
-    imgStyle() {
-      return {
-        transform: `scale(${this.scale})`,
-        // transformOrigin: `50% 50%`,
-      };
-    },
-    containerStyle() {
-      return {
-        width: `${this.imageSize.width}px`,
-        height: `${this.imageSize.height}px`,
-        left: `calc(50% - ${this.imageSize.width / 2}px)`,
-        top: `calc(50% - ${this.imageSize.height / 2}px)`,
-      };
-    },
-  },
   watch: {
-    scale() {
-      return this.calculateImgSize();
+    scale(val) {
+      if (val === 1) {
+        this.resetImageSize();
+      } else {
+        this.zoom(val);
+      }
+    },
+    imageSize(val) {
+      this.$emit('resized', val);
     },
   },
-
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeThrottled, false);
   },
@@ -54,32 +45,36 @@ export default {
     this.resizeThrottled = _.throttle(this.onImgLoad, 400);
     window.addEventListener('resize', this.resizeThrottled, false);
   },
-
   methods: {
     onImgLoad() {
-      requestIdleCallback(this.calculateImgSize, { timeout: 1000 });
+      requestIdleCallback(this.setInitialImageSize, { timeout: 1000 });
     },
-    calculateImgSize() {
+    setImageSize({ width, height }) {
+      this.imageStyle = {
+        maxWidth: 'unset',
+        width: `${width}px`,
+        height: `${height}px`,
+      };
+    },
+    zoom(amount) {
+      const width = this.initialImageSize.width * amount;
+      const height = this.initialImageSize.height * amount;
+      this.setImageSize({ width, height });
+    },
+    resetImageSize() {
+      this.setImageSize(this.initialImageSize);
+    },
+    setInitialImageSize() {
+      if (this.initialImageSize && this.initialImageSize.width > 0) return;
+
       const { contentImg } = this.$refs;
       if (!contentImg) return;
 
       this.$nextTick(() => {
-        const naturalRatio = contentImg.naturalWidth / contentImg.naturalHeight;
-        const visibleRatio = contentImg.width / contentImg.height;
-
-        const height = contentImg.clientHeight;
-        // Handling the case where img element takes more width than visible image thanks to object-fit: contain
-        const width =
-          naturalRatio < visibleRatio
-            ? contentImg.clientHeight * naturalRatio
-            : contentImg.clientWidth;
-        const imageSize = {
-          height: height * this.scale,
-          width: width * this.scale,
+        this.initialImageSize = {
+          height: contentImg.offsetHeight,
+          width: contentImg.offsetWidth,
         };
-
-        this.imageSize = imageSize;
-        this.$emit('setOverlayDimensions', imageSize);
       });
     },
   },
@@ -87,12 +82,12 @@ export default {
 </script>
 
 <template>
-  <div class="js-design-image">
+  <div class="design-image-container js-design-image">
     <img
       ref="contentImg"
       :src="image"
       :alt="name"
-      :style="imgStyle"
+      :style="imageStyle"
       class="img-fluid design-image js-design-image"
       @load="onImgLoad"
     />
