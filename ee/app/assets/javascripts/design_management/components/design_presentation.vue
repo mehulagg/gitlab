@@ -80,7 +80,7 @@ export default {
 <template>
   <div
     ref="presentationViewport"
-    class="d-flex-center p-3 h-100 w-100 position-relative overflow-auto"
+    class="d-flex align-items-center p-3 h-100 w-100 position-relative overflow-auto"
   >
     <design-image :image="image" :name="imageName" :scale="scale" @resized="setOverlayDimensions" />
     <design-overlay

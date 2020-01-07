@@ -44,7 +44,7 @@ export default {
 </script>
 
 <template>
-  <div>
+  <div class="design-scaler">
     <button class="btn" :disabled="disableDecrease" @click="decrementScale">-</button>
     <button class="btn" :disabled="disableReset" @click="resetScale">
       Reset
