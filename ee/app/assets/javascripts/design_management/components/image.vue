@@ -33,16 +33,21 @@ export default {
         this.zoom(val);
       }
     },
-    imageSize(val) {
-      this.$emit('resized', val);
-    },
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeThrottled, false);
   },
   mounted() {
     this.onImgLoad();
-    this.resizeThrottled = _.throttle(this.onImgLoad, 400);
+    this.resizeThrottled = _.throttle(() => {
+      const { contentImg } = this.$refs;
+      if (!contentImg) return;
+      const val = {
+        height: contentImg.offsetHeight,
+        width: contentImg.offsetWidth,
+      };
+      this.$emit('resized', val);
+    }, 400);
     window.addEventListener('resize', this.resizeThrottled, false);
   },
   methods: {
@@ -55,6 +60,7 @@ export default {
         width: `${width}px`,
         height: `${height}px`,
       };
+      this.$emit('resized', { width, height });
     },
     zoom(amount) {
       const width = this.initialImageSize.width * amount;
@@ -75,6 +81,8 @@ export default {
           height: contentImg.offsetHeight,
           width: contentImg.offsetWidth,
         };
+
+        this.$emit('resized', this.initialImageSize);
       });
     },
   },
