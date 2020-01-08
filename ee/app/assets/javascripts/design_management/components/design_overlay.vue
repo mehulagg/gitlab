@@ -11,6 +11,10 @@ export default {
       type: Object,
       required: true,
     },
+    position: {
+      type: Object,
+      required: true,
+    },
     notes: {
       type: Array,
       required: false,
@@ -27,8 +31,8 @@ export default {
       return {
         width: `${this.dimensions.width}px`,
         height: `${this.dimensions.height}px`,
-        left: `calc(50% - ${this.dimensions.width / 2}px)`,
-        top: `calc(50% - ${this.dimensions.height / 2}px)`,
+        left: this.position.left,
+        top: this.position.top,
       };
     },
   },

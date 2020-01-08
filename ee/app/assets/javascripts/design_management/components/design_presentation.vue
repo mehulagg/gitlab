@@ -39,6 +39,10 @@ export default {
         width: 0,
         height: 0,
       },
+      overlayPosition: {
+        top: '0',
+        left: '0',
+      },
     };
   },
   computed: {
@@ -55,10 +59,28 @@ export default {
       const scrollHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
       presentationViewport.scrollTo(scrollWidth / 2, scrollHeight / 2);
     },
+    setOverlayPosition() {
+      const { presentationViewport } = this.$refs;
+      if (!presentationViewport) return;
+
+      this.overlayPosition = {
+        left: `calc(50% - ${this.overlayDimensions.width / 2}px)`,
+        top: `calc(50% - ${this.overlayDimensions.height / 2}px)`,
+      };
+
+      if (this.overlayDimensions.width > presentationViewport.offsetWidth) {
+        this.overlayPosition.left = '0';
+      }
+
+      if (this.overlayDimensions.height > presentationViewport.offsetHeight) {
+        this.overlayPosition.top = '0';
+      }
+    },
     setOverlayDimensions({ width, height }) {
       this.overlayDimensions.width = width;
       this.overlayDimensions.height = height;
 
+      this.setOverlayPosition();
       this.centerViewportScroll();
     },
     openCommentForm(position) {
@@ -88,6 +110,7 @@ export default {
       />
       <design-overlay
         :dimensions="overlayDimensions"
+        :position="overlayPosition"
         :notes="discussionStartingNotes"
         :current-comment-form="annotationCoordinates"
         @openCommentForm="openCommentForm"
