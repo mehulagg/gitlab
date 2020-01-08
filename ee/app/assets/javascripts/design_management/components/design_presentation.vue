@@ -78,8 +78,8 @@ export default {
 </script>
 
 <template>
-  <div ref="presentationViewport" class="h-100 w-100 overflow-auto p-3">
-    <div class="h-100 w-100 d-flex position-relative align-items-center ">
+  <div ref="presentationViewport" class="h-100 w-100 p-3 overflow-auto">
+    <div class="h-100 w-100 d-flex align-items-center position-relative">
       <design-image
         :image="image"
         :name="imageName"
@@ -87,7 +87,7 @@ export default {
         @resized="setOverlayDimensions"
       />
       <design-overlay
-        :position="overlayDimensions"
+        :dimensions="overlayDimensions"
         :notes="discussionStartingNotes"
         :current-comment-form="annotationCoordinates"
         @openCommentForm="openCommentForm"

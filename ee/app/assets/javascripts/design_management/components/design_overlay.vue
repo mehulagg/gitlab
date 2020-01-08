@@ -7,7 +7,7 @@ export default {
     Icon,
   },
   props: {
-    position: {
+    dimensions: {
       type: Object,
       required: true,
     },
@@ -23,12 +23,12 @@ export default {
     },
   },
   computed: {
-    overlayDimensions() {
+    overlayStyle() {
       return {
-        width: `${this.position.width}px`,
-        height: `${this.position.height}px`,
-        left: `calc(50% - ${this.position.width / 2}px)`,
-        top: `calc(50% - ${this.position.height / 2}px)`,
+        width: `${this.dimensions.width}px`,
+        height: `${this.dimensions.height}px`,
+        left: `calc(50% - ${this.dimensions.width / 2}px)`,
+        top: `calc(50% - ${this.dimensions.height / 2}px)`,
       };
     },
   },
@@ -38,8 +38,8 @@ export default {
     },
     getNotePosition(data) {
       const { x, y, width, height } = data;
-      const widthRatio = this.position.width / width;
-      const heightRatio = this.position.height / height;
+      const widthRatio = this.dimensions.width / width;
+      const heightRatio = this.dimensions.height / height;
       return {
         left: `${Math.round(x * widthRatio)}px`,
         top: `${Math.round(y * heightRatio)}px`,
@@ -50,7 +50,7 @@ export default {
 </script>
 
 <template>
-  <div class="position-absolute image-diff-overlay frame" :style="overlayDimensions">
+  <div class="position-absolute image-diff-overlay frame" :style="overlayStyle">
     <button
       type="button"
       class="btn-transparent position-absolute image-diff-overlay-add-comment w-100 h-100 js-add-image-diff-note-button"
