@@ -78,16 +78,20 @@ export default {
 </script>
 
 <template>
-  <div
-    ref="presentationViewport"
-    class="d-flex align-items-center p-3 h-100 w-100 position-relative overflow-auto"
-  >
-    <design-image :image="image" :name="imageName" :scale="scale" @resized="setOverlayDimensions" />
-    <design-overlay
-      :position="overlayDimensions"
-      :notes="discussionStartingNotes"
-      :current-comment-form="annotationCoordinates"
-      @openCommentForm="openCommentForm"
-    />
+  <div ref="presentationViewport" class="h-100 w-100 overflow-auto p-3">
+    <div class="h-100 w-100 d-flex position-relative align-items-center ">
+      <design-image
+        :image="image"
+        :name="imageName"
+        :scale="scale"
+        @resized="setOverlayDimensions"
+      />
+      <design-overlay
+        :position="overlayDimensions"
+        :notes="discussionStartingNotes"
+        :current-comment-form="annotationCoordinates"
+        @openCommentForm="openCommentForm"
+      />
+    </div>
   </div>
 </template>
