@@ -12,7 +12,9 @@ module MergeRequests
       Ci::CreatePipelineService.new(merge_request.source_project,
                                     current_user,
                                     ref: pipeline_ref_for_detached_merge_request_pipeline(merge_request))
-        .execute(:merge_request_event, merge_request: merge_request)
+        .execute(:merge_request_event,
+                 merge_request: merge_request,
+                 save_on_errors: save_on_errors)
     end
 
     def can_create_pipeline_for?(merge_request)
@@ -37,6 +39,10 @@ module MergeRequests
       else
         merge_request.source_branch
       end
+    end
+
+    def save_on_errors
+      !Feature.enabled?(:ci_merge_request_pipelines_fix_yaml_errors, default_enabled: true)
     end
   end
 end

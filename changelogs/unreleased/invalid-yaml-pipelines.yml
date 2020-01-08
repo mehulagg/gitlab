@@ -1,0 +1,5 @@
+---
+title: Do not create a merge request pipeline for pushes with invalid yaml files
+merge_request: 22646
+author:
+type: fixed
