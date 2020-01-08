@@ -50,14 +50,21 @@ export default {
       return this.discussions.map(discussion => discussion.notes[0]);
     },
   },
+  watch: {
+    scale() {
+      this.centerViewportScroll();
+    },
+  },
   methods: {
     centerViewportScroll() {
       const { presentationViewport } = this.$refs;
       if (!presentationViewport) return;
 
-      const scrollWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
-      const scrollHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
-      presentationViewport.scrollTo(scrollWidth / 2, scrollHeight / 2);
+      this.$nextTick(() => {
+        const scrollWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
+        const scrollHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
+        presentationViewport.scrollTo(scrollWidth / 2, scrollHeight / 2);
+      });
     },
     setOverlayPosition() {
       const { presentationViewport } = this.$refs;
@@ -81,7 +88,7 @@ export default {
       this.overlayDimensions.height = height;
 
       this.setOverlayPosition();
-      this.centerViewportScroll();
+      // this.centerViewportScroll();
     },
     openCommentForm(position) {
       const { x, y } = position;
