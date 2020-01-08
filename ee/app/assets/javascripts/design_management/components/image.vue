@@ -21,7 +21,7 @@ export default {
   },
   data() {
     return {
-      initialImageSize: null,
+      defaultImageSize: null,
       imageStyle: {},
     };
   },
@@ -52,7 +52,7 @@ export default {
   },
   methods: {
     onImgLoad() {
-      requestIdleCallback(this.setInitialImageSize, { timeout: 1000 });
+      requestIdleCallback(this.setDefaultImageSize, { timeout: 1000 });
     },
     setImageSize({ width, height }) {
       this.imageStyle = {
@@ -63,26 +63,27 @@ export default {
       this.$emit('resized', { width, height });
     },
     zoom(amount) {
-      const width = this.initialImageSize.width * amount;
-      const height = this.initialImageSize.height * amount;
+      const width = this.defaultImageSize.width * amount;
+      const height = this.defaultImageSize.height * amount;
       this.setImageSize({ width, height });
     },
     resetImageSize() {
-      this.setImageSize(this.initialImageSize);
+      this.setDefaultImageSize({ force: true });
     },
-    setInitialImageSize() {
-      if (this.initialImageSize && this.initialImageSize.width > 0) return;
+    setDefaultImageSize({ force }) {
+      if (this.defaultImageSize && this.defaultImageSize.width > 0 && !force) return;
 
       const { contentImg } = this.$refs;
       if (!contentImg) return;
 
+      this.imageStyle = {};
       this.$nextTick(() => {
-        this.initialImageSize = {
+        this.defaultImageSize = {
           height: contentImg.offsetHeight,
           width: contentImg.offsetWidth,
         };
 
-        this.$emit('resized', this.initialImageSize);
+        this.$emit('resized', this.defaultImageSize);
       });
     },
   },
