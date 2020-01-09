@@ -1,4 +1,5 @@
 <script>
+import _ from 'underscore';
 import DesignImage from './image.vue';
 import DesignOverlay from './design_overlay.vue';
 
@@ -47,7 +48,6 @@ export default {
         xRatio: 0.5,
         yRatio: 0.5,
       },
-      userScrolling: false,
       initialLoad: true,
     };
   },
@@ -56,19 +56,21 @@ export default {
       return this.discussions.map(discussion => discussion.notes[0]);
     },
   },
+  beforeDestroy() {
+    const { presentationViewport } = this.$refs;
+    if (!presentationViewport) return;
+
+    presentationViewport.removeEventListener('scroll', this.scrollThrottled, false);
+  },
   mounted() {
     const { presentationViewport } = this.$refs;
     if (!presentationViewport) return;
 
-    // TODO: throttle
-    // presentationViewport.addEventListener('scroll', () => {
-    //   if (!this.userScrolling) {
-    //     return;
-    //   }
-    //   console.log('user scrolling...');
+    this.scrollThrottled = _.throttle(() => {
+      this.setZoomFocalPoint();
+    }, 400);
 
-    //   this.setZoomFocalPoint();
-    // });
+    presentationViewport.addEventListener('scroll', this.scrollThrottled, false);
   },
   methods: {
     scrollToFocalPoint() {
@@ -83,9 +85,7 @@ export default {
         const x = scrollBarWidth * this.zoomFocalPoint.xRatio;
         const y = scrollBarHeight * this.zoomFocalPoint.yRatio;
 
-        this.userScrolling = false;
         presentationViewport.scrollTo(x, y);
-        // this.userScrolling = true;
       });
     },
     setInitialZoomFocalPoint() {
@@ -103,30 +103,23 @@ export default {
         yRatio,
       };
     },
-    // setZoomFocalPoint() {
-    //   if (!this.userScrolling) return;
+    setZoomFocalPoint() {
+      const { presentationViewport } = this.$refs;
+      if (!presentationViewport) return;
 
-    //   const { presentationViewport } = this.$refs;
-    //   if (!presentationViewport) return;
+      const scrollBarWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
+      const scrollBarHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
 
-    //   const scrollBarWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
-    //   const scrollBarHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
+      const xRatio =
+        presentationViewport.scrollLeft > 0 ? presentationViewport.scrollLeft / scrollBarWidth : 0;
+      const yRatio =
+        presentationViewport.scrollTop > 0 ? presentationViewport.scrollTop / scrollBarHeight : 0;
 
-    //   const xRatio =
-    //     presentationViewport.scrollLeft > 0 ? presentationViewport.scrollLeft / scrollBarWidth : 0;
-    //   const yRatio =
-    //     presentationViewport.scrollTop > 0 ? presentationViewport.scrollTop / scrollBarHeight : 0;
-
-    //   this.zoomFocalPoint = {
-    //     xRatio,
-    //     yRatio,
-    //   };
-
-    //   console.log('New focal point:', {
-    //     xRatio,
-    //     yRatio,
-    //   });
-    // },
+      this.zoomFocalPoint = {
+        xRatio,
+        yRatio,
+      };
+    },
     setOverlayPosition() {
       const { presentationViewport } = this.$refs;
       if (!presentationViewport) return;
