@@ -88,21 +88,6 @@ export default {
         presentationViewport.scrollTo(x, y);
       });
     },
-    setInitialZoomFocalPoint() {
-      const { presentationViewport } = this.$refs;
-      if (!presentationViewport) return;
-
-      const xRatio = 0.5;
-      const yRatio =
-        presentationViewport.scrollHeight > 0
-          ? presentationViewport.offsetHeight / 2 / presentationViewport.scrollHeight
-          : 0.5;
-
-      this.zoomFocalPoint = {
-        xRatio,
-        yRatio,
-      };
-    },
     setZoomFocalPoint() {
       const { presentationViewport } = this.$refs;
       if (!presentationViewport) return;
@@ -110,10 +95,23 @@ export default {
       const scrollBarWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
       const scrollBarHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
 
-      const xRatio =
+      const xScrollRatio =
         presentationViewport.scrollLeft > 0 ? presentationViewport.scrollLeft / scrollBarWidth : 0;
-      const yRatio =
+      const yScrollRatio =
         presentationViewport.scrollTop > 0 ? presentationViewport.scrollTop / scrollBarHeight : 0;
+      const xScrollOffset =
+        (presentationViewport.scrollWidth - presentationViewport.offsetWidth - 0) * xScrollRatio;
+      const yScrollOffset =
+        (presentationViewport.scrollHeight - presentationViewport.offsetHeight - 0) * yScrollRatio;
+
+      const viewportCenterX = presentationViewport.offsetWidth / 2;
+      const viewportCenterY = presentationViewport.offsetHeight / 2;
+      const focalPointX = viewportCenterX + xScrollOffset;
+      const focalPointY = viewportCenterY + yScrollOffset;
+
+      const xRatio =
+        presentationViewport.scrollWidth > 0 ? focalPointX / presentationViewport.scrollWidth : 0.5;
+      const yRatio = focalPointY / presentationViewport.scrollHeight;
 
       this.zoomFocalPoint = {
         xRatio,
@@ -142,10 +140,11 @@ export default {
       this.overlayDimensions.height = height;
 
       this.setOverlayPosition();
-      if (!this.initialLoad) {
-        this.scrollToFocalPoint();
+
+      if (this.initialLoad) {
+        this.setZoomFocalPoint();
       } else {
-        this.setInitialZoomFocalPoint();
+        this.scrollToFocalPoint();
       }
 
       if (this.overlayDimensions.width > 0) {
