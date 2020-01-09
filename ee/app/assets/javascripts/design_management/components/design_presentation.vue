@@ -43,6 +43,12 @@ export default {
         top: '0',
         left: '0',
       },
+      zoomFocalPoint: {
+        xRatio: 0.5,
+        yRatio: 0.5,
+      },
+      userScrolling: false,
+      initialLoad: true,
     };
   },
   computed: {
@@ -50,20 +56,77 @@ export default {
       return this.discussions.map(discussion => discussion.notes[0]);
     },
   },
-  watch: {
-    scale() {
-      this.centerViewportScroll();
-    },
+  mounted() {
+    const { presentationViewport } = this.$refs;
+    if (!presentationViewport) return;
+
+    // TODO: throttle
+    // presentationViewport.addEventListener('scroll', () => {
+    //   if (!this.userScrolling) {
+    //     return;
+    //   }
+    //   console.log('user scrolling...');
+
+    //   this.setZoomFocalPoint();
+    // });
   },
   methods: {
-    centerViewportScroll() {
+    scrollToFocalPoint() {
       const { presentationViewport } = this.$refs;
       if (!presentationViewport) return;
 
-      const scrollWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
-      const scrollHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
-      presentationViewport.scrollTo(scrollWidth / 2, scrollHeight / 2);
+      this.$nextTick(() => {
+        const scrollBarWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
+        const scrollBarHeight =
+          presentationViewport.scrollHeight - presentationViewport.offsetHeight;
+
+        const x = scrollBarWidth * this.zoomFocalPoint.xRatio;
+        const y = scrollBarHeight * this.zoomFocalPoint.yRatio;
+
+        this.userScrolling = false;
+        presentationViewport.scrollTo(x, y);
+        // this.userScrolling = true;
+      });
     },
+    setInitialZoomFocalPoint() {
+      const { presentationViewport } = this.$refs;
+      if (!presentationViewport) return;
+
+      const xRatio = 0.5;
+      const yRatio =
+        presentationViewport.scrollHeight > 0
+          ? presentationViewport.offsetHeight / 2 / presentationViewport.scrollHeight
+          : 0.5;
+
+      this.zoomFocalPoint = {
+        xRatio,
+        yRatio,
+      };
+    },
+    // setZoomFocalPoint() {
+    //   if (!this.userScrolling) return;
+
+    //   const { presentationViewport } = this.$refs;
+    //   if (!presentationViewport) return;
+
+    //   const scrollBarWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
+    //   const scrollBarHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
+
+    //   const xRatio =
+    //     presentationViewport.scrollLeft > 0 ? presentationViewport.scrollLeft / scrollBarWidth : 0;
+    //   const yRatio =
+    //     presentationViewport.scrollTop > 0 ? presentationViewport.scrollTop / scrollBarHeight : 0;
+
+    //   this.zoomFocalPoint = {
+    //     xRatio,
+    //     yRatio,
+    //   };
+
+    //   console.log('New focal point:', {
+    //     xRatio,
+    //     yRatio,
+    //   });
+    // },
     setOverlayPosition() {
       const { presentationViewport } = this.$refs;
       if (!presentationViewport) return;
@@ -86,6 +149,15 @@ export default {
       this.overlayDimensions.height = height;
 
       this.setOverlayPosition();
+      if (!this.initialLoad) {
+        this.scrollToFocalPoint();
+      } else {
+        this.setInitialZoomFocalPoint();
+      }
+
+      if (this.overlayDimensions.width > 0) {
+        this.initialLoad = false;
+      }
     },
     openCommentForm(position) {
       const { x, y } = position;
@@ -113,6 +185,7 @@ export default {
         @resized="setOverlayDimensions"
       />
       <design-overlay
+        v-if="overlayDimensions && overlayPosition"
         :dimensions="overlayDimensions"
         :position="overlayPosition"
         :notes="discussionStartingNotes"
