@@ -95,6 +95,14 @@
   bottom: 0;
   left: 0;
   z-index: 1;
+  // TODO: hack until there is a `-` icon in gitlab-svg
+  button > span {
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .design-image-wrapper {

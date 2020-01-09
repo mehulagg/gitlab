@@ -224,7 +224,7 @@ export default {
             />
           </div>
           <div class="design-scaler position-absolute d-flex-center w-100 mb-3">
-            <design-scaler @change="zoomScale = $event" />
+            <design-scaler @scale="zoomScale = $event" />
           </div>
         </div>
       </div>
