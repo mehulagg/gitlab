@@ -46,8 +46,10 @@ export default {
         left: '0',
       },
       zoomFocalPoint: {
-        xRatio: 0.5,
-        yRatio: 0.5,
+        x: 0,
+        y: 0,
+        width: 0,
+        height: 0,
       },
       initialLoad: true,
     };
@@ -68,7 +70,7 @@ export default {
     if (!presentationViewport) return;
 
     this.scrollThrottled = _.throttle(() => {
-      this.setZoomFocalPoint();
+      this.shiftZoomFocalPoint();
     }, 400);
 
     presentationViewport.addEventListener('scroll', this.scrollThrottled, false);
@@ -78,22 +80,29 @@ export default {
       const { presentationViewport } = this.$refs;
       if (!presentationViewport) return;
 
-      this.$nextTick(() => {
-        const scrollBarWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
-        const scrollBarHeight =
-          presentationViewport.scrollHeight - presentationViewport.offsetHeight;
+      const scrollX = this.zoomFocalPoint.x - presentationViewport.offsetWidth / 2;
+      const scrollY = this.zoomFocalPoint.y - presentationViewport.offsetHeight / 2;
 
-        const x = scrollBarWidth * this.zoomFocalPoint.xRatio;
-        const y = scrollBarHeight * this.zoomFocalPoint.yRatio;
-
-        presentationViewport.scrollTo(x, y);
-      });
+      presentationViewport.scrollTo(scrollX, scrollY);
     },
-    setZoomFocalPoint() {
+    scaleZoomFocalPoint() {
+      const { x, y, width, height } = this.zoomFocalPoint;
+      const widthRatio = this.overlayDimensions.width / width;
+      const heightRatio = this.overlayDimensions.height / height;
+      this.zoomFocalPoint = {
+        x: Math.round(x * widthRatio),
+        y: Math.round(y * heightRatio),
+        ...this.overlayDimensions,
+      };
+    },
+    shiftZoomFocalPoint() {
       const { presentationViewport } = this.$refs;
       if (!presentationViewport) return;
 
-      this.zoomFocalPoint = getViewportCenter(presentationViewport);
+      this.zoomFocalPoint = {
+        ...getViewportCenter(presentationViewport),
+        ...this.overlayDimensions,
+      };
     },
     setOverlayPosition() {
       const { presentationViewport } = this.$refs;
@@ -112,21 +121,23 @@ export default {
         this.overlayPosition.top = '0';
       }
     },
-    setOverlayDimensions({ width, height }) {
-      this.overlayDimensions.width = width;
-      this.overlayDimensions.height = height;
-
+    setOverlayDimensions(overlayDimensions) {
+      this.overlayDimensions = overlayDimensions;
       this.setOverlayPosition();
 
-      if (this.initialLoad) {
-        this.setZoomFocalPoint();
-      } else {
-        this.scrollToFocalPoint();
-      }
+      this.$nextTick(() => {
+        if (this.initialLoad) {
+          // set focal point on initial load
+          this.shiftZoomFocalPoint();
+        } else {
+          this.scaleZoomFocalPoint();
+          this.scrollToFocalPoint();
+        }
 
-      if (this.overlayDimensions.width > 0) {
-        this.initialLoad = false;
-      }
+        if (this.overlayDimensions.width > 0) {
+          this.initialLoad = false;
+        }
+      });
     },
     openCommentForm(position) {
       const { x, y } = position;
