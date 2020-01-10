@@ -21,7 +21,7 @@ export default {
   },
   data() {
     return {
-      defaultImageSize: null,
+      baseImageSize: {},
       imageStyle: {},
     };
   },
@@ -39,51 +39,51 @@ export default {
   },
   mounted() {
     this.onImgLoad();
+
     this.resizeThrottled = _.throttle(() => {
       const { contentImg } = this.$refs;
       if (!contentImg) return;
+
       const val = {
         height: contentImg.offsetHeight,
         width: contentImg.offsetWidth,
       };
-      this.$emit('resized', val);
+      this.$emit('resize', val);
     }, 400);
+
     window.addEventListener('resize', this.resizeThrottled, false);
   },
   methods: {
     onImgLoad() {
-      requestIdleCallback(this.setDefaultImageSize, { timeout: 1000 });
+      requestIdleCallback(this.resetImageSize, { timeout: 1000 });
     },
     setImageSize({ width, height }) {
+      // unset max-width so we have full control over dimensions
       this.imageStyle = {
         maxWidth: 'unset',
         width: `${width}px`,
         height: `${height}px`,
       };
-      this.$emit('resized', { width, height });
+      this.$emit('resize', { width, height });
     },
     zoom(amount) {
-      const width = this.defaultImageSize.width * amount;
-      const height = this.defaultImageSize.height * amount;
+      const width = this.baseImageSize.width * amount;
+      const height = this.baseImageSize.height * amount;
       this.setImageSize({ width, height });
     },
     resetImageSize() {
-      this.setDefaultImageSize({ force: true });
-    },
-    setDefaultImageSize({ force }) {
-      if (this.defaultImageSize && this.defaultImageSize.width > 0 && !force) return;
-
       const { contentImg } = this.$refs;
       if (!contentImg) return;
 
+      // wipe image style so max-width can be 100%
       this.imageStyle = {};
       this.$nextTick(() => {
-        this.defaultImageSize = {
+        this.baseImageSize = {
           height: contentImg.offsetHeight,
           width: contentImg.offsetWidth,
         };
 
-        this.$emit('resized', this.defaultImageSize);
+        this.$emit('resize', this.baseImageSize);
       });
     },
   },

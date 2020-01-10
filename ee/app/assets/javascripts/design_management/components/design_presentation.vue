@@ -162,7 +162,7 @@ export default {
         :image="image"
         :name="imageName"
         :scale="scale"
-        @resized="setOverlayDimensions"
+        @resize="setOverlayDimensions"
       />
       <design-overlay
         v-if="overlayDimensions && overlayPosition"
