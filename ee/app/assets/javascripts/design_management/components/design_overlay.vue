@@ -20,6 +20,11 @@ export default {
       required: false,
       default: () => [],
     },
+    disableCommenting: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     currentCommentForm: {
       type: Object,
       required: false,
@@ -55,6 +60,7 @@ export default {
 <template>
   <div class="position-absolute image-diff-overlay frame" :style="overlayStyle">
     <button
+      v-show="!disableCommenting"
       type="button"
       class="btn-transparent position-absolute image-diff-overlay-add-comment w-100 h-100 js-add-image-diff-note-button"
       data-qa-selector="design_image_button"

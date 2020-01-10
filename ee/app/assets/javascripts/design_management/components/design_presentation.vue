@@ -3,6 +3,9 @@ import _ from 'underscore';
 import DesignImage from './image.vue';
 import DesignOverlay from './design_overlay.vue';
 
+const CLICK_DRAG_MOVEMENT_SPEED = 5;
+const CLICK_DRAG_NATURAL_DIRECTION = true;
+
 export default {
   components: {
     DesignImage,
@@ -46,6 +49,12 @@ export default {
         height: 0,
       },
       initialLoad: true,
+      mousedown: false,
+      disableCommenting: false,
+      lastDragPosition: {
+        x: 0,
+        y: 0,
+      },
     };
   },
   computed: {
@@ -61,6 +70,9 @@ export default {
     if (!presentationViewport) return;
 
     presentationViewport.removeEventListener('scroll', this.scrollThrottled, false);
+    presentationViewport.removeEventListener('mousemove', this.clickAndDrag, false);
+    presentationViewport.removeEventListener('mousedown', this.mousedownHandler, false);
+    document.removeEventListener('mouseup', this.mouseupHandler, false);
   },
   mounted() {
     const { presentationViewport } = this.$refs;
@@ -70,7 +82,48 @@ export default {
       this.shiftZoomFocalPoint();
     }, 400);
 
+    const getScrollDirection = (delta, natural = CLICK_DRAG_NATURAL_DIRECTION) =>
+      (delta > 0 ? 1 : -1) * (natural ? 1 : -1);
+
+    this.clickAndDrag = _.throttle(e => {
+      if (!this.mousedown) return;
+      this.disableCommenting = true;
+
+      const deltaX = this.lastDragPosition.x - e.clientX;
+      const deltaY = this.lastDragPosition.y - e.clientY;
+
+      if (deltaX !== 0) {
+        const direction = getScrollDirection(deltaX);
+        const scrollAmount = CLICK_DRAG_MOVEMENT_SPEED * direction;
+        presentationViewport.scrollLeft += scrollAmount;
+      }
+
+      if (deltaY !== 0) {
+        const direction = getScrollDirection(deltaY);
+        const scrollAmount = CLICK_DRAG_MOVEMENT_SPEED * direction;
+        presentationViewport.scrollTop += scrollAmount;
+      }
+
+      this.lastDragPosition = {
+        x: e.clientX,
+        y: e.clientY,
+      };
+    }, 1);
+
+    this.mousedownHandler = () => {
+      this.mousedown = true;
+    };
+
+    this.mouseupHandler = () => {
+      this.mousedown = false;
+      this.disableCommenting = false;
+    };
+
+    // add various event listeners
     presentationViewport.addEventListener('scroll', this.scrollThrottled, false);
+    presentationViewport.addEventListener('mousemove', this.clickAndDrag, false);
+    presentationViewport.addEventListener('mousedown', this.mousedownHandler, false);
+    document.addEventListener('mouseup', this.mouseupHandler, false);
   },
   methods: {
     setOverlayDimensions(overlayDimensions) {
@@ -204,6 +257,7 @@ export default {
       />
       <design-overlay
         v-if="overlayDimensions && overlayPosition"
+        :disable-commenting="disableCommenting"
         :dimensions="overlayDimensions"
         :position="overlayPosition"
         :notes="discussionStartingNotes"
