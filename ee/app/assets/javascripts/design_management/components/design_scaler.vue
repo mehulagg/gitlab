@@ -51,7 +51,7 @@ export default {
 <template>
   <div class="design-scaler btn-group" role="group">
     <button class="btn" :disabled="disableDecrease" @click="decrementScale">
-      <span>
+      <span class="d-flex-center gl-icon s16">
         –
       </span>
     </button>
