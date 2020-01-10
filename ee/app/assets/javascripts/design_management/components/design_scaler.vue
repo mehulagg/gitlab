@@ -49,7 +49,7 @@ export default {
 </script>
 
 <template>
-  <div class="design-scaler btn-group" role="group">
+  <div class="btn-group m-auto" role="group">
     <button class="btn" :disabled="disableDecrease" @click="decrementScale">
       <span class="d-flex-center gl-icon s16">
         –
