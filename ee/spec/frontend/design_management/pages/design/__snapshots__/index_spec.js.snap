@@ -5,7 +5,7 @@ exports[`Design management design index page renders design index 1`] = `
   class="design-detail fixed-top w-100 position-bottom-0 d-flex justify-content-center flex-column flex-lg-row"
 >
   <div
-    class="d-flex overflow-hidden flex-lg-grow-1 flex-column"
+    class="d-flex overflow-hidden flex-grow-1 flex-column position-relative"
   >
     <design-destroyer-stub
       filenames="test.jpg"
@@ -19,7 +19,14 @@ exports[`Design management design index page renders design index 1`] = `
       discussions="[object Object]"
       image="test.jpg"
       imagename="test.jpg"
+      scale="1"
     />
+     
+    <div
+      class="design-scaler-wrapper position-absolute w-100 pb-3 d-flex-center"
+    >
+      <design-scaler-stub />
+    </div>
   </div>
    
   <div
@@ -75,7 +82,7 @@ exports[`Design management design index page with error GlAlert is rendered in c
   class="design-detail fixed-top w-100 position-bottom-0 d-flex justify-content-center flex-column flex-lg-row"
 >
   <div
-    class="d-flex overflow-hidden flex-lg-grow-1 flex-column"
+    class="d-flex overflow-hidden flex-grow-1 flex-column position-relative"
   >
     <design-destroyer-stub
       filenames="test.jpg"
@@ -106,7 +113,14 @@ exports[`Design management design index page with error GlAlert is rendered in c
       discussions=""
       image="test.jpg"
       imagename="test.jpg"
+      scale="1"
     />
+     
+    <div
+      class="design-scaler-wrapper position-absolute w-100 pb-3 d-flex-center"
+    >
+      <design-scaler-stub />
+    </div>
   </div>
    
   <div
