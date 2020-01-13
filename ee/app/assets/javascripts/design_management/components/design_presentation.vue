@@ -27,6 +27,11 @@ export default {
       required: false,
       default: false,
     },
+    scale: {
+      type: Number,
+      required: false,
+      default: 1,
+    },
   },
   data() {
     return {
@@ -91,7 +96,13 @@ export default {
 <template>
   <div ref="presentationViewport" class="h-100 w-100 p-3 overflow-auto position-relative">
     <div class="h-100 w-100 d-flex align-items-center position-relative">
-      <design-image v-if="image" :image="image" :name="imageName" @resize="onImageResize" />
+      <design-image
+        v-if="image"
+        :image="image"
+        :name="imageName"
+        :scale="scale"
+        @resize="onImageResize"
+      />
       <design-overlay
         v-if="overlayDimensions && overlayPosition"
         :dimensions="overlayDimensions"

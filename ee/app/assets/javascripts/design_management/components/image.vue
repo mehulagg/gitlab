@@ -13,38 +13,74 @@ export default {
       required: false,
       default: '',
     },
+    scale: {
+      type: Number,
+      required: false,
+      default: 1,
+    },
+  },
+  data() {
+    return {
+      baseImageSize: null,
+      imageStyle: null,
+    };
+  },
+  watch: {
+    scale(val) {
+      if (val === 1) {
+        this.resetImageSize();
+      } else {
+        this.zoom(val);
+      }
+    },
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.resizeThrottled, false);
   },
   mounted() {
     this.onImgLoad();
-    this.resizeThrottled = _.throttle(this.onImgLoad, 400);
+
+    this.resizeThrottled = _.throttle(() => {
+      const { contentImg } = this.$refs;
+      if (!contentImg) return;
+
+      const val = {
+        height: contentImg.offsetHeight,
+        width: contentImg.offsetWidth,
+      };
+      this.$emit('resize', val);
+    }, 400);
+
     window.addEventListener('resize', this.resizeThrottled, false);
   },
   methods: {
     onImgLoad() {
-      requestIdleCallback(this.calculateImgSize, { timeout: 1000 });
+      requestIdleCallback(this.resetImageSize, { timeout: 1000 });
     },
-    calculateImgSize() {
+    setImageSize({ width, height }) {
+      this.imageStyle = {
+        width: `${width}px`,
+        height: `${height}px`,
+      };
+      this.$emit('resize', { width, height });
+    },
+    zoom(amount) {
+      const width = this.baseImageSize.width * amount;
+      const height = this.baseImageSize.height * amount;
+      this.setImageSize({ width, height });
+    },
+    resetImageSize() {
       const { contentImg } = this.$refs;
-
       if (!contentImg) return;
 
+      this.imageStyle = null;
       this.$nextTick(() => {
-        const naturalRatio = contentImg.naturalWidth / contentImg.naturalHeight;
-        const visibleRatio = contentImg.width / contentImg.height;
-
-        const position = {
-          // Handling the case where img element takes more width than visible image thanks to object-fit: contain
-          width:
-            naturalRatio < visibleRatio
-              ? contentImg.clientHeight * naturalRatio
-              : contentImg.clientWidth,
-          height: contentImg.clientHeight,
+        this.baseImageSize = {
+          height: contentImg.offsetHeight,
+          width: contentImg.offsetWidth,
         };
 
-        this.$emit('resize', position);
+        this.$emit('resize', this.baseImageSize);
       });
     },
   },
@@ -52,7 +88,15 @@ export default {
 </script>
 
 <template>
-  <div class="m-auto h-100 w-100 d-flex-center js-design-image">
-    <img ref="contentImg" :src="image" :alt="name" class="img-fluid mh-100" @load="onImgLoad" />
+  <div class="m-auto js-design-image" :class="{ 'h-100 w-100 d-flex-center': !imageStyle }">
+    <img
+      ref="contentImg"
+      class="mh-100"
+      :src="image"
+      :alt="name"
+      :style="imageStyle"
+      :class="{ 'img-fluid': !imageStyle }"
+      @load="onImgLoad"
+    />
   </div>
 </template>

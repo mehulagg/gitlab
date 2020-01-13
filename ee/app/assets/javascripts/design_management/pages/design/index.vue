@@ -9,7 +9,6 @@ import DesignDiscussion from '../../components/design_notes/design_discussion.vu
 import DesignReplyForm from '../../components/design_notes/design_reply_form.vue';
 import DesignDestroyer from '../../components/design_destroyer.vue';
 import DesignScaler from '../../components/design_scaler.vue';
-
 import Participants from '~/sidebar/components/participants/participants.vue';
 import DesignPresentation from '../../components/design_presentation.vue';
 import getDesignQuery from '../../graphql/queries/getDesign.query.graphql';
@@ -235,6 +234,7 @@ export default {
           :image-name="design.filename"
           :discussions="discussions"
           :is-annotating="isAnnotating"
+          :scale="scale"
           @openCommentForm="openCommentForm"
         />
         <div class="design-scaler-wrapper position-absolute w-100 pb-3 d-flex-center">
