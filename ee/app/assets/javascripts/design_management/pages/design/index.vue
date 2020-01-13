@@ -8,6 +8,8 @@ import Toolbar from '../../components/toolbar/index.vue';
 import DesignDiscussion from '../../components/design_notes/design_discussion.vue';
 import DesignReplyForm from '../../components/design_notes/design_reply_form.vue';
 import DesignDestroyer from '../../components/design_destroyer.vue';
+import DesignScaler from '../../components/design_scaler.vue';
+
 import Participants from '~/sidebar/components/participants/participants.vue';
 import DesignPresentation from '../../components/design_presentation.vue';
 import getDesignQuery from '../../graphql/queries/getDesign.query.graphql';
@@ -31,6 +33,7 @@ export default {
     ApolloMutation,
     DesignPresentation,
     DesignDiscussion,
+    DesignScaler,
     DesignDestroyer,
     Toolbar,
     DesignReplyForm,
@@ -53,6 +56,7 @@ export default {
       projectPath: '',
       errorMessage: '',
       issueIid: '',
+      scale: 1,
     };
   },
   apollo: {
@@ -202,7 +206,7 @@ export default {
   >
     <gl-loading-icon v-if="isLoading" size="xl" class="align-self-center" />
     <template v-else>
-      <div class="d-flex overflow-hidden flex-lg-grow-1 flex-column">
+      <div class="d-flex overflow-hidden flex-grow-1 flex-column position-relative">
         <design-destroyer
           :filenames="[design.filename]"
           :project-path="projectPath"
@@ -226,7 +230,6 @@ export default {
             {{ errorMessage }}
           </gl-alert>
         </div>
-
         <design-presentation
           :image="design.image"
           :image-name="design.filename"
@@ -234,6 +237,9 @@ export default {
           :is-annotating="isAnnotating"
           @openCommentForm="openCommentForm"
         />
+        <div class="design-scaler-wrapper position-absolute w-100 pb-3 d-flex-center">
+          <design-scaler @scale="scale = $event" />
+        </div>
       </div>
       <div class="image-notes">
         <h2 class="gl-font-size-20 font-weight-bold mt-0">{{ issue.title }}</h2>

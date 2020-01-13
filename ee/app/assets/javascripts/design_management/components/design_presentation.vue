@@ -89,7 +89,7 @@ export default {
 </script>
 
 <template>
-  <div ref="presentationViewport" class="h-100 w-100 p-3 overflow-auto">
+  <div ref="presentationViewport" class="h-100 w-100 p-3 overflow-auto position-relative">
     <div class="h-100 w-100 d-flex align-items-center position-relative">
       <design-image v-if="image" :image="image" :name="imageName" @resize="onImageResize" />
       <design-overlay

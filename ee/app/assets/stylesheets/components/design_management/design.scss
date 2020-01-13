@@ -7,6 +7,15 @@
   left: 0;
 }
 
+.design-scaler {
+  z-index: 1;
+}
+
+.design-scaler-wrapper {
+  bottom: 0;
+  left: 0;
+}
+
 .design-list-item .design-event {
   top: $gl-padding;
   right: $gl-padding;
