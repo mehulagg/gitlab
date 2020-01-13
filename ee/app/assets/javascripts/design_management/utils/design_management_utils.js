@@ -94,3 +94,35 @@ const normalizeAuthor = author => ({
 });
 
 export const extractParticipants = users => users.edges.map(({ node }) => normalizeAuthor(node));
+
+/**
+ * Return a point that represents the center of an
+ * overflowing child element w.r.t it's parent
+ * @param {HTMLElement} elem
+ */
+export const getViewportCenter = elem => {
+  // get height of scroll bars (i.e. the max values for scrollTop, scrollLeft)
+  const scrollBarWidth = elem.scrollWidth - elem.offsetWidth;
+  const scrollBarHeight = elem.scrollHeight - elem.offsetHeight;
+
+  // determine how many child pixels have been scrolled
+  const xScrollRatio = elem.scrollLeft > 0 ? elem.scrollLeft / scrollBarWidth : 0;
+  const yScrollRatio = elem.scrollTop > 0 ? elem.scrollTop / scrollBarHeight : 0;
+  const xScrollOffset = (elem.scrollWidth - elem.offsetWidth - 0) * xScrollRatio;
+  const yScrollOffset = (elem.scrollHeight - elem.offsetHeight - 0) * yScrollRatio;
+
+  const viewportCenterX = elem.offsetWidth / 2;
+  const viewportCenterY = elem.offsetHeight / 2;
+  const focalPointX = viewportCenterX + xScrollOffset;
+  const focalPointY = viewportCenterY + yScrollOffset;
+
+  const xRatio = scrollBarWidth > 0 ? focalPointX / elem.scrollWidth : 0.5;
+  const yRatio = scrollBarHeight > 0 ? focalPointY / elem.scrollHeight : 0.5;
+
+  return {
+    xRatio,
+    yRatio,
+    x: focalPointX,
+    y: focalPointY,
+  };
+};
