@@ -237,7 +237,7 @@ export default {
           :scale="scale"
           @openCommentForm="openCommentForm"
         />
-        <div class="design-scaler-wrapper position-absolute w-100 pb-3 d-flex-center">
+        <div class="design-scaler-wrapper position-absolute w-100 pb-4 d-flex-center">
           <design-scaler @scale="scale = $event" />
         </div>
       </div>
