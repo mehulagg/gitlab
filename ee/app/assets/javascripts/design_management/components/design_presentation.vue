@@ -148,8 +148,8 @@ export default {
       const heightRatio = this.overlayDimensions.height / height;
 
       this.zoomFocalPoint = {
-        x: Math.round(x * widthRatio),
-        y: Math.round(y * heightRatio),
+        x: Math.round(x * widthRatio * 100) / 100,
+        y: Math.round(y * heightRatio * 100) / 100,
         ...this.overlayDimensions,
       };
     },
@@ -167,13 +167,10 @@ export default {
         if (this.initialLoad) {
           // set focal point on initial load
           this.shiftZoomFocalPoint();
+          this.initialLoad = false;
         } else {
           this.scaleZoomFocalPoint();
           this.scrollToFocalPoint();
-        }
-
-        if (this.overlayDimensions.width > 0) {
-          this.initialLoad = false;
         }
       });
     },

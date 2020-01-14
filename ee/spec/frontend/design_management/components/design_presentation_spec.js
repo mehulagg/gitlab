@@ -75,47 +75,49 @@ describe('Design management design presentation component', () => {
     });
   });
 
-  it('currentCommentForm is null when isAnnotating is false', () => {
-    createComponent({
-      image: 'test.jpg',
-      imageName: 'test',
+  describe('currentCommentForm', () => {
+    it('currentCommentForm is null when isAnnotating is false', () => {
+      createComponent({
+        image: 'test.jpg',
+        imageName: 'test',
+      });
+
+      expect(wrapper.vm.currentCommentForm).toBeNull();
     });
 
-    expect(wrapper.vm.currentCommentForm).toBeNull();
-  });
-
-  it('currentCommentForm is null when isAnnotating is true but annotation coordinates are falsey', () => {
-    createComponent({
-      image: 'test.jpg',
-      imageName: 'test',
-      isAnnotating: true,
-    });
-
-    expect(wrapper.vm.currentCommentForm).toBeNull();
-  });
-
-  it('currentCommentForm is equal to current annotation coordinates when isAnnotating is true', () => {
-    createComponent(
-      {
+    it('currentCommentForm is null when isAnnotating is true but annotation coordinates are falsey', () => {
+      createComponent({
         image: 'test.jpg',
         imageName: 'test',
         isAnnotating: true,
-      },
-      {
-        currentAnnotationCoordinates: {
-          x: 1,
-          y: 1,
-          width: 100,
-          height: 100,
-        },
-      },
-    );
+      });
 
-    expect(wrapper.vm.currentCommentForm).toEqual({
-      x: 1,
-      y: 1,
-      width: 100,
-      height: 100,
+      expect(wrapper.vm.currentCommentForm).toBeNull();
+    });
+
+    it('currentCommentForm is equal to current annotation coordinates when isAnnotating is true', () => {
+      createComponent(
+        {
+          image: 'test.jpg',
+          imageName: 'test',
+          isAnnotating: true,
+        },
+        {
+          currentAnnotationCoordinates: {
+            x: 1,
+            y: 1,
+            width: 100,
+            height: 100,
+          },
+        },
+      );
+
+      expect(wrapper.vm.currentCommentForm).toEqual({
+        x: 1,
+        y: 1,
+        width: 100,
+        height: 100,
+      });
     });
   });
 
@@ -236,6 +238,92 @@ describe('Design management design presentation component', () => {
       expect(wrapper.vm.getViewportCenter()).toEqual({
         x: 10,
         y: 10,
+      });
+    });
+  });
+
+  describe('scaleZoomFocalPoint', () => {
+    it('scaleZoomFocalPoint scales focal point correctly when zooming in', () => {
+      createComponent(
+        {
+          image: 'test.jpg',
+          imageName: 'test',
+        },
+        {
+          ...mockOverlayData,
+          zoomFocalPoint: {
+            x: 5,
+            y: 5,
+            width: 50,
+            height: 50,
+          },
+        },
+      );
+
+      wrapper.vm.scaleZoomFocalPoint();
+      expect(wrapper.vm.zoomFocalPoint).toEqual({
+        x: 10,
+        y: 10,
+        width: 100,
+        height: 100,
+      });
+    });
+
+    it('scaleZoomFocalPoint scales focal point correctly when zooming out', () => {
+      createComponent(
+        {
+          image: 'test.jpg',
+          imageName: 'test',
+        },
+        {
+          ...mockOverlayData,
+          zoomFocalPoint: {
+            x: 10,
+            y: 10,
+            width: 200,
+            height: 200,
+          },
+        },
+      );
+
+      wrapper.vm.scaleZoomFocalPoint();
+      expect(wrapper.vm.zoomFocalPoint).toEqual({
+        x: 5,
+        y: 5,
+        width: 100,
+        height: 100,
+      });
+    });
+  });
+
+  describe('onImageResize', () => {
+    it('sets zoom focal point on initial load', () => {
+      createComponent(
+        {
+          image: 'test.jpg',
+          imageName: 'test',
+        },
+        mockOverlayData,
+      );
+
+      wrapper.setMethods({
+        shiftZoomFocalPoint: jest.fn(),
+        scaleZoomFocalPoint: jest.fn(),
+        scrollToFocalPoint: jest.fn(),
+      });
+
+      wrapper.vm.onImageResize({ width: 10, height: 10 });
+      wrapper.vm.$nextTick(() => {
+        expect(wrapper.vm.shiftZoomFocalPoint).toHaveBeenCalled();
+        expect(wrapper.vm.initialLoad).toBe(false);
+      });
+    });
+
+    it('calls scaleZoomFocalPoint and scrollToFocalPoint after initial load', () => {
+      wrapper.vm.onImageResize({ width: 10, height: 10 });
+      wrapper.vm.$nextTick(() => {
+        expect(wrapper.vm.scaleZoomFocalPoint).toHaveBeenCalled();
+        expect(wrapper.vm.scrollToFocalPoint).toHaveBeenCalled();
       });
     });
   });

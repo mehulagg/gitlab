@@ -44,11 +44,10 @@ export default {
       const { contentImg } = this.$refs;
       if (!contentImg) return;
 
-      const val = {
-        height: contentImg.offsetHeight,
+      this.onResize({
         width: contentImg.offsetWidth,
-      };
-      this.$emit('resize', val);
+        height: contentImg.offsetHeight,
+      });
     }, 400);
 
     window.addEventListener('resize', this.resizeThrottled, false);
@@ -72,7 +71,7 @@ export default {
     },
     resetImageSize() {
       const { contentImg } = this.$refs;
-      if (!contentImg) return;
+      if (!contentImg || contentImg.offsetHeight === 0 || contentImg.offsetWidth === 0) return;
 
       this.imageStyle = null;
       this.$nextTick(() => {
