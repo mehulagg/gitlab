@@ -27,11 +27,7 @@ export default {
   },
   watch: {
     scale(val) {
-      if (val === 1) {
-        this.resetImageSize();
-      } else {
-        this.zoom(val);
-      }
+      this.zoom(val);
     },
   },
   beforeDestroy() {
@@ -41,6 +37,15 @@ export default {
     this.onImgLoad();
 
     this.resizeThrottled = _.throttle(() => {
+      this.onWindowResize();
+    }, 400);
+    window.addEventListener('resize', this.resizeThrottled, false);
+  },
+  methods: {
+    onImgLoad() {
+      requestIdleCallback(this.setBaseImageSize, { timeout: 1000 });
+    },
+    onWindowResize() {
       const { contentImg } = this.$refs;
       if (!contentImg) return;
 
@@ -48,13 +53,16 @@ export default {
         width: contentImg.offsetWidth,
         height: contentImg.offsetHeight,
       });
-    }, 400);
+    },
+    setBaseImageSize() {
+      const { contentImg } = this.$refs;
+      if (!contentImg || contentImg.offsetHeight === 0 || contentImg.offsetWidth === 0) return;
 
-    window.addEventListener('resize', this.resizeThrottled, false);
-  },
-  methods: {
-    onImgLoad() {
-      requestIdleCallback(this.resetImageSize, { timeout: 1000 });
+      this.baseImageSize = {
+        height: contentImg.offsetHeight,
+        width: contentImg.offsetWidth,
+      };
+      this.onResize({ width: this.baseImageSize.width, height: this.baseImageSize.height });
     },
     onResize({ width, height }) {
       this.$emit('resize', { width, height });
@@ -62,26 +70,13 @@ export default {
     zoom(amount) {
       const width = this.baseImageSize.width * amount;
       const height = this.baseImageSize.height * amount;
+
       this.imageStyle = {
         width: `${width}px`,
         height: `${height}px`,
       };
 
       this.onResize({ width, height });
-    },
-    resetImageSize() {
-      const { contentImg } = this.$refs;
-      if (!contentImg || contentImg.offsetHeight === 0 || contentImg.offsetWidth === 0) return;
-
-      this.imageStyle = null;
-      this.$nextTick(() => {
-        this.baseImageSize = {
-          height: contentImg.offsetHeight,
-          width: contentImg.offsetWidth,
-        };
-
-        this.onResize({ width: this.baseImageSize.width, height: this.baseImageSize.height });
-      });
     },
   },
 };

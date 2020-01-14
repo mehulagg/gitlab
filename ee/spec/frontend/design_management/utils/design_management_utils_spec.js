@@ -4,7 +4,6 @@ import {
   extractDiscussions,
   findVersionId,
   designUploadOptimisticResponse,
-  getViewportCenter,
 } from 'ee/design_management/utils/design_management_utils';
 
 describe('extractCurrentDiscussion', () => {

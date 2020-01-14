@@ -137,8 +137,10 @@ describe('Design management design presentation component', () => {
     });
 
     it('sets overlay position correctly when overlay is smaller than viewport', () => {
-      jest.spyOn(wrapper.vm.$refs.presentationViewport, 'offsetWidth', 'get').mockReturnValue(200);
-      jest.spyOn(wrapper.vm.$refs.presentationViewport, 'offsetHeight', 'get').mockReturnValue(200);
+      jest.spyOn(wrapper.vm.$refs.presentationContainer, 'offsetWidth', 'get').mockReturnValue(200);
+      jest
+        .spyOn(wrapper.vm.$refs.presentationContainer, 'offsetHeight', 'get')
+        .mockReturnValue(200);
 
       wrapper.vm.setOverlayPosition();
       expect(wrapper.vm.overlayPosition).toEqual({
@@ -148,8 +150,10 @@ describe('Design management design presentation component', () => {
     });
 
     it('sets overlay position correctly when overlay width is larger than viewports', () => {
-      jest.spyOn(wrapper.vm.$refs.presentationViewport, 'offsetWidth', 'get').mockReturnValue(50);
-      jest.spyOn(wrapper.vm.$refs.presentationViewport, 'offsetHeight', 'get').mockReturnValue(200);
+      jest.spyOn(wrapper.vm.$refs.presentationContainer, 'offsetWidth', 'get').mockReturnValue(50);
+      jest
+        .spyOn(wrapper.vm.$refs.presentationContainer, 'offsetHeight', 'get')
+        .mockReturnValue(200);
 
       wrapper.vm.setOverlayPosition();
       expect(wrapper.vm.overlayPosition).toEqual({
@@ -159,8 +163,8 @@ describe('Design management design presentation component', () => {
     });
 
     it('sets overlay position correctly when overlay height is larger than viewports', () => {
-      jest.spyOn(wrapper.vm.$refs.presentationViewport, 'offsetWidth', 'get').mockReturnValue(200);
-      jest.spyOn(wrapper.vm.$refs.presentationViewport, 'offsetHeight', 'get').mockReturnValue(50);
+      jest.spyOn(wrapper.vm.$refs.presentationContainer, 'offsetWidth', 'get').mockReturnValue(200);
+      jest.spyOn(wrapper.vm.$refs.presentationContainer, 'offsetHeight', 'get').mockReturnValue(50);
 
       wrapper.vm.setOverlayPosition();
       expect(wrapper.vm.overlayPosition).toEqual({

@@ -81,8 +81,8 @@ export default {
         this.overlayPosition = {};
       }
 
-      const { presentationViewport } = this.$refs;
-      if (!presentationViewport) return;
+      const { presentationContainer } = this.$refs;
+      if (!presentationContainer) return;
 
       // default to center
       this.overlayPosition = {
@@ -91,10 +91,10 @@ export default {
       };
 
       // if the overlay overflows, then don't center
-      if (this.overlayDimensions.width > presentationViewport.offsetWidth) {
+      if (this.overlayDimensions.width > presentationContainer.offsetWidth) {
         this.overlayPosition.left = '0';
       }
-      if (this.overlayDimensions.height > presentationViewport.offsetHeight) {
+      if (this.overlayDimensions.height > presentationContainer.offsetHeight) {
         this.overlayPosition.top = '0';
       }
     },
@@ -191,7 +191,10 @@ export default {
 
 <template>
   <div ref="presentationViewport" class="h-100 w-100 p-3 overflow-auto position-relative">
-    <div class="h-100 w-100 d-flex align-items-center position-relative">
+    <div
+      ref="presentationContainer"
+      class="h-100 w-100 d-flex align-items-center position-relative"
+    >
       <design-image
         v-if="image"
         :image="image"

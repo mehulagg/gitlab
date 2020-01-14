@@ -25,19 +25,6 @@ exports[`Design management large image component renders loading state 1`] = `
 </div>
 `;
 
-exports[`Design management large image component resetImageSize sets correct classes and styles 1`] = `
-<div
-  class="m-auto js-design-image h-100 w-100 d-flex-center"
->
-  <img
-    alt="test"
-    class="mh-100 img-fluid"
-    src="test.jpg"
-    style=""
-  />
-</div>
-`;
-
 exports[`Design management large image component sets correct classes and styles if imageStyle is set 1`] = `
 <div
   class="m-auto js-design-image"
@@ -47,6 +34,19 @@ exports[`Design management large image component sets correct classes and styles
     class="mh-100"
     src="test.jpg"
     style="width: 100px; height: 100px;"
+  />
+</div>
+`;
+
+exports[`Design management large image component zoom sets image style when zoomed 1`] = `
+<div
+  class="m-auto js-design-image"
+>
+  <img
+    alt="test"
+    class="mh-100"
+    src="test.jpg"
+    style="width: 200px; height: 200px;"
   />
 </div>
 `;
