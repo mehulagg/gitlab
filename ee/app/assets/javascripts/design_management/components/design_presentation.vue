@@ -2,7 +2,6 @@
 import _ from 'underscore';
 import DesignImage from './image.vue';
 import DesignOverlay from './design_overlay.vue';
-import { getViewportCenter } from '../utils/design_management_utils';
 
 export default {
   components: {
@@ -99,6 +98,41 @@ export default {
         this.overlayPosition.top = '0';
       }
     },
+    /**
+     * Return a point that represents the center of an
+     * overflowing child element w.r.t it's parent
+     */
+    getViewportCenter() {
+      const { presentationViewport } = this.$refs;
+      if (!presentationViewport) return {};
+
+      // get height of scroll bars (i.e. the max values for scrollTop, scrollLeft)
+      const scrollBarWidth = presentationViewport.scrollWidth - presentationViewport.offsetWidth;
+      const scrollBarHeight = presentationViewport.scrollHeight - presentationViewport.offsetHeight;
+
+      // determine how many child pixels have been scrolled
+      const xScrollRatio =
+        presentationViewport.scrollLeft > 0 ? presentationViewport.scrollLeft / scrollBarWidth : 0;
+      const yScrollRatio =
+        presentationViewport.scrollTop > 0 ? presentationViewport.scrollTop / scrollBarHeight : 0;
+      const xScrollOffset =
+        (presentationViewport.scrollWidth - presentationViewport.offsetWidth - 0) * xScrollRatio;
+      const yScrollOffset =
+        (presentationViewport.scrollHeight - presentationViewport.offsetHeight - 0) * yScrollRatio;
+
+      const viewportCenterX = presentationViewport.offsetWidth / 2;
+      const viewportCenterY = presentationViewport.offsetHeight / 2;
+      const focalPointX = viewportCenterX + xScrollOffset;
+      const focalPointY = viewportCenterY + yScrollOffset;
+
+      return {
+        x: focalPointX,
+        y: focalPointY,
+      };
+    },
+    /**
+     * Scroll the viewport such that the focal point is positioned centrally
+     */
     scrollToFocalPoint() {
       const { presentationViewport } = this.$refs;
       if (!presentationViewport) return;
@@ -112,6 +146,7 @@ export default {
       const { x, y, width, height } = this.zoomFocalPoint;
       const widthRatio = this.overlayDimensions.width / width;
       const heightRatio = this.overlayDimensions.height / height;
+
       this.zoomFocalPoint = {
         x: Math.round(x * widthRatio),
         y: Math.round(y * heightRatio),
@@ -119,11 +154,8 @@ export default {
       };
     },
     shiftZoomFocalPoint() {
-      const { presentationViewport } = this.$refs;
-      if (!presentationViewport) return;
-
       this.zoomFocalPoint = {
-        ...getViewportCenter(presentationViewport),
+        ...this.getViewportCenter(),
         ...this.overlayDimensions,
       };
     },

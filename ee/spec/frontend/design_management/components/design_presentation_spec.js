@@ -167,4 +167,76 @@ describe('Design management design presentation component', () => {
       });
     });
   });
+
+  describe('getViewportCenter', () => {
+    /**
+     * Spy on $refs.presentationViewport with given values
+     * @param {Object} viewportDimensions {width, height}
+     * @param {Object} childDimensions {width, height}
+     * @param {Float} scrollTopPerc 0 < x < 1
+     * @param {Float} scrollLeftPerc  0 < x < 1
+     */
+    const spyOnPresentationViewport = (
+      viewportDimensions,
+      childDimensions,
+      scrollTopPerc,
+      scrollLeftPerc,
+    ) => {
+      jest
+        .spyOn(wrapper.vm.$refs.presentationViewport, 'scrollWidth', 'get')
+        .mockReturnValue(childDimensions.width);
+      jest
+        .spyOn(wrapper.vm.$refs.presentationViewport, 'scrollHeight', 'get')
+        .mockReturnValue(childDimensions.height);
+      jest
+        .spyOn(wrapper.vm.$refs.presentationViewport, 'offsetWidth', 'get')
+        .mockReturnValue(viewportDimensions.width);
+      jest
+        .spyOn(wrapper.vm.$refs.presentationViewport, 'offsetHeight', 'get')
+        .mockReturnValue(viewportDimensions.height);
+      jest
+        .spyOn(wrapper.vm.$refs.presentationViewport, 'scrollLeft', 'get')
+        .mockReturnValue((childDimensions.width - viewportDimensions.width) * scrollLeftPerc);
+      jest
+        .spyOn(wrapper.vm.$refs.presentationViewport, 'scrollTop', 'get')
+        .mockReturnValue((childDimensions.height - viewportDimensions.height) * scrollTopPerc);
+    };
+
+    beforeEach(() => {
+      createComponent(
+        {
+          image: 'test.jpg',
+          imageName: 'test',
+        },
+        mockOverlayData,
+      );
+    });
+
+    it('calculate center correctly with no scroll', () => {
+      spyOnPresentationViewport({ width: 10, height: 10 }, { width: 20, height: 20 }, 0, 0);
+
+      expect(wrapper.vm.getViewportCenter()).toEqual({
+        x: 5,
+        y: 5,
+      });
+    });
+
+    it('calculate center correctly with some scroll', () => {
+      spyOnPresentationViewport({ width: 10, height: 10 }, { width: 20, height: 20 }, 0.5, 0.5);
+
+      expect(wrapper.vm.getViewportCenter()).toEqual({
+        x: 10,
+        y: 10,
+      });
+    });
+
+    it('Returns default case if no overflow (scrollWidth==offsetWidth, etc.)', () => {
+      spyOnPresentationViewport({ width: 20, height: 20 }, { width: 20, height: 20 }, 0.5, 0.5);
+
+      expect(wrapper.vm.getViewportCenter()).toEqual({
+        x: 10,
+        y: 10,
+      });
+    });
+  });
 });
