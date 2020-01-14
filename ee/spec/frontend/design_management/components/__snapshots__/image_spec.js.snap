@@ -2,11 +2,11 @@
 
 exports[`Design management large image component renders image 1`] = `
 <div
-  class="m-auto h-100 w-100 d-flex-center js-design-image"
+  class="m-auto js-design-image h-100 w-100 d-flex-center"
 >
   <img
     alt="test"
-    class="img-fluid mh-100"
+    class="mh-100 img-fluid"
     src="test.jpg"
   />
 </div>
@@ -14,13 +14,39 @@ exports[`Design management large image component renders image 1`] = `
 
 exports[`Design management large image component renders loading state 1`] = `
 <div
-  class="m-auto h-100 w-100 d-flex-center js-design-image"
+  class="m-auto js-design-image h-100 w-100 d-flex-center"
   isloading="true"
 >
   <img
     alt=""
-    class="img-fluid mh-100"
+    class="mh-100 img-fluid"
     src=""
+  />
+</div>
+`;
+
+exports[`Design management large image component resetImageSize sets correct classes and styles 1`] = `
+<div
+  class="m-auto js-design-image h-100 w-100 d-flex-center"
+>
+  <img
+    alt="test"
+    class="mh-100 img-fluid"
+    src="test.jpg"
+    style=""
+  />
+</div>
+`;
+
+exports[`Design management large image component sets correct classes and styles if imageStyle is set 1`] = `
+<div
+  class="m-auto js-design-image"
+>
+  <img
+    alt="test"
+    class="mh-100"
+    src="test.jpg"
+    style="width: 100px; height: 100px;"
   />
 </div>
 `;

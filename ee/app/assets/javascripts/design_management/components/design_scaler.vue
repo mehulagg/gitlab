@@ -32,7 +32,7 @@ export default {
         return;
       }
 
-      this.scale = scale;
+      this.scale = Math.round(scale * 100) / 100;
       this.$emit('scale', this.scale);
     },
     incrementScale() {

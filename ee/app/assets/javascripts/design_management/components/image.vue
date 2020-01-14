@@ -57,17 +57,18 @@ export default {
     onImgLoad() {
       requestIdleCallback(this.resetImageSize, { timeout: 1000 });
     },
-    setImageSize({ width, height }) {
-      this.imageStyle = {
-        width: `${width}px`,
-        height: `${height}px`,
-      };
+    onResize({ width, height }) {
       this.$emit('resize', { width, height });
     },
     zoom(amount) {
       const width = this.baseImageSize.width * amount;
       const height = this.baseImageSize.height * amount;
-      this.setImageSize({ width, height });
+      this.imageStyle = {
+        width: `${width}px`,
+        height: `${height}px`,
+      };
+
+      this.onResize({ width, height });
     },
     resetImageSize() {
       const { contentImg } = this.$refs;
@@ -80,7 +81,7 @@ export default {
           width: contentImg.offsetWidth,
         };
 
-        this.$emit('resize', this.baseImageSize);
+        this.onResize({ width: this.baseImageSize.width, height: this.baseImageSize.height });
       });
     },
   },

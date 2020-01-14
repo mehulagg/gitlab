@@ -1,0 +1,133 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Design management design scaler component minus and reset buttons are disabled when scale === 1 1`] = `
+<div
+  class="design-scaler btn-group"
+  role="group"
+>
+  <button
+    class="btn"
+    disabled="disabled"
+  >
+    <span
+      class="d-flex-center gl-icon s16"
+    >
+      
+      –
+    
+    </span>
+  </button>
+   
+  <button
+    class="btn"
+    disabled="disabled"
+  >
+    <svg
+      class="gl-icon s16"
+    >
+      <use
+        href="#redo"
+      />
+    </svg>
+  </button>
+   
+  <button
+    class="btn"
+  >
+    <svg
+      class="gl-icon s16"
+    >
+      <use
+        href="#plus"
+      />
+    </svg>
+  </button>
+</div>
+`;
+
+exports[`Design management design scaler component minus and reset buttons are enabled when scale > 1 1`] = `
+<div
+  class="design-scaler btn-group"
+  role="group"
+>
+  <button
+    class="btn"
+  >
+    <span
+      class="d-flex-center gl-icon s16"
+    >
+      
+      –
+    
+    </span>
+  </button>
+   
+  <button
+    class="btn"
+  >
+    <svg
+      class="gl-icon s16"
+    >
+      <use
+        href="#redo"
+      />
+    </svg>
+  </button>
+   
+  <button
+    class="btn"
+  >
+    <svg
+      class="gl-icon s16"
+    >
+      <use
+        href="#plus"
+      />
+    </svg>
+  </button>
+</div>
+`;
+
+exports[`Design management design scaler component plus button is disabled when scale === 2 1`] = `
+<div
+  class="design-scaler btn-group"
+  role="group"
+>
+  <button
+    class="btn"
+  >
+    <span
+      class="d-flex-center gl-icon s16"
+    >
+      
+      –
+    
+    </span>
+  </button>
+   
+  <button
+    class="btn"
+  >
+    <svg
+      class="gl-icon s16"
+    >
+      <use
+        href="#redo"
+      />
+    </svg>
+  </button>
+   
+  <button
+    class="btn"
+    disabled="disabled"
+  >
+    <svg
+      class="gl-icon s16"
+    >
+      <use
+        href="#plus"
+      />
+    </svg>
+  </button>
+</div>
+`;
