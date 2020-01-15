@@ -22,25 +22,19 @@ exports[`Design management design scaler component minus and reset buttons are d
     class="btn"
     disabled="disabled"
   >
-    <svg
-      class="gl-icon s16"
-    >
-      <use
-        href="#redo"
-      />
-    </svg>
+    <gl-icon-stub
+      name="redo"
+      size="16"
+    />
   </button>
    
   <button
     class="btn"
   >
-    <svg
-      class="gl-icon s16"
-    >
-      <use
-        href="#plus"
-      />
-    </svg>
+    <gl-icon-stub
+      name="plus"
+      size="16"
+    />
   </button>
 </div>
 `;
@@ -65,25 +59,19 @@ exports[`Design management design scaler component minus and reset buttons are e
   <button
     class="btn"
   >
-    <svg
-      class="gl-icon s16"
-    >
-      <use
-        href="#redo"
-      />
-    </svg>
+    <gl-icon-stub
+      name="redo"
+      size="16"
+    />
   </button>
    
   <button
     class="btn"
   >
-    <svg
-      class="gl-icon s16"
-    >
-      <use
-        href="#plus"
-      />
-    </svg>
+    <gl-icon-stub
+      name="plus"
+      size="16"
+    />
   </button>
 </div>
 `;
@@ -108,26 +96,20 @@ exports[`Design management design scaler component plus button is disabled when 
   <button
     class="btn"
   >
-    <svg
-      class="gl-icon s16"
-    >
-      <use
-        href="#redo"
-      />
-    </svg>
+    <gl-icon-stub
+      name="redo"
+      size="16"
+    />
   </button>
    
   <button
     class="btn"
     disabled="disabled"
   >
-    <svg
-      class="gl-icon s16"
-    >
-      <use
-        href="#plus"
-      />
-    </svg>
+    <gl-icon-stub
+      name="plus"
+      size="16"
+    />
   </button>
 </div>
 `;

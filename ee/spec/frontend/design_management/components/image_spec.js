@@ -47,7 +47,7 @@ describe('Design management large image component', () => {
         },
       },
     );
-    wrapper.vm.$nextTick(() => {
+    return wrapper.vm.$nextTick().then(() => {
       expect(wrapper.element).toMatchSnapshot();
     });
   });
@@ -76,7 +76,7 @@ describe('Design management large image component', () => {
     it('emits @resize event on zoom', () => {
       wrapper.vm.zoom(2);
 
-      wrapper.vm.$nextTick(() => {
+      return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted('resize')).toEqual([[{ width: 200, height: 200 }]]);
       });
     });
@@ -84,7 +84,7 @@ describe('Design management large image component', () => {
     it('emits @resize event with base image size when scale=1', () => {
       wrapper.vm.zoom(1);
 
-      wrapper.vm.$nextTick(() => {
+      return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.emitted('resize')).toEqual([[{ width: 100, height: 100 }]]);
       });
     });
@@ -92,7 +92,7 @@ describe('Design management large image component', () => {
     it('sets image style when zoomed', () => {
       wrapper.vm.zoom(2);
       expect(wrapper.vm.imageStyle).toEqual({ width: '200px', height: '200px' });
-      wrapper.vm.$nextTick(() => {
+      return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.element).toMatchSnapshot();
       });
     });

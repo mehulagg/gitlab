@@ -1,11 +1,11 @@
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import DesignScaler from 'ee/design_management/components/design_scaler.vue';
 
 describe('Design management design scaler component', () => {
   let wrapper;
 
   function createComponent(propsData, data = {}) {
-    wrapper = mount(DesignScaler, {
+    wrapper = shallowMount(DesignScaler, {
       propsData,
     });
     wrapper.setData(data);
@@ -30,7 +30,7 @@ describe('Design management design scaler component', () => {
 
   it('emits @scale event when "reset" button clicked (scale > 1)', () => {
     createComponent({}, { scale: 1.6 });
-    wrapper.vm.$nextTick(() => {
+    return wrapper.vm.$nextTick().then(() => {
       getButton('reset').trigger('click');
       expect(wrapper.emitted('scale')).toEqual([[1]]);
     });
@@ -39,7 +39,7 @@ describe('Design management design scaler component', () => {
   it('emits @scale event when "minus" button clicked (scale > 1)', () => {
     createComponent({}, { scale: 1.6 });
 
-    wrapper.vm.$nextTick(() => {
+    return wrapper.vm.$nextTick().then(() => {
       getButton('minus').trigger('click');
       expect(wrapper.emitted('scale')).toEqual([[1.4]]);
     });
@@ -53,14 +53,14 @@ describe('Design management design scaler component', () => {
 
   it('minus and reset buttons are enabled when scale > 1', () => {
     createComponent({}, { scale: 1.2 });
-    wrapper.vm.$nextTick(() => {
+    return wrapper.vm.$nextTick().then(() => {
       expect(wrapper.element).toMatchSnapshot();
     });
   });
 
   it('plus button is disabled when scale === 2', () => {
     createComponent({}, { scale: 2 });
-    wrapper.vm.$nextTick(() => {
+    return wrapper.vm.$nextTick().then(() => {
       expect(wrapper.element).toMatchSnapshot();
     });
   });

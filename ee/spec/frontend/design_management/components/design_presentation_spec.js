@@ -77,22 +77,34 @@ describe('Design management design presentation component', () => {
 
   describe('currentCommentForm', () => {
     it('currentCommentForm is null when isAnnotating is false', () => {
-      createComponent({
-        image: 'test.jpg',
-        imageName: 'test',
-      });
+      createComponent(
+        {
+          image: 'test.jpg',
+          imageName: 'test',
+        },
+        mockOverlayData,
+      );
 
-      expect(wrapper.vm.currentCommentForm).toBeNull();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.vm.currentCommentForm).toBeNull();
+        expect(wrapper.element).toMatchSnapshot();
+      });
     });
 
     it('currentCommentForm is null when isAnnotating is true but annotation coordinates are falsey', () => {
-      createComponent({
-        image: 'test.jpg',
-        imageName: 'test',
-        isAnnotating: true,
-      });
+      createComponent(
+        {
+          image: 'test.jpg',
+          imageName: 'test',
+          isAnnotating: true,
+        },
+        mockOverlayData,
+      );
 
-      expect(wrapper.vm.currentCommentForm).toBeNull();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.vm.currentCommentForm).toBeNull();
+        expect(wrapper.element).toMatchSnapshot();
+      });
     });
 
     it('currentCommentForm is equal to current annotation coordinates when isAnnotating is true', () => {
@@ -103,6 +115,7 @@ describe('Design management design presentation component', () => {
           isAnnotating: true,
         },
         {
+          ...mockOverlayData,
           currentAnnotationCoordinates: {
             x: 1,
             y: 1,
@@ -111,12 +124,14 @@ describe('Design management design presentation component', () => {
           },
         },
       );
-
-      expect(wrapper.vm.currentCommentForm).toEqual({
-        x: 1,
-        y: 1,
-        width: 100,
-        height: 100,
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.vm.currentCommentForm).toEqual({
+          x: 1,
+          y: 1,
+          width: 100,
+          height: 100,
+        });
+        expect(wrapper.element).toMatchSnapshot();
       });
     });
   });
@@ -317,7 +332,7 @@ describe('Design management design presentation component', () => {
       });
 
       wrapper.vm.onImageResize({ width: 10, height: 10 });
-      wrapper.vm.$nextTick(() => {
+      return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.vm.shiftZoomFocalPoint).toHaveBeenCalled();
         expect(wrapper.vm.initialLoad).toBe(false);
       });
@@ -325,7 +340,7 @@ describe('Design management design presentation component', () => {
 
     it('calls scaleZoomFocalPoint and scrollToFocalPoint after initial load', () => {
       wrapper.vm.onImageResize({ width: 10, height: 10 });
-      wrapper.vm.$nextTick(() => {
+      return wrapper.vm.$nextTick().then(() => {
         expect(wrapper.vm.scaleZoomFocalPoint).toHaveBeenCalled();
         expect(wrapper.vm.scrollToFocalPoint).toHaveBeenCalled();
       });
