@@ -21,32 +21,28 @@ module Packages
     end
 
     def create_or_update_package(body)
-      package_exists = project.packages.with_name_and_version(body['name'], body['version'])
-
-      package_exists.blank? ? create_package(body) : update_package(package_exists, body)
-    end
-
-    def create_package(body)
-      project.packages.create!(
-        name: body['name'],
-        version: body['version'],
-        package_type: 'composer',
-        composer_metadatum_attributes: {
+      package = project
+        .packages
+        .with_name_and_version(body['name'], body['version'])
+        .first_or_initialize( # rubocop:disable CodeReuse/ActiveRecord
           name: body['name'],
           version: body['version'],
-          json: body['json']
-        }
-      )
-    end
+          package_type: 'composer',
+          composer_metadatum_attributes: {}
+        )
 
-    def update_package(package, body)
-      package = package.first
+      package.composer_metadatum.attributes = {
+        name: body['name'],
+        version: body['version'],
+        json: body['json']
+      }
 
-      package.update(name: body['name'], version: body['version'], package_type: 'composer')
-      package.composer_metadatum.update( name: body['name'], version: body['version'], json: body['json'])
+      clean_files = !package.new_record?
+
+      package.save!
 
       # This will remove 2 files and 2 associactions max
-      package.package_files.destroy_all # rubocop:disable Cop/DestroyAll
+      package.package_files.delete_all if clean_files
 
       package
     end

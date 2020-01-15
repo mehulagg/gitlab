@@ -29,6 +29,7 @@ class Packages::ComposerPackagesFinder < Packages::GroupPackagesFinder
                    .composer_only
                    .with_composer_metadata
                    .for_projects(projects_visible_to_current_user)
+                   .find_each
 
     packages_composer_matching_namespace(packages)
   end

@@ -2,7 +2,7 @@
 module API
   class ComposerPackages < Grape::API
     COMPOSER_ENDPOINT_REQUIREMENTS = {
-        package_name: API::NO_SLASH_URL_PART_REGEX
+      package_name: API::NO_SLASH_URL_PART_REGEX
     }.freeze
 
     before do
@@ -13,7 +13,7 @@ module API
     helpers ::API::Helpers::PackagesHelpers
 
     desc 'Composer packages endpoint at instance level' do
-      detail 'This feature was introduced in GitLab 12.6'
+      detail 'This feature was introduced in GitLab 12.8'
     end
     route_setting :authentication, job_token_allowed: true
     get 'packages/composer/packages.json' do
@@ -25,7 +25,7 @@ module API
     end
 
     desc 'Composer registry endpoint at instance level for include/all${sha}.json' do
-      detail 'This feature was introduced in GitLab 12.6'
+      detail 'This feature was introduced in GitLab 12.8'
     end
     params do
       requires :sha, type: String, desc: 'Shasum of current packages.json'
@@ -44,7 +44,7 @@ module API
     end
     resource :group, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
       desc 'Composer packages endpoint at group level' do
-        detail 'This feature was introduced in GitLab 12.6'
+        detail 'This feature was introduced in GitLab 12.8'
       end
       route_setting :authentication, job_token_allowed: true
       get ':id/-/packages/composer/packages.json' do
@@ -57,7 +57,7 @@ module API
       end
 
       desc 'Composer packages endpoint at group level for include/all${sha}.json' do
-        detail 'This feature was introduced in GitLab 12.6'
+        detail 'This feature was introduced in GitLab 12.8'
       end
       params do
         requires :sha, type: String, desc: 'Shasum of current packages.json'
@@ -82,7 +82,7 @@ module API
       end
 
       desc 'Download the Composer archive, can be zip or tar' do
-        detail 'This feature was introduced in GitLab 12.6'
+        detail 'This feature was introduced in GitLab 12.8'
       end
       params do
         requires :package_name, type: String, desc: 'Package name'
@@ -102,7 +102,7 @@ module API
       end
 
       desc 'Upload and create Composer package' do
-        detail 'This feature was introduced in GitLab 12.6'
+        detail 'This feature was introduced in GitLab 12.8'
       end
       params do
         requires :package_name, type: String, desc: 'Package name'

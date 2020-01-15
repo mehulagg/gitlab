@@ -190,6 +190,7 @@ FactoryBot.define do
       file_name { 'package.nupkg' }
       file_sha1 { '5fe852b2a6abd96c22c11fa1ff2fb19d9ce58b57' }
       size { 300.kilobytes }
+    end
 
     trait(:composer) do
       file { fixture_file_upload('ee/spec/fixtures/composer/ochorocho-gitlab-composer-2.0.0-19c3ec.tar') }
@@ -248,7 +249,7 @@ FactoryBot.define do
     sequence(:name) { |n| "tag-#{n}"}
   end
 
-  factory :composer_metadatum, class: Packages::ComposerMetadatum do
+  factory :composer_metadatum, class: 'Packages::ComposerMetadatum' do
     package
     name { 'ochorocho/gitlab-composer' }
     version { '2.0.0' }
