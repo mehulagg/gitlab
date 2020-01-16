@@ -50,7 +50,7 @@ export default {
       },
       initialLoad: true,
       mousedown: false,
-      disableCommenting: false,
+      clickDragging: false,
       lastDragPosition: {
         x: 0,
         y: 0,
@@ -63,6 +63,15 @@ export default {
     },
     currentCommentForm() {
       return (this.isAnnotating && this.currentAnnotationCoordinates) || null;
+    },
+    presentationViewportStyle() {
+      if (this.clickDragging) {
+        return {
+          cursor: 'grabbing',
+        };
+      }
+
+      return null;
     },
   },
   beforeDestroy() {
@@ -87,7 +96,7 @@ export default {
 
     this.clickAndDrag = _.throttle(e => {
       if (!this.mousedown) return;
-      this.disableCommenting = true;
+      this.clickDragging = true;
 
       const deltaX = this.lastDragPosition.x - e.clientX;
       const deltaY = this.lastDragPosition.y - e.clientY;
@@ -116,7 +125,7 @@ export default {
 
     this.mouseupHandler = () => {
       this.mousedown = false;
-      this.disableCommenting = false;
+      this.clickDragging = false;
     };
 
     // add various event listeners
@@ -125,6 +134,7 @@ export default {
     presentationViewport.addEventListener('mousedown', this.mousedownHandler, false);
     document.addEventListener('mouseup', this.mouseupHandler, false);
   },
+
   methods: {
     setOverlayDimensions(overlayDimensions) {
       this.overlayDimensions = overlayDimensions;
@@ -243,7 +253,11 @@ export default {
 </script>
 
 <template>
-  <div ref="presentationViewport" class="h-100 w-100 p-3 overflow-auto position-relative">
+  <div
+    ref="presentationViewport"
+    class="h-100 w-100 p-3 overflow-auto position-relative"
+    :style="presentationViewportStyle"
+  >
     <div
       ref="presentationContainer"
       class="h-100 w-100 d-flex align-items-center position-relative"
@@ -257,7 +271,7 @@ export default {
       />
       <design-overlay
         v-if="overlayDimensions && overlayPosition"
-        :disable-commenting="disableCommenting"
+        :disable-commenting="clickDragging"
         :dimensions="overlayDimensions"
         :position="overlayPosition"
         :notes="discussionStartingNotes"

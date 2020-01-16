@@ -33,11 +33,16 @@ export default {
   },
   computed: {
     overlayStyle() {
-      return {
+      const style = {
         width: `${this.dimensions.width}px`,
         height: `${this.dimensions.height}px`,
         ...this.position,
       };
+
+      if (this.disableCommenting) {
+        style.cursor = 'unset';
+      }
+      return style;
     },
   },
   methods: {
