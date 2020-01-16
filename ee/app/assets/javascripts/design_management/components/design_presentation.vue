@@ -120,6 +120,8 @@ export default {
     }, 1);
 
     this.mousedownHandler = () => {
+      if (!this.isDesignOverflowing()) return;
+
       this.mousedown = true;
     };
 
@@ -134,14 +136,23 @@ export default {
     presentationViewport.addEventListener('mousedown', this.mousedownHandler, false);
     document.addEventListener('mouseup', this.mouseupHandler, false);
   },
-
   methods: {
+    isDesignOverflowing() {
+      const { presentationContainer } = this.$refs;
+      if (!presentationContainer) return false;
+
+      return (
+        presentationContainer.scrollWidth > presentationContainer.offsetWidth ||
+        presentationContainer.scrollHeight > presentationContainer.offsetHeight
+      );
+    },
     setOverlayDimensions(overlayDimensions) {
       this.overlayDimensions = overlayDimensions;
     },
     setOverlayPosition() {
       if (!this.overlayDimensions) {
         this.overlayPosition = {};
+        return;
       }
 
       const { presentationContainer } = this.$refs;
