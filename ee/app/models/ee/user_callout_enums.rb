@@ -15,7 +15,11 @@ module EE
           geo_migrate_hashed_storage: 6,
           canary_deployment: 7,
           gold_trial_billings: 8,
-          threat_monitoring_info: 11
+          threat_monitoring_info: 11,
+          # Bump this value to trigger new account recovery check
+          # https://gitlab.com/gitlab-org/gitlab/issues/30065
+          # id Format: 1YYMM"
+          account_recovery_regular_check: 12002
         )
       end
     end

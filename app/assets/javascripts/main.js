@@ -35,6 +35,7 @@ import initPerformanceBar from './performance_bar';
 import initSearchAutocomplete from './search_autocomplete';
 import GlFieldErrors from './gl_field_errors';
 import initUserPopovers from './user_popovers';
+import PersistentUserCallout from './persistent_user_callout';
 import { initUserTracking } from './tracking';
 import { __ } from './locale';
 
@@ -105,6 +106,9 @@ function deferredInitialisation() {
   initUsagePingConsent();
   initUserPopovers();
   initUserTracking();
+
+  const recoverySettingsCallout = document.querySelector('.js-recovery-settings-callout');
+  PersistentUserCallout.factory(recoverySettingsCallout);
 
   if (document.querySelector('.search')) initSearchAutocomplete();
 

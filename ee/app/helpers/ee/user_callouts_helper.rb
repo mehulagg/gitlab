@@ -10,6 +10,7 @@ module EE
     GOLD_TRIAL = 'gold_trial'
     GOLD_TRIAL_BILLINGS = 'gold_trial_billings'
     THREAT_MONITORING_INFO = 'threat_monitoring_info'
+    ACCOUNT_RECOVERY_REGULAR_CHECK = 'account_recovery_regular_check'
 
     def show_canary_deployment_callout?(project)
       !user_dismissed?(CANARY_DEPLOYMENT) &&
@@ -55,6 +56,15 @@ module EE
           has_some_namespaces_with_no_trials?(user)
 
       render 'shared/gold_trial_callout_content'
+    end
+
+    def render_account_recovery_regular_check
+      return unless ::Gitlab.com? &&
+          current_user &&
+          3.months.ago > current_user.created_at &&
+          !user_dismissed?(ACCOUNT_RECOVERY_REGULAR_CHECK)
+
+      render 'shared/check_recovery_settings'
     end
 
     def render_billings_gold_trial(user, namespace)

@@ -22,6 +22,9 @@ module UserCalloutsHelper
   def render_dashboard_gold_trial(user)
   end
 
+  def render_account_recovery_regular_check
+  end
+
   def show_suggest_popover?
     !user_dismissed?(SUGGEST_POPOVER_DISMISSED)
   end

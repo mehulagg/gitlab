@@ -269,6 +269,44 @@ describe EE::UserCalloutsHelper do
     end
   end
 
+  describe '#render_account_recovery_regular_check' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:new_user) { create(:user) }
+    let(:old_user) { create(:user, created_at: 4.months.ago )}
+    let(:anonymous) { nil }
+
+    where(:kind_of_user, :is_gitlab_com?, :user_dismissed?, :should_render?) do
+      :anonymous | false | false | false
+      :anonymous | true  | false | false
+      :new_user  | false | false | false
+      :old_user  | false | false | false
+      :new_user  | true  | false | false
+      :old_user  | true  | false | true
+      :old_user  | true  | true  | false
+    end
+
+    with_them do
+      before do
+        user = send(kind_of_user)
+
+        allow(helper).to receive(:current_user).and_return(user)
+        allow(Gitlab).to receive(:com?).and_return(is_gitlab_com?)
+        allow(helper).to receive(:user_dismissed?).and_return(user_dismissed?)
+      end
+
+      it do
+        if should_render?
+          expect(helper).to receive(:render).with('shared/check_recovery_settings')
+        else
+          expect(helper).not_to receive(:render)
+        end
+
+        helper.render_account_recovery_regular_check
+      end
+    end
+  end
+
   describe '.show_threat_monitoring_info?' do
     subject { helper.show_threat_monitoring_info? }
 
