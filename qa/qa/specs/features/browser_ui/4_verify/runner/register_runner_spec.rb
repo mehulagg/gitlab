@@ -16,10 +16,11 @@ module QA
           runner.name = executor
         end.project.visit!
 
+        Resource::Runner.verify_runner_via_api(token)
+        
         Page::Project::Menu.perform(&:go_to_ci_cd_settings)
         Page::Project::Settings::CICD.perform do |settings|
-          sleep 5 # Runner should register within 5 seconds
-
+          # sleep 5 # Runner should register within 5 seconds
           settings.expand_runners_settings do |page|
             expect(page).to have_content(executor)
             expect(page).to have_online_runner

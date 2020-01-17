@@ -58,6 +58,10 @@ module QA
         Service::DockerRun::GitlabRunner.new(name).remove!
       end
 
+      def verify_runner_via_api(token)
+        # Ref: curl --request POST "https://gitlab.example.com/api/v4/runners/verify" --form "token=<authentication_token>"
+      end
+
       def api_delete_path
         "/runners/#{id}"
       end
