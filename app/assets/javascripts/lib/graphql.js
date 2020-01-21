@@ -3,6 +3,8 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 import { createUploadLink } from 'apollo-upload-client';
 import { ApolloLink } from 'apollo-link';
 import { BatchHttpLink } from 'apollo-link-batch-http';
+import ActionCable from 'actioncable';
+import ActionCableLink from 'graphql-ruby-client/subscriptions/ActionCableLink';
 import csrf from '~/lib/utils/csrf';
 
 export const fetchPolicies = {
@@ -32,12 +34,26 @@ export default (resolvers = {}, config = {}) => {
     credentials: 'same-origin',
   };
 
-  return new ApolloClient({
-    link: ApolloLink.split(
+  const cable = ActionCable.createConsumer();
+
+  const hasSubscriptionOperation = ({ query: { definitions } }) => {
+    return definitions.some(
+      ({ kind, operation }) => kind === 'OperationDefinition' && operation === 'subscription',
+    );
+  };
+
+  const link = ApolloLink.split(
+    hasSubscriptionOperation,
+    new ActionCableLink({ cable }),
+    ApolloLink.split(
       operation => operation.getContext().hasUpload || operation.getContext().isSingleRequest,
       createUploadLink(httpOptions),
       new BatchHttpLink(httpOptions),
     ),
+  );
+
+  return new ApolloClient({
+    link: link,
     cache: new InMemoryCache({
       ...config.cacheConfig,
       freezeResults: config.assumeImmutableResults,

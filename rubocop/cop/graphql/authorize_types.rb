@@ -10,8 +10,9 @@ module RuboCop
         TYPES_DIR = 'app/graphql/types'
 
         # We want to exclude our own basetypes and scalars
-        WHITELISTED_TYPES = %w[BaseEnum BaseScalar BasePermissionType MutationType
-                               QueryType GraphQL::Schema BaseUnion].freeze
+        WHITELISTED_TYPES = %w[BaseEnum BaseScalar BasePermissionType
+                               MutationType QueryType SubscriptionType
+                               GraphQL::Schema BaseUnion].freeze
 
         def_node_search :authorize?, <<~PATTERN
           (send nil? :authorize ...)

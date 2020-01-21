@@ -1184,6 +1184,12 @@ Represents how the blob content should be displayed
 | `type` | EntryType! | Type of tree entry |
 | `webUrl` | String | Web URL for the sub-module |
 
+## Subscription
+
+| Name  | Type  | Description |
+| ---   |  ---- | ----------  |
+| `issueUpdated` | Issue! | Triggered when an issue is updated |
+
 ## TaskCompletionStatus
 
 Completion status of tasks

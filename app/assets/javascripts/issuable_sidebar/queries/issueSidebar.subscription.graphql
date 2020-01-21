@@ -1,0 +1,12 @@
+subscription issueSidebar($id: ID!) {
+  issueUpdated(id: $id) {
+    assignees {
+      nodes {
+        webUrl
+        name
+        username
+        avatarUrl
+      }
+    }
+  }
+}
