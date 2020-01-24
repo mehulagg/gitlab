@@ -22,7 +22,6 @@ module Issues
     end
 
     def after_update(issue)
-
       IssuesChannel.broadcast_to(issue, event: 'updated')
     end
 
