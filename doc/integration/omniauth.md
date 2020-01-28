@@ -36,6 +36,7 @@ contains some settings that are common for all providers.
 - [OpenID Connect](../administration/auth/oidc.md)
 - [UltraAuth](ultra_auth.md)
 - [Salesforce](salesforce.md)
+- [AWS Cognito](cognito.md)
 
 ## Initial OmniAuth Configuration
 
