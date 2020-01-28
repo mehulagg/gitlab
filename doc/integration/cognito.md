@@ -23,10 +23,11 @@ This instruction contains minimum settings which allow to bring it to work.
 1. In next step you can setup lambdas for sending welcome emails and others. Finish creating pool. All settings can be changed later.
 
 1. After creating user pool go to **App client settings** and provide required information:
+
 - **Enabled Identity Providers** - select all
-- **Callback URL** - https://gitlab.example.com/users/auth/cognito/callback
+- **Callback URL** - `https://gitlab.example.com/users/auth/cognito/callback`
 - **Allowed OAuth Flows** - Authorization code grant
-- **Allowed OAuth Scopes** - email and openid
+- **Allowed OAuth Scopes** - `email` and `openid`
 
 1. Under **Domain name** setup domain for your Cognito.
 
