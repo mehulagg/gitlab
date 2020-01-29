@@ -5,9 +5,9 @@
 
 - if @notices
   - @notices.each do |notice|
-    = .js-vue-alert{ data: { variant: notice.type
-    message: notice.message,
-    dismissible: true.to_s } }
+    .js-vue-alert{ data: { variant: notice[:type],
+      message: notice[:message],
+      dismissible: true.to_s } }
 
 .admin-dashboard.prepend-top-default
   .row
