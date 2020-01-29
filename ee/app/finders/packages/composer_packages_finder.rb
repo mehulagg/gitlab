@@ -10,7 +10,7 @@ class Packages::ComposerPackagesFinder < Packages::GroupPackagesFinder
 
   def execute
     if group
-      packages_for_group_projects.composer_only.with_composer_metadata
+      packages_for_group_projects.composer.with_composer_metadata
     else
       packages_for_multiple_projects_matching_namespace
     end
@@ -26,7 +26,7 @@ class Packages::ComposerPackagesFinder < Packages::GroupPackagesFinder
   def packages_for_multiple_projects_matching_namespace
     packages = ::Packages::Package
                    .including_project_and_namespace
-                   .composer_only
+                   .composer
                    .with_composer_metadata
                    .for_projects(projects_visible_to_current_user)
                    .find_each

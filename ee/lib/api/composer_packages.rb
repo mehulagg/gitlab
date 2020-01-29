@@ -90,7 +90,7 @@ module API
       end
       route_setting :authentication, job_token_allowed: true
       get ':id/packages/composer/*package_name/-/*file_name', format: false do
-        package = Project.find_by_full_path(params[:id]).packages.composer_only
+        package = Project.find_by_full_path(params[:id]).packages.composer
                       .by_name_and_file_name(params[:package_name], params[:file_name])
 
         authorize_read_package!(user_project)
@@ -113,7 +113,7 @@ module API
 
         body = request.body.read.force_encoding(Encoding::UTF_8)
 
-        ::Packages::CreateComposerPackageService.new(user_project, current_user, body).execute
+        ::Packages::Composer::CreatePackageService.new(user_project, current_user, body).execute
       end
     end
   end

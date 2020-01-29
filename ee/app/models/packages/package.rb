@@ -60,7 +60,6 @@ class Packages::Package < ApplicationRecord
   scope :last_of_each_version, -> { where(id: all.select('MAX(id) AS id').group(:version)) }
   scope :limit_recent, ->(limit) { order_created_desc.limit(limit) }
   scope :select_distinct_name, -> { select(:name).distinct }
-  scope :composer_only, -> { where(package_type: package_types[:composer]) }
   scope :including_project_and_namespace, -> { includes(project: :namespace) }
   scope :with_name_and_version, -> (name, version) { where(name: name, version: version) }
   scope :with_composer_metadata, -> { joins(:composer_metadatum) }

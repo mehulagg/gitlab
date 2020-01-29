@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Packages::CreateComposerPackageService do
+describe Packages::Composer::CreatePackageService do
   let(:current_user) { create(:user) }
   let(:project) { create(:project) }
 
@@ -20,8 +20,21 @@ describe Packages::CreateComposerPackageService do
     }
   end
 
+  before do
+    project.add_developer(current_user)
+  end
+
   describe '#execute' do
     subject { described_class.new(project, current_user, params_hash.to_json).execute }
+
+    context 'without the correct permissions' do
+      let(:user) { create(:user) }
+
+      it 'cannot execute' do
+        expect { described_class.new(project, user, params_hash.to_json).execute }
+          .to raise_error(Gitlab::Access::AccessDeniedError)
+      end
+    end
 
     context 'when package is new' do
       it 'creates a new package with tar archive and json meta files ' do
