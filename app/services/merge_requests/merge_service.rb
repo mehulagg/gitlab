@@ -1,143 +1,99 @@
 # frozen_string_literal: true
 
 module MergeRequests
-  # MergeService class
-  #
-  # Do git merge and in case of success
-  # mark merge request as merged and execute all hooks and notifications
-  # Executed when you do merge via GitLab UI
-  #
-  class MergeService < MergeRequests::MergeBaseService
-    delegate :merge_jid, :state, to: :@merge_request
+  class MergeService < BaseService
+    STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS = 'merge_when_pipeline_succeeds'
+    STRATEGY_MERGE = 'merge'
+    STRATEGIES = [STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS, STRATEGY_MERGE].freeze
 
-    def execute(merge_request)
-      if project.merge_requests_ff_only_enabled && !self.is_a?(FfMergeService)
-        FfMergeService.new(project, current_user, params).execute(merge_request)
-        return
+    attr_reader :available_strategies
+
+    class << self
+      # NOTE: strategies must be sorted by the preferred order
+      def all_strategies
+        STRATEGIES
       end
 
-      @merge_request = merge_request
+      def get_service_class(strategy)
+        return unless all_strategies.include?(strategy)
 
-      validate!
-
-      merge_request.in_locked_state do
-        if commit
-          after_merge
-          clean_merge_jid
-          success
-        end
+        "::MergeRequests::MergeStrategies::#{strategy.camelize}Service".constantize
       end
-      log_info("Merge process finished on JID #{merge_jid} with state #{state}")
-    rescue MergeError => e
-      handle_merge_error(log_message: e.message, save_message_on_model: true)
+    end
+
+    def schedule(merge_request)
+      result = validate(merge_request)
+      return result unless result[:status] == :success
+
+      return update(merge_request) if merge_request.merge_strategy.present?
+
+      strategy = merge_strategy_for(merge_request)
+      service = get_service_instance(strategy)
+
+      unless service&.available_for?(merge_request)
+        return error("The merge strategy '#{strategy}' is not available for the merge request")
+      end
+
+      service.execute(merge_request)
+    end
+
+    def process(merge_request)
+      return error("Can't process unless auto merge is enabled", 406) unless merge_request.auto_merge_enabled?
+
+      get_service_instance(merge_request.merge_strategy).process(merge_request)
+    end
+
+    def cancel(merge_request)
+      return error("Can't cancel unless auto merge is enabled", 406) unless merge_request.auto_merge_enabled?
+
+      get_service_instance(merge_request.merge_strategy).cancel(merge_request)
+    end
+
+    def abort(merge_request, reason)
+      return error("Can't abort unless auto merge is enabled", 406) unless merge_request.auto_merge_enabled?
+
+      get_service_instance(merge_request.merge_strategy).abort(merge_request, reason)
+    end
+
+    def available_strategies(merge_request)
+      @available_strategies[merge_request] ||= {}
+      @available_strategies[merge_request] = self.class.all_strategies.select do |strategy|
+        get_service_instance(strategy).available_for?(merge_request)
+      end
+    end
+
+    def preferred_strategy(merge_request)
+      available_strategies(merge_request).first
     end
 
     private
 
-    def validate!
-      authorization_check!
-      error_check!
-      updated_check!
-    end
+    def validate(merge_request)
+      merge_service = ::MergeRequests::MergeBaseService.new(@project, current_user, merge_params)
 
-    def authorization_check!
-      unless @merge_request.can_be_merged_by?(current_user)
-        raise_error('You are not allowed to merge this merge request')
-      end
-    end
-
-    def error_check!
-      super
-
-      check_source
-
-      error =
-        if @merge_request.should_be_rebased?
-          'Only fast-forward merge is allowed for your project. Please update your source branch'
-        elsif !@merge_request.mergeable?
-          'Merge request is not mergeable'
-        end
-
-      raise_error(error) if error
-    end
-
-    def updated_check!
-      unless source_matches?
-        raise_error('Branch has been updated since the merge was requested. '\
-                    'Please review the changes.')
-      end
-    end
-
-    def commit
-      log_info("Git merge started on JID #{merge_jid}")
-      commit_id = try_merge
-
-      if commit_id
-        log_info("Git merge finished on JID #{merge_jid} commit #{commit_id}")
-      else
-        raise_error('Conflicts detected during merge')
+      unless merge_service.hooks_validation_pass?(@merge_request)
+        return error(error_type: :hook_validation_error)
       end
 
-      merge_request.update!(merge_commit_sha: commit_id)
-    ensure
-      merge_request.update_column(:in_progress_merge_commit_sha, nil)
-    end
-
-    def try_merge
-      repository.merge(current_user, source, merge_request, commit_message)
-    rescue Gitlab::Git::PreReceiveError => e
-      raise MergeError,
-            "Something went wrong during merge pre-receive hook. #{e.message}".strip
-    rescue => e
-      handle_merge_error(log_message: e.message)
-      raise_error('Something went wrong during merge')
-    end
-
-    def after_merge
-      log_info("Post merge started on JID #{merge_jid} with state #{state}")
-      MergeRequests::PostMergeService.new(project, current_user).execute(merge_request)
-      log_info("Post merge finished on JID #{merge_jid} with state #{state}")
-
-      if delete_source_branch?
-        ::Branches::DeleteService.new(@merge_request.source_project, branch_deletion_user)
-          .execute(merge_request.source_branch)
+      unless params[:sha] && params[:sha] == @merge_request.diff_head_sha
+        return error(error_type: :sha_mismatch)
       end
+
+      success
     end
 
-    def clean_merge_jid
-      merge_request.update_column(:merge_jid, nil)
+    def update(merge_request)
+      get_service_instance(merge_request.merge_strategy).update(merge_request)
     end
 
-    def branch_deletion_user
-      @merge_request.force_remove_source_branch? ? @merge_request.author : current_user
+    def get_service_instance(strategy)
+      self.class.get_service_class(strategy)&.new(project, current_user, params)
     end
 
-    # Verify again that the source branch can be removed, since branch may be protected,
-    # or the source branch may have been updated, or the user may not have permission
-    #
-    def delete_source_branch?
-      params.fetch('should_remove_source_branch', @merge_request.force_remove_source_branch?) &&
-        @merge_request.can_remove_source_branch?(branch_deletion_user)
-    end
-
-    def handle_merge_error(log_message:, save_message_on_model: false)
-      Rails.logger.error("MergeService ERROR: #{merge_request_info} - #{log_message}") # rubocop:disable Gitlab/RailsLogger
-      @merge_request.update(merge_error: log_message) if save_message_on_model
-    end
-
-    def log_info(message)
-      @logger ||= Rails.logger # rubocop:disable Gitlab/RailsLogger
-      @logger.info("#{merge_request_info} - #{message}")
-    end
-
-    def merge_request_info
-      merge_request.to_reference(full: true)
-    end
-
-    def source_matches?
-      # params-keys are symbols coming from the controller, but when they get
-      # loaded from the database they're strings
-      params.with_indifferent_access[:sha] == merge_request.diff_head_sha
+    def merge_strategy_for(merge_request)
+      params[:merge_strategy] || preferred_strategy(merge_request)
     end
   end
 end
+
+MergeRequests::MergeService.prepend_if_ee('EE::MergeRequests::MergeService')

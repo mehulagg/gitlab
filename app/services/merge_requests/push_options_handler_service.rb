@@ -85,6 +85,8 @@ module MergeRequests
       else
         create!(branch)
       end
+
+      schedule_merge(merge_request, push_options[:merge_strategy])
     end
 
     def create!(branch)
@@ -140,14 +142,23 @@ module MergeRequests
       params
     end
 
-    def merge_params(branch)
+    def leagcy_merge_params(branch)
       return {} unless push_options.key?(:merge_when_pipeline_succeeds)
 
+      # This doesn't work for the other merge strategies
       {
         merge_when_pipeline_succeeds: push_options[:merge_when_pipeline_succeeds],
         merge_user: current_user,
         sha: changes_by_branch.dig(branch, :newrev)
       }
+    end
+
+    def schedule_merge(merge_request)
+      return unless push_options.key?(:merge_strategy)
+
+      params = base_params.merge(merge_strategy: push_options[:merge_strategy])
+
+      MergeRequests::MergeService.new(project, current_user, params).schedule(merge_request)
     end
 
     def create_params(branch)
@@ -160,7 +171,7 @@ module MergeRequests
         target_project: target_project
       )
 
-      params.merge!(merge_params(branch))
+      params.merge!(leagcy_merge_params(branch))
 
       params[:target_branch] ||= target_project.default_branch
 
@@ -168,7 +179,7 @@ module MergeRequests
     end
 
     def update_params(merge_request)
-      base_params.merge(merge_params(merge_request.source_branch))
+      base_params.merge(leagcy_merge_params(merge_request.source_branch))
     end
 
     def collect_errors_from_merge_request(merge_request)

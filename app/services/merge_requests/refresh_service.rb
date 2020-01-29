@@ -161,7 +161,7 @@ module MergeRequests
       return unless @project.ff_merge_must_be_possible?
 
       merge_requests_with_auto_merge_enabled_to(@push.branch_name).each do |merge_request|
-        next unless merge_request.auto_merge_strategy == AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS
+        next unless merge_request.merge_strategy == MergeStrategyService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS
         next unless merge_request.should_be_rebased?
 
         abort_auto_merge_with_todo(merge_request, 'target branch was updated')

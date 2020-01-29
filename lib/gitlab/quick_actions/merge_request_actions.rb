@@ -15,7 +15,37 @@ module Gitlab
         condition do
           last_diff_sha = params && params[:merge_request_diff_head_sha]
           quick_action_target.persisted? &&
-            quick_action_target.mergeable_with_quick_action?(current_user, autocomplete_precheck: !last_diff_sha, last_diff_sha: last_diff_sha)
+            [MergeStrategyService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS ,MergeStrategyService::STRATEGY_MERGE_IMMEDIATELY].include?(
+              MergeStrategyService.new(quick_action_target.project, current_user).preferred_strategy(quick_action_target)
+            )
+        end
+        command :merge do
+          @updates[:merge] = params[:merge_request_diff_head_sha]
+        end
+
+        desc _('Merge (add to the merge train)')
+        explanation _('Merges this merge request on merge train.')
+        execution_message _('Scheduled to merge this merge request on merge train.')
+        types MergeRequest
+        condition do
+          last_diff_sha = params && params[:merge_request_diff_head_sha]
+          quick_action_target.persisted? &&
+            MergeStrategyService.new(quick_action_target.project, current_user).preferred_strategy(quick_action_target) ==
+              MergeStrategyService::STRATEGY_MERGE_TRAIN
+        end
+        command :merge do
+          @updates[:merge] = params[:merge_request_diff_head_sha]
+        end
+
+        desc _('Merge (adds to the merge train when pipeline succeeds)')
+        explanation _('Adds to the merge train when pipeline succeeds.')
+        execution_message _('Scheduled to adds to the merge train when pipeline succeeds.')
+        types MergeRequest
+        condition do
+          last_diff_sha = params && params[:merge_request_diff_head_sha]
+          quick_action_target.persisted? &&
+            MergeStrategyService.new(quick_action_target.project, current_user).preferred_strategy(quick_action_target) ==
+              MergeStrategyService::STRATEGY_MERGE_TRAIN_WHEN_PIPELINE_SUCCEEDS
         end
         command :merge do
           @updates[:merge] = params[:merge_request_diff_head_sha]

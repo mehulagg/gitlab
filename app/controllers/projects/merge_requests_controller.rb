@@ -211,12 +211,12 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
     return access_check_result if access_check_result
 
-    status = merge!
+    result = merge!
 
-    if @merge_request.merge_error
-      render json: { status: status, merge_error: @merge_request.merge_error }
+    if result[:status] == :success
+      render json: { status: result[:status] }
     else
-      render json: { status: status }
+      render json: { status: result[:error_type], merge_error: @merge_request.merge_error }
     end
   end
 
@@ -284,11 +284,6 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     MergeRequest::KNOWN_MERGE_PARAMS
   end
 
-  def auto_merge_requested?
-    # Support params[:merge_when_pipeline_succeeds] during the transition period
-    params[:auto_merge_strategy].present? || params[:merge_when_pipeline_succeeds].present?
-  end
-
   private
 
   def head_pipeline
@@ -307,37 +302,8 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   end
 
   def merge!
-    # Disable the CI check if auto_merge_strategy is specified since we have
-    # to wait until CI completes to know
-    unless @merge_request.mergeable?(skip_ci_check: auto_merge_requested?)
-      return :failed
-    end
-
-    merge_service = ::MergeRequests::MergeService.new(@project, current_user, merge_params)
-
-    unless merge_service.hooks_validation_pass?(@merge_request)
-      return :hook_validation_error
-    end
-
-    return :sha_mismatch if params[:sha] != @merge_request.diff_head_sha
-
-    @merge_request.update(merge_error: nil, squash: params.fetch(:squash, false))
-
-    if auto_merge_requested?
-      if merge_request.auto_merge_enabled?
-        # TODO: We should have a dedicated endpoint for updating merge params.
-        #       See https://gitlab.com/gitlab-org/gitlab-foss/issues/63130.
-        AutoMergeService.new(project, current_user, merge_params).update(merge_request)
-      else
-        AutoMergeService.new(project, current_user, merge_params)
-          .execute(merge_request,
-                   params[:auto_merge_strategy] || AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS)
-      end
-    else
-      @merge_request.merge_async(current_user.id, merge_params)
-
-      :success
-    end
+    ::MergeRequests::MergeService.new(project, current_user, merge_params)
+                                 .schedule(merge_request)
   end
 
   def serialize_widget(merge_request)

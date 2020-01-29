@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-module AutoMerge
-  class MergeWhenPipelineSucceedsService < AutoMerge::BaseService
-    def execute(merge_request)
+module MergeStrategies
+  class MergeWhenPipelineSucceedsService < MergeStrategies::AutoMergeBaseService
+    def schedule(merge_request)
       super do
         if merge_request.saved_change_to_auto_merge_enabled?
           SystemNoteService.merge_when_pipeline_succeeds(merge_request, project, current_user, merge_request.actual_head_pipeline.sha)
@@ -30,7 +30,8 @@ module AutoMerge
     end
 
     def available_for?(merge_request)
-      merge_request.actual_head_pipeline&.active?
+      merge_request.actual_head_pipeline&.active? &&
+        merge_request.mergeable_state?(skip_ci_check: true)
     end
   end
 end

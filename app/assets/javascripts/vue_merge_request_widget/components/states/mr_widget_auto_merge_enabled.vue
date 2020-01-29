@@ -62,7 +62,7 @@ export default {
     removeSourceBranch() {
       const options = {
         sha: this.mr.sha,
-        auto_merge_strategy: this.mr.autoMergeStrategy,
+        merge_strategy: this.mr.mergeStrategy,
         should_remove_source_branch: true,
       };
 

@@ -113,15 +113,6 @@ module MergeRequestsHelper
     version1 && version2 && version1.base_commit_sha != version2.base_commit_sha
   end
 
-  def merge_params(merge_request)
-    {
-      auto_merge_strategy: AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS,
-      should_remove_source_branch: true,
-      sha: merge_request.diff_head_sha,
-      squash: merge_request.squash
-    }
-  end
-
   def tab_link_for(merge_request, tab, options = {}, &block)
     data_attrs = {
       action: tab.to_s,

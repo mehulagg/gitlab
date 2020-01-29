@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-module AutoMerge
-  class MergeTrainService < AutoMerge::BaseService
+module MergeStrategies
+  class MergeTrainService < MergeStrategies::AutoMergeBaseService
     def execute(merge_request)
       merge_request.build_merge_train(user: current_user,
                                       target_project: merge_request.target_project,

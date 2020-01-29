@@ -440,7 +440,10 @@ module API
         optional :should_remove_source_branch, type: Boolean,
                                                desc: 'When true, the source branch will be deleted if possible'
         optional :merge_when_pipeline_succeeds, type: Boolean,
-                                                desc: 'When true, this merge request will be merged when the pipeline succeeds'
+                                                desc: 'When true, this merge request will be merged when the pipeline succeeds (Deprecated)'
+        optional :merge_strategy,               type: String,
+                                                desc: 'The merge strategy for the merge request',
+                                                values: MergeStrategyService.all_strategies
         optional :sha, type: String, desc: 'When present, must have the HEAD SHA of the source branch'
         optional :squash, type: Grape::API::Boolean, desc: 'When true, the commits will be squashed into a single commit on merge'
       end
@@ -453,13 +456,10 @@ module API
         # because user dont have permissions to push into target branch
         unauthorized! unless merge_request.can_be_merged_by?(current_user)
 
-        merge_when_pipeline_succeeds = to_boolean(params[:merge_when_pipeline_succeeds])
-        automatically_mergeable = automatically_mergeable?(merge_when_pipeline_succeeds, merge_request)
-        immediately_mergeable = immediately_mergeable?(merge_when_pipeline_succeeds, merge_request)
-
-        not_allowed! if !immediately_mergeable && !automatically_mergeable
-
-        render_api_error!('Branch cannot be merged', 406) unless merge_request.mergeable?(skip_ci_check: automatically_mergeable)
+        # Manual conversion for the deprecated `merge_when_pipeline_succeeds` param.
+        if params[:merge_when_pipeline_succeeds]
+          params[:merge_strategy] = MergeStrategyService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS
+        end
 
         check_sha_param!(params, merge_request)
 
@@ -469,17 +469,15 @@ module API
           commit_message: params[:merge_commit_message],
           squash_commit_message: params[:squash_commit_message],
           should_remove_source_branch: params[:should_remove_source_branch],
-          sha: params[:sha] || merge_request.diff_head_sha
+          sha: params[:sha] || merge_request.diff_head_sha,
+          merge_strategy: params[:merge_strategy]
         )
 
-        if immediately_mergeable
-          ::MergeRequests::MergeService
-            .new(merge_request.target_project, current_user, merge_params)
-            .execute(merge_request)
-        elsif automatically_mergeable
-          AutoMergeService.new(merge_request.target_project, current_user, merge_params)
-            .execute(merge_request, AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS)
-        end
+        result = MergeStrategyService
+          .new(merge_request.target_project, current_user, merge_params)
+          .execute(merge_request)
+
+        render_api_error!(result[:message], 400) unless result[:status] == :success
 
         present merge_request, with: Entities::MergeRequest, current_user: current_user, project: user_project
       end

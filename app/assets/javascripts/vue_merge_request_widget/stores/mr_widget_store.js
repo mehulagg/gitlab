@@ -71,11 +71,9 @@ export default class MergeRequestStore {
     this.shouldRemoveSourceBranch = data.remove_source_branch || false;
     this.onlyAllowMergeIfPipelineSucceeds = data.only_allow_merge_if_pipeline_succeeds || false;
     this.autoMergeEnabled = Boolean(data.auto_merge_enabled);
-    this.autoMergeStrategy = data.auto_merge_strategy;
-    this.availableAutoMergeStrategies = data.available_auto_merge_strategies;
-    this.preferredAutoMergeStrategy = MergeRequestStore.getPreferredAutoMergeStrategy(
-      this.availableAutoMergeStrategies,
-    );
+    this.mergeStrategy = data.merge_strategy;
+    this.availableMergeStrategies = data.available_merge_strategies;
+    this.preferredMergeStrategy = data.preferred_merge_strategies;
     this.ffOnlyEnabled = data.ff_only_enabled;
     this.shouldBeRebased = Boolean(data.should_be_rebased);
     this.isRemovingSourceBranch = this.isRemovingSourceBranch || false;

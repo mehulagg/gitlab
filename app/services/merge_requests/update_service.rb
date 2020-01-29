@@ -9,7 +9,7 @@ module MergeRequests
       params.delete(:target_project_id)
       params.delete(:source_branch)
 
-      merge_from_quick_action(merge_request) if params[:merge]
+      schedule_merge_from_quick_action(merge_request) if params[:merge]
 
       if merge_request.closed_without_fork?
         params.delete(:target_branch)
@@ -77,17 +77,12 @@ module MergeRequests
       todo_service.update_merge_request(merge_request, current_user)
     end
 
-    def merge_from_quick_action(merge_request)
+    def schedule_merge_from_quick_action(merge_request)
       last_diff_sha = params.delete(:merge)
-      return unless merge_request.mergeable_with_quick_action?(current_user, last_diff_sha: last_diff_sha)
 
-      merge_request.update(merge_error: nil)
-
-      if merge_request.head_pipeline_active?
-        AutoMergeService.new(project, current_user, { sha: last_diff_sha }).execute(merge_request, AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS)
-      else
-        merge_request.merge_async(current_user.id, { sha: last_diff_sha })
-      end
+      ## Or introduce MergeScheduleService
+      ::MergeRequests::MergeService.new(project, current_user, { sha: last_diff_sha })
+                                   .execute(merge_request)
     end
 
     def reopen_service

@@ -139,7 +139,7 @@ export default {
       const options = {
         sha: this.mr.latestSHA || this.mr.sha,
         commit_message: this.commitMessage,
-        auto_merge_strategy: useAutoMerge ? this.mr.preferredAutoMergeStrategy : undefined,
+        merge_strategy: useAutoMerge ? this.mr.preferredMergeStrategy : undefined,
         should_remove_source_branch: this.removeSourceBranch === true,
         squash: this.squashBeforeMerge,
       };

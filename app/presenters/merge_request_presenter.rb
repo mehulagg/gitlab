@@ -224,7 +224,19 @@ class MergeRequestPresenter < Gitlab::View::Presenter::Delegated
     end
   end
 
+  def available_merge_strategies
+    merge_service.available_strategies(merge_request)
+  end
+
+  def preferred_merge_strategy
+    merge_service.preferred_merge_strategy(merge_request)
+  end
+
   private
+
+  def merge_service
+    @merge_service ||= MergeService.new(merge_request.project, current_user)
+  end
 
   def cached_can_be_reverted?
     strong_memoize(:can_be_reverted) do

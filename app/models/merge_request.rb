@@ -87,7 +87,7 @@ class MergeRequest < ApplicationRecord
     through: :deployment_merge_requests
 
   KNOWN_MERGE_PARAMS = [
-    :auto_merge_strategy,
+    :merge_strategy,
     :should_remove_source_branch,
     :force_remove_source_branch,
     :commit_message,
@@ -933,14 +933,13 @@ class MergeRequest < ApplicationRecord
     Gitlab::Utils.to_boolean(merge_params['force_remove_source_branch'])
   end
 
-  def auto_merge_strategy
-    return unless auto_merge_enabled?
-
-    merge_params['auto_merge_strategy'] || AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS
+  def merge_strategy
+    # Support legacy 'auto_merge_strategy' for the transition period.
+    merge_params['merge_strategy'] || merge_params['auto_merge_strategy']
   end
 
-  def auto_merge_strategy=(strategy)
-    merge_params['auto_merge_strategy'] = strategy
+  def merge_strategy=(strategy)
+    merge_params['merge_strategy'] = strategy
   end
 
   def remove_source_branch?

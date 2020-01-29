@@ -156,7 +156,7 @@ export default {
         this.mr.pipeline &&
         isNumber(this.mr.pipeline.id) &&
         isString(this.mr.pipeline.path) &&
-        this.mr.preferredAutoMergeStrategy === MTWPS_MERGE_STRATEGY &&
+        this.mr.preferredMergeStrategy === MTWPS_MERGE_STRATEGY &&
         !this.mr.autoMergeEnabled
       );
     },

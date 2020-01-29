@@ -29,12 +29,12 @@ export default {
       return base.computed.mergeDisabledText.call(this);
     },
     autoMergeText() {
-      if (this.mr.preferredAutoMergeStrategy === MTWPS_MERGE_STRATEGY) {
+      if (this.mr.preferredMergeStrategy === MTWPS_MERGE_STRATEGY) {
         if (this.mr.mergeTrainsCount === 0) {
           return __('Start merge train when pipeline succeeds');
         }
         return __('Add to merge train when pipeline succeeds');
-      } else if (this.mr.preferredAutoMergeStrategy === MT_MERGE_STRATEGY) {
+      } else if (this.mr.preferredMergeStrategy === MT_MERGE_STRATEGY) {
         if (this.mr.mergeTrainsCount === 0) {
           return __('Start merge train');
         }
@@ -43,14 +43,14 @@ export default {
       return __('Merge when pipeline succeeds');
     },
     shouldShowMergeImmediatelyDropdown() {
-      if (this.mr.preferredAutoMergeStrategy === MT_MERGE_STRATEGY) {
+      if (this.mr.preferredMergeStrategy === MT_MERGE_STRATEGY) {
         return true;
       }
 
       return this.mr.isPipelineActive && !this.mr.onlyAllowMergeIfPipelineSucceeds;
     },
     isMergeImmediatelyDangerous() {
-      return [MT_MERGE_STRATEGY, MTWPS_MERGE_STRATEGY].includes(this.mr.preferredAutoMergeStrategy);
+      return [MT_MERGE_STRATEGY, MTWPS_MERGE_STRATEGY].includes(this.mr.preferredMergeStrategy);
     },
   },
 };

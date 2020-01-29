@@ -3,9 +3,12 @@
 class MergeRequestPollWidgetEntity < Grape::Entity
   include RequestAwareEntity
 
-  expose :auto_merge_strategy
-  expose :available_auto_merge_strategies do |merge_request|
-    AutoMergeService.new(merge_request.project, current_user).available_strategies(merge_request) # rubocop: disable CodeReuse/ServiceClass
+  expose :merge_strategy
+  expose :available_merge_strategies do |merge_request|
+    presenter(merge_request).available_merge_strategies
+  end
+  expose :preferred_merge_strategy do |merge_request|
+    presenter(merge_request).preferred_merge_strategy
   end
   expose :source_branch_protected do |merge_request|
     merge_request.source_project.present? && ProtectedBranch.protected?(merge_request.source_project, merge_request.source_branch)
