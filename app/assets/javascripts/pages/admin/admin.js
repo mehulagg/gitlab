@@ -1,5 +1,9 @@
 import $ from 'jquery';
 import { refreshCurrentPage } from '../../lib/utils/url_utility';
+import initVueAlerts from '../../vue_alerts';
+
+initVueAlerts();
+
 
 function showBlacklistType() {
   if ($('input[name="blacklist_type"]:checked').val() === 'file') {
