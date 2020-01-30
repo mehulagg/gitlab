@@ -15,15 +15,15 @@ class Admin::DashboardController < Admin::ApplicationController
     @notices = [
     { 
       type: 'info',
-      message: 'You are running Puma. This is experimental. Please go to puma upgrade document[https://docs.gitlab.com/ee/administration/operations/puma.html] to read more.'
+      message: _('You are running Puma. This is experimental. Please go to puma upgrade <a href="https://docs.gitlab.com/ee/administration/operations/puma.html">document</a> to read more.').html_safe
     },
     { 
       type: 'info',
-      message: 'You are running Puma with threads=2, please read puma upgrade document[https://docs.gitlab.com/ee/administration/operations/puma.html] of deprecations of running Puma.'
+      message: _('You are running Puma with threads=2, please read puma upgrade <a href="https://docs.gitlab.com/ee/administration/operations/puma.html">document</a> of deprecations of running Puma.').html_safe
     },
     { 
       type: 'warning',
-      message: 'We detected puma thread>1 and rugged service is enabled. This may decrease performance for some occasions. For details refer to puma upgrade document[https://docs.gitlab.com/ee/administration/operations/puma.html#performance-caveat-when-using-puma-with-rugged]'
+      message: _('We detected puma thread>1 and rugged service is enabled. This may decrease performance for some occasions. For details refer to puma upgrade <a href="https://docs.gitlab.com/ee/administration/operations/puma.html#performance-caveat-when-using-puma-with-rugged">document</a>').html_safe
     }
   ]
   end

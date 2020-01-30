@@ -1,13 +1,13 @@
 - breadcrumb_title "Dashboard"
 
-- if show_license_breakdown?
-  = render_if_exists 'admin/licenses/breakdown', license: @license
-
 - if @notices
   - @notices.each do |notice|
     .js-vue-alert{ data: { variant: notice[:type],
-      message: notice[:message],
       dismissible: true.to_s } }
+      = notice[:message]
+
+- if show_license_breakdown?
+  = render_if_exists 'admin/licenses/breakdown', license: @license
 
 .admin-dashboard.prepend-top-default
   .row
