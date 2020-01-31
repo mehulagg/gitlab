@@ -20,7 +20,7 @@ This instruction contains minimum settings which allow to bring it to work.
 1. At the **App clients** settings add an app client and mark **Enable username password based authentication**. Create app.
 ![Cognito app](img/cognito_app.png)
 
-1. In next step you can setup lambdas for sending welcome emails and others. Finish creating pool. All settings can be changed later.
+1. In the next step, you can setup lambdas for sending emails, such as welcome emails, and finish creating the pool. All settings can be changed later.
 
 1. After creating user pool go to **App client settings** and provide required information:
 
