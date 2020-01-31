@@ -85,7 +85,7 @@ This instruction contains minimum settings which allow to bring it to work.
 1. [Reconfigure][] or [restart GitLab][] for the changes to take effect if you
    installed GitLab via Omnibus or from source respectively.
 
-On the sign in page there should now be a Cognito button below the regular sign in form. Click the icon to begin the authentication process. AWS Cognito will ask the user to sign in and authorize the GitLab application. If everything goes well the user will be returned to GitLab and will be signed in.
+Your sign-in page should now display a Cognito button below the regular sign-in form. To begin the authentication process, click the icon, and AWS Cognito will ask the user to sign in and authorize the GitLab application. If successful, the user will be redirected back to GitLab, and signed in.
 
 [reconfigure]: ../administration/restart_gitlab.md#omnibus-gitlab-reconfigure
 [restart GitLab]: ../administration/restart_gitlab.md#installations-from-source
