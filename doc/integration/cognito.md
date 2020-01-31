@@ -35,7 +35,7 @@ This instruction contains minimum settings which allow to bring it to work.
 
    For Omnibus package:
 
-   ```sh
+   ```shell
    sudo editor /etc/gitlab/gitlab.rb
    ```
 
