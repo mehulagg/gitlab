@@ -22,7 +22,7 @@ This instruction contains minimum settings which allow to bring it to work.
 
 1. In the next step, you can setup lambdas for sending emails, such as welcome emails, and finish creating the pool. All settings can be changed later.
 
-1. After creating user pool go to **App client settings** and provide required information:
+1. After creating the user pool, go to **App client settings** and provide the required information:
 
 - **Enabled Identity Providers** - select all
 - **Callback URL** - `https://gitlab.example.com/users/auth/cognito/callback`
