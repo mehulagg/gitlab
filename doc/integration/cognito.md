@@ -1,6 +1,6 @@
 # Amazon Web Services Cognito
 
-To enable the AWS Cognito OAuth2 OmniAuth provider, you must register your application with Cognito, and generate a client id and secret key for you to use.
+To enable the [AWS Cognito](https://aws.amazon.com/cognito/) OAuth2 OmniAuth provider, you must register your application with Cognito, and generate a client id and secret key for you to use.
 This instruction contains minimum settings which allow to bring it to work.
 
 1. Sign in to the [AWS console](https://console.aws.amazon.com/console/home).
@@ -11,23 +11,22 @@ This instruction contains minimum settings which allow to bring it to work.
 
 1. Enter the pool name and then click the **Step through setting** button.
 
-1. Select **Allow email addresses** from the second option.
-
-1. Select **email** from standard attributes as required
+1. Select **Allow email addresses** and **email** from **standard attributes** section as required
+![Cognito app](img/cognito_app2.png)
 
 1. Go to the next steps and set all other attributes as you need.
 
-1. At the **App clients** settings add an app client and mark **Enable username password based authentication**. Create app.
+1. At the **App clients** settings click **Add an app client** and mark **Enable username password based authentication**. Create app.
 ![Cognito app](img/cognito_app.png)
 
 1. In the next step, you can setup lambdas for sending emails, such as welcome emails, and finish creating the pool. All settings can be changed later.
 
 1. After creating the user pool, go to **App client settings** and provide the required information:
 
-- **Enabled Identity Providers** - select all
-- **Callback URL** - `https://gitlab.example.com/users/auth/cognito/callback`
-- **Allowed OAuth Flows** - Authorization code grant
-- **Allowed OAuth Scopes** - `email` and `openid`
+   - **Enabled Identity Providers** - select all
+   - **Callback URL** - `https://gitlab.example.com/users/auth/cognito/callback`
+   - **Allowed OAuth Flows** - Authorization code grant
+   - **Allowed OAuth Scopes** - `email` and `openid`
 
 1. Under **Domain name** setup domain for your Cognito.
 
@@ -49,7 +48,7 @@ This instruction contains minimum settings which allow to bring it to work.
 
 1. See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration) for initial settings.
 
-1. Add the provider configuration:
+1. Add the provider configuration, replacing `CLIENT ID` and `CLIENT SECRET` with the values from **App clients** in Cognito:
 
    For Omnibus package:
 
@@ -77,8 +76,6 @@ This instruction contains minimum settings which allow to bring it to work.
      }
    ]
    ```
-
-1. Replace 'CLIENT ID' and 'CLIENT SECRET' with the values from **App clients** in Cognito.
 
 1. Save the configuration file.
 
