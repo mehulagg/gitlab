@@ -7,7 +7,7 @@ This instruction contains minimum settings which allow to bring it to work.
 
 1. Select **Cognito** from the **Services** menu.
 
-1. Select **Manage User Pools** and click the **Create a user pool** button at the right top.
+1. Select **Manage User Pools**, and click the **Create a user pool** button in the top right corner.
 
 1. Enter the pool name and then click the **Step through setting** button.
 
