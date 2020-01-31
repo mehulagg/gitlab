@@ -41,7 +41,7 @@ This instruction contains minimum settings which allow to bring it to work.
 
    For installations from source:
 
-   ```sh
+   ```shell
    cd /home/git/gitlab
 
    sudo -u git -H editor config/gitlab.yml
