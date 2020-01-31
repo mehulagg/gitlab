@@ -1,5 +1,7 @@
 import $ from 'jquery';
 import Vue from 'vue';
+import VueApollo from 'vue-apollo';
+import { toNumber } from "lodash";
 import SidebarTimeTracking from './components/time_tracking/sidebar_time_tracking.vue';
 import SidebarAssignees from './components/assignees/sidebar_assignees.vue';
 import ConfidentialIssueSidebar from './components/confidential/confidential_issue_sidebar.vue';
@@ -8,17 +10,23 @@ import LockIssueSidebar from './components/lock/lock_issue_sidebar.vue';
 import sidebarParticipants from './components/participants/sidebar_participants.vue';
 import sidebarSubscriptions from './components/subscriptions/sidebar_subscriptions.vue';
 import Translate from '../vue_shared/translate';
+import createDefaultClient from '~/lib/graphql';
 
 Vue.use(Translate);
+Vue.use(VueApollo);
 
 function mountAssigneesComponent(mediator) {
   const el = document.getElementById('js-vue-sidebar-assignees');
+  const apolloProvider = new VueApollo({
+    defaultClient: createDefaultClient(),
+  });
 
   if (!el) return;
 
   // eslint-disable-next-line no-new
   new Vue({
     el,
+    apolloProvider,
     components: {
       SidebarAssignees,
     },
@@ -26,6 +34,7 @@ function mountAssigneesComponent(mediator) {
       createElement('sidebar-assignees', {
         props: {
           mediator,
+          issuableId: toNumber(el.dataset.id), // TODO: mv to store?
           field: el.dataset.field,
           signedIn: el.hasAttribute('data-signed-in'),
           issuableType: gl.utils.isInIssuePage() ? 'issue' : 'merge_request',

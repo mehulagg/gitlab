@@ -1,7 +1,10 @@
 <script>
+import _ from "lodash";
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import Flash from '~/flash';
 import eventHub from '~/sidebar/event_hub';
 import Store from '~/sidebar/stores/sidebar_store';
+import query from '~/issuable_sidebar/queries/issueSidebar.subscription.graphql';
 import { refreshUserMergeRequestCounts } from '~/commons/nav/user_merge_requests';
 import AssigneeTitle from './assignee_title.vue';
 import Assignees from './assignees.vue';
@@ -12,6 +15,30 @@ export default {
   components: {
     AssigneeTitle,
     Assignees,
+  },
+  apollo: {
+    $subscribe: {
+      issueUpdated: {
+        query,
+        variables() {
+          return {
+            id: this.issuableId,
+          };
+        },
+        result({ data }) {
+          const nodes = [...data.issueUpdated.assignees.nodes];
+          console.log('here', data.issueUpdated.assignees.nodes);
+          // move to assignees to be consistent across
+          const assignees = nodes.map(n => ({
+              ...n,
+              avatar_url: n.avatarUrl,
+              id: getIdFromGraphQLId(n.id),
+          }));
+          // could this be in apollo cache or vuex??
+          this.mediator.store.setAssigneesFromRealtime(assignees);
+        },
+      }
+    },
   },
   props: {
     mediator: {
@@ -31,6 +58,10 @@ export default {
       type: String,
       required: false,
       default: 'issue',
+    },
+    issuableId: {
+      type: Number,
+      required: true,
     },
   },
   data() {

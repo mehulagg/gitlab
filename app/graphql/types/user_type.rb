@@ -14,6 +14,10 @@ module Types
           description: 'ID of the user'
     field :name, GraphQL::STRING_TYPE, null: false,
           description: 'Human-readable name of the user'
+    field :id, GraphQL::STRING_TYPE, null: false,
+          description: 'Global ID of the user.'
+    field :state, GraphQL::STRING_TYPE, null: false,
+          description: ''
     field :username, GraphQL::STRING_TYPE, null: false,
           description: 'Username of the user. Unique within this instance of GitLab'
     field :avatar_url, GraphQL::STRING_TYPE, null: true,

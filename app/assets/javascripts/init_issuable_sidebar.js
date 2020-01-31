@@ -8,9 +8,6 @@ import Sidebar from './right_sidebar';
 
 import DueDateSelectors from './due_date_select';
 
-import createDefaultClient from '~/lib/graphql';
-import issueSidebarSubscription from '~/issuable_sidebar/queries/issueSidebar.subscription.graphql';
-
 export default () => {
   const sidebarOptions = JSON.parse(document.querySelector('.js-sidebar-options').innerHTML);
 
