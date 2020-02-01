@@ -21,7 +21,7 @@ This instruction contains minimum settings which allow to bring it to work.
 1. Click **Create app client**.
 ![Cognito app](img/cognito_app.png)
 
-1. In the next step, you can setup lambdas for sending emails, such as welcome emails, and finish creating the pool. All settings can be changed later.
+1. In the next step, you can set up lambdas for sending emails, such as welcome emails, and finish creating the pool. All settings can be changed later.
 
 1. After creating the user pool, go to **App client settings** and provide the required information:
 
