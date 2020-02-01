@@ -17,7 +17,7 @@ This instruction contains minimum settings which allow to bring it to work.
 
 1. Go to the next steps and set all other attributes as you need.
 
-1. In the **App clients** settings, click **Add an app client**, and select the **Enable username password based authentication** check box. 
+1. In the **App clients** settings, click **Add an app client**, and select the **Enable username password based authentication** check box.
 1. Click **Create app client**.
 ![Cognito app](img/cognito_app.png)
 
