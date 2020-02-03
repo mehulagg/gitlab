@@ -5,8 +5,8 @@
 GitLab provides an integration for updating the pipeline statuses on GitHub.
 This is especially useful if using GitLab for CI/CD only.
 
-This project integration is separate from the [instance wide GitHub integration](../import/github.md#mirroring-and-pipeline-status-sharing)
-and is automatically configured on [GitHub import](../../../integration/github.md).
+This project integration is separate from the [instance wide GitHub integration](../../../integration/github.md)
+and is automatically configured on [GitHub import](../import/github.md#mirroring-and-pipeline-status-sharing).
 
 ![Pipeline status update on GitHub](img/github_status_check_pipeline_update.png)
 
