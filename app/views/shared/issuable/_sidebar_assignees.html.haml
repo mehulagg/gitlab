@@ -7,12 +7,8 @@
     .spinner.spinner-sm.align-bottom
 
 .selectbox.hide-collapsed
-  - if assignees.none?
-    = hidden_field_tag "#{issuable_type}[assignee_ids][]", 0, id: nil
-  - else
-    - assignees.each do |assignee|
-      = hidden_field_tag "#{issuable_type}[assignee_ids][]", assignee.id, id: nil, data: assignee_sidebar_data(assignee, merge_request: @merge_request)
-
+  #js-test
+    %user-select-hidden-input
   - options = { toggle_class: 'js-user-search js-author-search',
     title: _('Assign to'),
     filter: true,
