@@ -21,7 +21,7 @@ FactoryBot.define do
     end
 
     factory :npm_package do
-      sequence(:name) { |n| "@#{project.root_namespace.path}/package-#{n}"}
+      sequence(:name) { |n| "@#{project.root_namespace.path}/package-#{n}" }
       version { '1.0.0' }
       package_type { :npm }
 
@@ -54,7 +54,7 @@ FactoryBot.define do
 
       name { "ochorocho/gitlab-composer" }
       version { '2.0.0' }
-      package_type { 'composer' }
+      package_type { :composer }
 
       after :create do |package|
         create :package_file, :composer, package: package
@@ -196,7 +196,6 @@ FactoryBot.define do
       file { fixture_file_upload('ee/spec/fixtures/composer/ochorocho-gitlab-composer-2.0.0-19c3ec.tar') }
       file_name { 'ochorocho-gitlab-composer-2.0.0-19c3ec.tar' }
       file_sha1 { 'c775f1f5cc34f272e25c17b62e1932d0ca5087f8' }
-      file_type { 'tar' }
     end
 
     trait :object_storage do
@@ -250,7 +249,7 @@ FactoryBot.define do
   end
 
   factory :composer_metadatum, class: 'Packages::ComposerMetadatum' do
-    package
+    association :package, package_type: :composer
     name { 'ochorocho/gitlab-composer' }
     version { '2.0.0' }
     json { JSON.parse(File.read('ee/spec/fixtures/api/schemas/public_api/v4/packages/composer_package_version.json')) }

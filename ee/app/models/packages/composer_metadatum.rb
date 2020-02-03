@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 class Packages::ComposerMetadatum < ApplicationRecord
-  belongs_to :package, -> { where(package_type: Packages::Package::COMPOSER) }
+  belongs_to :package, -> { where(package_type: :composer) }
 
   validates :package, presence: true
   validate :composer_package_type
@@ -19,7 +19,7 @@ class Packages::ComposerMetadatum < ApplicationRecord
   private
 
   def composer_package_type
-    unless package && package.package_type == Packages::Package::COMPOSER
+    unless package && package.composer?
       errors.add(:base, 'Package type must be Composer')
     end
   end
