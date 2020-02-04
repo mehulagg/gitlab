@@ -13,7 +13,6 @@ This instruction contains minimum settings which allow to bring it to work.
 
 1. Under **How do you want your end users to sign in?**, select **Email address or phone number** and **Allow email addresses**.
 1. Under **Which standard attributes do you want to require?**, select **email**.
-![Cognito app](img/cognito_app2.png)
 
 1. Go to the next steps and set all other attributes as you need.
 
