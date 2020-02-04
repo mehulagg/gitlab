@@ -144,6 +144,7 @@ export function mountSidebar(mediator) {
   mountTimeTrackingComponent();
 }
 
+
 export function getSidebarOptions() {
   return JSON.parse(document.querySelector('.js-sidebar-options').innerHTML);
 }
