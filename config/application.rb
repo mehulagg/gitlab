@@ -8,6 +8,7 @@ require 'active_record/railtie'
 require 'action_controller/railtie'
 require 'action_view/railtie'
 require 'action_mailer/railtie'
+require 'action_cable/engine'
 require 'rails/test_unit/railtie'
 
 Bundler.require(*Rails.groups)
@@ -28,6 +29,8 @@ module Gitlab
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
+
+    config.action_cable.mount_path = '/-/cable'
 
     config.active_record.sqlite3.represent_boolean_as_integer = true
 

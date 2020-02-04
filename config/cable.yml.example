@@ -1,0 +1,15 @@
+# If you change this file in a Merge Request, please also create
+# a Merge Request on https://gitlab.com/gitlab-org/omnibus-gitlab/merge_requests
+#
+development:
+  adapter: redis
+  url: redis://localhost:6379
+  channel_prefix: gitlab_development
+test:
+  adapter: redis
+  url: redis://localhost:6379
+  channel_prefix: gitlab_test
+production:
+  adapter: redis
+  url: unix:/var/run/redis/redis.sock
+  channel_prefix: gitlab_production
