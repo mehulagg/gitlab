@@ -4,23 +4,15 @@ To enable the [AWS Cognito](https://aws.amazon.com/cognito/) OAuth2 OmniAuth pro
 This instruction contains minimum settings which allow to bring it to work.
 
 1. Sign in to the [AWS console](https://console.aws.amazon.com/console/home).
-
 1. Select **Cognito** from the **Services** menu.
-
 1. Select **Manage User Pools**, and click the **Create a user pool** button in the top right corner.
-
 1. Enter the pool name and then click the **Step through setting** button.
-
 1. Under **How do you want your end users to sign in?**, select **Email address or phone number** and **Allow email addresses**.
 1. Under **Which standard attributes do you want to require?**, select **email**.
-
 1. Go to the next steps and set all other attributes as you need.
-
 1. In the **App clients** settings, click **Add an app client**, and select the **Enable username password based authentication** check box.
 1. Click **Create app client**.
-
 1. In the next step, you can set up lambdas for sending emails, such as welcome emails, and finish creating the pool. All settings can be changed later.
-
 1. After creating the user pool, go to **App client settings** and provide the required information:
 
    - **Enabled Identity Providers** - select all
@@ -29,7 +21,6 @@ This instruction contains minimum settings which allow to bring it to work.
    - **Allowed OAuth Scopes** - `email` and `openid`
 
 1. Under **Domain name** setup domain for your Cognito.
-
 1. On your GitLab server, open the configuration file.
 
    For Omnibus package:
@@ -47,7 +38,6 @@ This instruction contains minimum settings which allow to bring it to work.
    ```
 
 1. See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration) for initial settings.
-
 1. Add the provider configuration, replacing `CLIENT ID` and `CLIENT SECRET` with the values from **App clients** in Cognito:
 
    For Omnibus package:
@@ -78,7 +68,6 @@ This instruction contains minimum settings which allow to bring it to work.
    ```
 
 1. Save the configuration file.
-
 1. [Reconfigure][] or [restart GitLab][] for the changes to take effect if you
    installed GitLab via Omnibus or from source respectively.
 
