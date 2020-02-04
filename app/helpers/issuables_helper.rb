@@ -455,6 +455,8 @@ module IssuablesHelper
 
   def issuable_sidebar_options(issuable)
     {
+      id: issuable[:id],
+      type: issuable[:type],
       endpoint: "#{issuable[:issuable_json_path]}?serializer=sidebar_extras",
       toggleSubscriptionEndpoint: issuable[:toggle_subscription_path],
       moveIssueEndpoint: issuable[:move_issue_path],
@@ -463,7 +465,6 @@ module IssuablesHelper
       currentUser: issuable[:current_user],
       rootPath: root_path,
       fullPath: issuable[:project_full_path],
-      id: issuable[:id],
       timeTrackingLimitToHours: Gitlab::CurrentSettings.time_tracking_limit_to_hours
     }
   end

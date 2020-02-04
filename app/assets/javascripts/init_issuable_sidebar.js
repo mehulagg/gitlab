@@ -1,5 +1,6 @@
 /* eslint-disable no-new */
 
+import ActionCable from 'actioncable';
 import MilestoneSelect from './milestone_select';
 import LabelsSelect from './labels_select';
 import IssuableContext from './issuable_context';
@@ -17,4 +18,20 @@ export default () => {
   new IssuableContext(sidebarOptions.currentUser);
   new DueDateSelectors();
   Sidebar.initialize();
+
+  if (sidebarOptions.type === 'issue') {
+    const cable = ActionCable.createConsumer();
+
+    cable.subscriptions.create(
+      {
+        channel: 'IssuesChannel',
+        id: sidebarOptions.id,
+      },
+      {
+        received(data) {
+          console.log(data);
+        },
+      },
+    );
+  }
 };
