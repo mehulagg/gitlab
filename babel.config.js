@@ -9,9 +9,8 @@ const presets = [
       useBuiltIns: 'usage',
       corejs: { version: 3, proposals: true },
       modules: false,
-      targets: {
-        ie: '11',
-      },
+      targets:
+        'last 2 Chrome versions, last 2 Firefox versions, last 2 Edge versions, last 2 Safari versions',
     },
   ],
 ];
