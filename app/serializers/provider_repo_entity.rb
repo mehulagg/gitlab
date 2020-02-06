@@ -21,5 +21,6 @@ class ProviderRepoEntity < Grape::Entity
 
   def owner_name(provider_repo, provider)
     provider_repo.dig(:owner, :login) if provider == :github
+    provider_repo.dig(:owner, :login) if provider == :bitbucket
   end
 end

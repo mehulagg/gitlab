@@ -31,10 +31,40 @@ class Import::BitbucketController < Import::BaseController
     already_added_projects_names = @already_added_projects.pluck(:import_source)
 
     @repos.to_a.reject! { |repo| already_added_projects_names.include?(repo.full_name) }
+    respond_to do |format|
+      format.json do
+        render json: { imported_projects: serialized_imported_projects(@already_added_projects),
+                        provider_repos: serialized_provider_repos,
+                        namespaces: serialized_namespaces }
+      end
+      format.html
+    end
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
-  def jobs
+  def serialized_provider_repos
+    repos = @repos.map {|repo| { id: repo.full_name, full_name: repo.full_name, name: repo.name, owner: { login: repo.owner }, provider_link: repo.clone_url } }
+    # repos = @repos.map {|repo| { full_name => 'full_name', sanitized_name => 'name', owner_name => 'lol', provider_link => 'lol', id => 'f' } }
+    ProviderRepoSerializer.new(current_user: current_user).represent(repos, provider: provider, provider_url: provider_url)
+  end
+
+  def provider_url
+    'https://bitbucket.org'
+  end
+
+  def serialized_namespaces
+    NamespaceSerializer.new.represent(namespaces)
+  end
+
+  def serialized_imported_projects(projects = already_added_projects)
+    ProjectSerializer.new.represent(projects, serializer: :import, provider_url: provider_url)
+  end
+
+  def namespaces
+    current_user.manageable_groups_with_routes
+  end
+
+  # rubocop: enable CodeReuse/ActiveRecord
+  def realtime_changes
     render json: find_jobs('bitbucket')
   end
 

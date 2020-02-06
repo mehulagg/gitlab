@@ -30,7 +30,7 @@ namespace :import do
   resource :bitbucket, only: [:create], controller: :bitbucket do
     get :status
     get :callback
-    get :jobs
+    get :realtime_changes
   end
 
   resource :bitbucket_server, only: [:create, :new], controller: :bitbucket_server do
