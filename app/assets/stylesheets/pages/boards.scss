@@ -513,20 +513,6 @@
   white-space: nowrap;
   margin-right: $gl-padding-8;
 
-  &:not(.board-card-weight) {
-    cursor: help;
-  }
-
-  &.board-card-weight {
-    color: $gl-text-color;
-    cursor: pointer;
-
-    &:hover {
-      color: initial;
-      text-decoration: underline;
-    }
-  }
-
   .board-card-info-icon {
     color: $gray-600;
     margin-right: $gl-padding-4;

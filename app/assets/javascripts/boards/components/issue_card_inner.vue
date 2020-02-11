@@ -13,6 +13,7 @@ import boardsStore from '../stores/boards_store';
 import { isScopedLabel } from '~/lib/utils/common_utils';
 
 export default {
+  isNumber,
   components: {
     GlLabel,
     Icon,
@@ -25,7 +26,6 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [issueCardInner],
   props: {
     issue: {
       type: Object,
@@ -206,11 +206,7 @@ export default {
         <span class="board-info-items prepend-top-8 d-inline-block">
           <issue-due-date v-if="issue.dueDate" :date="issue.dueDate" :closed="issue.closed" />
           <issue-time-estimate v-if="issue.timeEstimate" :estimate="issue.timeEstimate" />
-          <issue-card-weight
-            v-if="validIssueWeight"
-            :weight="issue.weight"
-            @click="filterByWeight(issue.weight)"
-          />
+          <issue-card-weight v-if="$options.isNumber(issue.weight)" :weight="issue.weight" />
         </span>
       </div>
       <div class="board-card-assignee d-flex">
