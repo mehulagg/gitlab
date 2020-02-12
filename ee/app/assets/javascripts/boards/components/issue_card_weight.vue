@@ -14,11 +14,6 @@ export default {
       required: false,
     },
   },
-  methods: {
-    x() {
-      escape();
-    },
-  },
 };
 </script>
 

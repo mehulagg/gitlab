@@ -1,5 +1,5 @@
 <script>
-import { sortBy } from 'lodash';
+import { sortBy, isNumber } from 'lodash';
 import { mapState } from 'vuex';
 import { GlLabel, GlTooltipDirective } from '@gitlab/ui';
 import issueCardInner from 'ee_else_ce/boards/mixins/issue_card_inner';
