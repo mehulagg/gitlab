@@ -1,0 +1,5 @@
+---
+title: Create ci_build_report_results table
+merge_request: 25199
+author:
+type: performance

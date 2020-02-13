@@ -886,6 +886,22 @@ CREATE SEQUENCE public.ci_build_needs_id_seq
 
 ALTER SEQUENCE public.ci_build_needs_id_seq OWNED BY public.ci_build_needs.id;
 
+CREATE TABLE public.ci_build_report_results (
+    id bigint NOT NULL,
+    build_id bigint NOT NULL,
+    project_id bigint NOT NULL,
+    data jsonb DEFAULT '{}'::jsonb NOT NULL
+);
+
+CREATE SEQUENCE public.ci_build_report_results_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE public.ci_build_report_results_id_seq OWNED BY public.ci_build_report_results.id;
+
 CREATE TABLE public.ci_build_trace_chunks (
     id bigint NOT NULL,
     build_id integer NOT NULL,
@@ -7363,6 +7379,8 @@ ALTER TABLE ONLY public.chat_teams ALTER COLUMN id SET DEFAULT nextval('public.c
 
 ALTER TABLE ONLY public.ci_build_needs ALTER COLUMN id SET DEFAULT nextval('public.ci_build_needs_id_seq'::regclass);
 
+ALTER TABLE ONLY public.ci_build_report_results ALTER COLUMN id SET DEFAULT nextval('public.ci_build_report_results_id_seq'::regclass);
+
 ALTER TABLE ONLY public.ci_build_trace_chunks ALTER COLUMN id SET DEFAULT nextval('public.ci_build_trace_chunks_id_seq'::regclass);
 
 ALTER TABLE ONLY public.ci_build_trace_section_names ALTER COLUMN id SET DEFAULT nextval('public.ci_build_trace_section_names_id_seq'::regclass);
@@ -8041,6 +8059,9 @@ ALTER TABLE public.lfs_objects
 
 ALTER TABLE ONLY public.ci_build_needs
     ADD CONSTRAINT ci_build_needs_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY public.ci_build_report_results
+    ADD CONSTRAINT ci_build_report_results_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY public.ci_build_trace_chunks
     ADD CONSTRAINT ci_build_trace_chunks_pkey PRIMARY KEY (id);
@@ -11624,6 +11645,9 @@ ALTER TABLE ONLY public.events
 ALTER TABLE ONLY public.ip_restrictions
     ADD CONSTRAINT fk_rails_04a93778d5 FOREIGN KEY (group_id) REFERENCES public.namespaces(id) ON DELETE CASCADE;
 
+ALTER TABLE ONLY public.ci_build_report_results
+    ADD CONSTRAINT fk_rails_056d298d48 FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
 ALTER TABLE ONLY public.ci_daily_build_group_report_results
     ADD CONSTRAINT fk_rails_0667f7608c FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
 
@@ -11692,6 +11716,9 @@ ALTER TABLE ONLY public.diff_note_positions
 
 ALTER TABLE ONLY public.users_security_dashboard_projects
     ADD CONSTRAINT fk_rails_150cd5682c FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY public.ci_build_report_results
+    ADD CONSTRAINT fk_rails_16cb1ff064 FOREIGN KEY (build_id) REFERENCES public.ci_builds(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY public.project_deploy_tokens
     ADD CONSTRAINT fk_rails_170e03cbaf FOREIGN KEY (project_id) REFERENCES public.projects(id) ON DELETE CASCADE;
@@ -13915,5 +13942,6 @@ COPY "schema_migrations" (version) FROM STDIN;
 20200514000340
 20200515155620
 20200519115908
+20200519175520
 \.
 

@@ -1,0 +1,11 @@
+{
+  "description": "Build report results data",
+  "type": "object",
+  "properties": {
+    "coverage": { "type": "float" },
+    "junit": {
+      "type": "array",
+      "items": { "$ref": "./build_report_results_data_junit.json" }
+    }
+  }
+}

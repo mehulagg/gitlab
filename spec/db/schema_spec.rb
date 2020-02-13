@@ -131,6 +131,7 @@ describe 'Database schema' do
     'Ci::Bridge' => %w[failure_reason],
     'Ci::Build' => %w[failure_reason],
     'Ci::BuildMetadata' => %w[timeout_source],
+    'Ci::BuildReportResults' => %w[param_type],
     'Ci::BuildTraceChunk' => %w[data_store],
     'Ci::DailyReportResult' => %w[param_type],
     'Ci::JobArtifact' => %w[file_type],
