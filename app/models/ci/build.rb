@@ -556,6 +556,7 @@ module Ci
           .append(key: 'CI_REGISTRY_USER', value: CI_REGISTRY_USER)
           .append(key: 'CI_REGISTRY_PASSWORD', value: token.to_s, public: false, masked: true)
           .append(key: 'CI_REPOSITORY_URL', value: repo_url.to_s, public: false)
+          .append(key: 'JWT_AUTH', value: Gitlab::Ci::JwtAuth.jwt_for_job(self), public: false)
           .concat(deploy_token_variables)
       end
     end
