@@ -1,16 +1,16 @@
 import MockAdapter from 'axios-mock-adapter';
 
 import testAction from 'helpers/vuex_action_helper';
-import * as types from 'ee/logs/stores/mutation_types';
+import * as types from '~/logs/stores/mutation_types';
 import { convertToFixedRange } from '~/lib/utils/datetime_range';
-import logsPageState from 'ee/logs/stores/state';
+import logsPageState from '~/logs/stores/state';
 import {
   setInitData,
   setSearch,
   showPodLogs,
   fetchEnvironments,
   fetchLogs,
-} from 'ee/logs/stores/actions';
+} from '~/logs/stores/actions';
 
 import { defaultTimeRange } from '~/monitoring/constants';
 
@@ -30,7 +30,7 @@ import {
 
 jest.mock('~/flash');
 jest.mock('~/lib/utils/datetime_range');
-jest.mock('ee/logs/utils');
+jest.mock('~/logs/utils');
 
 const mockDefaultRange = {
   start: '2020-01-10T18:00:00.000Z',

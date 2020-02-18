@@ -1,3 +1,3 @@
-import logsBundle from 'ee/logs';
+import logsBundle from '~/logs';
 
 document.addEventListener('DOMContentLoaded', logsBundle);

@@ -1,4 +1,4 @@
-import Api from 'ee/api';
+import Api from '~/api';
 import { backOff } from '~/lib/utils/common_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';

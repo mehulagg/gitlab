@@ -1,7 +1,7 @@
-import mutations from 'ee/logs/stores/mutations';
-import * as types from 'ee/logs/stores/mutation_types';
+import mutations from '~/logs/stores/mutations';
+import * as types from '~/logs/stores/mutation_types';
 
-import logsPageState from 'ee/logs/stores/state';
+import logsPageState from '~/logs/stores/state';
 import {
   mockEnvName,
   mockEnvironments,

@@ -1,5 +1,5 @@
-import * as getters from 'ee/logs/stores/getters';
-import logsPageState from 'ee/logs/stores/state';
+import * as getters from '~/logs/stores/getters';
+import logsPageState from '~/logs/stores/state';
 
 import { mockLogsResult, mockTrace } from '../mock_data';
 

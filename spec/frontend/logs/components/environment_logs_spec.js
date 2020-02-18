@@ -2,9 +2,9 @@ import Vue from 'vue';
 import { GlDropdown, GlDropdownItem, GlSearchBoxByClick } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 import DateTimePicker from '~/vue_shared/components/date_time_picker/date_time_picker.vue';
-import EnvironmentLogs from 'ee/logs/components/environment_logs.vue';
+import EnvironmentLogs from '~/logs/components/environment_logs.vue';
 
-import { createStore } from 'ee/logs/stores';
+import { createStore } from '~/logs/stores';
 import { scrollDown } from '~/lib/utils/scroll_utils';
 import {
   mockEnvName,

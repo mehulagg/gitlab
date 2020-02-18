@@ -1,4 +1,4 @@
-import { getTimeRange } from 'ee/logs/utils';
+import { getTimeRange } from '~/logs/utils';
 
 describe('logs/utils', () => {
   describe('getTimeRange', () => {
