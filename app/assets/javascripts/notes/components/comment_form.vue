@@ -186,11 +186,7 @@ export default {
       'toggleBlockedIssueWarning',
     ]),
     setIsSubmitButtonDisabled(note, isSubmitting) {
-      if (!isEmpty(note) && !isSubmitting) {
-        this.isSubmitButtonDisabled = false;
-      } else {
-        this.isSubmitButtonDisabled = true;
-      }
+      this.isSubmitButtonDisabled = !(!isEmpty(note) && !isSubmitting);
     },
     handleSave(withIssueAction) {
       this.isSubmitting = true;
@@ -222,7 +218,7 @@ export default {
           .then(() => {
             this.enableButton();
             this.restartPolling();
-            this.discard();
+            this.discard({ clear: true, refocus: true });
 
             if (withIssueAction) {
               this.toggleIssueState();
@@ -230,7 +226,7 @@ export default {
           })
           .catch(() => {
             this.enableButton();
-            this.discard(false);
+            this.discard({ clear: false, refocus: true });
             const msg = __(
               'Your comment could not be submitted! Please check your network connection and try again.',
             );
@@ -296,13 +292,16 @@ export default {
           );
         });
     },
-    discard(shouldClear = true) {
+    discard({ clear = true, refocus = true }) {
       // `blur` is needed to clear slash commands autocomplete cache if event fired.
       // `focus` is needed to remain cursor in the textarea.
       this.$refs.textarea.blur();
-      this.$refs.textarea.focus();
 
-      if (shouldClear) {
+      if (refocus) {
+        this.$refs.textarea.focus();
+      }
+
+      if (clear) {
         this.note = '';
         this.noteIsConfidential = false;
         this.resizeTextarea();
@@ -519,6 +518,15 @@ append-right-10 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
                 :label="issueActionButtonTitle"
                 @click="handleSave(true)"
               />
+
+              <button
+                type="button"
+                class="btn btn-cancel js-note-cancel-button"
+                :disabled="isSubmitting || note === ''"
+                @click="discard({ clear: true, refocus: false })"
+              >
+                {{ __('Cancel') }}
+              </button>
             </div>
           </form>
         </div>

@@ -176,7 +176,7 @@ describe('issue_comment_form component', () => {
         jest.spyOn(wrapper.vm, 'discard');
 
         wrapper.vm.note = 'foo';
-        wrapper.vm.discard();
+        wrapper.vm.discard({});
 
         wrapper.vm.$nextTick(() => {
           expect(Autosize.update).toHaveBeenCalled();
@@ -337,6 +337,32 @@ describe('issue_comment_form component', () => {
         wrapper.vm.$nextTick(() => {
           expect(wrapper.find('.confidential-issue-warning')).toBeDefined();
           done();
+        });
+      });
+    });
+
+    describe('cancel button', () => {
+      it('is disabled when note is empty', () => {
+        expect(wrapper.find('.js-note-cancel-button').attributes('disabled')).toEqual('disabled');
+      });
+
+      it('clears the note when clicked', () => {
+        const $cancelButton = $(wrapper.find('.js-note-cancel-button').element);
+        const textarea = wrapper.find('textarea');
+
+        textarea.setValue('This has content');
+
+        jest.spyOn(wrapper.vm, 'discard');
+
+        expect(textarea.element.value).toBe('This has content');
+
+        wrapper.vm.$nextTick(() => {
+          $cancelButton.trigger('click');
+
+          wrapper.vm.$nextTick(() => {
+            expect(wrapper.vm.discard).toHaveBeenCalled();
+            expect(textarea.element.value).toBe('');
+          });
         });
       });
     });
