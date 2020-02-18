@@ -9,6 +9,11 @@ module Gitlab
 
           ALLOWED_KEYS = %i[rules].freeze
 
+          DEFAULT_RULES = [
+            { if: "$CI_COMMIT_BRANCH" },
+            { if: "$CI_COMMIT_TAG" }
+          ].freeze
+
           validations do
             validates :config, type: Hash
             validates :config, allowed_keys: ALLOWED_KEYS
@@ -17,11 +22,8 @@ module Gitlab
 
           entry :rules, Entry::Rules,
             description: 'List of evaluable Rules to determine Pipeline status.',
-            metadata: { allowed_when: %w[always never] }
-
-          def has_rules?
-            @config.try(:key?, :rules)
-          end
+            metadata: { allowed_when: %w[always never] },
+            default: DEFAULT_RULES,
         end
       end
     end
