@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20180424151928_fill_file_store')
+require Rails.root.join('db', 'post_migrate', '20200218184134_fill_file_store_columns')
 
-describe FillFileStore do
+describe FillFileStoreColumns
   let(:namespaces) { table(:namespaces) }
   let(:projects) { table(:projects) }
   let(:builds) { table(:ci_builds) }
@@ -16,7 +16,6 @@ describe FillFileStore do
     projects.create!(id: 123, name: 'gitlab1', path: 'gitlab1', namespace_id: 123)
     builds.create!(id: 1)
 
-    ##
     # Create rows that have nullfied `file_store` column
     job_artifacts.create!(project_id: 123, job_id: 1, file_type: 1, file_store: nil)
     lfs_objects.create!(oid: 123, size: 10, file: 'file_name', file_store: nil)
