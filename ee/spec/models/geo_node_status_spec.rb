@@ -156,7 +156,7 @@ describe GeoNodeStatus, :geo, :geo_fdw do
       expect(subject.attachments_count).to eq(1)
       expect(subject.attachments_synced_count).to eq(1)
 
-      user.update(avatar: fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpg'))
+      user.update(avatar: fixture_file_upload('spec/fixtures/rails_sample.jpg', 'image/jpeg'))
 
       subject = described_class.current_node_status
 
