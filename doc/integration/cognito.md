@@ -1,7 +1,7 @@
 # Amazon Web Services Cognito
 
-To enable the [AWS Cognito](https://aws.amazon.com/cognito/) OAuth2 OmniAuth provider, you must register your application with Cognito, and generate a client id and secret key for you to use.
-This instruction contains minimum settings which allow to bring it to work.
+To enable the [AWS Cognito](https://aws.amazon.com/cognito/) OAuth2 OmniAuth provider, you must register your application with Cognito, and generate a client id and secret key.
+The following steps enable AWS Cognito as an authentication provider:
 
 1. Sign in to the [AWS console](https://console.aws.amazon.com/console/home).
 1. Select **Cognito** from the **Services** menu.
