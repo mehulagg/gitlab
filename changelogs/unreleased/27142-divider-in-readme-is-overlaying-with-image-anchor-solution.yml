@@ -1,5 +1,5 @@
 ---
 title: Improved selection of multiple cards and keep the anchors at the title hover
-merge_request:
+merge_request: 25442
 author: Gwen_
 type: fixed
