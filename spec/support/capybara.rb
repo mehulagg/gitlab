@@ -32,7 +32,7 @@ Capybara.register_driver(:cuprite) do |app|
     window_size: CAPYBARA_WINDOW_SIZE,
     browser_options: {
       # Chrome won't work properly in a Docker container in sandbox mode
-      'no-sandbox': nil,
+      'no-sandbox': nil
     }.tap do |options|
       if ENV['CI'] || ENV['CI_SERVER']
         options.merge!(
