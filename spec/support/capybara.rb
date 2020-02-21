@@ -20,7 +20,7 @@ JS_CONSOLE_FILTER = Regexp.union(
   '[WDS] Live Reloading enabled.',
   'Download the Vue Devtools extension',
   'Download the Apollo DevTools',
-  /^\s*(?:◀|▶) \d+\.\d+/,
+  /^\s*(?:◀|▶) \d+\.\d+/
 )
 
 class FilteredLogger

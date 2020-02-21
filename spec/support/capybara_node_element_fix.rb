@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module CapybaraNodeElementFix
   # Override `click` to prevent overlapping CSS selectors:
   #
