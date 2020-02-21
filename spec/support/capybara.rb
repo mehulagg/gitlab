@@ -14,19 +14,45 @@ timeout = (ENV['CI'] || ENV['CI_SERVER']) ? 60 : 30
 JSConsoleError = Class.new(StandardError)
 
 # Filter out innocuous JS console messages
-JS_CONSOLE_FILTER = Regexp.union([
-  '"[HMR] Waiting for update signal from WDS..."',
-  '"[WDS] Hot Module Replacement enabled."',
-  '"[WDS] Live Reloading enabled."',
+JS_CONSOLE_FILTER = Regexp.union(
+  '[HMR] Waiting for update signal from WDS...',
+  '[WDS] Hot Module Replacement enabled.',
+  '[WDS] Live Reloading enabled.',
   'Download the Vue Devtools extension',
-  'Download the Apollo DevTools'
-])
+  'Download the Apollo DevTools',
+  /^\s*(?:◀|▶) \d+\.\d+/,
+)
+
+class FilteredLogger
+  def initialize(ignore_regexp)
+    @ignore_regexp = ignore_regexp
+    @output = StringIO.new
+  end
+
+  def puts(*args)
+    return if args.any? { |arg| @ignore_regexp.match?(arg) }
+
+    @output.puts(*args)
+  end
+
+  def reset!
+    @output.truncate(0)
+    @output.rewind
+  end
+
+  def to_s
+    @output.string
+  end
+end
+
+logger = FilteredLogger.new(JS_CONSOLE_FILTER)
 
 CAPYBARA_WINDOW_SIZE = [1366, 768].freeze
 
 Capybara.register_driver(:cuprite) do |app|
   options = {
     timeout: timeout,
+    logger: logger,
     # Run headless by default unless CHROME_HEADLESS specified
     headless: ENV['CHROME_HEADLESS'] !~ /^(false|no|0)$/i,
     window_size: CAPYBARA_WINDOW_SIZE,
@@ -87,6 +113,8 @@ RSpec.configure do |config|
       rescue # ?
       end
     end
+
+    logger.reset!
   end
 
   config.after(:example, :js) do |example|
@@ -95,10 +123,10 @@ RSpec.configure do |config|
     # fixed. If we raised the `JSException` the fixed test would be marked as
     # failed again.
     if example.exception && !example.exception.is_a?(RSpec::Core::Pending::PendingExampleFixedError)
-      console = page.driver.browser.manage.logs.get(:browser)&.reject { |log| log.message =~ JS_CONSOLE_FILTER }
+      console = logger.to_s
 
       if console.present?
-        message = "Unexpected browser console output:\n" + console.map(&:message).join("\n")
+        message = "Unexpected browser console output:\n#{console}"
         raise JSConsoleError, message
       end
     end
