@@ -165,6 +165,9 @@ gem 'diff_match_patch', '~> 0.1.0'
 # Application server
 gem 'rack', '~> 2.0.7'
 
+# Faster JSON
+gem 'oj', '~> 3.10.0', require: false
+
 group :unicorn do
   gem 'unicorn', '~> 5.4.1'
   gem 'unicorn-worker-killer', '~> 0.4.4'
