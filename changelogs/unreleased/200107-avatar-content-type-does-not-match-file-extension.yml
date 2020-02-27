@@ -1,9 +1,5 @@
 ---
-<<<<<<< HEAD
 title: Replace avatar and favicon upload type consistency validation with content whitelist validation
-=======
-title: Replace file type check with content whitelist
->>>>>>> Replace file type check with content whitelist
 merge_request: 25401
 author:
 type: changed

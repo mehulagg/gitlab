@@ -58,22 +58,29 @@ describe DesignManagement::DesignV432x230Uploader do
     )
   end
 
-  context 'uploading a whitelisted file extension' do
-    it 'stores the image successfully' do
-      fixture_file = fixture_file_upload('spec/fixtures/dk.png')
+  context 'accept whitelist file content type' do
+    # We need to feed through a valid path, but we force the parsed mime type
+    # in a stub below so we can set any path.
+    let_it_be(:path) { File.join('spec', 'fixtures', 'dk.png') }
 
-      expect { uploader.cache!(fixture_file) }.to change { uploader.file }.from(nil).to(kind_of(CarrierWave::SanitizedFile))
+    where(:mime_type) { described_class::MIME_TYPE_WHITELIST }
+
+    with_them do
+      include_context 'stubbed content type detection'
+
+      it_behaves_like 'accepted carrierwave upload'
     end
   end
 
-  context 'uploading a non-whitelisted file' do
-    it 'will deny the upload' do
-      fixture_file = fixture_file_upload('spec/fixtures/logo_sample.svg', 'image/svg+xml')
+  context 'upload non-whitelisted file content type' do
+    let_it_be(:path) { File.join('spec', 'fixtures', 'logo_sample.svg') }
 
-      expect { uploader.cache!(fixture_file) }.to raise_exception(
-        CarrierWave::IntegrityError,
-        'You are not allowed to upload image/svg+xml files'
-      )
-    end
+    it_behaves_like 'denied carrierwave upload'
+  end
+
+  context 'upload misnamed non-whitelisted file content type' do
+    let_it_be(:path) { File.join('spec', 'fixtures', 'not_a_png.png') }
+
+    it_behaves_like 'denied carrierwave upload'
   end
 end
