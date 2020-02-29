@@ -6603,7 +6603,8 @@ CREATE TABLE public.vulnerabilities (
     confirmed_by_id bigint,
     confirmed_at timestamp with time zone,
     dismissed_at timestamp with time zone,
-    dismissed_by_id bigint
+    dismissed_by_id bigint,
+    vulnerability_occurrence_id bigint
 );
 
 CREATE SEQUENCE public.vulnerabilities_id_seq
@@ -8637,6 +8638,8 @@ CREATE INDEX idx_security_scans_on_scan_type ON public.security_scans USING btre
 
 CREATE UNIQUE INDEX idx_serverless_domain_cluster_on_clusters_applications_knative ON public.serverless_domain_cluster USING btree (clusters_applications_knative_id);
 
+CREATE INDEX idx_vuln_occurrence_pipelines_on_pipeline_id_and_occurrence_id ON public.vulnerability_occurrence_pipelines USING btree (pipeline_id, occurrence_id);
+
 CREATE UNIQUE INDEX idx_vulnerability_issue_links_on_vulnerability_id_and_issue_id ON public.vulnerability_issue_links USING btree (vulnerability_id, issue_id);
 
 CREATE UNIQUE INDEX idx_vulnerability_issue_links_on_vulnerability_id_and_link_type ON public.vulnerability_issue_links USING btree (vulnerability_id, link_type) WHERE (link_type = 2);
@@ -10361,6 +10364,8 @@ CREATE INDEX index_users_star_projects_on_project_id ON public.users_star_projec
 
 CREATE UNIQUE INDEX index_users_star_projects_on_user_id_and_project_id ON public.users_star_projects USING btree (user_id, project_id);
 
+CREATE INDEX index_vulnerabilities_for_occurrence_id_update ON public.vulnerabilities USING btree (vulnerability_occurrence_id);
+
 CREATE INDEX index_vulnerabilities_on_author_id ON public.vulnerabilities USING btree (author_id);
 
 CREATE INDEX index_vulnerabilities_on_confirmed_by_id ON public.vulnerabilities USING btree (confirmed_by_id);
@@ -10406,6 +10411,8 @@ CREATE INDEX index_vulnerability_occurrence_identifiers_on_identifier_id ON publ
 CREATE UNIQUE INDEX index_vulnerability_occurrence_identifiers_on_unique_keys ON public.vulnerability_occurrence_identifiers USING btree (occurrence_id, identifier_id);
 
 CREATE INDEX index_vulnerability_occurrence_pipelines_on_pipeline_id ON public.vulnerability_occurrence_pipelines USING btree (pipeline_id);
+
+CREATE INDEX index_vulnerability_occurrences_for_occurrence_id_update ON public.vulnerability_occurrences USING btree (id, project_id);
 
 CREATE INDEX index_vulnerability_occurrences_on_primary_identifier_id ON public.vulnerability_occurrences USING btree (primary_identifier_id);
 
@@ -13033,6 +13040,10 @@ COPY "schema_migrations" (version) FROM STDIN;
 20200227140242
 20200227164113
 20200227165129
+20200228100000
+20200228100100
+20200228100200
+20200228111111
 20200228160542
 20200302142052
 20200302152516
