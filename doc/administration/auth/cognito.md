@@ -1,8 +1,10 @@
 # Amazon Web Services Cognito
+
 Amazon Cognito lets you add user sign-up, sign-in, and access control to your GitLab quickly and easily.
 The following documentation enables Cognito as an OAuth provider.
 
 ## Configure Cognito
+
 To enable the [AWS Cognito](https://aws.amazon.com/cognito/) OAuth2 OmniAuth provider, you must register your application with Cognito, and generate a client id and secret key.
 The following steps enable AWS Cognito as an authentication provider:
 
@@ -27,6 +29,7 @@ The following steps enable AWS Cognito as an authentication provider:
 1. Under **Domain name** setup domain for your Cognito.
 
 ## Configure GitLab
+
 1. See [Initial OmniAuth Configuration](omniauth.md#initial-omniauth-configuration) for initial settings.
 1. On your GitLab server, open the configuration file.
 
