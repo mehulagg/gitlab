@@ -173,7 +173,7 @@ The table below shows what kind of documentation goes where.
 | Directory             | What belongs here      |
 |:----------------------|:---------------------------------------------------------------------------------------------------------------------------------|
 | `doc/user/`           | User related documentation. Anything that can be done within the GitLab UI goes here, including usage of the `/admin` interface. |
-| `doc/administration/` | Documentation that requires the user to have access to the server where GitLab is installed. The admin settings that can be accessed via GitLab's interface exist under `doc/user/admin_area/`. |
+| `doc/administration/` | Documentation that requires the user to have access to the server where GitLab is installed. The admin settings that can be accessed through GitLab's interface exist under `doc/user/admin_area/`. |
 | `doc/api/`            | API related documentation. |
 | `doc/development/`    | Documentation related to the development of GitLab, whether contributing code or docs. Related process and style guides should go here. |
 | `doc/legal/`          | Legal documents about contributing to GitLab. |
@@ -297,7 +297,7 @@ because it’s friendly and easy to understand.
 - Do not use "may" and "might" interchangeably:
   - Use "might" to indicate the probability of something occurring. "If you skip this step, the import process might fail."
   - Use "may" to indicate giving permission for someone to do something, or consider using "can" instead. "You may select either option on this screen." Or, "you can select either option on this screen."
-- We discourage use of Latin abbreviations, such as "e.g.," "i.e.," or "etc.,"
+- We discourage use of Latinisms, such as "e.g.," "i.e.,", "via", or "etc.,"
 as even native users of English might misunderstand them.
   - Instead of "i.e.," use "that is."
   - Instead of "e.g.," use "for example," "such as," "for instance," or "like."
@@ -305,6 +305,7 @@ as even native users of English might misunderstand them.
 - Avoid using the word *Currently* when talking about the product or its
   features. The documentation describes the product as it is, and not as it
   will be at some indeterminate point in the future.
+  - Instead of "via", be specific. For example, instead of "via the **Enable** button", write "click the **Enable** button".
 
 ### Contractions
 
