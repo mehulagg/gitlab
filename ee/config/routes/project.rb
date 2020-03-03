@@ -73,13 +73,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         resource :threat_monitoring, only: [:show], controller: :threat_monitoring
 
-        resources :logs, only: [:index] do
-          collection do
-            get :k8s
-            get :elasticsearch
-          end
-        end
-
         resources :protected_environments, only: [:create, :update, :destroy], constraints: { id: /\d+/ } do
           collection do
             get 'search'

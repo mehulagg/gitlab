@@ -32,7 +32,7 @@ module EE
 
       scope :preload_for_cluster_environment_entity, -> do
         preload(
-          last_deployment: [:deployable],
+          last_deployment: [:deployable, { cluster: :application_elastic_stack }],
           project: [:route, { namespace: :route }]
         )
       end
@@ -75,10 +75,6 @@ module EE
       result = rollout_status_with_reactive_cache
 
       result || ::Gitlab::Kubernetes::RolloutStatus.loading
-    end
-
-    def elastic_stack_available?
-      !!deployment_platform&.cluster&.application_elastic_stack&.available?
     end
 
     private

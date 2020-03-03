@@ -24,6 +24,7 @@
         { "$ref": "../rollout_status.json" }
       ]
     },
+    "logs_path": { "type": "string" },
     "updated_at": { "type": "date" }
   },
   "additionalProperties": false

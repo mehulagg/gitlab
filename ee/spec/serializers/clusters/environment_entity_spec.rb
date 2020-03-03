@@ -51,21 +51,8 @@ describe Clusters::EnvironmentEntity do
       end
     end
 
-    context 'when pod_logs are available' do
-      before do
-        stub_licensed_features(pod_logs: true)
-        project.add_maintainer(user)
-      end
-
-      it 'exposes logs_path' do
-        expect(subject).to include(:logs_path)
-      end
-    end
-
-    context 'when pod_logs are not available' do
-      it 'does not expose logs_path' do
-        expect(subject).not_to include(:logs_path)
-      end
+    it 'exposes logs_path' do
+      expect(subject).to include(:logs_path)
     end
   end
 end
