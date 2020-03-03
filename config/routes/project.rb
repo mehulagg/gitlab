@@ -348,6 +348,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
       namespace :prometheus do
         resources :alerts, constraints: { id: /\d+/ }, only: [:index, :create, :show, :update, :destroy] do
           post :notify, on: :collection
+
           member do
             get :metrics_dashboard
           end

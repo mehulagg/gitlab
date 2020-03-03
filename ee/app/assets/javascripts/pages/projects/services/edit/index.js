@@ -1,5 +1,5 @@
 import PrometheusMetrics from 'ee/prometheus_metrics/prometheus_metrics';
-import PrometheusAlerts from 'ee/prometheus_alerts';
+import PrometheusAlerts from '~/prometheus_alerts';
 import IntegrationSettingsForm from '~/integrations/integration_settings_form';
 import initAlertsSettings from '~/alerts_service_settings';
 

@@ -476,6 +476,8 @@ class ProjectPolicy < BasePolicy
 
   rule { admin }.enable :change_repository_storage
 
+  rule { can?(:maintainer_access) }.enable :read_prometheus_alerts
+
   private
 
   def team_member?
