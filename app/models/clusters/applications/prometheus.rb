@@ -15,6 +15,11 @@ module Clusters
       include ::Clusters::Concerns::ApplicationData
       include AfterCommitQueue
 
+      attr_encrypted :alert_manager_token,
+        mode: :per_attribute_iv,
+        key: Settings.attr_encrypted_db_key_base_truncated,
+        algorithm: 'aes-256-gcm'
+
       default_value_for :version, VERSION
 
       attr_encrypted :alert_manager_token,
