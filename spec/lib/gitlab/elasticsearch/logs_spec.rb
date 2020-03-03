@@ -10,7 +10,7 @@ describe Gitlab::Elasticsearch::Logs do
   let(:es_message_3) { { timestamp: "2019-12-13T14:35:36.034Z", message: "10.8.2.1 - - [04/Nov/2019:23:09:24 UTC] \"GET / HTTP/1.1\" 200 13" } }
   let(:es_message_4) { { timestamp: "2019-12-13T14:35:37.034Z", message: "- -\u003e /" } }
 
-  let(:es_response) { JSON.parse(fixture_file('lib/elasticsearch/logs_response.json', dir: 'ee')) }
+  let(:es_response) { JSON.parse(fixture_file('lib/elasticsearch/logs_response.json')) }
 
   subject { described_class.new(client) }
 
@@ -21,12 +21,12 @@ describe Gitlab::Elasticsearch::Logs do
   let(:start_time) { "2019-12-13T14:35:34.034Z" }
   let(:end_time) { "2019-12-13T14:35:34.034Z" }
 
-  let(:body) { JSON.parse(fixture_file('lib/elasticsearch/query.json', dir: 'ee')) }
-  let(:body_with_container) { JSON.parse(fixture_file('lib/elasticsearch/query_with_container.json', dir: 'ee')) }
-  let(:body_with_search) { JSON.parse(fixture_file('lib/elasticsearch/query_with_search.json', dir: 'ee')) }
-  let(:body_with_times) { JSON.parse(fixture_file('lib/elasticsearch/query_with_times.json', dir: 'ee')) }
-  let(:body_with_start_time) { JSON.parse(fixture_file('lib/elasticsearch/query_with_start_time.json', dir: 'ee')) }
-  let(:body_with_end_time) { JSON.parse(fixture_file('lib/elasticsearch/query_with_end_time.json', dir: 'ee')) }
+  let(:body) { JSON.parse(fixture_file('lib/elasticsearch/query.json')) }
+  let(:body_with_container) { JSON.parse(fixture_file('lib/elasticsearch/query_with_container.json')) }
+  let(:body_with_search) { JSON.parse(fixture_file('lib/elasticsearch/query_with_search.json')) }
+  let(:body_with_times) { JSON.parse(fixture_file('lib/elasticsearch/query_with_times.json')) }
+  let(:body_with_start_time) { JSON.parse(fixture_file('lib/elasticsearch/query_with_start_time.json')) }
+  let(:body_with_end_time) { JSON.parse(fixture_file('lib/elasticsearch/query_with_end_time.json')) }
 
   RSpec::Matchers.define :a_hash_equal_to_json do |expected|
     match do |actual|

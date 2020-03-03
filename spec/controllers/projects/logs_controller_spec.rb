@@ -22,39 +22,21 @@ describe Projects::LogsController do
   end
 
   describe 'GET #index' do
-    context 'when unlicensed' do
-      before do
-        stub_licensed_features(pod_logs: false)
-      end
+    let(:empty_project) { create(:project) }
 
-      it 'renders forbidden' do
-        get :index, params: environment_params
+    it 'renders empty logs page if no environment exists' do
+      empty_project.add_maintainer(user)
+      get :index, params: { namespace_id: empty_project.namespace, project_id: empty_project }
 
-        expect(response).to have_gitlab_http_status(:not_found)
-      end
+      expect(response).to be_ok
+      expect(response).to render_template 'empty_logs'
     end
 
-    context 'when licensed' do
-      before do
-        stub_licensed_features(pod_logs: true)
-      end
+    it 'renders index template' do
+      get :index, params: environment_params
 
-      let(:empty_project) { create(:project) }
-
-      it 'renders empty logs page if no environment exists' do
-        empty_project.add_maintainer(user)
-        get :index, params: { namespace_id: empty_project.namespace, project_id: empty_project }
-
-        expect(response).to be_ok
-        expect(response).to render_template 'empty_logs'
-      end
-
-      it 'renders index template' do
-        get :index, params: environment_params
-
-        expect(response).to be_ok
-        expect(response).to render_template 'index'
-      end
+      expect(response).to be_ok
+      expect(response).to render_template 'index'
     end
   end
 
@@ -78,14 +60,6 @@ describe Projects::LogsController do
       allow_next_instance_of(service) do |instance|
         allow(instance).to receive(:execute).and_return(service_result)
       end
-    end
-
-    it 'returns 404 when unlicensed' do
-      stub_licensed_features(pod_logs: false)
-
-      get endpoint, params: environment_params(pod_name: pod_name, format: :json)
-
-      expect(response).to have_gitlab_http_status(:not_found)
     end
 
     it 'returns the service result' do

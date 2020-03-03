@@ -26,12 +26,16 @@ describe Groups::ClustersController do
 
     it 'avoids N+1 database queries' do
       control_count = ActiveRecord::QueryRecorder.new(skip_cached: false) { go }.count
+      deployment_count = 2
 
-      create_list(:deployment, 2, :success, cluster: cluster)
+      create_list(:deployment, deployment_count, :success, cluster: cluster)
 
       # TODO remove this leeway when we refactor away from deployment_platform
       # (https://gitlab.com/gitlab-org/gitlab/issues/13635)
-      leeway = 5
+      leeway = deployment_count * 2
+      # it also appears that `can_read_pod_logs?` in ee/app/serializers/clusters/environment_entity.rb
+      # generates 3 additional queries per deployment
+      leeway += deployment_count * 3
       expect { go }.not_to exceed_all_query_limit(control_count + leeway)
     end
   end

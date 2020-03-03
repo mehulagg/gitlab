@@ -57,6 +57,15 @@
     "folder_path": {
       "type": "string"
     },
+    "logs_path": {
+      "type": "string"
+    },
+    "logs_api_path": {
+      "type": "string"
+    },
+    "enable_advanced_logs_querying": {
+      "type": "boolean"
+    },
     "created_at": {
       "type": "date"
     },
