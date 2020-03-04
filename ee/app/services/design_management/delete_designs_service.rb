@@ -15,7 +15,7 @@ module DesignManagement
       return error('Forbidden!') unless can_delete_designs?
 
       actions = build_actions
-      version = run_actions(actions)
+      version = run_actions(actions, current_user)
 
       # Create a Geo event so changes will be replicated to secondary node(s)
       repository.log_geo_updated_event

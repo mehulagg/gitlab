@@ -192,6 +192,10 @@ module DesignManagement
       strong_memoize(:diff_refs) { head_version&.diff_refs }
     end
 
+    def notes_with_associations
+      notes.includes(:author, :award_emoji)
+    end
+
     def clear_version_cache
       [versions, actions].each(&:reset)
       %i[new_design diff_refs head_sha visible_in most_recent_action].each do |key|

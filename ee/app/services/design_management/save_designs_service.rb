@@ -38,7 +38,7 @@ module DesignManagement
       actions = build_actions
       return [] if actions.empty?
 
-      version = run_actions(actions)
+      version = run_actions(actions, current_user)
       ::DesignManagement::NewVersionWorker.perform_async(version.id)
 
       actions.map(&:design)

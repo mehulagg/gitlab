@@ -16,10 +16,18 @@ module EE
         new_entity
       end
 
+      override :update_new_entity
+      def update_new_entity
+        copy_designs
+
+        super
+      end
+
       override :update_old_entity
       def update_old_entity
         rewrite_epic_issue
         rewrite_related_issues
+
         super
       end
 
@@ -30,6 +38,15 @@ module EE
 
         original_entity
           .sent_notifications.update_all(project_id: new_entity.project_id, noteable_id: new_entity.id)
+      end
+
+      def copy_designs
+        ::DesignManagement::CopyDesignsService.new(
+          new_entity.project,
+          current_user,
+          issue: original_entity,
+          to_issue: new_entity
+        ).execute
       end
 
       def rewrite_epic_issue

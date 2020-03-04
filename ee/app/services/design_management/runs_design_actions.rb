@@ -5,10 +5,10 @@ module DesignManagement
     NoActions = Class.new(StandardError)
 
     # this concern requires the following methods to be implemented:
-    #   current_user, target_branch, repository, commit_message
+    #   target_branch, repository, commit_message
     #
     # @raise [NoActions] if actions are empty
-    def run_actions(actions)
+    def run_actions(actions, current_user)
       raise NoActions if actions.empty?
 
       repository.create_if_not_exists

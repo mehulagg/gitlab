@@ -3,6 +3,8 @@
 module Issuable
   module Clone
     class ContentRewriter < ::Issuable::Clone::BaseService
+      include RewriteContent
+
       def initialize(current_user, original_entity, new_entity)
         @current_user = current_user
         @original_entity = original_entity
@@ -12,62 +14,22 @@ module Issuable
 
       def execute
         rewrite_description
-        rewrite_award_emoji(original_entity, new_entity)
-        rewrite_notes
+        copy_award_emoji
+        copy_notes
       end
 
       private
 
       def rewrite_description
-        new_entity.update(description: rewrite_content(original_entity.description))
+        new_entity.update(description: rewrite_content(original_entity.description, old_project, new_parent, current_user))
       end
 
-      def rewrite_notes
-        new_discussion_ids = {}
-        original_entity.notes_with_associations.find_each do |note|
-          new_note = note.dup
-          new_discussion_ids[note.discussion_id] ||= Discussion.discussion_id(new_note)
-          new_params = {
-            project: new_entity.project,
-            noteable: new_entity,
-            discussion_id: new_discussion_ids[note.discussion_id],
-            note: rewrite_content(new_note.note),
-            note_html: nil,
-            created_at: note.created_at,
-            updated_at: note.updated_at
-          }
-
-          if note.system_note_metadata
-            new_params[:system_note_metadata] = note.system_note_metadata.dup
-
-            # TODO: Implement copying of description versions when an issue is moved
-            # https://gitlab.com/gitlab-org/gitlab/issues/32300
-            new_params[:system_note_metadata].description_version = nil
-          end
-
-          new_note.update(new_params)
-
-          rewrite_award_emoji(note, new_note)
-        end
+      def copy_award_emoji
+        AwardEmojis::CopyService.new(original_entity, new_entity).execute
       end
 
-      def rewrite_content(content)
-        return unless content
-
-        rewriters = [Gitlab::Gfm::ReferenceRewriter, Gitlab::Gfm::UploadsRewriter]
-
-        rewriters.inject(content) do |text, klass|
-          rewriter = klass.new(text, old_project, current_user)
-          rewriter.rewrite(new_parent)
-        end
-      end
-
-      def rewrite_award_emoji(old_awardable, new_awardable)
-        old_awardable.award_emoji.each do |award|
-          new_award = award.dup
-          new_award.awardable = new_awardable
-          new_award.save
-        end
+      def copy_notes
+        Notes::CopyService.new(original_entity, new_entity, current_user).execute
       end
     end
   end

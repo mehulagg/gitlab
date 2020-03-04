@@ -3,9 +3,9 @@
 require 'spec_helper'
 
 describe Issues::MoveService do
-  let(:user) { create(:user) }
-  let(:old_project) { create(:project) }
-  let(:new_project) { create(:project, group: create(:group)) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:old_project) { create(:project) }
+  let_it_be(:new_project) { create(:project, group: create(:group)) }
   let(:old_issue) { create(:issue, project: old_project, author: user) }
   let(:move_service) { described_class.new(old_project, user) }
 
@@ -15,6 +15,20 @@ describe Issues::MoveService do
   end
 
   describe '#execute' do
+    it 'calls DesignManagement::CopyDesignsService' do
+      service = double
+      expect(service).to receive(:execute)
+
+      expect(DesignManagement::CopyDesignsService).to receive(:new).with(
+        new_project,
+        user,
+        issue: old_issue,
+        to_issue: instance_of(Issue)
+      ).and_return(service)
+
+      move_service.execute(old_issue, new_project)
+    end
+
     context 'group issue hooks' do
       let!(:hook) { create(:group_hook, group: new_project.group, issues_events: true) }
 
@@ -86,7 +100,7 @@ describe Issues::MoveService do
 
   describe '#rewrite_epic_issue' do
     context 'issue assigned to epic' do
-      let!(:epic_issue) { create(:epic_issue, issue: old_issue) }
+      let(:epic_issue) { create(:epic_issue, issue: old_issue) }
 
       before do
         stub_licensed_features(epics: true)
