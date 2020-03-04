@@ -541,7 +541,7 @@ module EE
     end
 
     def remove_import_data
-      super unless mirror?
+      super unless mirror? || jira_import?
     end
 
     def merge_requests_ff_only_enabled

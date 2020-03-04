@@ -68,6 +68,15 @@ describe Gitlab::Cache::Import::Caching, :clean_gitlab_redis_cache do
 
       expect(values).to eq(['10'])
     end
+
+    it 'adds multiple values to a set' do
+      described_class.set_add('foo', [10, 20, 30])
+
+      key = described_class.cache_key_for('foo')
+      values = Gitlab::Redis::Cache.with { |r| r.smembers(key) }
+
+      expect(values).to eq %w(10 20 30)
+    end
   end
 
   describe '.set_includes?' do
@@ -85,6 +94,14 @@ describe Gitlab::Cache::Import::Caching, :clean_gitlab_redis_cache do
       described_class.set_add('foo', 10)
 
       expect(described_class.set_includes?('foo', 10)).to eq(true)
+    end
+
+    it 'returns true when the set includes the given value' do
+      described_class.set_add('foo', [10, 20, 30])
+
+      expect(described_class.set_includes?('foo', 10)).to eq(true)
+      expect(described_class.set_includes?('foo', 20)).to eq(true)
+      expect(described_class.set_includes?('foo', 30)).to eq(true)
     end
   end
 

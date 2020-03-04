@@ -76,7 +76,7 @@ module EE
     override :in_progress?
     def in_progress?
       # If we're importing while we do have a repository, we're simply updating the mirror.
-      super && !project.mirror_with_content?
+      super && (!project.mirror_with_content? || project.jira_import?)
     end
 
     def mirror_waiting_duration
