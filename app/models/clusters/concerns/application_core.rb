@@ -28,6 +28,14 @@ module Clusters
           true
         end
 
+        def helmfile_install_supported?
+          true
+        end
+
+        def helmfile_application_name
+          name.underscore.camelize(:lower)
+        end
+
         def self.application_name
           self.to_s.demodulize.underscore
         end

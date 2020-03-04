@@ -75,6 +75,14 @@ module Clusters
         # since we want to delete it anyway.
       end
 
+      def helmfile_install_supported?
+        false
+      end
+
+      def predefined_variables
+        []
+      end
+
       private
 
       def files

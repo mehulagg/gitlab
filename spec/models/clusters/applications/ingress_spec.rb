@@ -8,6 +8,7 @@ describe Clusters::Applications::Ingress do
   it_behaves_like 'having unique enum values'
 
   include_examples 'cluster application core specs', :clusters_applications_ingress
+  include_examples 'cluster application data specs', :clusters_applications_ingress
   include_examples 'cluster application status specs', :clusters_applications_ingress
   include_examples 'cluster application version specs', :clusters_applications_ingress
   include_examples 'cluster application helm specs', :clusters_applications_ingress

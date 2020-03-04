@@ -29,6 +29,21 @@ module Clusters
         end
       end
 
+      def helmfile_configuration
+        helmfile_configuration =
+          if new_record?
+            { 'installed' => false }
+          else
+            helmfile_options.reverse_merge('installed' => true)
+          end
+
+        { helmfile_application_name => helmfile_configuration }
+      end
+
+      def predefined_variables
+        []
+      end
+
       private
 
       def use_tiller_ssl?
@@ -55,6 +70,10 @@ module Clusters
 
       def chart_values_file
         "#{Rails.root}/vendor/#{name}/values.yaml"
+      end
+
+      def helmfile_options
+        {}
       end
     end
   end

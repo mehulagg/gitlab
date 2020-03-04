@@ -103,6 +103,10 @@ module Clusters
         )
       end
 
+      def helmfile_install_supported?
+        false
+      end
+
       private
 
       def delete_knative_services_and_metrics

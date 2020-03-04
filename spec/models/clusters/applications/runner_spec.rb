@@ -6,6 +6,7 @@ describe Clusters::Applications::Runner do
   let(:ci_runner) { create(:ci_runner) }
 
   include_examples 'cluster application core specs', :clusters_applications_runner
+  include_examples 'cluster application data specs', :clusters_applications_runner
   include_examples 'cluster application status specs', :clusters_applications_runner
   include_examples 'cluster application version specs', :clusters_applications_runner
   include_examples 'cluster application helm specs', :clusters_applications_runner
@@ -188,5 +189,14 @@ describe Clusters::Applications::Runner do
 
       expect { application_runner.post_uninstall }.to change { Ci::Runner.count }.by(-1)
     end
+  end
+
+  describe '#predefined_variables' do
+    let(:application_runner) { create(:clusters_applications_runner) }
+
+    subject { application_runner.predefined_variables }
+
+    it { is_expected.to include(key: 'GITLAB_RUNNER_GITLAB_URL', value: Gitlab::Routing.url_helpers.root_url) }
+    it { is_expected.to include(key: 'GITLAB_RUNNER_REGISTRATION_TOKEN', value: application_runner.runner.token, public: false, masked: true) }
   end
 end

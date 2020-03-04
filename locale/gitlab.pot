@@ -4056,6 +4056,9 @@ msgstr ""
 msgid "Cluster level"
 msgstr ""
 
+msgid "Cluster management project not configured"
+msgstr ""
+
 msgid "ClusterIntegration| %{custom_domain_start}More information%{custom_domain_end}."
 msgstr ""
 
@@ -11070,6 +11073,9 @@ msgstr ""
 msgid "Invalid URL"
 msgstr ""
 
+msgid "Invalid configuration file"
+msgstr ""
+
 msgid "Invalid cursor value provided"
 msgstr ""
 
@@ -11670,6 +11676,9 @@ msgid "Last repository check run"
 msgstr ""
 
 msgid "Last seen"
+msgstr ""
+
+msgid "Last seen ref does not match cluster management project"
 msgstr ""
 
 msgid "Last successful sync"
@@ -21698,6 +21707,9 @@ msgid "Update all"
 msgstr ""
 
 msgid "Update approval rule"
+msgstr ""
+
+msgid "Update cluster management project"
 msgstr ""
 
 msgid "Update failed"

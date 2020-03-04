@@ -269,6 +269,10 @@ module Clusters
 
     def predefined_variables
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
+        persisted_applications.each do |application|
+          variables.concat(application.predefined_variables)
+        end
+
         break variables unless kube_ingress_domain
 
         variables.append(key: KUBE_INGRESS_BASE_DOMAIN, value: kube_ingress_domain)

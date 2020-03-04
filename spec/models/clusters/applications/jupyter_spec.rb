@@ -4,6 +4,7 @@ require 'spec_helper'
 
 describe Clusters::Applications::Jupyter do
   include_examples 'cluster application core specs', :clusters_applications_jupyter
+  include_examples 'cluster application data specs', :clusters_applications_jupyter
   include_examples 'cluster application status specs', :clusters_applications_jupyter
   include_examples 'cluster application version specs', :clusters_applications_jupyter
   include_examples 'cluster application helm specs', :clusters_applications_jupyter

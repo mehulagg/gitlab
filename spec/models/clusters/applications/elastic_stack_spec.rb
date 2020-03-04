@@ -6,6 +6,7 @@ describe Clusters::Applications::ElasticStack do
   include KubernetesHelpers
 
   include_examples 'cluster application core specs', :clusters_applications_elastic_stack
+  include_examples 'cluster application data specs', :clusters_applications_elastic_stack
   include_examples 'cluster application status specs', :clusters_applications_elastic_stack
   include_examples 'cluster application version specs', :clusters_applications_elastic_stack
   include_examples 'cluster application helm specs', :clusters_applications_elastic_stack

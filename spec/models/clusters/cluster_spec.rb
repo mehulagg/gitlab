@@ -760,6 +760,22 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
         expect(subject.to_hash).to be_empty
       end
     end
+
+    context 'cluster has applications installed' do
+      let(:cluster) { create(:cluster) }
+      let(:runner) { create(:clusters_applications_runner, cluster: cluster) }
+      let(:runner_variable) { Hash(key: :key, value: 'value') }
+
+      it 'includes predefined variables from installed applications' do
+        expect(cluster).to receive(:persisted_applications)
+          .and_return([runner])
+        expect(runner).to receive(:predefined_variables)
+          .and_return(Gitlab::Ci::Variables::Collection.new([runner_variable]))
+
+        expect(subject.count).to eq 1
+        expect(subject).to include runner_variable
+      end
+    end
   end
 
   describe '#provided_by_user?' do

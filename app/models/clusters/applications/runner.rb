@@ -25,6 +25,10 @@ module Clusters
         'https://charts.gitlab.io'
       end
 
+      def helmfile_application_name
+        'gitlabRunner'
+      end
+
       def values
         content_values.to_yaml
       end
@@ -46,6 +50,13 @@ module Clusters
 
       def post_uninstall
         runner.destroy!
+      end
+
+      def predefined_variables
+        Gitlab::Ci::Variables::Collection.new.tap do |variables|
+          variables.append(key: 'GITLAB_RUNNER_GITLAB_URL', value: gitlab_url)
+          variables.append(key: 'GITLAB_RUNNER_REGISTRATION_TOKEN', value: ensure_runner.token, public: false, masked: true)
+        end
       end
 
       private
