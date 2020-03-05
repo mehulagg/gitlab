@@ -70,7 +70,6 @@ describe 'Project navbar' do
           _('Environments'),
           _('Error Tracking'),
           _('Serverless'),
-          _('Logs'),
           _('Kubernetes')
         ]
       },
