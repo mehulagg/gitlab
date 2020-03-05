@@ -12,7 +12,8 @@ module QA
       let(:new_label_different_scope_multi_colon) { 'group::truck::mercedes-bens' }
 
       before do
-        Flow::Login.sign_in
+        Flow::Login.formless_login
+        # Flow::Login.sign_in
 
         issue = Resource::Issue.fabricate_via_api! do |issue|
           issue.labels = [initial_label, initial_label_multi_colon]

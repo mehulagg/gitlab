@@ -27,6 +27,10 @@ devise_for :users, controllers: { omniauth_callbacks: :omniauth_callbacks,
 devise_scope :user do
   get '/users/auth/:provider/omniauth_error' => 'omniauth_callbacks#omniauth_error', as: :omniauth_error
   get '/users/almost_there' => 'confirmations#almost_there'
+
+  # Used only by gitlab-qa for faster logins
+  post '/users/qa_sign_in' => 'qa_sessions#create'
+  get '/users/qa_login' => 'qa_sessions#show'
 end
 
 scope '-/users', module: :users do

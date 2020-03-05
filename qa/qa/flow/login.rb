@@ -26,6 +26,33 @@ module QA
         Page::Main::Login.perform { |login| login.sign_in_using_credentials(user: as) }
       end
 
+      def formless_login(user: nil, use_blank_page: false)
+        # Login can be made from a blank page Otherwise the javascript gets injected in the current one.
+        if use_blank_page
+          Runtime::Browser.visit(:gitlab, Page::Main::FormlessLogin)
+        end
+
+        login_as = user || Runtime::User.admin
+
+        Capybara.current_session.driver.execute_script(
+          <<~JS
+            var form = document.createElement('form');
+            form.action = '/users/qa_sign_in';
+            form.method = 'POST';
+            var username = document.createElement('input');
+            username.name = 'user[login]';
+            username.value = "#{login_as.username}";;
+            form.appendChild(username);
+            var password = document.createElement('input');
+            password.name = 'user[password]';
+            password.value = "#{login_as.password}";
+            form.appendChild(password);
+            document.body.appendChild(form);
+            form.submit();
+          JS
+        )
+      end
+
       def sign_in_as_admin(address: :gitlab)
         sign_in(as: Runtime::User.admin, address: address)
       end
