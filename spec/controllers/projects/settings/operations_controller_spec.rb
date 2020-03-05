@@ -374,14 +374,6 @@ describe Projects::Settings::OperationsController do
           expect(response).to have_gitlab_http_status(:redirect)
         end
       end
-
-      private
-
-      def reset_alerting_token
-        post :reset_alerting_token,
-          params: project_params(project),
-          format: :json
-      end
     end
   end
 
@@ -393,5 +385,11 @@ describe Projects::Settings::OperationsController do
       project_id: project,
       project: params
     }
+  end
+
+  def reset_alerting_token
+    post :reset_alerting_token,
+      params: project_params(project),
+      format: :json
   end
 end
