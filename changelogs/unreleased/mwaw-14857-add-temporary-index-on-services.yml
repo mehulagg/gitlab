@@ -1,0 +1,5 @@
+---
+title: Add temporary partial index to services on project_id and id
+merge_request: 26653
+author:
+type: added

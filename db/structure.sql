@@ -10172,6 +10172,8 @@ CREATE UNIQUE INDEX term_agreements_unique_index ON public.term_agreements USING
 
 CREATE INDEX tmp_build_stage_position_index ON public.ci_builds USING btree (stage_id, stage_idx) WHERE (stage_idx IS NOT NULL);
 
+CREATE INDEX tmp_index_on_project_id_partial_with_prometheus_services ON public.services USING btree (project_id, id) WHERE ((type)::text = 'PrometheusService'::text);
+
 CREATE INDEX undefined_vulnerabilities ON public.vulnerability_occurrences USING btree (id) WHERE (severity = 0);
 
 CREATE INDEX undefined_vulnerability ON public.vulnerabilities USING btree (id) WHERE (severity = 0);
@@ -12667,6 +12669,7 @@ INSERT INTO "schema_migrations" (version) VALUES
 ('20200305121159'),
 ('20200305151736'),
 ('20200306095654'),
+('20200306102535'),
 ('20200306160521'),
 ('20200306170211'),
 ('20200306170321'),
