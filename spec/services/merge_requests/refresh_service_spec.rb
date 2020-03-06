@@ -331,7 +331,7 @@ describe MergeRequests::RefreshService do
           })
         end
 
-        xit 'persists a pipeline with config error' do
+        it 'persists a pipeline with config error' do
           expect { subject }
             .to change { @merge_request.pipelines_for_merge_request.count }.by(1)
           expect(@merge_request.pipelines_for_merge_request.last).to be_failed
