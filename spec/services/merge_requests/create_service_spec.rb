@@ -294,7 +294,7 @@ describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
         context 'when .gitlab-ci.yml is invalid' do
           let(:config) { 'invalid yaml file' }
 
-          it 'does not persist a pipeline' do
+          xit 'does not persist a pipeline' do
             expect(merge_request).not_to be_persisted
 
             merge_request.reload
