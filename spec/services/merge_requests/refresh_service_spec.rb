@@ -222,7 +222,7 @@ describe MergeRequests::RefreshService do
           end
         end
 
-        context "when branch pipeline was created before a detached merge request pipeline has been created" do
+        context "when branch pipeline was created before a detaced merge request pipeline has been created" do
           before do
             create(:ci_pipeline, project: @merge_request.source_project,
                                  sha: @merge_request.diff_head_sha,
@@ -317,41 +317,15 @@ describe MergeRequests::RefreshService do
           expect(@merge_request.pipelines_for_merge_request.last).to be_failed
           expect(@merge_request.pipelines_for_merge_request.last).to be_config_error
         end
-      end
-
-      context 'when .gitlab-ci.yml file has a logical error' do
-        let(:config) do
-          YAML.dump({
-            build: {
-              script: 'echo "Hello World"',
-              only: ['master']
-            },
-            test: {
-              script: 'echo "Hello World"',
-              only: ['merge_request'],
-              needs: ['build']
-            }
-          })
-        end
-
-        context 'and the feature flag is enabled' do
-          # TODO: Fails right now...
-          it 'creates a detached merge request pipeline' do
-            stub_feature_flags(ci_merge_request_pipelines_fix_yaml_errors: true)
-
-            expect { subject }
-              .to change { @merge_request.pipelines_for_merge_request.count }.by(1)
-            expect(@merge_request.pipelines_for_merge_request.last.status).to eq('failed')
-          end
-        end
 
         context 'and the feature flag is disabled' do
-          it 'creates a detached merge request pipeline' do
+          it 'persists a pipeline with config error' do
             stub_feature_flags(ci_merge_request_pipelines_fix_yaml_errors: false)
 
             expect { subject }
               .to change { @merge_request.pipelines_for_merge_request.count }.by(1)
-            expect(@merge_request.pipelines_for_merge_request.last.status).to eq('failed')
+            expect(@merge_request.pipelines_for_merge_request.last).to be_failed
+            expect(@merge_request.pipelines_for_merge_request.last).to be_config_error
           end
         end
       end
