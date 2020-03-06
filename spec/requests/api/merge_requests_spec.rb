@@ -1283,6 +1283,18 @@ describe API::MergeRequests do
         expect(merge_request.pipelines_for_merge_request.last).to be_failed
         expect(merge_request.pipelines_for_merge_request.last).to be_config_error
       end
+
+      context 'and the feature flag is disabled' do
+        it 'still creates a failed pipeline' do
+          stub_feature_flags(ci_merge_request_pipelines_fix_yaml_errors: false)
+
+          expect { request }.to change(Ci::Pipeline, :count).by(1)
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_a Hash
+          expect(merge_request.pipelines_for_merge_request.last).to be_failed
+          expect(merge_request.pipelines_for_merge_request.last).to be_config_error
+        end
+      end
     end
   end
 

@@ -13,8 +13,8 @@ module MergeRequests
                                     current_user,
                                     ref: pipeline_ref_for_detached_merge_request_pipeline(merge_request))
         .execute(:merge_request_event,
-                 merge_request: merge_request,
-                 save_on_errors: save_on_errors)
+                 merge_request: merge_request)
+      # save_on_errors: save_on_errors)
     end
 
     def can_create_pipeline_for?(merge_request)

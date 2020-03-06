@@ -266,6 +266,19 @@ describe MergeRequests::RefreshService do
               .to change { @merge_request.pipelines_for_merge_request.count }.by(1)
             expect(@merge_request.pipelines_for_merge_request.last).to be_skipped
           end
+
+          context 'and the feature flag is disabled' do
+            it 'still saves a skipped detached merge request pipeline' do
+              stub_feature_flags(ci_merge_request_pipelines_fix_yaml_errors: false)
+              project.repository.create_file(@user, 'new-file.txt', 'A new file',
+                                             message: '[skip ci] This is a test',
+                                             branch_name: 'master')
+
+              expect { subject }
+                .to change { @merge_request.pipelines_for_merge_request.count }.by(1)
+              expect(@merge_request.pipelines_for_merge_request.last).to be_skipped
+            end
+          end
         end
       end
 
@@ -288,11 +301,18 @@ describe MergeRequests::RefreshService do
       context 'when .gitlab-ci.yml is invalid' do
         let(:config) { 'invalid yaml file' }
 
-        it 'persists a pipeline with config error' do
+        it 'does not persist a pipeline' do
           expect { subject }
-            .to change { @merge_request.pipelines_for_merge_request.count }.by(1)
-          expect(@merge_request.pipelines_for_merge_request.last).to be_failed
-          expect(@merge_request.pipelines_for_merge_request.last).to be_config_error
+            .not_to change { @merge_request.pipelines_for_merge_request.count }
+        end
+
+        context 'and the feature flag is disabled' do
+          it 'persists a pipeline with config error' do
+            expect { subject }
+              .to change { @merge_request.pipelines_for_merge_request.count }.by(1)
+            expect(@merge_request.pipelines_for_merge_request.last).to be_failed
+            expect(@merge_request.pipelines_for_merge_request.last).to be_config_error
+          end
         end
       end
 
@@ -311,7 +331,7 @@ describe MergeRequests::RefreshService do
           })
         end
 
-        it 'persists a pipeline with config error' do
+        xit 'persists a pipeline with config error' do
           expect { subject }
             .to change { @merge_request.pipelines_for_merge_request.count }.by(1)
           expect(@merge_request.pipelines_for_merge_request.last).to be_failed

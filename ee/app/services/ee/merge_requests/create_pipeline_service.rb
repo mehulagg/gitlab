@@ -26,8 +26,8 @@ module EE
                                           target_sha: ref_payload[:target_id],
                                           source_sha: ref_payload[:source_id])
             .execute(:merge_request_event,
-                     merge_request: merge_request,
-                     save_on_errors: save_on_errors)
+                     merge_request: merge_request)
+          # save_on_errors: save_on_errors)
         end
       end
 

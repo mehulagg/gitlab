@@ -143,6 +143,18 @@ describe Git::BranchPushService, services: true do
         expect(pipeline).to be_failed
         expect(pipeline).to be_config_error
       end
+
+      context 'and the feature flag is disabled' do
+        it 'still persists an error pipeline' do
+          stub_feature_flags(ci_merge_request_pipelines_fix_yaml_errors: false)
+          expect { subject }.to change { Ci::Pipeline.count }
+
+          pipeline = Ci::Pipeline.last
+          expect(pipeline).to be_push
+          expect(pipeline).to be_failed
+          expect(pipeline).to be_config_error
+        end
+      end
     end
   end
 
