@@ -136,7 +136,7 @@ describe MergeRequests::CreatePipelineService, :clean_gitlab_redis_shared_state 
     context 'when .gitlab-ci.yml is invalid' do
       let(:ci_yaml) { 'invalid yaml file' }
 
-      it 'does not persist a pipeline with a config error' do
+      it 'does not persist a pipeline' do
         expect { subject }.not_to change { Ci::Pipeline.count }
       end
 
