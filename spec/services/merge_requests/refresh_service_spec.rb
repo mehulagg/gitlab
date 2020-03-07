@@ -301,7 +301,7 @@ describe MergeRequests::RefreshService do
       context 'when .gitlab-ci.yml is invalid' do
         let(:config) { 'invalid yaml file' }
 
-        xit 'does not persist a pipeline' do
+        it 'does not persist a pipeline' do
           expect { subject }
             .not_to change { @merge_request.pipelines_for_merge_request.count }
         end
@@ -309,6 +309,7 @@ describe MergeRequests::RefreshService do
         context 'and the feature flag is disabled' do
           it 'persists a pipeline with config error' do
             stub_feature_flags(ci_merge_request_pipelines_fix_yaml_errors: false)
+
             expect { subject }
               .to change { @merge_request.pipelines_for_merge_request.count }.by(1)
             expect(@merge_request.pipelines_for_merge_request.last).to be_failed
