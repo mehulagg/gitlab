@@ -14,8 +14,6 @@ describe 'Environment > Pod Logs', :js do
   let(:service) { create(:cluster_platform_kubernetes, :configured) }
 
   before do
-    stub_licensed_features(pod_logs: true)
-
     create(:cluster, :provided_by_gcp, environment_scope: '*', projects: [project])
     create(:deployment, :success, environment: environment)
 

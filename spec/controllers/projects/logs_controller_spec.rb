@@ -55,8 +55,6 @@ describe Projects::LogsController do
     let_it_be(:cluster) { create(:cluster, :provided_by_gcp, environment_scope: '*', projects: [project]) }
 
     before do
-      stub_licensed_features(pod_logs: true)
-
       allow_next_instance_of(service) do |instance|
         allow(instance).to receive(:execute).and_return(service_result)
       end
