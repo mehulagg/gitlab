@@ -32,7 +32,7 @@ module EE
 
       scope :preload_for_cluster_environment_entity, -> do
         preload(
-          last_deployment: [:deployable, { cluster: :application_elastic_stack }],
+          last_deployment: [:deployable],
           project: [:route, { namespace: :route }]
         )
       end
