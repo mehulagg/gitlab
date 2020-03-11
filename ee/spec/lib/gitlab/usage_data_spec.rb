@@ -25,10 +25,6 @@ describe Gitlab::UsageData do
       create(:ee_ci_build, name: 'license_scanning', pipeline: pipeline)
       create(:ci_build, name: 'sast', pipeline: pipeline)
 
-      create(:prometheus_alert, project: projects[0])
-      create(:prometheus_alert, project: projects[0])
-      create(:prometheus_alert, project: projects[1])
-
       create(:service, project: projects[1], type: 'JenkinsService', active: true)
 
       create(:package, project: projects[0])
@@ -90,7 +86,6 @@ describe Gitlab::UsageData do
         projects_mirrored_with_pipelines_enabled
         projects_reporting_ci_cd_back_to_github
         projects_with_packages
-        projects_with_prometheus_alerts
         projects_with_tracing_enabled
         sast_jobs
         design_management_designs_create
@@ -102,7 +97,6 @@ describe Gitlab::UsageData do
       ))
 
       expect(count_data[:projects_jenkins_active]).to eq(1)
-      expect(count_data[:projects_with_prometheus_alerts]).to eq(2)
       expect(count_data[:projects_with_packages]).to eq(2)
       expect(count_data[:feature_flags]).to eq(1)
     end

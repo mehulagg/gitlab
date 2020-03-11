@@ -477,6 +477,8 @@ class Project < ApplicationRecord
   scope :with_merge_requests_enabled, -> { with_feature_enabled(:merge_requests) }
   scope :with_remote_mirrors, -> { joins(:remote_mirrors).where(remote_mirrors: { enabled: true }).distinct }
   scope :with_limit, -> (maximum) { limit(maximum) }
+  scope :with_active_prometheus_service, -> { joins(:prometheus_service).merge(PrometheusService.active) }
+  scope :with_prometheus_service, -> { joins(:prometheus_service) }
 
   scope :with_group_runners_enabled, -> do
     joins(:ci_cd_settings)

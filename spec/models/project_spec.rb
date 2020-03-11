@@ -1359,6 +1359,16 @@ describe Project do
     end
   end
 
+  describe '.with_active_prometheus_service' do
+    it 'returns the correct project' do
+      project_with_active_prometheus_service = create(:prometheus_project)
+      project_without_active_prometheus_service = create(:project)
+
+      expect(described_class.with_active_prometheus_service).to include(project_with_active_prometheus_service)
+      expect(described_class.with_active_prometheus_service).not_to include(project_without_active_prometheus_service)
+    end
+  end
+
   describe '.visible_to_user' do
     let!(:project) { create(:project, :private) }
     let!(:user)    { create(:user) }
