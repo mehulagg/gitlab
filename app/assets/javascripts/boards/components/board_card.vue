@@ -1,6 +1,6 @@
 <script>
 /* eslint-disable vue/require-default-prop */
-import IssueCardInner from './issue_card_inner.vue';
+import IssueCardInner from 'ee_else_ce/boards/components/issue_card_inner.vue';
 import eventHub from '../eventhub';
 import boardsStore from '../stores/boards_store';
 

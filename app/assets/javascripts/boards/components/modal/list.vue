@@ -2,7 +2,7 @@
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Icon from '~/vue_shared/components/icon.vue';
 import ModalStore from '../../stores/modal_store';
-import IssueCardInner from '../issue_card_inner.vue';
+import IssueCardInner from 'ee_else_ce/boards/components/issue_card_inner.vue';
 
 export default {
   components: {

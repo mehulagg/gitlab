@@ -21,7 +21,7 @@ export default {
     TooltipOnTruncate,
     IssueDueDate,
     IssueTimeEstimate,
-    IssueCardWeight: () => import('ee_component/boards/components/issue_card_weight.vue'),
+    IssueCardInnerScopedLabel,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -206,7 +206,7 @@ export default {
         <span class="board-info-items prepend-top-8 d-inline-block">
           <issue-due-date v-if="issue.dueDate" :date="issue.dueDate" :closed="issue.closed" />
           <issue-time-estimate v-if="issue.timeEstimate" :estimate="issue.timeEstimate" />
-          <issue-card-weight v-if="$options.isNumber(issue.weight)" :weight="issue.weight" />
+          <slot name="info"></slot>
         </span>
       </div>
       <div class="board-card-assignee d-flex">
