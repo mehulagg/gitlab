@@ -166,7 +166,7 @@ gem 'diff_match_patch', '~> 0.1.0'
 gem 'rack', '~> 2.0.7'
 
 # Faster JSON
-gem 'oj', '~> 3.10.0', require: false
+gem 'oj', '~> 3.10.0'
 
 group :unicorn do
   gem 'unicorn', '~> 5.4.1'
