@@ -1291,6 +1291,7 @@ DEPENDENCIES
   mimemagic (~> 0.3.2)
   mini_magick
   minitest (~> 5.11.0)
+  multi_json (~> 1.14.1)
   nakayoshi_fork (~> 0.0.4)
   net-ldap
   net-ntp
