@@ -4,7 +4,7 @@ def enable_oj?
   return false unless Feature::FlipperFeature.table_exists?
 
   Feature.enabled?(:multijson_oj, default_enabled: true)
-rescue ActiveRecord::NoDatabaseError
+rescue
   false
 end
 
