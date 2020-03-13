@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 def enable_oj?
-  return true unless Feature::FlipperFeature.table_exists?
+  return false unless Feature::FlipperFeature.table_exists?
 
   Feature.enabled?(:multijson_oj, default_enabled: true)
+rescue ActiveRecord::NoDatabaseError
+  false
 end
 
 if enable_oj?
