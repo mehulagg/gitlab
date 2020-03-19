@@ -99,11 +99,7 @@ module QA
         elasticsearch_state_request = Runtime::API::Request.new(api_client, '/application/settings')
         response = get elasticsearch_state_request.url
 
-        if response.to_s.match(/"elasticsearch_search":true/) && response.to_s.match(/"elasticsearch_indexing":true/)
-          return true
-        else
-          return false
-        end
+        parse_body(response)[:elasticsearch_search] && parse_body(response)[:elasticsearch_indexing]
       end
 
       def disable_elasticsearch(api_client)

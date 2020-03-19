@@ -3,7 +3,7 @@
 require 'securerandom'
 
 module QA
-  context 'Create' do
+  context 'Enablement:Search' do
     include Support::Api
     describe 'Elasticsearch advanced global search with advanced syntax', :orchestrated, :elasticsearch, :requires_admin, quarantine: { type: :new } do
       before(:all) do
@@ -13,8 +13,12 @@ module QA
 
         unless @elasticsearch_original_state_on
           QA::EE::Resource::Settings::Elasticsearch.fabricate_via_api!
-          sleep(60) # wait for the change to propagate before inserting records or else Gitlab::CurrentSettings.elasticsearch_indexing and Elastic::ApplicationVersionedSearch::searchable? will be false
-          # this sleep can be removed after we're able to query logs via the API as per this issue https://gitlab.com/gitlab-org/quality/team-tasks/issues/395
+          sleep(60) 
+          # wait for the change to propagate before inserting records or else 
+          # Gitlab::CurrentSettings.elasticsearch_indexing and 
+          # Elastic::ApplicationVersionedSearch::searchable? will be false
+          # this sleep can be removed after we're able to query logs via the API 
+          # as per this issue https://gitlab.com/gitlab-org/quality/team-tasks/issues/395
         end
 
         @project = create_project("es-adv-global-search-#{@project_name_suffix}",
@@ -46,9 +50,7 @@ module QA
           get create_search_request(@api_client, 'projects', search_term).url
           expect_status(QA::Support::Api::HTTP_STATUS_OK)
 
-          if json_body.empty?
-            raise 'Empty search result returned'
-          end
+          raise 'Empty search result returned' if json_body.empty?
 
           expect(json_body[0][:name]).to eq(@project.name)
         end
