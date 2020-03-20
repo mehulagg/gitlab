@@ -26,11 +26,8 @@ module QA
         Page::Main::Login.perform { |login| login.sign_in_using_credentials(user: as) }
       end
 
-      def formless_login(user: nil, use_blank_page: false)
-        # Login can be made from a blank page Otherwise the javascript gets injected in the current one.
-        if use_blank_page
-          Runtime::Browser.visit(:gitlab, Page::Main::FormlessLogin)
-        end
+      def formless_login(user: nil)
+        Runtime::Browser.visit(:gitlab, Page::Main::FormlessLogin)
 
         login_as = user || Runtime::User.admin
 
