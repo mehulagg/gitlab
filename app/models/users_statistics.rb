@@ -14,6 +14,12 @@ class UsersStatistics < ApplicationRecord
 
   private
 
+  def without_groups_and_projects_stats
+    return unless Feature.enabled?(:users_statistics)
+
+    batch_count_for_access_level(nil)
+  end
+
   def highest_role_stats
     return unless Feature.enabled?(:users_statistics)
 
