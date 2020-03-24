@@ -6,6 +6,8 @@ module EE
 
     prepended do
       before_destroy :delete_related_access_levels
+
+      after_commit :update_gitlab_subscription
     end
 
     def delete_related_access_levels
@@ -20,6 +22,12 @@ module EE
 
       # For protected environments
       project.protected_environments.deploy_access_levels_by_group(group).delete_all
+    end
+
+    private
+
+    def update_gitlab_subscription
+      ::Gitlab::Subscription::MaxSeatsUpdater.update(project)
     end
   end
 end

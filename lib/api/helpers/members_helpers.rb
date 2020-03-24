@@ -10,6 +10,10 @@ module API
       params :optional_filter_params_ee do
       end
 
+      # Noop on FOSS
+      def after_create(_)
+      end
+
       def find_source(source_type, id)
         public_send("find_#{source_type}!", id) # rubocop:disable GitlabSecurity/PublicSend
       end

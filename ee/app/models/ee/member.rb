@@ -5,6 +5,10 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
 
+    prepended do
+      after_commit :update_gitlab_subscription, on: [:update, :destroy]
+    end
+
     class_methods do
       extend ::Gitlab::Utils::Override
 
@@ -44,5 +48,11 @@ module EE
       user.using_license_seat?
     end
     # rubocop: enable Naming/PredicateName
+
+    private
+
+    def update_gitlab_subscription
+      ::Gitlab::Subscription::MaxSeatsUpdater.update(source)
+    end
   end
 end

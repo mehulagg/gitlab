@@ -120,35 +120,42 @@ describe API::Members do
   shared_examples 'POST /:source_type/:id/members' do |source_type|
     let(:stranger) { create(:user) }
     let(:url) { "/#{source_type.pluralize}/#{source.id}/members" }
+    let(:post_params) { { user_id: stranger.id, access_level: Member::DEVELOPER } }
 
     context "with :source_type == #{source_type.pluralize}" do
       it 'creates an audit event while creating a new member' do
-        params = { user_id: stranger.id, access_level: Member::DEVELOPER }
-
         expect do
-          post api(url, owner), params: params
+          post api(url, owner), params: post_params
 
           expect(response).to have_gitlab_http_status(:created)
         end.to change { AuditEvent.count }.by(1)
       end
 
       it 'does not create audit event if creating a new member fails' do
-        params = { user_id: 0, access_level: Member::DEVELOPER }
-
         expect do
-          post api(url, owner), params: params
+          post api(url, owner), params: post_params.merge(user_id: 0)
 
           expect(response).to have_gitlab_http_status(:not_found)
         end.not_to change { AuditEvent.count }
+      end
+
+      it 'updates the max_seats_used counter for subscription' do
+        allow(Gitlab::CurrentSettings.current_application_settings)
+          .to receive(:should_check_namespace_plan?) { true }
+
+        expect { post api(url, owner), params: post_params }
+          .to change { gitlab_subscription.reload.max_seats_used }.to(2)
       end
     end
   end
 
   it_behaves_like 'POST /:source_type/:id/members', 'project' do
     let(:source) { project }
+    let!(:gitlab_subscription) { create(:gitlab_subscription, namespace: project.namespace) }
   end
 
   it_behaves_like 'POST /:source_type/:id/members', 'group' do
     let(:source) { group }
+    let!(:gitlab_subscription) { create(:gitlab_subscription, namespace: group) }
   end
 end

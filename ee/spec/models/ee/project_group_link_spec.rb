@@ -55,4 +55,55 @@ describe ProjectGroupLink do
       it_behaves_like 'deleted related access levels', ProtectedEnvironment::DeployAccessLevel
     end
   end
+
+  describe 'Updating max seats counter for GitLab subscription' do
+    let(:project) { create(:project, namespace: create(:group)) }
+    let!(:gitlab_subscription) { create(:gitlab_subscription, namespace: project.namespace) }
+    let(:invited_group_1) { create(:group) }
+    let(:invited_group_2) { create(:group) }
+
+    before do
+      create(:group_member, :developer, group: invited_group_1)
+      create(:group_member, :developer, group: invited_group_2)
+
+      allow(Gitlab::CurrentSettings.current_application_settings)
+        .to receive(:should_check_namespace_plan?).and_return(true)
+    end
+
+    context 'on create' do
+      it 'updates the max_seats_used counter' do
+        expect { create_project_group_links }
+          .to change { gitlab_subscription.reload.max_seats_used }.from(0).to(2)
+      end
+    end
+
+    context 'on update' do
+      it 'updates the max_seats_used counter' do
+        create_project_group_links
+
+        gitlab_subscription.update_attribute(:max_seats_used, 0)
+
+        expect do
+          ProjectGroupLink.last.update_attribute(:expires_at, 5.days.from_now)
+        end.to change { gitlab_subscription.reload.max_seats_used }.from(0).to(2)
+      end
+    end
+
+    context 'on destroy' do
+      it 'updates the max_seats_used counter' do
+        create_project_group_links
+
+        gitlab_subscription.update_attribute(:max_seats_used, 0)
+
+        expect do
+          ProjectGroupLink.last.destroy
+        end.to change { gitlab_subscription.reload.max_seats_used }.from(0).to(1)
+      end
+    end
+
+    def create_project_group_links
+      create(:project_group_link, project: project, group: invited_group_1, group_access: GroupMember::MAINTAINER)
+      create(:project_group_link, project: project.reload, group: invited_group_2, group_access: GroupMember::MAINTAINER)
+    end
+  end
 end

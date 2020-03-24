@@ -43,4 +43,30 @@ describe Member, type: :model do
       end
     end
   end
+
+  describe 'Updating max seats counter for GitLab subscription' do
+    let!(:group) { create(:group) }
+    let!(:member_1) { create(:group_member, :reporter, group: group) }
+    let!(:member_2) { create(:group_member, :maintainer, group: group) }
+    let!(:gitlab_subscription) { create(:gitlab_subscription, namespace: group) }
+
+    before do
+      allow(Gitlab::CurrentSettings.current_application_settings)
+        .to receive(:should_check_namespace_plan?).and_return(true)
+    end
+
+    context 'on update' do
+      it 'updates the max_seats_used counter' do
+        expect { member_1.update_attribute(:access_level, GroupMember::DEVELOPER) }
+          .to change { gitlab_subscription.reload.max_seats_used }.from(0).to(2)
+      end
+    end
+
+    context 'on destroy' do
+      it 'updates the max_seats_used counter' do
+        expect { member_2.destroy }
+          .to change { gitlab_subscription.reload.max_seats_used }.from(0).to(1)
+      end
+    end
+  end
 end
