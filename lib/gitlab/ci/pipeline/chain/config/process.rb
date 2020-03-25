@@ -19,6 +19,8 @@ module Gitlab
                   parent_pipeline: parent_pipeline
                 }
               )
+            rescue Gitlab::Ci::YamlProcessor::SyntaxValidationError => ex
+              error(ex.message, config_syntax_error: true)
             rescue Gitlab::Ci::YamlProcessor::ValidationError => ex
               error(ex.message, config_error: true)
             rescue => ex

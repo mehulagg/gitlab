@@ -60,7 +60,7 @@ class Projects::PipelinesController < Projects::ApplicationController
   def create
     @pipeline = Ci::CreatePipelineService
       .new(project, current_user, create_params)
-      .execute(:web, ignore_skip_ci: true, save_config_errors: false, save_skipped_pipelines: false)
+      .execute(:web, ignore_skip_ci: true, save_config_errors: false, save_yaml_syntax_errors: false, save_skipped_pipelines: false)
 
     if @pipeline.created_successfully?
       redirect_to project_pipeline_path(project, @pipeline)

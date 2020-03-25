@@ -1285,7 +1285,7 @@ describe API::MergeRequests do
       end
 
       context 'and the feature flag is disabled' do
-        it 'still creates a failed pipeline' do
+        it 'creates a failed pipeline' do
           stub_feature_flags(ci_merge_request_pipelines_fix_yaml_errors: false)
 
           expect { request }.to change(Ci::Pipeline, :count).by(1)

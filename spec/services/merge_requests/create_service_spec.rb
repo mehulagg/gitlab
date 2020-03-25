@@ -313,6 +313,43 @@ describe MergeRequests::CreateService, :clean_gitlab_redis_shared_state do
             end
           end
         end
+
+        context 'when .gitlab-ci.yml file is valid but has a logical error' do
+          let(:config) do
+            YAML.dump({
+              build: {
+                script: 'echo "Valid yaml syntax, but..."',
+                only: ['master']
+              },
+              test: {
+                script: 'echo "... I depend on build, which does not run."',
+                only: ['merge_request'],
+                needs: ['build']
+              }
+            })
+          end
+
+          it 'persists a pipeline with config error' do
+            expect(merge_request).to be_persisted
+
+            merge_request.reload
+            expect(merge_request.pipelines_for_merge_request.count).to eq(1)
+            expect(merge_request.pipelines_for_merge_request.last).to be_failed
+            expect(merge_request.pipelines_for_merge_request.last).to be_config_error
+          end
+
+          context 'and the feature flag is disabled' do
+            it 'persists a pipeline with config error' do
+              stub_feature_flags(ci_merge_request_pipelines_fix_yaml_errors: false)
+              expect(merge_request).to be_persisted
+
+              merge_request.reload
+              expect(merge_request.pipelines_for_merge_request.count).to eq(1)
+              expect(merge_request.pipelines_for_merge_request.last).to be_failed
+              expect(merge_request.pipelines_for_merge_request.last).to be_config_error
+            end
+          end
+        end
       end
 
       it 'increments the usage data counter of create event' do

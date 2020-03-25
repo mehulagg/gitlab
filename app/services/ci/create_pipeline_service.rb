@@ -24,7 +24,7 @@ module Ci
                 Gitlab::Ci::Pipeline::Chain::Limit::JobActivity].freeze
 
     # rubocop: disable Metrics/ParameterLists
-    def execute(source, ignore_skip_ci: false, save_config_errors: true, save_skipped_pipelines: true, trigger_request: nil, schedule: nil, merge_request: nil, external_pull_request: nil, bridge: nil, **options, &block)
+    def execute(source, ignore_skip_ci: false, save_config_errors: true, save_yaml_syntax_errors: true, save_skipped_pipelines: true, trigger_request: nil, schedule: nil, merge_request: nil, external_pull_request: nil, bridge: nil, **options, &block)
       @pipeline = Ci::Pipeline.new
 
       command = Gitlab::Ci::Pipeline::Chain::Command.new(
@@ -41,6 +41,7 @@ module Ci
         external_pull_request: external_pull_request,
         ignore_skip_ci: ignore_skip_ci,
         save_config_errors: save_config_errors,
+        save_yaml_syntax_errors: save_yaml_syntax_errors,
         save_skipped_pipelines: save_skipped_pipelines,
         seeds_block: block,
         variables_attributes: params[:variables_attributes],

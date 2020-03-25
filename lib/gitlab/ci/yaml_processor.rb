@@ -4,6 +4,7 @@ module Gitlab
   module Ci
     class YamlProcessor
       ValidationError = Class.new(StandardError)
+      SyntaxValidationError = Class.new(StandardError)
 
       include Gitlab::Config::Entry::LegacyValidationHelpers
 
@@ -25,7 +26,7 @@ module Gitlab
 
         initial_parsing
       rescue Gitlab::Ci::Config::ConfigError => e
-        raise ValidationError, e.message
+        raise SyntaxValidationError, e.message
       end
 
       def self.new_with_validation_errors(content, opts = {})

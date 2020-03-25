@@ -639,6 +639,29 @@ describe Projects::PipelinesController do
       end
     end
 
+    context 'when .gitlab-ci.yml file is valid but has a logical error' do
+      before do
+        stub_ci_pipeline_yaml_file(YAML.dump({
+          build: {
+            script: 'echo "Valid yaml syntax, but..."',
+            only: ['master']
+          },
+          test: {
+            script: 'echo "... I depend on build, which does not run."',
+            only: ['merge_request'],
+            needs: ['build']
+          }
+        }))
+      end
+
+      it 'does not persist a pipeline' do
+        expect { post_request }.not_to change { project.ci_pipelines.count }
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+        expect(response).to render_template('new')
+      end
+    end
+
     def post_request
       post :create, params: {
         namespace_id: project.namespace,

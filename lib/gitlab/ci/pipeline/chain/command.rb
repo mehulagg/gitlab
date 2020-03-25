@@ -8,7 +8,7 @@ module Gitlab
           :source, :project, :current_user,
           :origin_ref, :checkout_sha, :after_sha, :before_sha, :source_sha, :target_sha,
           :trigger_request, :schedule, :merge_request, :external_pull_request,
-          :ignore_skip_ci, :save_config_errors, :save_skipped_pipelines,
+          :ignore_skip_ci, :save_config_errors, :save_yaml_syntax_errors, :save_skipped_pipelines,
           :seeds_block, :variables_attributes, :push_options,
           :chat_data, :allow_mirror_update, :bridge,
           # These attributes are set by Chains during processing:

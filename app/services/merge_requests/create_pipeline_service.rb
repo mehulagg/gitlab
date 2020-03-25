@@ -2,19 +2,19 @@
 
 module MergeRequests
   class CreatePipelineService < MergeRequests::BaseService
-    def execute(merge_request, save_config_errors: true)
+    def execute(merge_request, save_yaml_syntax_errors: true)
       return unless can_create_pipeline_for?(merge_request)
 
-      create_detached_merge_request_pipeline(merge_request, save_config_errors)
+      create_detached_merge_request_pipeline(merge_request, save_yaml_syntax_errors)
     end
 
-    def create_detached_merge_request_pipeline(merge_request, save_config_errors)
+    def create_detached_merge_request_pipeline(merge_request, save_yaml_syntax_errors)
       Ci::CreatePipelineService.new(merge_request.source_project,
                                     current_user,
                                     ref: pipeline_ref_for_detached_merge_request_pipeline(merge_request))
         .execute(:merge_request_event,
                  merge_request: merge_request,
-                 save_config_errors: save_config_errors)
+                 save_yaml_syntax_errors: save_yaml_syntax_errors)
     end
 
     def can_create_pipeline_for?(merge_request)

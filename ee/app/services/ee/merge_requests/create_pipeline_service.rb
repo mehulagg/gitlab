@@ -6,11 +6,11 @@ module EE
       extend ::Gitlab::Utils::Override
 
       override :execute
-      def execute(merge_request, save_config_errors: true)
-        create_merge_request_pipeline_for(merge_request, save_config_errors) || super
+      def execute(merge_request, save_yaml_syntax_errors: true)
+        create_merge_request_pipeline_for(merge_request, save_yaml_syntax_errors) || super
       end
 
-      def create_merge_request_pipeline_for(merge_request, save_config_errors)
+      def create_merge_request_pipeline_for(merge_request, save_yaml_syntax_errors)
         return unless can_create_merge_request_pipeline_for?(merge_request)
 
         result = ::MergeRequests::MergeabilityCheckService.new(merge_request).execute(recheck: true)
@@ -27,7 +27,7 @@ module EE
                                           source_sha: ref_payload[:source_id])
             .execute(:merge_request_event,
                      merge_request: merge_request,
-                     save_config_errors: save_config_errors)
+                     save_yaml_syntax_errors: save_yaml_syntax_errors)
         end
       end
 

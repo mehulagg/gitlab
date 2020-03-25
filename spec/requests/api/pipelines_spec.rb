@@ -390,6 +390,25 @@ describe API::Pipelines do
           expect(json_response['message']['base'].first).to eq 'Reference not found'
           expect(json_response).not_to be_an Array
         end
+
+        context 'when latest commit contains [ci skip]' do
+          before do
+            project.repository.create_file(user, 'new-file.txt', 'A new file',
+                                           message: '[skip ci] This is a test',
+                                           branch_name: 'master')
+          end
+
+          it 'creates a pipeline' do
+            expect do
+              post api("/projects/#{project.id}/pipeline", user), params: { ref: project.default_branch }
+            end.to change { project.ci_pipelines.count }.by(1)
+
+            expect(response).to have_gitlab_http_status(:created)
+            expect(json_response).to be_a Hash
+            expect(json_response['sha']).to eq project.commit.id
+            expect(project.ci_pipelines.last).to be_pending
+          end
+        end
       end
 
       context 'without gitlab-ci.yml' do
@@ -405,6 +424,45 @@ describe API::Pipelines do
             expect(json_response['message']['base'].first).to eq 'Missing CI config file'
             expect(json_response).not_to be_an Array
           end
+        end
+      end
+
+      context 'with invalid gitlab-ci.yml' do
+        before do
+          stub_ci_pipeline_yaml_file('invalid yaml file')
+        end
+
+        it 'does not persist a pipeline' do
+          post api("/projects/#{project.id}/pipeline", user), params: { ref: project.default_branch }
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']['base'].first).to eq 'Included file `.gitlab-ci.yml` does not have valid YAML syntax!'
+          expect(json_response).not_to be_an Array
+        end
+      end
+
+      context 'when .gitlab-ci.yml file is valid but has a logical error' do
+        before do
+          stub_ci_pipeline_yaml_file(YAML.dump({
+            build: {
+              script: 'echo "Valid yaml syntax, but..."',
+              only: ['master']
+            },
+            test: {
+              script: 'echo "... I depend on build, which does not run."',
+              stage: 'test',
+              only: ['merge_request'],
+              needs: ['build']
+            }
+          }))
+        end
+
+        it 'does not persist a pipeline' do
+          post api("/projects/#{project.id}/pipeline", user), params: { ref: project.default_branch }
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']['base'].first).to eq 'test job: need build is not defined in prior stages'
+          expect(json_response).not_to be_an Array
         end
       end
     end
