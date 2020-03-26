@@ -929,6 +929,59 @@ describe Clusters::Cluster, :use_clean_rails_memory_store_caching do
     end
   end
 
+  describe 'management_project_sync_status' do
+    let(:cluster) { create(:cluster, initial_status) }
+
+    describe '#make_committing' do
+      let(:initial_status) { :management_project_in_sync }
+
+      subject { cluster.make_committing }
+
+      it do
+        expect(subject).to be_truthy
+        expect(cluster).to be_management_project_committing
+      end
+    end
+
+    describe '#make_applying' do
+      let(:initial_status) { :management_project_committing }
+
+      subject { cluster.make_applying }
+
+      it do
+        expect(subject).to be_truthy
+        expect(cluster).to be_management_project_applying
+      end
+    end
+
+    describe '#make_applied' do
+      let(:initial_status) { :management_project_applying }
+
+      subject { cluster.make_applied }
+
+      it do
+        expect(subject).to be_truthy
+        expect(cluster).to be_management_project_in_sync
+      end
+    end
+
+    describe '#make_errored' do
+      let(:initial_status) { :management_project_in_sync }
+      let(:error_message) { "An error occurrred" }
+
+      subject { cluster.make_errored(error_message) }
+
+      it do
+        expect(subject).to be_truthy
+        expect(cluster).to be_management_project_errored
+      end
+
+      it 'sets the status reason' do
+        expect { subject }.to change(cluster, :management_project_sync_status_reason).from(nil).to(error_message)
+      end
+    end
+  end
+
   describe '#connection_status' do
     let(:cluster) { create(:cluster) }
     let(:status) { :connected }

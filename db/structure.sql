@@ -1587,7 +1587,9 @@ CREATE TABLE public.clusters (
     namespace_per_environment boolean DEFAULT true NOT NULL,
     management_project_id integer,
     cleanup_status smallint DEFAULT 1 NOT NULL,
-    cleanup_status_reason text
+    cleanup_status_reason text,
+    management_project_sync_status smallint DEFAULT 0 NOT NULL,
+    management_project_sync_status_reason text
 );
 
 CREATE TABLE public.clusters_applications_cert_managers (
@@ -12903,11 +12905,13 @@ COPY "schema_migrations" (version) FROM STDIN;
 20200325152327
 20200325160952
 20200325183636
+20200326054420
 20200326114443
 20200326124443
 20200326134443
 20200326135443
 20200326144443
 20200326145443
+20200331032724
 \.
 

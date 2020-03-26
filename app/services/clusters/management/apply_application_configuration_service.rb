@@ -25,7 +25,19 @@ module Clusters
           return error _('Last seen ref does not match cluster management project')
         end
 
-        create_commit!
+        unless cluster.make_committing
+          return error _('Operation already in progress')
+        end
+
+        result = create_commit!
+
+        if result[:status] == :success
+          cluster.make_applying!
+
+          result
+        else
+          error result[:message]
+        end
       end
 
       private
@@ -38,6 +50,12 @@ module Clusters
         applied_ref = project.commit(target_branch)
 
         applied_ref.present? && applied_ref != last_seen_ref
+      end
+
+      def error(message)
+        cluster.make_errored!(message)
+
+        super
       end
 
       def existing_project_configuration

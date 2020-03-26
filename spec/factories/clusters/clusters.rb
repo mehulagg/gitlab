@@ -135,5 +135,25 @@ FactoryBot.define do
     trait :cleanup_errored do
       cleanup_status { 5 }
     end
+
+    trait :management_project_errored do
+      management_project_sync_status { -1 }
+    end
+
+    trait :management_project_in_sync do
+      management_project_sync_status { 0 }
+    end
+
+    trait :management_project_committing do
+      management_project_sync_status { 1 }
+    end
+
+    trait :management_project_applying do
+      management_project_sync_status { 2 }
+    end
+
+    trait :management_project_applied do
+      management_project_sync_status { 3 }
+    end
   end
 end

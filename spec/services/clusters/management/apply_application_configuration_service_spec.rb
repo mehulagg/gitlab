@@ -37,7 +37,11 @@ describe Clusters::Management::ApplyApplicationConfigurationService do
         .with(management_project, user, commit_params)
         .and_return(double(execute: result))
 
+      expect(cluster).to receive(:make_committing)
+        .and_call_original
+
       expect(subject).to eq result
+      expect(cluster).to be_management_project_applying
     end
   end
 
@@ -96,6 +100,8 @@ describe Clusters::Management::ApplyApplicationConfigurationService do
         status: :error,
         message: error_message
       })
+      expect(cluster).to be_management_project_errored
+      expect(cluster.management_project_sync_status_reason).to eq error_message
     end
   end
 
@@ -142,5 +148,31 @@ describe Clusters::Management::ApplyApplicationConfigurationService do
     end
 
     include_examples 'configuration is not applied'
+  end
+
+  context 'a commit is already in progress' do
+    let(:error_message) { 'Operation already in progress' }
+
+    before do
+      cluster.make_committing!
+    end
+
+    include_examples 'configuration is not applied'
+  end
+
+  context 'an error is raised while applying configuration' do
+    let(:result) { { status: :error, message: 'something bad happened' } }
+
+    it 'marks the cluster as errored' do
+      expect(management_project.repository).to receive(:blob_at)
+        .and_return(nil)
+
+      expect(Files::CreateService).to receive(:new)
+        .and_return(double(execute: result))
+
+      expect(subject).to eq result
+      expect(cluster).to be_management_project_errored
+      expect(cluster.management_project_sync_status_reason).to eq result[:message]
+    end
   end
 end

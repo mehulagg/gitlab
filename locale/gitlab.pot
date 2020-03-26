@@ -13913,6 +13913,9 @@ msgstr ""
 msgid "Opens in a new window"
 msgstr ""
 
+msgid "Operation already in progress"
+msgstr ""
+
 msgid "Operation failed. Check pod logs for %{pod_name} for more details."
 msgstr ""
 

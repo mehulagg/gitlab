@@ -179,6 +179,33 @@ module Clusters
       end
     end
 
+    state_machine :management_project_sync_status, initial: :management_project_in_sync do
+      state :management_project_errored, value: -1
+      state :management_project_in_sync, value: 0
+      state :management_project_committing, value: 1
+      state :management_project_applying, value: 2
+
+      event :make_committing do
+        transition any - [:management_project_committing] => :management_project_committing
+      end
+
+      event :make_applying do
+        transition management_project_committing: :management_project_applying
+      end
+
+      event :make_applied do
+        transition management_project_applying: :management_project_in_sync
+      end
+
+      event :make_errored do
+        transition any => :management_project_errored
+      end
+
+      before_transition any => :management_project_errored do |cluster, transition|
+        cluster.management_project_sync_status_reason = transition.args.first
+      end
+    end
+
     def all_projects
       return projects if project_type?
       return groups_projects if group_type?
