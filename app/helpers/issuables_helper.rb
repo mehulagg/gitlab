@@ -457,6 +457,7 @@ module IssuablesHelper
   def issuable_sidebar_options(issuable)
     {
       id: issuable[:id],
+      iid: issuable[:iid],
       type: issuable[:type],
       endpoint: "#{issuable[:issuable_json_path]}?serializer=sidebar_extras",
       toggleSubscriptionEndpoint: issuable[:toggle_subscription_path],

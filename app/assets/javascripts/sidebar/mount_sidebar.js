@@ -23,6 +23,7 @@ function mountAssigneesComponent(mediator) {
 
   if (!el) return;
 
+  const { iid, fullPath } = getSidebarOptions();
   // eslint-disable-next-line no-new
   new Vue({
     el,
@@ -35,6 +36,8 @@ function mountAssigneesComponent(mediator) {
         props: {
           mediator,
           issuableId: toNumber(el.dataset.id), // TODO: mv to store?
+          issueId: String(iid),
+          projectPath: fullPath,
           field: el.dataset.field,
           signedIn: el.hasAttribute('data-signed-in'),
           issuableType: gl.utils.isInIssuePage() ? 'issue' : 'merge_request',

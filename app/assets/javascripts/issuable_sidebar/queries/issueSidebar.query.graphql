@@ -1,0 +1,16 @@
+query getProjectIssue($id: String!, $fullPath: ID!) {
+  project(fullPath: $fullPath) {
+    issue(iid: $id) {
+      assignees {
+        nodes {
+          id
+          webUrl
+          name
+          username
+          avatarUrl
+          state
+          }
+        }
+    }
+  }
+}

@@ -47,6 +47,12 @@ class Projects::IssuesController < Projects::ApplicationController
     push_frontend_feature_flag(:save_issuable_health_status, project.group)
   end
 
+  # This is currently only for issues, if we want it for other issuables well want to move it to issuable_actions.rb
+  before_action only: :show do
+    # TODO: add method
+    push_frontend_feature_flag(:project_issue_real_time_poc)
+  end
+
   around_action :allow_gitaly_ref_name_caching, only: [:discussions]
 
   respond_to :html
