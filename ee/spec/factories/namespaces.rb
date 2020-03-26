@@ -40,3 +40,22 @@ FactoryBot.define do
     end
   end
 end
+
+FactoryBot.define do
+  factory :namespace_with_plan, parent: :namespace do
+    transient do
+      plan { :default_plan }
+      trial_ends_on { nil }
+    end
+
+    after(:create) do |namespace, evaluator|
+      if evaluator.plan
+        create(:gitlab_subscription,
+               namespace: namespace,
+               hosted_plan: create(evaluator.plan),
+               trial: evaluator.trial_ends_on.present?,
+               trial_ends_on: evaluator.trial_ends_on)
+      end
+    end
+  end
+end
