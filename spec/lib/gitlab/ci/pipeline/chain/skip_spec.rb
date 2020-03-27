@@ -12,7 +12,7 @@ describe Gitlab::Ci::Pipeline::Chain::Skip do
       project: project,
       current_user: user,
       ignore_skip_ci: false,
-      save_incompleted: true)
+      save_skipped_pipelines: true)
   end
 
   let(:step) { described_class.new(pipeline, command) }
@@ -67,7 +67,7 @@ describe Gitlab::Ci::Pipeline::Chain::Skip do
       double('command', project: project,
                         current_user: user,
                         ignore_skip_ci: false,
-                        save_incompleted: false)
+                        save_skipped_pipelines: false)
     end
 
     before do

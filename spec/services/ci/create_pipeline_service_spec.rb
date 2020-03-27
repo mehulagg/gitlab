@@ -27,7 +27,9 @@ describe Ci::CreatePipelineService do
       push_options: nil,
       source_sha: nil,
       target_sha: nil,
-      save_on_errors: true)
+      save_config_errors: true,
+      save_yaml_syntax_errors: true,
+      save_skipped_pipelines: true)
       params = { ref: ref,
                  before: '00000000',
                  after: after,
@@ -38,7 +40,9 @@ describe Ci::CreatePipelineService do
                  target_sha: target_sha }
 
       described_class.new(project, user, params).execute(source,
-        save_on_errors: save_on_errors,
+        save_config_errors: save_config_errors,
+        save_yaml_syntax_errors: save_yaml_syntax_errors,
+        save_skipped_pipelines: save_skipped_pipelines,
         trigger_request: trigger_request,
         merge_request: merge_request,
         external_pull_request: external_pull_request)
@@ -1676,8 +1680,8 @@ describe Ci::CreatePipelineService do
       context 'when pipeline on feature is created' do
         let(:ref_name) { 'refs/heads/feature' }
 
-        context 'when save_on_errors is enabled' do
-          let(:pipeline) { execute_service(save_on_errors: true) }
+        context 'when save_config_errors is enabled' do
+          let(:pipeline) { execute_service(save_config_errors: true) }
 
           it 'does create a pipeline as test_a depends on build_a' do
             expect(pipeline).to be_persisted
@@ -1687,8 +1691,8 @@ describe Ci::CreatePipelineService do
           end
         end
 
-        context 'when save_on_errors is disabled' do
-          let(:pipeline) { execute_service(save_on_errors: false) }
+        context 'when save_config_errors is disabled' do
+          let(:pipeline) { execute_service(save_config_errors: false) }
 
           it 'does not create a pipeline as test_a depends on build_a' do
             expect(pipeline).not_to be_persisted

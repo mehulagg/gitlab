@@ -448,7 +448,7 @@ describe Ci::CreateCrossProjectPipelineService, '#execute' do
 
       let(:primary_pipeline) do
         Ci::CreatePipelineService.new(upstream_project, upstream_project.owner, { ref: 'master' })
-          .execute(:push, save_on_errors: false)
+          .execute(:push, save_config_errors: false, save_yaml_syntax_errors: false, save_skipped_pipelines: false)
       end
 
       let(:bridge)  { primary_pipeline.processables.find_by(name: 'bridge-job') }

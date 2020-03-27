@@ -1007,7 +1007,7 @@ module Gitlab
             let(:include_content) { ["/local.gitlab-ci.yml"] }
 
             it "returns a validation error" do
-              expect { subject }.to raise_error(Gitlab::Ci::YamlProcessor::ValidationError, /does not have project/)
+              expect { subject }.to raise_error(Gitlab::Ci::YamlProcessor::SyntaxValidationError, /does not have project/)
             end
           end
 
@@ -1015,7 +1015,7 @@ module Gitlab
             let(:include_content) { [{ yolo: "/local.gitlab-ci.yml" }] }
 
             it "returns a validation error" do
-              expect { subject }.to raise_error(Gitlab::Ci::YamlProcessor::ValidationError)
+              expect { subject }.to raise_error(Gitlab::Ci::YamlProcessor::SyntaxValidationError)
             end
           end
 
