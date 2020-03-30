@@ -49,7 +49,6 @@ RSpec.shared_examples 'dashboard gold trial callout' do
 
     it 'hides promotion callout if a gold plan is active', :js do
       group = create(:group_with_plan, name: 'gold group', plan: :gold_plan)
-      group.update(plan: group.gitlab_subscription.hosted_plan)
       group.add_owner(user)
 
       visit page_path
