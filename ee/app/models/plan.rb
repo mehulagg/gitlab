@@ -13,7 +13,6 @@ class Plan < ApplicationRecord
   DEFAULT_PLANS = [DEFAULT, FREE].freeze
   ALL_HOSTED_PLANS = (PAID_HOSTED_PLANS + [EARLY_ADOPTER]).freeze
 
-  has_many :namespaces
   has_many :hosted_subscriptions, class_name: 'GitlabSubscription', foreign_key: 'hosted_plan_id'
   has_one :limits, class_name: 'PlanLimits'
 
