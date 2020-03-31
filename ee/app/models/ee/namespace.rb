@@ -27,8 +27,6 @@ module EE
 
       attr_writer :root_ancestor
 
-      belongs_to :plan
-
       has_one :namespace_statistics
       has_one :gitlab_subscription, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
@@ -62,7 +60,6 @@ module EE
       # Opportunistically clear the +file_template_project_id+ if invalid
       before_validation :clear_file_template_project_id
 
-      validate :validate_plan_name
       validate :validate_shared_runner_minutes_support
 
       validates :max_pages_size,
@@ -293,17 +290,6 @@ module EE
       all_projects.with_shared_runners.any?
     end
 
-    # These helper methods are required to not break the Namespace API.
-    def plan=(plan_name)
-      if plan_name.is_a?(String)
-        @plan_name = plan_name # rubocop:disable Gitlab/ModuleWithInstanceVariables
-
-        super(Plan.find_by(name: @plan_name)) # rubocop:disable Gitlab/ModuleWithInstanceVariables
-      else
-        super
-      end
-    end
-
     def memoized_plans=(plans)
       @plans = plans # rubocop: disable Gitlab/ModuleWithInstanceVariables
     end
@@ -395,12 +381,6 @@ module EE
     end
 
     private
-
-    def validate_plan_name
-      if defined?(@plan_name) && @plan_name.present? && PLANS.exclude?(@plan_name) # rubocop:disable Gitlab/ModuleWithInstanceVariables
-        errors.add(:plan, 'is not included in the list')
-      end
-    end
 
     def validate_shared_runner_minutes_support
       return if shared_runner_minutes_supported?

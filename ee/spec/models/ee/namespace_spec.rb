@@ -14,7 +14,6 @@ describe Namespace do
 
   it { is_expected.to have_one(:namespace_statistics) }
   it { is_expected.to have_one(:gitlab_subscription).dependent(:destroy) }
-  it { is_expected.to belong_to(:plan) }
 
   it { is_expected.to delegate_method(:extra_shared_runners_minutes).to(:namespace_statistics) }
   it { is_expected.to delegate_method(:shared_runners_minutes).to(:namespace_statistics) }
@@ -262,33 +261,6 @@ describe Namespace do
   end
 
   describe 'custom validations' do
-    describe '#validate_plan_name' do
-      let(:group) { build(:group) }
-
-      context 'with a valid plan name' do
-        it 'is valid' do
-          group.plan = create(:bronze_plan)
-
-          expect(group).to be_valid
-        end
-      end
-
-      context 'with an invalid plan name' do
-        it 'is invalid when `unknown`' do
-          group.plan = 'unknown'
-
-          expect(group).not_to be_valid
-          expect(group.errors[:plan]).to include('is not included in the list')
-        end
-
-        it 'is valid for blank strings' do
-          group.plan = ' '
-
-          expect(group).to be_valid
-        end
-      end
-    end
-
     describe '#validate_shared_runner_minutes_support' do
       context 'when changing :shared_runners_minutes_limit' do
         before do
