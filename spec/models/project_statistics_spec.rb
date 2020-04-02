@@ -16,6 +16,7 @@ describe ProjectStatistics do
       ProjectStatistics.find_or_create_by!(project: project, namespace: project.namespace)
     end
 
+    let(:subject_factory) { :project_statistics }
     let(:counter_attribute_events_class) { ProjectStatisticsEvent }
     let(:counter_attribute_table_name) { 'project_statistics_events' }
     let(:counter_attribute_foreign_key) { 'project_statistics_id' }

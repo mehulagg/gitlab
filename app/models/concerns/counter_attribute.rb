@@ -77,7 +77,7 @@ module CounterAttribute
       counter_attributes << attribute
 
       define_method("accurate_#{attribute}") do
-        unless counter_attributes_enabled? && self.class.counter_attributes.include?(attribute)
+        unless counter_attribute_enabled?(attribute)
           return read_attribute(attribute)
         end
 
@@ -115,6 +115,8 @@ module CounterAttribute
         raise TransactionForbiddenError, "cannot consolidate counter attributes inside a transaction"
       end
 
+      consolidated_records_count = 0
+
       loop do
         ids_to_consolidate = next_batch_of_events(CONSOLIDATION_BATCH_SIZE)
 
@@ -122,8 +124,13 @@ module CounterAttribute
           slow_consolidate_counter_attributes_for!(id)
         end
 
-        break if ids_to_consolidate.size < CONSOLIDATION_BATCH_SIZE
+        current_batch_size = ids_to_consolidate.size
+        consolidated_records_count += current_batch_size
+
+        break if current_batch_size < CONSOLIDATION_BATCH_SIZE
       end
+
+      consolidated_records_count
     end
 
     private
@@ -179,8 +186,8 @@ module CounterAttribute
     end
   end
 
-  def counter_attributes_enabled?
-    Feature.enabled?(:efficient_counter_attribute, project, default_enabled: true)
+  def counter_attribute_enabled?(attribute)
+    counter_attributes_enabled? && counter_attribute?(attribute)
   end
 
   def increment_counter(attribute, increment)
@@ -199,16 +206,6 @@ module CounterAttribute
   def increment_counter!(attribute, increment)
     return if increment == 0
 
-    # Forbid running inside transaction because in case of rollback it would
-    # introduce data inconsistency
-    if Gitlab::Database.inside_transaction?
-      raise TransactionForbiddenError, "cannot perform increment inside a transaction because it may not be rolled back"
-    end
-
-    unless self.class.counter_attributes.include?(attribute)
-      raise UnknownAttributeError, "'#{attribute}' is not a counter attribute"
-    end
-
     if counter_attributes_enabled?
       log_event!(attribute, increment)
     else
@@ -220,7 +217,29 @@ module CounterAttribute
 
   private
 
+  def counter_attributes_enabled?
+    # TODO: remove update_project_statistics_after_commit feature flag
+    # because if disabled it conflicts with raising an exception if
+    # increment runs inside a db transaction.
+    Feature.enabled?(:efficient_counter_attribute, project, default_enabled: true) &&
+      Feature.enabled?(:update_project_statistics_after_commit, default_enabled: true)
+  end
+
+  def counter_attribute?(attribute)
+    self.class.counter_attributes.include?(attribute)
+  end
+
   def log_event!(attribute, increment)
+    # Forbid running inside transaction because in case of rollback it would
+    # introduce data inconsistency
+    if Gitlab::Database.inside_transaction?
+      raise TransactionForbiddenError, "cannot perform increment inside a transaction because it may not be rolled back"
+    end
+
+    unless counter_attribute?(attribute)
+      raise UnknownAttributeError, "'#{attribute}' is not a counter attribute"
+    end
+
     counter_events.create!(attribute => increment)
     ConsolidateCountersWorker.exclusively_perform_async(self.class.name)
   end

@@ -84,9 +84,10 @@ class ProjectStatistics < ApplicationRecord
     raise ArgumentError, "Cannot increment attribute: #{key}" unless INCREMENTABLE_COLUMNS.key?(key)
     return if amount == 0
 
-    project = Project.find_by(id: project_id)
+    statistics = find_by(project_id: project_id)
+    return unless statistics
 
-    if Feature.enabled?(:async_update_project_statistics, project) && counter_attributes.include?(key)
+    if statistics.counter_attribute_enabled?(key)
       self.async_increment_statistics(project_id, key, amount)
     else
       self.legacy_increment_statistic(project_id, key, amount)

@@ -22,6 +22,26 @@ shared_examples_for CounterAttribute do |counter_attributes|
     expect(subject.class.counter_attributes).to contain_exactly(*counter_attributes)
   end
 
+  describe '.counter_events_available?' do
+    context 'when there are logged events' do
+      let(:attribute) { counter_attributes.first }
+
+      before do
+        subject.increment_counter(attribute, 10)
+      end
+
+      it 'returns true' do
+        expect(subject.class.counter_events_available?).to be_truthy
+      end
+    end
+
+    context 'when there are no logged events' do
+      it 'returns false' do
+        expect(subject.class.counter_events_available?).to be_falsey
+      end
+    end
+  end
+
   shared_examples 'logs a new event' do |attribute|
     it 'in the events table' do
       expect(ConsolidateCountersWorker).to receive(:perform_in).once.and_return(nil)
@@ -31,6 +51,87 @@ shared_examples_for CounterAttribute do |counter_attributes|
       event = counter_attribute_events_class.last
       expect(event.send(counter_attribute_foreign_key)).to eq(subject.id)
       expect(event.build_artifacts_size).to eq(17)
+    end
+  end
+
+  describe '.slow_consolidate_counter_attributes!' do
+    let(:attribute) { counter_attributes.first }
+
+    context 'when it is executed inside an existing database transaction' do
+      it 'raises an error' do
+        subject.class.transaction do
+          expect { subject.class.slow_consolidate_counter_attributes! }
+            .to raise_error(CounterAttribute::TransactionForbiddenError)
+        end
+      end
+    end
+
+    context 'when there are pending events for the same object' do
+      before do
+        subject.increment_counter(attribute, 10)
+        subject.increment_counter(attribute, -3)
+      end
+
+      it 'updates the counter and removes the events' do
+        subject.class.slow_consolidate_counter_attributes!
+
+        expect(subject.reload.public_send(attribute)).to eq 7
+        expect(subject.counter_events).to be_empty
+      end
+
+      it 'performs 1 query to fetch all IDs and 1 query per record to update' do
+        expect { subject.class.slow_consolidate_counter_attributes! }.not_to exceed_query_limit(2)
+      end
+    end
+
+    context 'when there pending events for different records' do
+      let(:subject_2) { create(subject_factory) }
+      let(:subject_3) { create(subject_factory) }
+
+      before do
+        subject.increment_counter(attribute, 10)
+        subject.increment_counter(attribute, -3)
+
+        subject_2.increment_counter(attribute, 30)
+        subject_2.increment_counter(attribute, 13)
+        subject_2.increment_counter(attribute, -1)
+
+        subject_3.increment_counter(attribute, 20)
+      end
+
+      shared_examples 'updates the counters and removes the events' do
+        it 'updates the counters' do
+          subject.class.slow_consolidate_counter_attributes!
+
+          expect(subject.reload.public_send(attribute)).to eq 7
+          expect(subject_2.reload.public_send(attribute)).to eq 42
+          expect(subject_3.reload.public_send(attribute)).to eq 20
+        end
+
+        it 'removes the events' do
+          subject.class.slow_consolidate_counter_attributes!
+
+          expect(subject.reload.counter_events).to be_empty
+        end
+
+        it 'returns the count of consolidated subjects' do
+          expect(subject.class.slow_consolidate_counter_attributes!).to eq(3)
+        end
+      end
+
+      it_behaves_like 'updates the counters and removes the events'
+
+      it 'performs 1 query to fetch all IDs and 1 query per record to update' do
+        expect { subject.class.slow_consolidate_counter_attributes! }.not_to exceed_query_limit(4)
+      end
+
+      context 'when there are more logged events than the consolidation batch size' do
+        before do
+          stub_const('CounterAttribute::CONSOLIDATION_BATCH_SIZE', 2)
+        end
+
+        it_behaves_like 'updates the counters and removes the events'
+      end
     end
   end
 

@@ -6,7 +6,7 @@ RSpec.shared_examples 'UpdateProjectStatistics' do
   let(:statistic_attribute) { described_class.statistic_attribute }
 
   def reload_stat
-    project.statistics.reload.send(project_statistics_name).to_i
+    project.statistics.reload.public_send("accurate_#{project_statistics_name}").to_i
   end
 
   def read_attribute
@@ -42,6 +42,7 @@ RSpec.shared_examples 'UpdateProjectStatistics' do
     it 'updates project statistics' do
       expect(ProjectStatistics)
         .to receive(:increment_statistic)
+        .at_least(:once)
         .and_call_original
 
       subject.write_attribute(statistic_attribute, read_attribute + delta)
@@ -84,6 +85,7 @@ RSpec.shared_examples 'UpdateProjectStatistics' do
 
       expect(ProjectStatistics)
         .to receive(:increment_statistic)
+        .at_least(:once)
         .and_call_original
 
       expect { subject.destroy! }
