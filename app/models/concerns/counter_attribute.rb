@@ -233,7 +233,9 @@ module CounterAttribute
     # Forbid running inside transaction because in case of rollback it would
     # introduce data inconsistency
     if Gitlab::Database.inside_transaction?
-      raise TransactionForbiddenError, "cannot perform increment inside a transaction because it may not be rolled back"
+      error = TransactionForbiddenError.new(
+        'cannot perform increment inside a transaction because it may not be rolled back')
+      Gitlab::ErrorTracking.track_exception(error, attribute: attribute)
     end
 
     unless counter_attribute?(attribute)

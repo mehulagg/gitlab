@@ -160,12 +160,16 @@ shared_examples_for CounterAttribute do |counter_attributes|
             .not_to change { subject.class.counter_attribute_events_class.count }
         end
 
-        it 'raises error if runs inside a transaction' do
+        it 'raises exception if runs inside a transaction' do
+          expect(Gitlab::ErrorTracking)
+            .to receive(:track_exception)
+            .with(instance_of(CounterAttribute::TransactionForbiddenError), attribute: attribute)
+
           expect do
-            subject.transaction do
+            subject.class.transaction do
               subject.increment_counter!(attribute, 10)
             end
-          end.to raise_error(CounterAttribute::TransactionForbiddenError)
+          end.to raise_error(Sidekiq::Worker::EnqueueFromTransactionError)
         end
 
         it 'raises error if non counter attribute is incremented' do
