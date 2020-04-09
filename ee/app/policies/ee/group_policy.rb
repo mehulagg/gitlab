@@ -30,7 +30,7 @@ module EE
       end
 
       condition(:group_activity_analytics_available) do
-        @subject.feature_available?(:group_activity_analytics) && ::Feature.enabled?(:group_activity_analytics, @subject, type: :licensed, default_enabled: true)
+        @subject.feature_available?(:group_activity_analytics)
       end
 
       condition(:can_owners_manage_ldap, scope: :global) do

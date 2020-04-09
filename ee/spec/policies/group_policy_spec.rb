@@ -176,7 +176,6 @@ RSpec.describe GroupPolicy do
     let(:current_user) { developer }
 
     before do
-      stub_feature_flags(group_activity_analytics: true)
       stub_licensed_features(group_activity_analytics: true)
     end
 
@@ -187,7 +186,6 @@ RSpec.describe GroupPolicy do
     let(:current_user) { developer }
 
     before do
-      stub_feature_flags(group_activity_analytics: false)
       stub_licensed_features(group_activity_analytics: false)
     end
 
