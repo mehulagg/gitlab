@@ -2,12 +2,15 @@
 import ViewerMixin from './mixins';
 import { GlIcon } from '@gitlab/ui';
 import { HIGHLIGHT_CLASS_NAME } from './constants';
+import Tracking from '~/tracking';
+
+const trackingMixin = Tracking.mixin({ label: 'snippet' });
 
 export default {
   components: {
     GlIcon,
   },
-  mixins: [ViewerMixin],
+  mixins: [ViewerMixin, trackingMixin],
   data() {
     return {
       highlightedLine: null,
@@ -22,8 +25,10 @@ export default {
     const { hash } = window.location;
     if (hash) this.scrollToLine(hash, true);
     window.requestAnimationFrame(() => {
-      performance.measure('snippet-content-full');
-      performance.measure('snippet-content-within-vue', 'snippet-start');
+      const perfFull = performance.measure('snippet-content-full');
+      const perfSnipetInVue = performance.measure('snippet-content-within-vue', 'snippet-start');
+      this.track('loading_snippet_full', { value: perfFull.duration });
+      this.track('loading_snippet_in_vue', { value: perfSnipetInVue.duration });
     });
   },
   methods: {
