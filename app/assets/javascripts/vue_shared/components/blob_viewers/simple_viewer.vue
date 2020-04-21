@@ -22,8 +22,8 @@ export default {
     const { hash } = window.location;
     if (hash) this.scrollToLine(hash, true);
     window.requestAnimationFrame(() => {
-      performance.mark('snippet-content-end');
       performance.measure('snippet-content-full');
+      performance.measure('snippet-content-within-vue', 'snippet-start');
     });
   },
   methods: {
