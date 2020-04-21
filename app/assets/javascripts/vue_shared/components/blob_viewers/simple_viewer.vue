@@ -21,6 +21,9 @@ export default {
   mounted() {
     const { hash } = window.location;
     if (hash) this.scrollToLine(hash, true);
+    window.requestAnimationFrame(() => {
+      performance.measure('snippet-content-full');
+    });
   },
   methods: {
     scrollToLine(hash, scroll = false) {
