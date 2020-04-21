@@ -14,6 +14,9 @@ export default {
     SnippetBlob,
   },
   mixins: [getSnippetMixin],
+  beforeCreate() {
+    performance.mark('snippet-start');
+  },
 };
 </script>
 <template>
