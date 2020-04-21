@@ -9,6 +9,8 @@ import SnippetsEdit from './components/edit.vue';
 Vue.use(VueApollo);
 Vue.use(Translate);
 
+performance.measure('snippet-before-vue');
+
 function appFactory(el, Component) {
   if (!el) {
     return false;
