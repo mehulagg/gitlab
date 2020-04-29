@@ -12,7 +12,7 @@
 
 @mixin build-content($border-radius: 30px) {
   display: inline-block;
-  padding: 8px 10px 9px;
+  padding: 8px 10px 8px;
   width: 100%;
   border: 1px solid $border-color;
   border-radius: $border-radius;
@@ -668,13 +668,13 @@
 
   .ci-action-icon-container {
     position: absolute;
-    right: 5px;
-    top: 5px;
+    right: 6px;
+    top: 6px;
 
     // Action Icons in big pipeline-graph nodes
     &.ci-action-icon-wrapper {
-      height: 30px;
-      width: 30px;
+      height: 24px;
+      width: 24px;
       background: $white;
       border: 1px solid $border-color;
       border-radius: 100%;
@@ -692,7 +692,7 @@
       svg {
         fill: $gl-text-color-secondary;
         position: relative;
-        top: -1px;
+        top: 0px;
       }
 
       .spinner {
@@ -845,8 +845,8 @@ button.mini-pipeline-graph-dropdown-toggle {
 
   .ci-action-icon-container {
     position: absolute;
-    right: 8px;
-    top: 8px;
+    right: 10px;
+    top: 10px;
 
     &.ci-action-icon-wrapper {
       height: $ci-action-dropdown-button-size;
@@ -856,6 +856,7 @@ button.mini-pipeline-graph-dropdown-toggle {
       border: 1px solid $border-color;
       border-radius: 50%;
       display: block;
+      vertical-align: middle;
 
       &:hover {
         background-color: $gray-darker;

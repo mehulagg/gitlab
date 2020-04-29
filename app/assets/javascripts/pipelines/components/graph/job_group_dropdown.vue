@@ -68,10 +68,7 @@ export default {
       class="dropdown-menu-toggle build-content"
     >
       <ci-icon :status="group.status" />
-
-      <span
-        class="ci-status-text text-truncate mw-70p gl-pl-1-deprecated-no-really-do-not-use-me d-inline-block align-bottom"
-      >
+      <span class="ci-status-text text-truncate mw-70p d-inline-block align-bottom">
         {{ group.name }}
       </span>
 
