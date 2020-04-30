@@ -27,6 +27,10 @@ class ConsolidateCountersWorker
       end
     end
 
+    def redis_key_for(model_class)
+      "consolidate-counters:scheduling:#{model_class}"
+    end
+
     private
 
     def schedule_worker_in(delay, model_class)
@@ -35,10 +39,6 @@ class ConsolidateCountersWorker
       end
 
       perform_in(delay, model_class)
-    end
-
-    def redis_key_for(model_class)
-      "consolidate-counters:scheduling:#{model_class}"
     end
   end
 

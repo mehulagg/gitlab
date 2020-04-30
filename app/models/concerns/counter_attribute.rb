@@ -13,7 +13,7 @@
 #
 # 2. Read the value persisted in the database including logged events.
 #    This is more accurate but slower to compute because it includes the
-#    sum of the logged events.
+#    sum of the logged events. Use this with caution!
 #
 # @example
 #   project_statistics.accurate_commit_count
@@ -63,23 +63,19 @@ module CounterAttribute
   included do |base|
     @counter_attribute_events_class = "#{base}Event".constantize
     @counter_attribute_events_table = @counter_attribute_events_class.table_name
-    @counter_attribute_foreign_key = base.name.foreign_key
+    @counter_attribute_foreign_key = base.table_name.singularize.foreign_key
 
-    has_many :counter_events, class_name: "#{@counter_attribute_events_class}"
+    has_many :counter_events, class_name: "#{@counter_attribute_events_class}", foreign_key: @counter_attribute_foreign_key
   end
 
   class_methods do
-    attr_reader :counter_attribute_events_class,
-      :counter_attribute_events_table,
-      :counter_attribute_foreign_key
+    attr_reader :counter_attribute_events_class, :counter_attribute_events_table, :counter_attribute_foreign_key
 
     def counter_attribute(attribute)
       counter_attributes << attribute
 
       define_method("accurate_#{attribute}") do
-        unless counter_attribute_enabled?(attribute)
-          return read_attribute(attribute)
-        end
+        return read_attribute(attribute) unless counter_attribute_enabled?(attribute)
 
         # Return the value persisted in the origin table + all related log events
         results = self.class
@@ -218,11 +214,7 @@ module CounterAttribute
   private
 
   def counter_attributes_enabled?
-    # TODO: remove update_project_statistics_after_commit feature flag
-    # because if disabled it conflicts with raising an exception if
-    # increment runs inside a db transaction.
-    Feature.enabled?(:efficient_counter_attribute, project, default_enabled: true) &&
-      Feature.enabled?(:update_project_statistics_after_commit, default_enabled: true)
+    Feature.enabled?(:efficient_counter_attribute, project)
   end
 
   def counter_attribute?(attribute)

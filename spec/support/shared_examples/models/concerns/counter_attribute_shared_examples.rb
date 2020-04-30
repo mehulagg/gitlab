@@ -44,7 +44,7 @@ shared_examples_for CounterAttribute do |counter_attributes|
 
   shared_examples 'logs a new event' do |attribute|
     it 'in the events table' do
-      expect(ConsolidateCountersWorker).to receive(:perform_in).once.and_return(nil)
+      expect(ConsolidateCountersWorker).to receive(:exclusively_perform_async).once.and_return(nil)
       expect { subject.increment_counter!(attribute, 17) }
         .to change { counter_attribute_events_class.count }.by(1)
 
@@ -85,9 +85,6 @@ shared_examples_for CounterAttribute do |counter_attributes|
     end
 
     context 'when there pending events for different records' do
-      let(:subject_2) { create(subject_factory) }
-      let(:subject_3) { create(subject_factory) }
-
       before do
         subject.increment_counter(attribute, 10)
         subject.increment_counter(attribute, -3)
@@ -160,16 +157,14 @@ shared_examples_for CounterAttribute do |counter_attributes|
             .not_to change { subject.class.counter_attribute_events_class.count }
         end
 
-        it 'raises exception if runs inside a transaction' do
+        it 'reports exception if runs inside a transaction' do
           expect(Gitlab::ErrorTracking)
             .to receive(:track_exception)
             .with(instance_of(CounterAttribute::TransactionForbiddenError), attribute: attribute)
 
-          expect do
-            subject.class.transaction do
-              subject.increment_counter!(attribute, 10)
-            end
-          end.to raise_error(Sidekiq::Worker::EnqueueFromTransactionError)
+          subject.class.transaction do
+            subject.increment_counter!(attribute, 10)
+          end
         end
 
         it 'raises error if non counter attribute is incremented' do
@@ -212,11 +207,21 @@ shared_examples_for CounterAttribute do |counter_attributes|
           expect { subject.increment_counter(:unknown_attribute, 10) }.to raise_error(CounterAttribute::UnknownAttributeError)
         end
 
-        it 'schedules the worker once on multiple increments' do
-          expect(ConsolidateCountersWorker).to receive(:perform_in).once.and_return(nil)
+        context 'when multiple increments occur for the same model' do
+          before do
+            # Ensure no exclusive lease is present
+            Gitlab::Redis::SharedState.with do |redis|
+              redis.del(ConsolidateCountersWorker.redis_key_for(subject.class))
+            end
+          end
 
-          subject.increment_counter(attribute, 10)
-          subject.increment_counter(attribute, -40)
+          it 'schedules the worker once on multiple increments' do
+            expect(ConsolidateCountersWorker).to receive(:perform_in).once.and_return(nil)
+
+            expect(ConsolidateCountersWorker).not_to be_worker_scheduled(subject.class)
+            subject.increment_counter(attribute, 10)
+            subject.increment_counter(attribute, -40)
+          end
         end
       end
 
