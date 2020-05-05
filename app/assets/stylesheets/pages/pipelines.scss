@@ -12,7 +12,7 @@
 
 @mixin build-content($border-radius: 30px) {
   display: inline-block;
-  padding: 8px 10px 8px;
+  padding: 8px 10px;
   width: 100%;
   border: 1px solid $border-color;
   border-radius: $border-radius;
@@ -692,7 +692,7 @@
       svg {
         fill: $gl-text-color-secondary;
         position: relative;
-        top: 0px;
+        top: 0;
       }
 
       .spinner {
