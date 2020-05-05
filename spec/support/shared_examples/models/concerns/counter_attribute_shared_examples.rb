@@ -10,10 +10,6 @@ shared_examples_for CounterAttribute do |counter_attributes|
     expect(subject.class.counter_attribute_events_class).to eq(counter_attribute_events_class)
   end
 
-  it 'captures the table where to save the events' do
-    expect(subject.class.counter_attribute_events_table).to eq(counter_attribute_table_name)
-  end
-
   it 'captures the foreign key to use in the events table' do
     expect(subject.class.counter_attribute_foreign_key).to eq(counter_attribute_foreign_key)
   end
@@ -22,7 +18,18 @@ shared_examples_for CounterAttribute do |counter_attributes|
     expect(subject.class.counter_attributes).to contain_exactly(*counter_attributes)
   end
 
-  describe '.counter_events_available?' do
+  it 'has default value and not null constraint for each attribute' do
+    columns = subject.class.columns.select { |c| counter_attributes.include?(c.name.to_sym) }
+    expect(columns).not_to be_empty
+    expect(columns.size).to eq(counter_attributes.size)
+
+    columns.each do |column|
+      expect(column.default).to be_present
+      expect(column.null).to be_falsey
+    end
+  end
+
+  describe '.counter_events_exist?' do
     context 'when there are logged events' do
       let(:attribute) { counter_attributes.first }
 
@@ -31,13 +38,13 @@ shared_examples_for CounterAttribute do |counter_attributes|
       end
 
       it 'returns true' do
-        expect(subject.class.counter_events_available?).to be_truthy
+        expect(subject.class.counter_events_exist?).to be_truthy
       end
     end
 
     context 'when there are no logged events' do
       it 'returns false' do
-        expect(subject.class.counter_events_available?).to be_falsey
+        expect(subject.class.counter_events_exist?).to be_falsey
       end
     end
   end
@@ -50,7 +57,7 @@ shared_examples_for CounterAttribute do |counter_attributes|
 
       event = counter_attribute_events_class.last
       expect(event.send(counter_attribute_foreign_key)).to eq(subject.id)
-      expect(event.build_artifacts_size).to eq(17)
+      expect(event.read_attribute(attribute)).to eq(17)
     end
   end
 
@@ -75,7 +82,7 @@ shared_examples_for CounterAttribute do |counter_attributes|
       it 'updates the counter and removes the events' do
         subject.class.slow_consolidate_counter_attributes!
 
-        expect(subject.reload.public_send(attribute)).to eq 7
+        expect(subject.reload.read_attribute(attribute)).to eq 7
         expect(subject.counter_events).to be_empty
       end
 
@@ -157,16 +164,6 @@ shared_examples_for CounterAttribute do |counter_attributes|
             .not_to change { subject.class.counter_attribute_events_class.count }
         end
 
-        it 'reports exception if runs inside a transaction' do
-          expect(Gitlab::ErrorTracking)
-            .to receive(:track_exception)
-            .with(instance_of(CounterAttribute::TransactionForbiddenError), attribute: attribute)
-
-          subject.class.transaction do
-            subject.increment_counter!(attribute, 10)
-          end
-        end
-
         it 'raises error if non counter attribute is incremented' do
           expect do
             subject.increment_counter!(:something_else, 10)
@@ -225,14 +222,14 @@ shared_examples_for CounterAttribute do |counter_attributes|
         end
       end
 
-      describe "accurate_#{attribute}" do
+      describe "accurate_counter for #{attribute}" do
         before do
           subject.update_column(attribute, 100)
         end
 
         context 'when there are no pending events' do
           it 'reads the value from the model table' do
-            expect(subject.send("accurate_#{attribute}")).to eq(100)
+            expect(subject.accurate_counter(attribute)).to eq(100)
           end
         end
 
@@ -241,7 +238,7 @@ shared_examples_for CounterAttribute do |counter_attributes|
             subject.increment_counter(attribute, 10)
             subject.increment_counter(attribute, -40)
 
-            expect(subject.send("accurate_#{attribute}")).to eq(70)
+            expect(subject.accurate_counter(attribute)).to eq(70)
           end
         end
       end

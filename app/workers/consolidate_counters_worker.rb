@@ -59,7 +59,7 @@ class ConsolidateCountersWorker
   end
 
   def reschedule_itself_if_there_are_more_events(model)
-    return unless model.counter_events_available?
+    return unless model.counter_events_exist?
 
     self.class.exclusively_perform_async(model.name)
   end

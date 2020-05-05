@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 # Add capabilities to increment a numeric model attribute efficiently by
-# using CQRS. When an attribute is incremented by a value, the increment
-# is logged to a separate events table. When reading the attribute we can
+# using CQRS (https://www.martinfowler.com/bliki/CQRS.html).
+# When an attribute is incremented by a value, the increment is logged
+# to a separate events table. When reading the attribute we can
 # choose whether to:
 # 1. Read the value persisted in the database. This is faster but less
 #    accurate because it can take up to ConsolidateCountersWorker::DELAY
@@ -16,7 +17,7 @@
 #    sum of the logged events. Use this with caution!
 #
 # @example
-#   project_statistics.accurate_commit_count
+#   project_statistics.accurate_counter(:commit_count)
 #
 # Periodically, we consolidate the logged events into the origin attribute
 # and delete them from the associcate events table.
@@ -62,45 +63,42 @@ module CounterAttribute
 
   included do |base|
     @counter_attribute_events_class = "#{base}Event".constantize
-    @counter_attribute_events_table = @counter_attribute_events_class.table_name
     @counter_attribute_foreign_key = base.table_name.singularize.foreign_key
 
     has_many :counter_events, class_name: "#{@counter_attribute_events_class}", foreign_key: @counter_attribute_foreign_key
   end
 
   class_methods do
-    attr_reader :counter_attribute_events_class, :counter_attribute_events_table, :counter_attribute_foreign_key
+    attr_reader :counter_attribute_events_class, :counter_attribute_foreign_key
 
     def counter_attribute(attribute)
       counter_attributes << attribute
+    end
 
-      define_method("accurate_#{attribute}") do
-        return read_attribute(attribute) unless counter_attribute_enabled?(attribute)
+    # Return the value persisted in the origin table + all related log events
+    def accurate_counter_for_id(id, attribute)
+      events_arel_table = counter_attribute_events_class.arel_table
+      results = select((arel_table[attribute] + arel_table.coalesce(events_arel_table[attribute].sum, 0)).as('actual_value'))
+        .left_outer_joins(:counter_events)
+        .where(arel_table[:id].eq(id))
+        .group(arel_table[attribute], arel_table[:id])
+      # Example of result query:
+      # SELECT project_statistics.commit_count + COALESCE(
+      #   SUM(project_statistics_events.commit_count), 0) AS actual_value
+      # FROM "project_statistics"
+      # LEFT OUTER JOIN "project_statistics_events"
+      #   ON "project_statistics_events"."project_statistics_id" = "project_statistics"."id"
+      # WHERE "project_statistics"."id" = 10
+      # GROUP BY "project_statistics"."commit_count", "project_statistics"."id"
 
-        # Return the value persisted in the origin table + all related log events
-        results = self.class
-          .select("#{self.class.table_name}.#{attribute} + COALESCE(SUM(#{self.class.counter_attribute_events_table}.#{attribute}), 0) AS actual_value")
-          .left_outer_joins(:counter_events)
-          .where(self.class.arel_table[:id].eq(id))
-          .group(self.class.arel_table[attribute], self.class.arel_table[:id])
-        # Example of result query:
-        # SELECT project_statistics.commit_count + COALESCE(
-        #   SUM(project_statistics_events.commit_count), 0) AS actual_value
-        # FROM "project_statistics"
-        # LEFT OUTER JOIN "project_statistics_events"
-        #   ON "project_statistics_events"."project_statistics_id" = "project_statistics"."id"
-        # WHERE "project_statistics"."id" = 10
-        # GROUP BY "project_statistics"."commit_count", "project_statistics"."id"
-
-        results.first['actual_value']
-      end
+      results.first['actual_value']
     end
 
     def counter_attributes
       @counter_attributes ||= Set.new
     end
 
-    def counter_events_available?
+    def counter_events_exist?
       counter_attribute_events_class.exists?
     end
 
@@ -165,7 +163,7 @@ module CounterAttribute
 
       consolidate_counters_sql = <<~SQL
         WITH events AS (
-          DELETE FROM #{counter_attribute_events_table}
+          DELETE FROM #{counter_attribute_events_class.table_name}
           WHERE #{counter_attribute_foreign_key} = #{id}
           RETURNING *
         )
@@ -180,6 +178,12 @@ module CounterAttribute
 
       connection.execute(consolidate_counters_sql)
     end
+  end
+
+  def accurate_counter(attribute)
+    return read_attribute(attribute) unless counter_attribute_enabled?(attribute)
+
+    self.class.accurate_counter_for_id(id, attribute)
   end
 
   def counter_attribute_enabled?(attribute)
@@ -222,14 +226,6 @@ module CounterAttribute
   end
 
   def log_event!(attribute, increment)
-    # Forbid running inside transaction because in case of rollback it would
-    # introduce data inconsistency
-    if Gitlab::Database.inside_transaction?
-      error = TransactionForbiddenError.new(
-        'cannot perform increment inside a transaction because it may not be rolled back')
-      Gitlab::ErrorTracking.track_exception(error, attribute: attribute)
-    end
-
     unless counter_attribute?(attribute)
       raise UnknownAttributeError, "'#{attribute}' is not a counter attribute"
     end
@@ -239,6 +235,6 @@ module CounterAttribute
   end
 
   def legacy_update_counter!(attribute, increment)
-    update!(attribute => read_attribute(attribute) + increment)
+    update!(attribute => read_attribute(attribute).to_i + increment)
   end
 end

@@ -2,24 +2,8 @@
 
 require 'spec_helper'
 
-describe ConsolidateCountersWorker do
-  class StubProjectStatisticsEvent < ApplicationRecord
-    self.table_name = 'project_statistics_events'
-
-    belongs_to :stub_project_statistics, foreign_key: :project_statistics_id
-  end
-
-  class StubProjectStatistics < ApplicationRecord
-    self.table_name = 'project_statistics'
-
-    belongs_to :project
-
-    include CounterAttribute
-
-    counter_attribute :build_artifacts_size
-  end
-
-  let(:model) { StubProjectStatistics }
+describe ConsolidateCountersWorker, :counter_attribute do
+  let(:model) { TestCounterAttribute }
   let(:scheduling_lock_key) { "consolidate-counters:scheduling:#{model}" }
 
   describe '.exclusively_perform_async' do
