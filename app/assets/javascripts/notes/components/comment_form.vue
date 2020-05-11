@@ -67,7 +67,6 @@ export default {
       noteType: constants.COMMENT,
       noteIsConfidential: false,
       isSubmitting: false,
-      isSubmitButtonDisabled: true,
     };
   },
   computed: {
@@ -80,6 +79,9 @@ export default {
       'getBlockedByIssues',
     ]),
     ...mapState(['isToggleStateButtonLoading', 'isToggleBlockedIssueWarning']),
+    isSubmitButtonDisabled() {
+      return this.isSubmitting || isEmpty(this.note);
+    },
     noteableDisplayName() {
       return splitCamelCase(this.noteableType).toLowerCase();
     },
@@ -157,14 +159,6 @@ export default {
       return Boolean(this.glFeatures.confidentialNotes);
     },
   },
-  watch: {
-    note(newNote) {
-      this.setIsSubmitButtonDisabled(newNote, this.isSubmitting);
-    },
-    isSubmitting(newValue) {
-      this.setIsSubmitButtonDisabled(this.note, newValue);
-    },
-  },
   mounted() {
     // jQuery is needed here because it is a custom event being dispatched with jQuery.
     $(document).on('issuable:change', (e, isClosed) => {
@@ -185,9 +179,6 @@ export default {
       'toggleStateButtonLoading',
       'toggleBlockedIssueWarning',
     ]),
-    setIsSubmitButtonDisabled(note, isSubmitting) {
-      this.isSubmitButtonDisabled = !(!isEmpty(note) && !isSubmitting);
-    },
     handleSave(withIssueAction) {
       this.isSubmitting = true;
 
@@ -292,7 +283,7 @@ export default {
           );
         });
     },
-    discard({ clear = true, refocus = true }) {
+    discard({ clear = true, refocus = true } = {}) {
       // `blur` is needed to clear slash commands autocomplete cache if event fired.
       // `focus` is needed to remain cursor in the textarea.
       this.$refs.textarea.blur();
@@ -521,8 +512,9 @@ append-right-10 comment-type-dropdown js-comment-type-dropdown droplab-dropdown"
 
               <button
                 type="button"
-                class="btn btn-cancel js-note-cancel-button"
-                :disabled="isSubmitting || note === ''"
+                class="btn btn-cancel"
+                data-testid="note-cancel-button"
+                :disabled="isSubmitButtonDisabled"
                 @click="discard({ clear: true, refocus: false })"
               >
                 {{ __('Cancel') }}

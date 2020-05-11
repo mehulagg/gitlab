@@ -20,6 +20,8 @@ jest.mock('autosize');
 jest.mock('~/commons/nav/user_merge_requests');
 jest.mock('~/gl_form');
 
+const TEST_NOTE = 'This has content';
+
 describe('issue_comment_form component', () => {
   let store;
   let wrapper;
@@ -43,6 +45,11 @@ describe('issue_comment_form component', () => {
       },
     });
   };
+
+  const findCancelButton = () => wrapper.find('[data-testid="note-cancel-button"]');
+  const findTextarea = () => wrapper.find('textarea');
+  const setNote = val => findTextarea().setValue(val);
+  const getNote = () => findTextarea().element.value;
 
   beforeEach(() => {
     axiosMock = new MockAdapter(axios);
@@ -82,6 +89,7 @@ describe('issue_comment_form component', () => {
         expect(wrapper.vm.saveNote).toHaveBeenCalled();
         expect(wrapper.vm.stopPolling).toHaveBeenCalled();
         expect(wrapper.vm.resizeTextarea).toHaveBeenCalled();
+        expect(findCancelButton().attributes('disabled')).toBe('disabled');
       });
 
       it('should toggle issue state when no note', () => {
@@ -341,28 +349,35 @@ describe('issue_comment_form component', () => {
       });
     });
 
-    describe('cancel button', () => {
-      it('is disabled when note is empty', () => {
-        expect(wrapper.find('.js-note-cancel-button').attributes('disabled')).toEqual('disabled');
+    describe('when note is empty', () => {
+      it('disables cancel button', () => {
+        expect(findCancelButton().attributes('disabled')).toEqual('disabled');
       });
+    });
 
-      it('clears the note when clicked', () => {
-        const $cancelButton = $(wrapper.find('.js-note-cancel-button').element);
-        const textarea = wrapper.find('textarea');
-
-        textarea.setValue('This has content');
+    describe('when note is not empty', () => {
+      beforeEach(() => {
+        setNote(TEST_NOTE);
 
         jest.spyOn(wrapper.vm, 'discard');
 
-        expect(textarea.element.value).toBe('This has content');
+        return wrapper.vm.$nextTick();
+      });
 
-        wrapper.vm.$nextTick(() => {
-          $cancelButton.trigger('click');
+      it('has note', () => {
+        expect(getNote()).toEqual(TEST_NOTE);
+      });
 
-          wrapper.vm.$nextTick(() => {
-            expect(wrapper.vm.discard).toHaveBeenCalled();
-            expect(textarea.element.value).toBe('');
-          });
+      it('cancel is enabled', () => {
+        expect(findCancelButton().attributes('disabled')).toBeUndefined();
+      });
+
+      it('note is cleared when cancel is clicked', () => {
+        findCancelButton().trigger('click');
+
+        return wrapper.vm.$nextTick().then(() => {
+          expect(wrapper.vm.discard).toHaveBeenCalledWith({ clear: true, refocus: false });
+          expect(getNote()).toBe('');
         });
       });
     });
