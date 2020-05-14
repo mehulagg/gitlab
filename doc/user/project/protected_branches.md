@@ -24,6 +24,9 @@ By default, a protected branch does these things:
 NOTE:
 A GitLab administrator is allowed to push to the protected branches.
 
+NOTE: **Note:**
+A user with the role developer is allowed to create a project in a group, but might not be allowed to initially push to the master branch (depending on the configuration of the instance).
+
 See the [Changelog](#changelog) section for changes over time.
 
 The default branch protection level is set in the [Admin Area](../admin_area/settings/visibility_and_access_controls.md#default-branch-protection).
