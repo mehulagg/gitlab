@@ -1,14 +1,7 @@
 {
   "description": "Build report results data junit",
   "type": "object",
-  "required": [
-    "name",
-    "duration",
-    "failed",
-    "errored",
-    "skipped",
-    "success"
-  ],
+  "required": ["name", "duration", "failed", "errored", "skipped", "success"],
   "properties": {
     "name": { "type": "string" },
     "duration": { "type": "string" },

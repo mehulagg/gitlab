@@ -4,7 +4,6 @@ FactoryBot.define do
   factory :ci_build_report_results, class: 'Ci::BuildReportResults' do
     build factory: :ci_build
     project factory: :project
-    title { "title" }
 
     trait :with_junit_success do
       data do
@@ -17,7 +16,7 @@ FactoryBot.define do
             skipped: 0,
             success: 2
           }
-        }
+        }.to_json
       end
     end
 
@@ -32,12 +31,12 @@ FactoryBot.define do
             skipped: 0,
             success: 0
           }
-        }
+        }.to_json
       end
     end
 
     trait :with_coverage do
-      data { { coverage: 80.0 } }
+      data { { coverage: 80.0 }.to_json }
     end
   end
 end

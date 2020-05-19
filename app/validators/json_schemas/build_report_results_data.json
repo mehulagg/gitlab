@@ -1,10 +1,11 @@
 {
   "description": "Build report results data",
   "type": "object",
+  "required": ["junit"],
   "properties": {
     "coverage": { "type": "float" },
     "junit": {
-      "type": "array",
+      "type": "object",
       "items": { "$ref": "./build_report_results_data_junit.json" }
     }
   }
