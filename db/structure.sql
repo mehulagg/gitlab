@@ -9224,7 +9224,7 @@ CREATE UNIQUE INDEX index_chat_teams_on_namespace_id ON public.chat_teams USING 
 
 CREATE UNIQUE INDEX index_ci_build_needs_on_build_id_and_name ON public.ci_build_needs USING btree (build_id, name);
 
-CREATE INDEX index_ci_build_report_results_on_build_id ON public.ci_build_report_results USING btree (build_id);
+CREATE UNIQUE INDEX index_ci_build_report_results_on_build_id ON public.ci_build_report_results USING btree (build_id);
 
 CREATE INDEX index_ci_build_report_results_on_project_id ON public.ci_build_report_results USING btree (project_id);
 
@@ -13948,5 +13948,6 @@ COPY "schema_migrations" (version) FROM STDIN;
 20200519115908
 20200519175520
 20200519203850
+20200520151652
 \.
 
