@@ -802,6 +802,16 @@ module Ci
       complete? && builds.latest.with_reports(reports_scope).exists?
     end
 
+    def build_report_results
+      ids = builds.latest.with_report_results.pluck(:id)
+
+      Ci::BuildReportResults.for_build_ids(ids)
+    end
+
+    def test_report_results_summary
+      Gitlab::Ci::Reports::TestReportResults.new(build_report_results)
+    end
+
     def test_reports
       Gitlab::Ci::Reports::TestReports.new.tap do |test_reports|
         builds.latest.with_reports(Ci::JobArtifact.test_reports).preload(:project).find_each do |build|

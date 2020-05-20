@@ -191,6 +191,16 @@ class Projects::PipelinesController < Projects::ApplicationController
     end
   end
 
+  def test_report_results
+    respond_to do |format|
+      format.json do
+        render json: TestReportResultsSerializer
+          .new(current_user: @current_user)
+          .represent(@pipeline.test_report_results_summary, project: project)
+      end
+    end
+  end
+
   def test_reports_count
     return unless Feature.enabled?(:junit_pipeline_view, project)
 

@@ -16,7 +16,7 @@ FactoryBot.define do
             skipped: 0,
             success: 2
           }
-        }.to_json
+        }
       end
     end
 
@@ -31,12 +31,12 @@ FactoryBot.define do
             skipped: 0,
             success: 0
           }
-        }.to_json
+        }
       end
     end
 
     trait :with_coverage do
-      data { { coverage: 80.0 }.to_json }
+      data { { coverage: 80.0 } }
     end
   end
 end

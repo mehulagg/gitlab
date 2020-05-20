@@ -34,6 +34,7 @@ class BuildFinishedWorker # rubocop:disable Scalability/IdempotentWorker
     ArchiveTraceWorker.perform_async(build.id)
     ExpirePipelineCacheWorker.perform_async(build.pipeline_id) if build.pipeline.cacheable?
     ChatNotificationWorker.perform_async(build.id) if build.pipeline.chat?
+    Ci::BuildReportResultsWorker.perform_async(build.id) if build.job_artifacts.test_reports.any?
   end
 end
 

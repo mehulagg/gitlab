@@ -182,6 +182,7 @@ module Ci
     end
 
     scope :with_coverage, -> { where.not(coverage: nil) }
+    scope :with_report_results, -> { where('EXISTS (?)', Ci::BuildReportResults.where('ci_builds.id = ci_build_report_results.build_id').select(1)) }
 
     acts_as_taggable
 
