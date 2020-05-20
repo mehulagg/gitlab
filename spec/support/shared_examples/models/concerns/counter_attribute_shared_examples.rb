@@ -62,6 +62,10 @@ shared_examples_for CounterAttribute do |counter_attributes|
   end
 
   describe '.slow_consolidate_counter_attributes!' do
+    before do
+      stub_const("#{described_class}::CONSOLIDATION_BATCH_SIZE", 2)
+    end
+
     let(:attribute) { counter_attributes.first }
 
     context 'when it is executed inside an existing database transaction' do
@@ -75,8 +79,9 @@ shared_examples_for CounterAttribute do |counter_attributes|
 
     context 'when there are pending events for the same object' do
       before do
-        subject.increment_counter(attribute, 10)
+        subject.increment_counter(attribute, 4)
         subject.increment_counter(attribute, -3)
+        subject.increment_counter(attribute, 6)
       end
 
       it 'updates the counter and removes the events' do
@@ -86,8 +91,9 @@ shared_examples_for CounterAttribute do |counter_attributes|
         expect(subject.counter_events).to be_empty
       end
 
-      it 'performs 1 query to fetch all IDs and 1 query per record to update' do
-        expect { subject.class.slow_consolidate_counter_attributes! }.not_to exceed_query_limit(2)
+      it 'performs 2 initial queries to fetch min and max IDs and 1 query per batch' do
+        expect { subject.class.slow_consolidate_counter_attributes! }
+          .not_to exceed_query_limit(4)
       end
     end
 
@@ -107,9 +113,9 @@ shared_examples_for CounterAttribute do |counter_attributes|
         it 'updates the counters' do
           subject.class.slow_consolidate_counter_attributes!
 
-          expect(subject.reload.public_send(attribute)).to eq 7
-          expect(subject_2.reload.public_send(attribute)).to eq 42
-          expect(subject_3.reload.public_send(attribute)).to eq 20
+          expect(subject.reload.read_attribute(attribute)).to eq 7
+          expect(subject_2.reload.read_attribute(attribute)).to eq 42
+          expect(subject_3.reload.read_attribute(attribute)).to eq 20
         end
 
         it 'removes the events' do
@@ -118,8 +124,9 @@ shared_examples_for CounterAttribute do |counter_attributes|
           expect(subject.reload.counter_events).to be_empty
         end
 
-        it 'returns the count of consolidated subjects' do
-          expect(subject.class.slow_consolidate_counter_attributes!).to eq(3)
+        it 'performs 2 initial queries to fetch min and max IDs and 1 query per batch' do
+          expect { subject.class.slow_consolidate_counter_attributes! }
+            .not_to exceed_query_limit(5)
         end
       end
 

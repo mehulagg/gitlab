@@ -59,7 +59,7 @@ module CounterAttribute
 
   extend ActiveSupport::Concern
 
-  CONSOLIDATION_BATCH_SIZE = 100
+  CONSOLIDATION_BATCH_SIZE = 100 # TODO: increase to 1000 or more
 
   included do |base|
     @counter_attribute_events_class = "#{base}Event".constantize
@@ -105,44 +105,38 @@ module CounterAttribute
     # This method must only be called by ConsolidateCountersWorker
     # because it should run asynchronously and with exclusive lease.
     def slow_consolidate_counter_attributes!
+      return if counter_attributes.empty?
+
       if Gitlab::Database.inside_transaction?
         raise TransactionForbiddenError, "cannot consolidate counter attributes inside a transaction"
       end
 
-      consolidated_records_count = 0
+      # consolidate logged events in batches
+      overall_max_id = counter_attribute_events_class.maximum(:id)
+      return unless overall_max_id
+
+      batch_start_id = counter_attribute_events_class.minimum(:id)
 
       loop do
-        ids_to_consolidate = next_batch_of_events(CONSOLIDATION_BATCH_SIZE)
+        break if batch_start_id > overall_max_id
 
-        ids_to_consolidate.each do |id|
-          slow_consolidate_counter_attributes_for!(id)
-        end
+        batch_end_id = batch_start_id + CONSOLIDATION_BATCH_SIZE
 
-        current_batch_size = ids_to_consolidate.size
-        consolidated_records_count += current_batch_size
+        consolidate_batch!(batch_start_id, batch_end_id)
 
-        break if current_batch_size < CONSOLIDATION_BATCH_SIZE
+        batch_start_id = batch_end_id + 1
       end
-
-      consolidated_records_count
     end
 
     private
 
-    def next_batch_of_events(batch_size)
-      counter_attribute_events_class
-        .distinct
-        .limit(batch_size)
-        .pluck(counter_attribute_foreign_key)
-    end
-
-    # Delete events and update the model atomically.
+    # Delete events and update the model atomically in batches.
     # E.g. given a model ProjectStatistics and its counter attributes, will produce
     # the following query:
     #
     # WITH events AS (
     #   DELETE FROM project_statistics_events
-    #   WHERE project_statistics_id = 1
+    #   WHERE project_statistics_id >= 1 AND project_statistics_id <= 1001
     #   RETURNING *
     # )
     # UPDATE project_statistics
@@ -152,28 +146,28 @@ module CounterAttribute
     #   ...
     # FROM (
     #   SELECT
+    #     project_statistics_id,
     #     SUM(build_artifacts_size) AS build_artifacts_size,
     #     SUM(commit_count) AS commit_count,
     #     ...
-    #   FROM events
+    #   FROM events GROUP BY project_statistics_id
     # ) AS sums
-    # WHERE project_statistics.id = 1
-    def slow_consolidate_counter_attributes_for!(id)
-      return if counter_attributes.empty?
-
+    # WHERE project_statistics_id = sums.project_statistics_id
+    def consolidate_batch!(start_id, end_id)
       consolidate_counters_sql = <<~SQL
         WITH events AS (
           DELETE FROM #{counter_attribute_events_class.table_name}
-          WHERE #{counter_attribute_foreign_key} = #{id}
+          WHERE id >= #{start_id} AND id <= #{end_id}
           RETURNING *
         )
         UPDATE #{table_name}
         SET #{counter_attributes.map { |attr| "#{attr} = #{table_name}.#{attr} + sums.#{attr}" }.join(', ')}
         FROM (
-          SELECT #{counter_attributes.map { |attr| "SUM(#{attr}) AS #{attr}" }.join(', ')}
+          SELECT #{counter_attribute_foreign_key}, #{counter_attributes.map { |attr| "SUM(#{attr}) AS #{attr}" }.join(', ')}
           FROM events
+          GROUP BY #{counter_attribute_foreign_key}
         ) AS sums
-        WHERE #{table_name}.id = #{id}
+        WHERE #{table_name}.id = sums.#{counter_attribute_foreign_key}
       SQL
 
       connection.execute(consolidate_counters_sql)
