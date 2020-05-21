@@ -54,6 +54,16 @@ class Import::FogbugzController < Import::BaseController
     already_added_projects_names = @already_added_projects.pluck(:import_source)
 
     @repos.reject! { |repo| already_added_projects_names.include? repo.name }
+    print @repos[0].to_json
+
+    respond_to do |format|
+      format.json do
+        render json: { imported_projects: serialized_imported_projects(@already_added_projects),
+          namespaces: serialized_namespaces,
+          provider_repos: serialized_provider_repos }
+      end
+      format.html
+    end
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -76,6 +86,34 @@ class Import::FogbugzController < Import::BaseController
   end
 
   private
+
+  def provider
+    :fogbugz
+  end
+
+  def serialized_imported_projects(projects)
+    ProjectSerializer.new.represent(projects, serializer: :import, provider_url: provider_url)
+  end
+
+  def serialized_provider_repos
+    ProviderRepoSerializer.new(current_user: current_user).represent(@repos, provider: provider, provider_url: 'lol')
+  end
+
+  def serialized_namespaces
+    NamespaceSerializer.new.represent(namespaces)
+  end
+
+  def namespaces
+    current_user.manageable_groups_with_routes
+  end
+
+  def provider_url
+    strong_memoize(:provider_url) do
+      provider = Gitlab::Auth::OAuth::Provider.config_for('fogbugz')
+
+      provider&.dig('url').presence || 'https://fogbugz.com'
+    end
+  end
 
   def client
     @client ||= Gitlab::FogbugzImport::Client.new(token: session[:fogbugz_token], uri: session[:fogbugz_uri])
