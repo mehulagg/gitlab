@@ -4,66 +4,17 @@ require 'spec_helper'
 
 describe ConsolidateCountersWorker, :counter_attribute do
   let(:model) { TestCounterAttribute }
-  let(:scheduling_lock_key) { "consolidate-counters:scheduling:#{model}" }
 
-  describe '.exclusively_perform_async' do
-    subject { described_class.exclusively_perform_async(model) }
-
-    before do
-      Gitlab::Redis::SharedState.with do |redis|
-        redis.del(scheduling_lock_key)
-      end
-    end
-
-    context 'when no workers are scheduled' do
-      it 'takes exclusive lease of the schedule' do
-        subject
-
-        expect(described_class.worker_scheduled?(model))
-          .to be_truthy
-      end
-
-      it 'schedules the worker some time in the future' do
-        subject
-
-        job = described_class.jobs.last
-        job_delay = job.fetch('at') - job.fetch('created_at')
-
-        expect(job_delay).to be_within(5).of(described_class::DELAY)
-      end
-    end
-
-    context 'when a worker is already scheduled' do
-      before do
-        described_class.exclusively_perform_async(model)
-      end
-
-      it 'exits immediately' do
-        expect(described_class.worker_scheduled?(model))
-          .to be_truthy
-
-        expect { described_class.exclusively_perform_async(model) }
-          .not_to change { described_class.jobs.size }
-      end
-    end
-  end
-
-  describe '#perform' do
-    let(:processing_lock_key) { "consolidate-counters:processing:#{model}" }
+  describe '#perform', :redis do
+    let(:processing_lock_key) { "counter-attributes:#{model}" }
     let(:worker) { described_class.new }
-
-    after do
-      Gitlab::Redis::SharedState.with do |redis|
-        redis.del(processing_lock_key)
-      end
-    end
 
     subject { worker.perform(model.name) }
 
     it 'obtains an exclusive lease during processing' do
       expect(worker)
         .to receive(:in_lock)
-        .with("consolidate-counters:processing:#{model}", ttl: described_class::LOCK_TTL)
+        .with(processing_lock_key, ttl: described_class::LOCK_TTL)
         .and_call_original
 
       subject
@@ -75,6 +26,14 @@ describe ConsolidateCountersWorker, :counter_attribute do
         .and_call_original
 
       subject
+    end
+
+    context 'when model class does not exist' do
+      subject { worker.perform('non-existend-model') }
+
+      it 'does nothing' do
+        expect(worker).not_to receive(:in_lock)
+      end
     end
   end
 end

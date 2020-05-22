@@ -234,6 +234,13 @@
   :resource_boundary: :unknown
   :weight: 1
   :idempotent: 
+- :name: cronjob:schedule_consolidate_counters
+  :feature_category: :not_owned
+  :has_external_dependencies: 
+  :urgency: :low
+  :resource_boundary: :unknown
+  :weight: 1
+  :idempotent: true
 - :name: cronjob:schedule_migrate_external_diffs
   :feature_category: :source_code_management
   :has_external_dependencies: 
@@ -964,7 +971,7 @@
   :idempotent: 
 - :name: consolidate_counters
   :feature_category: :not_owned
-  :has_external_dependencies:
+  :has_external_dependencies: 
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1

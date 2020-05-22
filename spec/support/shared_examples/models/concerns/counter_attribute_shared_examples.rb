@@ -18,7 +18,7 @@ shared_examples_for CounterAttribute do |counter_attributes|
     expect(subject.class.counter_attributes).to contain_exactly(*counter_attributes)
   end
 
-  it 'has default value and not null constraint for each attribute' do
+  it 'has default value and not null constraint for each attribute', :aggregate_failure do
     columns = subject.class.columns.select { |c| counter_attributes.include?(c.name.to_sym) }
     expect(columns).not_to be_empty
     expect(columns.size).to eq(counter_attributes.size)
@@ -50,8 +50,7 @@ shared_examples_for CounterAttribute do |counter_attributes|
   end
 
   shared_examples 'logs a new event' do |attribute|
-    it 'in the events table' do
-      expect(ConsolidateCountersWorker).to receive(:exclusively_perform_async).once.and_return(nil)
+    it 'inserts a record in the events table', :aggregate_failure do
       expect { subject.increment_counter!(attribute, 17) }
         .to change { counter_attribute_events_class.count }.by(1)
 
@@ -148,12 +147,6 @@ shared_examples_for CounterAttribute do |counter_attributes|
 
   counter_attributes.each do |attribute|
     describe attribute do
-      before do
-        Gitlab::Redis::SharedState.with do |redis|
-          redis.del("consolidate-counters:scheduling:ProjectStatistics")
-        end
-      end
-
       describe "#increment_counter!" do
         it_behaves_like 'logs a new event', attribute
 
@@ -193,8 +186,7 @@ shared_examples_for CounterAttribute do |counter_attributes|
       describe "#increment_counter" do
         it_behaves_like 'logs a new event', attribute
 
-        it 'logs ActiveRecord errors and returns false' do
-          expect(ConsolidateCountersWorker).not_to receive(:perform_in)
+        it 'logs ActiveRecord errors and returns false if invalid increment' do
           expect(Gitlab::ErrorTracking).to receive(:track_exception).with(anything, {
             model: subject.class.name,
             id: subject.id,
@@ -203,71 +195,35 @@ shared_examples_for CounterAttribute do |counter_attributes|
           })
 
           expect(subject.increment_counter(attribute, nil)).to be_falsey
+          expect(subject.counter_events).to be_empty
         end
 
         it 'raises an error if attribute is not a counter attribute' do
-          expect(ConsolidateCountersWorker).not_to receive(:perform_in)
-
           expect { subject.increment_counter(:unknown_attribute, 10) }.to raise_error(CounterAttribute::UnknownAttributeError)
+          expect(subject.counter_events).to be_empty
+        end
+      end
+
+      describe "accurate_counter vs attribute reader for #{attribute}" do
+        before do
+          subject.update_column(attribute, 100)
         end
 
-        context 'when multiple increments occur for the same model' do
+        context 'when there are no pending events' do
+          it { expect(subject.accurate_counter(attribute)).to eq(100) }
+
+          it { expect(subject.send(attribute)).to eq(100) }
+        end
+
+        context 'when there are pending events' do
           before do
-            # Ensure no exclusive lease is present
-            Gitlab::Redis::SharedState.with do |redis|
-              redis.del(ConsolidateCountersWorker.redis_key_for(subject.class))
-            end
-          end
-
-          it 'schedules the worker once on multiple increments' do
-            expect(ConsolidateCountersWorker).to receive(:perform_in).once.and_return(nil)
-
-            expect(ConsolidateCountersWorker).not_to be_worker_scheduled(subject.class)
             subject.increment_counter(attribute, 10)
             subject.increment_counter(attribute, -40)
           end
-        end
-      end
 
-      describe "accurate_counter for #{attribute}" do
-        before do
-          subject.update_column(attribute, 100)
-        end
+          it { expect(subject.accurate_counter(attribute)).to eq(70) }
 
-        context 'when there are no pending events' do
-          it 'reads the value from the model table' do
-            expect(subject.accurate_counter(attribute)).to eq(100)
-          end
-        end
-
-        context 'when there are pending events' do
-          it 'reads the value from the model table and sums the pending events' do
-            subject.increment_counter(attribute, 10)
-            subject.increment_counter(attribute, -40)
-
-            expect(subject.accurate_counter(attribute)).to eq(70)
-          end
-        end
-      end
-
-      describe "##{attribute}" do
-        before do
-          subject.update_column(attribute, 100)
-        end
-
-        context 'when there are no pending events' do
-          it 'reads the value from the model table' do
-            expect(subject.send(attribute)).to eq(100)
-          end
-        end
-
-        context 'when there are pending events' do
-          it 'reads the value from the model table without including events' do
-            subject.increment_counter(attribute, 10)
-            subject.increment_counter(attribute, -40)
-
-            expect(subject.send(attribute)).to eq(100)
-          end
+          it { expect(subject.send(attribute)).to eq(100) }
         end
       end
     end

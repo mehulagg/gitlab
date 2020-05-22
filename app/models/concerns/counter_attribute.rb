@@ -3,21 +3,25 @@
 # Add capabilities to increment a numeric model attribute efficiently by
 # using CQRS (https://www.martinfowler.com/bliki/CQRS.html).
 # When an attribute is incremented by a value, the increment is logged
-# to a separate events table. When reading the attribute we can
-# choose whether to:
-# 1. Read the value persisted in the database. This is faster but less
-#    accurate because it can take up to ConsolidateCountersWorker::DELAY
-#    to be updated. Use this unless high accuracy is required.
+# to a separate events table.
+# Then, ScheduleConsolidateCountersWorker runs in a cronjob and runs a
+# consolidation process by removing the logged events and updating the
+# main attribute.
 #
-# @example
-#   project_statistics.commit_count
+# When reading the attribute we can choose whether to:
+# 1. Read the value persisted in the database. This is faster but less
+#    accurate because we need to wait for the next consolidation
+#    to be updated. We recommend using this unless time sensitive accuracy
+#    is required.
+#
+# @example: project_statistics.commit_count
 #
 # 2. Read the value persisted in the database including logged events.
 #    This is more accurate but slower to compute because it includes the
-#    sum of the logged events. Use this with caution!
+#    sum of the logged events. Avoid it unless unless time sensitive
+#    accuracy is required.
 #
-# @example
-#   project_statistics.accurate_counter(:commit_count)
+# @example: project_statistics.accurate_counter(:commit_count)
 #
 # Periodically, we consolidate the logged events into the origin attribute
 # and delete them from the associcate events table.
@@ -59,7 +63,7 @@ module CounterAttribute
 
   extend ActiveSupport::Concern
 
-  CONSOLIDATION_BATCH_SIZE = 100 # TODO: increase to 1000 or more
+  CONSOLIDATION_BATCH_SIZE = 1000
 
   included do |base|
     @counter_attribute_events_class = "#{base}Event".constantize
@@ -136,7 +140,7 @@ module CounterAttribute
     #
     # WITH events AS (
     #   DELETE FROM project_statistics_events
-    #   WHERE project_statistics_id >= 1 AND project_statistics_id <= 1001
+    #   WHERE id >= 1 AND id <= 1001
     #   RETURNING *
     # )
     # UPDATE project_statistics
@@ -225,7 +229,6 @@ module CounterAttribute
     end
 
     counter_events.create!(attribute => increment)
-    ConsolidateCountersWorker.exclusively_perform_async(self.class.name)
   end
 
   def legacy_update_counter!(attribute, increment)
