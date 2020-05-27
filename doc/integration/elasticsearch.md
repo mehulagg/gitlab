@@ -159,7 +159,7 @@ After installation, be sure to [enable Elasticsearch](#enabling-elasticsearch).
 
 NOTE: **Note:**
 If you see an error such as `Permission denied - /home/git/gitlab-elasticsearch-indexer/` while indexing, you
-may need to set the `production -> elasticsearch -> indexer_path` setting in your `gitlab.yml` file to 
+may need to set the `production -> elasticsearch -> indexer_path` setting in your `gitlab.yml` file to
 `/usr/local/bin/gitlab-elasticsearch-indexer`, which is where the binary is installed.
 
 ## Enabling Elasticsearch
@@ -718,7 +718,7 @@ Here are some common pitfalls and how to overcome them:
   ```
 
   If you see `"ActiveRecord::Relation"`, you are **not** using Elasticsearch.
-  
+
   If you see `"Kaminari::PaginatableArray"` you are using Elasticsearch.
 
   NOTE: **Note:**
