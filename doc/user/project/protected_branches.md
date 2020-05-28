@@ -25,7 +25,9 @@ NOTE:
 A GitLab administrator is allowed to push to the protected branches.
 
 NOTE: **Note:**
-A user with the role developer is allowed to create a project in a group, but might not be allowed to initially push to the master branch (depending on the configuration of the instance).
+A user with the [Developer role](../permissions.md) is allowed to create a project in a group, but
+might not be allowed to initially push to the `master` branch (depending on the configuration of the
+instance).
 
 See the [Changelog](#changelog) section for changes over time.
 
