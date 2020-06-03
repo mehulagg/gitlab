@@ -7,6 +7,10 @@ module BitbucketServer
         super(raw)
       end
 
+      def id
+        full_name
+      end
+
       def project_key
         raw.dig('project', 'key')
       end
@@ -43,6 +47,10 @@ module BitbucketServer
 
       def name
         raw['name']
+      end
+
+      def safe_name
+        name.gsub(/[^\s\w.-]/, '')
       end
 
       def valid?

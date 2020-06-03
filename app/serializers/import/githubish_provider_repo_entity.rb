@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProviderRepoEntity < Grape::Entity
+class Import::GithubishProviderRepoEntity < Grape::Entity
   include ImportHelper
 
   expose :id

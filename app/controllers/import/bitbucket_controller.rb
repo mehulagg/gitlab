@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Import::BitbucketController < Import::BaseController
+  extend ::Gitlab::Utils::Override
+
   include ActionView::Helpers::SanitizeHelper
 
   before_action :verify_bitbucket_import_enabled
@@ -22,9 +24,12 @@ class Import::BitbucketController < Import::BaseController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def status
+    if Feature.enabled?(:new_import_ui)
+      return super
+    end
+
     bitbucket_client = Bitbucket::Client.new(credentials)
     repos = bitbucket_client.repos(filter: sanitized_filter_param)
-
     @repos, @incompatible_repos = repos.partition { |repo| repo.valid? }
 
     @already_added_projects = find_already_added_projects('bitbucket')
@@ -36,6 +41,10 @@ class Import::BitbucketController < Import::BaseController
 
   def jobs
     render json: find_jobs('bitbucket')
+  end
+
+  def realtime_changes
+    super
   end
 
   def create
@@ -59,13 +68,38 @@ class Import::BitbucketController < Import::BaseController
       project = Gitlab::BitbucketImport::ProjectCreator.new(repo, project_name, target_namespace, current_user, credentials).execute
 
       if project.persisted?
-        render json: ProjectSerializer.new.represent(project)
+        render json: ProjectSerializer.new.represent(project, serializer: :import)
       else
         render json: { errors: project_save_error(project) }, status: :unprocessable_entity
       end
     else
       render json: { errors: _('This namespace has already been taken! Please choose another one.') }, status: :unprocessable_entity
     end
+  end
+
+  protected
+
+  # rubocop: disable CodeReuse/ActiveRecord
+  override :provider_repos
+  def provider_repos
+    bitbucket_client = Bitbucket::Client.new(credentials)
+    repos = bitbucket_client.repos(filter: sanitized_filter_param)
+
+    already_added_projects = find_already_added_projects('bitbucket')
+    already_added_projects_names = already_added_projects.pluck(:import_source)
+
+    repos.reject { |repo| already_added_projects_names.include? repo.full_name }
+  end
+  # rubocop: enable CodeReuse/ActiveRecord
+
+  override :provider_name
+  def provider_name
+    :bitbucket
+  end
+
+  override :provider_url
+  def provider_url
+    provider.url
   end
 
   private

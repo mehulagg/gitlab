@@ -9,6 +9,10 @@ module Bitbucket
         super(raw)
       end
 
+      def id
+        full_name
+      end
+
       def owner_and_slug
         @owner_and_slug ||= full_name.split('/', 2)
       end
@@ -47,6 +51,10 @@ module Bitbucket
 
       def name
         raw['name']
+      end
+
+      def safe_name
+        name.gsub(/[^\s\w.-]/, '')
       end
 
       def valid?
