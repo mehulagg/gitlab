@@ -16,7 +16,6 @@ RSpec.describe Project do
 
     it { is_expected.to delegate_method(:actual_shared_runners_minutes_limit).to(:shared_runners_limit_namespace) }
     it { is_expected.to delegate_method(:shared_runners_minutes_limit_enabled?).to(:shared_runners_limit_namespace) }
-    it { is_expected.to delegate_method(:shared_runners_minutes_used?).to(:shared_runners_limit_namespace) }
     it { is_expected.to delegate_method(:shared_runners_remaining_minutes_below_threshold?).to(:shared_runners_limit_namespace) }
 
     it { is_expected.to delegate_method(:closest_gitlab_subscription).to(:namespace) }
@@ -966,12 +965,21 @@ RSpec.describe Project do
           shared_runners_enabled: true)
       end
 
-      before do
-        expect(namespace).to receive(:shared_runners_minutes_used?).and_call_original
+      it 'shared runners are not available' do
+        expect(project.shared_runners_available?).to be_falsey
+      end
+    end
+
+    context 'without used pipeline minutes' do
+      let(:namespace) { create(:namespace, :with_not_used_build_minutes_limit) }
+      let(:project) do
+        create(:project,
+          namespace: namespace,
+          shared_runners_enabled: true)
       end
 
       it 'shared runners are not available' do
-        expect(project.shared_runners_available?).to be_falsey
+        expect(project.shared_runners_available?).to be_truthy
       end
     end
   end

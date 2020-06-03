@@ -250,11 +250,6 @@ module EE
         actual_shared_runners_minutes_limit.nonzero?
     end
 
-    def shared_runners_minutes_used?
-      shared_runners_minutes_limit_enabled? &&
-        shared_runners_minutes.to_i >= actual_shared_runners_minutes_limit
-    end
-
     def shared_runners_remaining_minutes_percent
       return 0 if shared_runners_remaining_minutes.to_f <= 0
       return 0 if actual_shared_runners_minutes_limit.to_f == 0
@@ -273,8 +268,6 @@ module EE
     end
 
     def any_project_with_shared_runners_enabled?
-      # TODO: check after rebase that any instances of `shared_runners_enabled?` are 
-      # migrated to `any_project_with_shared_runners_enabled?`
       all_projects.with_shared_runners.any?
     end
 

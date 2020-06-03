@@ -648,46 +648,6 @@ RSpec.describe Namespace do
     end
   end
 
-  describe '#shared_runners_minutes_used?' do
-    subject { namespace.shared_runners_minutes_used? }
-
-    context 'with project' do
-      let!(:project) do
-        create(:project,
-          namespace: namespace,
-          shared_runners_enabled: true)
-      end
-
-      context 'when limit is defined' do
-        context 'when limit is used' do
-          let(:namespace) { create(:namespace, :with_used_build_minutes_limit) }
-
-          it { is_expected.to be_truthy }
-        end
-
-        context 'when limit not yet used' do
-          let(:namespace) { create(:namespace, :with_not_used_build_minutes_limit) }
-
-          it { is_expected.to be_falsey }
-        end
-
-        context 'when minutes are not yet set' do
-          it { is_expected.to be_falsey }
-        end
-      end
-
-      context 'without limit' do
-        let(:namespace) { create(:namespace, :with_build_minutes_limit) }
-
-        it { is_expected.to be_falsey }
-      end
-    end
-
-    context 'without project' do
-      it { is_expected.to be_falsey }
-    end
-  end
-
   describe '#shared_runners_remaining_minutes_percent' do
     let(:namespace) { build(:namespace) }
 

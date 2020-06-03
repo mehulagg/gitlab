@@ -43,13 +43,12 @@ module Ci
         100 * purchased_minutes_used.to_i / purchased_minutes
       end
 
-      private
-
-      # TODO: maps to Namespace#shared_runners_minutes_used?
       def minutes_used_up?
         namespace.shared_runners_minutes_limit_enabled? &&
           minutes_used >= total_minutes
       end
+
+      private
 
       def monthly_minutes_used_up?
         namespace.shared_runners_minutes_limit_enabled? &&
