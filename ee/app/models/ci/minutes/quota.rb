@@ -46,12 +46,16 @@ module Ci
       private
 
       # TODO: maps to Namespace#shared_runners_minutes_used?
+      def minutes_used_up?
+        namespace.shared_runners_minutes_limit_enabled? &&
+          minutes_used >= total_minutes
+      end
+
       def monthly_minutes_used_up?
         namespace.shared_runners_minutes_limit_enabled? &&
           monthly_minutes_used >= monthly_minutes
       end
 
-      # TODO: maps to Namespace#extra_shared_runners_minutes_used?
       def purchased_minutes_used_up?
         namespace.shared_runners_minutes_limit_enabled? &&
           any_minutes_purchased? &&
@@ -85,6 +89,11 @@ module Ci
       # TODO: maps to NamespaceStatistics#shared_runners_minutes(include_extra: true)
       def minutes_used
         @minutes_used ||= namespace.shared_runners_seconds.to_i / 60
+      end
+
+      # TODO: maps to Namespace#actual_shared_runners_minuts_limit(include_extra: true)
+      def total_minutes
+        @total_minutes ||= monthly_minutes + purchased_minutes
       end
 
       # TODO: maps to Namespace#actual_shared_runners_minuts_limit(include_extra: false)

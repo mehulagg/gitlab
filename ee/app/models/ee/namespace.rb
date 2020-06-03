@@ -273,6 +273,8 @@ module EE
     end
 
     def any_project_with_shared_runners_enabled?
+      # TODO: check after rebase that any instances of `shared_runners_enabled?` are 
+      # migrated to `any_project_with_shared_runners_enabled?`
       all_projects.with_shared_runners.any?
     end
 
