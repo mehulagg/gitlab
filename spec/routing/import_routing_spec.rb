@@ -126,6 +126,7 @@ RSpec.describe Import::BitbucketServerController, 'routing' do
   end
 end
 
+<<<<<<< HEAD
 #          status_import_google_code GET      /import/google_code/status(.:format)                                                          import/google_code#status
 #        callback_import_google_code POST     /import/google_code/callback(.:format)                                                        import/google_code#callback
 #            jobs_import_google_code GET      /import/google_code/jobs(.:format)                                                            import/google_code#jobs

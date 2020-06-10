@@ -52,7 +52,6 @@ RSpec.describe 'New project' do
       expect(page).to have_link('GitHub')
       expect(page).to have_link('Bitbucket')
       expect(page).to have_link('GitLab.com')
-      expect(page).to have_link('Google Code')
       expect(page).to have_button('Repo by URL')
       expect(page).to have_link('GitLab export')
     end
@@ -282,17 +281,6 @@ RSpec.describe 'New project' do
         it 'shows import instructions' do
           expect(page).to have_content('Authenticate with GitHub')
           expect(current_path).to eq new_import_github_path
-        end
-      end
-
-      context 'from Google Code' do
-        before do
-          first('.import_google_code').click
-        end
-
-        it 'shows import instructions' do
-          expect(page).to have_content('Import projects from Google Code')
-          expect(current_path).to eq new_import_google_code_path
         end
       end
 
