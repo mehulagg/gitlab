@@ -131,7 +131,7 @@ module Trigger
     end
 
     def ref
-      ENV['OMNIBUS_BRANCH'] || 'master'
+      'allow-to-skip-qa-docker' # ENV['OMNIBUS_BRANCH'] || 'master'
     end
 
     def extra_variables
@@ -143,6 +143,8 @@ module Trigger
       {
         'GITLAB_VERSION' => source_sha,
         'IMAGE_TAG' => source_sha,
+        'QA_IMAGE' => "#{ENV['CI_REGISTRY']}/#{ENV['CI_PROJECT_PATH']}/gitlab-ee-qa:#{ENV['CI_COMMIT_REF_SLUG']}",
+        'SKIP_QA_DOCKER' => 'true',
         'ALTERNATIVE_SOURCES' => 'true',
         'SECURITY_SOURCES' => Trigger.security? ? 'true' : 'false',
         'ee' => Trigger.ee? ? 'true' : 'false',
