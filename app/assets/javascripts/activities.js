@@ -3,7 +3,7 @@
 import $ from 'jquery';
 import Cookies from 'js-cookie';
 import Pager from './pager';
-import { localTimeAgo } from './lib/utils/datetime_utility';
+import { localTimeAgo } from 'lib/utils/datetime_utility';
 
 export default class Activities {
   constructor(container = '') {
