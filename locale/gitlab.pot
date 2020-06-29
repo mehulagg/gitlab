@@ -10958,6 +10958,9 @@ msgstr ""
 msgid "Go to find file"
 msgstr ""
 
+msgid "Go to fork"
+msgstr ""
+
 msgid "Go to issue boards"
 msgstr ""
 
@@ -15095,7 +15098,7 @@ msgstr ""
 msgid "No authentication methods configured."
 msgstr ""
 
-msgid "No available namespaces to fork the project."
+msgid "No available groups to fork the project."
 msgstr ""
 
 msgid "No branches found"
@@ -19780,6 +19783,9 @@ msgstr ""
 msgid "Search by author"
 msgstr ""
 
+msgid "Search by name"
+msgstr ""
+
 msgid "Search files"
 msgstr ""
 
@@ -22895,6 +22901,9 @@ msgid "There is no data available. Please change your selection."
 msgstr ""
 
 msgid "There was a problem communicating with your device."
+msgstr ""
+
+msgid "There was a problem fetching groups."
 msgstr ""
 
 msgid "There was a problem fetching project branches."
@@ -26310,6 +26319,9 @@ msgid "You must disassociate %{domain} from all clusters it is attached to befor
 msgstr ""
 
 msgid "You must have maintainer access to force delete a lock"
+msgstr ""
+
+msgid "You must have permission to create a project in a group before forking."
 msgstr ""
 
 msgid "You must have permission to create a project in a namespace before forking."
