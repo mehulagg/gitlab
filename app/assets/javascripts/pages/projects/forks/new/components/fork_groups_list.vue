@@ -30,10 +30,6 @@ export default {
     };
   },
   computed: {
-    searchPlaceholder() {
-      return __('Search by name');
-    },
-
     filteredNamespaces() {
       return this.namespaces.filter(n => n.name.toLowerCase().includes(this.filter.toLowerCase()));
     },
@@ -53,15 +49,19 @@ export default {
         .catch(() => createFlash(__('There was a problem fetching groups.')));
     },
   },
+
+  i18n: {
+    searchPlaceholder: __('Search by name'),
+  },
 };
 </script>
 <template>
-  <gl-tabs theme="indigo" class="fork-groups">
+  <gl-tabs class="fork-groups">
     <gl-tab title="Groups and subgroups">
       <gl-loading-icon v-if="!namespaces" size="md" class="gl-mt-3" />
       <template v-else-if="namespaces.length === 0">
         <div class="gl-text-center">
-          <h5>{{ __('No available groups to fork the project.') }}</h5>
+          <div class="h5">{{ __('No available groups to fork the project.') }}</div>
           <p class="gl-mt-5">
             {{ __('You must have permission to create a project in a group before forking.') }}
           </p>
@@ -83,7 +83,7 @@ export default {
       <gl-search-box-by-type
         v-if="namespaces && namespaces.length"
         v-model="filter"
-        :placeholder="searchPlaceholder"
+        :placeholder="$options.i18n.searchPlaceholder"
         class="gl-align-self-center gl-ml-auto fork-filtered-search"
       />
     </template>

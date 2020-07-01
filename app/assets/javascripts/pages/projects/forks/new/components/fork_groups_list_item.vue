@@ -10,7 +10,7 @@ import {
 } from '@gitlab/ui';
 import { VISIBILITY_TYPE_ICON, GROUP_VISIBILITY_TYPE } from '~/groups/constants';
 import { __ } from '~/locale';
-import { visitUrl } from '~/lib/utils/url_utility';
+import csrf from '~/lib/utils/csrf';
 
 export default {
   components: {
@@ -67,16 +67,14 @@ export default {
     },
   },
 
-  methods: {
-    visitUrl,
-  },
-
   i18n: {
     hasReachedProjectLimitMessage: __('You have reached your project limit'),
     insufficientPermissionsMessage: __(
       'You must have permission to create a project in a namespace before forking.',
     ),
   },
+
+  csrf,
 };
 </script>
 <template>
@@ -126,16 +124,17 @@ export default {
           >
           <template v-else>
             <div ref="selectButtonWrapper">
-              <gl-button
-                ref="selectButton"
-                class="gl-h-7 gl-text-decoration-none!"
-                :data-qa-name="group.full_name"
-                data-method="post"
-                variant="success"
-                :disabled="isSelectButtonDisabled"
-                @click="visitUrl(group.fork_path)"
-                >{{ __('Select') }}</gl-button
-              >
+              <form method="POST" :action="group.fork_path">
+                <input type="hidden" name="authenticity_token" :value="$options.csrf.token" />
+                <gl-button
+                  type="submit"
+                  class="gl-h-7 gl-text-decoration-none!"
+                  :data-qa-name="group.full_name"
+                  variant="success"
+                  :disabled="isSelectButtonDisabled"
+                  >{{ __('Select') }}</gl-button
+                >
+              </form>
             </div>
             <gl-tooltip v-if="isSelectButtonDisabled" :target="() => $refs.selectButtonWrapper">
               {{ selectButtonDisabledTooltip }}

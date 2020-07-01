@@ -58,6 +58,7 @@ describe('Fork groups list item component', () => {
     });
 
     expect(wrapper.find(GlButton).text()).toBe('Select');
+    expect(wrapper.find('form').attributes().action).toBe(DUMMY_PATH);
   });
 
   it('renders link to current group', () => {
