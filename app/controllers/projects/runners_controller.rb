@@ -50,6 +50,8 @@ class Projects::RunnersController < Projects::ApplicationController
   end
 
   def toggle_shared_runners
+    return redirect_to project_runners_path(@project), alert: _("Can't update due to restriction on group level") if project.group && project.group.shared_runners_setting != 'enabled'
+
     project.toggle!(:shared_runners_enabled)
 
     redirect_to project_settings_ci_cd_path(@project, anchor: 'js-runners-settings')

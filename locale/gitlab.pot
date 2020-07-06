@@ -4512,6 +4512,9 @@ msgstr ""
 msgid "Can't scan the code?"
 msgstr ""
 
+msgid "Can't update due to restriction on group level"
+msgstr ""
+
 msgid "Can't update snippet: %{err}"
 msgstr ""
 
@@ -29955,6 +29958,15 @@ msgid "by %{user}"
 msgstr ""
 
 msgid "cannot be changed if a personal project has container registry tags."
+msgstr ""
+
+msgid "cannot be changed if shared runners are enabled"
+msgstr ""
+
+msgid "cannot be enabled because parent group does not allow it"
+msgstr ""
+
+msgid "cannot be enabled because parent group has shared Runners disabled"
 msgstr ""
 
 msgid "cannot be enabled unless all domains have TLS certificates"
