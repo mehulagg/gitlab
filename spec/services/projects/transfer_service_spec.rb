@@ -314,6 +314,36 @@ RSpec.describe Projects::TransferService do
     end
   end
 
+  context 'shared Runners group level configurations' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:initial_shared_runners_config_for_project, :parent_group_shared_runners_config, :parent_group_allow_override, :expectation) do
+      true  | false | false | false
+      false | false | false | false
+      true  | true  | false | true
+      false | true  | false | false
+      true  | false | true  | true
+      false | false | true  | false
+      true  | true  | true  | true
+      false | true  | true  | false
+    end
+
+    with_them do
+      let(:project) { create(:project, :public, :repository, namespace: user.namespace, shared_runners_enabled: initial_shared_runners_config_for_project) }
+      let(:group) { create(:group, shared_runners_enabled: parent_group_shared_runners_config, allow_descendants_override_disabled_shared_runners: parent_group_allow_override) }
+
+      before do
+        group.add_owner(user)
+
+        execute_transfer
+      end
+
+      it 'updates shared runners based on the parent group' do
+        expect(project.shared_runners_enabled).to eq(expectation)
+      end
+    end
+  end
+
   context 'missing group labels applied to issues or merge requests' do
     it 'delegates transfer to Labels::TransferService' do
       group.add_owner(user)

@@ -27445,6 +27445,9 @@ msgstr ""
 msgid "UpdateProject|Cannot rename project because it contains container registry tags!"
 msgstr ""
 
+msgid "UpdateProject|Cannot update due to restriction on group level"
+msgstr ""
+
 msgid "UpdateProject|Could not set the default branch"
 msgstr ""
 

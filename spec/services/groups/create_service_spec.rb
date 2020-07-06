@@ -101,6 +101,26 @@ RSpec.describe Groups::CreateService, '#execute' do
 
       it { is_expected.to be_persisted }
     end
+
+    context 'shared runners configuration' do
+      where(:shared_runners_config) do
+        [true, false]
+      end
+
+      before do
+        group.add_owner(user)
+      end
+
+      with_them do
+        let!(:group) { create(:group, shared_runners_enabled: shared_runners_config) }
+
+        it 'created group follows the parent config' do
+          new_group = service.execute
+
+          expect(new_group.shared_runners_enabled).to eq(shared_runners_config)
+        end
+      end
+    end
   end
 
   describe "when visibility level is passed as a string" do

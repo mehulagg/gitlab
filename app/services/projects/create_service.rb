@@ -19,6 +19,8 @@ module Projects
 
       @project = Project.new(params)
 
+      set_shared_runners_permission
+
       # Make sure that the user is allowed to use the specified visibility level
       if project_visibility.restricted?
         deny_visibility_level(@project, project_visibility.visibility_level)
@@ -268,6 +270,10 @@ module Projects
       @project_visibility ||= Gitlab::VisibilityLevelChecker
         .new(current_user, @project, project_params: { import_data: @import_data })
         .level_restricted?
+    end
+
+    def set_shared_runners_permission
+      @project.shared_runners_enabled = false if @project.group&.shared_runners_enabled? == false
     end
   end
 end

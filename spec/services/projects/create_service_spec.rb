@@ -782,4 +782,50 @@ RSpec.describe Projects::CreateService, '#execute' do
   def create_project(user, opts)
     Projects::CreateService.new(user, opts).execute
   end
+
+  context 'shared Runners config' do
+    context 'parent group is present' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:shared_runners_group_config, :desired_config_for_new_project, :expected_result_for_project) do
+        true  | true  | true
+        true  | false | false
+        false | true  | false
+        false | false | false
+      end
+
+      with_them do
+        let(:group) { create(:group, shared_runners_enabled: shared_runners_group_config) }
+
+        before do
+          group.add_owner(user)
+
+          user.refresh_authorized_projects # Ensure cache is warm
+        end
+
+        it 'created project follows the parent config' do
+          project = create_project(user, opts.merge!(namespace_id: group.id)
+                                            .merge!(shared_runners_enabled: desired_config_for_new_project))
+
+          expect(project).to be_valid
+          expect(project.shared_runners_enabled).to eq(expected_result_for_project)
+        end
+      end
+    end
+
+    context 'parent group is not present' do
+      where(:desired_config) do
+        [true, false]
+      end
+
+      with_them do
+        it 'follows desired config' do
+          project = create_project(user, opts.merge!(shared_runners_enabled: desired_config))
+
+          expect(project).to be_valid
+          expect(project.shared_runners_enabled).to eq(desired_config)
+        end
+      end
+    end
+  end
 end

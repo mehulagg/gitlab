@@ -19,6 +19,8 @@ module Groups
 
       return false unless valid_path_change_with_npm_packages?
 
+      return false unless update_shared_runners
+
       before_assignment_hook(group, params)
 
       group.assign_attributes(params)
@@ -97,6 +99,19 @@ module Groups
       return false if params[:share_with_group_lock].nil?
 
       params[:share_with_group_lock] != group.share_with_group_lock
+    end
+
+    def update_shared_runners
+      unless params[:shared_runners_enabled].nil? && params[:allow_descendants_override_disabled_shared_runners].nil?
+        result = Groups::UpdateSharedRunnersService.new(group, current_user, params).execute
+
+        return true if result[:status] == :success
+
+        group.errors.add(:update_shared_runners, result[:message])
+        return false
+      end
+
+      true
     end
   end
 end

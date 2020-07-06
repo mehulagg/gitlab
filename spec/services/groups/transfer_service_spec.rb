@@ -267,6 +267,55 @@ RSpec.describe Groups::TransferService do
           end
         end
 
+        context 'shared runners configuration' do
+          using RSpec::Parameterized::TableSyntax
+
+          context 'when parent group has shared runners disabled' do
+            where(:initial_shared_runners_config_for_group, :initial_override_config, :parent_group_shared_runners_config, :expectation, :expectation_allow_override) do
+              true  | true  | true  | true  | true
+              true  | true  | false | false | false
+              true  | false | true  | true  | false
+              true  | false | false | false | false
+              false | true  | true  | false | true
+              false | true  | false | false | false
+              false | false | true  | false | false
+              false | false | false | false | false
+            end
+
+            with_them do
+              let(:new_parent_group) { create(:group, shared_runners_enabled: parent_group_shared_runners_config) }
+              let(:group) { create(:group, shared_runners_enabled: initial_shared_runners_config_for_group, allow_descendants_override_disabled_shared_runners: initial_override_config) }
+
+              it 'updates shared runners based on the parent group' do
+                group.reload
+
+                expect(group.shared_runners_enabled).to eq(expectation)
+                expect(group.allow_descendants_override_disabled_shared_runners).to eq(expectation_allow_override)
+              end
+            end
+          end
+
+          context 'when parent group has shared runners disabled but allow descendants to override' do
+            where(:initial_shared_runners_config_for_group, :parent_group_shared_runners_config, :expectation) do
+              true  | true  | true
+              true  | false | false
+              false | true  | false
+              false | false | false
+            end
+
+            with_them do
+              let(:new_parent_group) { create(:group, shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: parent_group_shared_runners_config) }
+              let(:group) { create(:group, shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: initial_shared_runners_config_for_group) }
+
+              it 'updates shared runners based on the parent group' do
+                group.reload
+
+                expect(group.allow_descendants_override_disabled_shared_runners).to eq(expectation)
+              end
+            end
+          end
+        end
+
         it 'updates visibility for the group based on the parent group' do
           expect(group.visibility_level).to eq(new_parent_group.visibility_level)
         end

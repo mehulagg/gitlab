@@ -103,6 +103,9 @@ module Groups
 
       @group.parent = @new_parent_group
       @group.clear_memoization(:self_and_ancestors_ids)
+
+      set_shared_runners_permission
+
       @group.save!
     end
 
@@ -160,6 +163,12 @@ module Groups
         cannot_transfer_to_subgroup: s_('TransferGroup|Cannot transfer group to one of its subgroup.'),
         group_contains_npm_packages: s_('TransferGroup|Group contains projects with NPM packages.')
       }.freeze
+    end
+
+    def set_shared_runners_permission
+      @group.shared_runners_enabled = false unless @group.parent_enabled_shared_runners?
+
+      @group.allow_descendants_override_disabled_shared_runners = false unless @group.parent_allows_shared_runners?
     end
   end
 end
