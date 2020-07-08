@@ -8,25 +8,33 @@ settings automatically by default. If your editor/IDE does not automatically sup
 we suggest investigating to see if a plugin exists. For instance here is the
 [plugin for vim](https://github.com/editorconfig/editorconfig-vim).
 
-## Pre-commit static analysis
+## Pre-push static analysis
 
-You should install [`overcommit`](https://github.com/sds/overcommit) to automatically check for
-static analysis offenses before committing locally.
+You're strongly advised to install
+[Lefthook](https://github.com/Arkweid/lefthook) to automatically check for
+static analysis offenses before pushing your changes.
 
 After installing `overcommit`, run the following in your GitLab source directory:
 
 ```shell
-make -C tooling/overcommit
+# Make sure to uninstall Overcommit first
+overcommit --uninstall
+
+# Install lefthook
+gem install lefthook && lefthook install -f
 ```
 
-Then before a commit is created, `overcommit` automatically checks for RuboCop (and other checks)
-offenses on every modified file.
+Then before you push your changes, Lefthook will automatically run Danger checks, as well
+as RuboCop, ES Lint, HAML Lint, and SCSS Lint for the changed files.
 
 This saves you time as you don't have to wait for the same errors to be detected by CI/CD.
 
-`overcommit` relies on a pre-commit hook to prevent commits that violate its ruleset. To override
-this behavior, pass the `OVERCOMMIT_DISABLE` environment variable. For example,
-`OVERCOMMIT_DISABLE=1 git rebase master` to rebase while disabling the Git hook.
+Lefthook relies on a pre-push hook to prevent commits that violate its ruleset.
+If you wish to override this behavior, it can be done by passing the ENV variable
+`LEFTHOOK=0`; i.e. `LEFTHOOK=0 git push`.
+
+You can also [define local configs](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#local-config) and
+[skip checks per tag on the fly](https://github.com/Arkweid/lefthook/blob/master/docs/full_guide.md#skip-some-tags-on-the-fly).
 
 ## Ruby, Rails, RSpec
 
