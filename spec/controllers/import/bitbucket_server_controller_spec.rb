@@ -9,6 +9,9 @@ RSpec.describe Import::BitbucketServerController do
   let(:repo_id) { "#{project_key}/#{repo_slug}" }
   let(:client) { instance_double(BitbucketServer::Client) }
 
+  let(:repo) { double(slug: 'vim', project_key: 'asd', full_name: 'asd/vim', "valid?" => true, project_name: 'asd', browse_url: 'http://test', name: 'vim') }
+  let(:invalid_repo) { double(slug: 'invalid', project_key: 'foobar', full_name: 'asd/foobar', "valid?" => false, browse_url: 'http://bad-repo', name: 'invalid') }
+
   def assign_session_tokens
     session[:bitbucket_server_url] = 'http://localhost:7990'
     session[:bitbucket_server_username] = 'bitbucket'
@@ -18,6 +21,19 @@ RSpec.describe Import::BitbucketServerController do
   before do
     sign_in(user)
     allow(controller).to receive(:bitbucket_server_import_enabled?).and_return(true)
+  end
+
+  it_behaves_like 'import controller with status' do
+    before do
+      allow(controller).to receive(:client).and_return(client)
+
+      assign_session_tokens
+    end
+
+    let(:repo_id) { repo.full_name }
+    let(:import_source) { repo.browse_url }
+    let(:provider_name) { 'bitbucket_server' }
+    let(:client_repos_field) { :repos }
   end
 
   describe 'GET new' do
@@ -33,15 +49,18 @@ RSpec.describe Import::BitbucketServerController do
   describe 'POST create' do
     let(:project_name) { "my-project_123" }
 
+    # rubocop: disable CodeReuse/ActiveRecord
     before do
       allow(controller).to receive(:client).and_return(client)
       repo = double(name: project_name)
       allow(client).to receive(:repo).with(project_key, repo_slug).and_return(repo)
       assign_session_tokens
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     let_it_be(:project) { create(:project) }
 
+    # rubocop: disable CodeReuse/ActiveRecord
     it 'returns the new project' do
       allow(Gitlab::BitbucketServerImport::ProjectCreator)
         .to receive(:new).with(project_key, repo_slug, anything, project_name, user.namespace, user, anything)
@@ -51,10 +70,12 @@ RSpec.describe Import::BitbucketServerController do
 
       expect(response).to have_gitlab_http_status(:ok)
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     context 'with project key with tildes' do
       let(:project_key) { '~someuser_123' }
 
+      # rubocop: disable CodeReuse/ActiveRecord
       it 'successfully creates a project' do
         allow(Gitlab::BitbucketServerImport::ProjectCreator)
           .to receive(:new).with(project_key, repo_slug, anything, project_name, user.namespace, user, anything)
@@ -64,6 +85,7 @@ RSpec.describe Import::BitbucketServerController do
 
         expect(response).to have_gitlab_http_status(:ok)
       end
+      # rubocop: enable CodeReuse/ActiveRecord
     end
 
     it 'returns an error when an invalid project key is used' do
@@ -78,6 +100,7 @@ RSpec.describe Import::BitbucketServerController do
       expect(response).to have_gitlab_http_status(:unprocessable_entity)
     end
 
+    # rubocop: disable CodeReuse/ActiveRecord
     it 'returns an error when the project cannot be found' do
       allow(client).to receive(:repo).with(project_key, repo_slug).and_return(nil)
 
@@ -85,7 +108,9 @@ RSpec.describe Import::BitbucketServerController do
 
       expect(response).to have_gitlab_http_status(:unprocessable_entity)
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
+    # rubocop: disable CodeReuse/ActiveRecord
     it 'returns an error when the project cannot be saved' do
       allow(Gitlab::BitbucketServerImport::ProjectCreator)
         .to receive(:new).with(project_key, repo_slug, anything, project_name, user.namespace, user, anything)
@@ -95,7 +120,9 @@ RSpec.describe Import::BitbucketServerController do
 
       expect(response).to have_gitlab_http_status(:unprocessable_entity)
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
+    # rubocop: disable CodeReuse/ActiveRecord
     it "returns an error when the server can't be contacted" do
       allow(client).to receive(:repo).with(project_key, repo_slug).and_raise(::BitbucketServer::Connection::ConnectionError)
 
@@ -103,6 +130,7 @@ RSpec.describe Import::BitbucketServerController do
 
       expect(response).to have_gitlab_http_status(:unprocessable_entity)
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     it_behaves_like 'project import rate limiter'
   end
@@ -142,14 +170,12 @@ RSpec.describe Import::BitbucketServerController do
     before do
       allow(controller).to receive(:client).and_return(client)
 
-      @repo = double(slug: 'vim', project_key: 'asd', full_name: 'asd/vim', "valid?" => true, project_name: 'asd', browse_url: 'http://test', name: 'vim')
-      @invalid_repo = double(slug: 'invalid', project_key: 'foobar', full_name: 'asd/foobar', "valid?" => false, browse_url: 'http://bad-repo', name: 'invalid')
-      @created_repo = double(slug: 'created', project_key: 'existing', full_name: 'group/created', "valid?" => true, browse_url: 'http://existing')
       assign_session_tokens
     end
 
+    # rubocop: disable CodeReuse/ActiveRecord
     it 'returns invalid repos' do
-      allow(client).to receive(:repos).with(filter: nil, limit: 25, page_offset: 0).and_return([@repo, @invalid_repo])
+      allow(client).to receive(:repos).with(filter: nil, limit: 25, page_offset: 0).and_return([repo, invalid_repo])
 
       get :status, format: :json
 
@@ -159,6 +185,7 @@ RSpec.describe Import::BitbucketServerController do
       expect(json_response['provider_repos'].length).to eq(1)
       expect(json_response.dig("provider_repos", 0, "id")).to eq(@repo.full_name)
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     it_behaves_like 'import controller status' do
       let(:repo) { @repo }
@@ -171,11 +198,13 @@ RSpec.describe Import::BitbucketServerController do
     context 'when filtering' do
       let(:filter) { 'test' }
 
+      # rubocop: disable CodeReuse/ActiveRecord
       it 'passes filter param to bitbucket client' do
-        expect(client).to receive(:repos).with(filter: filter, limit: 25, page_offset: 0).and_return([@repo])
+        expect(client).to receive(:repos).with(filter: filter, limit: 25, page_offset: 0).and_return([repo])
 
         get :status, params: { filter: filter }, as: :json
       end
+      # rubocop: enable CodeReuse/ActiveRecord
     end
   end
 end

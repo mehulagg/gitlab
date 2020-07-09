@@ -8,6 +8,7 @@ RSpec.describe Import::GitlabController do
   let(:user) { create(:user) }
   let(:token) { "asdasd12345" }
   let(:access_params) { { gitlab_access_token: token } }
+  let(:repo) { OpenStruct.new(id: 1, path: 'vim', path_with_namespace: 'asd/vim', web_url: 'https://gitlab.com/asd/vim') }
 
   def assign_session_token
     session[:gitlab_access_token] = token
@@ -16,6 +17,17 @@ RSpec.describe Import::GitlabController do
   before do
     sign_in(user)
     allow(controller).to receive(:gitlab_import_enabled?).and_return(true)
+  end
+
+  it_behaves_like 'import controller with status' do
+    before do
+      assign_session_token
+    end
+
+    let(:repo_id) { repo.id }
+    let(:import_source) { repo.path_with_namespace }
+    let(:provider_name) { 'gitlab' }
+    let(:client_repos_field) { :projects }
   end
 
   describe "GET callback" do
@@ -29,21 +41,6 @@ RSpec.describe Import::GitlabController do
 
       expect(session[:gitlab_access_token]).to eq(token)
       expect(controller).to redirect_to(status_import_gitlab_url)
-    end
-  end
-
-  describe "GET status" do
-    before do
-      @repo = OpenStruct.new(id: 1, path: 'vim', path_with_namespace: 'asd/vim', web_url: 'https://gitlab.com/asd/vim')
-      assign_session_token
-    end
-
-    it_behaves_like 'import controller status' do
-      let(:repo) { @repo }
-      let(:repo_id) { @repo.id }
-      let(:import_source) { @repo.path_with_namespace }
-      let(:provider_name) { 'gitlab' }
-      let(:client_repos_field) { :projects }
     end
   end
 

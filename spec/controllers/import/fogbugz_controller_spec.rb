@@ -6,9 +6,17 @@ RSpec.describe Import::FogbugzController do
   include ImportSpecHelper
 
   let(:user) { create(:user) }
+  let(:repo) { OpenStruct.new(id: 'demo', name: 'vim') }
 
   before do
     sign_in(user)
+  end
+
+  it_behaves_like 'import controller with status' do
+    let(:repo_id) { repo.id }
+    let(:import_source) { repo.name }
+    let(:provider_name) { 'fogbugz' }
+    let(:client_repos_field) { :repos }
   end
 
   describe 'POST #callback' do
@@ -75,21 +83,6 @@ RSpec.describe Import::FogbugzController do
 
       expect(session[:fogbugz_user_map]).to eq(user_map)
       expect(response).to redirect_to(status_import_fogbugz_path)
-    end
-  end
-
-  describe 'GET status' do
-    before do
-      @repo = OpenStruct.new(id: 'demo', name: 'vim')
-      stub_client(valid?: true)
-    end
-
-    it_behaves_like 'import controller status' do
-      let(:repo) { @repo }
-      let(:repo_id) { @repo.id }
-      let(:import_source) { @repo.name }
-      let(:provider_name) { 'fogbugz' }
-      let(:client_repos_field) { :repos }
     end
   end
 
