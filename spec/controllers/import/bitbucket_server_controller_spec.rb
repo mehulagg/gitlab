@@ -8,9 +8,7 @@ RSpec.describe Import::BitbucketServerController do
   let(:repo_slug) { 'some-repo' }
   let(:repo_id) { "#{project_key}/#{repo_slug}" }
   let(:client) { instance_double(BitbucketServer::Client) }
-
   let(:repo) { double(slug: 'vim', project_key: 'asd', full_name: 'asd/vim', "valid?" => true, project_name: 'asd', browse_url: 'http://test', name: 'vim') }
-  let(:invalid_repo) { double(slug: 'invalid', project_key: 'foobar', full_name: 'asd/foobar', "valid?" => false, browse_url: 'http://bad-repo', name: 'invalid') }
 
   def assign_session_tokens
     session[:bitbucket_server_url] = 'http://localhost:7990'
@@ -166,6 +164,8 @@ RSpec.describe Import::BitbucketServerController do
 
   describe 'GET status' do
     render_views
+
+    let(:invalid_repo) { double(slug: 'invalid', project_key: 'foobar', full_name: 'asd/foobar', "valid?" => false, browse_url: 'http://bad-repo', name: 'invalid') }
 
     before do
       allow(controller).to receive(:client).and_return(client)

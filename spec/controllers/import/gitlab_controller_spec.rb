@@ -8,7 +8,6 @@ RSpec.describe Import::GitlabController do
   let(:user) { create(:user) }
   let(:token) { "asdasd12345" }
   let(:access_params) { { gitlab_access_token: token } }
-  let(:repo) { OpenStruct.new(id: 1, path: 'vim', path_with_namespace: 'asd/vim', web_url: 'https://gitlab.com/asd/vim') }
 
   def assign_session_token
     session[:gitlab_access_token] = token
@@ -24,6 +23,7 @@ RSpec.describe Import::GitlabController do
       assign_session_token
     end
 
+    let(:repo) { OpenStruct.new(id: 1, path: 'vim', path_with_namespace: 'asd/vim', web_url: 'https://gitlab.com/asd/vim') }
     let(:repo_id) { repo.id }
     let(:import_source) { repo.path_with_namespace }
     let(:provider_name) { 'gitlab' }

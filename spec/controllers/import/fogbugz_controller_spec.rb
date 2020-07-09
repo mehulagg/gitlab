@@ -6,13 +6,13 @@ RSpec.describe Import::FogbugzController do
   include ImportSpecHelper
 
   let(:user) { create(:user) }
-  let(:repo) { OpenStruct.new(id: 'demo', name: 'vim') }
 
   before do
     sign_in(user)
   end
 
   it_behaves_like 'import controller with status' do
+    let(:repo) { OpenStruct.new(id: 'demo', name: 'vim') }
     let(:repo_id) { repo.id }
     let(:import_source) { repo.name }
     let(:provider_name) { 'fogbugz' }

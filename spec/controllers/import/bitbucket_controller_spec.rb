@@ -13,7 +13,6 @@ RSpec.describe Import::BitbucketController do
   let(:code) { SecureRandom.hex(8) }
 
   let(:repo) { double(name: 'vim', slug: 'vim', owner: 'asd', full_name: 'asd/vim', clone_url: 'http://test.host/demo/url.git', 'valid?' => true) }
-  let(:invalid_repo) { double(name: 'mercurialrepo', slug: 'mercurialrepo', owner: 'asd', full_name: 'asd/mercurialrepo', clone_url: 'http://test.host/demo/mercurialrepo.git', 'valid?' => false) }
 
   def assign_session_tokens
     session[:bitbucket_token] = token
@@ -70,6 +69,8 @@ RSpec.describe Import::BitbucketController do
   end
 
   describe "GET status" do
+    let(:invalid_repo) { double(name: 'mercurialrepo', slug: 'mercurialrepo', owner: 'asd', full_name: 'asd/mercurialrepo', clone_url: 'http://test.host/demo/mercurialrepo.git', 'valid?' => false) }
+
     before do
       allow(controller).to receive(:provider_url).and_return('http://demobitbucket.org')
 
