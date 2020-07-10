@@ -2530,6 +2530,9 @@ msgstr ""
 msgid "Allow projects within this group to use Git LFS"
 msgstr ""
 
+msgid "Allow projects/subgroups to override the group setting"
+msgstr ""
+
 msgid "Allow public access to pipelines and job details, including output logs and artifacts"
 msgstr ""
 
@@ -2573,6 +2576,9 @@ msgid "Allowed email domain restriction only permitted for top-level groups"
 msgstr ""
 
 msgid "Allowed to fail"
+msgstr ""
+
+msgid "Allows projects or subgroups that belong to this group to override the global setting and use Shared Runners on an opt-in basis."
 msgstr ""
 
 msgid "Allows you to add and manage Kubernetes clusters."
@@ -2939,6 +2945,9 @@ msgid "An error occurred while updating approvers"
 msgstr ""
 
 msgid "An error occurred while updating labels."
+msgstr ""
+
+msgid "An error occurred while updating configuration."
 msgstr ""
 
 msgid "An error occurred while updating the comment"
@@ -4483,6 +4492,9 @@ msgid "Can't remove group members without group managed account"
 msgstr ""
 
 msgid "Can't scan the code?"
+msgstr ""
+
+msgid "Can't update due to restriction on group level"
 msgstr ""
 
 msgid "Can't update snippet: %{err}"
@@ -8931,6 +8943,9 @@ msgstr ""
 msgid "Disable"
 msgstr ""
 
+msgid "Disable Shared Runners for this group"
+msgstr ""
+
 msgid "Disable for this project"
 msgstr ""
 
@@ -8950,6 +8965,9 @@ msgid "Disabled"
 msgstr ""
 
 msgid "Disabled mirrors can only be enabled by instance owners. It is recommended that you delete them."
+msgstr ""
+
+msgid "Disables Shared Runners for existing and new projects/subgroups that belong to this group."
 msgstr ""
 
 msgid "Discard"
@@ -20921,6 +20939,9 @@ msgstr ""
 msgid "Refresh"
 msgstr ""
 
+msgid "Refresh the page and try again."
+msgstr ""
+
 msgid "Refreshing in a second to show the updated status..."
 msgid_plural "Refreshing in %d seconds to show the updated status..."
 msgstr[0] ""
@@ -23224,6 +23245,9 @@ msgstr ""
 msgid "Set up pipeline subscriptions for this project."
 msgstr ""
 
+msgid "Set up shared Runner availability"
+msgstr ""
+
 msgid "Set up your project to automatically push and/or pull changes to/from another repository. Branches, tags, and commits will be synced automatically."
 msgstr ""
 
@@ -23324,6 +23348,9 @@ msgid "Share the %{strong_open}GitLab single sign-on URL%{strong_close} with mem
 msgstr ""
 
 msgid "Shared Runners"
+msgstr ""
+
+msgid "Shared Runners disabled on group level"
 msgstr ""
 
 msgid "Shared projects"

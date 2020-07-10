@@ -7,13 +7,17 @@
   - else
     = _('GitLab Shared Runners execute code of different projects on the same Runner unless you configure GitLab Runner Autoscale with MaxBuilds 1 (which it is on GitLab.com).')
   %hr
-  - if @project.shared_runners_enabled?
-    = link_to toggle_shared_runners_project_runners_path(@project), class: 'btn btn-close', method: :post do
-      = _('Disable shared Runners')
+  - if @project.group&.shared_runners_allowed? == false
+    %h5.text-danger
+      = _('Shared Runners disabled on group level')
   - else
-    = link_to toggle_shared_runners_project_runners_path(@project), class: 'btn btn-success', method: :post do
-      = _('Enable shared Runners')
-  &nbsp; for this project
+    - if @project.shared_runners_enabled?
+      = link_to toggle_shared_runners_project_runners_path(@project), class: 'btn btn-close', method: :post do
+        = _('Disable shared Runners')
+    - else
+      = link_to toggle_shared_runners_project_runners_path(@project), class: 'btn btn-success', method: :post do
+        = _('Enable shared Runners')
+    &nbsp; for this project
 
 - if @shared_runners_count == 0
   = _('This GitLab instance does not provide any shared Runners yet. Instance administrators can register shared Runners in the admin area.')
