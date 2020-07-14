@@ -12,7 +12,7 @@ RSpec.describe Import::BitbucketController do
   let(:access_params) { { token: token, expires_at: nil, expires_in: nil, refresh_token: nil } }
   let(:code) { SecureRandom.hex(8) }
 
-  let(:repo) { double(name: 'vim', slug: 'vim', owner: 'asd', full_name: 'asd/vim', clone_url: 'http://test.host/demo/url.git', 'valid?' => true) }
+  let(:repo) { instance_double(Bitbucket::Representation::Repo, name: 'vim', slug: 'vim', owner: 'asd', full_name: 'asd/vim', clone_url: 'http://test.host/demo/url.git', 'valid?' => true) }
 
   def assign_session_tokens
     session[:bitbucket_token] = token
@@ -72,13 +72,15 @@ RSpec.describe Import::BitbucketController do
     let(:invalid_repo) { double(name: 'mercurialrepo', slug: 'mercurialrepo', owner: 'asd', full_name: 'asd/mercurialrepo', clone_url: 'http://test.host/demo/mercurialrepo.git', 'valid?' => false) }
 
     before do
-      allow(controller).to receive(:provider_url).and_return('http://demobitbucket.org')
+      allow(Gitlab::Auth::OAuth::Provider).to receive(:config_for).with('bitbucket').and_return(double(url: 'http://demobitbucket.org'))
 
       assign_session_tokens
     end
 
     it 'returns invalid repos' do
-      allow_any_instance_of(Bitbucket::Client).to receive(:repos).and_return([repo, invalid_repo])
+      allow_next_instance_of(Bitbucket::Client) do |client|
+        allow(client).to receive(:repos).and_return([repo, invalid_repo])
+      end
 
       get :status, format: :json
 

@@ -3,7 +3,7 @@
 RSpec.shared_examples 'import controller with status' do
   include ImportSpecHelper
 
-  let(:group) { create(:group) }
+  let_it_be(:group) { create(:group) }
 
   before do
     group.add_owner(user)
