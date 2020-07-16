@@ -5,6 +5,8 @@ import SecurityDashboardLayout from './security_dashboard_layout.vue';
 import VulnerabilitiesCountList from './vulnerability_count_list.vue';
 import Filters from './first_class_vulnerability_filters.vue';
 import CsvExportButton from './csv_export_button.vue';
+import projectSpecificScanners from '../graphql/project_specific_scanners.query.graphql';
+import { parseSpecificFilters } from '../utils/filters_utils';
 
 export const BANNER_COOKIE_KEY = 'hide_vulnerabilities_introduction_banner';
 
@@ -38,9 +40,25 @@ export default {
       default: '',
     },
   },
+  apollo: {
+    specificFilters: {
+      query: projectSpecificScanners,
+      variables() {
+        return {
+          fullPath: this.projectFullPath,
+        };
+      },
+      update: ({
+        project: {
+          vulnerabilityScanners: { nodes },
+        },
+      }) => parseSpecificFilters(nodes),
+    },
+  },
   data() {
     return {
       filters: {},
+      specificFilters: {},
     };
   },
   inject: ['dashboardDocumentation'],
@@ -64,7 +82,7 @@ export default {
           <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
         </template>
         <template #sticky>
-          <filters @filterChange="handleFilterChange" />
+          <filters :specific-filters="specificFilters" @filterChange="handleFilterChange" />
         </template>
         <project-vulnerabilities-app
           :dashboard-documentation="dashboardDocumentation"

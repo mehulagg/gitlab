@@ -1,9 +1,27 @@
 import isPlainObject from 'lodash/isPlainObject';
-import { ALL, BASE_FILTERS } from 'ee/security_dashboard/store/modules/filters/constants';
-import { REPORT_TYPES, SEVERITY_LEVELS } from 'ee/security_dashboard/store/constants';
 import { VULNERABILITY_STATES } from 'ee/vulnerabilities/constants';
-import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
 import { s__, __ } from '~/locale';
+import { convertObjectPropsToSnakeCase } from '~/lib/utils/common_utils';
+import { ALL, BASE_FILTERS } from './store/modules/filters/constants';
+import { REPORT_TYPES, SEVERITY_LEVELS } from './store/constants';
+import { createCustomFilters, createGitlabFilters } from './utils/filters_utils';
+
+/**
+ * Parses the available report types and specific scanner filters and creates the report type
+ * filters with the links to the appropriate scanner filters
+ * @param {Object} reportTypes all the different report types supported by GitLab
+ * @param {Object} specificFilters the project specific filters retrieved
+ * @returns {Object} the reportType and scanner options arrays
+ */
+const parseReportTypes = (reportTypes, specificFilters) => {
+  const customFilters = createCustomFilters(reportTypes, specificFilters);
+  const gitlabFilters = createGitlabFilters(reportTypes, specificFilters);
+
+  const reportTypeOptions = [...gitlabFilters.filters, ...customFilters.filters];
+  const scannerOptions = [...gitlabFilters.linkedFilters, ...customFilters.linkedFilters];
+
+  return { reportTypeOptions, scannerOptions };
+};
 
 const parseOptions = obj =>
   Object.entries(obj).map(([id, name]) => ({ id: id.toUpperCase(), name }));
@@ -11,7 +29,34 @@ const parseOptions = obj =>
 export const mapProjects = projects =>
   projects.map(p => ({ id: p.id.split('/').pop(), name: p.name }));
 
-export const initFirstClassVulnerabilityFilters = projects => {
+/**
+ * Modifies the existing reportType and scanner filters with project specific filters
+ *
+ * @param {Array} filters the exisiting filters
+ * @param {Object} specificFilters the map of project-specific filters
+ * @returns {Array} the updated filters
+ */
+export const modifyReportTypeAndScannerFilters = (filters, specificFilters) => {
+  const { reportTypeOptions, scannerOptions } = parseReportTypes(REPORT_TYPES, specificFilters);
+
+  return filters.map(curr => {
+    let updatedFilter;
+
+    if (curr.id === 'reportType') {
+      updatedFilter = curr;
+      updatedFilter.options = [BASE_FILTERS.report_type, ...reportTypeOptions];
+    } else if (curr.id === 'scanner') {
+      updatedFilter = curr;
+      updatedFilter.options = [BASE_FILTERS.scanner, ...scannerOptions];
+    }
+
+    return updatedFilter || curr;
+  });
+};
+
+export const initFirstClassVulnerabilityFilters = (projects, specificFilters) => {
+  const { reportTypeOptions, scannerOptions } = parseReportTypes(REPORT_TYPES, specificFilters);
+
   const filters = [
     {
       name: s__('SecurityReports|Status'),
@@ -31,7 +76,14 @@ export const initFirstClassVulnerabilityFilters = projects => {
     {
       name: s__('Reports|Scanner'),
       id: 'reportType',
-      options: [BASE_FILTERS.report_type, ...parseOptions(REPORT_TYPES)],
+      options: [BASE_FILTERS.report_type, ...reportTypeOptions],
+      selection: new Set([ALL]),
+    },
+    {
+      name: s__('Reports|Vendor'),
+      id: 'scanner',
+      hidden: true,
+      options: [BASE_FILTERS.scanner, ...scannerOptions],
       selection: new Set([ALL]),
     },
   ];
