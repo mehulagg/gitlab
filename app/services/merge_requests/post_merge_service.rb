@@ -12,21 +12,35 @@ module MergeRequests
     MAX_RETARGET_MERGE_REQUESTS = 4
 
     def execute(merge_request)
+      return if merge_request.merged?
+
+      # These operations need to happen transactionally
+      ActiveRecord::Base.transaction(requires_new: true) do
+        # These options do not call external services and should be
+        # quick enough to put in a transaction
+        create_event(merge_request)
+        todo_service.merge_merge_request(merge_request, current_user)
+      end
+
+      # Mark the merge request as merged, everything that happens afterwards is
+      # executed once
       merge_request.mark_as_merged
-      close_issues(merge_request)
-      todo_service.merge_merge_request(merge_request, current_user)
-      create_event(merge_request)
-      create_note(merge_request)
+
       merge_request_activity_counter.track_merge_mr_action(user: current_user)
+
+      create_note(merge_request)
+      close_issues(merge_request)
       notification_service.merge_mr(merge_request, current_user)
-      execute_hooks(merge_request, 'merge')
       retarget_chain_merge_requests(merge_request)
+
       invalidate_cache_counts(merge_request, users: merge_request.assignees | merge_request.reviewers)
       merge_request.update_project_counter_caches
       delete_non_latest_diffs(merge_request)
       cancel_review_app_jobs!(merge_request)
       cleanup_environments(merge_request)
       cleanup_refs(merge_request)
+
+      execute_hooks(merge_request, 'merge')
     end
 
     private
