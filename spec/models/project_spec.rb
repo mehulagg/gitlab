@@ -5812,6 +5812,70 @@ RSpec.describe Project do
     end
   end
 
+  describe '#validate_shared_runners_allowed_by_group' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:shared_runners_parent_group_config, :parent_group_allow_override, :project_shared_runners_desired_config, :expected_outcome, :expected_result) do
+      false | false | false | false | true
+      true  | false | false | false | true
+      false | false | true  | false | false
+      true  | false | true  | true  | true
+      false | true  | false | false | true
+      true  | true  | false | false | true
+      false | true  | true  | true  | true
+      true  | true  | true  | true  | true
+    end
+
+    with_them do
+      let(:group) { create(:group, shared_runners_enabled: shared_runners_parent_group_config, allow_descendants_override_disabled_shared_runners: parent_group_allow_override) }
+      let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
+
+      it 'parent restrictions are fullfiled' do
+        result = project.update(shared_runners_enabled: project_shared_runners_desired_config)
+
+        expect(result).to eq(expected_result)
+        expect(project.reload.shared_runners_enabled).to eq(expected_outcome)
+
+        unless expected_result
+          expect(project.errors).to have_key(:shared_runners)
+          expect(project.errors[:shared_runners].first).to eq('cannot be enabled because parent group does not allow')
+        end
+      end
+    end
+  end
+
+  describe '#shared_runners_enabled_allowed_by_group?' do
+    subject { project.shared_runners_enabled_allowed_by_group? }
+
+    context 'project does not belong to group' do
+      let(:project) { create(:project) }
+
+      it 'returns true' do
+        expect(subject).to be_truthy
+      end
+    end
+
+    context 'project belongs to group' do
+      context 'shared runners not allowed' do
+        let(:group) { create(:group, :shared_runners_disabled) }
+        let(:project) { create(:project, shared_runners_enabled: false, namespace: group) }
+
+        it 'returns false' do
+          expect(subject).to be_falsey
+        end
+      end
+
+      context 'shared runners allowed' do
+        let(:group) { create(:group) }
+        let(:project) { create(:project, namespace: group) }
+
+        it 'returns true' do
+          expect(subject).to be_truthy
+        end
+      end
+    end
+  end
+
   describe '#mark_pages_as_deployed' do
     let(:project) { create(:project) }
     let(:artifacts_archive) { create(:ci_job_artifact, project: project) }

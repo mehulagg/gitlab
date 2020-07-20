@@ -10244,6 +10244,9 @@ msgstr ""
 msgid "Error while migrating %{upload_id}: %{error_message}"
 msgstr ""
 
+msgid "Error while updating shared Runners"
+msgstr ""
+
 msgid "Error with Akismet. Please check the logs for more info."
 msgstr ""
 
@@ -27445,9 +27448,6 @@ msgstr ""
 msgid "UpdateProject|Cannot rename project because it contains container registry tags!"
 msgstr ""
 
-msgid "UpdateProject|Cannot update due to restriction on group level"
-msgstr ""
-
 msgid "UpdateProject|Could not set the default branch"
 msgstr ""
 
@@ -29779,6 +29779,15 @@ msgid "by %{user}"
 msgstr ""
 
 msgid "cannot be changed if a personal project has container registry tags."
+msgstr ""
+
+msgid "cannot be enabled because parent group does not allow"
+msgstr ""
+
+msgid "cannot be enabled because parent group does not allow."
+msgstr ""
+
+msgid "cannot be enabled because parent group has shared Runners disabled."
 msgstr ""
 
 msgid "cannot be enabled unless all domains have TLS certificates"

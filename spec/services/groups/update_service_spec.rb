@@ -320,6 +320,7 @@ RSpec.describe Groups::UpdateService do
           expect(subject).to be_truthy
         end
       end
+
       context 'when parent does not allow' do
         let(:group) { create(:group, :shared_runners_disabled, :private, parent: private_group) }
         let(:project) { create(:project, shared_runners_enabled: false, group: group) }
@@ -398,6 +399,22 @@ RSpec.describe Groups::UpdateService do
           expect { subject }
             .to change { group.reload.allow_descendants_override_disabled_shared_runners }.from(true).to(false)
             .and change { project.reload.shared_runners_enabled }.from(true).to(false)
+          expect(subject).to be_truthy
+        end
+      end
+
+      context 'params are nil' do
+        let(:group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
+        let(:project) { create(:project, shared_runners_enabled: true, group: group) }
+
+        subject { described_class.new(group, user).execute }
+
+        before do
+          group.add_owner(user)
+        end
+
+        it 'no Groups::UpdateSharedRunnersService is called' do
+          expect_any_instance_of(::Groups::UpdateSharedRunnersService).not_to receive(:execute)
           expect(subject).to be_truthy
         end
       end

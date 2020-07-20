@@ -153,37 +153,27 @@ RSpec.describe Projects::UpdateService do
       end
 
       context 'when updating shared runners' do
-        using RSpec::Parameterized::TableSyntax
-
-        where(:shared_runners_parent_group_config, :parent_group_allow_override, :project_shared_runners_desired_config, :expected_outcome, :expected_result) do
-          false | false | false | false | { status: :success }
-          true  | false | false | false | { status: :success }
-          false | false | true  | false | { status: :error, message: 'Cannot update due to restriction on group level' }
-          true  | false | true  | true  | { status: :success }
-          false | true  | false | false | { status: :success }
-          true  | true  | false | false | { status: :success }
-          false | true  | true  | true  | { status: :success }
-          true  | true  | true  | true  | { status: :success }
-        end
-
-        with_them do
-          let(:group) { create(:group, shared_runners_enabled: shared_runners_parent_group_config, allow_descendants_override_disabled_shared_runners: parent_group_allow_override) }
+        context 'can enable shared runners' do
+          let(:group) { create(:group, shared_runners_enabled: true) }
           let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
 
-          before do
-            group.add_owner(user)
+          it 'enables shared runners' do
+            result = update_project(project, user, shared_runners_enabled: true)
+
+            expect(result).to eq({ status: :success })
+            expect(project.reload.shared_runners_enabled).to be_truthy
           end
+        end
 
-          it 'parent restrictions is fullfiled' do
-            result = update_project(project, user, shared_runners_enabled: project_shared_runners_desired_config)
+        context 'cannot enable shared runners' do
+          let(:group) { create(:group, :shared_runners_disabled) }
+          let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
 
-            expect(result).to eq(expected_result)
-            expect(project.shared_runners_enabled).to eq(expected_outcome)
+          it 'does not enable shared runners' do
+            result = update_project(project, user, shared_runners_enabled: true)
 
-            if expected_result[:status] == :error
-              expect(project.errors.messages).to have_key(:shared_runners_enabled)
-              expect(project.errors.messages[:shared_runners_enabled]).to include('Cannot update due to restriction on group level')
-            end
+            expect(result).to eq({ status: :error, message: 'Shared runners cannot be enabled because parent group does not allow' })
+            expect(project.reload.shared_runners_enabled).to be_falsey
           end
         end
       end

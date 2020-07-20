@@ -432,6 +432,7 @@ class Project < ApplicationRecord
   validate :visibility_level_allowed_by_group, if: :should_validate_visibility_level?
   validate :visibility_level_allowed_as_fork, if: :should_validate_visibility_level?
   validate :validate_pages_https_only, if: -> { changes.has_key?(:pages_https_only) }
+  validate :validate_shared_runners_allowed_by_group, if: -> { new_record? || changes.has_key?(:shared_runners_enabled) }
   validates :repository_storage,
     presence: true,
     inclusion: { in: ->(_object) { Gitlab.config.repositories.storages.keys } }
@@ -1184,6 +1185,19 @@ class Project < ApplicationRecord
     unless pages_domains.all?(&:https?)
       errors.add(:pages_https_only, _("cannot be enabled unless all domains have TLS certificates"))
     end
+  end
+
+  def validate_shared_runners_allowed_by_group
+    return if shared_runners_enabled_allowed_by_group?
+
+    errors.add(:shared_runners, _('cannot be enabled because parent group does not allow')) if shared_runners_enabled
+  end
+
+  def shared_runners_enabled_allowed_by_group?
+    return true unless group
+    return true unless group.public_methods.include?(:shared_runners_allowed?)
+
+    group.shared_runners_allowed?
   end
 
   def to_param

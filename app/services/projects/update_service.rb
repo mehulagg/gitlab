@@ -21,8 +21,6 @@ module Projects
         storage_move.schedule
       end
 
-      check_shared_runners_permission
-
       yield if block_given?
 
       validate_classification_label(project, :external_authorization_classification_label)
@@ -159,17 +157,6 @@ module Projects
       new_repository_storage && project.repository.exists? &&
         project.repository_storage != new_repository_storage &&
         can?(current_user, :change_repository_storage, project)
-    end
-
-    def check_shared_runners_permission
-      if params[:shared_runners_enabled]
-        if project.group&.shared_runners_allowed? == false
-          error_message = s_('UpdateProject|Cannot update due to restriction on group level')
-          project.errors.add(:shared_runners_enabled, error_message)
-
-          raise ValidationError.new(error_message)
-        end
-      end
     end
   end
 end

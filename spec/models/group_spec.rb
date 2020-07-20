@@ -179,6 +179,68 @@ RSpec.describe Group do
       end
     end
 
+    describe '#validate_shared_runners_allowed_by_parent' do
+      context 'without a parent' do
+        let(:group) { create(:group, shared_runners_enabled: true) }
+
+        it 'is valid' do
+          expect(group).to be_valid
+        end
+      end
+
+      context 'with a parent' do
+        context 'when parent has shared runners disabled' do
+          let(:parent) { create(:group, :shared_runners_disabled) }
+          let(:sub_group) { build(:group, shared_runners_enabled: true, parent_id: parent.id) }
+
+          it 'is invalid' do
+            expect(sub_group).to be_invalid
+            expect(sub_group.errors[:shared_runners]).to include('cannot be enabled because parent group has shared Runners disabled.')
+          end
+        end
+
+        context 'when parent has shared runners enabled' do
+          let(:parent) { create(:group, shared_runners_enabled: true) }
+          let(:sub_group) { build(:group, shared_runners_enabled: true, parent_id: parent.id) }
+
+          it 'is valid' do
+            expect(sub_group).to be_valid
+          end
+        end
+      end
+    end
+
+    describe '#validate_allow_descendants_override_disabled_shared_runners_allowed_by_parent' do
+      context 'without a parent' do
+        let(:group) { create(:group, :allow_descendants_override_disabled_shared_runners, :shared_runners_disabled) }
+
+        it 'is valid' do
+          expect(group).to be_valid
+        end
+      end
+
+      context 'with a parent' do
+        context 'when parent does not allow shared runners' do
+          let(:parent) { create(:group, :shared_runners_disabled) }
+          let(:sub_group) { build(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners, parent_id: parent.id) }
+
+          it 'is invalid' do
+            expect(sub_group).to be_invalid
+            expect(sub_group.errors[:allow_descendants_override_disabled_shared_runners]).to include('cannot be enabled because parent group does not allow.')
+          end
+        end
+
+        context 'when parent allows shared runners' do
+          let(:parent) { create(:group, shared_runners_enabled: true) }
+          let(:sub_group) { build(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners, parent_id: parent.id) }
+
+          it 'is valid' do
+            expect(sub_group).to be_valid
+          end
+        end
+      end
+    end
+
     describe '#visibility_level_allowed_by_projects' do
       let!(:internal_group) { create(:group, :internal) }
       let!(:internal_project) { create(:project, :internal, group: internal_group) }
@@ -1362,7 +1424,7 @@ RSpec.describe Group do
 
       with_them do
         let!(:parent_group) { create(:group, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override) }
-        let!(:group) { create(:group, parent: parent_group) }
+        let!(:group) { create(:group, :shared_runners_disabled, parent: parent_group) }
 
         it 'returns the expected result' do
           expect(group.parent_allows_shared_runners?).to eq(expected_shared_runners_allowed)
@@ -1385,7 +1447,7 @@ RSpec.describe Group do
     context 'when parent group is present' do
       context 'When shared Runners are disabled' do
         let!(:parent_group) { create(:group, :shared_runners_disabled) }
-        let!(:group) { create(:group, parent: parent_group) }
+        let!(:group) { create(:group, :shared_runners_disabled, parent: parent_group) }
 
         it { is_expected.to be_falsy }
       end

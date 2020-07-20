@@ -270,48 +270,34 @@ RSpec.describe Groups::TransferService do
         context 'shared runners configuration' do
           using RSpec::Parameterized::TableSyntax
 
-          context 'when parent group has shared runners disabled' do
-            where(:initial_shared_runners_config_for_group, :initial_override_config, :parent_group_shared_runners_config, :expectation, :expectation_allow_override) do
-              true  | true  | true  | true  | true
-              true  | true  | false | false | false
-              true  | false | true  | true  | false
-              true  | false | false | false | false
-              false | true  | true  | false | true
-              false | true  | false | false | false
-              false | false | true  | false | false
-              false | false | false | false | false
-            end
-
-            with_them do
-              let(:new_parent_group) { create(:group, shared_runners_enabled: parent_group_shared_runners_config) }
-              let(:group) { create(:group, shared_runners_enabled: initial_shared_runners_config_for_group, allow_descendants_override_disabled_shared_runners: initial_override_config) }
-
-              it 'updates shared runners based on the parent group' do
-                group.reload
-
-                expect(group.shared_runners_enabled).to eq(expectation)
-                expect(group.allow_descendants_override_disabled_shared_runners).to eq(expectation_allow_override)
-              end
-            end
+          where(:group_shared_runners_enabled, :group_override_allowed, :new_parent_shared_runners_enabled, :new_parent_override_allowed, :expected_shared_runners_enabled, :expected_override_allowed) do
+            true  | true  | true  | false | true  | true
+            true  | true  | false | false | false | false
+            true  | false | true  | false | true  | false
+            true  | false | false | false | false | false
+            false | true  | true  | false | false | true
+            false | true  | false | false | false | false
+            false | false | true  | false | false | false
+            false | false | false | false | false | false
+            true  | true  | true  | true  | true  | true
+            true  | true  | false | true  | false | true
+            true  | false | true  | true  | true  | false
+            true  | false | false | true  | false | false
+            false | true  | true  | true  | false | true
+            false | true  | false | true  | false | true
+            false | false | true  | true  | false | false
+            false | false | false | true  | false | false
           end
 
-          context 'when parent group has shared runners disabled but allow descendants to override' do
-            where(:initial_shared_runners_config_for_group, :parent_group_shared_runners_config, :expectation) do
-              true  | true  | true
-              true  | false | false
-              false | true  | false
-              false | false | false
-            end
+          with_them do
+            let(:new_parent_group) { create(:group, shared_runners_enabled: new_parent_shared_runners_enabled, allow_descendants_override_disabled_shared_runners: new_parent_override_allowed) }
+            let(:group) { create(:group, shared_runners_enabled: group_shared_runners_enabled, allow_descendants_override_disabled_shared_runners: group_override_allowed) }
 
-            with_them do
-              let(:new_parent_group) { create(:group, shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: parent_group_shared_runners_config) }
-              let(:group) { create(:group, shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: initial_shared_runners_config_for_group) }
+            it 'updates shared runners based on the parent group' do
+              group.reload
 
-              it 'updates shared runners based on the parent group' do
-                group.reload
-
-                expect(group.allow_descendants_override_disabled_shared_runners).to eq(expectation)
-              end
+              expect(group.shared_runners_enabled).to eq(expected_shared_runners_enabled)
+              expect(group.allow_descendants_override_disabled_shared_runners).to eq(expected_override_allowed)
             end
           end
         end

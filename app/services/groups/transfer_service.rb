@@ -166,9 +166,17 @@ module Groups
     end
 
     def set_shared_runners_permission
-      @group.shared_runners_enabled = false unless @group.parent_enabled_shared_runners?
+      unless @group.parent_enabled_shared_runners?
+        result = Groups::UpdateSharedRunnersService.new(@group, current_user, { shared_runners_enabled: false }).execute
 
-      @group.allow_descendants_override_disabled_shared_runners = false unless @group.parent_allows_shared_runners?
+        raise TransferError, s_('Error while updating shared Runners') unless result[:status] == :success
+      end
+
+      unless @group.parent_allows_shared_runners?
+        result = Groups::UpdateSharedRunnersService.new(@group, current_user, { allow_descendants_override_disabled_shared_runners: false }).execute
+
+        raise TransferError, s_('Error while updating shared Runners') unless result[:status] == :success
+      end
     end
   end
 end

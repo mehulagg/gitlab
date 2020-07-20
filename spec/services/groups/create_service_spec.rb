@@ -101,26 +101,6 @@ RSpec.describe Groups::CreateService, '#execute' do
 
       it { is_expected.to be_persisted }
     end
-
-    context 'shared runners configuration' do
-      where(:shared_runners_config) do
-        [true, false]
-      end
-
-      before do
-        group.add_owner(user)
-      end
-
-      with_them do
-        let!(:group) { create(:group, shared_runners_enabled: shared_runners_config) }
-
-        it 'created group follows the parent config' do
-          new_group = service.execute
-
-          expect(new_group.shared_runners_enabled).to eq(shared_runners_config)
-        end
-      end
-    end
   end
 
   describe "when visibility level is passed as a string" do
@@ -156,6 +136,39 @@ RSpec.describe Groups::CreateService, '#execute' do
     it 'create the settings record connected to the group' do
       group = subject
       expect(group.namespace_settings).to be_persisted
+    end
+  end
+
+  context 'shared runners configuration' do
+    context 'parent group present' do
+      where(:shared_runners_config) do
+        [true, false]
+      end
+
+      with_them do
+        let!(:group) { create(:group, shared_runners_enabled: shared_runners_config) }
+        let!(:service) { described_class.new(user, group_params.merge(parent_id: group.id)) }
+
+        before do
+          group.add_owner(user)
+        end
+
+        it 'created group follows the parent config' do
+          new_group = service.execute
+
+          expect(new_group.shared_runners_enabled).to eq(shared_runners_config)
+        end
+      end
+    end
+
+    context 'root group' do
+      let!(:service) { described_class.new(user) }
+
+      it 'follows default config' do
+        new_group = service.execute
+
+        expect(new_group.shared_runners_enabled).to eq(true)
+      end
     end
   end
 end

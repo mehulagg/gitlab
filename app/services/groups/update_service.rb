@@ -102,16 +102,14 @@ module Groups
     end
 
     def update_shared_runners
-      unless params[:shared_runners_enabled].nil? && params[:allow_descendants_override_disabled_shared_runners].nil?
-        result = Groups::UpdateSharedRunnersService.new(group, current_user, params).execute
+      return true if params[:shared_runners_enabled].nil? && params[:allow_descendants_override_disabled_shared_runners].nil?
 
-        return true if result[:status] == :success
+      result = Groups::UpdateSharedRunnersService.new(group, current_user, params).execute
 
-        group.errors.add(:update_shared_runners, result[:message])
-        return false
-      end
+      return true if result[:status] == :success
 
-      true
+      group.errors.add(:update_shared_runners, result[:message])
+      false
     end
   end
 end

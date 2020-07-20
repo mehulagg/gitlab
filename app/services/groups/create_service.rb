@@ -91,7 +91,7 @@ module Groups
     end
 
     def set_shared_runners_permission
-      @group.shared_runners_enabled = @group.parent.shared_runners_enabled if @group.parent
+      @group.shared_runners_enabled = @group.parent_enabled_shared_runners? if @group.parent
     end
   end
 end
