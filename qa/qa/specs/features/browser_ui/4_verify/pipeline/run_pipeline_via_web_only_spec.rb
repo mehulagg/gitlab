@@ -58,7 +58,6 @@ module QA
 
         after do
           runner.remove_via_api!
-          Page::Main::Menu.perform(&:sign_out_if_signed_in)
         end
 
         it 'does not have danger alert' do
