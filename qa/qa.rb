@@ -260,6 +260,7 @@ module QA
       module Pipeline
         autoload :Index, 'qa/page/project/pipeline/index'
         autoload :Show, 'qa/page/project/pipeline/show'
+        autoload :New, 'qa/page/project/pipeline/new'
       end
 
       module Tag
