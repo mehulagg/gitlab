@@ -128,7 +128,7 @@ service account can be found at Google's documentation for
    **Settings > Integrations**.
 1. Click the **Prometheus** service.
 1. For **API URL**, provide the domain name or IP address of your server, such as
-   `http://prometheus.example.com/` or `http://192.0.2.1/`.
+   `http://prometheus.<your_GitLab_domain.tld>/` or `http://<your_GitLab_IP>/`.
 1. (Optional) In **Google IAP Audience Client ID**, provide the Client ID of the
    Prometheus OAuth Client secured with Google IAP.
 1. (Optional) In **Google IAP Service Account JSON**, provide the contents of the
@@ -145,7 +145,7 @@ to integrate with.
 
 1. Navigate to the [Integrations page](overview.md#accessing-integrations).
 1. Click the **Prometheus** service.
-1. Provide the domain name or IP address of your server, for example `http://thanos.example.com/` or `http://192.0.2.1/`.
+1. Provide the domain name or IP address of your server, for example `http://thanos.<your_GitLab_domain.tld>/` or `http://<your_GitLab_IP>/`.
 1. Click **Save changes**.
 
 ### Precedence with multiple Prometheus configurations
