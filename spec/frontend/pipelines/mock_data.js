@@ -1,3 +1,9 @@
+import {
+  PIPELINE_CANCELED,
+  PIPELINE_FAILED,
+  PIPELINE_RUNNING,
+} from '../../../app/assets/javascripts/pipelines/constants';
+
 export const pipelineWithStages = {
   id: 20333396,
   user: {
@@ -318,6 +324,69 @@ export const pipelineWithStages = {
   cancel_path: '/gitlab-org/gitlab/pipelines/20333396/cancel',
   triggered_by: null,
   triggered: [],
+};
+
+const threeWeeksAgo = new Date();
+threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
+
+export const mockPipelineHeader = {
+  detailedStatus: {},
+  id: 123,
+  createdAt: threeWeeksAgo.toISOString(),
+  user: {
+    name: 'Foo',
+    username: 'foobar',
+    email: 'foo@bar.com',
+    avatarUrl: 'link',
+  },
+};
+
+export const mockFailedPipelineHeader = {
+  ...mockPipelineHeader,
+  status: PIPELINE_FAILED,
+  detailedStatus: {
+    group: 'failed',
+    icon: 'status_failed',
+    label: 'failed',
+    text: 'failed',
+    detailsPath: 'path',
+  },
+};
+
+export const mockRunningPipelineHeader = {
+  ...mockPipelineHeader,
+  status: PIPELINE_RUNNING,
+  detailedStatus: {
+    group: 'running',
+    icon: 'status_running',
+    label: 'running',
+    text: 'running',
+    detailsPath: 'path',
+  },
+};
+
+export const mockCancelledPipelineHeader = {
+  ...mockPipelineHeader,
+  status: PIPELINE_CANCELED,
+  detailedStatus: {
+    group: 'cancelled',
+    icon: 'status_cancelled',
+    label: 'cancelled',
+    text: 'cancelled',
+    detailsPath: 'path',
+  },
+};
+
+export const mockSuccessfulPipelineHeader = {
+  ...mockPipelineHeader,
+  status: 'SUCCESS',
+  detailedStatus: {
+    group: 'success',
+    icon: 'status_success',
+    label: 'success',
+    text: 'success',
+    detailsPath: 'path',
+  },
 };
 
 export const stageReply = {

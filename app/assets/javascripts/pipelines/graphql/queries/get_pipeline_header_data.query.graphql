@@ -1,0 +1,25 @@
+# All data that we need:
+
+query getPipelineHeaderData($fullPath: ID!, $iid: ID!) {
+  project(fullPath: $fullPath) {
+    pipeline(iid: $iid) {
+      id
+      status
+      detailedStatus {
+        detailsPath
+        icon
+        group
+        text
+      }
+      createdAt
+      #user {
+      #name
+      #path
+      #email
+      #avatarUrl
+      #userAvatarAltText
+      #statusTooltipHtml
+      #}
+    }
+  }
+}

@@ -21,3 +21,7 @@ export const FETCH_TAG_ERROR_MESSAGE = __('There was a problem fetching project 
 export const RAW_TEXT_WARNING = s__(
   'Pipeline|Raw text search is not currently supported. Please use the available search tokens.',
 );
+
+export const PIPELINE_RUNNING = 'RUNNING';
+export const PIPELINE_CANCELED = 'CANCELED';
+export const PIPELINE_FAILED = 'FAILED';
