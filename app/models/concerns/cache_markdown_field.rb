@@ -71,7 +71,9 @@ module CacheMarkdownField
   def refresh_markdown_cache!
     updates = refresh_markdown_cache
 
-    save_markdown(updates)
+    if save_markdown(updates)
+      reset.store_mentions! if is_a?(Mentionable) && mentionable_attrs_changed?(updates.keys)
+    end
   end
 
   def cached_html_up_to_date?(markdown_field)
@@ -106,7 +108,18 @@ module CacheMarkdownField
   def updated_cached_html_for(markdown_field)
     return unless cached_markdown_fields.markdown_fields.include?(markdown_field)
 
-    refresh_markdown_cache! if attribute_invalidated?(cached_markdown_fields.html_field(markdown_field))
+    if attribute_invalidated?(cached_markdown_fields.html_field(markdown_field))
+      # * If html is invalid and there is a change in markdown field, then just refresh html for the
+      # corresponding markdown field.
+      # * Else if the the markdown did not changee it means it is freshly loaded from DB
+      # but its corresponding html field is invalid, so we refresh and update it in DB.
+      # * The change in html field will trigger also a mentions parsing as well as an update if needed.
+      if changed_attributes[markdown_field]
+        refresh_markdown_cache
+      else
+        refresh_markdown_cache!
+      end
+    end
 
     cached_html_for(markdown_field)
   end
@@ -138,6 +151,16 @@ module CacheMarkdownField
 
   def parent_user
     nil
+  end
+
+  private
+
+  def mentionable_attrs_changed?(updated_fields)
+    return false unless is_a?(Mentionable)
+
+    self.class.mentionable_attrs.any? do |attr|
+      updated_fields.include?(cached_markdown_fields.html_field(attr.first))
+    end
   end
 
   included do
