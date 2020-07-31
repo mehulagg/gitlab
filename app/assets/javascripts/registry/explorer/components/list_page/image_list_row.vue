@@ -82,7 +82,7 @@ export default {
         :disabled="item.deleting"
         :text="item.location"
         :title="item.location"
-        css-class="btn-default btn-transparent btn-clipboard gl-text-gray-300"
+        category="tertiary"
       />
       <gl-icon
         v-if="item.failedDelete"

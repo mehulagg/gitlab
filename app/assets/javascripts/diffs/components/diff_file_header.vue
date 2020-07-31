@@ -197,7 +197,7 @@ export default {
     :class="{ 'gl-z-dropdown-menu!': hasDropdownOpen }"
     @click.self="handleToggleFile"
   >
-    <div class="file-header-content">
+    <div class="file-header-content gl-display-flex gl-align-items-center">
       <gl-icon
         v-if="collapsible"
         ref="collapseIcon"
@@ -240,7 +240,8 @@ export default {
         :title="__('Copy file path')"
         :text="diffFile.file_path"
         :gfm="gfmCopyText"
-        css-class="btn-default btn-transparent btn-clipboard"
+        css-class="js-copy-clipboard"
+        category="tertiary"
         data-track-event="click_copy_file_button"
         data-track-label="diff_copy_file_path_button"
         data-track-property="diff_copy_file"
