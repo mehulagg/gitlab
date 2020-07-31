@@ -44,6 +44,13 @@
           %strong Merge request events
         %p.light
           This URL will be triggered when a merge request is created/updated/merged
+    %li
+      = form.check_box :issues_events, class: 'float-left'
+      .prepend-left-20
+        = form.label :issues_events, class: 'list-label' do
+          %strong Issue events
+        %p.light
+          This URL will be triggered when an issue is created
 .form-group
   = form.label :enable_ssl_verification, 'SSL verification', class: 'label-bold checkbox'
   .form-check

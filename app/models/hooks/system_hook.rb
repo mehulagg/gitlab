@@ -7,12 +7,14 @@ class SystemHook < WebHook
     :repository_update_hooks,
     :push_hooks,
     :tag_push_hooks,
-    :merge_request_hooks
+    :merge_request_hooks,
+    :issue_hooks
   ]
 
   default_value_for :push_events, false
   default_value_for :repository_update_events, true
   default_value_for :merge_requests_events, false
+  default_value_for :issues_events, false
 
   validates :url, system_hook_url: true
 
