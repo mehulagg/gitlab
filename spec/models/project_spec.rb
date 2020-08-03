@@ -5815,7 +5815,7 @@ RSpec.describe Project do
   describe '#validate_shared_runners_allowed_by_group' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:shared_runners_parent_group_config, :parent_group_allow_override, :project_shared_runners_desired_config, :expected_outcome, :expected_result) do
+    where(:shared_runners_parent_group_config, :parent_group_allow_override, :project_shared_runners_desired_config, :expected_outcome, :update_status) do
       false | false | false | false | true
       true  | false | false | false | true
       false | false | true  | false | false
@@ -5833,10 +5833,10 @@ RSpec.describe Project do
       it 'parent restrictions are fullfiled' do
         result = project.update(shared_runners_enabled: project_shared_runners_desired_config)
 
-        expect(result).to eq(expected_result)
+        expect(result).to eq(update_status)
         expect(project.reload.shared_runners_enabled).to eq(expected_outcome)
 
-        unless expected_result
+        unless update_status
           expect(project.errors).to have_key(:shared_runners)
           expect(project.errors[:shared_runners].first).to eq('cannot be enabled because parent group does not allow')
         end

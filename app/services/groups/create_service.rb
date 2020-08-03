@@ -15,7 +15,7 @@ module Groups
 
       after_build_hook(@group, params)
 
-      set_shared_runners_permission
+      inherit_group_shared_runners_settings
 
       unless can_use_visibility_level? && can_create_group?
         return @group
@@ -90,8 +90,10 @@ module Groups
       @group.create_namespace_settings
     end
 
-    def set_shared_runners_permission
-      @group.shared_runners_enabled = @group.parent_enabled_shared_runners? if @group.parent
+    def inherit_group_shared_runners_settings
+      return unless @group.parent
+
+      @group.shared_runners_enabled = @group.parent_enabled_shared_runners?
     end
   end
 end

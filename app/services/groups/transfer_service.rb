@@ -104,7 +104,7 @@ module Groups
       @group.parent = @new_parent_group
       @group.clear_memoization(:self_and_ancestors_ids)
 
-      set_shared_runners_permission
+      inherit_group_shared_runners_settings
 
       @group.save!
     end
@@ -165,17 +165,17 @@ module Groups
       }.freeze
     end
 
-    def set_shared_runners_permission
+    def inherit_group_shared_runners_settings
       unless @group.parent_enabled_shared_runners?
         result = Groups::UpdateSharedRunnersService.new(@group, current_user, { shared_runners_enabled: false }).execute
 
-        raise TransferError, s_('Error while updating shared Runners') unless result[:status] == :success
+        raise TransferError, result[:message] unless result[:status] == :success
       end
 
       unless @group.parent_allows_shared_runners?
         result = Groups::UpdateSharedRunnersService.new(@group, current_user, { allow_descendants_override_disabled_shared_runners: false }).execute
 
-        raise TransferError, s_('Error while updating shared Runners') unless result[:status] == :success
+        raise TransferError, result[:message] unless result[:status] == :success
       end
     end
   end

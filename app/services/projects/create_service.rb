@@ -19,7 +19,7 @@ module Projects
 
       @project = Project.new(params)
 
-      set_shared_runners_permission
+      inherit_group_shared_runners_settings
 
       # Make sure that the user is allowed to use the specified visibility level
       if project_visibility.restricted?
@@ -272,8 +272,9 @@ module Projects
         .level_restricted?
     end
 
-    def set_shared_runners_permission
-      @project.shared_runners_enabled = false if @project.group&.shared_runners_enabled? == false
+    def inherit_group_shared_runners_settings
+      return if @project.group&.shared_runners_enabled?
+      @project.shared_runners_enabled = false
     end
   end
 end

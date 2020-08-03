@@ -378,6 +378,10 @@ class Namespace < ApplicationRecord
     actual_plan.name
   end
 
+  def shared_runners_allowed?
+    shared_runners_enabled? || allow_descendants_override_disabled_shared_runners?
+  end
+
   private
 
   def all_projects_with_pages

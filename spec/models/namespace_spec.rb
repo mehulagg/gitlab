@@ -1320,4 +1320,23 @@ RSpec.describe Namespace do
       end
     end
   end
+
+  describe '#shared_runners_allowed?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:shared_runners_enabled, :allow_descendants_override, :expected_shared_runners_allowed) do
+      true  | false | true
+      true  | true  | true
+      false | false | false
+      false | true  | true
+    end
+
+    with_them do
+      let!(:namespace) { create(:namespace, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override) }
+
+      it 'returns the expected result' do
+        expect(namespace.shared_runners_allowed?).to eq(expected_shared_runners_allowed)
+      end
+    end
+  end
 end

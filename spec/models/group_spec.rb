@@ -1392,25 +1392,6 @@ RSpec.describe Group do
     end
   end
 
-  describe '#shared_runners_allowed?' do
-    using RSpec::Parameterized::TableSyntax
-
-    where(:shared_runners_enabled, :allow_descendants_override, :expected_shared_runners_allowed) do
-      true  | false | true
-      true  | true  | true
-      false | false | false
-      false | true  | true
-    end
-
-    with_them do
-      let!(:group) { create(:group, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override) }
-
-      it 'returns the expected result' do
-        expect(group.shared_runners_allowed?).to eq(expected_shared_runners_allowed)
-      end
-    end
-  end
-
   describe '#parent_allows_shared_runners?' do
     context 'when parent group is present' do
       using RSpec::Parameterized::TableSyntax

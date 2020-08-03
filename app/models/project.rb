@@ -1195,7 +1195,6 @@ class Project < ApplicationRecord
 
   def shared_runners_enabled_allowed_by_group?
     return true unless group
-    return true unless group.public_methods.include?(:shared_runners_allowed?)
 
     group.shared_runners_allowed?
   end

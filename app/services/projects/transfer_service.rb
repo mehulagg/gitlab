@@ -88,7 +88,7 @@ module Projects
         # Move uploads
         move_project_uploads(project)
 
-        set_shared_runners_permission
+        inherit_group_shared_runners_settings
 
         project.old_path_with_namespace = @old_path
 
@@ -205,8 +205,10 @@ module Projects
       "#{new_path}#{::Gitlab::GlRepository::DESIGN.path_suffix}"
     end
 
-    def set_shared_runners_permission
-      project.shared_runners_enabled = false if @project.group&.shared_runners_allowed? == false
+    def inherit_group_shared_runners_settings
+      return if @project.group&.shared_runners_allowed?
+
+      project.shared_runners_enabled = false
     end
   end
 end

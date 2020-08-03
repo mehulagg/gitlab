@@ -790,8 +790,10 @@ RSpec.describe Projects::CreateService, '#execute' do
       where(:shared_runners_group_config, :desired_config_for_new_project, :expected_result_for_project) do
         true  | true  | true
         true  | false | false
+        true  | nil   | true
         false | true  | false
         false | false | false
+        false | nil   | false
       end
 
       with_them do
@@ -804,8 +806,9 @@ RSpec.describe Projects::CreateService, '#execute' do
         end
 
         it 'created project follows the parent config' do
-          project = create_project(user, opts.merge!(namespace_id: group.id)
-                                            .merge!(shared_runners_enabled: desired_config_for_new_project))
+          params = opts.merge(namespace_id: group.id)
+          params = params.merge(shared_runners_enabled: desired_config_for_new_project) unless desired_config_for_new_project.nil?
+          project = create_project(user, params)
 
           expect(project).to be_valid
           expect(project.shared_runners_enabled).to eq(expected_result_for_project)
@@ -815,15 +818,16 @@ RSpec.describe Projects::CreateService, '#execute' do
 
     context 'parent group is not present' do
       where(:desired_config) do
-        [true, false]
+        [true, false, nil]
       end
 
       with_them do
         it 'follows desired config' do
-          project = create_project(user, opts.merge!(shared_runners_enabled: desired_config))
+          params =  opts.merge!(shared_runners_enabled: desired_config) unless desired_config.nil?
+          project = create_project(user, params)
 
           expect(project).to be_valid
-          expect(project.shared_runners_enabled).to eq(desired_config)
+          expect(project.shared_runners_enabled).to eq(desired_config || desired_config.nil?)
         end
       end
     end
