@@ -817,17 +817,21 @@ RSpec.describe Projects::CreateService, '#execute' do
     end
 
     context 'parent group is not present' do
-      where(:desired_config) do
-        [true, false, nil]
+      using RSpec::Parameterized::TableSyntax
+
+      where(:desired_config, :expected_result) do
+        true  | true
+        false | false
+        nil   | true
       end
 
       with_them do
         it 'follows desired config' do
-          params =  opts.merge!(shared_runners_enabled: desired_config) unless desired_config.nil?
-          project = create_project(user, params)
+          opts.merge!(shared_runners_enabled: desired_config) unless desired_config.nil?
+          project = create_project(user, opts)
 
           expect(project).to be_valid
-          expect(project.shared_runners_enabled).to eq(desired_config || desired_config.nil?)
+          expect(project.shared_runners_enabled).to eq(expected_result)
         end
       end
     end

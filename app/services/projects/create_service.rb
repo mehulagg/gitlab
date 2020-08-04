@@ -273,7 +273,8 @@ module Projects
     end
 
     def inherit_group_shared_runners_settings
-      return if @project.group&.shared_runners_enabled?
+      return if @project.group.nil? || @project.group.shared_runners_enabled?
+
       @project.shared_runners_enabled = false
     end
   end

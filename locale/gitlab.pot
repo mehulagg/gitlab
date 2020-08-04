@@ -10244,9 +10244,6 @@ msgstr ""
 msgid "Error while migrating %{upload_id}: %{error_message}"
 msgstr ""
 
-msgid "Error while updating shared Runners"
-msgstr ""
-
 msgid "Error with Akismet. Please check the logs for more info."
 msgstr ""
 
