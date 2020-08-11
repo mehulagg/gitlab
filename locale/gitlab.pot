@@ -29781,6 +29781,9 @@ msgstr ""
 msgid "cannot be enabled because parent group does not allow it"
 msgstr ""
 
+msgid "cannot be enabled because parent group does not allow it."
+msgstr ""
+
 msgid "cannot be enabled because parent group has shared Runners disabled."
 msgstr ""
 
