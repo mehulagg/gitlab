@@ -1,9 +1,8 @@
 <script>
-/* global Flash */
-
 import { GlToggle, GlLoadingIcon } from '@gitlab/ui';
 import { debounce } from 'lodash';
 import { __ } from '~/locale';
+import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { DEBOUNCE_TOGGLE_DELAY, ERROR_MESSAGE } from '../constants';
 
@@ -25,10 +24,6 @@ export default {
       type: Boolean,
       required: true,
     },
-    parentEnabled: {
-      type: Boolean,
-      required: true,
-    },
     parentAllowOverride: {
       type: Boolean,
       required: true,
@@ -45,17 +40,6 @@ export default {
     toggleDisabled() {
       return !this.parentAllowOverride || this.isLoading;
     },
-    allowOverrideToggleDisabled() {
-      return this.enabled || !this.parentAllowOverride || this.isLoading;
-    },
-    disabled: {
-      get() {
-        return !this.enabled;
-      },
-      set(val) {
-        this.enabled = !val;
-      },
-    },
     updatePayload() {
       return {
         shared_runners_enabled: this.enabled,
@@ -65,8 +49,11 @@ export default {
       };
     },
   },
+  created() {
+    this.onToggleChange = debounce(this.onToggleChangeRaw.bind(this), DEBOUNCE_TOGGLE_DELAY);
+  },
   methods: {
-    onToggleChange: debounce(function toggleChange() {
+    onToggleChangeRaw() {
       this.isLoading = true;
 
       axios
@@ -80,11 +67,9 @@ export default {
             ERROR_MESSAGE,
           ].join(' ');
 
-          Flash(message);
-
-          throw error;
+          createFlash(message);
         });
-    }, DEBOUNCE_TOGGLE_DELAY),
+    },
   },
 };
 </script>
@@ -92,36 +77,36 @@ export default {
 <template>
   <div>
     <h4 class="gl-display-flex gl-align-items-center">
-      {{ __('Set up shared Runner availability') }}
+      {{ __('Set up Shared Runner availability') }}
       <gl-loading-icon v-show="isLoading" class="gl-ml-3" inline />
     </h4>
 
     <section class="gl-mt-5">
       <gl-toggle
-        v-model="disabled"
+        v-model="enabled"
         :disabled="toggleDisabled"
-        :label="__('Disable Shared Runners for this group')"
+        :label="__('Enable Shared Runners for this group')"
         @change="onToggleChange"
       />
 
-      <span class="text-muted" data-testid="description-span">
+      <span class="text-muted">
         {{
           __(
-            'Disables Shared Runners for existing and new projects/subgroups that belong to this group.',
+            'Enables Shared Runners for existing and new projects/subgroups that belong to this group.',
           )
         }}
       </span>
     </section>
 
-    <section class="gl-mt-5">
+    <section v-if="!enabled" class="gl-mt-5">
       <gl-toggle
         v-model="allowOverride"
-        :disabled="allowOverrideToggleDisabled"
+        :disabled="toggleDisabled"
         :label="__('Allow projects/subgroups to override the group setting')"
         @change="onToggleChange"
       />
 
-      <span class="text-muted" data-testid="description-span">
+      <span class="text-muted">
         {{
           __(
             'Allows projects or subgroups that belong to this group to override the global setting and use Shared Runners on an opt-in basis.',
