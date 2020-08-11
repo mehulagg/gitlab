@@ -166,14 +166,12 @@ module Groups
     end
 
     def inherit_group_shared_runners_settings
-      unless @group.parent_enabled_shared_runners?
-        result = Groups::UpdateSharedRunnersService.new(@group, current_user, { shared_runners_enabled: false }).execute
+      params = {}
+      params[:shared_runners_enabled] = false unless @group.parent_enabled_shared_runners?
+      params[:allow_descendants_override_disabled_shared_runners] = false unless @group.parent_allows_shared_runners?
 
-        raise TransferError, result[:message] unless result[:status] == :success
-      end
-
-      unless @group.parent_allows_shared_runners?
-        result = Groups::UpdateSharedRunnersService.new(@group, current_user, { allow_descendants_override_disabled_shared_runners: false }).execute
+      if params.any?
+        result = Groups::UpdateSharedRunnersService.new(@group, current_user, params).execute
 
         raise TransferError, result[:message] unless result[:status] == :success
       end

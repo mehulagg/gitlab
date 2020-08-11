@@ -5845,7 +5845,7 @@ RSpec.describe Project do
   end
 
   describe '#shared_runners_enabled_allowed_by_group?' do
-    subject { project.shared_runners_enabled_allowed_by_group? }
+    subject { project.send(:shared_runners_enabled_allowed_by_group?) }
 
     context 'project does not belong to group' do
       let(:project) { create(:project) }

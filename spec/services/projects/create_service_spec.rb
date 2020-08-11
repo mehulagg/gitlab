@@ -827,7 +827,7 @@ RSpec.describe Projects::CreateService, '#execute' do
 
       with_them do
         it 'follows desired config' do
-          opts.merge!(shared_runners_enabled: desired_config) unless desired_config.nil?
+          opts[:shared_runners_enabled] = desired_config unless desired_config.nil?
           project = create_project(user, opts)
 
           expect(project).to be_valid

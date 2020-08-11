@@ -1193,12 +1193,6 @@ class Project < ApplicationRecord
     errors.add(:shared_runners, _('cannot be enabled because parent group does not allow')) if shared_runners_enabled
   end
 
-  def shared_runners_enabled_allowed_by_group?
-    return true unless group
-
-    group.shared_runners_allowed?
-  end
-
   def to_param
     if persisted? && errors.include?(:path)
       path_was
@@ -2679,6 +2673,12 @@ class Project < ApplicationRecord
     [].tap do |out|
       objects.each_batch { |relation| out.concat(relation.pluck(:oid)) }
     end
+  end
+
+  def shared_runners_enabled_allowed_by_group?
+    return true unless group
+
+    group.shared_runners_allowed?
   end
 end
 

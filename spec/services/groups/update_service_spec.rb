@@ -284,140 +284,24 @@ RSpec.describe Groups::UpdateService do
   end
 
   context 'change shared Runners config' do
-    context 'disable shared Runners' do
-      let(:group) { create(:group) }
-      let(:project) { create(:project, shared_runners_enabled: true, group: group) }
+    let(:group) { create(:group) }
+    let(:project) { create(:project, shared_runners_enabled: true, group: group) }
 
-      subject { described_class.new(group, user, shared_runners_enabled: false).execute }
+    subject { described_class.new(group, user, shared_runners_enabled: false).execute }
 
-      before do
-        group.add_owner(user)
-      end
-
-      it 'disables shared Runners for itself and for project' do
-        expect { subject }
-          .to change { group.reload.shared_runners_enabled }.from(true).to(false)
-          .and change { project.reload.shared_runners_enabled }.from(true).to(false)
-        expect(subject).to be_truthy
-      end
+    before do
+      group.add_owner(user)
     end
 
-    context 'enable shared Runners' do
-      context 'top level group' do
-        let(:group) { create(:group, :shared_runners_disabled) }
-        let(:project) { create(:project, shared_runners_enabled: false, group: group) }
-
-        subject { described_class.new(group, user, shared_runners_enabled: true).execute }
-
-        before do
-          group.add_owner(user)
-        end
-
-        it 'enable shared Runners for itself' do
-          expect { subject }
-            .to change { group.reload.shared_runners_enabled }.from(false).to(true)
-            .and not_change { project.reload.shared_runners_enabled }
-          expect(subject).to be_truthy
-        end
-      end
-
-      context 'when parent does not allow' do
-        let(:group) { create(:group, :shared_runners_disabled, :private, parent: private_group) }
-        let(:project) { create(:project, shared_runners_enabled: false, group: group) }
-
-        subject { described_class.new(group, user, shared_runners_enabled: true).execute }
-
-        before do
-          private_group.update_column(:shared_runners_enabled, false)
-
-          private_group.add_owner(user)
-        end
-
-        it 'results in error' do
-          expect { subject }
-            .to not_change { group.reload.shared_runners_enabled }
-            .and not_change { project.reload.shared_runners_enabled }
-          expect(subject).to be_falsy
-          expect(group.errors[:update_shared_runners].first).to be_a(String)
-        end
-      end
+    it 'calls the shared runners update service' do
+      expect_any_instance_of(::Groups::UpdateSharedRunnersService).to receive(:execute).and_return({status: :success})
+      expect(subject).to be_truthy
     end
 
-    context 'allow_descendants_override_disabled_shared_runners' do
-      context 'top level group' do
-        let(:group) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false) }
-        let(:project) { create(:project, shared_runners_enabled: false, group: group) }
-
-        subject { described_class.new(group, user, allow_descendants_override_disabled_shared_runners: true).execute }
-
-        before do
-          group.add_owner(user)
-        end
-
-        it 'enable allow_descendants_override_disabled_shared_runners for itself' do
-          expect { subject }
-            .to change { group.reload.allow_descendants_override_disabled_shared_runners }.from(false).to(true)
-            .and not_change { project.reload.shared_runners_enabled }
-          expect(subject).to be_truthy
-        end
-      end
-
-      context 'when parent does not allow' do
-        let(:group) { create(:group, :private, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false, parent: private_group) }
-        let(:project) { create(:project, shared_runners_enabled: false, group: group) }
-
-        subject { described_class.new(group, user, allow_descendants_override_disabled_shared_runners: true).execute }
-
-        before do
-          private_group.update_column(:shared_runners_enabled, false)
-          private_group.update_column(:allow_descendants_override_disabled_shared_runners, false)
-
-          private_group.add_owner(user)
-        end
-
-        it 'results in error' do
-          expect { subject }
-            .to not_change { group.reload.shared_runners_enabled }
-            .and not_change { group.reload.allow_descendants_override_disabled_shared_runners }
-            .and not_change { project.reload.shared_runners_enabled }
-          expect(subject).to be_falsy
-          expect(group.errors[:update_shared_runners].first).to be_a(String)
-        end
-      end
-
-      context 'top level group disable override' do
-        let(:group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
-        let(:project) { create(:project, shared_runners_enabled: true, group: group) }
-
-        subject { described_class.new(group, user, allow_descendants_override_disabled_shared_runners: false).execute }
-
-        before do
-          group.add_owner(user)
-        end
-
-        it 'disables shared Runners for itself and for project' do
-          expect { subject }
-            .to change { group.reload.allow_descendants_override_disabled_shared_runners }.from(true).to(false)
-            .and change { project.reload.shared_runners_enabled }.from(true).to(false)
-          expect(subject).to be_truthy
-        end
-      end
-
-      context 'params are nil' do
-        let(:group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
-        let(:project) { create(:project, shared_runners_enabled: true, group: group) }
-
-        subject { described_class.new(group, user).execute }
-
-        before do
-          group.add_owner(user)
-        end
-
-        it 'no Groups::UpdateSharedRunnersService is called' do
-          expect_any_instance_of(::Groups::UpdateSharedRunnersService).not_to receive(:execute)
-          expect(subject).to be_truthy
-        end
-      end
+    it 'handles errors in the shared runners update service' do
+      expect_any_instance_of(::Groups::UpdateSharedRunnersService).to receive(:execute).and_return({status: :error, message: 'something happened'})
+      expect(subject).to be_falsy
+      expect(group.errors[:update_shared_runners].first).to eq('something happened')
     end
   end
 
