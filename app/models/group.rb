@@ -602,7 +602,7 @@ class Group < Namespace
   end
 
   def shared_runners_allowed_by_parent
-    return if parent_enabled_shared_runners?
+    return if parent_allows_shared_runners?
     return unless shared_runners_enabled
 
     errors.add(:shared_runners, _('cannot be enabled because parent group has shared Runners disabled.'))
@@ -612,7 +612,7 @@ class Group < Namespace
     return if parent_allows_shared_runners?
     return unless allow_descendants_override_disabled_shared_runners
 
-    errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be enabled because parent group does not allow.'))
+    errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be enabled because parent group does not allow it.'))
   end
 
   def visibility_level_allowed_by_projects

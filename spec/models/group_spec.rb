@@ -199,6 +199,15 @@ RSpec.describe Group do
           end
         end
 
+        context 'when parent has shared runners disabled but allows override' do
+          let(:parent) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
+          let(:sub_group) { build(:group, shared_runners_enabled: true, parent_id: parent.id) }
+
+          it 'is invalid' do
+            expect(sub_group).to be_valid
+          end
+        end
+
         context 'when parent has shared runners enabled' do
           let(:parent) { create(:group, shared_runners_enabled: true) }
           let(:sub_group) { build(:group, shared_runners_enabled: true, parent_id: parent.id) }

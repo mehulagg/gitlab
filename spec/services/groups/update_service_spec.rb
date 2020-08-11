@@ -294,12 +294,12 @@ RSpec.describe Groups::UpdateService do
     end
 
     it 'calls the shared runners update service' do
-      expect_any_instance_of(::Groups::UpdateSharedRunnersService).to receive(:execute).and_return({status: :success})
+      expect_any_instance_of(::Groups::UpdateSharedRunnersService).to receive(:execute).and_return({ status: :success })
       expect(subject).to be_truthy
     end
 
     it 'handles errors in the shared runners update service' do
-      expect_any_instance_of(::Groups::UpdateSharedRunnersService).to receive(:execute).and_return({status: :error, message: 'something happened'})
+      expect_any_instance_of(::Groups::UpdateSharedRunnersService).to receive(:execute).and_return({ status: :error, message: 'something happened' })
       expect(subject).to be_falsy
       expect(group.errors[:update_shared_runners].first).to eq('something happened')
     end

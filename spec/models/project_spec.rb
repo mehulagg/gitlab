@@ -5844,38 +5844,6 @@ RSpec.describe Project do
     end
   end
 
-  describe '#shared_runners_enabled_allowed_by_group?' do
-    subject { project.send(:shared_runners_enabled_allowed_by_group?) }
-
-    context 'project does not belong to group' do
-      let(:project) { create(:project) }
-
-      it 'returns true' do
-        expect(subject).to be_truthy
-      end
-    end
-
-    context 'project belongs to group' do
-      context 'shared runners not allowed' do
-        let(:group) { create(:group, :shared_runners_disabled) }
-        let(:project) { create(:project, shared_runners_enabled: false, namespace: group) }
-
-        it 'returns false' do
-          expect(subject).to be_falsey
-        end
-      end
-
-      context 'shared runners allowed' do
-        let(:group) { create(:group) }
-        let(:project) { create(:project, namespace: group) }
-
-        it 'returns true' do
-          expect(subject).to be_truthy
-        end
-      end
-    end
-  end
-
   describe '#mark_pages_as_deployed' do
     let(:project) { create(:project) }
     let(:artifacts_archive) { create(:ci_job_artifact, project: project) }
