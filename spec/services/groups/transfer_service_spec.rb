@@ -267,28 +267,6 @@ RSpec.describe Groups::TransferService do
           end
         end
 
-        context 'shared runners configuration' do
-          context 'if parent group has disabled shared runners' do
-            let(:new_parent_group) { create(:group, shared_runners_enabled: false) }
-
-            it 'calls update service ' do
-              expect(Groups::UpdateSharedRunnersService).to receive(:new).with(group, user, { shared_runners_enabled: false }).and_call_original
-
-              create(:group)
-            end
-          end
-
-          context 'if parent group does not allow shared runners' do
-            let(:new_parent_group) { create(:group, allow_descendants_override_disabled_shared_runners: false) }
-
-            it 'calls update service ' do
-              expect(Groups::UpdateSharedRunnersService).to receive(:new).with(group, user, { allow_descendants_override_disabled_shared_runners: false }).and_call_original
-
-              create(:group)
-            end
-          end
-        end
-
         it 'updates visibility for the group based on the parent group' do
           expect(group.visibility_level).to eq(new_parent_group.visibility_level)
         end
@@ -304,6 +282,32 @@ RSpec.describe Groups::TransferService do
 
         it 'creates a redirect for the group' do
           expect(group.redirect_routes.count).to eq(1)
+        end
+      end
+
+      context 'shared runners configuration' do
+        before do
+          create(:group_member, :owner, group: new_parent_group, user: user)
+        end
+
+        context 'if parent group has disabled shared runners' do
+          let(:new_parent_group) { create(:group, shared_runners_enabled: false) }
+
+          it 'calls update service ' do
+            expect(Groups::UpdateSharedRunnersService).to receive(:new).with(group, user, { shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: false }).and_call_original
+
+            transfer_service.execute(new_parent_group)
+          end
+        end
+
+        context 'if parent group does not allow shared runners' do
+          let(:new_parent_group) { create(:group, shared_runners_enabled: true, allow_descendants_override_disabled_shared_runners: false) }
+
+          it 'calls update service ' do
+            expect(Groups::UpdateSharedRunnersService).to receive(:new).with(group, user, { shared_runners_enabled: false, allow_descendants_override_disabled_shared_runners: false }).and_call_original
+
+            transfer_service.execute(new_parent_group)
+          end
         end
       end
 

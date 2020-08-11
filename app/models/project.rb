@@ -1190,7 +1190,7 @@ class Project < ApplicationRecord
   def validate_shared_runners_allowed_by_group
     return if shared_runners_enabled_allowed_by_group?
 
-    errors.add(:shared_runners, _('cannot be enabled because parent group does not allow')) if shared_runners_enabled
+    errors.add(:shared_runners, _('cannot be enabled because parent group does not allow it')) if shared_runners_enabled
   end
 
   def to_param

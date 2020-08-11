@@ -5838,7 +5838,7 @@ RSpec.describe Project do
 
         unless update_status
           expect(project.errors).to have_key(:shared_runners)
-          expect(project.errors[:shared_runners].first).to eq('cannot be enabled because parent group does not allow')
+          expect(project.errors[:shared_runners].first).to eq('cannot be enabled because parent group does not allow it')
         end
       end
     end

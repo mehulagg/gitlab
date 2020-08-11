@@ -226,7 +226,7 @@ RSpec.describe Group do
 
           it 'is invalid' do
             expect(sub_group).to be_invalid
-            expect(sub_group.errors[:allow_descendants_override_disabled_shared_runners]).to include('cannot be enabled because parent group does not allow.')
+            expect(sub_group.errors[:allow_descendants_override_disabled_shared_runners]).to include('cannot be enabled because parent group does not allow it')
           end
         end
 

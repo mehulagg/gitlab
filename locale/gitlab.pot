@@ -29778,10 +29778,7 @@ msgstr ""
 msgid "cannot be changed if a personal project has container registry tags."
 msgstr ""
 
-msgid "cannot be enabled because parent group does not allow"
-msgstr ""
-
-msgid "cannot be enabled because parent group does not allow."
+msgid "cannot be enabled because parent group does not allow it"
 msgstr ""
 
 msgid "cannot be enabled because parent group has shared Runners disabled."
