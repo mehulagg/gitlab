@@ -8943,9 +8943,6 @@ msgstr ""
 msgid "Disable"
 msgstr ""
 
-msgid "Disable Shared Runners for this group"
-msgstr ""
-
 msgid "Disable for this project"
 msgstr ""
 
@@ -8965,9 +8962,6 @@ msgid "Disabled"
 msgstr ""
 
 msgid "Disabled mirrors can only be enabled by instance owners. It is recommended that you delete them."
-msgstr ""
-
-msgid "Disables Shared Runners for existing and new projects/subgroups that belong to this group."
 msgstr ""
 
 msgid "Discard"
@@ -9521,6 +9515,9 @@ msgstr ""
 msgid "Enable Seat Link"
 msgstr ""
 
+msgid "Enable Shared Runners for this group"
+msgstr ""
+
 msgid "Enable Spam Check via external API endpoint"
 msgstr ""
 
@@ -9627,6 +9624,9 @@ msgid "Enabled Git access protocols"
 msgstr ""
 
 msgid "Enabled sources for code import during project creation. OmniAuth must be configured for GitHub"
+msgstr ""
+
+msgid "Enables Shared Runners for existing and new projects/subgroups that belong to this group."
 msgstr ""
 
 msgid "Enabling this will only make licensed EE features available to projects if the project namespace's plan includes the feature or if the project is public."
@@ -23227,6 +23227,9 @@ msgstr ""
 msgid "Set up Jira Integration"
 msgstr ""
 
+msgid "Set up Shared Runner availability"
+msgstr ""
+
 msgid "Set up a %{type} Runner automatically"
 msgstr ""
 
@@ -23243,9 +23246,6 @@ msgid "Set up new password"
 msgstr ""
 
 msgid "Set up pipeline subscriptions for this project."
-msgstr ""
-
-msgid "Set up shared Runner availability"
 msgstr ""
 
 msgid "Set up your project to automatically push and/or pull changes to/from another repository. Branches, tags, and commits will be synced automatically."
