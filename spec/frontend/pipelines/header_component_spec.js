@@ -16,9 +16,9 @@ describe('Pipeline details header', () => {
   let mockAxios;
 
   const findDeleteModal = () => wrapper.find(GlModal);
-  const findRetryButton = () => wrapper.find('.js-retry-button');
-  const findCancelButton = () => wrapper.find('.js-btn-cancel-pipeline');
-  const findDeleteButton = () => wrapper.find('.js-btn-delete-pipeline');
+  const findRetryButton = () => wrapper.find('[data-testid="retryPipeline"]');
+  const findCancelButton = () => wrapper.find('[data-testid="cancelPipeline"]');
+  const findDeleteButton = () => wrapper.find('[data-testid="deletePipeline"]');
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
 
   const defaultProvideOptions = {

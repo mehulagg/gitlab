@@ -130,10 +130,11 @@ export default {
     >
       <gl-button
         v-if="canRetryPipeline"
-        category="secondary"
-        variant="info"
         :loading="isRetrying"
         :disabled="isRetrying"
+        category="secondary"
+        variant="info"
+        data-testid="retryPipeline"
         class="js-retry-button"
         @click="retryPipeline()"
       >
@@ -142,11 +143,10 @@ export default {
 
       <gl-button
         v-if="canCancelPipeline"
-        variant="danger"
         :loading="isCanceling"
         :disabled="isCanceling"
-        class="js-btn-cancel-pipeline"
-        container-class="d-inline"
+        variant="danger"
+        data-testid="cancelPipeline"
         @click="cancelPipeline()"
       >
         {{ __('Cancel running') }}
@@ -155,11 +155,12 @@ export default {
       <gl-button
         v-if="paths.delete"
         v-gl-modal="$options.DELETE_MODAL_ID"
-        variant="danger"
-        category="secondary"
         :loading="isDeleting"
         :disabled="isDeleting"
-        class="js-btn-delete-pipeline gl-ml-2"
+        class="gl-ml-3"
+        variant="danger"
+        category="secondary"
+        data-testid="deletePipeline"
       >
         {{ __('Delete') }}
       </gl-button>
