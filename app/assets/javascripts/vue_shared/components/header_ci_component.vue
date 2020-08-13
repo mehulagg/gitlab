@@ -62,6 +62,18 @@ export default {
     userAvatarAltText() {
       return sprintf(__(`%{username}'s avatar`), { username: this.user.name });
     },
+    userPath() {
+      // GraphQL returns `webPath` and Rest `path`
+      return this.user?.webPath || this.user?.path;
+    },
+    avatarUrl() {
+      // GraphQL returns `avatarUrl` and Rest `avatar_url`
+      return this.user?.avatarUrl || this.user?.avatar_url;
+    },
+    statusTooltipHTML() {
+      // GraphQL returns `status.messageHtml` and Rest `status_tooltip_html`
+      return this.user?.status?.messageHtml || this.user?.status_tooltip_html;
+    },
   },
 
   methods: {
@@ -89,12 +101,12 @@ export default {
       <template v-if="user">
         <gl-link
           v-gl-tooltip
-          :href="user.path"
+          :href="userPath"
           :title="user.email"
           class="js-user-link commit-committer-link"
         >
           <user-avatar-image
-            :img-src="user.avatar_url"
+            :img-src="avatarUrl"
             :img-alt="userAvatarAltText"
             :tooltip-text="user.name"
             :img-size="24"
@@ -102,7 +114,7 @@ export default {
 
           {{ user.name }}
         </gl-link>
-        <span v-if="user.status_tooltip_html" v-html="user.status_tooltip_html"></span>
+        <span v-if="statusTooltipHTML" v-html="statusTooltipHTML"></span>
       </template>
     </section>
 
