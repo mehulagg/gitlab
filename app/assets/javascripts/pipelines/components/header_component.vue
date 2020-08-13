@@ -75,19 +75,6 @@ export default {
         (this.pipeline.status === PIPELINE_CANCELED || this.pipeline.status === PIPELINE_FAILED)
       );
     },
-    // TODO: Replace this with the new user data from the API
-    user() {
-      return {
-        __typename: 'User',
-        name: 'Frédéric Caplette',
-        email: 'fcaplette@gitlab.com',
-        avatarUrl:
-          'https://www.gravatar.com/avatar/cdd0c8a718cfd6e18352c80790bc25ec?s=46&d=identicon',
-        userAvatarAltText: 'ALT TEXT',
-        path: 'https://gitlab.com/f_caplette',
-        statusTooltipHtml: '',
-      };
-    },
     status() {
       return this?.pipeline.status;
     },
@@ -137,7 +124,7 @@ export default {
       v-if="shouldRenderContent"
       :status="pipeline.detailedStatus"
       :time="pipeline.createdAt"
-      :user="user"
+      :user="pipeline.user"
       :item-id="Number(pipelineId)"
       item-name="Pipeline"
     >

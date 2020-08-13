@@ -12,14 +12,15 @@ query getPipelineHeaderData($fullPath: ID!, $iid: ID!) {
         text
       }
       createdAt
-      #user {
-      #name
-      #path
-      #email
-      #avatarUrl
-      #userAvatarAltText
-      #statusTooltipHtml
-      #}
+      user {
+        name
+        webPath
+        email
+        avatarUrl
+        status {
+          messageHtml
+        }
+      }
     }
   }
 }
