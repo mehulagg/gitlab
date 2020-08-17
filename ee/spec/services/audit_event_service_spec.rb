@@ -122,12 +122,23 @@ RSpec.describe AuditEventService do
           expect(event.ip_address).to eq(user.current_sign_in_ip)
           expect(event.details[:ip_address]).to eq(user.current_sign_in_ip)
         end
+
+        it 'tracks exceptions when the event cannot be created' do
+          allow(user).to receive_messages(current_sign_in_ip: 'invalid IP')
+
+          expect(Gitlab::ErrorTracking).to(
+            receive(:track_exception)
+              .with(ActiveRecord::RecordInvalid, audit_event_type: 'AuditEvent').and_call_original
+          )
+
+          service.security_event
+        end
       end
 
       context 'for an impersonated user' do
         let(:details) { {} }
         let(:impersonator) { build(:user, name: 'Donald Duck', current_sign_in_ip: '192.168.88.88') }
-        let(:user) { build(:user, impersonator: impersonator) }
+        let(:user) { create(:user, impersonator: impersonator) }
 
         it 'has the impersonator IP address' do
           event = service.security_event
