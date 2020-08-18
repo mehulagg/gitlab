@@ -185,7 +185,7 @@ describe('import_projects store mutations', () => {
       const REPO_ID = 1;
       state = { repositories: [{ importSource: { id: REPO_ID } }] };
 
-      mutations[types.RECEIVE_IMPORT_ERROR](state, REPO_ID);
+      mutations[types.RECEIVE_IMPORT_ERROR](state, { repoId: REPO_ID });
     });
 
     it(`resets import status to ${STATUSES.NONE}`, () => {

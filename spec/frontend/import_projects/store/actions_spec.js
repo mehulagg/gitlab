@@ -1,7 +1,6 @@
 import MockAdapter from 'axios-mock-adapter';
 import testAction from 'helpers/vuex_action_helper';
 import { TEST_HOST } from 'helpers/test_constants';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import {
@@ -21,8 +20,6 @@ import actionsFactory from '~/import_projects/store/actions';
 import { getImportTarget } from '~/import_projects/store/getters';
 import state from '~/import_projects/store/state';
 import { STATUSES } from '~/import_projects/constants';
-
-jest.mock('~/flash');
 
 const MOCK_ENDPOINT = `${TEST_HOST}/endpoint.json`;
 const endpoints = {
@@ -108,7 +105,13 @@ describe('import_projects store actions', () => {
         fetchRepos,
         null,
         localState,
-        [{ type: REQUEST_REPOS }, { type: RECEIVE_REPOS_ERROR }],
+        [
+          { type: REQUEST_REPOS },
+          {
+            type: RECEIVE_REPOS_ERROR,
+            payload: { error: expect.any(Object) },
+          },
+        ],
         [{ type: 'stopJobsPolling' }],
       );
     });
@@ -193,7 +196,7 @@ describe('import_projects store actions', () => {
       );
     });
 
-    it('commits REQUEST_IMPORT and RECEIVE_IMPORT_ERROR and shows generic error message on an unsuccessful request', async () => {
+    it('commits REQUEST_IMPORT and RECEIVE_IMPORT_ERROR on an unsuccessful request', async () => {
       mock.onPost(MOCK_ENDPOINT).reply(500);
 
       await testAction(
@@ -205,33 +208,13 @@ describe('import_projects store actions', () => {
             type: REQUEST_IMPORT,
             payload: { repoId: importRepoId, importTarget: defaultImportTarget },
           },
-          { type: RECEIVE_IMPORT_ERROR, payload: importRepoId },
-        ],
-        [],
-      );
-
-      expect(createFlash).toHaveBeenCalledWith('Importing the project failed');
-    });
-
-    it('commits REQUEST_IMPORT and RECEIVE_IMPORT_ERROR and shows detailed error message on an unsuccessful request with errors fields in response', async () => {
-      const ERROR_MESSAGE = 'dummy';
-      mock.onPost(MOCK_ENDPOINT).reply(500, { errors: ERROR_MESSAGE });
-
-      await testAction(
-        fetchImport,
-        importRepoId,
-        localState,
-        [
           {
-            type: REQUEST_IMPORT,
-            payload: { repoId: importRepoId, importTarget: defaultImportTarget },
+            type: RECEIVE_IMPORT_ERROR,
+            payload: { error: expect.any(Object), repoId: importRepoId },
           },
-          { type: RECEIVE_IMPORT_ERROR, payload: importRepoId },
         ],
         [],
       );
-
-      expect(createFlash).toHaveBeenCalledWith(`Importing the project failed: ${ERROR_MESSAGE}`);
     });
   });
 
@@ -319,18 +302,19 @@ describe('import_projects store actions', () => {
       );
     });
 
-    it('commits REQUEST_NAMESPACES and RECEIVE_NAMESPACES_ERROR and shows generic error message on an unsuccessful request', async () => {
+    it('commits REQUEST_NAMESPACES and RECEIVE_NAMESPACES_ERROR on an unsuccessful request', async () => {
       mock.onGet(MOCK_ENDPOINT).reply(500);
 
       await testAction(
         fetchNamespaces,
         null,
         localState,
-        [{ type: REQUEST_NAMESPACES }, { type: RECEIVE_NAMESPACES_ERROR }],
+        [
+          { type: REQUEST_NAMESPACES },
+          { type: RECEIVE_NAMESPACES_ERROR, payload: { error: expect.any(Object) } },
+        ],
         [],
       );
-
-      expect(createFlash).toHaveBeenCalledWith('Requesting namespaces failed');
     });
   });
 

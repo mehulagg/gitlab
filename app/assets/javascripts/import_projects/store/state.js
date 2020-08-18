@@ -1,5 +1,4 @@
 export default () => ({
-  provider: '',
   repositories: [],
   namespaces: [],
   customImportTargets: {},

@@ -11,7 +11,6 @@ export function initStoreFromElement(element) {
   const {
     ciCdOnly,
     canSelectNamespace,
-    provider,
 
     reposPath,
     jobsPath,
@@ -28,7 +27,6 @@ export function initStoreFromElement(element) {
       defaultTargetNamespace: gon.current_username,
       ciCdOnly: parseBoolean(ciCdOnly),
       canSelectNamespace: parseBoolean(canSelectNamespace),
-      provider,
       pageInfo: {
         page,
       },

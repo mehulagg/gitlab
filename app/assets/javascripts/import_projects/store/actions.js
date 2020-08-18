@@ -7,15 +7,11 @@ import {
   parseIntPagination,
 } from '~/lib/utils/common_utils';
 import Poll from '~/lib/utils/poll';
-import { visitUrl, objectToQuery } from '~/lib/utils/url_utility';
-import { deprecatedCreateFlash as createFlash } from '~/flash';
-import { s__, sprintf } from '~/locale';
+import { objectToQuery } from '~/lib/utils/url_utility';
 import axios from '~/lib/utils/axios_utils';
 
 let eTagPoll;
 
-const hasRedirectInError = e => e?.response?.data?.error?.redirect;
-const redirectToUrlInError = e => visitUrl(e.response.data.error.redirect);
 const pathWithParams = ({ path, ...params }) => {
   const filteredParams = Object.fromEntries(
     Object.entries(params).filter(([, value]) => value !== ''),
@@ -62,7 +58,7 @@ const fetchReposFactory = ({ reposPath = isRequired(), hasPagination }) => ({
   dispatch('stopJobsPolling');
   commit(types.REQUEST_REPOS);
 
-  const { provider, filter } = state;
+  const { filter } = state;
 
   return axios
     .get(
@@ -82,19 +78,13 @@ const fetchReposFactory = ({ reposPath = isRequired(), hasPagination }) => ({
       commit(types.RECEIVE_REPOS_SUCCESS, convertObjectPropsToCamelCase(data, { deep: true }));
     })
     .then(() => dispatch('fetchJobs'))
-    .catch(e => {
-      if (hasRedirectInError(e)) {
-        redirectToUrlInError(e);
-      } else {
-        createFlash(
-          sprintf(s__('ImportProjects|Requesting your %{provider} repositories failed'), {
-            provider,
-          }),
-        );
-
-        commit(types.RECEIVE_REPOS_ERROR);
-      }
-    });
+    .catch(e =>
+      commit(types.RECEIVE_REPOS_ERROR, {
+        error: {
+          redirectUrl: e?.response?.data?.error?.redirect,
+        },
+      }),
+    );
 };
 
 const fetchImportFactory = (importPath = isRequired()) => ({ state, commit, getters }, repoId) => {
@@ -117,22 +107,14 @@ const fetchImportFactory = (importPath = isRequired()) => ({ state, commit, gett
         repoId,
       });
     })
-    .catch(e => {
-      const serverErrorMessage = e?.response?.data?.errors;
-      const flashMessage = serverErrorMessage
-        ? sprintf(
-            s__('ImportProjects|Importing the project failed: %{reason}'),
-            {
-              reason: serverErrorMessage,
-            },
-            false,
-          )
-        : s__('ImportProjects|Importing the project failed');
-
-      createFlash(flashMessage);
-
-      commit(types.RECEIVE_IMPORT_ERROR, repoId);
-    });
+    .catch(e =>
+      commit(types.RECEIVE_IMPORT_ERROR, {
+        repoId,
+        error: {
+          reason: e?.response?.data?.errors,
+        },
+      }),
+    );
 };
 
 export const fetchJobsFactory = (jobsPath = isRequired()) => ({ state, commit, dispatch }) => {
@@ -150,13 +132,12 @@ export const fetchJobsFactory = (jobsPath = isRequired()) => ({ state, commit, d
     method: 'fetchJobs',
     successCallback: ({ data }) =>
       commit(types.RECEIVE_JOBS_SUCCESS, convertObjectPropsToCamelCase(data, { deep: true })),
-    errorCallback: e => {
-      if (hasRedirectInError(e)) {
-        redirectToUrlInError(e);
-      } else {
-        createFlash(s__('ImportProjects|Update of imported projects with realtime changes failed'));
-      }
-    },
+    errorCallback: e =>
+      commit(types.RECEIVE_JOBS_ERROR, {
+        error: {
+          redirectUrl: e?.response?.data?.error?.redirect,
+        },
+      }),
     data: { filter },
   });
 
@@ -180,11 +161,7 @@ const fetchNamespacesFactory = (namespacesPath = isRequired()) => ({ commit }) =
     .then(({ data }) =>
       commit(types.RECEIVE_NAMESPACES_SUCCESS, convertObjectPropsToCamelCase(data, { deep: true })),
     )
-    .catch(() => {
-      createFlash(s__('ImportProjects|Requesting namespaces failed'));
-
-      commit(types.RECEIVE_NAMESPACES_ERROR);
-    });
+    .catch(error => commit(types.RECEIVE_NAMESPACES_ERROR, { error }));
 };
 
 const setPage = ({ state, commit, dispatch }, page) => {

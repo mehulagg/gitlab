@@ -64,7 +64,7 @@ export default {
     existingRepo.importedProject = project;
   },
 
-  [types.RECEIVE_IMPORT_ERROR](state, repoId) {
+  [types.RECEIVE_IMPORT_ERROR](state, { repoId }) {
     const existingRepo = state.repositories.find(r => r.importSource.id === repoId);
     existingRepo.importStatus = STATUSES.NONE;
     existingRepo.importedProject = null;
@@ -77,6 +77,10 @@ export default {
         repo.importStatus = updatedProject.importStatus;
       }
     });
+  },
+
+  [types.RECEIVE_JOBS_ERROR]() {
+    // intentionally left blank for error handling
   },
 
   [types.REQUEST_NAMESPACES](state) {

@@ -8,6 +8,7 @@ import ImportedProjectTableRow from './imported_project_table_row.vue';
 import ProviderRepoTableRow from './provider_repo_table_row.vue';
 import IncompatibleRepoTableRow from './incompatible_repo_table_row.vue';
 import PageQueryParamSync from './page_query_param_sync.vue';
+import VuexErrorsHandler from './vuex_errors_handler.vue';
 import { isProjectImportable } from '../utils';
 
 const reposFetchThrottleDelay = 1000;
@@ -22,6 +23,7 @@ export default {
     GlLoadingIcon,
     GlButton,
     PaginationLinks,
+    VuexErrorsHandler,
   },
   props: {
     providerTitle: {
@@ -118,6 +120,7 @@ export default {
 <template>
   <div>
     <page-query-param-sync :page="pageInfo.page" @popstate="setPage" />
+    <vuex-errors-handler :provider-title="providerTitle" />
 
     <p class="light text-nowrap mt-2">
       {{ s__('ImportProjects|Select the projects you want to import') }}
