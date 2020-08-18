@@ -44,6 +44,14 @@ export default {
       },
       update: data => data.project.pipeline,
       pollInterval: 10000,
+      watchLoading(isLoading) {
+        if (!isLoading) {
+          // To ensure apollo has updated the cache,
+          // we only remove the loading state in sync with GraphQL
+          this.isCanceling = false;
+          this.isRetrying = false;
+        }
+      },
     },
   },
   data() {
@@ -94,12 +102,10 @@ export default {
     async cancelPipeline() {
       this.isCanceling = true;
       await this.postAction(this.paths.cancel);
-      this.isCanceling = false;
     },
     async retryPipeline() {
       this.isRetrying = true;
       await this.postAction(this.paths.retry);
-      this.isRetrying = false;
     },
     async deletePipeline() {
       this.isDeleting = true;

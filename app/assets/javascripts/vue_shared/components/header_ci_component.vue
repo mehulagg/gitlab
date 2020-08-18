@@ -5,6 +5,7 @@ import { __, sprintf } from '~/locale';
 import CiIconBadge from './ci_badge_link.vue';
 import TimeagoTooltip from './time_ago_tooltip.vue';
 import UserAvatarImage from './user_avatar/user_avatar_image.vue';
+import { glEmojiTag } from '../../emoji';
 
 /**
  * Renders header component for job and pipeline page based on UI mockups
@@ -72,7 +73,11 @@ export default {
     },
     statusTooltipHTML() {
       // GraphQL returns `status.messageHtml` and Rest `status_tooltip_html`
-      return this.user?.status?.messageHtml || this.user?.status_tooltip_html;
+      const { messageHtml, emoji } = this.user?.status || {};
+      const emojiHtml = emoji ? glEmojiTag(emoji) : '';
+      const statusMessage = `${emojiHtml}${messageHtml || ''}`;
+
+      return statusMessage || this.user?.status_tooltip_html;
     },
   },
 
