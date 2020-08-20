@@ -12,7 +12,7 @@ module EE
     class_methods do
       def replicables_for_geo_node
         # Not implemented yet. Should be responible for selective sync
-        none
+        all
       end
     end
   end

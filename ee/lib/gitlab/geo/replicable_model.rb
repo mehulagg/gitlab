@@ -84,7 +84,7 @@ module Gitlab
       end
 
       def in_replicables_for_geo_node?
-        self.class.replicables_for_geo_node.id_in(self).exists?
+        self.class.replicables_for_geo_node.primary_key_in(self).exists?
       end
     end
   end
