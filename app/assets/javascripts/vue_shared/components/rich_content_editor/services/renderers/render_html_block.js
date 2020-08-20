@@ -5,7 +5,9 @@ import { getURLOrigin } from '~/lib/utils/url_utility';
 const isVideoFrame = html => {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
-  const { children: { length } } = doc;
+  const {
+    children: { length },
+  } = doc;
   const iframe = doc.querySelector('iframe');
   const origin = iframe && getURLOrigin(iframe.getAttribute('src'));
 
