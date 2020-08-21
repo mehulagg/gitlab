@@ -12,7 +12,6 @@ class GitlabSchema < GraphQL::Schema
 
   use GraphQL::Pagination::Connections
   use BatchLoader::GraphQL
-  use Gitlab::Graphql::Authorize
   use Gitlab::Graphql::Pagination::Connections
   use Gitlab::Graphql::GenericTracing
   use Gitlab::Graphql::Timeout, max_seconds: Gitlab.config.gitlab.graphql_timeout
@@ -132,6 +131,14 @@ class GitlabSchema < GraphQL::Schema
       end
 
       gid
+    end
+
+    def unauthorized_object(unauthorized_error)
+      if unauthorized_error.context.query.mutation? && unauthorized_error.type < ::Mutations::BaseMutation
+        ::Gitlab::Graphql::Authorize::AuthorizeResource.raise_resource_not_available_error!
+      else
+        nil
+      end
     end
 
     private

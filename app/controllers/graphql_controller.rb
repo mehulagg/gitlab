@@ -33,9 +33,10 @@ class GraphqlController < ApplicationController
   feature_category :not_owned
 
   def execute
-    result = multiplex? ? execute_multiplex : execute_query
-
-    render json: result
+    ::Gitlab::ApplicationContext.with_context(user: context[:current_user]) do
+      result = multiplex? ? execute_multiplex : execute_query
+      render json: result
+    end
   end
 
   rescue_from StandardError do |exception|
