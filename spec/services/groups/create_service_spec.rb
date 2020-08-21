@@ -141,12 +141,17 @@ RSpec.describe Groups::CreateService, '#execute' do
 
   context 'shared runners configuration' do
     context 'parent group present' do
-      where(:shared_runners_config) do
-        [true, false]
+      using RSpec::Parameterized::TableSyntax
+
+      where(:shared_runners_config, :descendants_override_disabled_shared_runners_config) do
+        true  | false
+        false | false
+        true  | true
+        false | true
       end
 
       with_them do
-        let!(:group) { create(:group, shared_runners_enabled: shared_runners_config) }
+        let!(:group) { create(:group, shared_runners_enabled: shared_runners_config, allow_descendants_override_disabled_shared_runners: descendants_override_disabled_shared_runners_config) }
         let!(:service) { described_class.new(user, group_params.merge(parent_id: group.id)) }
 
         before do
@@ -157,6 +162,7 @@ RSpec.describe Groups::CreateService, '#execute' do
           new_group = service.execute
 
           expect(new_group.shared_runners_enabled).to eq(shared_runners_config)
+          expect(new_group.allow_descendants_override_disabled_shared_runners).to eq(descendants_override_disabled_shared_runners_config)
         end
       end
     end
@@ -168,6 +174,7 @@ RSpec.describe Groups::CreateService, '#execute' do
         new_group = service.execute
 
         expect(new_group.shared_runners_enabled).to eq(true)
+        expect(new_group.allow_descendants_override_disabled_shared_runners).to eq(false)
       end
     end
   end

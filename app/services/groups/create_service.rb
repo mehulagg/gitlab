@@ -93,7 +93,8 @@ module Groups
     def inherit_group_shared_runners_settings
       return unless @group.parent
 
-      @group.shared_runners_enabled = @group.parent_enabled_shared_runners?
+      @group.shared_runners_enabled = @group.parent.shared_runners_enabled
+      @group.allow_descendants_override_disabled_shared_runners = @group.parent.allow_descendants_override_disabled_shared_runners
     end
   end
 end

@@ -309,6 +309,18 @@ RSpec.describe Groups::TransferService do
             transfer_service.execute(new_parent_group)
           end
         end
+
+        context 'if parent group allows shared runners' do
+          let(:group) { create(:group, :public, :nested, shared_runners_enabled: false) }
+          let(:new_parent_group) { create(:group, shared_runners_enabled: true) }
+
+          it 'does not call update service and keeps them disabled on the group' do
+            expect(Groups::UpdateSharedRunnersService).not_to receive(:new)
+
+            transfer_service.execute(new_parent_group)
+            expect(group.reload.shared_runners_enabled).to be_falsy
+          end
+        end
       end
 
       context 'when a group is transferred to its subgroup' do

@@ -797,9 +797,10 @@ RSpec.describe Projects::CreateService, '#execute' do
       end
 
       with_them do
-        let(:group) { create(:group, shared_runners_enabled: shared_runners_group_config) }
+        let(:group) { create(:group) }
 
         before do
+          expect_any_instance_of(Group).to receive(:shared_runners_allowed?).twice.and_return(shared_runners_group_config)
           group.add_owner(user)
 
           user.refresh_authorized_projects # Ensure cache is warm

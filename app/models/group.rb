@@ -78,7 +78,7 @@ class Group < Namespace
   validate :visibility_level_allowed_by_sub_groups
   validate :visibility_level_allowed_by_parent
   validate :shared_runners_allowed_by_parent, if: :should_validate_shared_runners_allowed_by_parent
-  validate :allow_descendants_override_disabled_shared_runners_allowed_by_parent, if: :should_validate_shared_runners_allowed_by_parent
+  validate :allow_descendants_override_disabled_shared_runners_allowed_by_parent, if: :should_validate_allow_descendants_override_disabled_shared_runners
   validates :variables, variable_duplicates: true
 
   validates :two_factor_grace_period, presence: true, numericality: { greater_than_or_equal_to: 0 }
@@ -543,9 +543,7 @@ class Group < Namespace
   end
 
   def enable_shared_runners!
-    raise UpdateSharedRunnersError, 'Shared Runners disabled for the parent group' unless parent_enabled_shared_runners?
-
-    update_column(:shared_runners_enabled, true)
+    update!(shared_runners_enabled: true)
   end
 
   def disable_shared_runners!
@@ -559,9 +557,8 @@ class Group < Namespace
 
   def allow_descendants_override_disabled_shared_runners!
     raise UpdateSharedRunnersError, 'Shared Runners enabled' if shared_runners_enabled?
-    raise UpdateSharedRunnersError, 'Group level shared Runners not allowed' unless parent_allows_shared_runners?
 
-    update_column(:allow_descendants_override_disabled_shared_runners, true)
+    update!(allow_descendants_override_disabled_shared_runners: true)
   end
 
   def disallow_descendants_override_disabled_shared_runners!
@@ -601,16 +598,20 @@ class Group < Namespace
     new_record? || changes.has_key?(:shared_runners_enabled)
   end
 
+  def should_validate_allow_descendants_override_disabled_shared_runners
+    new_record? || changes.has_key?(:allow_descendants_override_disabled_shared_runners)
+  end
+
   def shared_runners_allowed_by_parent
-    return if parent_allows_shared_runners?
     return unless shared_runners_enabled
+    return if parent_allows_shared_runners?
 
     errors.add(:shared_runners, _('cannot be enabled because parent group has shared Runners disabled.'))
   end
 
   def allow_descendants_override_disabled_shared_runners_allowed_by_parent
-    return if parent_allows_shared_runners?
     return unless allow_descendants_override_disabled_shared_runners
+    return if parent_allows_shared_runners?
 
     errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be enabled because parent group does not allow it.'))
   end

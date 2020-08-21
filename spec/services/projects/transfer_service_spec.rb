@@ -326,10 +326,11 @@ RSpec.describe Projects::TransferService do
 
     with_them do
       let(:project) { create(:project, :public, :repository, namespace: user.namespace, shared_runners_enabled: project_shared_runners_enabled) }
-      let(:group) { create(:group, shared_runners_enabled: new_group_shared_runners_allowed) }
+      let(:group) { create(:group) }
 
       before do
         group.add_owner(user)
+        expect_any_instance_of(Group).to receive(:shared_runners_allowed?).and_return(new_group_shared_runners_allowed)
 
         execute_transfer
       end

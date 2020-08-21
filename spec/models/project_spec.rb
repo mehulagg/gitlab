@@ -6521,6 +6521,35 @@ RSpec.describe Project do
     end
   end
 
+  describe '#inherit_group_shared_runners_settings' do
+    let(:project) { build(:project, shared_runners_enabled: true) }
+    let(:group) { build(:group) }
+
+    it 'does not change if there is no parent' do
+      project.inherit_group_shared_runners_settings
+
+      expect(project.shared_runners_enabled).to be_truthy
+    end
+
+    it 'does not change if the parent allows shared runners' do
+      expect(group).to receive(:shared_runners_allowed?).and_return(true)
+      project.group = group
+
+      project.inherit_group_shared_runners_settings
+
+      expect(project.shared_runners_enabled).to be_truthy
+    end
+
+    it 'is disabled if the parent does not allow shared runners' do
+      expect(group).to receive(:shared_runners_allowed?).and_return(false)
+      project.group = group
+
+      project.inherit_group_shared_runners_settings
+
+      expect(project.shared_runners_enabled).to be_falsy
+    end
+  end
+
   def finish_job(export_job)
     export_job.start
     export_job.finish

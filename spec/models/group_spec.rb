@@ -203,7 +203,7 @@ RSpec.describe Group do
           let(:parent) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
           let(:sub_group) { build(:group, shared_runners_enabled: true, parent_id: parent.id) }
 
-          it 'is invalid' do
+          it 'is valid' do
             expect(sub_group).to be_valid
           end
         end
@@ -1467,7 +1467,7 @@ RSpec.describe Group do
 
       it 'raises error and does not enable shared Runners' do
         expect { subject }
-          .to raise_error(described_class::UpdateSharedRunnersError, 'Shared Runners disabled for the parent group')
+          .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Shared runners cannot be enabled because parent group has shared Runners disabled.')
           .and not_change { parent.reload.shared_runners_enabled }
           .and not_change { group.reload.shared_runners_enabled }
           .and not_change { project.reload.shared_runners_enabled }
@@ -1549,7 +1549,7 @@ RSpec.describe Group do
 
       it 'raises error and does not allow descendants to override' do
         expect { subject }
-          .to raise_error(described_class::UpdateSharedRunnersError, 'Group level shared Runners not allowed')
+          .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Allow descendants override disabled shared runners cannot be enabled because parent group does not allow it.')
           .and not_change { parent.reload.allow_descendants_override_disabled_shared_runners }
           .and not_change { parent.reload.shared_runners_enabled }
           .and not_change { group.reload.allow_descendants_override_disabled_shared_runners }
