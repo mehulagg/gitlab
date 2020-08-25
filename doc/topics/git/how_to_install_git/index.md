@@ -24,12 +24,12 @@ installing Git with Homebrew to get access to an extensive selection of
 dependency-managed libraries and applications.
 
 If you don't need access to any additional development libraries or don't have
-approximately 15 GB of available disk space for Xcode and Homebrew, use one of
+approximately 15 GiB of available disk space for Xcode and Homebrew, use one of
 the previously mentioned methods.
 
 ### Installing Xcode
 
-To build dependencies, Homebrew needs the XCode Command Line Tools. Install
+To build dependencies, Homebrew needs the Xcode Command Line Tools. Install
 it by running in your terminal:
 
 ```shell
@@ -37,7 +37,7 @@ xcode-select --install
 ```
 
 Click **Install** to download and install it. Alternatively, you can install
-the entire [XCode](https://developer.apple.com/xcode/) package through the
+the entire [Xcode](https://developer.apple.com/xcode/) package through the
 macOS App Store.
 
 ### Installing Homebrew

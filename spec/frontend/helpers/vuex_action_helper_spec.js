@@ -3,7 +3,7 @@ import { TEST_HOST } from 'helpers/test_constants';
 import axios from '~/lib/utils/axios_utils';
 import testAction from './vuex_action_helper';
 
-describe('VueX test helper (testAction)', () => {
+describe('Vuex test helper (testAction)', () => {
   let originalExpect;
   let assertion;
   let mock;

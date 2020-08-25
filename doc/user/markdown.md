@@ -52,7 +52,7 @@ The documentation website had its [Markdown engine migrated from Redcarpet to Kr
 in October 2018.
 
 You may have older issues, merge requests, or Markdown documents in your
-repository that were written using some of the nuances of GitLab's RedCarpet version
+repository that were written using some of the nuances of GitLab's Redcarpet version
 of Markdown. Since CommonMark uses slightly stricter syntax, these documents
 might now appear a little differently since we have transitioned to CommonMark.
 
@@ -84,7 +84,7 @@ If you have a large volume of Markdown files, it can be tedious to determine
 if they display correctly or not. You can use the
 [`diff_redcarpet_cmark`](https://gitlab.com/digitalmoksha/diff_redcarpet_cmark)
 tool (not an officially supported product) to generate a list of files and the
-differences between how RedCarpet and CommonMark render the files. It gives
+differences between how Redcarpet and CommonMark render the files. It gives
 an indication if anything needs to be changed - often nothing needs
 to change.
 

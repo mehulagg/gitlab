@@ -259,7 +259,7 @@ For more information, see [Usage](#usage).
 
 #### Troubleshooting GitLab for Jira
 
-The GitLab for Jira App uses an iframe to add namespaces on the settings page. Some browsers block cross-site cookies which can lead to a message saying that the user needs to log in on GitLab.com even though the user is already logged in.
+The GitLab for Jira App uses an iFrame to add namespaces on the settings page. Some browsers block cross-site cookies which can lead to a message saying that the user needs to log in on GitLab.com even though the user is already logged in.
 
 > "You need to sign in or sign up before continuing."
 

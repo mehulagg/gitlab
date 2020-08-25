@@ -1001,7 +1001,7 @@ export default {
 
 `import MyComponent from 'ee_else_ce/path/my_component'.vue`
 
-- this way the correct component will be included for either the ce or ee implementation
+- this way the correct component will be included for either the CE or EE implementation
 
 **For EE components that need different results for the same computed values, we can pass in props to the CE wrapper as seen in the example.**
 
@@ -1078,7 +1078,7 @@ to avoid conflicts during CE to EE merge.
 // EE-specific end
 ```
 
-## GitLab-svgs
+## GitLab-SVGs
 
 Conflicts in `app/assets/images/icons.json` or `app/assets/images/icons.svg` can
 be resolved simply by regenerating those assets with

@@ -114,7 +114,7 @@ allowing you to profile which code is running on CPU in detail.
 It's important to note that profiling an application *alters its performance*.
 Different profiling strategies have different overheads. Stackprof is a sampling
 profiler. It will sample stack traces from running threads at a configurable
-frequency (e.g. 100hz, that is 100 stacks per second). This type of profiling
+frequency (e.g. 100Hz, that is 100 stacks per second). This type of profiling
 has quite a low (albeit non-zero) overhead and is generally considered to be
 safe for production.
 
@@ -252,7 +252,7 @@ The following configuration options can be configured:
 - `STACKPROF_INTERVAL`: Sampling interval. Unit semantics depend on `STACKPROF_MODE`.
   For `object` mode this is a per-event interval (every `n`th event will be sampled)
   and defaults to `1000`.
-  For other modes such as `cpu` this is a frequency and defaults to `10000` μs (100hz).
+  For other modes such as `cpu` this is a frequency and defaults to `10000` μs (100Hz).
 - `STACKPROF_FILE_PREFIX`: File path prefix where profiles are stored. Defaults
   to `$TMPDIR` (often corresponds to `/tmp`).
 - `STACKPROF_TIMEOUT_S`: Profiling timeout in seconds. Profiling will
