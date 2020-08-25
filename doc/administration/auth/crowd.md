@@ -82,6 +82,6 @@ If you see an error message like the one below when you sign in after Crowd auth
 could not authorize you from Crowd because invalid credentials
 ```
 
-Please make sure the Crowd users who need to login to GitLab are authorized to [the application](#configure-a-new-crowd-application) in the step of **Authorisation**. This could be verified by try "Authentication test" for Crowd as of 2.11.
+Please make sure the Crowd users who need to login to GitLab are authorized to [the application](#configure-a-new-crowd-application) in the step of **Authorization**. This could be verified by try "Authentication test" for Crowd as of 2.11.
 
-![Example Crowd application authorisation configuration](img/crowd_application_authorisation.png)
+![Example Crowd application authorization configuration](img/crowd_application_authorisation.png)

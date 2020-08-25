@@ -1181,7 +1181,7 @@ repmgr will be disabled automatically.
 Any PostgreSQL configuration item that controls replication, for example `wal_level`, `max_wal_senders`, etc, are strictly
 controlled by Patroni and will override the original settings that you make with the `postgresql[...]` configuration key.
 Hence, they are all separated and placed under `patroni['postgresql'][...]`. This behavior is limited to replication.
-Patroni honours any other PostgreSQL configuration that was made with the `postgresql[...]` configuration key. For example,
+Patroni honors any other PostgreSQL configuration that was made with the `postgresql[...]` configuration key. For example,
 `max_wal_senders` by default is set to `5`. If you wish to change this you must set it with the `patroni['postgresql']['max_wal_senders']`
 configuration key.
 

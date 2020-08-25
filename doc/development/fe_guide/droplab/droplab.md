@@ -246,7 +246,7 @@ droplab.init(trigger, list, [droplabAjax], {
 
 ### Development
 
-When plugins are initialised for a droplab trigger+dropdown, DropLab will
+When plugins are initialized for a droplab trigger+dropdown, DropLab will
 call the plugins `init` function, so this must be implemented in the plugin.
 
 ```javascript

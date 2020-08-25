@@ -546,9 +546,9 @@ when GitLab is deployed with the Helm chart restore from backup
 [will not properly function](https://docs.gitlab.com/charts/advanced/external-object-storage/#lfs-artifacts-uploads-packages-external-diffs-pseudonymizer)
 unless separate buckets are used.
 
-One risk of using a single bucket would be that if your organisation decided to
+One risk of using a single bucket would be that if your organization decided to
 migrate GitLab to the Helm deployment in the future. GitLab would run, but the situation with
-backups might not be realised until the organisation had a critical requirement for the backups to work.
+backups might not be realized until the organization had a critical requirement for the backups to work.
 
 ### S3 API compatibility issues
 

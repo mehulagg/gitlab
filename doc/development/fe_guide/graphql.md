@@ -834,7 +834,7 @@ it('calls a mutation with correct parameters and reorders designs', async () => 
 
 GitLab's GraphQL mutations currently have two distinct error modes: [Top-level](#top-level-errors) and [errors-as-data](#errors-as-data).
 
-When utilising a GraphQL mutation, we must consider handling **both of these error modes** to ensure that the user receives the appropriate feedback when an error occurs.
+When utilizing a GraphQL mutation, we must consider handling **both of these error modes** to ensure that the user receives the appropriate feedback when an error occurs.
 
 ### Top-level errors
 

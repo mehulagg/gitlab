@@ -156,7 +156,7 @@ might not have permission to read issue `#1234`, and so we need to redact
 these sensitive pieces of data. This is what `ReferenceParser` classes do.
 
 A reference parser is linked to the object that it handles by the link
-advertising this relationship in the `data-reference-type` attribute (set by the
+advertizing this relationship in the `data-reference-type` attribute (set by the
 reference filter). This is used by the
 [`ReferenceRedactor`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/banzai/reference_redactor.rb)
 to compute which nodes should be visible to users:

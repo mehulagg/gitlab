@@ -263,7 +263,7 @@ because the previous node produced 36 rows.
 This means that nested loops can quickly slow the query down if the various
 child nodes keep producing many rows.
 
-## Optimising queries
+## Optimizing queries
 
 With that out of the way, let's see how we can optimise a query. Let's use the
 following query as an example:
@@ -519,7 +519,7 @@ selectivity, the more likely PostgreSQL is able to use an index.
 In the above example, there are only 3 unique values: 0, 10, and 20. This means
 the cardinality is 3. The selectivity in turn is also very low: 0.0000003% (2 /
 5,811,804), because our `Filter` only filters using two values (`0` and `20`).
-With such a low selectivity value it's not surprising that PostgreSQL decides
+With such a low selectivity value it's not surprizing that PostgreSQL decides
 using an index is not worth it, because it would produce almost no unique rows.
 
 ## Rewriting queries
@@ -695,7 +695,7 @@ You can use ChatOps to get a query plan by running the following:
 /chatops run explain SELECT COUNT(*) FROM projects WHERE visibility_level IN (0, 20)
 ```
 
-Visualising the plan using <https://explain.depesz.com/> is also supported:
+Visualizing the plan using <https://explain.depesz.com/> is also supported:
 
 ```sql
 /chatops run explain --visual SELECT COUNT(*) FROM projects WHERE visibility_level IN (0, 20)

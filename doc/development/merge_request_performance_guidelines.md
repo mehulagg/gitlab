@@ -344,7 +344,7 @@ This can speed up the initial page load and give a better user experience overal
 ## Application/misuse limits
 
 Every new feature should have safe usage quotas introduced.
-The quota should be optimised to a level that we consider the feature to
+The quota should be optimized to a level that we consider the feature to
 be performant and usable for the user, but **not limiting**.
 
 **We want the features to be fully usable for the users.**
@@ -356,8 +356,8 @@ instead of later introducing a breaking change that would result in some
 workflows breaking.
 
 The intent is to provide a safe usage pattern for the feature,
-as our implementation decisions are optimised for the given data set.
-Our feature limits should reflect the optimisations that we introduced.
+as our implementation decisions are optimized for the given data set.
+Our feature limits should reflect the optimizations that we introduced.
 
 The intent of quotas could be different:
 

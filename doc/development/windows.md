@@ -95,7 +95,7 @@ Here are a few tips on GCP and Windows.
 
 ### GCP cost savings
 
-To minimise the cost of your GCP VM instance, stop it when you're not using it.
+To minimize the cost of your GCP VM instance, stop it when you're not using it.
 If you do, you'll need to re-download the RDP file from the console as the IP
 address changes every time you stop and start it.
 

@@ -850,7 +850,7 @@ If you run into issues,
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/25138) in GitLab 12.8.
 
 [Prometheus](https://prometheus.io/docs/introduction/overview/) is an
-open-source monitoring and alerting system for supervising your
+open-source monitoring and alerting system for supervizing your
 deployed applications.
 
 To install Prometheus into the `gitlab-managed-apps` namespace of your cluster,

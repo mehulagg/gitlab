@@ -3186,7 +3186,7 @@
 
 ## 8.12.2
 
-  - Fix Import/Export not recognising correctly the imported services.
+  - Fix Import/Export not recognizing correctly the imported services.
   - Fix snippets pagination
   - Fix "Create project" button layout when visibility options are restricted
   - Fix List-Unsubscribe header in emails
