@@ -18,7 +18,7 @@ This page can help you configure secure SSH keys which you can use to help secur
 connections to GitLab repositories.
 
 - If you need information on creating SSH keys, start with our [options for SSH keys](#options-for-ssh-keys).
-- If you have SSH keys dedicated for your GitLab account, you may be interested in [Working with non-default SSH key pair paths](#working-with-non-default-ssh-key-pair-paths).
+- If you've SSH keys dedicated for your GitLab account, you may be interested in [Working with non-default SSH key pair paths](#working-with-non-default-ssh-key-pair-paths).
 - If you already have an SSH key pair, you can go to how you can [add an SSH key to your GitLab account](#adding-an-ssh-key-to-your-gitlab-account).
 
 ## Requirements
@@ -53,7 +53,7 @@ Administrators can [restrict which keys should be permitted and their minimum le
 
 ## Review existing SSH keys
 
-If you have existing SSH keys, you may be able to use them to help secure connections with GitLab
+If you've existing SSH keys, you may be able to use them to help secure connections with GitLab
 repositories. By default, SSH keys on Linux and macOS systems are stored in the user's home directory,
 in the `.ssh/` subdirectory. The following table includes default filenames for each SSH key algorithm:
 
@@ -122,7 +122,7 @@ Enter file in which to save the key (/home/user/.ssh/id_rsa):
 For guidance, proceed to the [common steps](#common-steps-for-generating-an-ssh-key-pair).
 
 NOTE: **Note:**
-If you have OpenSSH version 7.8 or below, consider the problems associated
+If you've OpenSSH version 7.8 or below, consider the problems associated
 with [encoding](#rsa-keys-and-openssh-from-versions-65-to-78).
 
 ### Common steps for generating an SSH key pair
@@ -263,7 +263,7 @@ Once added to the list of known hosts, you should validate the
 authenticity of GitLab's host again. Run the above command once more, and
 you should only receive a _Welcome to GitLab, `@username`!_ message.
 
-If the welcome message doesn't appear, you can troubleshoot the problem by running `ssh`
+If the welcome message does not appear, you can troubleshoot the problem by running `ssh`
 in verbose mode with the following command:
 
 ```shell
@@ -298,12 +298,12 @@ Host gitlab.company.com
 ```
 
 Public SSH keys need to be unique to GitLab, as they bind to your account.
-Your SSH key is the only identifier you have when pushing code via SSH,
+Your SSH key is the only identifier you've when pushing code via SSH,
 that's why it needs to uniquely map to a single user.
 
 ## Per-repository SSH keys
 
-If you want to use different keys depending on the repository you are working
+If you want to use different keys depending on the repository you're working
 on, you can issue the following command while inside your repository:
 
 ```shell
@@ -317,7 +317,7 @@ This does not use the SSH Agent and requires at least Git 2.10.
 The [per-repository](#per-repository-ssh-keys) method also works for using
 multiple accounts within a single GitLab instance.
 
-Alternatively, it is possible to directly assign aliases to hosts in
+Alternatively, it's possible to directly assign aliases to hosts in
 `~.ssh/config`. SSH and, by extension, Git fails to log in if there is
 an `IdentityFile` set outside of a `Host` block in `.ssh/config`. This is
 due to how SSH assembles `IdentityFile` entries and is not changed by
@@ -379,7 +379,7 @@ Read the [documentation on Deploy Keys](../user/project/deploy_keys/index.md).
 
 ### Eclipse
 
-If you are using [EGit](https://www.eclipse.org/egit/), you can [add your SSH key to Eclipse](https://wiki.eclipse.org/EGit/User_Guide#Eclipse_SSH_Configuration).
+If you're using [EGit](https://www.eclipse.org/egit/), you can [add your SSH key to Eclipse](https://wiki.eclipse.org/EGit/User_Guide#Eclipse_SSH_Configuration).
 
 ## SSH on the GitLab server
 
@@ -389,10 +389,7 @@ connecting to the GitLab server over SSH are identified by their SSH key instead
 of their username.
 
 SSH *client* operations performed on the GitLab server are executed as this
-user. Although it is possible to modify the SSH configuration for this user to,
-e.g., provide a private SSH key to authenticate these requests by, this practice
-is **not supported** and is strongly discouraged as it presents significant
-security risks.
+user. It's possible to change the SSH configuration for this user. For example, to provide a private SSH key to authenticate these requests. However, this practice is **not supported** and is strongly discouraged as it presents significant security risks.
 
 The GitLab check process includes a check for this condition, and directs you
 to this section if your server is configured like this, for example:
@@ -428,7 +425,7 @@ Alternative tools include:
 
 ## Troubleshooting
 
-If on Git clone you are prompted for a password like `git@gitlab.com's password:`
+If on Git clone you're prompted for a password like `git@gitlab.com's password:`
 something is wrong with your SSH setup.
 
 - Ensure that you generated your SSH key pair correctly and added the public SSH
