@@ -72,6 +72,8 @@ export default {
       return scanSummary.scannedResourcesCsvPath || '';
     },
   },
+
+  emits: [],
 };
 </script>
 

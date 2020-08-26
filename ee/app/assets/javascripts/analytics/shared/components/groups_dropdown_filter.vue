@@ -110,6 +110,8 @@ export default {
         .join(' / ');
     },
   },
+
+  emits: ['selected'],
 };
 </script>
 

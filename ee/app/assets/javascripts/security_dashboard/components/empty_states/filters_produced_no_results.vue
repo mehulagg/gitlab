@@ -5,7 +5,9 @@ export default {
   components: {
     GlEmptyState,
   },
+
   inject: ['noVulnerabilitiesSvgPath'],
+  emits: [],
 };
 </script>
 

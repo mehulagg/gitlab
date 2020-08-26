@@ -85,5 +85,7 @@ export default {
       loading: this.loading,
     });
   },
+
+  emits: [],
 };
 </script>

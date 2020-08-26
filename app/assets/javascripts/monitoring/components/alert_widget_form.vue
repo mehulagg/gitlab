@@ -214,6 +214,8 @@ export default {
       'Example: Usage = single query. (Requested) / (Capacity) = multiple queries combined into a formula.',
     ),
   },
+
+  emits: ['cancel', 'setAction', 'create', 'update', 'delete'],
 };
 </script>
 

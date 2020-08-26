@@ -36,6 +36,8 @@ export default {
         .catch(e => Sentry.captureException(e));
     }
   },
+
+  emits: [],
 };
 </script>
 

@@ -117,6 +117,8 @@ export default {
       this.$emit('onDropdownClose');
     },
   },
+
+  emits: ['onDropdownClose', 'onLabelClick', 'toggleCollapse'],
 };
 </script>
 

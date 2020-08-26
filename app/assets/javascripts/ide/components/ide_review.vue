@@ -38,6 +38,8 @@ export default {
   methods: {
     ...mapActions(['updateViewer', 'resetOpenFiles']),
   },
+
+  emits: [],
 };
 </script>
 

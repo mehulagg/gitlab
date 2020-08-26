@@ -126,6 +126,8 @@ export default {
       this.scrollDownButtonDisabled = scrollTop + clientHeight === scrollHeight;
     }, 200),
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -213,6 +213,8 @@ export default {
       this.selectState = false;
     },
   },
+
+  emits: ['error'],
 };
 </script>
 

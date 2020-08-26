@@ -112,6 +112,8 @@ export default {
       return formatDate(date, 'mmm d, yyyy', true);
     },
   },
+
+  emits: [],
 };
 </script>
 

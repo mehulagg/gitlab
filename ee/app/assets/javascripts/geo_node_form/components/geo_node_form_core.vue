@@ -30,7 +30,9 @@ export default {
       this.setError({ key: VALIDATION_FIELD_KEYS.URL, error: validateUrl(this.nodeData.url) });
     },
   },
+
   NODE_NAME_MORE_INFO,
+  emits: [],
 };
 </script>
 

@@ -35,6 +35,8 @@ export default {
       return this.line.type === MATCH_LINE_TYPE;
     },
   },
+
+  emits: [],
 };
 </script>
 

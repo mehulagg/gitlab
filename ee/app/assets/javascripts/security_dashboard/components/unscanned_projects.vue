@@ -38,6 +38,8 @@ export default {
   methods: {
     ...mapActions('unscannedProjects', ['fetchUnscannedProjects']),
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -126,6 +126,8 @@ export default {
       this.itemToDelete = {};
     },
   },
+
+  emits: [],
 };
 </script>
 

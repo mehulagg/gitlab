@@ -110,6 +110,8 @@ export default {
   methods: {
     ...mapActions(['removeProject']),
   },
+
+  emits: [],
 };
 </script>
 <template>

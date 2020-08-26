@@ -52,6 +52,8 @@ export default {
       this.showTooltip = Boolean(target && target.scrollWidth > target.offsetWidth);
     },
   },
+
+  emits: [],
 };
 </script>
 

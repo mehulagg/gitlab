@@ -83,6 +83,8 @@ export default {
         .catch(() => Flash(__('Unable to build Slack link.')));
     },
   },
+
+  emits: [],
 };
 </script>
 

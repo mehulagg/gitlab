@@ -45,6 +45,8 @@ export default {
       this.$emit('downstreamHovered', jobName);
     },
   },
+
+  emits: ['downstreamHovered', 'linkedPipelineClick'],
 };
 </script>
 

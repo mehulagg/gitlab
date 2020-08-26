@@ -109,6 +109,8 @@ export default {
       }
     },
   },
+
+  emits: ['error', 'success'],
 };
 </script>
 <template>

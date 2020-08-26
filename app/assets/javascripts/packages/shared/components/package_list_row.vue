@@ -55,6 +55,8 @@ export default {
       return Boolean(this.packageEntity.project_path);
     },
   },
+
+  emits: ['packageToDelete'],
 };
 </script>
 

@@ -6,6 +6,8 @@ export default {
   components: {
     BoardPromotionState,
   },
+
   extends: BoardColumnFoss,
+  emits: [],
 };
 </script>

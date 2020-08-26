@@ -57,6 +57,8 @@ export default {
       return monthInWords(subItem, true);
     },
   },
+
+  emits: [],
 };
 </script>
 

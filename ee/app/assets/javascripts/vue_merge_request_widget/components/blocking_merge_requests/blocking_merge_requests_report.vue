@@ -89,7 +89,9 @@ export default {
       return this.isBlocked ? reportStatus.ERROR : reportStatus.SUCCESS;
     },
   },
+
   componentNames,
+  emits: [],
 };
 </script>
 

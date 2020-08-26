@@ -8,6 +8,8 @@ export default {
     Cell,
     GlSkeletonLoading,
   },
+
+  emits: [],
 };
 </script>
 

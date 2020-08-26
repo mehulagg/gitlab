@@ -40,6 +40,8 @@ export default {
     warning: s__('ApprovalStatusTooltip|At least one rule does not adhere to separation of duties'),
     failed: s__('ApprovalStatusTooltip|Fails to adhere to separation of duties'),
   },
+
+  emits: [],
 };
 </script>
 

@@ -86,6 +86,8 @@ export default {
       thClass: TABLE_HEADER_CLASSES,
     },
   ],
+
+  emits: [],
 };
 </script>
 

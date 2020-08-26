@@ -60,7 +60,9 @@ export default {
       }
     },
   },
+
   issuableTypesMap,
+  emits: [],
 };
 </script>
 

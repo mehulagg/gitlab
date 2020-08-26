@@ -49,6 +49,8 @@ export default {
       this.userIds = '';
     },
   },
+
+  emits: ['addUsers'],
 };
 </script>
 <template>

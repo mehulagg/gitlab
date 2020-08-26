@@ -38,6 +38,8 @@ export default {
       return this.$options.components[this.packageEntity.package_type];
     },
   },
+
+  emits: [],
 };
 </script>
 

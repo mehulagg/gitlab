@@ -212,6 +212,8 @@ export default {
       return originalStopCallback(e, el, combo);
     },
   },
+
+  emits: ['click', 'toggle'],
 };
 </script>
 

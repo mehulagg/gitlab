@@ -26,7 +26,9 @@ export default {
       eventHub.$emit('cancelAutoStop', this.autoStopUrl);
     },
   },
+
   title: __('Prevent environment from auto-stopping'),
+  emits: [],
 };
 </script>
 <template>

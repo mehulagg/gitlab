@@ -114,6 +114,8 @@ export default {
       visitUrl(this.selfMonitorProjectFullUrl);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

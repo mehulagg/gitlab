@@ -114,7 +114,9 @@ export default {
       this.imageLoading = true;
     },
   },
+
   DESIGN_ROUTE_NAME,
+  emits: [],
 };
 </script>
 

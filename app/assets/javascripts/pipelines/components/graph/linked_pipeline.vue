@@ -82,6 +82,8 @@ export default {
       this.$emit('downstreamHovered', '');
     },
   },
+
+  emits: ['downstreamHovered', 'pipelineClicked'],
 };
 </script>
 

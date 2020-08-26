@@ -112,6 +112,8 @@ export default {
 
     isProjectImportable,
   },
+
+  emits: [],
 };
 </script>
 

@@ -32,6 +32,8 @@ export default {
   beforeCreate() {
     performance.mark(SNIPPET_MARK_VIEW_APP_START);
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -164,6 +164,8 @@ export default {
       return milestones.filter(({ state }) => state === 'active').map(({ title }) => title);
     },
   },
+
+  emits: ['change'],
 };
 </script>
 

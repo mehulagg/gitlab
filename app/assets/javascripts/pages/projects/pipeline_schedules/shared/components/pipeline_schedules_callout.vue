@@ -27,6 +27,8 @@ export default {
       Cookies.set(cookieKey, this.calloutDismissed, { expires: 365 });
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

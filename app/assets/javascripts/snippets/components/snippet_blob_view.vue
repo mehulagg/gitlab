@@ -84,8 +84,10 @@ export default {
       return updatedBlobData.richData || updatedBlobData.plainData;
     },
   },
+
   BLOB_RENDER_EVENT_LOAD,
   BLOB_RENDER_EVENT_SHOW_SOURCE,
+  emits: [],
 };
 </script>
 <template>

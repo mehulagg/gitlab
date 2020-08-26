@@ -27,6 +27,8 @@ export default {
   methods: {
     ...mapActions(['setEndpoint', 'fetchArtifacts']),
   },
+
+  emits: [],
 };
 </script>
 <template>

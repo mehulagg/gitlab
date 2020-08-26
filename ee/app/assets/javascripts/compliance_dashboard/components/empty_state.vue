@@ -15,6 +15,8 @@ export default {
     subheading: __('Interested parties can even contribute by pushing commits if they want to.'),
     alt: __('Merge Requests'),
   },
+
+  emits: [],
 };
 </script>
 

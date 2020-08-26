@@ -81,6 +81,8 @@ export default {
       return this.status === status;
     },
   },
+
+  emits: ['onDropdownClick'],
 };
 </script>
 

@@ -34,6 +34,8 @@ export default {
       return unit && value ? `${value} ${unit}` : value;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

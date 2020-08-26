@@ -130,6 +130,8 @@ export default {
       this.validated = true;
     },
   },
+
+  emits: [],
 };
 </script>
 

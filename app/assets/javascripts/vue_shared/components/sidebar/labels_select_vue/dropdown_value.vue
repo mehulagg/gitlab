@@ -19,6 +19,8 @@ export default {
       return this.allowScopedLabels && isScopedLabel(label);
     },
   },
+
+  emits: [],
 };
 </script>
 

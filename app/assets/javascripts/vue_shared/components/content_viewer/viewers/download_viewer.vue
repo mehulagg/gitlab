@@ -32,6 +32,8 @@ export default {
       return (this.filePath || this.path).split('/').pop();
     },
   },
+
+  emits: [],
 };
 </script>
 

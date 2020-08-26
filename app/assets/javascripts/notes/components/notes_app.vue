@@ -243,7 +243,9 @@ export default {
       return defaultConfig;
     },
   },
+
   systemNote: constants.SYSTEM_NOTE,
+  emits: [],
 };
 </script>
 

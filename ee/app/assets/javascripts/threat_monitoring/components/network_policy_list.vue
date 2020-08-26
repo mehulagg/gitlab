@@ -131,7 +131,9 @@ export default {
   autodevopsNoticeDescription: s__(
     `NetworkPolicies|If you are using Auto DevOps, your %{monospacedStart}auto-deploy-values.yaml%{monospacedEnd} file will not be updated if you change a policy in this section. Auto DevOps users should make changes by following the %{linkStart}Container Network Policy documentation%{linkEnd}.`,
   ),
+
   headerHeight: process.env.NODE_ENV === 'development' ? '75px' : '40px',
+  emits: [],
 };
 </script>
 

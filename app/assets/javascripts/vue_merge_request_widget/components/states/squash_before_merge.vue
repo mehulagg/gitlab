@@ -31,6 +31,8 @@ export default {
       return this.isDisabled ? __('Required in this project.') : false;
     },
   },
+
+  emits: ['input'],
 };
 </script>
 

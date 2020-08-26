@@ -39,6 +39,8 @@ export default {
       return this.packageEntity.pipeline?.id ? this.packageEntity.pipeline : null;
     },
   },
+
+  emits: [],
 };
 </script>
 

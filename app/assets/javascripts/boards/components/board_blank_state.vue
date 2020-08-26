@@ -58,6 +58,8 @@ export default {
     },
     clearBlankState: boardsStore.removeBlankState.bind(boardsStore),
   },
+
+  emits: [],
 };
 </script>
 

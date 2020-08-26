@@ -190,7 +190,9 @@ export default {
         });
     },
   },
+
   createNoteMutation,
+  emits: ['createNoteError', 'openForm', 'resolveDiscussionError', 'updateNoteError'],
 };
 </script>
 

@@ -69,6 +69,8 @@ export default {
       return this.fetchJobTrace().then(() => this.scrollDown());
     },
   },
+
+  emits: [],
 };
 </script>
 

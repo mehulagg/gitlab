@@ -43,6 +43,7 @@ export default {
   BTN_COPY_CONTENTS_TITLE,
   BTN_DOWNLOAD_TITLE,
   BTN_RAW_TITLE,
+  emits: [],
 };
 </script>
 <template>

@@ -28,6 +28,8 @@ export default {
       userCanReply: 'userCanReply',
     }),
   },
+
+  emits: ['showNewDiscussionForm'],
 };
 </script>
 

@@ -41,6 +41,8 @@ export default {
       return { duration: null, units: null };
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

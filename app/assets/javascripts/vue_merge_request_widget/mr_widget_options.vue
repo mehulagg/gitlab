@@ -406,6 +406,8 @@ export default {
       this.mr.isDismissedSuggestPipeline = true;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -45,6 +45,8 @@ export default {
       return typeof metric === 'number';
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

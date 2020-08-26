@@ -13,6 +13,8 @@ export default {
       inactiveClass: 'bg-transparent border-color-default',
     };
   },
+
+  emits: [],
 };
 </script>
 

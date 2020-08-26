@@ -84,6 +84,8 @@ export default {
     REASON_WONT_FIX,
     REASON_NONE,
   ],
+
+  emits: ['deselect-all-vulnerabilities', 'refetch-vulnerabilities'],
 };
 </script>
 

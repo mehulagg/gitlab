@@ -129,6 +129,8 @@ export default {
       this.isConfirmingDeletion = false;
     },
   },
+
+  emits: ['onCommentDeleted', 'onCommentUpdated', 'onCommentAdded'],
 };
 </script>
 

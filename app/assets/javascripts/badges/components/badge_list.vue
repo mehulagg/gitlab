@@ -19,6 +19,8 @@ export default {
       return this.kind === GROUP_BADGE;
     },
   },
+
+  emits: [],
 };
 </script>
 

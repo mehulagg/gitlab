@@ -83,7 +83,9 @@ export default {
       return getLineClasses(lineNumber);
     },
   },
+
   showStaysResolved: false,
+  emits: [],
 };
 </script>
 

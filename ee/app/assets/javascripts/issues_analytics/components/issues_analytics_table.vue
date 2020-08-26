@@ -140,7 +140,9 @@ export default {
       return mergeUrlParams({ 'label_name[]': name }, this.endpoints.issuesPage);
     },
   },
+
   avatarSize: 24,
+  emits: [],
 };
 </script>
 <template>

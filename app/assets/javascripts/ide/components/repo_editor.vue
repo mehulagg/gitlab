@@ -333,6 +333,7 @@ export default {
   viewerTypes,
   FILE_VIEW_MODE_EDITOR,
   FILE_VIEW_MODE_PREVIEW,
+  emits: ['editorSetup'],
 };
 </script>
 

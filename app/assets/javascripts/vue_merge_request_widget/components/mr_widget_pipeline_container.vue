@@ -70,6 +70,8 @@ export default {
       return isNumber(this.mr.mergeTrainIndex);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

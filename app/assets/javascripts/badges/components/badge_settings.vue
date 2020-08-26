@@ -38,6 +38,8 @@ export default {
         });
     },
   },
+
+  emits: [],
 };
 </script>
 

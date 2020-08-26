@@ -279,8 +279,10 @@ export default {
       this.resolvedDiscussionsExpanded = !this.resolvedDiscussionsExpanded;
     },
   },
+
   createImageDiffNoteMutation,
   DESIGNS_ROUTE_NAME,
+  emits: [],
 };
 </script>
 

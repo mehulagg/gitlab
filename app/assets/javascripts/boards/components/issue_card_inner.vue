@@ -141,6 +141,8 @@ export default {
       return boardsStore.scopedLabels.enabled && isScopedLabel(label);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -28,6 +28,8 @@ export default {
       this.$emit('onClickCollapsibleLine', section);
     },
   },
+
+  emits: ['onClickCollapsibleLine'],
 };
 </script>
 <template>

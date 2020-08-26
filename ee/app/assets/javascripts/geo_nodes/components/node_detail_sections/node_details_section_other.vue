@@ -94,6 +94,8 @@ export default {
       this.showSectionItems = toggleState;
     },
   },
+
+  emits: [],
 };
 </script>
 

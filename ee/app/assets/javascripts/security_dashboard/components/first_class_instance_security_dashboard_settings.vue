@@ -27,6 +27,8 @@ export default {
       hasError: false,
     };
   },
+
+  emits: [],
 };
 </script>
 

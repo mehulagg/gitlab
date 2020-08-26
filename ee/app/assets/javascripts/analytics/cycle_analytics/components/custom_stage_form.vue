@@ -248,6 +248,8 @@ export default {
       this.$emit(STAGE_ACTIONS.UPDATE, { id, hidden: false });
     },
   },
+
+  emits: ['cancel', STAGE_ACTIONS.CREATE, STAGE_ACTIONS.UPDATE],
 };
 </script>
 <template>

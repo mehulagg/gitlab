@@ -256,6 +256,8 @@ export default {
       this.sort = `${sortingColumn}_${sortingDirection}`;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

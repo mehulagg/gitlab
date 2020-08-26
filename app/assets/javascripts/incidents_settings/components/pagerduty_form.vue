@@ -95,6 +95,8 @@ export default {
         });
     },
   },
+
+  emits: [],
 };
 </script>
 

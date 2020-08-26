@@ -60,6 +60,8 @@ export default {
   methods: {
     ...mapActions(['fetchIssuesForAllLists']),
   },
+
+  emits: [],
 };
 </script>
 

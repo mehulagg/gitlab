@@ -9,6 +9,8 @@ export default {
   computed: {
     ...mapGetters('batchComments', ['draftsCount']),
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -45,6 +45,8 @@ export default {
   tooltips: {
     information: s__('EnvironmentDashboard|You are looking at the last updated environment'),
   },
+
+  emits: [],
 };
 </script>
 

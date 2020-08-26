@@ -67,6 +67,8 @@ export default {
       return this.timeRemainingPercent > 100 ? 'danger' : 'primary';
     },
   },
+
+  emits: [],
 };
 </script>
 

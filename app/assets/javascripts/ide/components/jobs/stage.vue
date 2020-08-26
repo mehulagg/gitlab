@@ -51,6 +51,8 @@ export default {
       this.$emit('clickViewLog', job);
     },
   },
+
+  emits: ['clickViewLog', 'fetch', 'toggleCollapsed'],
 };
 </script>
 

@@ -44,6 +44,8 @@ export default {
   methods: {
     ...mapActions({ openCreateModal: 'createModal/open' }),
   },
+
+  emits: [],
 };
 </script>
 

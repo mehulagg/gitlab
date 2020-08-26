@@ -10,6 +10,8 @@ export default {
   computed: {
     ...mapGetters('monitoringDashboard', { links: 'linksWithMetadata' }),
   },
+
+  emits: [],
 };
 </script>
 <template>

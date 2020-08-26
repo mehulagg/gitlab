@@ -11,6 +11,8 @@ export default {
   computed: {
     ...mapState(['clustersPath', 'emptyImagePath', 'helpPath']),
   },
+
+  emits: [],
 };
 </script>
 

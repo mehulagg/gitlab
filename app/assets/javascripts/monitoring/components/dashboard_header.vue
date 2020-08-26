@@ -161,7 +161,9 @@ export default {
       return mergeUrlParams({ environment }, url);
     },
   },
+
   timeRanges,
+  emits: ['dateTimePickerInvalid', 'setRearrangingPanels'],
 };
 </script>
 

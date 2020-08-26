@@ -90,6 +90,8 @@ export default {
       $(this.$refs['gfm-content']).renderGFM();
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

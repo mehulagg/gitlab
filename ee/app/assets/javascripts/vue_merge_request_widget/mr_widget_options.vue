@@ -230,6 +230,8 @@ export default {
     'containerScanning',
     'coverageFuzzing',
   ],
+
+  emits: [],
 };
 </script>
 <template>

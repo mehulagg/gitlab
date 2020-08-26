@@ -67,7 +67,9 @@ export default {
           });
     },
   },
+
   HELP_INFO_URL,
+  emits: [],
 };
 </script>
 

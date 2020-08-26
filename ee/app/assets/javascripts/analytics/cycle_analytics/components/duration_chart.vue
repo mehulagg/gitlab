@@ -31,7 +31,9 @@ export default {
       this.updateSelectedDurationChartStages(stages);
     },
   },
+
   durationChartTooltipDateFormat: dateFormats.defaultDate,
+  emits: [],
 };
 </script>
 

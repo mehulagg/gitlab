@@ -42,6 +42,8 @@ export default {
       }, 0);
     },
   },
+
+  emits: ['approve', 'hide'],
 };
 </script>
 <template>

@@ -30,6 +30,8 @@ export default {
     const callout = this.$refs['canary-deployment-callout'];
     PersistentUserCallout.factory(callout);
   },
+
+  emits: [],
 };
 </script>
 

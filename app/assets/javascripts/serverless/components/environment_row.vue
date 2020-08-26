@@ -41,6 +41,8 @@ export default {
       this.isOpen = !this.isOpen;
     },
   },
+
+  emits: [],
 };
 </script>
 

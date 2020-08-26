@@ -222,6 +222,8 @@ export default {
       this.callLoadMoreLines(endpoint, params, lineNumbers, fileHash);
     },
   },
+
+  emits: [],
 };
 </script>
 

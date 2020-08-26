@@ -120,6 +120,8 @@ export default {
       this.isUsernameLinkHovered = false;
     },
   },
+
+  emits: ['toggleHandler'],
 };
 </script>
 

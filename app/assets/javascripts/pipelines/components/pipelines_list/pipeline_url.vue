@@ -33,6 +33,8 @@ export default {
       return this.pipeline.source === SCHEDULE_ORIGIN;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

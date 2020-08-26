@@ -33,6 +33,8 @@ export default {
   methods: {
     ...mapActions(['setOverride']),
   },
+
+  emits: [],
 };
 </script>
 

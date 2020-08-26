@@ -19,6 +19,8 @@ export default {
   methods: {
     ...mapActions(['toggleSidebar', 'toggleEpicSubscription']),
   },
+
+  emits: [],
 };
 </script>
 

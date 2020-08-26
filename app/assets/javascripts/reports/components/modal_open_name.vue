@@ -35,6 +35,8 @@ export default {
       this.tooltipTitle = this.$el.offsetWidth < this.$el.scrollWidth ? this.issue.title : '';
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

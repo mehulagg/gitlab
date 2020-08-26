@@ -210,7 +210,9 @@ export default {
   groupsQueryParams: {
     min_access_level: featureAccessLevel.EVERYONE,
   },
+
   maxDateRange: DATE_RANGE_LIMIT,
+  emits: ['clear-form-errors'],
 };
 </script>
 <template>

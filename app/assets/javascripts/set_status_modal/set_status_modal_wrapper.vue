@@ -154,6 +154,8 @@ export default {
       this.closeModal();
     },
   },
+
+  emits: [],
 };
 </script>
 

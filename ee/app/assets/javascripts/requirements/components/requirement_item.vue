@@ -101,6 +101,8 @@ export default {
       });
     },
   },
+
+  emits: ['archiveClick', 'editClick', 'reopenClick'],
 };
 </script>
 

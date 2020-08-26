@@ -23,6 +23,8 @@ export default {
   methods: {
     ...mapActions(LICENSE_MANAGEMENT, ['resetLicenseInModal', 'deleteLicense']),
   },
+
+  emits: [],
 };
 </script>
 <template>

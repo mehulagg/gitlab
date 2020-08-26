@@ -83,6 +83,8 @@ export default {
       this.isExpanded = false;
     },
   },
+
+  emits: [],
 };
 </script>
 

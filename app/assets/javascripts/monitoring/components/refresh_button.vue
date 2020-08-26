@@ -139,6 +139,8 @@ export default {
     makeInterval(12, 'h'),
     makeInterval(1, 'd'),
   ],
+
+  emits: [],
 };
 </script>
 

@@ -63,7 +63,9 @@ export default {
       eventHub.$emit('headerDeleteAction', this.pipeline.delete_path);
     },
   },
+
   DELETE_MODAL_ID,
+  emits: [],
 };
 </script>
 <template>

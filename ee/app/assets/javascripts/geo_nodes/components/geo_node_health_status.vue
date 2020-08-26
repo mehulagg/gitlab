@@ -26,6 +26,8 @@ export default {
       return HEALTH_STATUS_ICON[this.status.toLowerCase()];
     },
   },
+
+  emits: [],
 };
 </script>
 

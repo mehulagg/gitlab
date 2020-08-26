@@ -21,6 +21,8 @@ export default {
       this.$emit('clickViewLog', this.job);
     },
   },
+
+  emits: ['clickViewLog'],
 };
 </script>
 

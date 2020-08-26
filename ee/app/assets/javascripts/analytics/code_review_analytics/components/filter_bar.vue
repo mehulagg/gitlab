@@ -90,6 +90,8 @@ export default {
       this.setFilters({ labelNames, milestoneTitle });
     },
   },
+
+  emits: [],
 };
 </script>
 

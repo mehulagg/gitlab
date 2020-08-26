@@ -59,6 +59,8 @@ export default {
       return this.playable && !this.scheduled;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

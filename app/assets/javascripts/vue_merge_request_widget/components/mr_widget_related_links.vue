@@ -26,6 +26,8 @@ export default {
       return s__('mrWidget|Closes');
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

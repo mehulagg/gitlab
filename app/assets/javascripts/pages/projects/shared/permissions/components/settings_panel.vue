@@ -287,6 +287,8 @@ export default {
       return this.allowedVisibilityOptions.includes(option);
     },
   },
+
+  emits: [],
 };
 </script>
 

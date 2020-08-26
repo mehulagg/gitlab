@@ -46,7 +46,9 @@ export default {
       );
     },
   },
+
   destroyDesignMutation,
+  emits: [],
 };
 </script>
 

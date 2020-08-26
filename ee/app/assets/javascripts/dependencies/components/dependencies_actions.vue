@@ -66,6 +66,8 @@ export default {
       return id === this.sortField;
     },
   },
+
+  emits: [],
 };
 </script>
 

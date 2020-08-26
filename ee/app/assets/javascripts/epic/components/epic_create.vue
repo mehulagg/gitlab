@@ -65,6 +65,8 @@ export default {
   methods: {
     ...mapActions(['setEpicCreateTitle', 'createEpic', 'setEpicCreateConfidential']),
   },
+
+  emits: [],
 };
 </script>
 

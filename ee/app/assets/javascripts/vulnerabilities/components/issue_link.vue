@@ -15,7 +15,9 @@ export default {
       required: true,
     },
   },
+
   STATE_OPENED: 'opened',
+  emits: [],
 };
 </script>
 <template>

@@ -114,8 +114,10 @@ export default {
       this.setSvg('scroll-handle');
     },
   },
+
   height: CHART_HEIGHT,
   chartTypes: CHART_TYPES,
+  emits: [],
 };
 </script>
 <template>

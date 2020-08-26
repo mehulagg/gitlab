@@ -47,6 +47,8 @@ export default {
   methods: {
     ...mapActions('commit', ['updateCommitAction', 'updateBranchName']),
   },
+
+  emits: [],
 };
 </script>
 

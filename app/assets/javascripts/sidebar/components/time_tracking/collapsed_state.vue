@@ -93,6 +93,8 @@ export default {
       return this.showNoTimeTrackingState ? __('Time tracking') : this.timeTrackedTooltipText;
     },
   },
+
+  emits: [],
 };
 </script>
 

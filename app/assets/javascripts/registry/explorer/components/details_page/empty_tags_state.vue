@@ -20,6 +20,8 @@ export default {
     EMPTY_IMAGE_REPOSITORY_TITLE,
     EMPTY_IMAGE_REPOSITORY_MESSAGE,
   },
+
+  emits: [],
 };
 </script>
 

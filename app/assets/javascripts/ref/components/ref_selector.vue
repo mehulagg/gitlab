@@ -103,6 +103,8 @@ export default {
       this.$emit('input', this.selectedRef);
     },
   },
+
+  emits: ['input'],
 };
 </script>
 

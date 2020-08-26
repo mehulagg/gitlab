@@ -62,6 +62,8 @@ export default {
   i18n: {
     CUSTOM_VALUE_MESSAGE,
   },
+
+  emits: ['input'],
 };
 </script>
 

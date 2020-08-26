@@ -31,6 +31,8 @@ export default {
       return this.isMergeRequest && !this.user.can_merge;
     },
   },
+
+  emits: [],
 };
 </script>
 

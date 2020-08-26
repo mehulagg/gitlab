@@ -15,7 +15,9 @@ export default {
       required: true,
     },
   },
+
   HEADERS,
+  emits: [],
 };
 </script>
 

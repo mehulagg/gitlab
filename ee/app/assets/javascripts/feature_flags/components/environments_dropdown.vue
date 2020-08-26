@@ -166,6 +166,8 @@ export default {
       this.closeSuggestions();
     },
   },
+
+  emits: ['clearInput', 'createClicked', 'selectEnvironment'],
 };
 </script>
 <template>

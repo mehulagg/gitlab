@@ -33,6 +33,8 @@ export default {
       default: 'edited-text',
     },
   },
+
+  emits: [],
 };
 </script>
 

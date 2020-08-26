@@ -70,6 +70,8 @@ export default {
       this.expanded = !this.expanded;
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -88,6 +88,8 @@ export default {
       });
     },
   },
+
+  emits: ['submit'],
 };
 </script>
 <template>

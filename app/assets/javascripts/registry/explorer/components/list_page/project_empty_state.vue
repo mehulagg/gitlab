@@ -39,6 +39,8 @@ export default {
     ...mapState(['config']),
     ...mapGetters(['dockerBuildCommand', 'dockerPushCommand', 'dockerLoginCommand']),
   },
+
+  emits: [],
 };
 </script>
 <template>

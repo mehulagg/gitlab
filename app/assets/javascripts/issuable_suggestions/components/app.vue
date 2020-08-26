@@ -62,6 +62,8 @@ export default {
   helpText: __(
     'These existing issues have a similar title. It might be better to comment there instead of creating another similar issue.',
   ),
+
+  emits: [],
 };
 </script>
 

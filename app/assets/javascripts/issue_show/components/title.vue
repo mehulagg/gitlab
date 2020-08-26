@@ -61,6 +61,8 @@ export default {
       eventHub.$emit('open.form');
     },
   },
+
+  emits: [],
 };
 </script>
 

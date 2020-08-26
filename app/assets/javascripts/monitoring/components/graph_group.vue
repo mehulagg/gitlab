@@ -54,6 +54,8 @@ export default {
       this.isCollapsed = !this.isCollapsed;
     },
   },
+
+  emits: [],
 };
 </script>
 

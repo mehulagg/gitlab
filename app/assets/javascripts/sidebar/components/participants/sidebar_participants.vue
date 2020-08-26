@@ -17,6 +17,8 @@ export default {
       store: new Store(),
     };
   },
+
+  emits: [],
 };
 </script>
 

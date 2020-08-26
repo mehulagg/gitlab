@@ -49,6 +49,8 @@ export default {
       return this.metricType === metric;
     },
   },
+
+  emits: ['columnMetricChange', 'pageChange'],
 };
 </script>
 

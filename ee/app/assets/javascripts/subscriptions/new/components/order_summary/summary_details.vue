@@ -26,6 +26,8 @@ export default {
     tax: s__('Checkout|Tax'),
     total: s__('Checkout|Total'),
   },
+
+  emits: [],
 };
 </script>
 <template>

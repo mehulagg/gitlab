@@ -25,7 +25,9 @@ export default {
       'PackageRegistry|For more information on Composer packages in GitLab, %{linkStart}see the documentation.%{linkEnd}',
     ),
   },
+
   trackingActions: { ...TrackingActions },
+  emits: [],
 };
 </script>
 

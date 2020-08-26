@@ -48,6 +48,8 @@ export default {
       },
     },
   },
+
+  emits: ['clearError', 'input', 'openDismissalCommentBox', 'submit'],
 };
 </script>
 

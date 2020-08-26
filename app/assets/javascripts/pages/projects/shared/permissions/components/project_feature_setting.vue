@@ -66,6 +66,8 @@ export default {
       this.$emit('change', Number(e.target.value));
     },
   },
+
+  emits: ['change'],
 };
 </script>
 

@@ -134,6 +134,8 @@ export default {
     editDashboard: s__('Metrics|Edit dashboard YAML'),
     createDashboard: s__('Metrics|Create new dashboard'),
   },
+
+  emits: [],
 };
 </script>
 

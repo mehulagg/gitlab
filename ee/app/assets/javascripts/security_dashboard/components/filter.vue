@@ -51,6 +51,8 @@ export default {
       this.$refs.dropdown.$children[0].hide(true);
     },
   },
+
+  emits: ['setFilter'],
 };
 </script>
 

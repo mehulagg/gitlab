@@ -96,6 +96,8 @@ export default {
       return this.selectVulnerability(this.vulnerability);
     },
   },
+
+  emits: [],
 };
 </script>
 

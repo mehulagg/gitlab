@@ -59,6 +59,8 @@ export default {
       return this.hasMetrics && this.showMetrics;
     },
   },
+
+  emits: [],
 };
 </script>
 

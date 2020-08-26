@@ -116,6 +116,8 @@ export default {
       this.removeSuggestionInfoFromBatch(suggestionId);
     },
   },
+
+  emits: ['cancelForm', 'handleFormUpdate'],
 };
 </script>
 

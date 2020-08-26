@@ -14,6 +14,8 @@ export default {
       return 'bg-transparent border-style-dashed border-color-default';
     },
   },
+
+  emits: ['showform'],
 };
 </script>
 <template>

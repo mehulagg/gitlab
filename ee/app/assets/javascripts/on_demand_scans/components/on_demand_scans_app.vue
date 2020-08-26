@@ -39,6 +39,8 @@ export default {
       showForm: false,
     };
   },
+
+  emits: [],
 };
 </script>
 

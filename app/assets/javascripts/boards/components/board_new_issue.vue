@@ -98,6 +98,8 @@ export default {
       this.selectedProject = selectedProject;
     },
   },
+
+  emits: [],
 };
 </script>
 

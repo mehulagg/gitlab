@@ -88,6 +88,13 @@ export default {
       ];
     },
   },
+
+  emits: [
+    'deleteDismissalComment',
+    'editVulnerabilityDismissalComment',
+    'hideDismissalDeleteButtons',
+    'showDismissalDeleteButtons',
+  ],
 };
 </script>
 

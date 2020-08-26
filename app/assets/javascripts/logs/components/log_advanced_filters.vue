@@ -70,6 +70,8 @@ export default {
       this.showFilteredLogs(filters);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -63,6 +63,8 @@ export default {
       eventHub.$emit('pollNodeDetails', this.node);
     },
   },
+
+  emits: [],
 };
 </script>
 

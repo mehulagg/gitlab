@@ -106,6 +106,8 @@ export default {
   methods: {
     ...mapActions(['fetchJobsForStage', 'toggleSidebar']),
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -173,6 +173,8 @@ export default {
       this[key] = value;
     },
   },
+
+  emits: ['invalidated', 'validated', 'input'],
 };
 </script>
 

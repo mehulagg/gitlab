@@ -7,6 +7,8 @@ export default {
     GlBadge,
     GlPopover,
   },
+
+  emits: [],
 };
 </script>
 

@@ -15,7 +15,9 @@ export default {
       required: true,
     },
   },
+
   REMOVED_TEXT,
+  emits: [],
 };
 </script>
 

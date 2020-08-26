@@ -35,5 +35,7 @@ export default {
   render() {
     return this.$slots.default;
   },
+
+  emits: ['input'],
 };
 </script>

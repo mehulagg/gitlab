@@ -263,6 +263,8 @@ export default {
       this.$emit('onFilter', this.removeQuotesEnclosure(filters));
     },
   },
+
+  emits: ['onFilter', 'onSort'],
 };
 </script>
 

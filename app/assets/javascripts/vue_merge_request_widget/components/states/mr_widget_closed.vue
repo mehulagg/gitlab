@@ -17,6 +17,8 @@ export default {
       default: () => ({}),
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

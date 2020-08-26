@@ -122,6 +122,8 @@ export default {
       return `dependency_list_${label.toLowerCase().replace(' ', '_')}_count`;
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -30,6 +30,8 @@ export default {
       this.$emit('dismiss');
     },
   },
+
+  emits: ['dismiss'],
 };
 </script>
 

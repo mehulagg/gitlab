@@ -28,6 +28,8 @@ export default {
       name: this.value,
     };
   },
+
+  emits: ['delete', 'input'],
 };
 </script>
 <template>

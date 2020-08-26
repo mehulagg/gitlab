@@ -33,7 +33,9 @@ export default {
       );
     },
   },
+
   SIDEBAR_INIT_WIDTH,
+  emits: [],
 };
 </script>
 

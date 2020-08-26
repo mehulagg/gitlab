@@ -79,6 +79,8 @@ export default {
     wikiSize: s__('UsageQuota|Wiki'),
     snippetsSize: s__('UsageQuota|Snippets'),
   },
+
+  emits: [],
 };
 </script>
 <template>

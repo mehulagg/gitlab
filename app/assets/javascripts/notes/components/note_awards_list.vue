@@ -51,6 +51,8 @@ export default {
       this.toggleAwardRequest(data).catch(() => Flash(__('Something went wrong on our end.')));
     },
   },
+
+  emits: [],
 };
 </script>
 

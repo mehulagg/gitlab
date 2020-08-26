@@ -53,6 +53,8 @@ export default {
       this.activateStep(this.step);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

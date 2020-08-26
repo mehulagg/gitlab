@@ -80,6 +80,8 @@ export default {
       return dateInWords(this.issueDueDate, true, isDueInCurrentYear);
     },
   },
+
+  emits: [],
 };
 </script>
 

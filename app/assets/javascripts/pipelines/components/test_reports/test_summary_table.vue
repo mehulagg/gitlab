@@ -31,8 +31,10 @@ export default {
       this.$emit('row-click', index);
     },
   },
+
   maxShownRows: 20,
   typicalRowHeight: 55,
+  emits: ['row-click'],
 };
 </script>
 

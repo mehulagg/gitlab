@@ -23,6 +23,8 @@ export default {
       default: __('Select'),
     },
   },
+
+  emits: [],
 };
 </script>
 

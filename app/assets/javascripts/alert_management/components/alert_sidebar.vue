@@ -43,6 +43,8 @@ export default {
       return this.sidebarStatus ? 'right-sidebar-collapsed' : 'right-sidebar-expanded';
     },
   },
+
+  emits: ['alert-error', 'toggle-sidebar'],
 };
 </script>
 

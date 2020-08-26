@@ -218,6 +218,8 @@ export default {
         });
     },
   },
+
+  emits: [],
 };
 </script>
 

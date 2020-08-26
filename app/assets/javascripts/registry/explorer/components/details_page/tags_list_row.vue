@@ -94,6 +94,8 @@ export default {
       return !this.tag.digest;
     },
   },
+
+  emits: ['delete', 'select'],
 };
 </script>
 

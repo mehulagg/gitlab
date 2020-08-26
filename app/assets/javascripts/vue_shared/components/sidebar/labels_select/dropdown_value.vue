@@ -37,6 +37,8 @@ export default {
       return this.enableScopedLabels && isScopedLabel(label);
     },
   },
+
+  emits: [],
 };
 </script>
 

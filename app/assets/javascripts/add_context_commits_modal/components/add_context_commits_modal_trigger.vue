@@ -30,6 +30,8 @@ export default {
       eventHub.$emit('openModal');
     },
   },
+
+  emits: [],
 };
 </script>
 

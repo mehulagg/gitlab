@@ -99,6 +99,8 @@ export default {
       this.prepareOnionSkin();
     },
   },
+
+  emits: [],
 };
 </script>
 

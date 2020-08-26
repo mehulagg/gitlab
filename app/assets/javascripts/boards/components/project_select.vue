@@ -92,6 +92,8 @@ export default {
       text: project => project.name_with_namespace,
     });
   },
+
+  emits: [],
 };
 </script>
 

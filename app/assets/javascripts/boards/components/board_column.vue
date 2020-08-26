@@ -112,6 +112,8 @@ export default {
       eventHub.$emit('showForm', listId);
     },
   },
+
+  emits: [],
 };
 </script>
 

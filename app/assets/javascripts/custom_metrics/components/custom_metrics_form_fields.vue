@@ -171,6 +171,8 @@ export default {
     { text: __('Response'), value: queryTypes.response },
     { text: __('System'), value: queryTypes.system },
   ],
+
+  emits: ['formValidation'],
 };
 </script>
 

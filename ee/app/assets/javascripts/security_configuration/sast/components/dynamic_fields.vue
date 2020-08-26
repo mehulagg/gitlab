@@ -43,6 +43,8 @@ export default {
   entityTypeToComponent: {
     string: FormInput,
   },
+
+  emits: ['input'],
 };
 </script>
 

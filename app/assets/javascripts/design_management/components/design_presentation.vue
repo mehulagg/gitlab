@@ -280,6 +280,8 @@ export default {
       );
     },
   },
+
+  emits: ['closeCommentForm', 'moveNote', 'openCommentForm'],
 };
 </script>
 

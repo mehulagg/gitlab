@@ -151,6 +151,8 @@ export default {
       this.$refs.modal.ok();
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

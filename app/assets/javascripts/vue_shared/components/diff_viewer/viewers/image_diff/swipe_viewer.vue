@@ -104,6 +104,8 @@ export default {
       this.prepareSwipe();
     }, 400),
   },
+
+  emits: [],
 };
 </script>
 

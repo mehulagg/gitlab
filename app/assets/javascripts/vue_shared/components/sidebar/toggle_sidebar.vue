@@ -28,6 +28,8 @@ export default {
       this.$emit('toggle');
     },
   },
+
+  emits: ['toggle'],
 };
 </script>
 

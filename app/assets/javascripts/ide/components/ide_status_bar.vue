@@ -71,7 +71,9 @@ export default {
       return `${this.currentProject.web_url}/commit/${shortSha}`;
     },
   },
+
   rightSidebarViews,
+  emits: [],
 };
 </script>
 

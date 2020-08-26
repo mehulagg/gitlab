@@ -62,6 +62,8 @@ export default {
       return isFuture ? __('Will be created') : __('Created');
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

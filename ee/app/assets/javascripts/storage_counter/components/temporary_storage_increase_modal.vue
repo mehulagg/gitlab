@@ -23,6 +23,7 @@ export default {
   modalTitle: s__('TemporaryStorage|Temporarily increase storage now?'),
   okTitle: s__('TemporaryStorage|Increase storage temporarily'),
   cancelTitle: __('Cancel'),
+  emits: [],
 };
 </script>
 <template>

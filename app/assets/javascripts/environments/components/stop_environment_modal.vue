@@ -50,6 +50,8 @@ export default {
       eventHub.$emit('stopEnvironment', this.environment);
     },
   },
+
+  emits: [],
 };
 </script>
 

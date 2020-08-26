@@ -103,6 +103,8 @@ export default {
       return __('Added for this merge request');
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -6,6 +6,8 @@ export default {
   components: {
     statusIcon,
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -108,6 +108,8 @@ export default {
       key: 'actions',
     },
   ],
+
+  emits: ['deleteProfile', 'loadMoreProfiles'],
 };
 </script>
 <template>

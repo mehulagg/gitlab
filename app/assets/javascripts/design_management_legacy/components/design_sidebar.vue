@@ -83,8 +83,17 @@ export default {
       this.discussionWithOpenForm = id;
     },
   },
+
   resolveCommentsToggleText: s__('DesignManagement|Resolved Comments'),
   cookieKey: 'hide_design_resolved_comments_popover',
+
+  emits: [
+    'closeCommentForm',
+    'onDesignDiscussionError',
+    'resolveDiscussionError',
+    'toggleResolvedComments',
+    'updateNoteError',
+  ],
 };
 </script>
 

@@ -81,6 +81,8 @@ export default {
   methods: {
     ...mapActions(['createFeatureFlag', 'setEndpoint', 'setPath']),
   },
+
+  emits: [],
 };
 </script>
 <template>

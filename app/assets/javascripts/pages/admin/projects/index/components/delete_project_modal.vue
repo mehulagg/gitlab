@@ -78,6 +78,8 @@ export default {
       this.enteredProjectName = '';
     },
   },
+
+  emits: [],
 };
 </script>
 

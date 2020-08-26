@@ -10,6 +10,8 @@ export default {
     width: 1000,
     height: 40,
   },
+
+  emits: [],
 };
 </script>
 

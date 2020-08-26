@@ -45,6 +45,8 @@ export default {
       this.$emit('createEpicFormCancel');
     },
   },
+
+  emits: ['createEpicFormCancel', 'createEpicFormSubmit'],
 };
 </script>
 

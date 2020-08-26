@@ -242,6 +242,8 @@ export default {
       return { inactive: this.isNoteInactive(note), resolved: note.resolved };
     },
   },
+
+  emits: ['closeCommentForm', 'moveNote', 'openCommentForm'],
 };
 </script>
 

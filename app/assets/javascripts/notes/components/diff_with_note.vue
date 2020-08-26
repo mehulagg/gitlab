@@ -65,7 +65,9 @@ export default {
       return line.replace(FIRST_CHAR_REGEX, '');
     },
   },
+
   userColorSchemeClass: window.gon.user_color_scheme,
+  emits: [],
 };
 </script>
 

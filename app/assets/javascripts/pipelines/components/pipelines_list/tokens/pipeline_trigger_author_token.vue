@@ -70,6 +70,8 @@ export default {
       this.fetchProjectUsers(data);
     }, FILTER_PIPELINES_SEARCH_DELAY),
   },
+
+  emits: [],
 };
 </script>
 

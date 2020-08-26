@@ -53,6 +53,8 @@ export default {
       return this.items.map(sanitizeItem);
     },
   },
+
+  emits: [],
 };
 </script>
 

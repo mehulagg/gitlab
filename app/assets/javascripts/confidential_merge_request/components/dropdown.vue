@@ -33,6 +33,8 @@ export default {
       this.$emit('click', project);
     },
   },
+
+  emits: ['click'],
 };
 </script>
 

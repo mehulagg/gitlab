@@ -130,6 +130,8 @@ export default {
       this.fetchFiles();
     },
   },
+
+  emits: [],
 };
 </script>
 

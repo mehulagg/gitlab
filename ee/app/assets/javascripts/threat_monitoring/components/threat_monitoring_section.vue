@@ -96,6 +96,8 @@ export default {
       return setUrlFragment(this.documentationPath, this.documentationAnchor);
     },
   },
+
+  emits: [],
 };
 </script>
 

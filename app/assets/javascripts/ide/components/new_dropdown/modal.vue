@@ -128,6 +128,8 @@ export default {
       this.$refs.modal.hide();
     },
   },
+
+  emits: [],
 };
 </script>
 

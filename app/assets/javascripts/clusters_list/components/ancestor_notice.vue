@@ -10,6 +10,8 @@ export default {
   computed: {
     ...mapState(['ancestorHelperPath', 'hasAncestorClusters']),
   },
+
+  emits: [],
 };
 </script>
 

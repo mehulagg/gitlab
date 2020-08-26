@@ -26,6 +26,8 @@ export default {
   mounted() {
     this.button = this.$refs.button;
   },
+
+  emits: [],
 };
 </script>
 

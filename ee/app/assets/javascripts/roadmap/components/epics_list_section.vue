@@ -160,6 +160,8 @@ export default {
     },
     generateKey,
   },
+
+  emits: [],
 };
 </script>
 

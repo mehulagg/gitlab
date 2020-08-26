@@ -127,6 +127,8 @@ export default {
       this.$emit('alert-error', `${this.$options.i18n.UPDATE_ALERT_TODO_ERROR} ${error}`);
     },
   },
+
+  emits: ['alert-error'],
 };
 </script>
 

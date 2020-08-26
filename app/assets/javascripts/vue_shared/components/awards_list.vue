@@ -144,6 +144,8 @@ export default {
       this.$emit('award', parsedName);
     },
   },
+
+  emits: ['award'],
 };
 </script>
 

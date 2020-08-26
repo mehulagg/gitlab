@@ -130,6 +130,7 @@ export default {
   },
 
   PANELS,
+  emits: [],
 };
 </script>
 

@@ -19,6 +19,8 @@ export default {
   methods: {
     ...mapActions(['requestEditRule', 'requestDeleteRule']),
   },
+
+  emits: [],
 };
 </script>
 

@@ -58,6 +58,8 @@ export default {
       this.$emit('submit', { ...this.userList, name: this.name });
     },
   },
+
+  emits: ['submit'],
 };
 </script>
 <template>

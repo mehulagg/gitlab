@@ -227,6 +227,8 @@ export default {
       }
     },
   },
+
+  emits: ['noteDeleted'],
 };
 </script>
 

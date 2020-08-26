@@ -9,6 +9,8 @@ export default {
   methods: {
     ...mapActions(['setFilter']),
   },
+
+  emits: ['filter'],
 };
 </script>
 

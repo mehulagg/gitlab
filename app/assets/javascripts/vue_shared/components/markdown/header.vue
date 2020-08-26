@@ -106,6 +106,8 @@ export default {
         .catch(() => {});
     },
   },
+
+  emits: ['handleSuggestDismissed', 'preview-markdown', 'write-markdown'],
 };
 </script>
 

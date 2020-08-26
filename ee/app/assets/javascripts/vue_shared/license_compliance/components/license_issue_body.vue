@@ -13,7 +13,9 @@ export default {
       required: true,
     },
   },
+
   methods: { ...mapActions(LICENSE_MANAGEMENT, ['setLicenseInModal']) },
+  emits: [],
 };
 </script>
 

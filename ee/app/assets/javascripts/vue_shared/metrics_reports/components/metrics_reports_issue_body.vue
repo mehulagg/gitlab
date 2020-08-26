@@ -42,6 +42,8 @@ export default {
       return __('(No changes)');
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

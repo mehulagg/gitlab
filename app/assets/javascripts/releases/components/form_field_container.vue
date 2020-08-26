@@ -1,6 +1,7 @@
 <script>
 export default {
   name: 'FormFieldContainer',
+  emits: [],
 };
 </script>
 <template>

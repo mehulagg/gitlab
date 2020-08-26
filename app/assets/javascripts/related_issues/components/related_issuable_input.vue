@@ -176,6 +176,13 @@ export default {
       this.$refs.input.focus();
     },
   },
+
+  emits: [
+    'addIssuableFormBlur',
+    'addIssuableFormCancel',
+    'addIssuableFormInput',
+    'pendingIssuableRemoveRequest',
+  ],
 };
 </script>
 

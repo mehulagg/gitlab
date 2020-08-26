@@ -88,6 +88,8 @@ export default {
       this.$emit('removeFromBatch');
     },
   },
+
+  emits: ['addToBatch', 'apply', 'applyBatch', 'removeFromBatch'],
 };
 </script>
 

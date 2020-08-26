@@ -57,6 +57,8 @@ export default {
     searchPlaceholder: __('Search branches, tags, and commits'),
     dropdownHeader: __('Select source'),
   },
+
+  emits: [],
 };
 </script>
 <template>

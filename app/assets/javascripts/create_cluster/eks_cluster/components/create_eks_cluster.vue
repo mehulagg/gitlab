@@ -33,6 +33,8 @@ export default {
   computed: {
     ...mapState(['hasCredentials']),
   },
+
+  emits: [],
 };
 </script>
 <template>

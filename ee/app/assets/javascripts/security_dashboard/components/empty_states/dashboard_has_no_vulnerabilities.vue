@@ -5,7 +5,9 @@ export default {
   components: {
     GlEmptyState,
   },
+
   inject: ['emptyStateSvgPath', 'dashboardDocumentation'],
+  emits: [],
 };
 </script>
 

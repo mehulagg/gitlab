@@ -128,6 +128,8 @@ export default {
       }
     },
   },
+
+  emits: ['actions'],
 };
 </script>
 <template>

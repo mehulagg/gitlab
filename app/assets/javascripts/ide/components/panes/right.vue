@@ -52,7 +52,9 @@ export default {
       ];
     },
   },
+
   WIDTH,
+  emits: [],
 };
 </script>
 

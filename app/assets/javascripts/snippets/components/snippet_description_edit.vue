@@ -26,6 +26,8 @@ export default {
   mounted() {
     setupCollapsibleInputs();
   },
+
+  emits: ['input'],
 };
 </script>
 <template>

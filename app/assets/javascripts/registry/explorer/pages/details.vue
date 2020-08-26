@@ -108,6 +108,8 @@ export default {
       this.isDesktop = GlBreakpointInstance.isDesktop();
     },
   },
+
+  emits: [],
 };
 </script>
 

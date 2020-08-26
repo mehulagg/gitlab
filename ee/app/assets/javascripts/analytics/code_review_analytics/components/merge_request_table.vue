@@ -84,6 +84,8 @@ export default {
       tdClass: 'table-col d-flex align-items-center d-sm-table-cell',
     },
   ],
+
+  emits: [],
 };
 </script>
 

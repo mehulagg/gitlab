@@ -150,6 +150,8 @@ export default {
       return this.glFeatures.productivityAnalyticsScatterplotEnabled;
     },
   },
+
+  emits: [],
 };
 </script>
 

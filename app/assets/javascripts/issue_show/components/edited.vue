@@ -28,6 +28,8 @@ export default {
       return this.updatedByName && this.updatedByPath;
     },
   },
+
+  emits: [],
 };
 </script>
 

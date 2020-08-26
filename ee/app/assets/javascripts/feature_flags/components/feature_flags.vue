@@ -235,6 +235,8 @@ export default {
       return this[scope];
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

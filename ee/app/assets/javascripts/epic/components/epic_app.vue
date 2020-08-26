@@ -12,6 +12,8 @@ export default {
   mounted() {
     this.sidebarContext = new SidebarContext();
   },
+
+  emits: [],
 };
 </script>
 

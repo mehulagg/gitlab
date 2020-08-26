@@ -26,6 +26,8 @@ export default {
       return window.location.href;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

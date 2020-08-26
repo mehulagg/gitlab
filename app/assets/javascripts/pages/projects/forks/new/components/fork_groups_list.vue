@@ -53,6 +53,8 @@ export default {
   i18n: {
     searchPlaceholder: __('Search by name'),
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -21,7 +21,9 @@ export default {
       'PackageRegistry|For more information on the NuGet registry, %{linkStart}see the documentation%{linkEnd}.',
     ),
   },
+
   trackingActions: { ...TrackingActions },
+  emits: [],
 };
 </script>
 

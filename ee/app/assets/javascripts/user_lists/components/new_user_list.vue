@@ -23,6 +23,8 @@ export default {
   methods: {
     ...mapActions(['createUserList', 'dismissErrorAlert']),
   },
+
+  emits: [],
 };
 </script>
 <template>

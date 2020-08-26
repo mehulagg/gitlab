@@ -30,6 +30,8 @@ export default {
       return this.helpUrl.length > 0;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

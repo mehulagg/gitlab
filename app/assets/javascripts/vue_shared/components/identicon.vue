@@ -25,6 +25,8 @@ export default {
       return getIdenticonTitle(this.entityName);
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -34,6 +34,8 @@ export default {
       return isNumber(this.diffFilesLength) && this.diffFilesLength >= 0;
     },
   },
+
+  emits: [],
 };
 </script>
 

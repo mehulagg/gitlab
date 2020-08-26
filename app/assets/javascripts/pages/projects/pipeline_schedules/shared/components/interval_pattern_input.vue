@@ -112,6 +112,8 @@ export default {
       return Math.floor(Math.random() * 28);
     },
   },
+
+  emits: [],
 };
 </script>
 

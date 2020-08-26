@@ -23,6 +23,8 @@ export default {
       required: false,
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

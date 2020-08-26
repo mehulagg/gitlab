@@ -38,6 +38,8 @@ export default {
       modalId: uniqueId('design-deletion-confirmation-'),
     };
   },
+
+  emits: ['deleteSelectedDesigns'],
 };
 </script>
 

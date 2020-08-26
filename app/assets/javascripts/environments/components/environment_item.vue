@@ -513,6 +513,8 @@ export default {
       eventHub.$emit('toggleFolder', this.model);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

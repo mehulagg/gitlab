@@ -95,6 +95,8 @@ export default {
       if (!this.popoverDismissed) this.track();
     },
   },
+
+  emits: [],
 };
 </script>
 

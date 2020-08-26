@@ -35,6 +35,8 @@ export default {
   computed: {
     ...mapGetters(['getUserData']),
   },
+
+  emits: [],
 };
 </script>
 

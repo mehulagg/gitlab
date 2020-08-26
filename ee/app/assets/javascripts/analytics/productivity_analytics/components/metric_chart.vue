@@ -87,6 +87,8 @@ export default {
       return this.selectedMetric === key;
     },
   },
+
+  emits: ['metricTypeChange'],
 };
 </script>
 <template>

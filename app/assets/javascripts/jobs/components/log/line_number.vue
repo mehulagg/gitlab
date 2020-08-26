@@ -30,5 +30,7 @@ export default {
       parsedLineNumber,
     );
   },
+
+  emits: [],
 };
 </script>

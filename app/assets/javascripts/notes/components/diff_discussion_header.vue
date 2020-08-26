@@ -89,6 +89,8 @@ export default {
       this.toggleDiscussion({ discussionId: this.discussion.id });
     },
   },
+
+  emits: [],
 };
 </script>
 

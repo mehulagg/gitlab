@@ -42,6 +42,8 @@ export default {
       this.$set(this.selectedItems, name, !this.selectedItems[name]);
     },
   },
+
+  emits: ['delete'],
 };
 </script>
 

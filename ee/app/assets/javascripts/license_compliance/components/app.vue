@@ -89,6 +89,8 @@ export default {
       return activeTabIndex !== -1 ? activeTabIndex : 0;
     },
   },
+
+  emits: [],
 };
 </script>
 

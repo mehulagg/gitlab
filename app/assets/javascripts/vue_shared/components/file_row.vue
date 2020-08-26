@@ -102,6 +102,8 @@ export default {
       return this.$router.currentRoute.path === `/project${escapeFileUrl(this.file.url)}`;
     },
   },
+
+  emits: ['clickFile', 'mouseleave', 'toggleTreeOpen'],
 };
 </script>
 

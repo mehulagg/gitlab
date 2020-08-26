@@ -61,6 +61,8 @@ export default {
       this.syncHide();
     },
   },
+
+  emits: ['cancel', 'ok'],
 };
 </script>
 

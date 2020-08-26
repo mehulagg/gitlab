@@ -47,6 +47,8 @@ export default {
       this.$emit('onChangeTab', tab.scope);
     },
   },
+
+  emits: ['onChangeTab'],
 };
 </script>
 <template>

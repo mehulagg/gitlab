@@ -8,6 +8,8 @@ export default {
     GlSkeletonLoading,
     TimelineEntryItem,
   },
+
+  emits: [],
 };
 </script>
 

@@ -89,6 +89,8 @@ export default {
       this.humanTimeSpent = humanTimeSpent;
     },
   },
+
+  emits: [],
 };
 </script>
 

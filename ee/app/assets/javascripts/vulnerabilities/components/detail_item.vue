@@ -12,6 +12,8 @@ export default {
       return this.sprintfMessage.match(/%{(?!(labelStart|labelEnd))(.+)}/)[2];
     },
   },
+
+  emits: [],
 };
 </script>
 

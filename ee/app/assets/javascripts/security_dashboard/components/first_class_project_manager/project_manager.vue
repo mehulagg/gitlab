@@ -196,6 +196,8 @@ export default {
       };
     },
   },
+
+  emits: ['handleProjectManipulation'],
 };
 </script>
 

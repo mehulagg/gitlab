@@ -54,6 +54,8 @@ export default {
     pipeline: 'pipeline',
     updates: 'updates',
   },
+
+  emits: [],
 };
 </script>
 

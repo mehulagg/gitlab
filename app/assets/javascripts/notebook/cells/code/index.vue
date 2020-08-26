@@ -51,6 +51,8 @@ export default {
   mounted() {
     Prism.highlightElement(this.$refs.code);
   },
+
+  emits: [],
 };
 </script>
 

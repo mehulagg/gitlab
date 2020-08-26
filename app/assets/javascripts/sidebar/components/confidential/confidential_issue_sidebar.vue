@@ -66,6 +66,8 @@ export default {
       this.edit = !this.edit;
     },
   },
+
+  emits: [],
 };
 </script>
 

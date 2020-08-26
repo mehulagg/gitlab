@@ -75,6 +75,8 @@ export default {
       return req;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

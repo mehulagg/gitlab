@@ -133,6 +133,8 @@ export default {
     group: s__('Checkout|Group'),
     users: s__('Checkout|Users'),
   },
+
+  emits: [],
 };
 </script>
 <template>

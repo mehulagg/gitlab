@@ -157,6 +157,8 @@ export default {
       return iterationId === this.currentIteration || (!this.currentIteration && !iterationId);
     },
   },
+
+  emits: [],
 };
 </script>
 

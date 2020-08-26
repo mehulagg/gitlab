@@ -39,6 +39,8 @@ export default {
       this.$emit('sort:changed');
     },
   },
+
+  emits: ['sort:changed'],
 };
 </script>
 

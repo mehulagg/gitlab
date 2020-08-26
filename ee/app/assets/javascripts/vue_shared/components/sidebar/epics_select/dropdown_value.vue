@@ -16,6 +16,8 @@ export default {
       return this.epic ? Boolean(this.epic.title && this.epic.url) : false;
     },
   },
+
+  emits: [],
 };
 </script>
 

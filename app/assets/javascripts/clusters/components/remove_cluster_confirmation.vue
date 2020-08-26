@@ -103,6 +103,8 @@ export default {
       this.enteredClusterName = '';
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -44,6 +44,8 @@ export default {
       return highlight(this.itemName, this.matcher);
     },
   },
+
+  emits: [],
 };
 </script>
 

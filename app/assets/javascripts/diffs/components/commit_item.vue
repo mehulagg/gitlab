@@ -117,6 +117,8 @@ export default {
   methods: {
     ...mapActions('diffs', ['moveToNeighboringCommit']),
   },
+
+  emits: ['handleCheckboxChange'],
 };
 </script>
 

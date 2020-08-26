@@ -370,6 +370,8 @@ export default {
       }
     },
   },
+
+  emits: [],
 };
 </script>
 

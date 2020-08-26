@@ -333,6 +333,15 @@ export default {
       this.updateAssignees(assignees);
     },
   },
+
+  emits: [
+    'cancelForm',
+    'handleDeleteNote',
+    'handleEdit',
+    'handleUpdateNote',
+    'startReplying',
+    'updateSuccess',
+  ],
 };
 </script>
 

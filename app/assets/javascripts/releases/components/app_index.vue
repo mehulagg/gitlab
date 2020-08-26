@@ -66,6 +66,8 @@ export default {
       this.fetchReleases({ page, projectId: this.projectId });
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

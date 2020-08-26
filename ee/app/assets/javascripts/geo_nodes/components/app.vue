@@ -204,6 +204,8 @@ export default {
       return !node.primary || this.nodes.length <= 1;
     },
   },
+
+  emits: [],
 };
 </script>
 

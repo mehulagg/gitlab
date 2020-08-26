@@ -37,8 +37,10 @@ export default {
       return this.approvers[0];
     },
   },
+
   avatarSize: 24,
   badgeTooltipMaxChars: 50,
+  emits: [],
 };
 </script>
 

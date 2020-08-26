@@ -5,6 +5,8 @@ export default {
   components: {
     GlButton,
   },
+
+  emits: [],
 };
 </script>
 

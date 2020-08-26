@@ -71,6 +71,8 @@ export default {
       'toggleShowTreeList',
     ]),
   },
+
+  emits: [],
 };
 </script>
 

@@ -52,6 +52,8 @@ export default {
       return `${hh}:${mm}:${ss}`;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

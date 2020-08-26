@@ -115,6 +115,8 @@ export default {
       this.autosaveTitle.reset();
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -36,6 +36,8 @@ export default {
       return this.release._links?.self;
     },
   },
+
+  emits: [],
 };
 </script>
 

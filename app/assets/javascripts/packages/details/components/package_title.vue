@@ -32,6 +32,8 @@ export default {
   i18n: {
     packageInfo: __('v%{version} published %{timeAgo}'),
   },
+
+  emits: [],
 };
 </script>
 

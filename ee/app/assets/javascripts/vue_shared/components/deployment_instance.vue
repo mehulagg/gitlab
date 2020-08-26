@@ -78,6 +78,8 @@ export default {
       return this.isLink ? mergeUrlParams({ pod_name: this.podName }, this.logsPath) : null;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

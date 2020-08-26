@@ -211,6 +211,8 @@ export default {
       clearTimeout(this.timeout);
     },
   },
+
+  emits: [],
 };
 </script>
 

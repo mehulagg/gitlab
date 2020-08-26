@@ -16,6 +16,8 @@ export default {
       endDate: new Date(),
     };
   },
+
+  emits: [],
 };
 </script>
 <template>

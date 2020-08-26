@@ -40,6 +40,8 @@ export default {
       return this.item.type === ITEM_TYPE.GROUP;
     },
   },
+
+  emits: [],
 };
 </script>
 

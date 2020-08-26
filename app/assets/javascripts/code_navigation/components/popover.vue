@@ -79,7 +79,9 @@ export default {
       );
     },
   },
+
   colorScheme: gon?.user_color_scheme,
+  emits: [],
 };
 </script>
 

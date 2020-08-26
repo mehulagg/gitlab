@@ -41,6 +41,7 @@ export default {
   RICH_BLOB_VIEWER,
   SIMPLE_BLOB_VIEWER_TITLE,
   RICH_BLOB_VIEWER_TITLE,
+  emits: ['input'],
 };
 </script>
 <template>

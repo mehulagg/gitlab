@@ -88,6 +88,8 @@ export default {
       return size / max;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -74,6 +74,8 @@ export default {
       this.fetchMilestoneBySearchTerm(data);
     }, DEBOUNCE_DELAY),
   },
+
+  emits: [],
 };
 </script>
 

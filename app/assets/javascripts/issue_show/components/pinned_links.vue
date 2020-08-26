@@ -41,6 +41,8 @@ export default {
       return i < this.pinnedLinks.length - 1;
     },
   },
+
+  emits: [],
 };
 </script>
 

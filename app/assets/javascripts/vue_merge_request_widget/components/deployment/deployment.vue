@@ -47,6 +47,8 @@ export default {
       return Boolean(this.deployment.details?.playable_build?.play_path);
     },
   },
+
+  emits: [],
 };
 </script>
 

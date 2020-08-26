@@ -225,6 +225,8 @@ export default {
         .catch(() => new Flash(__('Error rendering markdown preview')));
     },
   },
+
+  emits: ['handleSuggestDismissed'],
 };
 </script>
 

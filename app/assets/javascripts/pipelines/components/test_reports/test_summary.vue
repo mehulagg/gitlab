@@ -61,6 +61,8 @@ export default {
       this.$emit('on-back-click');
     },
   },
+
+  emits: ['on-back-click'],
 };
 </script>
 

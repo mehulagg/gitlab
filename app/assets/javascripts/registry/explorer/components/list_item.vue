@@ -53,6 +53,8 @@ export default {
       this.isDetailsShown = !this.isDetailsShown;
     },
   },
+
+  emits: [],
 };
 </script>
 

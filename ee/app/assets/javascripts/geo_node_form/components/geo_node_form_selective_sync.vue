@@ -45,8 +45,10 @@ export default {
       this.$emit('removeSyncOption', { key, index });
     },
   },
+
   SELECTIVE_SYNC_MORE_INFO,
   OBJECT_STORAGE_MORE_INFO,
+  emits: ['addSyncOption', 'removeSyncOption'],
 };
 </script>
 

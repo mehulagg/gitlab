@@ -43,6 +43,8 @@ export default {
       this.$refs.deleteModal.show();
     },
   },
+
+  emits: ['cancelDelete', 'confirmDelete'],
 };
 </script>
 

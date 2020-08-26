@@ -68,6 +68,8 @@ export default {
       { titleLength: MAX_TITLE_LENGTH, bodyLength: MAX_BODY_LENGTH },
     ),
   },
+
+  emits: ['input', 'submit'],
 };
 </script>
 

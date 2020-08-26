@@ -32,6 +32,8 @@ export default {
       this.fetchSubnetworks({ project, region, network: network.selfLink });
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

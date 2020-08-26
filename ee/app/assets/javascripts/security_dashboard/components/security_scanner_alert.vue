@@ -52,6 +52,8 @@ export default {
       );
     },
   },
+
+  emits: ['dismiss'],
 };
 </script>
 

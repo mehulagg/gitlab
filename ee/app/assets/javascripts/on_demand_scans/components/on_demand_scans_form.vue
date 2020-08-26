@@ -183,6 +183,8 @@ export default {
       this.showAlert = false;
     },
   },
+
+  emits: ['cancel'],
 };
 </script>
 

@@ -49,7 +49,9 @@ export default {
   methods: {
     ...mapActions(['openPendingTab', 'updateViewer', 'updateActivityBarView']),
   },
+
   stageKeys,
+  emits: [],
 };
 </script>
 

@@ -11,6 +11,8 @@ export default {
       $(this.$el).renderGFM();
     },
   },
+
+  emits: [],
 };
 </script>
 

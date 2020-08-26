@@ -176,6 +176,8 @@ export default {
       return __('This job is creating a deployment to %{environmentLink}.');
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

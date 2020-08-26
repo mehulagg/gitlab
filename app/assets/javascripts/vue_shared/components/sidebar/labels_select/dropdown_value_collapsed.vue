@@ -40,6 +40,8 @@ export default {
       this.$emit('onValueClick');
     },
   },
+
+  emits: ['onValueClick'],
 };
 </script>
 

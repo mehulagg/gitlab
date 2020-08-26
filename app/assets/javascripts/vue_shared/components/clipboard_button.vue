@@ -61,6 +61,8 @@ export default {
       return this.text;
     },
   },
+
+  emits: [],
 };
 </script>
 

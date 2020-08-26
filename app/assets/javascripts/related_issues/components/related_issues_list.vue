@@ -91,6 +91,8 @@ export default {
       return this.issuableType === 'issue' ? epicIssueId : id;
     },
   },
+
+  emits: ['relatedIssueRemoveRequest', 'saveReorder'],
 };
 </script>
 

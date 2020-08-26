@@ -30,6 +30,8 @@ export default {
       this.height = clientHeight;
     },
   },
+
+  emits: [],
 };
 </script>
 

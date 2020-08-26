@@ -71,6 +71,8 @@ export default {
       return `[UTC ${this.formatUtcOffset(item.offset)}] ${item.name}`;
     },
   },
+
+  emits: ['input'],
 };
 </script>
 <template>

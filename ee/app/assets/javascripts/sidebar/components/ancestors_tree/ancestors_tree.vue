@@ -59,6 +59,8 @@ export default {
       return ancestor.state === 'opened' ? 'opened' : 'closed';
     },
   },
+
+  emits: [],
 };
 </script>
 

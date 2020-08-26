@@ -25,6 +25,8 @@ export default {
       return this.project.importStatus === STATUSES.FINISHED;
     },
   },
+
+  emits: [],
 };
 </script>
 

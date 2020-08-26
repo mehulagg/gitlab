@@ -36,6 +36,8 @@ export default {
   methods: {
     ...mapActions(['fetchUserList', 'updateUserList', 'dismissErrorAlert']),
   },
+
+  emits: [],
 };
 </script>
 <template>

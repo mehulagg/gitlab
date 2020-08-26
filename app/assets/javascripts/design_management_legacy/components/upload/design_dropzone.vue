@@ -59,8 +59,10 @@ export default {
       this.$emit('change', e.target.files);
     },
   },
+
   uploadDesignMutation,
   VALID_DESIGN_FILE_MIMETYPE,
+  emits: ['change'],
 };
 </script>
 

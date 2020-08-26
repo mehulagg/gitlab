@@ -29,6 +29,7 @@ export default {
   labelPrevPage: LABEL_PREV_PAGE,
   labelNextPage: LABEL_NEXT_PAGE,
   labelLastPage: LABEL_LAST_PAGE,
+  emits: [],
 };
 </script>
 

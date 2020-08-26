@@ -47,6 +47,8 @@ export default {
       this.$emit('change', option.value);
     },
   },
+
+  emits: ['change'],
 };
 </script>
 

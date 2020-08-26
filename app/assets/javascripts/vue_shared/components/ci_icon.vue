@@ -63,6 +63,8 @@ export default {
       return this.borderless ? `${this.status.icon}_borderless` : this.status.icon;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

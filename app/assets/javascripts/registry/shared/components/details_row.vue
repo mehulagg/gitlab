@@ -26,6 +26,8 @@ export default {
       return this.dashed ? 'gl-border-b-solid gl-border-gray-100 gl-border-b-1' : '';
     },
   },
+
+  emits: [],
 };
 </script>
 

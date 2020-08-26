@@ -90,6 +90,8 @@ export default {
         .catch(this.errorCallback);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

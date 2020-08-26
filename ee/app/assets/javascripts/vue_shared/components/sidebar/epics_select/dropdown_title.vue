@@ -21,6 +21,8 @@ export default {
       default: false,
     },
   },
+
+  emits: ['onClickEdit'],
 };
 </script>
 

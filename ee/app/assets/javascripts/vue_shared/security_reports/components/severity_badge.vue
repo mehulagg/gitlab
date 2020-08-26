@@ -37,6 +37,8 @@ export default {
       return SEVERITY_TOOLTIP_TITLE_MAP[this.severityKey];
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -111,6 +111,8 @@ Once deleted, it cannot be undone or recovered.`),
         });
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -53,6 +53,8 @@ export default {
       this.deleteRule(this.rule.id);
     },
   },
+
+  emits: [],
 };
 </script>
 

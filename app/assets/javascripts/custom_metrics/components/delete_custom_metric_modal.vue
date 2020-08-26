@@ -28,7 +28,9 @@ export default {
   descriptionText: s__(
     `Metrics|You're about to permanently delete this metric. This cannot be undone.`,
   ),
+
   modalId: 'delete-custom-metric-modal',
+  emits: [],
 };
 </script>
 <template>

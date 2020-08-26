@@ -171,6 +171,7 @@ export default {
   assigneesVisible: ASSIGNEES_VISIBLE,
   avatarSize: AVATAR_SIZE,
   testIds: THROUGHPUT_TABLE_TEST_IDS,
+  emits: [],
 };
 </script>
 <template>

@@ -51,6 +51,8 @@ export default {
       return this.release.tagPath;
     },
   },
+
+  emits: [],
 };
 </script>
 

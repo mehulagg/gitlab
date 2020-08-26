@@ -77,6 +77,8 @@ export default {
       return noneEpic;
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -93,7 +93,9 @@ export default {
     { value: ASSET_LINK_TYPE.RUNBOOK, text: s__('ReleaseAssetLinkType|Runbook') },
     { value: ASSET_LINK_TYPE.OTHER, text: s__('ReleaseAssetLinkType|Other') },
   ],
+
   defaultTypeOptionValue: DEFAULT_ASSET_LINK_TYPE,
+  emits: [],
 };
 </script>
 

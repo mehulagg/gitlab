@@ -46,6 +46,8 @@ export default {
       return className ? `ci-status ci-${className} qa-status-badge` : 'ci-status qa-status-badge';
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -47,6 +47,8 @@ export default {
       this.fetchBranches(data);
     }, FILTER_PIPELINES_SEARCH_DELAY),
   },
+
+  emits: [],
 };
 </script>
 

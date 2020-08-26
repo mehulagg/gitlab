@@ -34,6 +34,8 @@ export default {
       this.store.sortMembers(columnName);
     },
   },
+
+  emits: [],
 };
 </script>
 

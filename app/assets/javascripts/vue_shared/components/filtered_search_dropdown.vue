@@ -98,6 +98,8 @@ export default {
         this.filter = '';
       });
   },
+
+  emits: ['createItem'],
 };
 </script>
 <template>

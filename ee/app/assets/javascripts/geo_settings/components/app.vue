@@ -18,6 +18,8 @@ export default {
   methods: {
     ...mapActions(['fetchGeoSettings']),
   },
+
+  emits: [],
 };
 </script>
 

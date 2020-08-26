@@ -60,6 +60,8 @@ export default {
       this.toggleCreateEpicForm({ toggleState: true });
     },
   },
+
+  emits: [],
 };
 </script>
 

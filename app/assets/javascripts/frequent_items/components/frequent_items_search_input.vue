@@ -37,6 +37,8 @@ export default {
       this.$refs.search.focus();
     },
   },
+
+  emits: [],
 };
 </script>
 

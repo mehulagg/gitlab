@@ -101,6 +101,8 @@ export default {
       this.enteredUsername = '';
     },
   },
+
+  emits: [],
 };
 </script>
 

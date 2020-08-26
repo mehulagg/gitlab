@@ -24,7 +24,9 @@ export default {
       this.$emit('upload', e.target.files);
     },
   },
+
   VALID_DESIGN_FILE_MIMETYPE,
+  emits: ['upload'],
 };
 </script>
 

@@ -65,6 +65,8 @@ export default {
       this.$emit('removeToken', token);
     },
   },
+
+  emits: ['blur', 'focus', 'input', 'removeToken'],
 };
 </script>
 

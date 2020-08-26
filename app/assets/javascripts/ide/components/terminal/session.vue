@@ -29,6 +29,8 @@ export default {
   methods: {
     ...mapActions('terminal', ['restartSession', 'stopSession']),
   },
+
+  emits: [],
 };
 </script>
 

@@ -28,6 +28,8 @@ export default {
       },
     },
   },
+
+  emits: ['delete', 'pageChange'],
 };
 </script>
 

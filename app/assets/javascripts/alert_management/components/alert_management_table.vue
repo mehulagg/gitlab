@@ -312,6 +312,8 @@ export default {
       this.errorMessage = '';
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

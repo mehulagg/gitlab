@@ -47,6 +47,8 @@ export default {
     },
     startCase,
   },
+
+  emits: [],
 };
 </script>
 

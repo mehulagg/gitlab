@@ -15,7 +15,9 @@ export default {
   methods: {
     ...mapActions('threatMonitoring', ['setCurrentEnvironmentId']),
   },
+
   environmentFilterId: 'threat-monitoring-environment-filter',
+  emits: [],
 };
 </script>
 

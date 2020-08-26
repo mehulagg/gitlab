@@ -301,6 +301,8 @@ export default {
     animation: 200,
     ghostClass: 'gl-visibility-hidden',
   },
+
+  emits: [],
 };
 </script>
 

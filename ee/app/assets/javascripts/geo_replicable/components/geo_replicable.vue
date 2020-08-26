@@ -46,6 +46,8 @@ export default {
       return item.name ? item.name : item.id;
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -49,6 +49,8 @@ export default {
       return config;
     },
   },
+
+  emits: ['change'],
 };
 </script>
 

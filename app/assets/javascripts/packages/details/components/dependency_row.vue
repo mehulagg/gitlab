@@ -12,6 +12,8 @@ export default {
       return Boolean(this.dependency.version_pattern);
     },
   },
+
+  emits: [],
 };
 </script>
 

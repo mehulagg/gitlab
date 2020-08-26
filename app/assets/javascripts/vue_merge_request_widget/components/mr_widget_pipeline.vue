@@ -104,7 +104,9 @@ export default {
   errorText: s__(
     'Pipeline|Could not retrieve the pipeline status. For troubleshooting steps, read the %{linkStart}documentation%{linkEnd}.',
   ),
+
   monitoringPipelineText: s__('Pipeline|Checking pipeline status.'),
+  emits: [],
 };
 </script>
 <template>

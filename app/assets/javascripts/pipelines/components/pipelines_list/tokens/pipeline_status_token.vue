@@ -75,6 +75,8 @@ export default {
       return this.statuses.find(status => status.value === this.value.data);
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -55,6 +55,8 @@ export default {
       return `${noteData.author.name}: ${note}`;
     },
   },
+
+  emits: ['toggleLineDiscussions'],
 };
 </script>
 

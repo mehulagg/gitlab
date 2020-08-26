@@ -117,6 +117,8 @@ export default {
       'fetchLicenseCheckApprovalRule',
     ]),
   },
+
+  emits: ['updateBadgeCount'],
 };
 </script>
 <template>

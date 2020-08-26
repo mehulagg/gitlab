@@ -22,5 +22,7 @@ export default {
   render() {
     return this.$slots.default;
   },
+
+  emits: [],
 };
 </script>

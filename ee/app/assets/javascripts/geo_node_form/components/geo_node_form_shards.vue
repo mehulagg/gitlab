@@ -45,6 +45,8 @@ export default {
       return this.selectedShards.includes(shard.value);
     },
   },
+
+  emits: ['addSyncOption', 'removeSyncOption'],
 };
 </script>
 

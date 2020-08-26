@@ -91,6 +91,8 @@ export default {
   mounted() {
     this.$set(this, 'stageNavHeight', this.$refs.stageNav.clientHeight);
   },
+
+  emits: [],
 };
 </script>
 <template>

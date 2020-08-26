@@ -18,6 +18,8 @@ export default {
       return `#${this.job.id}`;
     },
   },
+
+  emits: [],
 };
 </script>
 

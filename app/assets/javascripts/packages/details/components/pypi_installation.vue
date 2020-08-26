@@ -24,7 +24,9 @@ export default {
       'PackageRegistry|For more information on the PyPi registry, %{linkStart}see the documentation%{linkEnd}.',
     ),
   },
+
   trackingActions: { ...TrackingActions },
+  emits: [],
 };
 </script>
 

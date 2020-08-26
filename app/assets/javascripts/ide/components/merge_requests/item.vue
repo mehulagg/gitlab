@@ -35,6 +35,8 @@ export default {
       return this.$router.resolve(path).href;
     },
   },
+
+  emits: [],
 };
 </script>
 

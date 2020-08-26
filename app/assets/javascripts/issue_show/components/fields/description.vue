@@ -34,6 +34,8 @@ export default {
   mounted() {
     this.$refs.textarea.focus();
   },
+
+  emits: [],
 };
 </script>
 

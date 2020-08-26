@@ -27,6 +27,8 @@ export default {
       return spriteIcon(this.note?.systemNoteIconName);
     },
   },
+
+  emits: [],
 };
 </script>
 

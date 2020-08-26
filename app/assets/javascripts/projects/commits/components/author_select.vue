@@ -102,6 +102,8 @@ export default {
       this.hasSearchParam = Boolean(value);
     },
   },
+
+  emits: [],
 };
 </script>
 

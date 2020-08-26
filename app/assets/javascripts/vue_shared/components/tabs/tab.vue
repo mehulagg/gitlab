@@ -31,6 +31,8 @@ export default {
       this.$parent.$forceUpdate();
     }
   },
+
+  emits: [],
 };
 </script>
 

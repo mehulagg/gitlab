@@ -44,6 +44,8 @@ export default {
   methods: {
     generateKey,
   },
+
+  emits: [],
 };
 </script>
 

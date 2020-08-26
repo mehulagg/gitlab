@@ -36,6 +36,8 @@ export default {
       this.$router.push(this.parentRoute);
     },
   },
+
+  emits: [],
 };
 </script>
 

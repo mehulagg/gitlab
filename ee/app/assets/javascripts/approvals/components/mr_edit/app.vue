@@ -9,6 +9,8 @@ export default {
     MrRules,
     MrRulesHiddenInputs,
   },
+
+  emits: [],
 };
 </script>
 

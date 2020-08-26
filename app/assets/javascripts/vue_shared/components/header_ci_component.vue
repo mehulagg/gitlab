@@ -68,6 +68,8 @@ export default {
       this.$emit('clickedSidebarButton');
     },
   },
+
+  emits: ['clickedSidebarButton'],
 };
 </script>
 

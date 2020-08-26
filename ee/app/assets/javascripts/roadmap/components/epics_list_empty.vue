@@ -120,6 +120,8 @@ export default {
       initEpicCreate(true);
     }
   },
+
+  emits: [],
 };
 </script>
 

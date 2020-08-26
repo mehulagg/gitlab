@@ -21,6 +21,8 @@ export default {
       this.toggleInput();
     },
   },
+
+  emits: ['add-request'],
 };
 </script>
 <template>

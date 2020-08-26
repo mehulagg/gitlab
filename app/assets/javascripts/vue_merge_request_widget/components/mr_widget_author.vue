@@ -30,6 +30,8 @@ export default {
       return this.author.avatarUrl || this.author.avatar_url || gl.mrWidgetData.defaultAvatarUrl;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -147,6 +147,8 @@ export default {
       $(this.$refs.input).select2('data', []);
     },
   },
+
+  emits: ['input'],
 };
 </script>
 

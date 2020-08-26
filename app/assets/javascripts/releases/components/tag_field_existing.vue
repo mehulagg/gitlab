@@ -16,6 +16,8 @@ export default {
       return uniqueId('tag-name-help-');
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

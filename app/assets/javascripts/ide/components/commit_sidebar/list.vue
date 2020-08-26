@@ -66,6 +66,8 @@ export default {
   discardModalText: __(
     "You will lose all uncommitted changes you've made in this project. This action cannot be undone.",
   ),
+
+  emits: [],
 };
 </script>
 

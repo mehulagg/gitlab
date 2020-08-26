@@ -23,6 +23,8 @@ export default {
       return s__('Environments|Open live environment');
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -117,7 +117,9 @@ export default {
     malicious traffic is trying to access your app. The docs link is also
     accessible by clicking the "?" icon next to the title below.`,
   ),
+
   helpPopoverText: s__('ThreatMonitoring|View documentation'),
+  emits: [],
 };
 </script>
 

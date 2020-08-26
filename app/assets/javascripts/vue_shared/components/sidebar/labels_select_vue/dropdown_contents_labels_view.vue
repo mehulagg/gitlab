@@ -129,6 +129,8 @@ export default {
       if (!this.allowMultiselect) this.toggleDropdownContents();
     },
   },
+
+  emits: [],
 };
 </script>
 

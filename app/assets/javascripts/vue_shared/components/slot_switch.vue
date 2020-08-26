@@ -23,6 +23,8 @@ export default {
       return Object.keys(this.$slots);
     },
   },
+
+  emits: [],
 };
 </script>
 

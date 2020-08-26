@@ -168,6 +168,8 @@ export default {
       this.isCollapsed = !this.isCollapsed;
     },
   },
+
+  emits: ['toggleEvent'],
 };
 </script>
 <template>

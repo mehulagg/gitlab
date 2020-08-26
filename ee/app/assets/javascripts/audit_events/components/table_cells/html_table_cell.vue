@@ -15,6 +15,8 @@ export default {
       return sanitize(this.html, { ALLOWED_TAGS });
     },
   },
+
+  emits: [],
 };
 </script>
 

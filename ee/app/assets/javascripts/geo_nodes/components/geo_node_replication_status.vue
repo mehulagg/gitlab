@@ -32,7 +32,9 @@ export default {
       return this.node.enabled ? __('Replication enabled') : __('Replication paused');
     },
   },
+
   REPLICATION_PAUSE_URL,
+  emits: [],
 };
 </script>
 

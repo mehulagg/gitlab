@@ -16,6 +16,8 @@ export default {
       return this.pipeline.user;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

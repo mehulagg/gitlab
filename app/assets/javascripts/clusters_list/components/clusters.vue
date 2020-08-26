@@ -190,6 +190,8 @@ export default {
       return { totalCpu: null, freeSpacePercentage: null };
     },
   },
+
+  emits: [],
 };
 </script>
 

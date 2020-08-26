@@ -75,8 +75,17 @@ export default {
       return this.medians[id] ? this.medians[id] : null;
     },
   },
+
   STAGE_ACTIONS,
   noDragClass: NO_DRAG_CLASS,
+  emits: [
+    'reorderStage',
+    'showAddStageForm',
+    STAGE_ACTIONS.REMOVE,
+    STAGE_ACTIONS.HIDE,
+    STAGE_ACTIONS.SELECT,
+    STAGE_ACTIONS.EDIT,
+  ],
 };
 </script>
 <template>

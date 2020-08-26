@@ -15,6 +15,8 @@ export default {
       return this.line.type;
     },
   },
+
+  emits: [],
 };
 </script>
 

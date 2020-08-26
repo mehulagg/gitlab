@@ -89,7 +89,9 @@ export default {
       return this.assets.links.filter(l => l.linkType === type);
     },
   },
+
   externalLinkTooltipText: __('This link points to external content'),
+  emits: [],
 };
 </script>
 

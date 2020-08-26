@@ -59,6 +59,8 @@ export default {
       this.$emit('selected', this.selectedStages);
     },
   },
+
+  emits: ['selected'],
 };
 </script>
 

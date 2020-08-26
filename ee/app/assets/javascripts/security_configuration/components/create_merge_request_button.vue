@@ -68,6 +68,8 @@ export default {
     autoDevOps: s__('SecurityConfiguration|Configure'),
     noAutoDevOps: s__('SecurityConfiguration|Enable via Merge Request'),
   },
+
+  emits: [],
 };
 </script>
 

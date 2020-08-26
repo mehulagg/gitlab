@@ -41,6 +41,8 @@ export default {
       this.config.fetchData(data);
     }, DEBOUNCE_DELAY),
   },
+
+  emits: [],
 };
 </script>
 <template>

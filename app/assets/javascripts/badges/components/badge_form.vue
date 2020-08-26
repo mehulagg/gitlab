@@ -158,6 +158,8 @@ export default {
         });
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -52,6 +52,8 @@ export default {
       return s__('Modal|Close');
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -9,8 +9,10 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+
   components: { GlIcon },
   gitlabTeamMemberLabel: GITLAB_TEAM_MEMBER_LABEL,
+  emits: [],
 };
 </script>
 

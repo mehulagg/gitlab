@@ -41,6 +41,8 @@ export default {
   methods: {
     ...mapActions(['fetchFreezePeriods']),
   },
+
+  emits: [],
 };
 </script>
 

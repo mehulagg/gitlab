@@ -33,6 +33,8 @@ export default {
       });
     },
   },
+
+  emits: [],
 };
 </script>
 

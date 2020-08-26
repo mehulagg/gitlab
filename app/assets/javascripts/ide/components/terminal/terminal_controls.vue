@@ -17,6 +17,8 @@ export default {
       default: false,
     },
   },
+
+  emits: ['scroll-down', 'scroll-up'],
 };
 </script>
 <template>

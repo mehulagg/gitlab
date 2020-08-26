@@ -117,6 +117,8 @@ export default {
   autoDevopsAlertMessage: s__(`
     SecurityConfiguration|You can quickly enable all security scanning tools by
     enabling %{linkStart}Auto DevOps%{linkEnd}.`),
+
+  emits: [],
 };
 </script>
 

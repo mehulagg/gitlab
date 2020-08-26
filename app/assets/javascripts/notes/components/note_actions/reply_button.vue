@@ -10,6 +10,8 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+
+  emits: ['startReplying'],
 };
 </script>
 

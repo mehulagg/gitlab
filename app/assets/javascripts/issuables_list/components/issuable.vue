@@ -234,6 +234,7 @@ export default {
   },
 
   confidentialTooltipText: __('Confidential'),
+  emits: ['select'],
 };
 </script>
 <template>

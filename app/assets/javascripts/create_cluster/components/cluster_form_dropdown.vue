@@ -180,6 +180,8 @@ export default {
       return this.selectedItems.includes(item);
     },
   },
+
+  emits: ['input'],
 };
 </script>
 

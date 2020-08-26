@@ -9,7 +9,10 @@ const events = {
 };
 
 export default {
+  emits: Object.values(events),
+
   components: { GlAlert, GlLoadingIcon, GlModal, DuplicateDashboardForm },
+
   props: {
     defaultBranch: {
       type: String,

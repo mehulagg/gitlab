@@ -58,6 +58,8 @@ export default {
       return this.actionInProgress === this.actionsConfiguration.actionName;
     },
   },
+
+  emits: ['click'],
 };
 </script>
 

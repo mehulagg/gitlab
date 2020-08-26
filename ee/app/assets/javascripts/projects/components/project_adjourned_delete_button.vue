@@ -35,6 +35,8 @@ export default {
     helpLabel: __('Recovering projects'),
     recoveryMessage: __('You can recover this project until %{date}'),
   },
+
+  emits: [],
 };
 </script>
 

@@ -149,6 +149,8 @@ export default {
       eventHub.$emit('updateWeight', '', this.id);
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -17,6 +17,8 @@ export default {
       return this.isGroupOpen ? 'angle-down' : 'angle-right';
     },
   },
+
+  emits: [],
 };
 </script>
 

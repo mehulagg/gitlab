@@ -119,6 +119,8 @@ export default {
       if (anyLabelUpdated) this.updateEpicLabels(labels);
     },
   },
+
+  emits: [],
 };
 </script>
 

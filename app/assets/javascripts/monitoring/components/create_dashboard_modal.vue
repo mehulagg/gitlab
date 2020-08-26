@@ -31,6 +31,8 @@ export default {
       'Metrics|To create a new dashboard, add a new YAML file to %{codeStart}.gitlab/dashboards%{codeEnd} at the root of this project.',
     ),
   },
+
+  emits: [],
 };
 </script>
 

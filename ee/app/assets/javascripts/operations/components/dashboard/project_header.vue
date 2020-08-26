@@ -46,6 +46,8 @@ export default {
       this.$emit('remove', this.project.remove_path);
     },
   },
+
+  emits: ['remove'],
 };
 </script>
 

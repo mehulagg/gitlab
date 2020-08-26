@@ -19,6 +19,8 @@ export default {
   i18n: {
     edit: s__('Checkout|Edit'),
   },
+
+  emits: [],
 };
 </script>
 <template>

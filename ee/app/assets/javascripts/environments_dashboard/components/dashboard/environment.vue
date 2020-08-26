@@ -114,6 +114,8 @@ export default {
         : s__('EnvironmentDashboard|API');
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

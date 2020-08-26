@@ -98,6 +98,8 @@ export default {
       return localStorage.setItem(storageKey, JSON.stringify(storedFrequentItems));
     },
   },
+
+  emits: [],
 };
 </script>
 

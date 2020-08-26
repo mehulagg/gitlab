@@ -33,7 +33,9 @@ export default {
       'PackageRegistry|You may also need to setup authentication using an auth token. %{linkStart}See the documentation%{linkEnd} to find out more.',
     ),
   },
+
   trackingActions: { ...TrackingActions },
+  emits: [],
 };
 </script>
 

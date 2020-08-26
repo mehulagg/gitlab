@@ -22,6 +22,8 @@ export default {
   destroyed() {
     this.modal.selectedList = null;
   },
+
+  emits: [],
 };
 </script>
 <template>

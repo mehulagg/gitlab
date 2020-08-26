@@ -25,6 +25,8 @@ export default {
   methods: {
     ...mapActions('details', ['startPollingStacktrace']),
   },
+
+  emits: [],
 };
 </script>
 

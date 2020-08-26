@@ -50,6 +50,8 @@ export default {
   assignMergeRequestInstruction: s__(
     'StaticSiteEditor|3. Assign a person to review and accept the merge request.',
   ),
+
+  emits: [],
 };
 </script>
 <template>

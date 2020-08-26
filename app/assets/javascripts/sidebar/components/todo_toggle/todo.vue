@@ -66,6 +66,8 @@ export default {
       this.$emit('toggleTodo');
     },
   },
+
+  emits: ['toggleTodo'],
 };
 </script>
 

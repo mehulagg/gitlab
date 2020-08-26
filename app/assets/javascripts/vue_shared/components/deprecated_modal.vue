@@ -81,6 +81,8 @@ export default {
       this.$emit('submit', event);
     },
   },
+
+  emits: ['cancel', 'submit'],
 };
 </script>
 

@@ -92,6 +92,8 @@ export default {
       columnChart.on('datazoom', this.updateAxisNamePadding);
     },
   },
+
+  emits: [],
 };
 </script>
 

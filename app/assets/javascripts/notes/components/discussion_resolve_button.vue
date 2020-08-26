@@ -17,6 +17,8 @@ export default {
       required: true,
     },
   },
+
+  emits: ['onClick'],
 };
 </script>
 

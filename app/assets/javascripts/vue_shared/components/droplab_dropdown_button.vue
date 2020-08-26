@@ -53,6 +53,8 @@ export default {
       this.$emit('onActionSelect', selectedAction);
     },
   },
+
+  emits: ['onActionClick', 'onActionSelect'],
 };
 </script>
 

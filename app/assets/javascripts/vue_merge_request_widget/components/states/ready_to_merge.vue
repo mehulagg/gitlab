@@ -287,6 +287,8 @@ export default {
         });
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -26,6 +26,8 @@ export default {
   methods: {
     ...mapCommitActions(['toggleShouldCreateMR']),
   },
+
+  emits: [],
 };
 </script>
 

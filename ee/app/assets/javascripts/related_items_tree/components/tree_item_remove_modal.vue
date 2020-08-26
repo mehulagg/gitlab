@@ -49,6 +49,8 @@ export default {
   methods: {
     ...mapActions(['removeItem']),
   },
+
+  emits: [],
 };
 </script>
 

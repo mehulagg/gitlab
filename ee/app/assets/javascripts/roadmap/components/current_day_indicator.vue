@@ -27,6 +27,8 @@ export default {
       this.indicatorStyles = this.getIndicatorStyles();
     });
   },
+
+  emits: [],
 };
 </script>
 

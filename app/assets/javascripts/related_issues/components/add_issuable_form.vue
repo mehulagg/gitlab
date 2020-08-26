@@ -145,6 +145,14 @@ export default {
       this.$emit('addIssuableFormBlur', params);
     },
   },
+
+  emits: [
+    'addIssuableFormBlur',
+    'addIssuableFormCancel',
+    'addIssuableFormInput',
+    'addIssuableFormSubmit',
+    'pendingIssuableRemoveRequest',
+  ],
 };
 </script>
 

@@ -5,6 +5,8 @@ export default {
   i18n: {
     title: s__('SecurityReports|Security Dashboard'),
   },
+
+  emits: [],
 };
 </script>
 

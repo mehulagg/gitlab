@@ -104,6 +104,8 @@ export default {
       return this.hideTooltips ? '' : `${label}: ${count}`;
     },
   },
+
+  emits: [],
 };
 </script>
 

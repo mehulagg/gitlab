@@ -62,6 +62,8 @@ export default {
       this.$emit('onChangePage', page);
     },
   },
+
+  emits: ['onChangePage'],
 };
 </script>
 

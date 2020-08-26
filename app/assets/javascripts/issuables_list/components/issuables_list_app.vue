@@ -352,6 +352,8 @@ export default {
       this.refetchIssuables();
     },
   },
+
+  emits: [],
 };
 </script>
 

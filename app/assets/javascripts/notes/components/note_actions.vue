@@ -170,6 +170,8 @@ export default {
       }
     },
   },
+
+  emits: ['handleDelete', 'handleEdit', 'handleResolve', 'startReplying', 'updateAssignees'],
 };
 </script>
 

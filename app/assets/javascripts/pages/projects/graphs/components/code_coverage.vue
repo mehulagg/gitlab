@@ -117,7 +117,9 @@ export default {
       this.coveragePercentage = get(params, 'seriesData[0].data[1]', '');
     },
   },
+
   height: 200,
+  emits: [],
 };
 </script>
 

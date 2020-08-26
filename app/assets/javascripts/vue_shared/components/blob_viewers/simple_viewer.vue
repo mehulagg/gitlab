@@ -39,7 +39,9 @@ export default {
       }
     },
   },
+
   userColorScheme: window.gon.user_color_scheme,
+  emits: [],
 };
 </script>
 <template>

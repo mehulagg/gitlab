@@ -53,6 +53,8 @@ export default {
       return this.$refs.testReportBadge?.$el || '';
     },
   },
+
+  emits: [],
 };
 </script>
 

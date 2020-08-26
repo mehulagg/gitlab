@@ -105,6 +105,8 @@ export default {
       return DISCUSSION_FILTER_TYPES.HISTORY;
     },
   },
+
+  emits: [],
 };
 </script>
 

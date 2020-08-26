@@ -43,6 +43,8 @@ export default {
       this.undoFileTemplate();
     },
   },
+
+  emits: [],
 };
 </script>
 

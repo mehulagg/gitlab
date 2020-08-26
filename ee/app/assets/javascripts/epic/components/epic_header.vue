@@ -69,6 +69,8 @@ export default {
   methods: {
     ...mapActions(['toggleSidebar', 'requestEpicStatusChangeSuccess', 'toggleEpicStatus']),
   },
+
+  emits: [],
 };
 </script>
 

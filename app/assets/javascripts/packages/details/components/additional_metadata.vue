@@ -37,6 +37,8 @@ export default {
       return visibilityConditions[this.packageEntity.package_type];
     },
   },
+
+  emits: [],
 };
 </script>
 

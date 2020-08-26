@@ -288,6 +288,8 @@ export default {
       };
     },
   },
+
+  emits: [],
 };
 </script>
 

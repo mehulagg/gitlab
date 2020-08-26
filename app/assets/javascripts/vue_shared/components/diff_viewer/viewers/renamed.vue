@@ -82,6 +82,8 @@ export default {
       this.transition(TRANSITION_ACKNOWLEDGE_ERROR);
     },
   },
+
+  emits: [],
 };
 </script>
 

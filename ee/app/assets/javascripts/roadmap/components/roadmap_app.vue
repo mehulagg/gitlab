@@ -126,6 +126,8 @@ export default {
       });
     },
   },
+
+  emits: [],
 };
 </script>
 

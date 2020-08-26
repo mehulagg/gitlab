@@ -26,6 +26,8 @@ export default {
   i18n: {
     checkout: s__('Checkout|Checkout'),
   },
+
+  emits: [],
 };
 </script>
 <template>

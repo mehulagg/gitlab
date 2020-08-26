@@ -28,6 +28,8 @@ export default {
     creditCardDetails: s__('Checkout|%{cardType} ending in %{lastFourDigits}'),
     expirationDate: s__('Checkout|Exp %{expirationMonth}/%{expirationYear}'),
   },
+
+  emits: [],
 };
 </script>
 <template>

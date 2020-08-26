@@ -7,6 +7,8 @@ export default {
     DeployFreezeTable,
     DeployFreezeModal,
   },
+
+  emits: [],
 };
 </script>
 

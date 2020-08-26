@@ -52,6 +52,8 @@ export default {
       this.$refs.form.submit();
     },
   },
+
+  emits: [],
 };
 </script>
 

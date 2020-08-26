@@ -52,6 +52,8 @@ export default {
       return this.addNum + this.changeNum + this.deleteNum >= 0;
     },
   },
+
+  emits: [],
 };
 </script>
 

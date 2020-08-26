@@ -162,6 +162,8 @@ export default {
       this.setFluentdSettings({ ciliumLogEnabled });
     },
   },
+
+  emits: [],
 };
 </script>
 

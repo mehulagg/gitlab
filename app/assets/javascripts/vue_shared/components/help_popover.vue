@@ -40,6 +40,8 @@ export default {
         window.addEventListener('scroll', togglePopover.bind($el, false), { once: true });
       });
   },
+
+  emits: [],
 };
 </script>
 <template>

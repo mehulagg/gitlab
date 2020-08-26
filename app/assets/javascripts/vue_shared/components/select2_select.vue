@@ -29,6 +29,8 @@ export default {
   beforeDestroy() {
     $(this.$refs.dropdownInput).select2('destroy');
   },
+
+  emits: ['input'],
 };
 </script>
 

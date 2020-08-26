@@ -67,6 +67,8 @@ export default {
       return rawTimestamp ? this.timeFormatted(rawTimestamp) : '';
     },
   },
+
+  emits: [],
 };
 </script>
 

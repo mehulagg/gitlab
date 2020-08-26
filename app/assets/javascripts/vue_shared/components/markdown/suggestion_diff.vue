@@ -55,6 +55,8 @@ export default {
       this.$emit('removeFromBatch', this.suggestion.id);
     },
   },
+
+  emits: ['addToBatch', 'apply', 'applyBatch', 'removeFromBatch'],
 };
 </script>
 

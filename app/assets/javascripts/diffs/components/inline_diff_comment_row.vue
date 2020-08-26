@@ -46,6 +46,8 @@ export default {
   methods: {
     ...mapActions('diffs', ['showCommentForm']),
   },
+
+  emits: [],
 };
 </script>
 

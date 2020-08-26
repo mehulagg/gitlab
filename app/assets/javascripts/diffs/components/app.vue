@@ -427,8 +427,10 @@ export default {
       }
     },
   },
+
   minTreeWidth: MIN_TREE_WIDTH,
   maxTreeWidth: MAX_TREE_WIDTH,
+  emits: [],
 };
 </script>
 

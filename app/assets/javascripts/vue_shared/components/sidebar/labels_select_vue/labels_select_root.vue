@@ -227,6 +227,8 @@ export default {
       });
     },
   },
+
+  emits: ['onDropdownClose', 'toggleCollapse', 'updateSelectedLabels'],
 };
 </script>
 

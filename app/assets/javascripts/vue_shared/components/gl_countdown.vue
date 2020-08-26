@@ -40,6 +40,8 @@ export default {
   beforeDestroy() {
     window.clearInterval(this.countdownUpdateIntervalId);
   },
+
+  emits: [],
 };
 </script>
 

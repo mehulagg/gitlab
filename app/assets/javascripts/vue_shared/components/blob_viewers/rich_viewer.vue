@@ -11,6 +11,8 @@ export default {
   mounted() {
     handleBlobRichViewer(this.$refs.content, this.type);
   },
+
+  emits: [],
 };
 </script>
 <template>

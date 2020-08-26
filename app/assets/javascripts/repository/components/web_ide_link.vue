@@ -39,6 +39,8 @@ export default {
       return webIDEUrl(`/${path}/edit/${this.refSha}/-/${this.$route.params.path || ''}`);
     },
   },
+
+  emits: [],
 };
 </script>
 

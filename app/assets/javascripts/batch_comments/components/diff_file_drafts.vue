@@ -20,6 +20,8 @@ export default {
       return this.draftsForFile(this.fileHash);
     },
   },
+
+  emits: [],
 };
 </script>
 

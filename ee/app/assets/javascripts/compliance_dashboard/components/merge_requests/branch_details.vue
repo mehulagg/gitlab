@@ -25,6 +25,8 @@ export default {
   strings: {
     branchDetails: __('%{sourceBranch} into %{targetBranch}'),
   },
+
+  emits: [],
 };
 </script>
 

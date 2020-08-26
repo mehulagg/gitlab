@@ -15,6 +15,8 @@ export default {
       return truncatePathMiddleToLength(this.path, MAX_PATH_LENGTH);
     },
   },
+
+  emits: [],
 };
 </script>
 

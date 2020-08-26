@@ -72,6 +72,8 @@ Once you confirm %{deleteAccount}, it cannot be undone or recovered.`),
       this.$refs.form.submit();
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -56,6 +56,8 @@ export default {
     ...mapActions(['fetchZones']),
     ...mapActions({ setItem: 'setZone' }),
   },
+
+  emits: [],
 };
 </script>
 

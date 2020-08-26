@@ -58,6 +58,8 @@ export default {
       this.$emit('hidePicker');
     },
   },
+
+  emits: ['hidePicker', 'newDateSelected'],
 };
 </script>
 

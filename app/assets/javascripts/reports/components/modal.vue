@@ -19,7 +19,9 @@ export default {
       required: true,
     },
   },
+
   fieldTypes,
+  emits: [],
 };
 </script>
 <template>

@@ -59,6 +59,8 @@ export default {
       }
     },
   },
+
+  emits: ['close', 'open'],
 };
 </script>
 <template>

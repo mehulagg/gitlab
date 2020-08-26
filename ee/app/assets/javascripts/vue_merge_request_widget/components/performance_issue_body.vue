@@ -40,6 +40,8 @@ export default {
       return formatScore(this.issue.delta);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

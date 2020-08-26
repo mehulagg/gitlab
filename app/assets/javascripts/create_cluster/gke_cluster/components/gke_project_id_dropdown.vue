@@ -128,6 +128,8 @@ export default {
       this.gapiError = resp.result ? resp.result.error.message : resp;
     },
   },
+
+  emits: [],
 };
 </script>
 

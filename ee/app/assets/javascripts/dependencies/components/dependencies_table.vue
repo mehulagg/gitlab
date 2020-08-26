@@ -80,7 +80,9 @@ export default {
     { key: 'license', label: s__('Dependencies|License'), tdClass },
     { key: 'isVulnerable', label: '', tdClass },
   ],
+
   DEPENDENCIES_PER_PAGE: 20,
+  emits: [],
 };
 </script>
 

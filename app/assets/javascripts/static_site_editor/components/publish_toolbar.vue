@@ -22,6 +22,8 @@ export default {
       default: false,
     },
   },
+
+  emits: ['submit'],
 };
 </script>
 <template>

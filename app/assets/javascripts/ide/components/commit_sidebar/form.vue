@@ -98,6 +98,8 @@ export default {
       this.componentHeight = null;
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -109,6 +109,8 @@ export default {
       this.$nextTick(() => this.renderSuggestions());
     },
   },
+
+  emits: ['addToBatch', 'apply', 'applyBatch', 'removeFromBatch'],
 };
 </script>
 

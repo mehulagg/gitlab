@@ -82,6 +82,8 @@ export default {
       eventHub.$emit('repairNode', this.node);
     },
   },
+
+  emits: [],
 };
 </script>
 

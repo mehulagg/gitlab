@@ -60,6 +60,8 @@ export default {
       return mr.assignee ? [mr.assignee] : [];
     },
   },
+
+  emits: [],
 };
 </script>
 

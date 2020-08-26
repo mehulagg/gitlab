@@ -78,6 +78,8 @@ export default {
       this.$emit('searched', this.searchQuery);
     }, SEARCH_INPUT_TIMEOUT_MS),
   },
+
+  emits: ['bottomReached', 'projectClicked', 'searched'],
 };
 </script>
 <template>

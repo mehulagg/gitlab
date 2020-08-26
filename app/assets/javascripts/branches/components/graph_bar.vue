@@ -52,6 +52,8 @@ export default {
       return `position-${this.isLeftSide ? SIDES.right : SIDES.left}-0`;
     },
   },
+
+  emits: [],
 };
 </script>
 

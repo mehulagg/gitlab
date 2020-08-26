@@ -103,6 +103,8 @@ export default {
       return this.states[this.selectedState];
     },
   },
+
+  emits: [],
 };
 </script>
 

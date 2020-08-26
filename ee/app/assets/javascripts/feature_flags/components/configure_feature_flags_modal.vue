@@ -135,6 +135,8 @@ export default {
       this.clearState();
     },
   },
+
+  emits: ['token'],
 };
 </script>
 <template>

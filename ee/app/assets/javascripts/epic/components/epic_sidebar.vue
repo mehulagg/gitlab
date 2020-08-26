@@ -132,6 +132,8 @@ export default {
       notesEventHub.$emit('notesApp.updateIssuableConfidentiality', confidential);
     },
   },
+
+  emits: [],
 };
 </script>
 

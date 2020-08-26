@@ -28,6 +28,8 @@ export default {
       this.toggleEpicSwimlanes();
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -55,7 +55,9 @@ export default {
       return Boolean(this.approvers.length);
     },
   },
+
   APPROVED_MESSAGE,
+  emits: [],
 };
 </script>
 

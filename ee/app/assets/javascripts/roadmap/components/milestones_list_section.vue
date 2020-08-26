@@ -111,6 +111,8 @@ export default {
       this.milestonesExpanded = !this.milestonesExpanded;
     },
   },
+
+  emits: [],
 };
 </script>
 

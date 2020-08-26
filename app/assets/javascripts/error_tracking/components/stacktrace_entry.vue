@@ -70,7 +70,9 @@ export default {
       return line[1];
     },
   },
+
   userColorScheme: window.gon.user_color_scheme,
+  emits: [],
 };
 </script>
 

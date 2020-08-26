@@ -72,6 +72,8 @@ export default {
       return itemLabelClass;
     },
   },
+
+  emits: [],
 };
 </script>
 

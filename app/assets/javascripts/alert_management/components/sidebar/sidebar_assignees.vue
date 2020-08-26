@@ -164,7 +164,6 @@ export default {
         })
         .then(({ data: { alertSetAssignees: { errors } = [] } = {} } = {}) => {
           this.hideDropdown();
-
           if (errors[0]) {
             this.$emit(
               'alert-error',
@@ -180,6 +179,8 @@ export default {
         });
     },
   },
+
+  emits: ['alert-error', 'toggle-sidebar'],
 };
 </script>
 

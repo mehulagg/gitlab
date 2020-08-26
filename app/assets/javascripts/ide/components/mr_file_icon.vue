@@ -9,6 +9,8 @@ export default {
   directives: {
     tooltip,
   },
+
+  emits: [],
 };
 </script>
 

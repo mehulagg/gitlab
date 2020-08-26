@@ -12,6 +12,8 @@ export default {
   created() {
     this.suggestedColors = gon.suggested_label_colors;
   },
+
+  emits: [],
 };
 </script>
 

@@ -81,6 +81,8 @@ export default {
       return `report-block-list ${this.issuesUlElementClass}`;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

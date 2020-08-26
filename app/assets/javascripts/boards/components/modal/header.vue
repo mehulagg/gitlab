@@ -44,6 +44,8 @@ export default {
       ModalStore.toggleAll();
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

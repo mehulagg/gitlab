@@ -50,6 +50,8 @@ export default {
       return `${this.issuesPath}?search=${this.importProject}`;
     },
   },
+
+  emits: [],
 };
 </script>
 

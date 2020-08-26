@@ -18,6 +18,8 @@ export default {
       return this.versions.find(x => x.selected)?.versionName || '';
     },
   },
+
+  emits: [],
 };
 </script>
 

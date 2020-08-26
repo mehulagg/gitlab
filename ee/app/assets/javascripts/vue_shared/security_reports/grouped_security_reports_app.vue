@@ -350,7 +350,9 @@ export default {
       fetchSastDiff: 'fetchDiff',
     }),
   },
+
   summarySlots: ['success', 'error', 'loading'],
+  emits: [],
 };
 </script>
 <template>

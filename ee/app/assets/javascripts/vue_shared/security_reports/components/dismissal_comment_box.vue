@@ -61,6 +61,8 @@ export default {
       }
     },
   },
+
+  emits: ['clearError', 'input', 'submit'],
 };
 </script>
 

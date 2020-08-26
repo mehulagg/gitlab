@@ -71,6 +71,8 @@ export default {
       this.cancelingPipeline = this.pipelineId;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

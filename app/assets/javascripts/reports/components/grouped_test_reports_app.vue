@@ -102,6 +102,8 @@ export default {
       return report.resolved_failures.concat(report.resolved_errors);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

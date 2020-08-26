@@ -191,6 +191,8 @@ export default {
     description: '',
     visibilityLevel: SNIPPET_VISIBILITY_PRIVATE,
   },
+
+  emits: [],
 };
 </script>
 <template>

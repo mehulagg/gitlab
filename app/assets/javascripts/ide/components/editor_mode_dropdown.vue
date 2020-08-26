@@ -25,7 +25,9 @@ export default {
       this.$emit('click', mode);
     },
   },
+
   viewerTypes,
+  emits: ['click'],
 };
 </script>
 

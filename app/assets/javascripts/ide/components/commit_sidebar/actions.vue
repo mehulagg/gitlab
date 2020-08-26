@@ -66,6 +66,8 @@ export default {
   currentBranchPermissionsTooltip: s__(
     "IDE|This option is disabled because you don't have write permissions for the current branch.",
   ),
+
+  emits: [],
 };
 </script>
 

@@ -5,6 +5,8 @@ export default {
   computed: {
     ...mapGetters(['hasValidData']),
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -50,6 +50,8 @@ export default {
       document.documentElement.style.overflowX = '';
     },
   },
+
+  emits: [],
 };
 </script>
 

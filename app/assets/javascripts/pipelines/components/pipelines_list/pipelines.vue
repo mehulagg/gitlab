@@ -277,6 +277,8 @@ export default {
       this.updateContent(this.requestData);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

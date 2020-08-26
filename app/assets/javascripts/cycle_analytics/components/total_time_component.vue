@@ -12,6 +12,8 @@ export default {
       return Object.keys(this.time).length;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -246,6 +246,8 @@ export default {
   i18n: {
     newCommentButtonLabel: __('Add comment to design'),
   },
+
+  emits: ['closeCommentForm', 'moveNote', 'openCommentForm'],
 };
 </script>
 

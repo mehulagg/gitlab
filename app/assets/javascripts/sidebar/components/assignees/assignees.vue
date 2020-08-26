@@ -45,6 +45,8 @@ export default {
       this.$emit('assign-self');
     },
   },
+
+  emits: ['assign-self'],
 };
 </script>
 

@@ -61,6 +61,8 @@ export default {
       this.$emit('input', !this.value);
     },
   },
+
+  emits: ['input'],
 };
 </script>
 

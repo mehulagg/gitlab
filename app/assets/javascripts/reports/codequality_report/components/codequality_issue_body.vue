@@ -27,6 +27,8 @@ export default {
       return this.status === STATUS_SUCCESS;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

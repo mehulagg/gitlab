@@ -40,6 +40,8 @@ export default {
       this.fetchDeleteLicense(...args);
     },
   },
+
+  emits: [],
 };
 </script>
 

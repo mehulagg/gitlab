@@ -36,6 +36,8 @@ export default {
       },
     }),
   },
+
+  emits: [],
 };
 </script>
 

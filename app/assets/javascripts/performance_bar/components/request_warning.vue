@@ -31,6 +31,8 @@ export default {
   methods: {
     glEmojiTag,
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -108,6 +108,8 @@ export default {
       return `${this.node.url}admin/geo/replication/${nodeDetailItem.itemName}`;
     },
   },
+
+  emits: [],
 };
 </script>
 

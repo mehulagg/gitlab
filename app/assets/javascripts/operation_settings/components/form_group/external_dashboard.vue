@@ -21,6 +21,8 @@ export default {
   methods: {
     ...mapActions(['setExternalDashboardUrl']),
   },
+
+  emits: [],
 };
 </script>
 

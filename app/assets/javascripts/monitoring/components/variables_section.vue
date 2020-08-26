@@ -34,6 +34,8 @@ export default {
       return TextField;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -81,6 +81,8 @@ export default {
       return this.size ? `s${this.size}` : '';
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

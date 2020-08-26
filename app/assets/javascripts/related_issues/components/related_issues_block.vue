@@ -118,7 +118,19 @@ export default {
       return issuableQaClassMap[this.issuableType];
     },
   },
+
   linkedIssueTypesTextMap,
+
+  emits: [
+    'addIssuableFormBlur',
+    'addIssuableFormCancel',
+    'addIssuableFormInput',
+    'addIssuableFormSubmit',
+    'pendingIssuableRemoveRequest',
+    'relatedIssueRemoveRequest',
+    'saveReorder',
+    'toggleAddRelatedIssuesForm',
+  ],
 };
 </script>
 

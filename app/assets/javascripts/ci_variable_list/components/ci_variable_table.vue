@@ -79,6 +79,8 @@ export default {
   methods: {
     ...mapActions(['fetchVariables', 'toggleValues', 'editVariable']),
   },
+
+  emits: [],
 };
 </script>
 

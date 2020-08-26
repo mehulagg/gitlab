@@ -41,7 +41,9 @@ export default {
     defaultLabel: __('Clone'),
     ssh: __('Clone with SSH'),
   },
+
   copyURLTooltip: __('Copy URL'),
+  emits: [],
 };
 </script>
 <template>

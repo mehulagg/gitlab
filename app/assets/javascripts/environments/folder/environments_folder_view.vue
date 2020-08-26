@@ -60,6 +60,8 @@ export default {
       this.saveData(resp);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -33,6 +33,8 @@ export default {
       return n__('Assignee', `%d Assignees`, assignees);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -25,6 +25,8 @@ export default {
       return this.type && this.count && this.showOutput;
     },
   },
+
+  emits: [],
 };
 </script>
 

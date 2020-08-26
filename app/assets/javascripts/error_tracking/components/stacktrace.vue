@@ -16,6 +16,8 @@ export default {
       return index === 0;
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -293,6 +293,8 @@ export default {
       Object.assign(this.filteredStrategies[index], strategy);
     },
   },
+
+  emits: ['handleSubmit'],
 };
 </script>
 <template>

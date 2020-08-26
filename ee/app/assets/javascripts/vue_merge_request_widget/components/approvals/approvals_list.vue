@@ -87,7 +87,9 @@ export default {
       return sprintf(s__('Approvals|Section: %section'), { section: rule.section });
     },
   },
+
   ruleTypeAnyApprover: RULE_TYPE_ANY_APPROVER,
+  emits: [],
 };
 </script>
 

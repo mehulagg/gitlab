@@ -8,6 +8,8 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+
+  emits: [],
 };
 </script>
 

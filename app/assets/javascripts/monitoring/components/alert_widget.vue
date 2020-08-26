@@ -219,6 +219,8 @@ export default {
         });
     },
   },
+
+  emits: ['setAlerts'],
 };
 </script>
 

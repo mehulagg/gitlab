@@ -93,6 +93,8 @@ export default {
       this.$emit('toggleCollapse');
     },
   },
+
+  emits: ['saveDate', 'toggleCollapse'],
 };
 </script>
 

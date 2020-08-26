@@ -57,6 +57,8 @@ export default {
       this.isUpdating = updating;
     },
   },
+
+  emits: ['alert-error', 'toggle-sidebar'],
 };
 </script>
 

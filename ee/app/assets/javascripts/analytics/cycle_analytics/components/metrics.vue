@@ -19,7 +19,9 @@ export default {
       required: true,
     },
   },
+
   overviewMetrics: OVERVIEW_METRICS,
+  emits: [],
 };
 </script>
 <template>

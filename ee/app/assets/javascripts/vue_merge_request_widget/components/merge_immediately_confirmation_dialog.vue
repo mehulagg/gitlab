@@ -49,6 +49,8 @@ export default {
       this.$refs.cancelButton.$el.focus();
     },
   },
+
+  emits: ['mergeImmediately'],
 };
 </script>
 <template>

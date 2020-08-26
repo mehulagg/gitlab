@@ -23,6 +23,8 @@ export default {
       return this.fetchLicenses({ page });
     },
   },
+
+  emits: [],
 };
 </script>
 

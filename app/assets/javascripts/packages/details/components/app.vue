@@ -135,6 +135,8 @@ export default {
       class: 'text-right',
     },
   ],
+
+  emits: [],
 };
 </script>
 

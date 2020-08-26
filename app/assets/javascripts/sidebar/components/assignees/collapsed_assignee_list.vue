@@ -93,6 +93,8 @@ export default {
       return { container: 'body', placement: 'left', boundary: 'viewport' };
     },
   },
+
+  emits: [],
 };
 </script>
 

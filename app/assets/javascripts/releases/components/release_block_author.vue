@@ -22,6 +22,8 @@ export default {
         : null;
     },
   },
+
+  emits: [],
 };
 </script>
 

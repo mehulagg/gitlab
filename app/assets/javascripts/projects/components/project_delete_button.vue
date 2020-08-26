@@ -28,6 +28,8 @@ export default {
       "This action cannot be undone. You will lose the project's respository and all conent: issues, merge requests, etc.",
     ),
   },
+
+  emits: [],
 };
 </script>
 

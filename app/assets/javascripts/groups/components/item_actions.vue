@@ -40,6 +40,8 @@ export default {
       eventHub.$emit(`${this.action}showLeaveGroupModal`, this.group, this.parentGroup);
     },
   },
+
+  emits: [],
 };
 </script>
 

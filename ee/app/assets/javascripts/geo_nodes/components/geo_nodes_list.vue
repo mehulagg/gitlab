@@ -27,6 +27,8 @@ export default {
       required: true,
     },
   },
+
+  emits: [],
 };
 </script>
 

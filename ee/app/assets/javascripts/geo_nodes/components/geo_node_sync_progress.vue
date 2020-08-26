@@ -44,6 +44,8 @@ export default {
       return toNumber(this.itemValue.successCount) || 0;
     },
   },
+
+  emits: [],
 };
 </script>
 

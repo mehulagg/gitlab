@@ -38,6 +38,8 @@ export default {
       this.$emit('requestSidebarStageDropdown', stage);
     },
   },
+
+  emits: ['requestSidebarStageDropdown'],
 };
 </script>
 <template>

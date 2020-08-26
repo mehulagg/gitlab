@@ -173,5 +173,7 @@ export default {
   render(createElement) {
     return createElement('div', this.$slots.default);
   },
+
+  emits: [],
 };
 </script>

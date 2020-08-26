@@ -42,6 +42,8 @@ export default {
   methods: {
     glEmojiTag,
   },
+
+  emits: ['change-current-request'],
 };
 </script>
 <template>

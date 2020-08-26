@@ -45,6 +45,8 @@ export default {
       this.showList = !this.showList;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

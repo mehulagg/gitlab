@@ -34,6 +34,8 @@ export default {
   methods: {
     ...mapActions(['editBadge', 'updateBadgeInModal']),
   },
+
+  emits: [],
 };
 </script>
 

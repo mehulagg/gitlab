@@ -65,6 +65,8 @@ export default {
       this.$emit('closed');
     },
   },
+
+  emits: ['cancel', 'closed', 'open', 'submit'],
 };
 </script>
 

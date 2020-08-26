@@ -49,6 +49,8 @@ export default {
     REASON_WONT_FIX,
     REASON_NONE,
   ],
+
+  emits: [],
 };
 </script>
 

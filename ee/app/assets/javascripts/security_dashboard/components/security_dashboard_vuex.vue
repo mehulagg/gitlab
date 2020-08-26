@@ -155,6 +155,8 @@ export default {
       this.$emit('vulnerabilitiesCountChanged', count);
     },
   },
+
+  emits: ['vulnerabilitiesCountChanged'],
 };
 </script>
 

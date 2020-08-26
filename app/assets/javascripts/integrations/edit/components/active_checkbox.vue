@@ -29,6 +29,8 @@ export default {
       eventHub.$emit('toggle', e);
     },
   },
+
+  emits: [],
 };
 </script>
 

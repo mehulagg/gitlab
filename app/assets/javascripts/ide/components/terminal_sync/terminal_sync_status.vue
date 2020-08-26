@@ -55,6 +55,8 @@ export default {
   created() {
     this.isLoading = this.isLoadingState;
   },
+
+  emits: [],
 };
 </script>
 

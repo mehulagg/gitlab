@@ -34,6 +34,8 @@ export default {
   methods: {
     ...mapActions('subscription', ['setNamespaceId']),
   },
+
+  emits: [],
 };
 </script>
 

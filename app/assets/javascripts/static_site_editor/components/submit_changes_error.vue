@@ -12,6 +12,8 @@ export default {
       required: true,
     },
   },
+
+  emits: ['dismiss', 'retry'],
 };
 </script>
 <template>

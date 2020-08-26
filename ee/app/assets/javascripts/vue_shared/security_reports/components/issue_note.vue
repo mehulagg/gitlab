@@ -32,6 +32,8 @@ export default {
       return __('Created issue %{issueLink}');
     },
   },
+
+  emits: [],
 };
 </script>
 

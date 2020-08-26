@@ -297,6 +297,13 @@ export default {
       this.$emit('handleFormUpdateAddToReview', this.updatedNoteBody, shouldResolve);
     },
   },
+
+  emits: [
+    'cancelForm',
+    'handleFormUpdate',
+    'handleFormUpdateAddToReview',
+    'handleSuggestDismissed',
+  ],
 };
 </script>
 

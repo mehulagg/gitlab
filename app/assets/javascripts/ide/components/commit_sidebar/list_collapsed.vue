@@ -65,6 +65,8 @@ export default {
       return this.title.toLowerCase() === 'staged' ? 'file-modified-solid' : 'file-modified';
     },
   },
+
+  emits: [],
 };
 </script>
 

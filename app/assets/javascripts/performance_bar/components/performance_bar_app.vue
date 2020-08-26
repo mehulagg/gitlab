@@ -113,6 +113,8 @@ export default {
       this.currentRequest = newRequestId;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

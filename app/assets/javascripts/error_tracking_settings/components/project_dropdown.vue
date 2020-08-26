@@ -45,6 +45,8 @@ export default {
   methods: {
     getDisplayName,
   },
+
+  emits: ['select-project'],
 };
 </script>
 

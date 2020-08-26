@@ -49,6 +49,8 @@ export default {
       this.isVisible = false;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

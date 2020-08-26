@@ -59,6 +59,8 @@ export default {
       return __('Version %{versionNumber}');
     },
   },
+
+  emits: [],
 };
 </script>
 

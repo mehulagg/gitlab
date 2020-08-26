@@ -38,6 +38,8 @@ export default {
       this.discardFileChanges(path);
     },
   },
+
+  emits: [],
 };
 </script>
 

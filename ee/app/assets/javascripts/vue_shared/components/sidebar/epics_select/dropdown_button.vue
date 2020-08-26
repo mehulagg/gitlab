@@ -23,6 +23,8 @@ export default {
       return this.selectedEpicTitle || __('Epic');
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -25,7 +25,9 @@ export default {
       default: '',
     },
   },
+
   diffModes,
+  emits: [],
 };
 </script>
 

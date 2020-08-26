@@ -69,6 +69,8 @@ export default {
     // eslint-disable-next-line @gitlab/require-i18n-strings
     { value: 'Started', text: __('Started') },
   ],
+
+  emits: [],
 };
 </script>
 

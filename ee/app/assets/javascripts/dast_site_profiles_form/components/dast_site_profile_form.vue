@@ -155,7 +155,9 @@ export default {
       this.showAlert = false;
     },
   },
+
   modalId: 'deleteDastProfileModal',
+  emits: [],
 };
 </script>
 

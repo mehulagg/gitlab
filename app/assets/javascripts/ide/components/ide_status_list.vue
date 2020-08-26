@@ -18,6 +18,8 @@ export default {
       return getFileEOL(this.activeFile.content);
     },
   },
+
+  emits: [],
 };
 </script>
 

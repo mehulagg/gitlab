@@ -28,6 +28,8 @@ export default {
       return !this.nodeDetailsLoading && this.isNodeHTTP;
     },
   },
+
+  emits: [],
 };
 </script>
 

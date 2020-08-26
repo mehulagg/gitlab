@@ -59,6 +59,8 @@ export default {
       this.$emit('set', stack);
     },
   },
+
+  emits: ['set'],
 };
 </script>
 

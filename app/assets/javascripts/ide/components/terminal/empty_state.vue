@@ -37,6 +37,8 @@ export default {
       this.$emit('start');
     },
   },
+
+  emits: ['start'],
 };
 </script>
 <template>

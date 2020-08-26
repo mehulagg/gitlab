@@ -26,6 +26,8 @@ export default {
       return this.currentBranchId || EMPTY_LABEL;
     },
   },
+
+  emits: [],
 };
 </script>
 

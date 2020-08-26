@@ -14,6 +14,8 @@ export default {
   methods: {
     ...mapActions('filters', ['setFilter']),
   },
+
+  emits: [],
 };
 </script>
 

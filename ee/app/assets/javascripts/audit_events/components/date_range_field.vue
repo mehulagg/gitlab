@@ -22,6 +22,8 @@ export default {
       this.$emit('selected', dates);
     },
   },
+
+  emits: ['selected'],
 };
 </script>
 

@@ -53,6 +53,8 @@ export default {
   methods: {
     ...mapActions('pipelines', ['fetchLatestPipeline']),
   },
+
+  emits: [],
 };
 </script>
 

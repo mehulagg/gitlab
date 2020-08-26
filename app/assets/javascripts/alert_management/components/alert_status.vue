@@ -86,6 +86,8 @@ export default {
       Tracking.event(category, action, { label, property: status });
     },
   },
+
+  emits: ['alert-error', 'handle-updating', 'hide-dropdown'],
 };
 </script>
 

@@ -27,6 +27,8 @@ export default {
       return this.comment.trim();
     },
   },
+
+  emits: ['onCancel', 'onSave'],
 };
 </script>
 

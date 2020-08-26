@@ -67,6 +67,8 @@ export default {
   mounted() {
     this.track();
   },
+
+  emits: ['dismiss'],
 };
 </script>
 <template>

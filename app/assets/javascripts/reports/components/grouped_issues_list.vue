@@ -59,6 +59,8 @@ export default {
       return groupsCount + issuesCount;
     },
   },
+
+  emits: [],
 };
 </script>
 

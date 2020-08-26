@@ -40,6 +40,8 @@ export default {
     id: 'enable-review-app-info',
     title: s__('ReviewApp|Enable Review App'),
   },
+
+  emits: [],
 };
 </script>
 <template>

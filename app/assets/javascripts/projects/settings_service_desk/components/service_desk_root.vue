@@ -139,6 +139,8 @@ export default {
       this.isAlertShowing = false;
     },
   },
+
+  emits: [],
 };
 </script>
 

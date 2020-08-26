@@ -30,6 +30,8 @@ export default {
   i18n: {
     title: s__("Checkout|%{name}'s GitLab subscription"),
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -60,6 +60,8 @@ export default {
     this.baseDomainField = this.baseDomain;
     this.externalIp = this.applicationIngressExternalIp;
   },
+
+  emits: [],
 };
 </script>
 

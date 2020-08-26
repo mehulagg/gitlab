@@ -109,6 +109,8 @@ export default {
       lastYear: __('Pipelines for last year'),
     };
   },
+
+  emits: [],
 };
 </script>
 <template>

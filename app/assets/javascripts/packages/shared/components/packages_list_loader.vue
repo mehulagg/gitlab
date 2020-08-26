@@ -43,6 +43,8 @@ export default {
     mobile: 5,
     desktop: 20,
   },
+
+  emits: [],
 };
 </script>
 

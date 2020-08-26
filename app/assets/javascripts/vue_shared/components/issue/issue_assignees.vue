@@ -74,6 +74,8 @@ export default {
       return assignee.avatar_url || assignee.avatarUrl;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

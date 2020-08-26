@@ -23,5 +23,7 @@ export default {
 
     return children;
   },
+
+  emits: [],
 };
 </script>

@@ -73,6 +73,8 @@ export default {
       return !action.playable;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

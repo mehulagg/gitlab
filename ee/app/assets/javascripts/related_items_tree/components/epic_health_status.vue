@@ -19,6 +19,8 @@ export default {
       return totalHealthStatuses > 0;
     },
   },
+
+  emits: [],
 };
 </script>
 

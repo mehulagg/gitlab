@@ -199,6 +199,8 @@ export default {
       return this.formStrategy.name === type;
     },
   },
+
+  emits: ['change', 'delete'],
 };
 </script>
 <template>

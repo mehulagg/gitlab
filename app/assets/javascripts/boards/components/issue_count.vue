@@ -21,6 +21,8 @@ export default {
       return this.isMaxLimitSet && this.issuesSize > this.maxIssueCount;
     },
   },
+
+  emits: [],
 };
 </script>
 

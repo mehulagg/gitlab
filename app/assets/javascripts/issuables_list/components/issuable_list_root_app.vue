@@ -85,6 +85,8 @@ export default {
       this.jiraImport.shouldShowInProgressAlert = false;
     },
   },
+
+  emits: [],
 };
 </script>
 

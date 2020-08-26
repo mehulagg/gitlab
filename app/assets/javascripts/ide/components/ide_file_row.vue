@@ -28,6 +28,8 @@ export default {
       this.dropdownOpen = val;
     },
   },
+
+  emits: [],
 };
 </script>
 

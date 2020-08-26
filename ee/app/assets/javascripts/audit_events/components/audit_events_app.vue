@@ -44,6 +44,8 @@ export default {
   methods: {
     ...mapActions(['setDateRange', 'setFilterValue', 'setSortBy', 'searchForAuditEvents']),
   },
+
+  emits: [],
 };
 </script>
 

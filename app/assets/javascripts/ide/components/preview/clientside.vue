@@ -148,6 +148,8 @@ export default {
       this.manager = new Manager('#ide-preview', this.sandboxOpts, settings);
     },
   },
+
+  emits: [],
 };
 </script>
 

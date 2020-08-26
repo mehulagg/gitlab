@@ -61,6 +61,8 @@ export default {
       this.$refs.fileUpload.click();
     },
   },
+
+  emits: ['create'],
 };
 </script>
 

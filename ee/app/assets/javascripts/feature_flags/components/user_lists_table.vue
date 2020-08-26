@@ -63,6 +63,8 @@ export default {
       this.deleteUserList = list;
     },
   },
+
+  emits: ['delete'],
 };
 </script>
 <template>

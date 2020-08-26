@@ -61,6 +61,8 @@ export default {
       this.$emit('input', e.target.value.trim() || null);
     },
   },
+
+  emits: ['input'],
 };
 </script>
 

@@ -188,6 +188,21 @@ export default {
       this.dismissalCommentErrorMessage = '';
     },
   },
+
+  emits: [
+    'addDismissalComment',
+    'closeDismissalCommentBox',
+    'createMergeRequest',
+    'createNewIssue',
+    'deleteDismissalComment',
+    'dismissVulnerability',
+    'downloadPatch',
+    'editVulnerabilityDismissalComment',
+    'hideDismissalDeleteButtons',
+    'openDismissalCommentBox',
+    'revertDismissVulnerability',
+    'showDismissalDeleteButtons',
+  ],
 };
 </script>
 <template>

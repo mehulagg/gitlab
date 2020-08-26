@@ -39,6 +39,8 @@ export default {
       return this.filterBy === FilterState.all;
     },
   },
+
+  emits: ['clickNewRequirement', 'clickTab'],
 };
 </script>
 

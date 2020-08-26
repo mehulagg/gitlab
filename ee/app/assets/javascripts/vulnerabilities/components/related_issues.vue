@@ -204,6 +204,7 @@ export default {
   autoCompleteSources: gl?.GfmAutoComplete?.dataSources,
   issuableType: issuableTypesMap.ISSUE,
   pathIdSeparator: PathIdSeparator.Issue,
+  emits: [],
 };
 </script>
 

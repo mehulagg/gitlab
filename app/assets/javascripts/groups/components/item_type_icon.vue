@@ -25,6 +25,8 @@ export default {
       return 'bookmark';
     },
   },
+
+  emits: [],
 };
 </script>
 

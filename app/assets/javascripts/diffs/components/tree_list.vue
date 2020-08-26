@@ -57,7 +57,9 @@ export default {
   searchPlaceholder: sprintf(s__('MergeRequest|Search files (%{modifier_key}P)'), {
     modifier_key: /Mac/i.test(navigator.userAgent) ? '⌘' : 'Ctrl+',
   }),
+
   DiffFileRow,
+  emits: [],
 };
 </script>
 

@@ -50,6 +50,8 @@ export default {
   methods: {
     ...mapActions(['fetchSettings']),
   },
+
+  emits: [],
 };
 </script>
 

@@ -27,6 +27,8 @@ export default {
       this.$emit('toggleButton', this.toggleState);
     },
   },
+
+  emits: ['toggleButton'],
 };
 </script>
 

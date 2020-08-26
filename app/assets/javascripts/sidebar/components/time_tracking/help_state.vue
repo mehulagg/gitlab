@@ -29,6 +29,8 @@ export default {
       );
     },
   },
+
+  emits: [],
 };
 </script>
 

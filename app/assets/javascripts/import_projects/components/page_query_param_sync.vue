@@ -35,5 +35,6 @@ export default {
   },
 
   render: () => null,
+  emits: ['popstate'],
 };
 </script>

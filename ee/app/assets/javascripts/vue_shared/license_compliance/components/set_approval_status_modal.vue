@@ -36,6 +36,8 @@ export default {
   methods: {
     ...mapActions(LICENSE_MANAGEMENT, ['resetLicenseInModal', 'allowLicense', 'denyLicense']),
   },
+
+  emits: [],
 };
 </script>
 <template>

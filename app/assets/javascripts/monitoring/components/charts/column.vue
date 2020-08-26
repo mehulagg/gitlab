@@ -102,6 +102,8 @@ export default {
         .catch(() => {});
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

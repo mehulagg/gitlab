@@ -48,6 +48,8 @@ export default {
       'updateGrafanaIntegration',
     ]),
   },
+
+  emits: [],
 };
 </script>
 

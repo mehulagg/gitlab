@@ -21,6 +21,8 @@ export default {
   methods: {
     ...mapActions('pipelines', ['fetchJobs', 'toggleStageCollapsed', 'setDetailJob']),
   },
+
+  emits: [],
 };
 </script>
 

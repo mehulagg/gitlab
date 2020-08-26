@@ -23,6 +23,8 @@ export default {
       vulnerabilityGradesQuery,
     };
   },
+
+  emits: [],
 };
 </script>
 

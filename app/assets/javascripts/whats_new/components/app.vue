@@ -12,6 +12,8 @@ export default {
   methods: {
     ...mapActions(['closeDrawer']),
   },
+
+  emits: [],
 };
 </script>
 

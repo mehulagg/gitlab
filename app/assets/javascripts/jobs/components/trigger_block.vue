@@ -38,6 +38,8 @@ export default {
       return this.showVariableValues ? value : HIDDEN_VALUE;
     },
   },
+
+  emits: [],
 };
 </script>
 

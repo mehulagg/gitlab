@@ -79,6 +79,7 @@ Please update your Git repository remotes as soon as possible.`),
   modalId: 'username-change-confirmation-modal',
   inputId: 'username-change-input',
   buttonText: s__('Profiles|Update username'),
+  emits: [],
 };
 </script>
 <template>

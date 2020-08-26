@@ -30,6 +30,8 @@ export default {
       this.error = error;
     },
   },
+
+  emits: [],
 };
 </script>
 

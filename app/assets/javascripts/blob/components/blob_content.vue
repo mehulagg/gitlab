@@ -44,8 +44,10 @@ export default {
       return this.activeViewer.renderError;
     },
   },
+
   BLOB_RENDER_EVENT_LOAD,
   BLOB_RENDER_EVENT_SHOW_SOURCE,
+  emits: [BLOB_RENDER_EVENT_LOAD, BLOB_RENDER_EVENT_SHOW_SOURCE],
 };
 </script>
 <template>

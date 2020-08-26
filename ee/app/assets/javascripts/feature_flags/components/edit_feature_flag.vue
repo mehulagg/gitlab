@@ -104,6 +104,8 @@ export default {
       'toggleActive',
     ]),
   },
+
+  emits: [],
 };
 </script>
 <template>

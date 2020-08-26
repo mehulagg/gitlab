@@ -7,6 +7,8 @@ export default {
     App,
     ProjectRules,
   },
+
+  emits: [],
 };
 </script>
 

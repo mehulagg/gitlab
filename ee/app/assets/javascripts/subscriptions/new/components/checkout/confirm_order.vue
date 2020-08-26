@@ -22,6 +22,8 @@ export default {
     confirm: s__('Checkout|Confirm purchase'),
     confirming: s__('Checkout|Confirming...'),
   },
+
+  emits: [],
 };
 </script>
 <template>

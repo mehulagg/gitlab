@@ -87,6 +87,8 @@ export default {
       eventHub.$emit('epicsListScrolled', { scrollTop, scrollLeft, clientHeight, scrollHeight });
     },
   },
+
+  emits: ['onScrollToEnd', 'onScrollToStart'],
 };
 </script>
 

@@ -38,6 +38,8 @@ export default {
       this.$emit('resetRunnersCache', this.resetCachePath);
     },
   },
+
+  emits: ['resetRunnersCache'],
 };
 </script>
 <template>

@@ -4,6 +4,7 @@ import { GlDatepicker } from '@gitlab/ui';
 export default {
   name: 'ExpiresAtField',
   components: { GlDatepicker },
+  emits: [],
 };
 </script>
 

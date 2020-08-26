@@ -44,6 +44,8 @@ export default {
       return this.selectedNamespaces.includes(namespace.id);
     },
   },
+
+  emits: ['addSyncOption', 'removeSyncOption'],
 };
 </script>
 

@@ -48,7 +48,9 @@ export default {
       this.$emit('toggle', !this.isOpen);
     },
   },
+
   modalTypes,
+  emits: ['toggle'],
 };
 </script>
 

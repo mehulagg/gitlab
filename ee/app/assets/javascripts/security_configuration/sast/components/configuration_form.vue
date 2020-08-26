@@ -74,6 +74,8 @@ export default {
     submitButton: s__('SecurityConfiguration|Create Merge Request'),
     cancelButton: __('Cancel'),
   },
+
+  emits: [],
 };
 </script>
 

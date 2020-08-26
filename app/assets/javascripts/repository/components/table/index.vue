@@ -75,6 +75,8 @@ export default {
       this.$emit('showMore');
     },
   },
+
+  emits: ['showMore'],
 };
 </script>
 

@@ -95,6 +95,8 @@ export default {
       this.variables.splice(this.variables.findIndex(el => el.id === id), 1);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

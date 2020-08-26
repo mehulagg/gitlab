@@ -97,6 +97,8 @@ export default {
     chartTitle: THROUGHPUT_CHART_STRINGS.CHART_TITLE,
     chartDescription: THROUGHPUT_CHART_STRINGS.CHART_DESCRIPTION,
   },
+
+  emits: [],
 };
 </script>
 <template>

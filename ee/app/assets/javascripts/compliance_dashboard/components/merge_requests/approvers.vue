@@ -42,6 +42,8 @@ export default {
     approvedBy: __('approved by: '),
     noApprovers: __('no approvers'),
   },
+
+  emits: [],
 };
 </script>
 

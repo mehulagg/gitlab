@@ -308,6 +308,8 @@ export default {
       });
     },
   },
+
+  emits: [],
 };
 </script>
 

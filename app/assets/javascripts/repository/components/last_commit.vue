@@ -91,7 +91,9 @@ export default {
       this.showDescription = !this.showDescription;
     },
   },
+
   defaultAvatarUrl,
+  emits: [],
 };
 </script>
 

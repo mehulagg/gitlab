@@ -20,6 +20,8 @@ export default {
       return this.alert.assignees.nodes.some(({ username }) => username === name);
     },
   },
+
+  emits: ['update-alert-assignees'],
 };
 </script>
 

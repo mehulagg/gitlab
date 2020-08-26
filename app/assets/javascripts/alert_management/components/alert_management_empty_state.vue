@@ -75,6 +75,8 @@ export default {
       return this.userCanEnableAlertManagement || this.opsgenieMvcEnabled;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

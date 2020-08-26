@@ -19,6 +19,8 @@ export default {
       this.$emit('input', newValue);
     },
   },
+
+  emits: ['input'],
 };
 </script>
 

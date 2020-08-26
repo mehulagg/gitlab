@@ -59,6 +59,8 @@ export default {
   methods: {
     ...mapActions(['fetchLists', 'showPromotionList']),
   },
+
+  emits: [],
 };
 </script>
 

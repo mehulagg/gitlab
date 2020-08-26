@@ -24,6 +24,8 @@ export default {
       return isScrollable ? scrollableStyles : null;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

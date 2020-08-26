@@ -108,6 +108,8 @@ export default {
       }
     },
   },
+
+  emits: ['deleteNote', 'startReplying'],
 };
 </script>
 

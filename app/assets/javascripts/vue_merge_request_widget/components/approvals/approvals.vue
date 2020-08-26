@@ -166,7 +166,9 @@ export default {
         });
     },
   },
+
   FETCH_LOADING,
+  emits: ['updated', 'clearError'],
 };
 </script>
 <template>

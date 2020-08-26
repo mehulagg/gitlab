@@ -59,6 +59,8 @@ export default {
       this.issuesSelected = selected;
     },
   },
+
+  emits: [],
 };
 </script>
 

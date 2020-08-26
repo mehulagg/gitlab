@@ -163,6 +163,8 @@ export default {
       this.showCommentForm({ lineCode: this.line.line_code, fileHash: this.fileHash });
     },
   },
+
+  emits: [],
 };
 </script>
 

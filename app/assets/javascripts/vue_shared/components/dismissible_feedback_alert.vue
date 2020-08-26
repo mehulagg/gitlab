@@ -38,6 +38,8 @@ export default {
       this.isDismissed = 'true';
     },
   },
+
+  emits: [],
 };
 </script>
 

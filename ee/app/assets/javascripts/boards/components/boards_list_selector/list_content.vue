@@ -23,6 +23,8 @@ export default {
       this.$emit('onItemSelect', item);
     },
   },
+
+  emits: ['onItemSelect'],
 };
 </script>
 

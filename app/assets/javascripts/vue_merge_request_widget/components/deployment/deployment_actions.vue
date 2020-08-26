@@ -148,6 +148,8 @@ export default {
       this.executeAction(this.redeployPath, this.$options.actionsConfiguration[REDEPLOYING]);
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -11,6 +11,8 @@ export default {
       return Boolean(this.$slots.aside);
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -29,6 +29,8 @@ export default {
       this.visible = false;
     },
   },
+
+  emits: [],
 };
 </script>
 

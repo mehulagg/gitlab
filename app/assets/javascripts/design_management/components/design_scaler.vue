@@ -45,6 +45,8 @@ export default {
       this.setScale(DEFAULT_SCALE);
     },
   },
+
+  emits: ['scale'],
 };
 </script>
 

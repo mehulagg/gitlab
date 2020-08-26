@@ -19,6 +19,8 @@ export default {
       'setShowWhitespace',
     ]),
   },
+
+  emits: [],
 };
 </script>
 

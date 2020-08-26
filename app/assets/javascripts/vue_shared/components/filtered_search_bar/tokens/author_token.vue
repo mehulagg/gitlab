@@ -78,6 +78,8 @@ export default {
       this.fetchAuthorBySearchTerm(data);
     }, DEBOUNCE_DELAY),
   },
+
+  emits: [],
 };
 </script>
 

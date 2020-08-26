@@ -55,6 +55,8 @@ export default {
       this.$emit('refreshPipelineGraph');
     },
   },
+
+  emits: ['refreshPipelineGraph'],
 };
 </script>
 <template>

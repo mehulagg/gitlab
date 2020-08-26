@@ -40,8 +40,10 @@ export default {
       return key === this.selectedOption.key;
     },
   },
+
   SORTING_TITLE,
   SORTING_OPTIONS,
+  emits: ['selected'],
 };
 </script>
 

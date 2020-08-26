@@ -35,6 +35,8 @@ export default {
       return iconBranch;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

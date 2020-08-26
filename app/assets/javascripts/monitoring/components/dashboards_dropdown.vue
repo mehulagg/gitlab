@@ -15,6 +15,8 @@ const events = {
 };
 
 export default {
+  emits: Object.values(events),
+
   components: {
     GlIcon,
     GlNewDropdown,

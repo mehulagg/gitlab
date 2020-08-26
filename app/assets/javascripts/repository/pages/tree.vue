@@ -32,6 +32,8 @@ export default {
       updateElementsVisibility('.js-hide-on-root', !isRoot);
     },
   },
+
+  emits: [],
 };
 </script>
 

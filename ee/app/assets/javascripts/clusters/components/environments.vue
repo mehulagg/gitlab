@@ -85,6 +85,8 @@ export default {
     hasInstances: rolloutStatus => rolloutStatus.instances && rolloutStatus.instances.length,
     isLoadingRollout: rolloutStatus => rolloutStatus.status === 'loading',
   },
+
+  emits: [],
 };
 </script>
 

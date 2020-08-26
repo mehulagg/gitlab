@@ -64,6 +64,8 @@ export default {
       return formatTime(Math.max(0, remainingMilliseconds));
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -20,6 +20,8 @@ export default {
       return this.file.isHeader ? 0 : this.level + 1;
     },
   },
+
+  emits: [],
 };
 </script>
 

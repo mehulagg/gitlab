@@ -69,6 +69,8 @@ export default {
       text: __('Cancel'),
     },
   },
+
+  emits: ['deleteSelectedDesigns'],
 };
 </script>
 

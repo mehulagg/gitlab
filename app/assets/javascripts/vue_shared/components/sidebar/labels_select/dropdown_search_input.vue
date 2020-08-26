@@ -5,6 +5,8 @@ export default {
   components: {
     GlIcon,
   },
+
+  emits: [],
 };
 </script>
 

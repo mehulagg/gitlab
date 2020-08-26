@@ -16,6 +16,8 @@ export default {
       default: 'issue',
     },
   },
+
+  emits: [],
 };
 </script>
 

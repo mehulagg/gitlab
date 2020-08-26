@@ -121,6 +121,8 @@ export default {
       });
     },
   },
+
+  emits: ['toggle-flag'],
 };
 </script>
 <template>

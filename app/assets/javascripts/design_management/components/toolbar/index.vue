@@ -86,7 +86,9 @@ export default {
       return this.permissions.createDesign;
     },
   },
+
   DESIGNS_ROUTE_NAME,
+  emits: ['delete'],
 };
 </script>
 

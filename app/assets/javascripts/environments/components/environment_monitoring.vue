@@ -23,6 +23,8 @@ export default {
       return __('Monitoring');
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

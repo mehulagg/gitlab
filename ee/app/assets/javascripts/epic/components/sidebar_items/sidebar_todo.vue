@@ -20,6 +20,8 @@ export default {
   methods: {
     ...mapActions(['toggleTodo']),
   },
+
+  emits: [],
 };
 </script>
 

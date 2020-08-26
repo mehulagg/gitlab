@@ -34,6 +34,8 @@ export default {
   mounted() {
     this.popoverTarget = this.$refs.popoverTarget;
   },
+
+  emits: [],
 };
 </script>
 

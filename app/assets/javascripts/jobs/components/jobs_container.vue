@@ -21,6 +21,8 @@ export default {
       return this.jobId === currentJobId;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

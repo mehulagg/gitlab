@@ -36,6 +36,8 @@ export default {
       return Boolean(this.path && this.timestamp);
     },
   },
+
+  emits: [],
 };
 </script>
 

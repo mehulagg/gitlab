@@ -14,6 +14,8 @@ export default {
   i18n: {
     DETAILS_PAGE_TITLE,
   },
+
+  emits: [],
 };
 </script>
 

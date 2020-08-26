@@ -86,6 +86,8 @@ export default {
       return this.states[this.selectedState] || this.states[metricStates.UNKNOWN_ERROR];
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -43,6 +43,8 @@ export default {
       return !this.user?.loaded;
     },
   },
+
+  emits: [],
 };
 </script>
 

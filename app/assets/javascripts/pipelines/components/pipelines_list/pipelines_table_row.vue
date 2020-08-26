@@ -262,6 +262,8 @@ export default {
       eventHub.$emit('retryPipeline', this.pipeline.retry_path);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

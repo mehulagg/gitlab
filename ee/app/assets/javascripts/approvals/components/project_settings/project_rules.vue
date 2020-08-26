@@ -94,6 +94,8 @@ export default {
       return canEdit && (!allowMultiRule || !rule.hasSource);
     },
   },
+
+  emits: [],
 };
 </script>
 

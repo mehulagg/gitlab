@@ -61,6 +61,8 @@ export default {
       this.$emit('copy');
     },
   },
+
+  emits: ['copy', 'viewer-changed'],
 };
 </script>
 <template>

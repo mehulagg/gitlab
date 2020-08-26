@@ -12,6 +12,8 @@ export default {
   computed: {
     ...mapState(['config']),
   },
+
+  emits: [],
 };
 </script>
 <template>

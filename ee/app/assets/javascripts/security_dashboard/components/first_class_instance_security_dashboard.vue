@@ -91,6 +91,8 @@ export default {
       this.isManipulatingProjects = value;
     },
   },
+
+  emits: [],
 };
 </script>
 

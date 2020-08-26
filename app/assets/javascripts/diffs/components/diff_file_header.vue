@@ -151,6 +151,8 @@ export default {
       }
     },
   },
+
+  emits: ['showForkMessage', 'toggleFile'],
 };
 </script>
 

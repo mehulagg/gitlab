@@ -79,6 +79,8 @@ export default {
   groupsQueryParams: {
     min_access_level: accessLevelReporter,
   },
+
+  emits: ['groupSelected', 'projectSelected'],
 };
 </script>
 

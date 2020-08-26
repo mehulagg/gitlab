@@ -33,6 +33,8 @@ export default {
       this.fetchPage(nextPage);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

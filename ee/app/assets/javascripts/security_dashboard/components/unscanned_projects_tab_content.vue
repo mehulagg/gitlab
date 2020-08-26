@@ -21,6 +21,8 @@ export default {
   // within the aside.
   // Details: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24242#note_282008456
   wrapperHeight: '15rem',
+
+  emits: [],
 };
 </script>
 

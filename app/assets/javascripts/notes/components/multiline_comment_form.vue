@@ -68,6 +68,8 @@ export default {
       this.setSelectedCommentPosition(updatedLineRange);
     },
   },
+
+  emits: ['input'],
 };
 </script>
 

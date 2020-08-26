@@ -107,6 +107,8 @@ export default {
       return s__('GeoNodeSyncStatus|Node is failing or broken.');
     },
   },
+
+  emits: [],
 };
 </script>
 

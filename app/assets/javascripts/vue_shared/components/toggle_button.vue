@@ -55,6 +55,8 @@ export default {
       if (!this.disabledInput) this.$emit('change', !this.value);
     },
   },
+
+  emits: ['change'],
 };
 </script>
 

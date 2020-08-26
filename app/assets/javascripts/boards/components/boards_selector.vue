@@ -225,6 +225,8 @@ export default {
       this.hasScrollFade = this.isScrolledUp();
     },
   },
+
+  emits: [],
 };
 </script>
 

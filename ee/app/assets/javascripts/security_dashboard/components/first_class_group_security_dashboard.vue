@@ -60,6 +60,8 @@ export default {
       this.filters = filters;
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -97,6 +97,8 @@ export default {
       return Object.prototype.hasOwnProperty.call(this.configData, tab);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

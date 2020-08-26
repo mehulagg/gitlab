@@ -5,6 +5,8 @@ export default {
   components: {
     GlSkeletonLoader,
   },
+
+  emits: [],
 };
 </script>
 <template>

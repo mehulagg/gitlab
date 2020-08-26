@@ -30,6 +30,8 @@ export default {
       return this.quickActionsDocsPath !== '';
     },
   },
+
+  emits: [],
 };
 </script>
 

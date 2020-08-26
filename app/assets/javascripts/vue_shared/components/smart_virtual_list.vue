@@ -12,6 +12,8 @@ export default {
     wtag: { type: String, default: 'div', required: false },
     wclass: { type: String, default: null, required: false },
   },
+
+  emits: [],
 };
 </script>
 <template>

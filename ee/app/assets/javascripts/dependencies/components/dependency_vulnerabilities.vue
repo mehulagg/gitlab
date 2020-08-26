@@ -21,6 +21,8 @@ export default {
       return this.vulnerabilities.length - this.renderableVulnerabilities.length;
     },
   },
+
+  emits: [],
 };
 </script>
 

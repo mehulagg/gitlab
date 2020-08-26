@@ -31,7 +31,9 @@ export default {
       this.$refs.form.submit();
     },
   },
+
   modalModule: APPROVALS_MODAL,
+  emits: [],
 };
 </script>
 

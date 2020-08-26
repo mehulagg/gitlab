@@ -79,7 +79,9 @@ export default {
       }
     },
   },
+
   timeRanges,
+  emits: [],
 };
 </script>
 <template>

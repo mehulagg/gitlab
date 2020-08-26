@@ -31,6 +31,8 @@ export default {
       return this.issue.report_type === 'sast' || this.issue.report_type === 'dependency_scanning';
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -182,6 +182,8 @@ export default {
       }
     },
   },
+
+  emits: ['onEpicSelect'],
 };
 </script>
 

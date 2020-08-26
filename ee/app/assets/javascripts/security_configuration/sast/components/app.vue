@@ -73,6 +73,8 @@ export default {
     ),
   },
   feedbackIssue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225991',
+
+  emits: [],
 };
 </script>
 

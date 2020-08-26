@@ -46,7 +46,9 @@ export default {
   methods: {
     ...mapActions(['setResizingStatus']),
   },
+
   maxSize: window.innerWidth / 2,
+  emits: [],
 };
 </script>
 

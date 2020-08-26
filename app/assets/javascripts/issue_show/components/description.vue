@@ -123,6 +123,8 @@ export default {
       }
     },
   },
+
+  emits: ['taskListUpdateFailed'],
 };
 </script>
 

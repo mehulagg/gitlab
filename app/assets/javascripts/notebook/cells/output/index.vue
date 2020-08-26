@@ -72,6 +72,8 @@ export default {
       return this.dataForType(output, this.outputType(output));
     },
   },
+
+  emits: [],
 };
 </script>
 

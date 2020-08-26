@@ -38,6 +38,8 @@ export default {
       eventHub.$emit(`${this.action}fetchPage`, page, filterGroupsParam, sortParam, archivedParam);
     },
   },
+
+  emits: [],
 };
 </script>
 

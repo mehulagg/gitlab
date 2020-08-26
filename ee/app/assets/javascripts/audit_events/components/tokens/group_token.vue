@@ -18,6 +18,8 @@ export default {
       return item.full_name;
     },
   },
+
+  emits: [],
 };
 </script>
 

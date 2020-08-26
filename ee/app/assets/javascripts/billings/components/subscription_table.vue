@@ -79,6 +79,8 @@ export default {
   methods: {
     ...mapActions('subscription', ['fetchSubscription']),
   },
+
+  emits: [],
 };
 </script>
 

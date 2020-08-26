@@ -79,6 +79,8 @@ export default {
       return item.name === this.selectedRef || item.value === this.selectedRef;
     },
   },
+
+  emits: ['selected'],
 };
 </script>
 

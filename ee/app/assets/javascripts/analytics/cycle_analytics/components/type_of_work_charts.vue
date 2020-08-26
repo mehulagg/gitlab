@@ -59,6 +59,8 @@ export default {
       this.setTasksByTypeFilters(e);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

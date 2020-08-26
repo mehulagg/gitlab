@@ -59,6 +59,8 @@ export default {
       return this.triggerCommit || this.triggerMergeRequest;
     },
   },
+
+  emits: [],
 };
 </script>
 

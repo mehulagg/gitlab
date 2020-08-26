@@ -83,6 +83,8 @@ export default {
   methods: {
     ...mapActions(['fetchUserList', 'dismissErrorAlert', 'removeUserId', 'addUserIds']),
   },
+
+  emits: [],
 };
 </script>
 <template>

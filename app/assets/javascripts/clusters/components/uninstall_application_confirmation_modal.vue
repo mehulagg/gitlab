@@ -82,6 +82,8 @@ export default {
       this.$emit('confirm');
     },
   },
+
+  emits: ['confirm'],
 };
 </script>
 <template>

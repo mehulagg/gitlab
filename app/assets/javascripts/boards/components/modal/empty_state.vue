@@ -40,6 +40,8 @@ export default {
       return obj;
     },
   },
+
+  emits: [],
 };
 </script>
 

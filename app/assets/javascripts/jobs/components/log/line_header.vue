@@ -38,6 +38,8 @@ export default {
       this.$emit('toggleLine');
     },
   },
+
+  emits: ['toggleLine'],
 };
 </script>
 

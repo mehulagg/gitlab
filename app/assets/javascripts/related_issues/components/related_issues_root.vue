@@ -216,6 +216,8 @@ export default {
       this.inputValue = '';
     },
   },
+
+  emits: [],
 };
 </script>
 

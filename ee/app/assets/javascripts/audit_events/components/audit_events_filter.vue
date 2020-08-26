@@ -59,6 +59,8 @@ export default {
       this.$emit('selected', val);
     },
   },
+
+  emits: ['selected', 'submit'],
 };
 </script>
 

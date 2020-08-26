@@ -18,6 +18,8 @@ export default {
       return name;
     },
   },
+
+  emits: [],
 };
 </script>
 

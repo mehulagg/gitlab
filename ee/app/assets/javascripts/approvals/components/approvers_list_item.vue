@@ -31,6 +31,8 @@ export default {
       return this.isGroup ? this.approver.full_path : this.approver.name;
     },
   },
+
+  emits: ['remove'],
 };
 </script>
 

@@ -15,6 +15,8 @@ export default {
       bannerMessage: '',
     };
   },
+
+  emits: [],
 };
 </script>
 <template>

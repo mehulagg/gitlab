@@ -48,5 +48,7 @@ export default {
       this.setActiveId({ id: this.list.id, sidebarType: LIST });
     },
   },
+
+  emits: [],
 };
 </script>

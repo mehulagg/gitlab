@@ -87,6 +87,8 @@ export default {
       this.$emit('resize-end', this.size);
     },
   },
+
+  emits: ['resize-end', 'resize-start', 'update:size'],
 };
 </script>
 

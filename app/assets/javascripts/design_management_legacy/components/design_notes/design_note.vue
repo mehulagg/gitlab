@@ -75,7 +75,9 @@ export default {
       }
     },
   },
+
   updateNoteMutation,
+  emits: ['error'],
 };
 </script>
 

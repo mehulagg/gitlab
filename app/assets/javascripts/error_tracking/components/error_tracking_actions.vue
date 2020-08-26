@@ -39,6 +39,8 @@ export default {
       return `error_tracking/${this.error.id}/details`;
     },
   },
+
+  emits: ['update-issue-status'],
 };
 </script>
 

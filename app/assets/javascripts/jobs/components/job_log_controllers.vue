@@ -65,6 +65,8 @@ export default {
       this.$emit('scrollJobLogBottom');
     },
   },
+
+  emits: ['scrollJobLogBottom', 'scrollJobLogTop'],
 };
 </script>
 <template>

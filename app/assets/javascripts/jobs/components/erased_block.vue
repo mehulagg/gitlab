@@ -24,6 +24,8 @@ export default {
       return !isEmpty(this.user);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

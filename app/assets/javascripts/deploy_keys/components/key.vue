@@ -105,6 +105,8 @@ export default {
       this.projectsExpanded = !this.projectsExpanded;
     },
   },
+
+  emits: [],
 };
 </script>
 

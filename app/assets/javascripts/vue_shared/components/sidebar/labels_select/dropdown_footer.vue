@@ -18,6 +18,8 @@ export default {
       default: () => __('Manage labels'),
     },
   },
+
+  emits: [],
 };
 </script>
 

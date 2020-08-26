@@ -39,6 +39,8 @@ export default {
       return this.currentTabCount % DEFAULT_PAGE_SIZE || DEFAULT_PAGE_SIZE;
     },
   },
+
+  emits: [],
 };
 </script>
 

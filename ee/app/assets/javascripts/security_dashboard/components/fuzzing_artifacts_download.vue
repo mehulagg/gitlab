@@ -33,6 +33,8 @@ export default {
       }/download?job=${encodeURIComponent(job.name)}`;
     },
   },
+
+  emits: [],
 };
 </script>
 

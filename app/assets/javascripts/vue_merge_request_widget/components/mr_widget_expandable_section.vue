@@ -39,6 +39,8 @@ export default {
       this.contentIsVisible = !this.contentIsVisible;
     },
   },
+
+  emits: [],
 };
 </script>
 

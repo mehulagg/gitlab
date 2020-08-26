@@ -326,6 +326,8 @@ export default {
       };
     },
   },
+
+  emits: ['on-failure', 'update-annotation'],
 };
 </script>
 <template>

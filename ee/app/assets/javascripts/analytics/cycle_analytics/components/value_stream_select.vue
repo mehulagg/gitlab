@@ -115,6 +115,8 @@ export default {
       this.setSelectedValueStream(id);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

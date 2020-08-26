@@ -65,6 +65,8 @@ export default {
       eventHub.$emit('requestClearRecentSearches');
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

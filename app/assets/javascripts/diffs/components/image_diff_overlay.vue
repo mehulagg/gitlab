@@ -89,6 +89,8 @@ export default {
       });
     },
   },
+
+  emits: [],
 };
 </script>
 

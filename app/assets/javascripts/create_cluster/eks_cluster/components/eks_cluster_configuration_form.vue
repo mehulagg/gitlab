@@ -313,6 +313,8 @@ export default {
       this.fetchSecurityGroups({ vpc, region: this.selectedRegion });
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

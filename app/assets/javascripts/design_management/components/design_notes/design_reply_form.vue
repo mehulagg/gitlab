@@ -79,6 +79,8 @@ export default {
       this.$refs.textarea.focus();
     },
   },
+
+  emits: ['cancelForm', 'input', 'submitForm'],
 };
 </script>
 

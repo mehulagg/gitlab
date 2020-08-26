@@ -16,6 +16,8 @@ export default {
       return 20 * (i - 1);
     },
   },
+
+  emits: [],
 };
 </script>
 

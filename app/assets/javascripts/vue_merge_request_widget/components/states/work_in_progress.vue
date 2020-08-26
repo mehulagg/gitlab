@@ -136,6 +136,8 @@ export default {
       }
     },
   },
+
+  emits: [],
 };
 </script>
 

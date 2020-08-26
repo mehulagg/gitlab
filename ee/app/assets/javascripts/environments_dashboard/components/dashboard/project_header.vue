@@ -27,6 +27,7 @@ export default {
 
   removeProjectText: s__('EnvironmentsDashboard|Remove'),
   moreActionsText: s__('EnvironmentsDashboard|More actions'),
+  emits: ['remove'],
 };
 </script>
 

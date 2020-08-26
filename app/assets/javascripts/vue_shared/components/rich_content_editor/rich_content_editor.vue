@@ -115,6 +115,8 @@ export default {
       this.$emit('modeChange', newMode);
     },
   },
+
+  emits: ['input', 'modeChange', 'uploadImage'],
 };
 </script>
 <template>

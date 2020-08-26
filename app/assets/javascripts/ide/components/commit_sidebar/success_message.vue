@@ -5,6 +5,8 @@ export default {
   computed: {
     ...mapState(['lastCommitMsg', 'committedStateSvgPath']),
   },
+
+  emits: [],
 };
 </script>
 

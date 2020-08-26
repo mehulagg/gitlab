@@ -93,6 +93,8 @@ export default {
       this.board.assignee = assignee;
     },
   },
+
+  emits: [],
 };
 </script>
 

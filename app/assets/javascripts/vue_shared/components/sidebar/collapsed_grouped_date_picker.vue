@@ -73,6 +73,8 @@ export default {
       return __('Start and due date');
     },
   },
+
+  emits: ['toggleCollapse'],
 };
 </script>
 

@@ -37,6 +37,8 @@ export default {
       this.$refs.newModal.open(modalTypes.tree);
     },
   },
+
+  emits: [],
 };
 </script>
 

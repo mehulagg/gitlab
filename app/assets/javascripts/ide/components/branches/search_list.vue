@@ -52,6 +52,8 @@ export default {
       return item.name === this.currentBranchId;
     },
   },
+
+  emits: [],
 };
 </script>
 

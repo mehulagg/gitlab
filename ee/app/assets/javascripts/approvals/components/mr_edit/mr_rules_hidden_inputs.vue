@@ -33,6 +33,7 @@ export default {
   INPUT_REMOVE_HIDDEN_GROUPS,
   INPUT_FALLBACK_APPROVALS_REQUIRED,
   INPUT_RESET_TO_DEFAULTS_ID,
+  emits: [],
 };
 </script>
 

@@ -136,6 +136,8 @@ export default {
       )(environments);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

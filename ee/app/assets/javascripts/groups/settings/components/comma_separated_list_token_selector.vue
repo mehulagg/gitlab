@@ -122,6 +122,8 @@ export default {
       this.hideErrorMessage = true;
     },
   },
+
+  emits: ['text-input'],
 };
 </script>
 

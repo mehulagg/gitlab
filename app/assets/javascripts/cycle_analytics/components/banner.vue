@@ -22,6 +22,8 @@ export default {
       this.$emit('dismiss-overview-dialog');
     },
   },
+
+  emits: ['dismiss-overview-dialog'],
 };
 </script>
 <template>

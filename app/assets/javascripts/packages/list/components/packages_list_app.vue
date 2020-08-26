@@ -71,6 +71,8 @@ export default {
       'PackageRegistry|Learn how to %{noPackagesLinkStart}publish and share your packages%{noPackagesLinkEnd} with GitLab.',
     ),
   },
+
+  emits: [],
 };
 </script>
 

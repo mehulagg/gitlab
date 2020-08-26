@@ -22,6 +22,8 @@ export default {
       return n__('Milestone', 'Milestones', this.milestones.length);
     },
   },
+
+  emits: [],
 };
 </script>
 

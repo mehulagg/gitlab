@@ -126,6 +126,8 @@ export default {
       return this.commit && this.commit.lockLabel;
     },
   },
+
+  emits: [],
 };
 </script>
 

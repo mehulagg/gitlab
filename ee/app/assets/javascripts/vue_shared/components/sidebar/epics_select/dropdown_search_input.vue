@@ -25,6 +25,8 @@ export default {
       this.handleKeyUp();
     },
   },
+
+  emits: ['onSearchInput'],
 };
 </script>
 

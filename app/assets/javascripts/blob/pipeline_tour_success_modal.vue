@@ -69,6 +69,8 @@ export default {
       Cookies.remove(this.commitCookie);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

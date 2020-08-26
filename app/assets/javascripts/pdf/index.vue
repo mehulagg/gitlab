@@ -56,6 +56,8 @@ export default {
       return Promise.all(pagePromises);
     },
   },
+
+  emits: ['pdflaberror', 'pdflabload'],
 };
 </script>
 

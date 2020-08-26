@@ -30,6 +30,7 @@ export default {
   maxShownRows: 30,
   typicalRowHeight: 75,
   wrapSymbols: ['::', '#', '.', '_', '-', '/', '\\'],
+  emits: [],
 };
 </script>
 

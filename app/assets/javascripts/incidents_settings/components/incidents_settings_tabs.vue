@@ -12,8 +12,10 @@ export default {
     AlertsSettingsForm,
     PagerDutySettingsForm,
   },
+
   tabs: INTEGRATION_TABS_CONFIG,
   i18n: I18N_INTEGRATION_TABS,
+  emits: [],
 };
 </script>
 

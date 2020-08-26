@@ -97,6 +97,15 @@ export default {
       return buttons;
     },
   },
+
+  emits: [
+    'createMergeRequest',
+    'createNewIssue',
+    'dismissVulnerability',
+    'downloadPatch',
+    'openDismissalCommentBox',
+    'revertDismissVulnerability',
+  ],
 };
 </script>
 

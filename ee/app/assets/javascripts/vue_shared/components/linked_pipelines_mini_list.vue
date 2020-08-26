@@ -74,6 +74,8 @@ export default {
       return `ci-status-icon-${group}`;
     },
   },
+
+  emits: [],
 };
 </script>
 

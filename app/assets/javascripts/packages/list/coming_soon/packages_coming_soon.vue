@@ -73,8 +73,10 @@ export default {
     emptyStateTitle: s__('PackageRegistry|No upcoming issues'),
     emptyStateDescription: s__('PackageRegistry|There are no upcoming issues to display.'),
   },
+
   comingSoonIssuesQuery,
   toViewModel,
+  emits: [],
 };
 </script>
 

@@ -22,6 +22,8 @@ export default {
   methods: {
     ...mapActions(['fetchStatistics']),
   },
+
+  emits: [],
 };
 </script>
 

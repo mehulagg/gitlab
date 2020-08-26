@@ -81,6 +81,8 @@ export default {
       this.manager.iframe.src = `${this.manager.bundlerURL}${path}`;
     },
   },
+
+  emits: [],
 };
 </script>
 

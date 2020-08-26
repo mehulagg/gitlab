@@ -48,6 +48,8 @@ export default {
       );
     },
   },
+
+  emits: [],
 };
 </script>
 

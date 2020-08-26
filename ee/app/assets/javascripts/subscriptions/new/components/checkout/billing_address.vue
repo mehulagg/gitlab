@@ -128,6 +128,8 @@ export default {
     stateSelectPrompt: s__('Checkout|Please select a state'),
     zipCodeLabel: s__('Checkout|Zip code'),
   },
+
+  emits: [],
 };
 </script>
 <template>

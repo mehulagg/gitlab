@@ -57,6 +57,8 @@ export default {
   methods: {
     ...mapActions(['fetchMetrics']),
   },
+
+  emits: [],
 };
 </script>
 

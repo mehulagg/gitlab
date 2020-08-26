@@ -34,6 +34,8 @@ export default {
       return !this.hideFileStats && this.file.type === 'blob';
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -30,6 +30,8 @@ export default {
       return { 'flex-grow-1': this.isFlexible };
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -103,6 +103,8 @@ export default {
       return Boolean(milestoneIndex === this.milestonesToDisplay.length - 1 && this.showMoreLink);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

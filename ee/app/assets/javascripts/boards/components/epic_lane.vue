@@ -94,6 +94,8 @@ export default {
       this.isExpanded = !this.isExpanded;
     },
   },
+
+  emits: [],
 };
 </script>
 

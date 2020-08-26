@@ -37,6 +37,8 @@ export default {
       return n__('Dependencies|%d more', 'Dependencies|%d more', this.remainingDependenciesCount);
     },
   },
+
+  emits: [],
 };
 </script>
 

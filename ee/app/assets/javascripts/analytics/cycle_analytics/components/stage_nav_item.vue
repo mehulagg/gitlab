@@ -79,6 +79,8 @@ export default {
       }
     },
   },
+
+  emits: ['select'],
 };
 </script>
 

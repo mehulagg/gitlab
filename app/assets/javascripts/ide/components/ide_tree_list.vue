@@ -35,7 +35,9 @@ export default {
   methods: {
     ...mapActions(['updateViewer', 'toggleTreeOpen']),
   },
+
   IdeFileRow,
+  emits: [],
 };
 </script>
 

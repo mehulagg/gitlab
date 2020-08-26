@@ -14,6 +14,8 @@ export default {
     ...mapState(['licenses', 'isLoadingLicenses', 'newLicensePath']),
     ...mapGetters(['hasLicenses']),
   },
+
+  emits: [],
 };
 </script>
 

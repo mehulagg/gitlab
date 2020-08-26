@@ -40,6 +40,8 @@ export default {
       return this.sidebarCollapsed ? 'right-sidebar-collapsed' : 'right-sidebar-expanded';
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -24,7 +24,9 @@ export default {
       name: s__('Pipeline|Pipelines'),
     },
   },
+
   chartContainerHeight: CHART_CONTAINER_HEIGHT,
+  emits: [],
 };
 </script>
 <template>

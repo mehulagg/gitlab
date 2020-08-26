@@ -34,6 +34,8 @@ export default {
       return setUrlParams({ page });
     },
   },
+
+  emits: [],
 };
 </script>
 

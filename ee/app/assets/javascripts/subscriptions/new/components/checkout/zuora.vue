@@ -57,6 +57,8 @@ export default {
       window.Z.render(params, {}, this.paymentFormSubmitted);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

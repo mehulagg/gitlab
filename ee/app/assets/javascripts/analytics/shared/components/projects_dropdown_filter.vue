@@ -130,6 +130,8 @@ export default {
       return this.selectedProjects ? this.selectedProjectIds.includes(id) : false;
     },
   },
+
+  emits: ['selected'],
 };
 </script>
 

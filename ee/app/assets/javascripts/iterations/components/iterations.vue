@@ -135,6 +135,8 @@ export default {
       this.pagination = { currentPage: 1 };
     },
   },
+
+  emits: [],
 };
 </script>
 

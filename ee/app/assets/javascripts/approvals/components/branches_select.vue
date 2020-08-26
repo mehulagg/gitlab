@@ -107,6 +107,8 @@ export default {
       this.$input.select2('data', []);
     },
   },
+
+  emits: ['input'],
 };
 </script>
 

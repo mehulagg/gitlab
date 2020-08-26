@@ -34,6 +34,8 @@ export default {
       return this.cell.outputs;
     },
   },
+
+  emits: [],
 };
 </script>
 

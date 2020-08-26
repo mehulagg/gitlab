@@ -96,6 +96,8 @@ export default {
       this.$emit('filterPipelines', filters);
     },
   },
+
+  emits: ['filterPipelines'],
 };
 </script>
 

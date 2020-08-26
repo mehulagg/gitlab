@@ -45,6 +45,8 @@ export default {
     emailPlaceholder: __('teammate%{number}@company.com'),
     inviteAnother: __('Invite another teammate'),
   },
+
+  emits: [],
 };
 </script>
 <template>

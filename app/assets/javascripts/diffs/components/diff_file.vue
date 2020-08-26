@@ -159,6 +159,8 @@ export default {
       this.forkMessageVisible = false;
     },
   },
+
+  emits: [],
 };
 </script>
 

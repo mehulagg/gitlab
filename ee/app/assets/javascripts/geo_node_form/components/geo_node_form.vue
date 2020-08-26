@@ -68,6 +68,8 @@ export default {
       this.nodeData[key].splice(index, 1);
     },
   },
+
+  emits: [],
 };
 </script>
 

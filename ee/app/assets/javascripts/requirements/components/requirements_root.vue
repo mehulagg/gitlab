@@ -509,6 +509,8 @@ export default {
       this.updateUrl();
     },
   },
+
+  emits: [],
 };
 </script>
 

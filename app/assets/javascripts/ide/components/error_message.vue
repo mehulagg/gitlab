@@ -43,6 +43,8 @@ export default {
       this.setErrorMessage(null);
     },
   },
+
+  emits: [],
 };
 </script>
 

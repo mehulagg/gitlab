@@ -61,6 +61,8 @@ export default {
       return this.suggestion.updatedAt !== this.suggestion.createdAt;
     },
   },
+
+  emits: [],
 };
 </script>
 

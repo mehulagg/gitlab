@@ -54,6 +54,8 @@ export default {
     subheading: __('Here you will find recent merge request activity'),
     mergeRequestsTabLabel: __('Merge Requests'),
   },
+
+  emits: [],
 };
 </script>
 

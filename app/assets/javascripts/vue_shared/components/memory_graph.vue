@@ -28,6 +28,8 @@ export default {
       return Number(MBs).toFixed(2);
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -17,6 +17,8 @@ export default {
       updateElementsVisibility('.js-show-on-project-root', isShow);
     },
   },
+
+  emits: [],
 };
 </script>
 

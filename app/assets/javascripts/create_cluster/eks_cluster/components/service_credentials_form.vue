@@ -78,6 +78,8 @@ export default {
   methods: {
     ...mapActions(['createRole']),
   },
+
+  emits: [],
 };
 </script>
 <template>

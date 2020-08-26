@@ -65,6 +65,8 @@ export default {
   errorText: sprintf(s__('ciReport|Failed to load %{reportName} report'), {
     reportName: 'codeclimate',
   }),
+
+  emits: [],
 };
 </script>
 <template>

@@ -113,6 +113,8 @@ export default {
     SECRET_DETECTION: __('Secret Detection'),
     DEPENDENCY_SCANNING: __('Dependency Scanning'),
   },
+
+  emits: [],
 };
 </script>
 

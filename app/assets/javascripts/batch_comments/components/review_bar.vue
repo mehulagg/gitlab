@@ -40,6 +40,8 @@ export default {
     },
     false,
   ),
+
+  emits: [],
 };
 </script>
 <template>

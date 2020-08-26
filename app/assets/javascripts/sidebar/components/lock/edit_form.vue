@@ -17,6 +17,8 @@ export default {
       type: String,
     },
   },
+
+  emits: [],
 };
 </script>
 

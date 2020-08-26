@@ -5,6 +5,8 @@ export default {
   created() {
     this.uniqueId = uniqueId('accordion-');
   },
+
+  emits: [],
 };
 </script>
 <template>

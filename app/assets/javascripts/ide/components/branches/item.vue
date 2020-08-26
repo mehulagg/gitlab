@@ -28,6 +28,8 @@ export default {
       return this.$router.resolve(`/project/${this.projectId}/edit/${this.item.name}`).href;
     },
   },
+
+  emits: [],
 };
 </script>
 

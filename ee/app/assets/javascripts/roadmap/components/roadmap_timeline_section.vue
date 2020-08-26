@@ -63,6 +63,8 @@ export default {
       this.scrolledHeaderClass = scrollTop > this.$el.clientHeight / 100 ? 'scroll-top-shadow' : '';
     },
   },
+
+  emits: [],
 };
 </script>
 

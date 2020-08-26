@@ -77,6 +77,8 @@ export default {
       this.$refs.newModal.open(modalTypes.blob);
     },
   },
+
+  emits: [],
 };
 </script>
 

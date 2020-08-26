@@ -29,6 +29,8 @@ export default {
       this.selectedOption = option;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

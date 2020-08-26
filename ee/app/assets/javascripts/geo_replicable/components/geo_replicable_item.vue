@@ -74,7 +74,9 @@ export default {
   methods: {
     ...mapActions(['initiateReplicableSync']),
   },
+
   actionTypes: ACTION_TYPES,
+  emits: [],
 };
 </script>
 

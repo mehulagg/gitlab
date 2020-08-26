@@ -32,6 +32,8 @@ export default {
       this.$emit('projectRemoved', project);
     },
   },
+
+  emits: ['projectRemoved'],
 };
 </script>
 

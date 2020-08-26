@@ -49,6 +49,8 @@ export default {
       this.$emit('clickLabel', this.label);
     },
   },
+
+  emits: ['clickLabel'],
 };
 </script>
 

@@ -96,6 +96,8 @@ export default {
       this.isHover = e.type === 'mouseover';
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -63,6 +63,8 @@ export default {
       Flash(sprintf(SNIPPET_BLOB_CONTENT_FETCH_ERROR, { err }));
     },
   },
+
+  emits: ['blob-updated', 'delete'],
 };
 </script>
 <template>

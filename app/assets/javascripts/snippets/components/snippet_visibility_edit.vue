@@ -41,6 +41,8 @@ export default {
       ].map(key => ({ value: key, ...SNIPPET_VISIBILITY[key] }));
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -36,6 +36,8 @@ export default {
         : sprintf(__("Comment '%{label}' position"), { label: this.label });
     },
   },
+
+  emits: ['click', 'mousedown', 'mouseup'],
 };
 </script>
 

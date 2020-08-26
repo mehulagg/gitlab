@@ -13,6 +13,8 @@ export default {
       this.$emit('handleAddProjectsClick');
     },
   },
+
+  emits: ['handleAddProjectsClick'],
 };
 </script>
 

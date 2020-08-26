@@ -14,6 +14,8 @@ export default {
   computed: {
     ...mapState(['terminalSync']),
   },
+
+  emits: [],
 };
 </script>
 

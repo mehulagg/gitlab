@@ -80,7 +80,9 @@ export default {
       return numberToHumanSize(size);
     },
   },
+
   modalId: 'temporary-increase-storage-modal',
+  emits: [],
 };
 </script>
 <template>

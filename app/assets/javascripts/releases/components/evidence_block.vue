@@ -54,6 +54,8 @@ export default {
       return summary;
     },
   },
+
+  emits: [],
 };
 </script>
 

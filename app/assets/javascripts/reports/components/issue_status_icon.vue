@@ -38,6 +38,8 @@ export default {
       return this.status === STATUS_NEUTRAL;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -78,6 +78,8 @@ export default {
       this.tooltipContent = metric;
     },
   },
+
+  emits: [],
 };
 </script>
 

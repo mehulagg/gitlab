@@ -390,6 +390,8 @@ export default {
     collapsePanelLabel: s__('Metrics|Collapse panel'),
     collapsePanelTooltip: s__('Metrics|Collapse panel (Esc)'),
   },
+
+  emits: [],
 };
 </script>
 

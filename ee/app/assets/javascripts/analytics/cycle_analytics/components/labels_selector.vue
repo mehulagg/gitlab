@@ -123,6 +123,8 @@ export default {
       return Boolean(this.maxLabelsSelected && !this.isSelectedLabel(id));
     },
   },
+
+  emits: ['clearLabel', 'selectLabel'],
 };
 </script>
 <template>

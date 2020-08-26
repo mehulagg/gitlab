@@ -73,6 +73,8 @@ export default {
       return this.includeSelectedDate ? dayDifference + OFFSET_DATE_BY_ONE : dayDifference;
     },
   },
+
+  emits: ['change'],
 };
 </script>
 <template>

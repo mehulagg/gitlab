@@ -11,6 +11,8 @@ export default {
   computed: {
     ...mapGetters('detail', ['isExistingRelease']),
   },
+
+  emits: [],
 };
 </script>
 

@@ -70,6 +70,8 @@ export default {
       this.$el.querySelector('form').submit();
     },
   },
+
+  emits: ['close'],
 };
 </script>
 

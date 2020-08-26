@@ -35,6 +35,8 @@ export default {
       return this.eventId;
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -98,6 +98,8 @@ export default {
       return true;
     },
   },
+
+  emits: ['addImage'],
 };
 </script>
 <template>

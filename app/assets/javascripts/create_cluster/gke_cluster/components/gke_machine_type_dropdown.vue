@@ -67,6 +67,8 @@ export default {
     ...mapActions(['fetchMachineTypes']),
     ...mapActions({ setItem: 'setMachineType' }),
   },
+
+  emits: [],
 };
 </script>
 

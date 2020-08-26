@@ -21,6 +21,8 @@ export default {
       return imagePath(this.image);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

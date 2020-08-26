@@ -189,6 +189,8 @@ export default {
       }
     },
   },
+
+  emits: [],
 };
 </script>
 

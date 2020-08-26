@@ -23,6 +23,8 @@ export default {
   methods: {
     ...mapActions(['setSubnetwork']),
   },
+
+  emits: [],
 };
 </script>
 <template>

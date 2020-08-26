@@ -24,6 +24,8 @@ export default {
       this.source.appendChild(this.$el.firstChild);
     }
   },
+
+  emits: [],
 };
 </script>
 <template>

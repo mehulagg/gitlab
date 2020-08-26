@@ -39,6 +39,8 @@ export default {
       return this.license.name.includes('http');
     },
   },
+
+  emits: [],
 };
 </script>
 

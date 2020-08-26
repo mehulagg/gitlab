@@ -79,6 +79,8 @@ export default {
       return this.shouldShowUsername ? '' : this.tooltipText;
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -101,6 +101,8 @@ export default {
       this.$emit('set', { domain, domainId: null });
     },
   },
+
+  emits: ['save', 'set'],
 };
 </script>
 

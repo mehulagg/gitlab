@@ -66,8 +66,10 @@ export default {
       this.mode = newMode;
     },
   },
+
   diffModes,
   imageViewMode,
+  emits: [],
 };
 </script>
 

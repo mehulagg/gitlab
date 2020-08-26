@@ -56,8 +56,10 @@ export default {
       return (0.5 + index) * (this.barWidth + spaceBetweenBars);
     },
   },
+
   BAR_HEIGHTS,
   GRID_YS,
+  emits: [],
 };
 </script>
 <template>

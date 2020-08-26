@@ -49,6 +49,8 @@ export default {
       return this.isExpirable ? this.dateInWords || __('Never') : this.dateInWords;
     },
   },
+
+  emits: [],
 };
 </script>
 

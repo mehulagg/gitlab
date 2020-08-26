@@ -123,6 +123,8 @@ export default {
       this.toggleSelectedProject(project);
     },
   },
+
+  emits: [],
 };
 </script>
 

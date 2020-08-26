@@ -35,6 +35,8 @@ export default {
   methods: {
     ...mapActions(['setDashboardTimezone']),
   },
+
+  emits: [],
 };
 </script>
 

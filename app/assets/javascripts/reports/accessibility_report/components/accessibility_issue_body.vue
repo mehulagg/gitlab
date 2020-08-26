@@ -33,6 +33,8 @@ export default {
       return `https://www.w3.org/TR/WCAG20-TECHS/${this.parsedTECHSCode || 'Overview'}.html`;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

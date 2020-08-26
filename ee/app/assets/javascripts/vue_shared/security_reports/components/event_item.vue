@@ -58,6 +58,8 @@ export default {
       return this.id ? `note_${this.id}` : undefined;
     },
   },
+
+  emits: [],
 };
 </script>
 

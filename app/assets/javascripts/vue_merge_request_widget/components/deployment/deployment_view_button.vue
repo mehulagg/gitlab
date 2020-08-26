@@ -48,6 +48,8 @@ export default {
       return this.deployment.changes && this.deployment.changes.length > 1;
     },
   },
+
+  emits: [],
 };
 </script>
 

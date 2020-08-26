@@ -222,6 +222,8 @@ export default {
       Tracking.event(category, action);
     },
   },
+
+  emits: [],
 };
 </script>
 

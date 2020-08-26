@@ -57,6 +57,8 @@ export default {
       return this.labels[0].title;
     },
   },
+
+  emits: [],
 };
 </script>
 

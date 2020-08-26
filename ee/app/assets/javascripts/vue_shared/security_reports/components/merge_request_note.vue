@@ -32,6 +32,8 @@ export default {
       return __('Created merge request %{mergeRequestLink}');
     },
   },
+
+  emits: [],
 };
 </script>
 

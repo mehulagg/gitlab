@@ -8,6 +8,8 @@ export default {
     GlButton,
     StatusIcon,
   },
+
+  emits: [],
 };
 </script>
 <template>

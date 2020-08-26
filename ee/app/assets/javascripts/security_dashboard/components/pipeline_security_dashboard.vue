@@ -105,6 +105,8 @@ export default {
     ...mapActions('vulnerabilities', ['setSourceBranch']),
     ...mapActions('pipelineJobs', ['setPipelineJobsPath', 'setProjectId']),
   },
+
+  emits: [],
 };
 </script>
 

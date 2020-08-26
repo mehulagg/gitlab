@@ -27,6 +27,8 @@ export default {
       return this.artifact?.expired === false && !this.isLocked;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

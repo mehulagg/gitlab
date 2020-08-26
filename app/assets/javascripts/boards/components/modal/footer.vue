@@ -60,6 +60,8 @@ export default {
       this.toggleModal(false);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

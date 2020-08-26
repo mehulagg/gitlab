@@ -17,6 +17,8 @@ export default {
   strings: {
     createdBy: s__('ComplianceDashboard|created by:'),
   },
+
+  emits: [],
 };
 </script>
 

@@ -121,6 +121,8 @@ export default {
       this.jobName = jobName;
     },
   },
+
+  emits: ['onClickTriggered', 'onClickTriggeredBy', 'onResetTriggered'],
 };
 </script>
 <template>

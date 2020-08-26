@@ -21,6 +21,8 @@ export default {
       required: true,
     },
   },
+
+  emits: ['alert-error', 'toggle-sidebar'],
 };
 </script>
 

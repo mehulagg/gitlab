@@ -33,6 +33,8 @@ export default {
   computed: {
     ...mapGetters(['dockerBuildCommand', 'dockerPushCommand', 'dockerLoginCommand']),
   },
+
+  emits: [],
 };
 </script>
 <template>

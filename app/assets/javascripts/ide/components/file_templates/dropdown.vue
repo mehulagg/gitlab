@@ -70,6 +70,8 @@ export default {
       this.$emit('click', item);
     },
   },
+
+  emits: ['click'],
 };
 </script>
 

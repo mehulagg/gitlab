@@ -47,6 +47,8 @@ export default {
       return typeof col.value !== 'undefined' && col.value !== null ? col.value : ' - ';
     },
   },
+
+  emits: [],
 };
 </script>
 

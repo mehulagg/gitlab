@@ -109,6 +109,8 @@ export default {
       }, sidebarAnimationDuration);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

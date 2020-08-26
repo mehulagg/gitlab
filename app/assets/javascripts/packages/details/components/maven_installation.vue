@@ -27,7 +27,9 @@ export default {
       'PackageRegistry|For more information on the Maven registry, %{linkStart}see the documentation%{linkEnd}.',
     ),
   },
+
   trackingActions: { ...TrackingActions },
+  emits: [],
 };
 </script>
 

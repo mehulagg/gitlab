@@ -45,6 +45,7 @@ export default {
   actionTypes: ACTION_TYPES,
   filterStates: FILTER_STATES,
   debounce: DEFAULT_SEARCH_DELAY,
+  emits: [],
 };
 </script>
 

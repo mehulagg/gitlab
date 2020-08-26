@@ -90,6 +90,8 @@ export default {
   methods: {
     ...mapActions(['fetchDescriptionVersion', 'softDeleteDescriptionVersion']),
   },
+
+  emits: [],
 };
 </script>
 

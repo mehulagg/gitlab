@@ -88,7 +88,9 @@ export default {
       }
     },
   },
+
   TASKS_BY_TYPE_FILTERS,
+  emits: ['updateFilter'],
 };
 </script>
 <template>

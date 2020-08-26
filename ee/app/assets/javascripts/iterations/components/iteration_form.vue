@@ -136,6 +136,8 @@ export default {
       this.startDate = val;
     },
   },
+
+  emits: ['cancel', 'updated'],
 };
 </script>
 

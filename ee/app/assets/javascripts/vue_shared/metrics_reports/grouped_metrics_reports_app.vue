@@ -67,6 +67,8 @@ export default {
   methods: {
     ...mapActions(['setEndpoint', 'fetchMetrics']),
   },
+
+  emits: [],
 };
 </script>
 <template>

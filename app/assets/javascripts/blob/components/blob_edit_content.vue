@@ -64,6 +64,8 @@ export default {
       this.$emit('input', this.editor.getValue());
     },
   },
+
+  emits: ['input'],
 };
 </script>
 <template>

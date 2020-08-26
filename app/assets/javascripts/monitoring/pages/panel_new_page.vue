@@ -25,6 +25,8 @@ export default {
   i18n: {
     backToDashboard: s__('Metrics|Back to dashboard'),
   },
+
+  emits: [],
 };
 </script>
 <template>

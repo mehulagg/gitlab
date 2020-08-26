@@ -40,6 +40,8 @@ export default {
       return sprintf(__('Last %{days} days'), { days });
     },
   },
+
+  emits: ['selected'],
 };
 </script>
 <template>

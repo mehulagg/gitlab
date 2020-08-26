@@ -37,6 +37,8 @@ export default {
       this.$emit('input', value);
     },
   },
+
+  emits: ['input'],
 };
 </script>
 <template>

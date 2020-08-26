@@ -38,6 +38,8 @@ export default {
       return this.line.right && this.line.right.type === MATCH_LINE_TYPE;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

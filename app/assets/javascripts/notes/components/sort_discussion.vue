@@ -45,6 +45,8 @@ export default {
       return sortDir === this.sortDirection;
     },
   },
+
+  emits: [],
 };
 </script>
 

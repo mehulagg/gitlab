@@ -16,6 +16,8 @@ export default {
       });
     },
   },
+
+  emits: [],
 };
 </script>
 

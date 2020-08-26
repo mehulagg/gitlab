@@ -40,6 +40,8 @@ export default {
       return podName === this.pods.current;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

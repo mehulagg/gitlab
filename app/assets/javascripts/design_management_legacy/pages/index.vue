@@ -255,6 +255,8 @@ export default {
     this.toggleOnPasteListener(to.name);
     next();
   },
+
+  emits: [],
 };
 </script>
 

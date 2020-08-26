@@ -24,7 +24,7 @@ afterEach(() =>
   }),
 );
 
-initializeTestTimeout(process.env.CI ? 6000 : 500);
+initializeTestTimeout(process.env.CI ? 6000 : 5000);
 
 Vue.config.devtools = false;
 Vue.config.productionTip = false;
@@ -59,6 +59,49 @@ expect.extend(customMatchers);
 
 // Tech debt issue TBD
 testUtilsConfig.logModifiedComponents = false;
+
+// Patch emit to support our shiny `emits` option
+const originalEmit = Vue.prototype.$emit;
+Vue.prototype.$emit = function emitWithValidation(eventName, ...args) {
+  const allowedEvents = [
+    // component lifecycle hooks are emitted as events
+    'hook:mounted',
+    'hook:beforeUpdate',
+    'hook:updated',
+    'hook:beforeDestroy',
+    'hook:destroyed',
+
+    // bootstrap events are emitted on $root, so we need to allow them when testing, since
+    // root might be our component
+    'bv::modal::show',
+    'bv::modal::hide',
+    'bv::modal::hidden',
+    'bv::modal::shown',
+    'bv::modal::hide',
+    'bv::hide::modal',
+    'bv::hide::tooltip',
+    'bv::show::modal',
+  ];
+
+  const component = this.$options.$_vueTestUtils_original ?? this.$options;
+  if (component.emits) {
+    const { emits } = component;
+    const normalizedEmits = Array.isArray(emits)
+      ? Object.fromEntries(emits.map(def => [def, () => true]))
+      : emits;
+
+    if (!allowedEvents.includes(eventName)) {
+      if (!(eventName in normalizedEmits)) {
+        console.error(
+          `Component emitted event "${eventName}" but it is not declared in the emits option`,
+        );
+      } else if (!normalizedEmits[eventName](...args)) {
+        console.error(`Invalid event arguments: event validation failed for event "${eventName}".`);
+      }
+    }
+  }
+  return originalEmit.call(this, eventName, ...args);
+};
 
 Object.assign(global, {
   requestIdleCallback(cb) {

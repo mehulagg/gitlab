@@ -75,6 +75,8 @@ export default {
       this.setActiveId({ id: issue.id, sidebarType: ISSUABLE });
     },
   },
+
+  emits: [],
 };
 </script>
 

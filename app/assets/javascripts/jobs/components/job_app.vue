@@ -193,6 +193,8 @@ export default {
       this.throttled();
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

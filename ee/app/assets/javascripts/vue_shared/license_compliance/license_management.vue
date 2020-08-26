@@ -73,6 +73,8 @@ export default {
   emptySearchMessage: s__(
     'LicenseCompliance|There are currently no policies that match in this project.',
   ),
+
+  emits: [],
 };
 </script>
 <template>

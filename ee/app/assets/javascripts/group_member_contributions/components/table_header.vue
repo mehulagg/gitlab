@@ -46,6 +46,8 @@ export default {
       this.columnIconMeta[columnName] = this.getColumnIconMeta(columnName, this.sortOrders);
     },
   },
+
+  emits: ['onColumnClick'],
 };
 </script>
 

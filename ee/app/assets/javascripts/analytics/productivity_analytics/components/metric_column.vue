@@ -31,6 +31,8 @@ export default {
         : n__('Time|hr', 'Time|hrs', this.value);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

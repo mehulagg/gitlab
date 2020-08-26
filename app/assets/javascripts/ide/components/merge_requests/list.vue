@@ -69,7 +69,9 @@ export default {
       this.loadMergeRequests();
     },
   },
+
   searchTypes: SEARCH_TYPES,
+  emits: [],
 };
 </script>
 

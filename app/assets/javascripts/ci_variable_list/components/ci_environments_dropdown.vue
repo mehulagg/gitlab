@@ -63,6 +63,8 @@ export default {
       return this.value === env;
     },
   },
+
+  emits: ['createClicked', 'selectEnvironment'],
 };
 </script>
 <template>

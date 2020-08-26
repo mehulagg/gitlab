@@ -62,6 +62,8 @@ export default {
       return this.user.web_url;
     },
   },
+
+  emits: [],
 };
 </script>
 

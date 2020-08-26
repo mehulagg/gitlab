@@ -159,6 +159,8 @@ export default {
     elasticStackLogo,
     fluentdLogo,
   },
+
+  emits: [],
 };
 </script>
 

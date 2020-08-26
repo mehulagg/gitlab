@@ -89,6 +89,8 @@ export default {
       return `${this.basePath}${this.projectPath}/-/raw/${this.newSha}/${this.newPath}`;
     },
   },
+
+  emits: [],
 };
 </script>
 

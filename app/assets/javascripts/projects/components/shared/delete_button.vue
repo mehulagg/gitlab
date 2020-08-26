@@ -58,6 +58,8 @@ export default {
     title: __('Delete project. Are you ABSOLUTELY SURE?'),
     confirmText: __('Please type the following to confirm:'),
   },
+
+  emits: [],
 };
 </script>
 

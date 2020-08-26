@@ -16,6 +16,8 @@ export default {
   DESCRIPTION: s__(
     `SecurityReports|The security dashboard displays the latest security report. Use it to find and fix vulnerabilities.`,
   ),
+
+  emits: [],
 };
 </script>
 

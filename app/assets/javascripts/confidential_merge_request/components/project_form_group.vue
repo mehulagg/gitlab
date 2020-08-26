@@ -93,6 +93,8 @@ export default {
       }
     },
   },
+
+  emits: [],
 };
 </script>
 

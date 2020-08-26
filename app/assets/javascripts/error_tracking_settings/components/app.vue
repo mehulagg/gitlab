@@ -61,6 +61,8 @@ export default {
       this.updateSettings();
     },
   },
+
+  emits: [],
 };
 </script>
 

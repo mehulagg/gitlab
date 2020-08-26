@@ -27,6 +27,8 @@ export default {
       return stringifyTime(parseSeconds(this.estimate, { limitToHours: this.limitToHours }));
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -35,6 +35,8 @@ export default {
       this.showAllPackages = true;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

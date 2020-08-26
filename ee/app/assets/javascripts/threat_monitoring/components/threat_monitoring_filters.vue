@@ -28,6 +28,8 @@ export default {
       this.setCurrentTimeWindow(timeRange);
     },
   },
+
+  emits: [],
 };
 </script>
 

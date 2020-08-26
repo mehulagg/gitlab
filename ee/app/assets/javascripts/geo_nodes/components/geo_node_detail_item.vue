@@ -79,8 +79,10 @@ export default {
       return this.customType === CUSTOM_TYPE.SYNC;
     },
   },
+
   replicationHelpUrl: REPLICATION_HELP_URL,
   disabledText: s__('Geo|Synchronization of %{itemTitle} is disabled.'),
+  emits: [],
 };
 </script>
 

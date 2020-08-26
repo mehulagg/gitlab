@@ -26,6 +26,8 @@ export default {
       return this.loading ? __('Uninstalling') : __('Uninstall');
     },
   },
+
+  emits: [],
 };
 </script>
 

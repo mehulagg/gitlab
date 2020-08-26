@@ -60,6 +60,8 @@ export default {
       this.showLess = !this.showLess;
     },
   },
+
+  emits: [],
 };
 </script>
 

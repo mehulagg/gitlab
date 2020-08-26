@@ -65,6 +65,8 @@ export default {
       return this.license.licensee[key] || __('Unknown');
     },
   },
+
+  emits: [],
 };
 </script>
 

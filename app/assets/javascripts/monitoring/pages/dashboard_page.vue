@@ -22,6 +22,8 @@ export default {
   methods: {
     ...mapActions('monitoringDashboard', ['setCurrentDashboard']),
   },
+
+  emits: [],
 };
 </script>
 <template>

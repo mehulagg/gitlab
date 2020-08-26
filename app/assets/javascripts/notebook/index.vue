@@ -42,6 +42,8 @@ export default {
       return `${type}-cell`; // eslint-disable-line @gitlab/require-i18n-strings
     },
   },
+
+  emits: [],
 };
 </script>
 

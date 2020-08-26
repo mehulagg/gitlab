@@ -103,6 +103,8 @@ export default {
       this.$emit('toggleSidebar');
     },
   },
+
+  emits: ['toggleSidebar', 'toggleSubscription'],
 };
 </script>
 

@@ -32,6 +32,8 @@ export default {
       return getCommitLink(this.packageEntity, this.isGroup);
     },
   },
+
+  emits: [],
 };
 </script>
 

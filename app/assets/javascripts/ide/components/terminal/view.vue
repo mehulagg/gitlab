@@ -19,6 +19,8 @@ export default {
       this.hideSplash();
     },
   },
+
+  emits: [],
 };
 </script>
 

@@ -55,6 +55,8 @@ export default {
       this.$emit('pipelineActionRequestComplete');
     },
   },
+
+  emits: ['pipelineActionRequestComplete'],
 };
 </script>
 <template>

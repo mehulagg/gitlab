@@ -18,6 +18,8 @@ export default {
       return issueHealthStatusCSSMapping[this.healthStatus];
     },
   },
+
+  emits: [],
 };
 </script>
 

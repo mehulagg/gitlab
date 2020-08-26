@@ -34,6 +34,8 @@ export default {
       return this.timeFormatted(this.time);
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

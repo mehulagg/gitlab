@@ -15,6 +15,8 @@ export default {
   data() {
     return { EVENTS_LIST_ITEM_LIMIT };
   },
+
+  emits: [],
 };
 </script>
 <template>

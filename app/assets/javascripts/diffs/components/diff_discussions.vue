@@ -46,6 +46,8 @@ export default {
       return this.shouldCollapseDiscussions ? discussion.expanded : true;
     },
   },
+
+  emits: [],
 };
 </script>
 

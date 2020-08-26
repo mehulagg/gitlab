@@ -25,6 +25,8 @@ export default {
       return getStatusTranslationsFromLicenseStatus(this.license.approvalStatus);
     },
   },
+
+  emits: [],
 };
 </script>
 

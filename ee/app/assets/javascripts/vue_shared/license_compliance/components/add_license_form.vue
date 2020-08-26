@@ -71,6 +71,8 @@ export default {
       this.$emit('closeForm');
     },
   },
+
+  emits: ['addLicense', 'closeForm'],
 };
 </script>
 <template>

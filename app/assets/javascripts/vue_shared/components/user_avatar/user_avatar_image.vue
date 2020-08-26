@@ -80,6 +80,8 @@ export default {
       return `s${this.size}`;
     },
   },
+
+  emits: [],
 };
 </script>
 

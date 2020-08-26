@@ -47,6 +47,8 @@ export default {
       return this.downloadLink ? buttonAttrs : null;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

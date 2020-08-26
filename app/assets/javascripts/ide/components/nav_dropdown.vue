@@ -41,6 +41,8 @@ export default {
       this.isVisibleDropdown = false;
     },
   },
+
+  emits: [],
 };
 </script>
 

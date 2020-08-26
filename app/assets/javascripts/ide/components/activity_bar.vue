@@ -27,7 +27,9 @@ export default {
       $(e.currentTarget).tooltip('hide');
     },
   },
+
   leftSidebarViews,
+  emits: [],
 };
 </script>
 

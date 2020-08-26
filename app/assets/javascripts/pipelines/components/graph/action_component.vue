@@ -78,6 +78,8 @@ export default {
         });
     },
   },
+
+  emits: ['pipelineActionRequestComplete'],
 };
 </script>
 <template>

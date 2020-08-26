@@ -48,6 +48,8 @@ export default {
       return this.resolvableNotes.every(note => note.current_user && note.current_user.can_resolve);
     },
   },
+
+  emits: ['resolve', 'showReplyForm'],
 };
 </script>
 

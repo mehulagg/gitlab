@@ -89,6 +89,8 @@ export default {
       this.onResize({ width, height });
     },
   },
+
+  emits: ['resize'],
 };
 </script>
 

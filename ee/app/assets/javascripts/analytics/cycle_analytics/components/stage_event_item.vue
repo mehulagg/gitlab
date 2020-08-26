@@ -24,6 +24,8 @@ export default {
       return url.includes('/merge_request');
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

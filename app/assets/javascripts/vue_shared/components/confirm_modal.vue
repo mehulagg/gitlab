@@ -44,7 +44,9 @@ export default {
       this.$refs.form.submit();
     },
   },
+
   csrf,
+  emits: [],
 };
 </script>
 

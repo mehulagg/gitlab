@@ -16,6 +16,8 @@ export default {
   destroyed() {
     this.activeTab = 'all';
   },
+
+  emits: [],
 };
 </script>
 <template>

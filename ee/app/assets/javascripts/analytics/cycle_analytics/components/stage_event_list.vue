@@ -31,6 +31,8 @@ export default {
       return current.toLowerCase() === target;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

@@ -86,6 +86,8 @@ export default {
       this.$refs.copyBranchNameButton.$el.click();
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

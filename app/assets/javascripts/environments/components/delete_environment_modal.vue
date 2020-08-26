@@ -42,6 +42,8 @@ export default {
       eventHub.$emit('deleteEnvironment', this.environment);
     },
   },
+
+  emits: [],
 };
 </script>
 

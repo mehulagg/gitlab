@@ -122,6 +122,8 @@ export default {
       this.issuesSelected = false;
     },
   },
+
+  emits: [],
 };
 </script>
 

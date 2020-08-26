@@ -64,6 +64,8 @@ export default {
       this.numRetries += 1;
     },
   },
+
+  emits: [],
 };
 </script>
 

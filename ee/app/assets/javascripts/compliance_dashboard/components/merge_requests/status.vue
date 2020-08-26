@@ -20,6 +20,8 @@ export default {
       return !isEmpty(this.status.data);
     },
   },
+
+  emits: [],
 };
 </script>
 

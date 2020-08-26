@@ -61,6 +61,8 @@ export default {
       this.$emit('mousemove', this.index);
     },
   },
+
+  emits: ['click', 'mousemove', 'mouseover'],
 };
 </script>
 

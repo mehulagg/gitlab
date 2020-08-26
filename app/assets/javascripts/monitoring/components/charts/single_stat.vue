@@ -56,6 +56,8 @@ export default {
       return this.queryInfo.label;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

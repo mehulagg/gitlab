@@ -69,6 +69,8 @@ export default {
   methods: {
     ...mapActions(['updateStatusPageSettings']),
   },
+
+  emits: [],
 };
 </script>
 

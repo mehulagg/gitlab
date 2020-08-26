@@ -28,6 +28,8 @@ export default {
       return this.draftForLine(this.diffFileContentSha, this.line, 'right');
     },
   },
+
+  emits: [],
 };
 </script>
 

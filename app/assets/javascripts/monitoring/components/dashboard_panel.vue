@@ -42,6 +42,8 @@ const events = {
 };
 
 export default {
+  emits: Object.values(events),
+
   components: {
     MonitorEmptyChart,
     AlertWidget,

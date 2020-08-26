@@ -78,6 +78,8 @@ export default {
       'PackageRegistry|You are about to delete %{name}, this operation is irreversible, are you sure?',
     ),
   },
+
+  emits: ['package:delete', 'page:changed'],
 };
 </script>
 

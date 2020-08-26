@@ -132,6 +132,8 @@ export default {
       }
     },
   },
+
+  emits: ['onDropdownClick'],
 };
 </script>
 

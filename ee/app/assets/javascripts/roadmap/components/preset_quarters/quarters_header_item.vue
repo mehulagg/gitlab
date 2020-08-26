@@ -53,6 +53,8 @@ export default {
       return headerClass;
     },
   },
+
+  emits: [],
 };
 </script>
 

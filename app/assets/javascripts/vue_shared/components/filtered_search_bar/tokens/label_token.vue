@@ -89,6 +89,8 @@ export default {
       this.fetchLabelBySearchTerm(data);
     }, DEBOUNCE_DELAY),
   },
+
+  emits: [],
 };
 </script>
 

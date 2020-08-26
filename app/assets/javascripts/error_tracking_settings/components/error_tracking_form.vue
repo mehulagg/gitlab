@@ -14,6 +14,8 @@ export default {
   methods: {
     ...mapActions(['fetchProjects', 'updateApiHost', 'updateToken']),
   },
+
+  emits: [],
 };
 </script>
 

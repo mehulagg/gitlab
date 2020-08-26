@@ -162,6 +162,8 @@ export default {
       deletionBackendError: s__('DastProfiles|Could not delete site profiles:'),
     },
   },
+
+  emits: [],
 };
 </script>
 

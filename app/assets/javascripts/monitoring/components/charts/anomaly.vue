@@ -198,6 +198,8 @@ export default {
       };
     },
   },
+
+  emits: [],
 };
 </script>
 

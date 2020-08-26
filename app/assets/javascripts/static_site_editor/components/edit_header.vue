@@ -14,6 +14,8 @@ export default {
       return this.title || DEFAULT_HEADING;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

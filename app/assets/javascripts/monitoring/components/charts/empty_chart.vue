@@ -18,6 +18,8 @@ export default {
   created() {
     this.chartEmptyStateIllustration = chartEmptyStateIllustration;
   },
+
+  emits: [],
 };
 </script>
 <template>

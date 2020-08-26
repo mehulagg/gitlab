@@ -31,6 +31,8 @@ export default {
       return this.value && this.value.length > 0;
     },
   },
+
+  emits: ['select'],
 };
 </script>
 

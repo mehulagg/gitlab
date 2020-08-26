@@ -24,7 +24,9 @@ export default {
       default: () => {},
     },
   },
+
   backgroundColor: PATH_BACKGROUND_COLOR,
+  emits: ['selected'],
 };
 </script>
 <template>

@@ -78,6 +78,8 @@ export default {
     ...mapActions('filters', ['setMilestonesEndpoint', 'setLabelsEndpoint']),
     ...mapActions('mergeRequests', ['setProjectId', 'fetchMergeRequests', 'setPage']),
   },
+
+  emits: [],
 };
 </script>
 

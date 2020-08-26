@@ -43,6 +43,8 @@ export default {
         this.$emit('pdflaberror', error);
       });
   },
+
+  emits: ['pdflaberror'],
 };
 </script>
 

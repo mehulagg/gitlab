@@ -51,6 +51,8 @@ export default {
       this.$emit('submit', event);
     },
   },
+
+  emits: ['submit'],
 };
 </script>
 <template>

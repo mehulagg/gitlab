@@ -380,6 +380,8 @@ export default {
       this.isStickyHeaderShowing = true;
     },
   },
+
+  emits: [],
 };
 </script>
 

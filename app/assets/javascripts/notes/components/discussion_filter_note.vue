@@ -28,6 +28,8 @@ export default {
       notesEventHub.$emit('dropdownSelect', value);
     },
   },
+
+  emits: [],
 };
 </script>
 

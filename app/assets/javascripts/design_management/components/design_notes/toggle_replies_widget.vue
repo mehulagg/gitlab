@@ -34,6 +34,8 @@ export default {
         : __('Collapse replies');
     },
   },
+
+  emits: ['toggle'],
 };
 </script>
 

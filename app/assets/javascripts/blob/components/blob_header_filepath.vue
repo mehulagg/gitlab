@@ -22,6 +22,8 @@ export default {
       return `\`${this.blob.path}\``;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>

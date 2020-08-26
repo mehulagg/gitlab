@@ -103,6 +103,8 @@ export default {
       this.width = width;
     },
   },
+
+  emits: [],
 };
 </script>
 <template>
