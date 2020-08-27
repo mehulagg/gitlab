@@ -122,10 +122,10 @@ RSpec.describe Clusters::Platforms::Kubernetes do
     end
 
     context 'with valid deployments' do
-      let(:matched_deployment) { kube_deployment(environment_slug: environment.slug, project_slug: project.full_path_slug) }
+      let(:matched_deployment) { kube_deployment(environment_slug: environment.slug, project_slug: project.full_path_slug, replicas: 2) }
       let(:unmatched_deployment) { kube_deployment }
-      let(:matched_pod) { kube_pod(environment_slug: environment.slug, project_slug: project.full_path_slug) }
-      let(:unmatched_pod) { kube_pod(environment_slug: environment.slug, project_slug: project.full_path_slug, status: 'Pending') }
+      let(:matched_pod) { kube_pod(environment_slug: environment.slug, project_slug: project.full_path_slug, status: 'Pending') }
+      let(:unmatched_pod) { kube_pod(environment_slug: environment.slug + '-test', project_slug: project.full_path_slug) }
       let(:deployments) { [matched_deployment, unmatched_deployment] }
       let(:pods) { [matched_pod, unmatched_pod] }
 
@@ -134,6 +134,16 @@ RSpec.describe Clusters::Platforms::Kubernetes do
         expect(rollout_status.deployments.map(&:annotations)).to eq([
           { 'app.gitlab.com/app' => project.full_path_slug, 'app.gitlab.com/env' => 'env-000000' }
         ])
+        expect(rollout_status.instances).to eq([{ pod_name: "kube-pod",
+                                                 stable: true,
+                                                 status: "pending",
+                                                 tooltip: "kube-pod (Pending)",
+                                                 track: "stable" },
+                                                { pod_name: "Not provided",
+                                                 stable: true,
+                                                 status: "pending",
+                                                 tooltip: "Not provided (Pending)",
+                                                 track: "stable" }])
       end
     end
 
@@ -141,6 +151,101 @@ RSpec.describe Clusters::Platforms::Kubernetes do
       it 'creates a matching RolloutStatus' do
         expect(rollout_status).to be_kind_of(::Gitlab::Kubernetes::RolloutStatus)
         expect(rollout_status).to be_not_found
+      end
+    end
+
+    context 'when the pod track does not match the deployment track' do
+      let(:deployments) do
+        [
+          kube_deployment(name: 'deployment-a', environment_slug: environment.slug, project_slug: project.full_path_slug, replicas: 1, track: 'weekly')
+        ]
+      end
+
+      let(:pods) do
+        [
+          kube_pod(name: 'pod-a-1', environment_slug: environment.slug, project_slug: project.full_path_slug, track: 'weekly'),
+          kube_pod(name: 'pod-a-2', environment_slug: environment.slug, project_slug: project.full_path_slug, track: 'daily')
+        ]
+      end
+
+      it 'does not return the pod' do
+        expect(rollout_status.instances.map { |p| p[:pod_name] }).to eq(['pod-a-1'])
+      end
+    end
+
+    context 'when the pod track is not stable' do
+      let(:deployments) do
+        [
+          kube_deployment(name: 'deployment-a', environment_slug: environment.slug, project_slug: project.full_path_slug, replicas: 1, track: 'something')
+        ]
+      end
+
+      let(:pods) do
+        [
+          kube_pod(name: 'pod-a-1', environment_slug: environment.slug, project_slug: project.full_path_slug, track: 'something')
+        ]
+      end
+
+      it 'the pod is not stable' do
+        expect(rollout_status.instances.map { |p| p.slice(:stable, :track) }).to eq([{ stable: false, track: 'something' }])
+      end
+    end
+
+    context 'when the pod track is stable' do
+      let(:deployments) do
+        [
+          kube_deployment(name: 'deployment-a', environment_slug: environment.slug, project_slug: project.full_path_slug, replicas: 1, track: 'stable')
+        ]
+      end
+
+      let(:pods) do
+        [
+          kube_pod(name: 'pod-a-1', environment_slug: environment.slug, project_slug: project.full_path_slug, track: 'stable')
+        ]
+      end
+
+      it 'the pod is stable' do
+        expect(rollout_status.instances.map { |p| p.slice(:stable, :track) }).to eq([{ stable: true, track: 'stable' }])
+      end
+    end
+
+    context 'when the pod track is not provided' do
+      let(:deployments) do
+        [
+          kube_deployment(name: 'deployment-a', environment_slug: environment.slug, project_slug: project.full_path_slug, replicas: 1)
+        ]
+      end
+
+      let(:pods) do
+        [
+          kube_pod(name: 'pod-a-1', environment_slug: environment.slug, project_slug: project.full_path_slug)
+        ]
+      end
+
+      it 'the pod is stable' do
+        expect(rollout_status.instances.map { |p| p.slice(:stable, :track) }).to eq([{ stable: true, track: 'stable' }])
+      end
+    end
+
+    context 'when the number of matching pods does not match the number of replicas' do
+      let(:deployments) do
+        [
+          kube_deployment(name: 'deployment-a', environment_slug: environment.slug, project_slug: project.full_path_slug, replicas: 3)
+        ]
+      end
+
+      let(:pods) do
+        [
+          kube_pod(name: 'pod-a-1', environment_slug: environment.slug, project_slug: project.full_path_slug)
+        ]
+      end
+
+      it 'returns a pending pod for each missing replica' do
+        expect(rollout_status.instances.map { |p| p.slice(:pod_name, :status) }).to eq([
+          { pod_name: 'pod-a-1', status: 'running' },
+          { pod_name: 'Not provided', status: 'pending' },
+          { pod_name: 'Not provided', status: 'pending' }
+        ])
       end
     end
   end
