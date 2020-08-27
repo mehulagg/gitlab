@@ -4,6 +4,13 @@ class ContainerExpirationPolicy < ApplicationRecord
   include Schedulable
   include UsageStatistics
 
+  POLICY_PARAMS = %w[
+    older_than
+    keep_n
+    name_regex
+    name_regex_keep
+  ].freeze
+
   belongs_to :project, inverse_of: :container_expiration_policy
 
   delegate :container_repositories, to: :project
@@ -55,5 +62,9 @@ class ContainerExpirationPolicy < ApplicationRecord
 
   def disable!
     update_attribute(:enabled, false)
+  end
+
+  def policy_params
+    attributes.slice(*POLICY_PARAMS)
   end
 end

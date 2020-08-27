@@ -9296,6 +9296,7 @@ CREATE TABLE application_settings (
     gitpod_url text DEFAULT 'https://gitpod.io/'::text,
     abuse_notification_email character varying,
     require_admin_approval_after_user_signup boolean DEFAULT false NOT NULL,
+    container_registry_expiration_policies_worker_capacity integer DEFAULT 100 NOT NULL,
     CONSTRAINT check_2dba05b802 CHECK ((char_length(gitpod_url) <= 255)),
     CONSTRAINT check_51700b31b5 CHECK ((char_length(default_branch_name) <= 255)),
     CONSTRAINT check_9c6c447a13 CHECK ((char_length(maintenance_mode_message) <= 255)),
@@ -11128,7 +11129,8 @@ CREATE TABLE container_repositories (
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
     status smallint,
-    expiration_policy_started_at timestamp with time zone
+    expiration_policy_started_at timestamp with time zone,
+    expiration_policy_cleanup_status smallint
 );
 
 CREATE SEQUENCE container_repositories_id_seq
@@ -19443,6 +19445,8 @@ CREATE UNIQUE INDEX epic_user_mentions_on_epic_id_index ON epic_user_mentions US
 CREATE INDEX idx_audit_events_on_entity_id_desc_author_id_created_at ON audit_events USING btree (entity_id, entity_type, id DESC, author_id, created_at);
 
 CREATE INDEX idx_ci_pipelines_artifacts_locked ON ci_pipelines USING btree (ci_ref_id, id) WHERE (locked = 1);
+
+CREATE INDEX idx_container_repositories_on_exp_cleanup_status_and_start_date ON container_repositories USING btree (expiration_policy_cleanup_status, expiration_policy_started_at);
 
 CREATE INDEX idx_container_scanning_findings ON vulnerability_occurrences USING btree (id) WHERE (report_type = 2);
 
