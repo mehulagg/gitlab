@@ -325,4 +325,10 @@ RSpec.describe ContainerRepository do
 
     it { is_expected.to contain_exactly(repository) }
   end
+
+  describe '.for_project' do
+    subject { described_class.for_project(project) }
+
+    it { is_expected.to contain_exactly(repository) }
+  end
 end
