@@ -85,7 +85,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
         create_pods(name: "one", count: 3, track: 'stable') + create_pods(name: "two", count: 3, track: track)
       end
 
-      it 'stores the union of deployment instances' do
+      it 'sorts stable instances last' do
         expected = [
           { status: 'running', pod_name: "two", tooltip: 'two (Running)', track: 'canary', stable: false },
           { status: 'running', pod_name: "two", tooltip: 'two (Running)', track: 'canary', stable: false },
@@ -104,6 +104,8 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
     subject { rollout_status.completion }
 
     context 'when all instances are finished' do
+      let(:track) { 'canary' }
+
       it { is_expected.to eq(100) }
     end
 
@@ -124,6 +126,8 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
     subject { rollout_status.complete? }
 
     context 'when all instances are finished' do
+      let(:track) { 'canary' }
+
       it { is_expected.to be_truthy }
     end
 

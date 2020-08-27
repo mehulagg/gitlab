@@ -35,17 +35,22 @@ module Gitlab
 
         deployments = deployments.map { |deploy| ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods) }
         deployments.sort_by!(&:order)
-        new(deployments, legacy_deployments: legacy_deployments)
+
+        pods = pods.map { |pod| ::Gitlab::Kubernetes::Pod.new(pod) }
+
+        rollout_status_pods = create_rollout_status_pods(deployments, pods)
+
+        new(deployments, pods: rollout_status_pods, legacy_deployments: legacy_deployments)
       end
 
       def self.loading
         new([], status: :loading)
       end
 
-      def initialize(deployments, status: :found, legacy_deployments: [])
+      def initialize(deployments, pods: [], status: :found, legacy_deployments: [])
         @status       = status
         @deployments  = deployments
-        @instances    = deployments.flat_map(&:instances)
+        @instances    = pods
         @legacy_deployments = legacy_deployments
 
         @completion =
@@ -53,7 +58,7 @@ module Gitlab
             100
           else
             # We downcase the pod status in Gitlab::Kubernetes::Deployment#deployment_instance
-            finished = @instances.count { |instance| instance[:status] == Gitlab::Kubernetes::Pod::RUNNING.downcase }
+            finished = @instances.count { |instance| instance[:status] == ::Gitlab::Kubernetes::Pod::RUNNING.downcase }
 
             (finished / @instances.count.to_f * 100).to_i
           end
@@ -62,6 +67,30 @@ module Gitlab
       private
 
       attr_reader :legacy_deployments
+
+      def self.create_rollout_status_pods(deployments, pods)
+        deployment_tracks = deployments.map(&:track)
+        total_wanted_instances = deployments.map(&:wanted_instances).reduce(&:+)
+
+        filtered_pods = pods.select { |p| deployment_tracks.include?(p.track) }
+        pending_pods = Array.new(total_wanted_instances - filtered_pods.count, pending_pod_for(deployments.first))
+        total_pods = filtered_pods + pending_pods
+
+        total_pods.sort_by(&:order).map(&:to_hash)
+      end
+
+      def self.pending_pod_for(deployment)
+        ::Gitlab::Kubernetes::Pod.new({
+          'status' => { 'phase' => 'Pending' },
+          'metadata' => {
+            'name' => 'Not provided',
+            'labels' => {
+              'track' => deployment.track
+            }
+          }
+
+        })
+      end
     end
   end
 end
