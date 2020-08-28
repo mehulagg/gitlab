@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { createDisposableMountPoint } from 'helpers/vue_test_utils_helper';
 import DuplicateDashboardForm from '~/monitoring/components/duplicate_dashboard_form.vue';
 
 import { dashboardGitResponse } from '../mock_data';
@@ -11,7 +12,7 @@ const createMountedWrapper = (props = {}) => {
     propsData: { ...props },
     sync: false,
     // We need to attach to document, so that `document.activeElement` is properly set in jsdom
-    attachToDocument: true,
+    attachTo: createDisposableMountPoint(),
   });
 };
 

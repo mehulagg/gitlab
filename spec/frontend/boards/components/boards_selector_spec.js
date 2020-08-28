@@ -92,7 +92,6 @@ describe('BoardsSelector', () => {
         weights: [],
       },
       mocks: { $apollo },
-      attachToDocument: true,
     });
 
     wrapper.vm.$apollo.addSmartQuery = jest.fn((_, options) => {

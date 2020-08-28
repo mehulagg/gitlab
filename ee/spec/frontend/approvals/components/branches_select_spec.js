@@ -3,6 +3,7 @@ import Vuex from 'vuex';
 import $ from 'jquery';
 import Api from 'ee/api';
 import BranchesSelect from 'ee/approvals/components/branches_select.vue';
+import { createDisposableMountPoint } from 'helpers/vue_test_utils_helper';
 
 const TEST_DEFAULT_BRANCH = { name: 'Any branch' };
 const TEST_PROJECT_ID = '1';
@@ -30,7 +31,7 @@ describe('Branches Select', () => {
       },
       localVue,
       store: new Vuex.Store(store),
-      attachToDocument: true,
+      attachTo: createDisposableMountPoint(),
     });
 
     $input = $(wrapper.vm.$refs.input);

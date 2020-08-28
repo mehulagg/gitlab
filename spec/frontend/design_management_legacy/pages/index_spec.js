@@ -96,7 +96,6 @@ describe('Design management index page', () => {
       localVue,
       router,
       stubs: { DesignDestroyer, ApolloMutation, ...stubs },
-      attachToDocument: true,
     });
 
     wrapper.setData({

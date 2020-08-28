@@ -24,7 +24,6 @@ describe('MrWidgetPipelineContainer', () => {
       provide: {
         ...provide,
       },
-      attachToDocument: true,
     });
   };
 

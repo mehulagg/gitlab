@@ -33,3 +33,14 @@ export const waitForMutation = (store, expectedMutationType) =>
       }
     });
   });
+
+export const createDisposableMountPoint = ({ tagName = 'div', disposeHook = afterEach } = {}) => {
+  const element = document.createElement(tagName);
+  document.body.appendChild(element);
+
+  disposeHook(() => {
+    element.remove();
+  });
+
+  return element;
+};

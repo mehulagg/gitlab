@@ -24,10 +24,9 @@ describe('EE Approvals MRRules', () => {
       store.modules.approvals.state.rules = approvalRules;
     }
 
-    wrapper = mount(localVue.extend(MRRules), {
+    wrapper = mount(MRRules, {
       localVue,
       store: new Vuex.Store(store),
-      attachToDocument: true,
     });
   };
 

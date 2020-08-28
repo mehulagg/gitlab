@@ -8,7 +8,6 @@ describe('datePicker', () => {
       propsData: {
         label: 'label',
       },
-      attachToDocument: true,
     });
   });
 

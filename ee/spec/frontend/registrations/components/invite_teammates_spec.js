@@ -1,6 +1,7 @@
 import { shallowMount, mount } from '@vue/test-utils';
 import { GlFormInput, GlButton } from '@gitlab/ui';
 import Component from 'ee/registrations/components/invite_teammates.vue';
+import { createDisposableMountPoint } from 'helpers/vue_test_utils_helper';
 
 describe('User invites', () => {
   let wrapper;
@@ -61,7 +62,7 @@ describe('User invites', () => {
     beforeEach(() => {
       wrapper = mount(Component, {
         propsData: { emails: [] },
-        attachToDocument: true,
+        attachTo: createDisposableMountPoint(),
       });
 
       clickButton();

@@ -1,9 +1,10 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import $ from 'jquery';
 import Api from 'ee/api';
 import ApproversSelect from 'ee/approvals/components/approvers_select.vue';
 import { TYPE_USER, TYPE_GROUP } from 'ee/approvals/constants';
 import { TEST_HOST } from 'helpers/test_constants';
+import { createDisposableMountPoint } from 'helpers/vue_test_utils_helper';
 
 const TEST_PROJECT_ID = '17';
 const TEST_GROUP_AVATAR = `${TEST_HOST}/group-avatar.png`;
@@ -21,8 +22,6 @@ const TEST_USERS = [
   { id: 1, name: 'Dolar', username: 'dolar', avatar_url: TEST_USER_AVATAR },
   { id: 3, name: 'Sit', username: 'sit', avatar_url: TEST_USER_AVATAR },
 ];
-
-const localVue = createLocalVue();
 
 const waitForEvent = ($input, event) => new Promise(resolve => $input.one(event, resolve));
 const parseAvatar = element =>
@@ -60,8 +59,7 @@ describe('Approvals ApproversSelect', () => {
     wrapper = shallowMount(ApproversSelect, {
       ...options,
       propsData,
-      localVue,
-      attachToDocument: true,
+      attachTo: createDisposableMountPoint(),
     });
 
     $input = $(wrapper.vm.$refs.input);

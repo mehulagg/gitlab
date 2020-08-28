@@ -17,7 +17,6 @@ describe('Ci variable modal', () => {
   const createComponent = (method, options = {}) => {
     store = createStore();
     wrapper = method(CiVariableModal, {
-      attachToDocument: true,
       provide: { glFeatures: { ciKeyAutocomplete: true } },
       stubs: {
         GlModal: ModalStub,

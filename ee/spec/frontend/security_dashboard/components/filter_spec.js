@@ -23,7 +23,6 @@ describe('Filter component', () => {
         GlSearchBoxByType: false,
       },
       propsData,
-      attachToDocument: true,
     });
   };
 

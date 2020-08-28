@@ -1,6 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import AxiosMockAdapter from 'axios-mock-adapter';
 import axios from 'axios';
+import { createDisposableMountPoint } from 'helpers/vue_test_utils_helper';
 import SidebarAssignees from '~/sidebar/components/assignees/sidebar_assignees.vue';
 import Assigness from '~/sidebar/components/assignees/assignees.vue';
 import AssigneesRealtime from '~/sidebar/components/assignees/assignees_realtime.vue';
@@ -28,7 +29,7 @@ describe('sidebar assignees', () => {
         },
       },
       // Attaching to document is required because this component emits something from the parent element :/
-      attachToDocument: true,
+      attachTo: createDisposableMountPoint(),
     });
   };
 

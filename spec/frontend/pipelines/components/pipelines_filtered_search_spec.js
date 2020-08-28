@@ -26,7 +26,6 @@ describe('Pipelines filtered search', () => {
         projectId: '21',
         params,
       },
-      attachToDocument: true,
     });
   };
 

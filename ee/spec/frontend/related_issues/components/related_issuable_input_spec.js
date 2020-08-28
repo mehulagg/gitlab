@@ -1,5 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
+import { createDisposableMountPoint } from 'helpers/vue_test_utils_helper';
 import { issuableTypesMap, PathIdSeparator } from '~/related_issues/constants';
 import RelatedIssuableInput from '~/related_issues/components/related_issuable_input.vue';
 
@@ -77,7 +78,7 @@ describe('RelatedIssuableInput', () => {
           references: ['foo', 'bar'],
         },
         // We need to attach to document, so that `document.activeElement` is properly set in jsdom
-        attachToDocument: true,
+        attachTo: createDisposableMountPoint(),
       });
 
       wrapper.find('li').trigger('click');

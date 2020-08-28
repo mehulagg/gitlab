@@ -1,13 +1,10 @@
-import Vue from 'vue';
 import { head } from 'lodash';
 
 import { GlSearchBoxByType, GlInfiniteScroll } from '@gitlab/ui';
-import { mount, createLocalVue } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { trimText } from 'helpers/text_helper';
 import ProjectListItem from '~/vue_shared/components/project_selector/project_list_item.vue';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
-
-const localVue = createLocalVue();
 
 describe('ProjectSelector component', () => {
   let wrapper;
@@ -20,8 +17,7 @@ describe('ProjectSelector component', () => {
   const findSearchInput = () => wrapper.find(GlSearchBoxByType).find('input');
 
   beforeEach(() => {
-    wrapper = mount(Vue.extend(ProjectSelector), {
-      localVue,
+    wrapper = mount(ProjectSelector, {
       propsData: {
         projectSearchResults: searchResults,
         selectedProjects: selected,
@@ -31,7 +27,6 @@ describe('ProjectSelector component', () => {
         showSearchErrorMessage: false,
         totalResults: searchResults.length,
       },
-      attachToDocument: true,
     });
 
     ({ vm } = wrapper);

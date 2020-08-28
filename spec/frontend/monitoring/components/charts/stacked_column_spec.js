@@ -26,7 +26,6 @@ describe('Stacked column chart component', () => {
       stubs: {
         GlPopover: true,
       },
-      attachToDocument: true,
     });
 
   beforeEach(() => {

@@ -1,5 +1,6 @@
 import $ from 'jquery';
 import { mount } from '@vue/test-utils';
+import { createDisposableMountPoint } from 'helpers/vue_test_utils_helper';
 import tooltip from '~/vue_shared/directives/tooltip';
 
 describe('Tooltip directive', () => {
@@ -25,7 +26,7 @@ describe('Tooltip directive', () => {
           },
           template: '<div v-tooltip :title="tooltip"></div>',
         },
-        { attachToDocument: true },
+        { attachTo: createDisposableMountPoint() },
       );
 
       vm = wrapper.vm;
@@ -81,7 +82,7 @@ describe('Tooltip directive', () => {
             </div>
           `,
         },
-        { attachToDocument: true },
+        { attachTo: createDisposableMountPoint() },
       );
 
       vm = wrapper.vm;

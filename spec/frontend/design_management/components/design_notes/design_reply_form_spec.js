@@ -1,4 +1,5 @@
 import { mount } from '@vue/test-utils';
+import { createDisposableMountPoint } from 'helpers/vue_test_utils_helper';
 import DesignReplyForm from '~/design_management/components/design_notes/design_reply_form.vue';
 
 const showModal = jest.fn();
@@ -36,7 +37,7 @@ describe('Design reply form component', () => {
 
   it('textarea has focus after component mount', () => {
     // We need to attach to document, so that `document.activeElement` is properly set in jsdom
-    createComponent({}, { attachToDocument: true });
+    createComponent({}, { attachTo: createDisposableMountPoint() });
 
     expect(findTextarea().element).toEqual(document.activeElement);
   });
