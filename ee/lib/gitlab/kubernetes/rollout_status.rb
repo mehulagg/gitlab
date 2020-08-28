@@ -72,11 +72,9 @@ module Gitlab
         deployment_tracks = deployments.map(&:track)
         filtered_pods = pods.select { |p| deployment_tracks.include?(p.track) }
 
-        wanted_instances = deployments.map { |d| { d.track => d.wanted_instances } }.reduce do |memo, h|
-          memo.merge(h) { |_key, val1, val2| val1 + val2 }
-        end
-        present_instances = filtered_pods.map { |p| { p.track => 1 } }.reduce({}) { |memo, h| memo.merge(h) { |_key, val1, val2| val1 + val2 } }
-        pending_instances = wanted_instances.merge(present_instances) { |_key, wanted, present| [0, wanted - present].max }
+        wanted_instances = sum_hashes(deployments.map { |d| { d.track => d.wanted_instances } })
+        present_instances = sum_hashes(filtered_pods.map { |p| { p.track => 1 } })
+        pending_instances = subtract_hashes(wanted_instances, present_instances)
 
         pending_pods = pending_instances.flat_map do |track, num|
           Array.new(num, pending_pod_for(track))
@@ -84,6 +82,16 @@ module Gitlab
         total_pods = filtered_pods + pending_pods
 
         total_pods.sort_by(&:order).map(&:to_hash)
+      end
+
+      def self.sum_hashes(hashes)
+        hashes.reduce({}) do |memo, hash|
+          memo.merge(hash) { |_key, memo_val, hash_val| memo_val + hash_val }
+        end
+      end
+
+      def self.subtract_hashes(hash_a, hash_b)
+        hash_a.merge(hash_b) { |_key, hash_a_val, hash_b_val| [0, hash_a_val - hash_b_val].max }
       end
 
       def self.pending_pod_for(track)
