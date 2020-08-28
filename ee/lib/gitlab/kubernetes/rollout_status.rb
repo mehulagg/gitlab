@@ -70,22 +70,29 @@ module Gitlab
 
       def self.create_rollout_status_pods(deployments, pods)
         deployment_tracks = deployments.map(&:track)
-        total_wanted_instances = deployments.map(&:wanted_instances).reduce(&:+)
-
         filtered_pods = pods.select { |p| deployment_tracks.include?(p.track) }
-        pending_pods = Array.new(total_wanted_instances - filtered_pods.count, pending_pod_for(deployments.first))
+
+        wanted_instances = deployments.map { |d| { d.track => d.wanted_instances } }.reduce do |memo, h|
+          memo.merge(h) { |_key, val1, val2| val1 + val2 }
+        end
+        present_instances = filtered_pods.map { |p| { p.track => 1 } }.reduce({}) { |memo, h| memo.merge(h) { |_key, val1, val2| val1 + val2 } }
+        pending_instances = wanted_instances.merge(present_instances) { |_key, wanted, present| [0, wanted - present].max }
+
+        pending_pods = pending_instances.flat_map do |track, num|
+          Array.new(num, pending_pod_for(track))
+        end
         total_pods = filtered_pods + pending_pods
 
         total_pods.sort_by(&:order).map(&:to_hash)
       end
 
-      def self.pending_pod_for(deployment)
+      def self.pending_pod_for(track)
         ::Gitlab::Kubernetes::Pod.new({
           'status' => { 'phase' => 'Pending' },
           'metadata' => {
             'name' => 'Not provided',
             'labels' => {
-              'track' => deployment.track
+              'track' => track
             }
           }
 
