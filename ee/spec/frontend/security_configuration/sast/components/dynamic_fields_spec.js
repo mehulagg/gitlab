@@ -47,7 +47,7 @@ describe('DynamicFields component', () => {
     it('renders each field with the correct component', () => {
       entities.forEach((entity, i) => {
         const field = fields.at(i);
-        expect(field.is(DynamicFields.entityTypeToComponent[entity.type])).toBe(true);
+        expect(field).toBeVueInstanceOf(DynamicFields.entityTypeToComponent[entity.type]);
       });
     });
 

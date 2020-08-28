@@ -18,9 +18,6 @@ jest.mock('~/user_popovers', () => jest.fn());
 
 setTestTimeout(1000);
 
-const TYPE_COMMENT_FORM = 'comment-form';
-const TYPE_NOTES_LIST = 'notes-list';
-
 const propsData = {
   noteableData: mockData.noteableDataMock,
   notesData: mockData.notesDataMock,
@@ -33,11 +30,7 @@ describe('note_app', () => {
   let wrapper;
   let store;
 
-  const getComponentOrder = () => {
-    return wrapper
-      .findAll('#notes-list,.js-comment-form')
-      .wrappers.map(node => (node.is(CommentForm) ? TYPE_COMMENT_FORM : TYPE_NOTES_LIST));
-  };
+  const getComponents = () => wrapper.findAll('#notes-list,.js-comment-form');
 
   /**
    * waits for fetchNotes() to complete
@@ -373,7 +366,12 @@ describe('note_app', () => {
     });
 
     it('finds CommentForm before notes list', () => {
-      expect(getComponentOrder()).toStrictEqual([TYPE_COMMENT_FORM, TYPE_NOTES_LIST]);
+      expect(getComponents().at(0)).toBeVueInstanceOf(CommentForm);
+      expect(
+        getComponents()
+          .at(1)
+          .classes(),
+      ).toContain('main-notes-list');
     });
   });
 
@@ -390,7 +388,12 @@ describe('note_app', () => {
     });
 
     it('finds CommentForm after notes list', () => {
-      expect(getComponentOrder()).toStrictEqual([TYPE_NOTES_LIST, TYPE_COMMENT_FORM]);
+      expect(
+        getComponents()
+          .at(0)
+          .classes(),
+      ).toContain('main-notes-list');
+      expect(getComponents().at(1)).toBeVueInstanceOf(CommentForm);
     });
   });
 });

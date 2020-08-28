@@ -273,7 +273,7 @@ describe('Dashboard header', () => {
       const externalDashboardButton = wrapper.find('.js-external-dashboard-link');
 
       expect(externalDashboardButton.exists()).toBe(true);
-      expect(externalDashboardButton.is(GlButton)).toBe(true);
+      expect(externalDashboardButton).toBeVueInstanceOf(GlButton);
       expect(externalDashboardButton.text()).toContain('View full dashboard');
     });
   });

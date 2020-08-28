@@ -121,7 +121,7 @@ describe('EnvironmentLogs', () => {
   it('displays UI elements', () => {
     initWrapper();
 
-    expect(findEnvironmentsDropdown().is(GlDeprecatedDropdown)).toBe(true);
+    expect(findEnvironmentsDropdown()).toBeVueInstanceOf(GlDeprecatedDropdown);
     expect(findSimpleFilters().exists()).toBe(true);
     expect(findLogControlButtons().exists()).toBe(true);
 

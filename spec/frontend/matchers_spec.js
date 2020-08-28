@@ -1,3 +1,5 @@
+import { mount } from '@vue/test-utils';
+
 describe('Custom jest matchers', () => {
   describe('toMatchInterpolatedText', () => {
     describe('malformed input', () => {
@@ -43,6 +45,28 @@ describe('Custom jest matchers', () => {
       `('$htmlString does not equal $templateString', ({ htmlString, templateString }) => {
         expect(htmlString).not.toMatchInterpolatedText(templateString);
       });
+    });
+  });
+
+  describe('toBeVueInstanceOf', () => {
+    const DemoComponent1 = { template: '<div>comp1</div>' };
+    const DemoComponent2 = { template: '<div>comp2</div>' };
+    let wrapper;
+
+    beforeEach(() => {
+      wrapper = mount(DemoComponent1);
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+    });
+
+    it('positive assertion', () => {
+      expect(wrapper).toBeVueInstanceOf(DemoComponent1);
+    });
+
+    it('negative assertion', () => {
+      expect(wrapper).not.toBeVueInstanceOf(DemoComponent2);
     });
   });
 });

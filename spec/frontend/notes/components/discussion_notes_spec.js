@@ -98,10 +98,10 @@ describe('DiscussionNotes', () => {
       createComponent({ discussion, shouldRenderDiffs: true });
       const notes = wrapper.findAll('.notes > *');
 
-      expect(notes.at(0).is(PlaceholderSystemNote)).toBe(true);
-      expect(notes.at(1).is(PlaceholderNote)).toBe(true);
-      expect(notes.at(2).is(SystemNote)).toBe(true);
-      expect(notes.at(3).is(NoteableNote)).toBe(true);
+      expect(notes.at(0)).toBeVueInstanceOf(PlaceholderSystemNote);
+      expect(notes.at(1)).toBeVueInstanceOf(PlaceholderNote);
+      expect(notes.at(2)).toBeVueInstanceOf(SystemNote);
+      expect(notes.at(3)).toBeVueInstanceOf(NoteableNote);
     });
 
     it('renders footer scoped slot with showReplies === true when expanded', () => {

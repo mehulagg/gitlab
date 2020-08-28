@@ -583,7 +583,7 @@ describe('Dashboard', () => {
       const emptyGroup = wrapper.findAll({ ref: 'empty-group' });
 
       expect(emptyGroup).toHaveLength(1);
-      expect(emptyGroup.is(GroupEmptyState)).toBe(true);
+      expect(emptyGroup.at(0)).toBeVueInstanceOf(GroupEmptyState);
     });
 
     it('group empty area displays a NO_DATA state', () => {

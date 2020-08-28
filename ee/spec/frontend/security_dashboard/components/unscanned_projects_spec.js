@@ -89,7 +89,7 @@ describe('UnscannedProjects component', () => {
     it('shows a tab-button for projects which have outdated security scanning', () => {
       factory();
 
-      expect(outdatedProjectsTab().is(GlTab)).toBe(true);
+      expect(outdatedProjectsTab()).toBeVueInstanceOf(GlTab);
     });
 
     it.each`
@@ -111,7 +111,7 @@ describe('UnscannedProjects component', () => {
     it('shows a tab-button for projects which have no security scanning configured', () => {
       factory();
 
-      expect(untestedProjectsTab().is(GlTab)).toBe(true);
+      expect(untestedProjectsTab()).toBeVueInstanceOf(GlTab);
     });
   });
 

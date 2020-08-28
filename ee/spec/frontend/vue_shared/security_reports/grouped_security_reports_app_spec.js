@@ -334,7 +334,7 @@ describe('Grouped security reports app', () => {
         ({ reportType, resolvedIssues, unresolvedIssues }) => {
           const issuesList = wrapper.find(`[data-testid="${reportType}-issues-list"]`);
 
-          expect(issuesList.is(GroupedIssuesList)).toBe(true);
+          expect(issuesList).toBeVueInstanceOf(GroupedIssuesList);
 
           expect(issuesList.props()).toMatchObject({
             resolvedIssues,

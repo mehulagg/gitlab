@@ -28,9 +28,9 @@ describe('LogControlButtons', () => {
   it('displays UI elements', () => {
     initWrapper();
 
-    expect(findScrollToTop().is(GlButton)).toBe(true);
-    expect(findScrollToBottom().is(GlButton)).toBe(true);
-    expect(findRefreshBtn().is(GlButton)).toBe(true);
+    expect(findScrollToTop()).toBeVueInstanceOf(GlButton);
+    expect(findScrollToBottom()).toBeVueInstanceOf(GlButton);
+    expect(findRefreshBtn()).toBeVueInstanceOf(GlButton);
   });
 
   it('emits a `refresh` event on click on `refresh` button', () => {

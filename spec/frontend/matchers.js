@@ -1,3 +1,5 @@
+import { createWrapper } from '@vue/test-utils';
+
 export default {
   toHaveSpriteIcon: (element, iconName) => {
     if (!iconName) {
@@ -67,5 +69,24 @@ export default {
         `;
 
     return { actual: received, message, pass };
+  },
+  toBeVueInstanceOf(wrapper, Component) {
+    const { $parent } = wrapper.vm;
+    const parentWrapper = createWrapper($parent);
+    const pass = Boolean(parentWrapper.findAll(Component).wrappers.find(w => w.vm === wrapper.vm));
+    const message = pass
+      ? () => `
+          \n\n
+          Expected: ${wrapper.vm.$options.name ?? 'AnonymousComponent'}
+          Not be Vue instance of: ${Component.name ?? 'AnonymousComponent'}
+          `
+      : () =>
+          `
+        \n\n
+        Expected: ${wrapper.vm.$options.name ?? 'AnonymousComponent'}
+        Not be Vue instance of: ${Component.name ?? 'AnonymousComponent'}
+      `;
+
+    return { message, pass };
   },
 };
