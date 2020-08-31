@@ -1,5 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { mount } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
 import EditFormButtons from '~/sidebar/components/confidential/edit_form_buttons.vue';
 import eventHub from '~/sidebar/event_hub';
@@ -22,7 +21,7 @@ describe('Edit Form Buttons', () => {
       jest.spyOn(store, 'dispatch').mockRejectedValue();
     }
 
-    wrapper = shallowMount(EditFormButtons, {
+    wrapper = mount(EditFormButtons, {
       propsData: {
         fullPath: '',
         ...props,
@@ -59,8 +58,8 @@ describe('Edit Form Buttons', () => {
       expect(findConfidentialToggle().attributes('disabled')).toBe('disabled');
     });
 
-    it('finds the GlLoadingIcon', () => {
-      expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
+    it('sets loading on the toggle button', () => {
+      expect(findConfidentialToggle().props('loading')).toBe(true);
     });
   });
 
@@ -109,9 +108,9 @@ describe('Edit Form Buttons', () => {
       });
     });
 
-    it('resets loading', () => {
+    it('resets loading on the toggle button', () => {
       return waitForPromises().then(() => {
-        expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
+        expect(findConfidentialToggle().props('loading')).toBe(false);
       });
     });
 
