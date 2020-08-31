@@ -11,7 +11,7 @@ import {
 } from '@gitlab/ui';
 
 import projectSpecificScanners from '../../graphql/project_specific_scanners.query.graphql';
-import { setFilter } from '../../store/modules/filters/utils';
+import { setReportTypeAndScannerFilter } from '../../store/modules/filters/utils';
 import { parseSpecificFilters } from '../../utils/filters_utils';
 import { modifyReportTypeFilter } from '../../helpers';
 
@@ -69,7 +69,16 @@ export default {
     },
     firstSelectedOption() {
       return this.processedFilter.options.reduce((acc, curr) => {
-        return curr.options.find(option => this.selection.has(option.id))?.name || acc;
+        const foundOption = curr.options.find(option => {
+          let returnValue = false;
+          Object.keys(this.selection).forEach(key => {
+            if (!returnValue) {
+              returnValue = this.selection[key].has(option.id);
+            }
+          });
+          return returnValue;
+        });
+        return foundOption?.name || acc;
       }, '-');
     },
     extraOptionCount() {
@@ -90,18 +99,19 @@ export default {
     },
   },
   methods: {
-    prepareData() {
-      console.log('prepareData:');
-      return null;
-    },
     clickFilter(option) {
-      // setFilter
-      const filters = setFilter([this.filter], option);
-      console.log('filters:', filters);
-      this.$emit('onFilterChange', filters);
+      const filters = setReportTypeAndScannerFilter(this.filter, option);
+      this.$emit('onFilterChange', [filters]);
     },
     isSelected(option) {
-      return this.selection.has(option.id);
+      // TODO fix this
+      let isSelected = false;
+      Object.keys(this.selection).forEach(key => {
+        if (!isSelected) {
+          isSelected = this.selection[key].has(option.id);
+        }
+      });
+      return isSelected;
     },
     closeDropdown() {
       this.$refs.dropdown.$children[0].hide(true);

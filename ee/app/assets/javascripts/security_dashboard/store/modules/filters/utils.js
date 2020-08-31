@@ -13,6 +13,61 @@ export const hasValidSelection = ({ selection, options }) =>
   isSubset(selection, new Set(options.map(({ id }) => id)));
 
 /**
+ * Takes the filters and a selected payload.
+ * It then either adds or removes that option from the appropriate linked filter.
+ * With a few extra exceptions around the `ALL` special case.
+ * @param {Array} filter the filter to mutate
+ * @param {Object} option the selected option
+ * @returns {Array} the mutated filters array
+ */
+export const setReportTypeAndScannerFilter = (filter, option) => {
+  const { selection } = filter;
+
+  const newSelection = {};
+  Object.keys(selection).forEach(key => {
+    const sel = selection[key];
+    if (key === 'reportType') {
+      const { id: optionId } = option;
+      if (optionId === ALL) {
+        sel.clear();
+      } else if (sel.has(optionId)) {
+        sel.delete(optionId);
+      } else {
+        sel.delete(ALL);
+        sel.add(optionId);
+      }
+
+      if (sel.size === 0) {
+        sel.add(ALL);
+      }
+      newSelection[key] = sel;
+    } else {
+      const { scanners: optionId } = option;
+      console.log('optionId: ', optionId);
+      if (optionId.length) {
+        if (optionId.every(Set.prototype.has, selection[key])) {
+          optionId.forEach(Set.prototype.delete, selection[key]);
+        } else {
+          selection[key].delete(ALL);
+          optionId.forEach(Set.prototype.add, selection[key]);
+        }
+
+        if (selection[key].size === 0) {
+          selection[key].add(ALL);
+        }
+        newSelection[key] = sel;
+      }
+    }
+  });
+
+  return {
+    ...filter,
+    selection,
+  };
+  return filter;
+};
+
+/**
  * Takes a filter array and a selected payload.
  * It then either adds or removes that option from the appropriate selected filter.
  * With a few extra exceptions around the `ALL` special case.

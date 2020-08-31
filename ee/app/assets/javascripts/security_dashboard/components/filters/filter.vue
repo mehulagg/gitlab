@@ -44,7 +44,6 @@ export default {
   methods: {
     clickFilter(option) {
       const filters = setFilter([this.filter], { option, filterId: this.filter.id });
-      console.log('filters:', filters);
       this.$emit('onFilterChange', filters);
     },
     isSelected(option) {

@@ -67,7 +67,7 @@ export const initFirstClassVulnerabilityFilters = projects => {
       name: s__('Reports|Scanner'),
       id: 'reportType',
       options: [allReportTypeFilter, gitlabFilters],
-      selection: new Set([ALL]),
+      selection: { reportType: new Set([ALL]), scanner: new Set([ALL]) },
       component: 'scanner',
     },
   ];
