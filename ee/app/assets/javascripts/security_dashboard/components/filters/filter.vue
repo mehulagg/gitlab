@@ -1,5 +1,6 @@
 <script>
 import { GlDeprecatedDropdown, GlSearchBoxByType, GlIcon } from '@gitlab/ui';
+import { setFilter } from '../../store/modules/filters/utils';
 
 export default {
   components: {
@@ -42,7 +43,9 @@ export default {
   },
   methods: {
     clickFilter(option) {
-      this.$emit('setFilter', { filterId: this.filterId, option });
+      const filters = setFilter([this.filter], { option, filterId: this.filter.id });
+      console.log('filters:', filters);
+      this.$emit('onFilterChange', filters);
     },
     isSelected(option) {
       return this.selection.has(option.id);

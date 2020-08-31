@@ -2,7 +2,7 @@
 import { isUndefined } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import IssueModal from 'ee/vue_shared/security_reports/components/modal.vue';
-import Filters from './filters.vue';
+import Filters from './filters/filters.vue';
 import SecurityDashboardLayout from './security_dashboard_layout.vue';
 import SecurityDashboardTable from './security_dashboard_table.vue';
 import VulnerabilityChart from './vulnerability_chart.vue';

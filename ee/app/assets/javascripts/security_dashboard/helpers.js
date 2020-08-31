@@ -6,6 +6,8 @@ import { ALL, BASE_FILTERS } from './store/modules/filters/constants';
 import { REPORT_TYPES, SEVERITY_LEVELS } from './store/constants';
 import { createCustomFilters, createGitlabFilters } from './utils/filters_utils';
 
+const allReportTypeFilter = { title: 'All', options: [BASE_FILTERS.report_type] };
+
 /**
  * Parses the available report types and specific scanner filters and creates the report type
  * filters with the links to the appropriate scanner filters
@@ -13,14 +15,10 @@ import { createCustomFilters, createGitlabFilters } from './utils/filters_utils'
  * @param {Object} specificFilters the project specific filters retrieved
  * @returns {Object} the reportType and scanner options arrays
  */
-const parseReportTypes = (reportTypes, specificFilters) => {
+const parseReportTypes = (reportTypes, specificFilters = {}) => {
   const customFilters = createCustomFilters(reportTypes, specificFilters);
   const gitlabFilters = createGitlabFilters(reportTypes, specificFilters);
-
-  const reportTypeOptions = [...gitlabFilters.filters, ...customFilters.filters];
-  const scannerOptions = [...gitlabFilters.linkedFilters, ...customFilters.linkedFilters];
-
-  return { reportTypeOptions, scannerOptions };
+  return { gitlabFilters, customFilters };
 };
 
 const parseOptions = obj =>
@@ -36,26 +34,16 @@ export const mapProjects = projects =>
  * @param {Object} specificFilters the map of project-specific filters
  * @returns {Array} the updated filters
  */
-export const modifyReportTypeAndScannerFilters = (filters, specificFilters) => {
-  const { reportTypeOptions, scannerOptions } = parseReportTypes(REPORT_TYPES, specificFilters);
-
-  return filters.map(curr => {
-    let updatedFilter;
-
-    if (curr.id === 'reportType') {
-      updatedFilter = curr;
-      updatedFilter.options = [BASE_FILTERS.report_type, ...reportTypeOptions];
-    } else if (curr.id === 'scanner') {
-      updatedFilter = curr;
-      updatedFilter.options = [BASE_FILTERS.scanner, ...scannerOptions];
-    }
-
-    return updatedFilter || curr;
-  });
+export const modifyReportTypeFilter = (filters, specificFilters) => {
+  console.log('modifyReportTypeAndScannerFilters filters: ', filters);
+  const { gitlabFilters, customFilters } = parseReportTypes(REPORT_TYPES, specificFilters);
+  // eslint-disable-next-line no-param-reassign
+  filters.options = [allReportTypeFilter, gitlabFilters, ...customFilters];
+  return filters;
 };
 
-export const initFirstClassVulnerabilityFilters = (projects, specificFilters) => {
-  const { reportTypeOptions, scannerOptions } = parseReportTypes(REPORT_TYPES, specificFilters);
+export const initFirstClassVulnerabilityFilters = projects => {
+  const { gitlabFilters } = parseReportTypes(REPORT_TYPES);
 
   const filters = [
     {
@@ -66,25 +54,21 @@ export const initFirstClassVulnerabilityFilters = (projects, specificFilters) =>
         ...parseOptions(VULNERABILITY_STATES),
       ],
       selection: new Set([ALL]),
+      component: 'dashboard',
     },
     {
       name: s__('SecurityReports|Severity'),
       id: 'severity',
       options: [BASE_FILTERS.severity, ...parseOptions(SEVERITY_LEVELS)],
       selection: new Set([ALL]),
+      component: 'dashboard',
     },
     {
       name: s__('Reports|Scanner'),
       id: 'reportType',
-      options: [BASE_FILTERS.report_type, ...reportTypeOptions],
+      options: [allReportTypeFilter, gitlabFilters],
       selection: new Set([ALL]),
-    },
-    {
-      name: s__('Reports|Vendor'),
-      id: 'scanner',
-      hidden: true,
-      options: [BASE_FILTERS.scanner, ...scannerOptions],
-      selection: new Set([ALL]),
+      component: 'scanner',
     },
   ];
 
@@ -94,6 +78,7 @@ export const initFirstClassVulnerabilityFilters = (projects, specificFilters) =>
       id: 'projectId',
       options: [BASE_FILTERS.project_id, ...mapProjects(projects)],
       selection: new Set([ALL]),
+      component: 'dashboard',
     });
   }
 
