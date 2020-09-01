@@ -30,10 +30,10 @@ const createDisplayName = (name, vendor = gl) => `${name} - ${vendor}`;
  * Example returned value
  * {
  *   "GitLab": {
- *     "SAST": ["brakeman", "gosec"],
+ *     "SAST": { vendor: "GitLab", reportType: "SAST", externalIds: ["brakeman", "gosec"],
  *   },
  *   "Whitesource": {
- *     "SAST": ["whitesource_sast"],
+ *     "SAST": { vendor: "Whitesource", reportType: "SAST", externalIds: ["whitesource_sast"],
  *   }
  * }
  */
@@ -42,19 +42,14 @@ export const parseSpecificFilters = nodes => {
     const { externalId, reportType } = curr;
     const vendor = curr.vendor || gl;
 
-    if (!acc[vendor]) {
-      acc[vendor] = {};
-    }
+    acc[vendor] = acc[vendor] || {};
+    acc[vendor][reportType] = acc[vendor][reportType] || {
+      vendor,
+      reportType,
+      externalIds: [],
+    };
 
-    if (!acc[vendor][reportType]) {
-      acc[vendor][reportType] = {
-        vendor,
-        reportType,
-        externalIds: [externalId],
-      };
-    } else {
-      acc[vendor][reportType].externalIds.push(externalId);
-    }
+    acc[vendor][reportType].externalIds.push(externalId);
 
     return acc;
   }, {});
@@ -71,6 +66,7 @@ export const parseSpecificFilters = nodes => {
  *      "displayName": "SAST - WHITESOURCE",
  *      "name": "SAST",
  *      "id": "sast",
+ *      "vendor": "WHITESOURCE",
  *      "scanners": ["whitesource_sast"]
  *   },
  * ]
@@ -86,13 +82,14 @@ export const createCustomFilters = (reportTypes, specificFilters) =>
           id,
           name,
           scanners,
+          vendor,
         };
 
         acc.push(customFilter);
         return acc;
       }, []);
       // eslint-disable-next-line no-param-reassign
-      filters.push({ title: vendor, options: newFilters });
+      filters.push(...newFilters);
     }
     return filters;
   }, []);
@@ -113,24 +110,22 @@ export const createCustomFilters = (reportTypes, specificFilters) =>
  * ]
  */
 export const createGitlabFilters = (reportTypes, specificFilters) =>
-  Object.entries(reportTypes).reduce(
-    (acc, [id, name]) => {
-      let scanners = [];
-      if (specificFilters[gl] && specificFilters[gl][id.toUpperCase()]) {
-        scanners = specificFilters[gl][id.toUpperCase()].externalIds;
-      }
+  Object.entries(reportTypes).reduce((acc, [id, name]) => {
+    let scanners = [];
+    if (specificFilters[gl] && specificFilters[gl][id.toUpperCase()]) {
+      scanners = specificFilters[gl][id.toUpperCase()].externalIds;
+    }
 
-      const filter = {
-        displayName: createDisplayName(name),
-        id: id.toUpperCase(),
-        name,
-        scanners,
-      };
+    const filter = {
+      displayName: createDisplayName(name),
+      id: id.toUpperCase(),
+      name,
+      vendor: gl,
+      scanners,
+    };
 
-      acc.options.push(filter);
-      return acc;
-    },
-    { title: 'Gitlab', options: [] },
-  );
+    acc.push(filter);
+    return acc;
+  }, []);
 
 export default {};

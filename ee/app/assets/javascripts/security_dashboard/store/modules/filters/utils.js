@@ -43,7 +43,6 @@ export const setReportTypeAndScannerFilter = (filter, option) => {
       newSelection[key] = sel;
     } else {
       const { scanners: optionId } = option;
-      console.log('optionId: ', optionId);
       if (optionId.length) {
         if (optionId.every(Set.prototype.has, selection[key])) {
           optionId.forEach(Set.prototype.delete, selection[key]);
@@ -64,7 +63,6 @@ export const setReportTypeAndScannerFilter = (filter, option) => {
     ...filter,
     selection,
   };
-  return filter;
 };
 
 /**

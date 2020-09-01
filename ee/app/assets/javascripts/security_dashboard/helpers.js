@@ -6,7 +6,13 @@ import { ALL, BASE_FILTERS } from './store/modules/filters/constants';
 import { REPORT_TYPES, SEVERITY_LEVELS } from './store/constants';
 import { createCustomFilters, createGitlabFilters } from './utils/filters_utils';
 
-const allReportTypeFilter = { title: 'All', options: [BASE_FILTERS.report_type] };
+const allReportTypeFilter = {
+  ...BASE_FILTERS.report_type,
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  title: 'All',
+  // eslint-disable-next-line @gitlab/require-i18n-strings
+  vendor: 'All',
+};
 
 /**
  * Parses the available report types and specific scanner filters and creates the report type
@@ -34,17 +40,14 @@ export const mapProjects = projects =>
  * @param {Object} specificFilters the map of project-specific filters
  * @returns {Array} the updated filters
  */
-export const modifyReportTypeFilter = (filters, specificFilters) => {
-  console.log('modifyReportTypeAndScannerFilters filters: ', filters);
+export const modifyReportTypeFilter = (filter, specificFilters) => {
   const { gitlabFilters, customFilters } = parseReportTypes(REPORT_TYPES, specificFilters);
   // eslint-disable-next-line no-param-reassign
-  filters.options = [allReportTypeFilter, gitlabFilters, ...customFilters];
-  return filters;
+  filter.options = [allReportTypeFilter, ...gitlabFilters, ...customFilters];
+  return filter;
 };
 
 export const initFirstClassVulnerabilityFilters = projects => {
-  const { gitlabFilters } = parseReportTypes(REPORT_TYPES);
-
   const filters = [
     {
       name: s__('SecurityReports|Status'),
@@ -54,21 +57,12 @@ export const initFirstClassVulnerabilityFilters = projects => {
         ...parseOptions(VULNERABILITY_STATES),
       ],
       selection: new Set([ALL]),
-      component: 'dashboard',
     },
     {
       name: s__('SecurityReports|Severity'),
       id: 'severity',
       options: [BASE_FILTERS.severity, ...parseOptions(SEVERITY_LEVELS)],
       selection: new Set([ALL]),
-      component: 'dashboard',
-    },
-    {
-      name: s__('Reports|Scanner'),
-      id: 'reportType',
-      options: [allReportTypeFilter, gitlabFilters],
-      selection: { reportType: new Set([ALL]), scanner: new Set([ALL]) },
-      component: 'scanner',
     },
   ];
 
@@ -78,11 +72,17 @@ export const initFirstClassVulnerabilityFilters = projects => {
       id: 'projectId',
       options: [BASE_FILTERS.project_id, ...mapProjects(projects)],
       selection: new Set([ALL]),
-      component: 'dashboard',
     });
   }
 
   return filters;
+};
+
+export const scannerFilter = {
+  name: s__('Reports|Scanner'),
+  id: 'reportType',
+  options: [allReportTypeFilter, ...parseReportTypes(REPORT_TYPES).gitlabFilters],
+  selection: { reportType: new Set([ALL]), scanner: new Set([ALL]) },
 };
 
 /**

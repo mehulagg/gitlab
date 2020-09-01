@@ -1,7 +1,7 @@
 // apollo call for specificFilter // handles visual implementation of new dropdown // data retrieval
 // emit event of filter change // filters component // parse data/prepare data in here
 <script>
-import { isEmpty } from 'lodash';
+import { groupBy, isEmpty } from 'lodash';
 import {
   GlDropdown,
   GlDropdownDivider,
@@ -68,31 +68,22 @@ export default {
       return this.processedFilter.selection;
     },
     firstSelectedOption() {
-      return this.processedFilter.options.reduce((acc, curr) => {
-        const foundOption = curr.options.find(option => {
-          let returnValue = false;
-          Object.keys(this.selection).forEach(key => {
-            if (!returnValue) {
-              returnValue = this.selection[key].has(option.id);
-            }
-          });
-          return returnValue;
-        });
-        return foundOption?.name || acc;
-      }, '-');
+      return (
+        this.processedFilter.options.find(option => this.selection.reportType.has(option.id))
+          ?.name || '-'
+      );
     },
     extraOptionCount() {
       return this.selection.size - 1;
     },
     filteredOptions() {
-      const test = this.processedFilter.options.map(group => {
-        const newGroup = { ...group };
-        newGroup.options = group.options.filter(option =>
+      const groupedOptions = groupBy(
+        this.processedFilter.options.filter(option =>
           option.name.toLowerCase().includes(this.filterTerm.toLowerCase()),
-        );
-        return newGroup;
-      });
-      return test;
+        ),
+        'vendor',
+      );
+      return Object.entries(groupedOptions).map(([vendor, options]) => ({ name: vendor, options }));
     },
     qaSelector() {
       return `filter_${this.processedFilter.name.toLowerCase().replace(' ', '_')}_dropdown`;
@@ -104,11 +95,14 @@ export default {
       this.$emit('onFilterChange', [filters]);
     },
     isSelected(option) {
-      // TODO fix this
       let isSelected = false;
       Object.keys(this.selection).forEach(key => {
         if (!isSelected) {
-          isSelected = this.selection[key].has(option.id);
+          if (option.id === 'all') {
+            isSelected = key === 'reportType' ? this.selection[key].has(option.id) : isSelected;
+          } else {
+            isSelected = this.selection[key].has(option.id);
+          }
         }
       });
       return isSelected;
@@ -157,7 +151,7 @@ export default {
         ref="searchBox"
         v-model="filterTerm"
         class="gl-m-3"
-        :placeholder="__('processedFilter...')"
+        :placeholder="__('Filter...')"
       />
 
       <div
@@ -166,7 +160,7 @@ export default {
       >
         <span v-for="vendor in filteredOptions" :key="vendor.name">
           <gl-dropdown-divider />
-          <gl-dropdown-header>{{ vendor.title }}</gl-dropdown-header>
+          <gl-dropdown-header>{{ vendor.name }}</gl-dropdown-header>
           <button
             v-for="option in vendor.options"
             :key="option.displayName || option.id"
