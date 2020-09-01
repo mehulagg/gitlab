@@ -171,15 +171,18 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       let!(:project) { create(:project, :public) }
       let!(:closed_result) { create(:issue, :closed, project: project, title: 'foo closed') }
       let!(:opened_result) { create(:issue, :opened, project: project, title: 'foo opened') }
+      let!(:confidential_result) { create(:issue, :confidential, project: project, title: 'foo confidential') }
 
       let(:scope) { 'issues' }
       let(:results) { described_class.new(user, 'foo', [project], filters: filters) }
 
-      include_examples 'search results filtered by state' do
-        before do
-          ensure_elasticsearch_index!
-        end
+      before do
+        project.add_developer(user)
+
+        ensure_elasticsearch_index!
       end
+      include_examples 'search results filtered by state'
+      include_examples 'search results filtered by confidential'
     end
   end
 
