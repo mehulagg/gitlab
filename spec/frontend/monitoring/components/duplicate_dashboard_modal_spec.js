@@ -1,39 +1,41 @@
-import { shallowMount } from '@vue/test-utils';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import { GlAlert, GlLoadingIcon, GlModal } from '@gitlab/ui';
 
 import waitForPromises from 'helpers/wait_for_promises';
 
+import { monitoringDashboard } from '~/monitoring/stores';
 import DuplicateDashboardModal from '~/monitoring/components/duplicate_dashboard_modal.vue';
 import DuplicateDashboardForm from '~/monitoring/components/duplicate_dashboard_form.vue';
 
 import { dashboardGitResponse } from '../mock_data';
 
+const localVue = createLocalVue();
+localVue.use(Vuex);
+
 describe('duplicate dashboard modal', () => {
   let wrapper;
-  let mockDashboards;
-  let mockSelectedDashboard;
-  let duplicateDashboardAction;
+  const duplicateSystemDashboardAction = jest.fn().mockResolvedValue();
   let okEvent;
 
-  function createComponent(opts = {}) {
-    const storeOpts = {
-      methods: {
-        duplicateSystemDashboard: jest.fn(),
+  function createComponent({ getters = {}, state: initialState } = {}) {
+    const fakeStore = new Vuex.Store({
+      modules: {
+        monitoringDashboard: {
+          ...monitoringDashboard,
+          actions: { duplicateSystemDashboard: duplicateSystemDashboardAction },
+          getters: { ...monitoringDashboard.getters, ...getters },
+          state: { ...monitoringDashboard.state(), ...initialState },
+        },
       },
-      computed: {
-        allDashboards: () => mockDashboards,
-        selectedDashboard: () => mockSelectedDashboard,
-      },
-    };
+    });
 
     return shallowMount(DuplicateDashboardModal, {
+      store: fakeStore,
       propsData: {
         defaultBranch: 'master',
         modalId: 'id',
       },
-      sync: false,
-      ...storeOpts,
-      ...opts,
     });
   }
 
@@ -42,20 +44,13 @@ describe('duplicate dashboard modal', () => {
   const findDuplicateDashboardForm = () => wrapper.find(DuplicateDashboardForm);
 
   beforeEach(() => {
-    mockDashboards = dashboardGitResponse;
-    [mockSelectedDashboard] = dashboardGitResponse;
-
-    duplicateDashboardAction = jest.fn().mockResolvedValue();
-
     okEvent = {
       preventDefault: jest.fn(),
     };
 
     wrapper = createComponent({
-      methods: {
-        // Mock vuex actions
-        duplicateSystemDashboard: duplicateDashboardAction,
-      },
+      state: { dashboards: dashboardGitResponse },
+      getters: { selectedDashboard: () => dashboardGitResponse[0] },
     });
 
     wrapper.vm.$refs.duplicateDashboardModal.hide = jest.fn();
@@ -81,7 +76,7 @@ describe('duplicate dashboard modal', () => {
   it('handles error when a new dashboard is not saved', () => {
     const errMsg = 'An error occurred';
 
-    duplicateDashboardAction.mockRejectedValueOnce(errMsg);
+    duplicateSystemDashboardAction.mockRejectedValueOnce(errMsg);
     findModal().vm.$emit('ok', okEvent);
 
     return waitForPromises().then(() => {
