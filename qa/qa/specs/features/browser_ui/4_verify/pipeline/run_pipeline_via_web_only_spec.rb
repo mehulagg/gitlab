@@ -2,29 +2,15 @@
 
 module QA
   RSpec.describe 'Verify' do
-    describe 'Run pipeline', :docker, :runner do
-      before(:context) do
-        @feature_flag = 'new_pipeline_form'
-        @feature_flag_enabled = Runtime::Feature.enabled?(@feature_flag)
-        Runtime::Feature.enable_and_verify(@feature_flag) unless @feature_flag_enabled
-      end
+    describe 'Run pipeline', :docker, :runner, :requires_admin, :skip_live_env do
+      # [TODO]: Developer to remove :requires_admin and :skip_live_env once FF is removed
 
-      after(:context) do
-        Runtime::Feature.disable_and_verify(@feature_flag) unless @feature_flag_enabled
-      end
-
-      context 'via web only' do
+      context 'with web only rule' do
+        let(:feature_flag) { 'new_pipeline_form' }
+        let(:job_name) { 'test_job' }
         let(:project) do
           Resource::Project.fabricate_via_api! do |project|
             project.name = 'web-only-pipeline'
-          end
-        end
-
-        let!(:runner) do
-          Resource::Runner.fabricate! do |runner|
-            runner.project = project
-            runner.name = project.name
-            runner.tags = [project.name]
           end
         end
 
@@ -37,7 +23,7 @@ module QA
                   {
                       file_path: '.gitlab-ci.yml',
                       content: <<~YAML
-                        job1:
+                        #{job_name}:
                           tags:
                             - #{project.name}
                           script: echo 'OK'
@@ -51,24 +37,29 @@ module QA
         end
 
         before do
+          Runtime::Feature.enable_and_verify(feature_flag) # [TODO]: Developer to remove when feature flag is removed
           Flow::Login.sign_in
           project.visit!
           Page::Project::Menu.perform(&:click_ci_cd_pipelines)
         end
 
         after do
-          runner.remove_via_api!
+          Runtime::Feature.disable_and_verify(feature_flag) # [TODO]: Developer to remove when feature flag is removed
         end
 
-        it 'does not have danger alert' do
+        it 'can trigger pipeline' do
           Page::Project::Pipeline::Index.perform do |index|
-            expect(index).not_to have_pipeline
+            expect(index).not_to have_pipeline # should not auto trigger pipeline
             index.click_run_pipeline_button
           end
 
           Page::Project::Pipeline::New.perform do |new|
             new.click_run_pipeline_button
-            expect(new).not_to have_danger_alert
+            expect(new).not_to have_danger_alert # to make sure bug !230929 does not resurface
+          end
+
+          Page::Project::Pipeline::Show.perform do |pipeline|
+            expect(pipeline).to have_job(job_name)
           end
         end
       end
