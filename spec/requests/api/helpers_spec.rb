@@ -21,7 +21,7 @@ RSpec.describe API::Helpers do
         _csrf_token: csrf_token
       },
       'REQUEST_METHOD' => 'GET',
-      'CONTENT_TYPE' => 'text/plain;charset=utf-8'
+      'CONTENT_TYPE' => 'application/json;charset=utf-8'
     }
   end
 
@@ -528,6 +528,29 @@ RSpec.describe API::Helpers do
       it 'raises an error' do
         expect { current_user }.to raise_error /Must be authenticated using an OAuth or Personal Access Token to use sudo/
       end
+    end
+  end
+
+  describe 'content_type' do
+    it 'responds with application/json content_type by default' do
+      get api('/projects', user)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response.content_type).to eq('application/json')
+    end
+
+    it 'responds to api call with json suffix' do
+      get api('/projects.json', user)
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response.content_type).to eq('application/json')
+    end
+
+    it 'ignores text/plain unless explicitly defined in api file' do
+      get api('/projects.txt', user), headers: { 'Content-Type': 'text/plain' }
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(response.content_type).to eq('application/json')
     end
   end
 end

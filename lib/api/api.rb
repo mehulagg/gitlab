@@ -115,7 +115,15 @@ module API
 
     format :json
     formatter :json, Gitlab::Json::GrapeFormatter
-    content_type :txt, "text/plain"
+
+    if Feature.enabled?(:api_legacy_content_type)
+      # In case some of GitLab users depend on the old behavior.
+      # We put this legacy feature flag as a temporary solution
+      # for them to win some time while they update their API.
+      content_type :txt, 'text/plain'
+    else
+      content_type :json, 'application/json'
+    end
 
     # Ensure the namespace is right, otherwise we might load Grape::API::Helpers
     helpers ::API::Helpers

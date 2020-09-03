@@ -5,6 +5,8 @@ module API
     class Runner < Grape::API::Instance
       helpers ::API::Helpers::Runner
 
+      content_type :txt, 'text/plain'
+
       resource :runners do
         desc 'Registers a new Runner' do
           success Entities::RunnerRegistrationDetails

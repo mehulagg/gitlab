@@ -6,6 +6,8 @@ module API
   class Repositories < Grape::API::Instance
     include PaginationParams
 
+    content_type :txt, 'text/plain'
+
     helpers ::API::Helpers::HeadersHelpers
 
     before { authorize! :download_code, user_project }

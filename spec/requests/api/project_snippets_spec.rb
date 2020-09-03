@@ -94,6 +94,7 @@ RSpec.describe API::ProjectSnippets do
 
       aggregate_failures do
         expect(response).to have_gitlab_http_status(:ok)
+        expect(response.media_type).to eq 'application/json'
 
         expect(json_response['title']).to eq(snippet.title)
         expect(json_response['description']).to eq(snippet.description)
