@@ -1,7 +1,5 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { GlButton, GlIcon } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { GlButton, GlIcon, GlSprintf } from '@gitlab/ui';
 
 import notesEventHub from '../event_hub';
 
@@ -9,20 +7,7 @@ export default {
   components: {
     GlButton,
     GlIcon,
-  },
-  computed: {
-    timelineContent() {
-      return sprintf(
-        __(
-          "You're only seeing %{startTag}other activity%{endTag} in the feed. To add a comment, switch to one of the following options.",
-        ),
-        {
-          startTag: `<b>`,
-          endTag: `</b>`,
-        },
-        false,
-      );
-    },
+    GlSprintf,
   },
   methods: {
     selectFilter(value) {
@@ -38,7 +23,19 @@ export default {
       <gl-icon name="comment" />
     </div>
     <div class="timeline-content">
-      <div ref="timelineContent" v-html="timelineContent"></div>
+      <div ref="timelineContent">
+        <gl-sprintf
+          :message="
+            __(
+              'You\'re only seeing %{boldStart}other activity%{boldEnd} in the feed. To add a comment, switch to one of the following options.'
+            )
+          "
+        >
+          <template #bold="{ content }">
+            <b>{{ content }}</b>
+          </template>
+        </gl-sprintf>
+      </div>
       <div class="discussion-filter-actions mt-2">
         <gl-button ref="showAllActivity" variant="default" @click="selectFilter(0)">
           {{ __('Show all activity') }}
