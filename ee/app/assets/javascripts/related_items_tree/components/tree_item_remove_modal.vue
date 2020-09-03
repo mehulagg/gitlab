@@ -1,11 +1,8 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { mapState, mapActions } from 'vuex';
 import { escape } from 'lodash';
 
-import { GlModal } from '@gitlab/ui';
-
-import { sprintf } from '~/locale';
+import { GlModal, GlSprintf } from '@gitlab/ui';
 
 import { ChildType, RemoveItemModalProps, itemRemoveModalId } from '../constants';
 
@@ -13,9 +10,13 @@ export default {
   itemRemoveModalId,
   components: {
     GlModal,
+    GlSprintf,
   },
   computed: {
     ...mapState(['parentItem', 'removeItemModalProps']),
+    isEpic() {
+      return this.removeItemType === ChildType.Epic;
+    },
     removeItemType() {
       return this.removeItemModalProps.item.type;
     },
@@ -23,28 +24,13 @@ export default {
       return this.removeItemType ? RemoveItemModalProps[this.removeItemType].title : '';
     },
     modalBody() {
-      if (this.removeItemType) {
-        const sprintfParams = {
-          bStart: '<b>',
-          bEnd: '</b>',
-        };
-
-        if (this.removeItemType === ChildType.Epic) {
-          Object.assign(sprintfParams, {
-            targetEpicTitle: escape(this.removeItemModalProps.item.title),
-            parentEpicTitle: escape(this.parentItem.title),
-          });
-        } else {
-          Object.assign(sprintfParams, {
-            targetIssueTitle: escape(this.removeItemModalProps.item.title),
-            parentEpicTitle: escape(this.parentItem.title),
-          });
-        }
-
-        return sprintf(RemoveItemModalProps[this.removeItemType].body, sprintfParams, false);
-      }
-
-      return '';
+      return RemoveItemModalProps[this.removeItemType].body;
+    },
+    targetTitle() {
+      return escape(this.removeItemModalProps.item.title);
+    },
+    parentTitle() {
+      return escape(this.parentItem.title);
     },
   },
   methods: {
@@ -67,6 +53,21 @@ export default {
       })
     "
   >
-    <p v-html="modalBody"></p>
+    <p v-if="removeItemType">
+      <gl-sprintf :message="modalBody">
+        <template #b="{ content }">
+          <b>{{ content }}</b>
+        </template>
+        <template v-if="isEpic" #targetEpicTitle>
+          {{ targetTitle }}
+        </template>
+        <template v-else #targetIssueTitle>
+          {{ targetTitle }}
+        </template>
+        <template #parentEpicTitle>
+          {{ parentTitle }}
+        </template>
+      </gl-sprintf>
+    </p>
   </gl-modal>
 </template>
