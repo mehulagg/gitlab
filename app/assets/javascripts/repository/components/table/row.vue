@@ -1,10 +1,10 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { escapeRegExp } from 'lodash';
 import {
   GlBadge,
   GlLink,
   GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlSafeHtmlDirective as SafeHtml,
   GlTooltipDirective,
   GlLoadingIcon,
   GlIcon,
@@ -27,6 +27,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    SafeHtml,
   },
   apollo: {
     commit: {
@@ -174,10 +175,10 @@ export default {
     <td class="d-none d-sm-table-cell tree-commit cursor-default">
       <gl-link
         v-if="commit"
+        v-safe-html="commit.titleHtml"
         :href="commit.commitPath"
         :title="commit.message"
         class="str-truncated-100 tree-commit-link"
-        v-html="commit.titleHtml"
       />
       <gl-skeleton-loading v-else :lines="1" class="h-auto" />
     </td>
