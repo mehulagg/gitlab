@@ -158,11 +158,11 @@ RSpec.describe MarkupHelper do
 
     describe 'with already redacted attribute' do
       it 'returns the redacted attribute' do
-        commit.redacted_title_html = 'commit title'
+        commit.redacted_title_html = 'commit title :star:'
 
         expect(Banzai).not_to receive(:render_field)
 
-        expect(helper.markdown_field(commit, attribute)).to eq('commit title')
+        expect(helper.markdown_field(commit, attribute)).to eq('commit title :star:')
       end
     end
 

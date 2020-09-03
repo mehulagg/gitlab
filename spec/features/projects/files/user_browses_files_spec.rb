@@ -182,7 +182,8 @@ RSpec.describe "User browses files" do
     end
 
     it 'renders emojis' do
-      expect(page).to have_selector('gl-emoji', count: 2)
+      # one of the two gl-emoji elements is sanitized by DOMPurify in Vue
+      expect(page).to have_selector('gl-emoji', count: 1)
     end
   end
 
