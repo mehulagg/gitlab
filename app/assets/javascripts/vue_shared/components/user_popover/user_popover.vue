@@ -1,8 +1,12 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { GlPopover, GlDeprecatedSkeletonLoading as GlSkeletonLoading, GlIcon } from '@gitlab/ui';
+import {
+  GlEmoji,
+  GlPopover,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlIcon,
+  GlSafeHtmlDirective as SafeHtml,
+} from '@gitlab/ui';
 import UserAvatarImage from '../user_avatar/user_avatar_image.vue';
-import { glEmojiTag } from '../../../emoji';
 
 const MAX_SKELETON_LINES = 4;
 
@@ -10,10 +14,14 @@ export default {
   name: 'UserPopover',
   maxSkeletonLines: MAX_SKELETON_LINES,
   components: {
+    GlEmoji,
     GlIcon,
     GlPopover,
     GlSkeletonLoading,
     UserAvatarImage,
+  },
+  directives: {
+    SafeHtml,
   },
   props: {
     target: {
@@ -27,18 +35,11 @@ export default {
     },
   },
   computed: {
+    userEmoji() {
+      return this.user?.status?.emoji;
+    },
     statusHtml() {
-      if (!this.user.status) {
-        return '';
-      }
-
-      if (this.user.status.emoji && this.user.status.message_html) {
-        return `${glEmojiTag(this.user.status.emoji)} ${this.user.status.message_html}`;
-      } else if (this.user.status.message_html) {
-        return this.user.status.message_html;
-      }
-
-      return '';
+      return this.user?.status?.message_html || '';
     },
     userIsLoading() {
       return !this.user?.loaded;
@@ -75,7 +76,7 @@ export default {
           <div class="gl-text-gray-500">
             <div v-if="user.bio" class="gl-display-flex gl-mb-2">
               <gl-icon name="profile" class="gl-text-gray-400 gl-flex-shrink-0" />
-              <span ref="bio" class="gl-ml-2" v-html="user.bioHtml"></span>
+              <span ref="bio" v-safe-html="user.bioHtml" class="gl-ml-2"></span>
             </div>
             <div v-if="user.workInformation" class="gl-display-flex gl-mb-2">
               <gl-icon name="work" class="gl-text-gray-400 gl-flex-shrink-0" />
@@ -87,7 +88,8 @@ export default {
             <span class="gl-ml-2">{{ user.location }}</span>
           </div>
           <div v-if="statusHtml" class="js-user-status gl-mt-3">
-            <span v-html="statusHtml"></span>
+            <gl-emoji v-if="userEmoji" :data-name="userEmoji" />
+            <span v-safe-html="statusHtml"></span>
           </div>
         </template>
       </div>
