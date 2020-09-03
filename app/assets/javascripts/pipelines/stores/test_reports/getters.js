@@ -14,5 +14,7 @@ export const getSelectedSuite = state =>
 
 export const getSuiteTests = state => {
   const { test_cases: testCases = [] } = getSelectedSuite(state);
-  return testCases.map(addIconStatus);
+  return testCases
+    .map(addIconStatus)
+    .map(c => Object.assign(c, { key: `${c.classname}_${c.name}` }));
 };
