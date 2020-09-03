@@ -46,6 +46,14 @@ module Gitlab
         end
       end
 
+      def highlight_map(scope)
+        case scope
+        when 'issues'
+          issues.map { |issue| puts issue.highlight }
+          Hash[issues.map { |issue| [issue[:_source][:id], issue.highlight] }]
+        end
+      end
+
       def formatted_count(scope)
         case scope
         when 'projects'
