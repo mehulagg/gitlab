@@ -1,6 +1,12 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { GlTooltipDirective, GlLink, GlDeprecatedButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import {
+  GlTooltipDirective,
+  GlLink,
+  GlDeprecatedButton,
+  GlLoadingIcon,
+  GlIcon,
+  GlSafeHtmlDirective as SafeHtml,
+} from '@gitlab/ui';
 import defaultAvatarUrl from 'images/no_avatar.png';
 import { sprintf, s__ } from '~/locale';
 import UserAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
@@ -24,6 +30,7 @@ export default {
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    SafeHtml,
   },
   mixins: [getRefMixin],
   apollo: {
@@ -118,10 +125,10 @@ export default {
       <div class="commit-detail flex-list">
         <div class="commit-content qa-commit-content">
           <gl-link
+            v-safe-html="commit.titleHtml"
             :href="commit.webPath"
             :class="{ 'font-italic': !commit.message }"
             class="commit-row-message item-title"
-            v-html="commit.titleHtml"
           />
           <gl-deprecated-button
             v-if="commit.descriptionHtml"
@@ -148,13 +155,13 @@ export default {
           </div>
           <pre
             v-if="commit.descriptionHtml"
+            v-safe-html="commit.descriptionHtml"
             :class="{ 'd-block': showDescription }"
             class="commit-row-description gl-mb-3"
-            v-html="commit.descriptionHtml"
           ></pre>
         </div>
         <div class="commit-actions flex-row">
-          <div v-if="commit.signatureHtml" v-html="commit.signatureHtml"></div>
+          <div v-if="commit.signatureHtml" v-safe-html="commit.signatureHtml"></div>
           <div v-if="commit.pipeline" class="ci-status-link">
             <gl-link
               v-gl-tooltip.left
