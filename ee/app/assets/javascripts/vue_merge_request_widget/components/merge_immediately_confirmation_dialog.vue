@@ -1,35 +1,17 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { GlModal, GlButton } from '@gitlab/ui';
-import { escape } from 'lodash';
-import { __, sprintf } from '~/locale';
+import { GlModal, GlButton, GlSprintf } from '@gitlab/ui';
 
 export default {
   name: 'MergeImmediatelyConfirmationDialog',
   components: {
     GlModal,
     GlButton,
+    GlSprintf,
   },
   props: {
     docsUrl: {
       type: String,
       required: true,
-    },
-  },
-  computed: {
-    bodyText() {
-      return sprintf(
-        __(
-          "Merging immediately isn't recommended as it may negatively impact the existing merge train. Read the %{docsLinkStart}documentation%{docsLinkEnd} for more information.",
-        ),
-        {
-          docsLinkStart: `<a href="${escape(
-            this.docsUrl,
-          )}" target="_blank" rel="noopener noreferrer">`,
-          docsLinkEnd: '</a>',
-        },
-        false,
-      );
     },
   },
   methods: {
@@ -59,7 +41,17 @@ export default {
     :title="__('Merge immediately')"
     @shown="focusCancelButton"
   >
-    <p v-html="bodyText"></p>
+    <p>
+      <gl-sprintf
+        :message="__('Merging immediately isn\'t recommended as it may negatively impact the existing merge train. Read the %{linkStart}documentation%{linkEnd} for more information.')"
+      >
+        <template #link="{ content }">
+          <gl-link :href="docsUrl" target="_blank" rel="noopener noreferrer">
+            {{ content }}
+          </gl-link>
+        </template>
+      </gl-sprintf>
+    </p>
     <p>{{ __('Are you sure you want to merge immediately?') }}</p>
     <template #modal-footer>
       <gl-button ref="cancelButton" @click="cancel">{{ __('Cancel') }}</gl-button>

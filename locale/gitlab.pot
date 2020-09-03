@@ -15847,7 +15847,7 @@ msgstr ""
 msgid "Merges this merge request when the pipeline succeeds."
 msgstr ""
 
-msgid "Merging immediately isn't recommended as it may negatively impact the existing merge train. Read the %{docsLinkStart}documentation%{docsLinkEnd} for more information."
+msgid "Merging immediately isn't recommended as it may negatively impact the existing merge train. Read the %{linkStart}documentation%{linkEnd} for more information."
 msgstr ""
 
 msgid "Message"
