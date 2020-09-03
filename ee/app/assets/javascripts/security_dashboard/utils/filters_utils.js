@@ -1,5 +1,6 @@
 const gl = 'GitLab';
-const createDisplayName = (name, vendor = gl) => `${name} - ${vendor}`;
+const createName = (name, vendor = gl) => `${name} - ${vendor}`;
+const createReportTypeScannerId = (reportType, vendor = gl) => `${reportType}-${vendor}`;
 
 /**
  * Parses the returned data from the project-specific scanners GraphQL query into a format
@@ -20,6 +21,12 @@ const createDisplayName = (name, vendor = gl) => `${name} - ${vendor}`;
  *     "vendor": "GitLab"
  *   },
  *   {
+ *     "externalId": "bundler_audit",
+ *     "name": "bundler_audit",
+ *     "reportType": "DEPENDENCY_SCANNING",
+ *     "vendor": "GitLab"
+ *   },
+ *   {
  *     "externalId": "whitesource_sast",
  *     "name": "whitesource_sast",
  *     "reportType": "SAST",
@@ -30,10 +37,11 @@ const createDisplayName = (name, vendor = gl) => `${name} - ${vendor}`;
  * Example returned value
  * {
  *   "GitLab": {
- *     "SAST": { vendor: "GitLab", reportType: "SAST", externalIds: ["brakeman", "gosec"],
+ *     "SAST": { vendor: "GitLab", reportType: "SAST", scanners: ["brakeman", "gosec"],
+ *     "DEPENDENCY_SCANNING": { vendor: "GitLab", reportType: "DEPENDENCY_SCANNING", scanners: ["bundler_audit"],
  *   },
  *   "Whitesource": {
- *     "SAST": { vendor: "Whitesource", reportType: "SAST", externalIds: ["whitesource_sast"],
+ *     "SAST": { vendor: "Whitesource", reportType: "SAST", scanners: ["whitesource_sast"],
  *   }
  * }
  */
@@ -46,10 +54,10 @@ export const parseSpecificFilters = nodes => {
     acc[vendor][reportType] = acc[vendor][reportType] || {
       vendor,
       reportType,
-      externalIds: [],
+      scanners: [],
     };
 
-    acc[vendor][reportType].externalIds.push(externalId);
+    acc[vendor][reportType].scanners.push(externalId);
 
     return acc;
   }, {});
@@ -63,11 +71,18 @@ export const parseSpecificFilters = nodes => {
  * Example return
  * [
  *   {
- *      "displayName": "SAST - WHITESOURCE",
- *      "name": "SAST",
- *      "id": "sast",
- *      "vendor": "WHITESOURCE",
- *      "scanners": ["whitesource_sast"]
+ *      "id": "dependency_scanning-Custom Scanner",
+ *      "name": "Dependency Scanning - Custom Scanner",
+ *      "reportType": "DEPENDENCY_SCANNING"
+ *      "scanners": ["custom_scanner_dependency_scanning-01", "custom_scanner_dependency_scanning-02"]
+ *      "vendor": "Custom Scanner",
+ *   },
+ *   {
+ *      "id": "SAST-Custom Scanner",
+ *      "name": "SAST - Custom Scanner",
+ *      "reportType": "SAST"
+ *      "scanners": ["custom_scanner_sast"]
+ *      "vendor": "Custom Scanner",
  *   },
  * ]
  */
@@ -75,12 +90,12 @@ export const createCustomFilters = (reportTypes, specificFilters) =>
   Object.keys(specificFilters).reduce((filters, vendor) => {
     if (vendor !== gl) {
       const newFilters = Object.values(specificFilters[vendor]).reduce((acc, filter) => {
-        const { reportType: id, externalIds: scanners } = filter;
-        const name = reportTypes[id.toLowerCase()];
+        const { reportType, scanners } = filter;
+        const name = reportTypes[reportType.toLowerCase()];
         const customFilter = {
-          displayName: createDisplayName(name, vendor),
-          id,
-          name,
+          id: createReportTypeScannerId(reportType, vendor),
+          name: createName(name, vendor),
+          reportType,
           scanners,
           vendor,
         };
@@ -88,7 +103,6 @@ export const createCustomFilters = (reportTypes, specificFilters) =>
         acc.push(customFilter);
         return acc;
       }, []);
-      // eslint-disable-next-line no-param-reassign
       filters.push(...newFilters);
     }
     return filters;
@@ -102,26 +116,36 @@ export const createCustomFilters = (reportTypes, specificFilters) =>
  * Example return
  * [
  *   {
- *      "displayName": "SAST - GitLab",
- *      "name": "SAST",
- *      "id": "sast",
+ *      "id": "dependency_scanning-GitLab",
+ *      "name": "Dependency Scanning - GitLab",
+ *      "reportType": "DEPENDENCY_SCANNING"
+ *      "scanners": ["bundler_audit"]
+ *      "vendor": "GitLab",
+ *   },
+ *   {
+ *      "id": "sast-GitLab",
+ *      "name": "SAST - GitLab",
+ *      "reportType": "sast"
  *      "scanners": ["brakeman", "gosec"]
+ *      "vendor": "GitLab",
  *   },
  * ]
  */
 export const createGitlabFilters = (reportTypes, specificFilters) =>
-  Object.entries(reportTypes).reduce((acc, [id, name]) => {
+  Object.entries(reportTypes).reduce((acc, [reportType, name]) => {
     let scanners = [];
-    if (specificFilters[gl] && specificFilters[gl][id.toUpperCase()]) {
-      scanners = specificFilters[gl][id.toUpperCase()].externalIds;
+    const vendor = gl;
+
+    if (specificFilters[gl] && specificFilters[gl][reportType.toUpperCase()]) {
+      scanners = specificFilters[gl][reportType.toUpperCase()].scanners;
     }
 
     const filter = {
-      displayName: createDisplayName(name),
-      id: id.toUpperCase(),
-      name,
-      vendor: gl,
+      id: createReportTypeScannerId(reportType),
+      name: createName(name),
+      reportType: reportType.toUpperCase(),
       scanners,
+      vendor,
     };
 
     acc.push(filter);

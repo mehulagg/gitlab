@@ -43,7 +43,7 @@ export default {
   },
   methods: {
     clickFilter(option) {
-      const filters = setFilter([this.filter], { option, filterId: this.filter.id });
+      const filters = setFilter([this.filter], { optionId: option.id, filterId: this.filter.id });
       this.$emit('onFilterChange', filters);
     },
     isSelected(option) {
@@ -102,7 +102,7 @@ export default {
       >
         <button
           v-for="option in filteredOptions"
-          :key="option.displayName || option.id"
+          :key="option.id"
           role="menuitem"
           type="button"
           class="dropdown-item"
@@ -115,7 +115,7 @@ export default {
               name="mobile-issue-close"
             />
             <span class="gl-white-space-nowrap gl-ml-2" :class="{ 'gl-pl-5': !isSelected(option) }">
-              {{ option.displayName || option.name }}
+              {{ option.name }}
             </span>
           </span>
         </button>

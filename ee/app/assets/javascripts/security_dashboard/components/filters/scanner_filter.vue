@@ -1,7 +1,5 @@
-// apollo call for specificFilter // handles visual implementation of new dropdown // data retrieval
-// emit event of filter change // filters component // parse data/prepare data in here
 <script>
-import { groupBy, isEmpty } from 'lodash';
+import { groupBy } from 'lodash';
 import {
   GlDropdown,
   GlDropdownDivider,
@@ -11,7 +9,7 @@ import {
 } from '@gitlab/ui';
 
 import projectSpecificScanners from '../../graphql/project_specific_scanners.query.graphql';
-import { setReportTypeAndScannerFilter } from '../../store/modules/filters/utils';
+import { setFilter, createScannerSelection } from '../../store/modules/filters/utils';
 import { parseSpecificFilters } from '../../utils/filters_utils';
 import { modifyReportTypeFilter } from '../../helpers';
 
@@ -35,7 +33,7 @@ export default {
         project: {
           vulnerabilityScanners: { nodes },
         },
-      }) => parseSpecificFilters(nodes), // { GitLab: { DAST: [bunderler, gem], SAST:}, 3rdPart: {Dast: []}}
+      }) => parseSpecificFilters(nodes),
     },
   },
   props: {
@@ -55,30 +53,21 @@ export default {
     };
   },
   computed: {
-    processedFilter() {
-      const test = isEmpty(this.specificFilters)
-        ? this.filter
-        : modifyReportTypeFilter(this.filter, this.specificFilters);
-      return test;
-    },
     filterId() {
-      return this.processedFilter.id;
+      return this.filter.id;
     },
     selection() {
-      return this.processedFilter.selection;
+      return this.filter.idSelection;
     },
     firstSelectedOption() {
-      return (
-        this.processedFilter.options.find(option => this.selection.reportType.has(option.id))
-          ?.name || '-'
-      );
+      return this.filter.options.find(option => this.selection.has(option.id))?.name || '-';
     },
     extraOptionCount() {
       return this.selection.size - 1;
     },
     filteredOptions() {
       const groupedOptions = groupBy(
-        this.processedFilter.options.filter(option =>
+        this.filter.options.filter(option =>
           option.name.toLowerCase().includes(this.filterTerm.toLowerCase()),
         ),
         'vendor',
@@ -86,26 +75,26 @@ export default {
       return Object.entries(groupedOptions).map(([vendor, options]) => ({ name: vendor, options }));
     },
     qaSelector() {
-      return `filter_${this.processedFilter.name.toLowerCase().replace(' ', '_')}_dropdown`;
+      return `filter_${this.filter.name.toLowerCase().replace(' ', '_')}_dropdown`;
+    },
+  },
+  watch: {
+    specificFilters(newSpecificFilters) {
+      const filter = modifyReportTypeFilter(this.filter, newSpecificFilters);
+      this.$emit('onFilterChange', [{ ...filter }]);
     },
   },
   methods: {
     clickFilter(option) {
-      const filters = setReportTypeAndScannerFilter(this.filter, option);
-      this.$emit('onFilterChange', [filters]);
+      const filter = setFilter([{ ...this.filter, selection: this.selection }], {
+        optionId: option.id,
+        filterId: this.filter.id,
+      });
+      const updatedSelection = createScannerSelection(filter[0].selection, filter[0].options);
+      this.$emit('onFilterChange', [{ ...filter[0], selection: updatedSelection }]);
     },
     isSelected(option) {
-      let isSelected = false;
-      Object.keys(this.selection).forEach(key => {
-        if (!isSelected) {
-          if (option.id === 'all') {
-            isSelected = key === 'reportType' ? this.selection[key].has(option.id) : isSelected;
-          } else {
-            isSelected = this.selection[key].has(option.id);
-          }
-        }
-      });
-      return isSelected;
+      return this.selection.has(option.id);
     },
     closeDropdown() {
       this.$refs.dropdown.$children[0].hide(true);
@@ -116,7 +105,7 @@ export default {
 
 <template>
   <div class="dashboard-filter">
-    <strong class="js-name">{{ processedFilter.name }}</strong>
+    <strong class="js-name">{{ filter.name }}</strong>
     <gl-dropdown
       ref="dropdown"
       class="d-block mt-1"
@@ -134,7 +123,7 @@ export default {
       </template>
 
       <div class="dropdown-title mb-0">
-        {{ processedFilter.name }}
+        {{ filter.name }}
         <button
           ref="close"
           class="btn-blank float-right"
@@ -147,7 +136,7 @@ export default {
       </div>
 
       <gl-search-box-by-type
-        v-if="processedFilter.options.length >= 20"
+        v-if="filter.options.length >= 20"
         ref="searchBox"
         v-model="filterTerm"
         class="gl-m-3"
@@ -163,7 +152,7 @@ export default {
           <gl-dropdown-header>{{ vendor.name }}</gl-dropdown-header>
           <button
             v-for="option in vendor.options"
-            :key="option.displayName || option.id"
+            :key="option.name || option.id"
             role="menuitem"
             type="button"
             class="dropdown-item"
@@ -179,7 +168,7 @@ export default {
                 class="gl-white-space-nowrap gl-ml-2"
                 :class="{ 'gl-pl-5': !isSelected(option) }"
               >
-                {{ option.displayName || option.name }}
+                {{ option.name }}
               </span>
             </span>
           </button>

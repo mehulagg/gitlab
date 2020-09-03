@@ -1,7 +1,9 @@
+import { difference } from 'lodash';
 import { isSubset } from '~/lib/utils/set';
 import { ALL } from './constants';
 
 export const isBaseFilterOption = id => id === ALL;
+export const convertToArray = value => (Array.isArray(value) ? value : [value]);
 
 /**
  * Returns whether or not the given state filter has a valid selection,
@@ -13,55 +15,67 @@ export const hasValidSelection = ({ selection, options }) =>
   isSubset(selection, new Set(options.map(({ id }) => id)));
 
 /**
- * Takes the filters and a selected payload.
- * It then either adds or removes that option from the appropriate linked filter.
- * With a few extra exceptions around the `ALL` special case.
- * @param {Array} filter the filter to mutate
- * @param {Object} option the selected option
- * @returns {Array} the mutated filters array
+ * Creates the selection object that is compatible with GraphQL
+ * @param {Set} selection the set of selection strings
+ * Example: ['sast-GitLab', 'dependency_scanning-GitLab', 'sast-Custom Scanner']
+ * @returns {Object} the GraphQL compatible selection
+ * Example:
+ * {
+ *    reportType: ['sast', 'dependency_scanning'],
+ *    scanner: ['brakeman', 'geosec', 'gemnasium', 'custom_scanner_sast']
+ * }
  */
-export const setReportTypeAndScannerFilter = (filter, option) => {
-  const { selection } = filter;
-
-  const newSelection = {};
-  Object.keys(selection).forEach(key => {
-    const sel = selection[key];
-    if (key === 'reportType') {
-      const { id: optionId } = option;
-      if (optionId === ALL) {
-        sel.clear();
-      } else if (sel.has(optionId)) {
-        sel.delete(optionId);
-      } else {
-        sel.delete(ALL);
-        sel.add(optionId);
+export const createScannerSelection = (selection, options) =>
+  [...selection].reduce(
+    (acc, curr) => {
+      if (curr === 'all') {
+        return acc;
       }
 
-      if (sel.size === 0) {
-        sel.add(ALL);
-      }
-      newSelection[key] = sel;
-    } else {
-      const { scanners: optionId } = option;
-      if (optionId.length) {
-        if (optionId.every(Set.prototype.has, selection[key])) {
-          optionId.forEach(Set.prototype.delete, selection[key]);
-        } else {
-          selection[key].delete(ALL);
-          optionId.forEach(Set.prototype.add, selection[key]);
-        }
+      const currOption = options.find(option => option.id === curr);
+      const { reportType, scanners } = currOption;
 
-        if (selection[key].size === 0) {
-          selection[key].add(ALL);
-        }
-        newSelection[key] = sel;
+      acc.reportType.push(reportType);
+      if (scanners.length) {
+        acc.scanner.push(...scanners);
       }
-    }
-  });
+      return acc;
+    },
+    { reportType: [], scanner: [] },
+  );
+
+/**
+ * Recreates the scanner filter selection from the URL
+ * @param {Array} options all the scanner filter options
+ * @param {String|Array|} reportType the reportTypes parsed from the URL
+ * @param {Array} scanners the scanners parsed from the URL
+ * @returns {Set} the collection of ids of selected scanner filters
+ */
+export const rehydrateScannerSelection = (options, reportType, scanner) => {
+  const reportTypes = convertToArray(reportType);
+  const scanners = scanner ? convertToArray(scanner) : [];
+  let updatedScanner = [...scanners];
+
+  const idSelection = reportTypes.reduce((acc, curr) => {
+    // Find all the filters with the given reportType in the URL
+    const filteredOptions = options.filter(option => option.reportType === curr);
+    filteredOptions.forEach(option => {
+      // Find the filters with the given scanners in the URL and add them to the set
+      if (filteredOptions.length === 1 || scanners.every(val => option.scanners.includes(val))) {
+        // TODO: fix this
+        acc.add(option.id);
+        updatedScanner = difference(updatedScanner, option.scanners);
+      }
+    });
+    return acc;
+  }, new Set());
 
   return {
-    ...filter,
-    selection,
+    idSelection,
+    selection: {
+      reportType: reportTypes,
+      scanner: scanners,
+    },
   };
 };
 
@@ -75,11 +89,10 @@ export const setReportTypeAndScannerFilter = (filter, option) => {
  * @param {String} payload.filterId the ID of the filter that the selected option belongs to
  * @returns {Array} the mutated filters array
  */
-export const setFilter = (filters, { option, filterId }) =>
+export const setFilter = (filters, { optionId, filterId }) =>
   filters.map(filter => {
     if (filter.id === filterId) {
       const { selection } = filter;
-      const { id: optionId } = option;
 
       if (optionId === ALL) {
         selection.clear();

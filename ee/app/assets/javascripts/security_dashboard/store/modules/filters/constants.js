@@ -1,5 +1,7 @@
 import { s__ } from '~/locale';
 
+const allVendor = 'All';
+
 export const ALL = 'all';
 export const STATE = {
   DETECTED: 'DETECTED',
@@ -14,9 +16,7 @@ export const BASE_FILTERS = {
   report_type: {
     name: s__('ciReport|All scanners'),
     id: ALL,
-  },
-  scanner: {
-    id: ALL,
+    vendor: allVendor,
   },
   project_id: {
     name: s__('ciReport|All projects'),

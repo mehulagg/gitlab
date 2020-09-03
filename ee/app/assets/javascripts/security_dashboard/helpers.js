@@ -6,14 +6,6 @@ import { ALL, BASE_FILTERS } from './store/modules/filters/constants';
 import { REPORT_TYPES, SEVERITY_LEVELS } from './store/constants';
 import { createCustomFilters, createGitlabFilters } from './utils/filters_utils';
 
-const allReportTypeFilter = {
-  ...BASE_FILTERS.report_type,
-  // eslint-disable-next-line @gitlab/require-i18n-strings
-  title: 'All',
-  // eslint-disable-next-line @gitlab/require-i18n-strings
-  vendor: 'All',
-};
-
 /**
  * Parses the available report types and specific scanner filters and creates the report type
  * filters with the links to the appropriate scanner filters
@@ -34,17 +26,19 @@ export const mapProjects = projects =>
   projects.map(p => ({ id: p.id.split('/').pop(), name: p.name }));
 
 /**
- * Modifies the existing reportType and scanner filters with project specific filters
+ * Modifies the existing scanner filter with project-specific filters
  *
- * @param {Array} filters the exisiting filters
- * @param {Object} specificFilters the map of project-specific filters
- * @returns {Array} the updated filters
+ * @param {Object} filter the exisiting scanner filter
+ * @param {Object} specificFilters the dictionary of project-specific filters
+ *                                See the parseSpecificFilters method to see the data model
+ * @returns {Object} the updated scanner filter
  */
 export const modifyReportTypeFilter = (filter, specificFilters) => {
   const { gitlabFilters, customFilters } = parseReportTypes(REPORT_TYPES, specificFilters);
-  // eslint-disable-next-line no-param-reassign
-  filter.options = [allReportTypeFilter, ...gitlabFilters, ...customFilters];
-  return filter;
+  return {
+    ...filter,
+    options: [BASE_FILTERS.report_type, ...gitlabFilters, ...customFilters],
+  };
 };
 
 export const initFirstClassVulnerabilityFilters = projects => {
@@ -81,8 +75,9 @@ export const initFirstClassVulnerabilityFilters = projects => {
 export const scannerFilter = {
   name: s__('Reports|Scanner'),
   id: 'reportType',
-  options: [allReportTypeFilter, ...parseReportTypes(REPORT_TYPES).gitlabFilters],
-  selection: { reportType: new Set([ALL]), scanner: new Set([ALL]) },
+  options: [BASE_FILTERS.report_type, ...parseReportTypes(REPORT_TYPES).gitlabFilters],
+  idSelection: new Set([ALL]),
+  selection: { reportType: [], scanner: [] },
 };
 
 /**
