@@ -6,7 +6,7 @@ module EE
       extend ::Gitlab::Utils::Override
 
       included do
-        before_action :push_wip_limits
+        before_action :push_licensed_features
       end
 
       EE_MAX_LIMITS_PARAMS = %i[max_issue_count max_issue_weight limit_metric].freeze
