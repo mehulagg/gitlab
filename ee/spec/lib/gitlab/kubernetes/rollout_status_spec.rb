@@ -120,6 +120,74 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
 
       it { is_expected.to eq(50) }
     end
+
+    context 'with two deployments that both have track set to "stable"' do
+      it 'sets the completion percentage when all pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'stable', replicas: 2),
+          kube_deployment(name: 'two', track: 'stable', replicas: 2)
+        ]
+        pods = create_pods(name: 'one', track: 'stable', count: 2) + create_pods(name: 'two', track: 'stable', count: 2)
+        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+
+        expect(rollout_status.completion).to eq(100)
+      end
+
+      it 'sets the completion percentage when a quarter of the pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'stable', replicas: 6),
+          kube_deployment(name: 'two', track: 'stable', replicas: 2)
+        ]
+        pods = create_pods(name: 'one', track: 'stable', count: 2)
+        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+
+        expect(rollout_status.completion).to eq(25)
+      end
+
+      it 'sets the completion percentage when no pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'stable', replicas: 3),
+          kube_deployment(name: 'two', track: 'stable', replicas: 7)
+        ]
+        rollout_status = described_class.from_deployments(*deployments, pods: [])
+
+        expect(rollout_status.completion).to eq(0)
+      end
+    end
+
+    context 'with two deployments, one with track set to "stable" and one with no track label' do
+      it 'sets the completion percentage when all pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'stable', replicas: 3),
+          kube_deployment(name: 'two', track: nil, replicas: 3)
+        ]
+        pods = create_pods(name: 'one', track: 'stable', count: 3) + create_pods(name: 'two', track: nil, count: 3)
+        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+
+        expect(rollout_status.completion).to eq(100)
+      end
+
+      it 'sets the completion percentage when a third of the pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'stable', replicas: 2),
+          kube_deployment(name: 'two', track: nil, replicas: 7)
+        ]
+        pods = create_pods(name: 'one', track: 'stable', count: 2) + create_pods(name: 'two', track: nil, count: 1)
+        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+
+        expect(rollout_status.completion).to eq(33)
+      end
+
+      it 'sets the completion percentage when no pods are complete' do
+        deployments = [
+          kube_deployment(name: 'one', track: 'stable', replicas: 1),
+          kube_deployment(name: 'two', track: nil, replicas: 1)
+        ]
+        rollout_status = described_class.from_deployments(*deployments, pods: [])
+
+        expect(rollout_status.completion).to eq(0)
+      end
+    end
   end
 
   describe '#complete?' do
