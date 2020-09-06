@@ -1,10 +1,12 @@
 <script>
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 
 export default {
   components: {
     GlIcon,
+    GlDropdown,
+    GlDropdownItem,
     TimeAgo,
   },
   props: {
@@ -23,14 +25,14 @@ export default {
 
 <template>
   <span class="dropdown inline">
-    <a
+    <gl-dropdown
       class="dropdown-menu-toggle btn btn-default w-100"
       data-toggle="dropdown"
       aria-expanded="false"
     >
       <span> {{ selectedVersionName }} </span>
       <gl-icon :size="12" name="angle-down" class="position-absolute" />
-    </a>
+    </gl-dropdown>
     <div class="dropdown-menu dropdown-select dropdown-menu-selectable">
       <div class="dropdown-content" data-qa-selector="dropdown_content">
         <ul>
