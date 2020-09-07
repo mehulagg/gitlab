@@ -87,16 +87,16 @@ export default {
         data-track-event="click_button"
         data-track-label="mr_next_unresolved_thread"
         data-track-property="click_next_unresolved_thread_top"
-        @click="jumpToNextDiscussion"
         icon="comment-next"
+        @click="jumpToNextDiscussion"
       />
       <gl-button
         v-gl-tooltip
         :title="allExpanded ? __('Collapse all threads') : __('Expand all threads')"
         :aria-label="allExpanded ? __('Collapse all threads') : __('Expand all threads')"
         class="toggle-all-discussions-btn"
-        @click="handleExpandDiscussions"
         :icon="allExpanded ? 'angle-up' : 'angle-down'"
+        @click="handleExpandDiscussions"
       />
     </gl-button-group>
   </div>
