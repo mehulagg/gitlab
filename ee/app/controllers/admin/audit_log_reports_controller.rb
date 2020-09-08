@@ -10,11 +10,7 @@ class Admin::AuditLogReportsController < Admin::ApplicationController
 
     respond_to do |format|
       format.csv do
-        send_data(
-          csv_data,
-          type: 'text/csv; charset=utf-8; header=present',
-          filename: csv_filename
-        )
+        stream_csv(csv_data)
       end
     end
   end
@@ -32,5 +28,15 @@ class Admin::AuditLogReportsController < Admin::ApplicationController
 
   def audit_log_reports_params
     params.permit(:entity_type, :entity_id, :created_before, :created_after, :author_id)
+  end
+
+  def stream_csv(csv_enumerator)
+    headers["Content-Length"] = nil
+    headers["Cache-Control"] = "no-cache"
+    headers['Content-Type'] = 'text/csv; charset=utf-8; header=present'
+    headers['X-Accel-Buffering'] = 'no'
+    headers['Content-Disposition'] = "attachment; filename=\"#{csv_filename}\""
+
+    self.response_body = csv_enumerator
   end
 end
