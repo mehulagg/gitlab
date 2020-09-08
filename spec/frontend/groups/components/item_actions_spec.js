@@ -53,12 +53,12 @@ describe('ItemActionsComponent', () => {
       const editBtn = newVm.$el.querySelector('a.edit-group');
 
       expect(editBtn).toBeDefined();
-      expect(editBtn.classList.contains('no-expand')).toBeTruthy();
+      expect(editBtn.classList.contains('gl-button')).toBeTruthy();
       expect(editBtn.getAttribute('href')).toBe(group.editPath);
       expect(editBtn.getAttribute('aria-label')).toBe('Edit group');
       expect(editBtn.dataset.originalTitle).toBe('Edit group');
       expect(editBtn.querySelectorAll('svg').length).not.toBe(0);
-      expect(editBtn.querySelector('svg').getAttribute('data-testid')).toBe('settings-icon');
+      expect(editBtn.querySelector('svg').getAttribute('data-testid')).toBe('pencil-icon');
 
       newVm.$destroy();
     });
@@ -68,11 +68,10 @@ describe('ItemActionsComponent', () => {
       group.canLeave = true;
       const newVm = createComponent(group);
 
-      const leaveBtn = newVm.$el.querySelector('a.leave-group');
+      const leaveBtn = newVm.$el.querySelector('button.leave-group');
 
       expect(leaveBtn).toBeDefined();
-      expect(leaveBtn.classList.contains('no-expand')).toBeTruthy();
-      expect(leaveBtn.getAttribute('href')).toBe(group.leavePath);
+      expect(leaveBtn.classList.contains('gl-button')).toBeTruthy();
       expect(leaveBtn.getAttribute('aria-label')).toBe('Leave this group');
       expect(leaveBtn.dataset.originalTitle).toBe('Leave this group');
       expect(leaveBtn.querySelectorAll('svg').length).not.toBe(0);

@@ -284,26 +284,21 @@ describe('AppComponent', () => {
       it('updates props which show modal confirmation dialog', () => {
         const group = { ...mockParentGroupItem };
 
-        expect(vm.showModal).toBe(false);
         expect(vm.groupLeaveConfirmationMessage).toBe('');
         vm.showLeaveGroupModal(group, mockParentGroupItem);
 
-        expect(vm.showModal).toBe(true);
         expect(vm.groupLeaveConfirmationMessage).toBe(
           `Are you sure you want to leave the "${group.fullName}" group?`,
         );
       });
     });
 
-    describe('hideLeaveGroupModal', () => {
+    describe('hide leave group modal', () => {
       it('hides modal confirmation which is shown before leaving the group', () => {
         const group = { ...mockParentGroupItem };
         vm.showLeaveGroupModal(group, mockParentGroupItem);
 
-        expect(vm.showModal).toBe(true);
-        vm.hideLeaveGroupModal();
-
-        expect(vm.showModal).toBe(false);
+        eventHub.$emit('cancel')
       });
     });
 
@@ -329,7 +324,6 @@ describe('AppComponent', () => {
 
         vm.leaveGroup();
 
-        expect(vm.showModal).toBe(false);
         expect(vm.targetGroup.isBeingRemoved).toBe(true);
         expect(vm.service.leaveGroup).toHaveBeenCalledWith(vm.targetGroup.leavePath);
         return waitForPromises().then(() => {
@@ -494,9 +488,8 @@ describe('AppComponent', () => {
 
     it('renders modal confirmation dialog', () => {
       vm.groupLeaveConfirmationMessage = 'Are you sure you want to leave the "foo" group?';
-      vm.showModal = true;
       return vm.$nextTick().then(() => {
-        const modalDialogEl = vm.$el.querySelector('.modal');
+        const modalDialogEl = vm.$el.querySelector('.gl-modal');
 
         expect(modalDialogEl).not.toBe(null);
         expect(modalDialogEl.querySelector('.modal-title').innerText.trim()).toBe('Are you sure?');
