@@ -27,8 +27,7 @@ RSpec.describe 'User uses shortcuts', :js do
 
       open_modal_shortcut_keys
 
-      # modal-shortcuts still in the DOM, but hidden
-      expect(find('#modal-shortcuts', visible: false)).not_to be_visible
+      expect(page).not_to have_selector('#modal-shortcuts')
 
       page.refresh
       open_modal_shortcut_keys
