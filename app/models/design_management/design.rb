@@ -224,6 +224,10 @@ module DesignManagement
       !interloper.exists?
     end
 
+    def notes_with_associations
+      notes.includes(:author)
+    end
+
     private
 
     def head_version

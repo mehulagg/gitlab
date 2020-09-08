@@ -101,6 +101,37 @@ RSpec.describe DesignManagement::DesignCollection do
     end
   end
 
+  describe "#copy_in_progress?", :clean_gitlab_redis_shared_state do
+    where(:state, :expectation) do
+      "ready"   | false
+      "pending" | true
+      "copying" | true
+      "error"   | false
+    end
+
+    with_them do
+      subject do
+        described_class.new(issue).tap { |dc| dc.copy_state = state }
+      end
+
+      it "returns correct values for all states" do
+        expect(subject.copy_in_progress?).to eq(expectation)
+      end
+    end
+  end
+
+  describe "#empty?" do
+    it "is true when the design collection has no designs" do
+      expect(collection).to be_empty
+    end
+
+    it "is false when the design collection has designs" do
+      create(:design, issue: issue)
+
+      expect(collection).not_to be_empty
+    end
+  end
+
   describe "#versions" do
     it "includes versions for all designs" do
       version_1 = create(:design_version)

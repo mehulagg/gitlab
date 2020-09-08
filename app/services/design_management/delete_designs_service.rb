@@ -36,7 +36,12 @@ module DesignManagement
 
     def delete_designs!
       DesignManagement::Version.with_lock(project.id, repository) do
-        run_actions(build_actions)
+        run_actions(
+          build_actions,
+          repository: repository,
+          target_branch: target_branch,
+          commit_message: commit_message
+        )
       end
     end
 
