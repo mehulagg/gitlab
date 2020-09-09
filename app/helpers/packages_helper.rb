@@ -56,4 +56,9 @@ module PackagesHelper
       coming_soon_json: packages_coming_soon_data(resource).to_json
     }
   end
+
+  def track_package_event(event_name, scope, **args)
+    ::Packages::CreateEventService.new(nil, current_user, event_name: event_name, scope: scope).execute
+    track_event(event_name, **args)
+  end
 end
