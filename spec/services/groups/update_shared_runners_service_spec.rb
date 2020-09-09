@@ -50,7 +50,7 @@ RSpec.describe Groups::UpdateSharedRunnersService do
 
             it 'results error' do
               expect(subject[:status]).to eq(:error)
-              expect(subject[:message]).to eq('Shared Runners disabled for the parent group')
+              expect(subject[:message]).to eq('Validation failed: Shared runners enabled cannot be enabled because parent group has shared Runners disabled.')
             end
           end
 
@@ -117,7 +117,7 @@ RSpec.describe Groups::UpdateSharedRunnersService do
 
             it 'results error' do
               expect(subject[:status]).to eq(:error)
-              expect(subject[:message]).to eq('Group level shared Runners not allowed')
+              expect(subject[:message]).to eq('Validation failed: Allow descendants override disabled shared runners cannot be enabled because parent group does not allow it.')
             end
           end
         end
@@ -141,15 +141,6 @@ RSpec.describe Groups::UpdateSharedRunnersService do
               expect(group).not_to receive(:disable_shared_runners!)
 
               expect(subject[:status]).to eq(:success)
-            end
-          end
-
-          context 'top level group that has shared Runners enabled' do
-            let_it_be(:group) { create(:group, shared_runners_enabled: true) }
-
-            it 'results error' do
-              expect(subject[:status]).to eq(:error)
-              expect(subject[:message]).to eq('Shared Runners enabled')
             end
           end
         end
@@ -182,7 +173,7 @@ RSpec.describe Groups::UpdateSharedRunnersService do
         end
 
         context 'shared_runners_enabled: 0 and allow_descendants_override_disabled_shared_runners: 0' do
-          let_it_be(:group) { create(:group, :allow_descendants_override_disabled_shared_runners) }
+          let_it_be(:group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
           let_it_be(:sub_group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners, parent: group) }
           let_it_be(:sub_group_2) { create(:group, parent: group) }
           let_it_be(:project) { create(:project, group: group, shared_runners_enabled: true) }
@@ -191,6 +182,10 @@ RSpec.describe Groups::UpdateSharedRunnersService do
           let(:params) { { shared_runners_enabled: '0', allow_descendants_override_disabled_shared_runners: '0' } }
 
           it 'disables shared Runners and disable allow_descendants_override_disabled_shared_runners' do
+            # need to skip the validation to test that it goes from true to false, as true is an invalid case
+            group.shared_runners_enabled = true;
+            group.save(validate: false)
+
             expect { subject }
               .to change { group.reload.shared_runners_enabled }.from(true).to(false)
               .and change { group.reload.allow_descendants_override_disabled_shared_runners }.from(true).to(false)

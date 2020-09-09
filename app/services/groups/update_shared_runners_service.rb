@@ -12,7 +12,7 @@ module Groups
 
       success
 
-    rescue ActiveRecord::RecordInvalid => error
+    rescue ActiveRecord::RecordInvalid, ArgumentError => error
       error(error.message)
     end
 
@@ -20,7 +20,7 @@ module Groups
 
     def validate_params
       if Gitlab::Utils.to_boolean(params[:shared_runners_enabled]) && !params[:allow_descendants_override_disabled_shared_runners].nil?
-        raise ActiveRecord::RecordInvalid, 'Cannot set shared_runners_enabled to true and allow_descendants_override_disabled_shared_runners'
+        raise ArgumentError, 'Cannot set shared_runners_enabled to true and allow_descendants_override_disabled_shared_runners'
       end
     end
 
