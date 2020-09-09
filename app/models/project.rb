@@ -432,7 +432,7 @@ class Project < ApplicationRecord
   validate :visibility_level_allowed_by_group, if: :should_validate_visibility_level?
   validate :visibility_level_allowed_as_fork, if: :should_validate_visibility_level?
   validate :validate_pages_https_only, if: -> { changes.has_key?(:pages_https_only) }
-  validate :validate_shared_runners_allowed_by_group, if: -> { new_record? || changes.has_key?(:shared_runners_enabled) }
+  validate :changing_shared_runners_enabled_is_allowed
   validates :repository_storage,
     presence: true,
     inclusion: { in: ->(_object) { Gitlab.config.repositories.storages.keys } }
@@ -1187,10 +1187,12 @@ class Project < ApplicationRecord
     end
   end
 
-  def validate_shared_runners_allowed_by_group
-    return if shared_runners_enabled_allowed_by_group?
+  def changing_shared_runners_enabled_is_allowed
+    return unless new_record? || changes.has_key?(:shared_runners_enabled)
 
-    errors.add(:shared_runners, _('cannot be enabled because parent group does not allow it')) if shared_runners_enabled
+    if shared_runners_enabled && !shared_runners_enabled_allowed_by_group?
+      errors.add(:shared_runners_enabled, _('cannot be enabled because parent group does not allow it'))
+    end
   end
 
   def to_param
