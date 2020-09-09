@@ -6,7 +6,6 @@ import {
   GlCard,
   GlForm,
   GlFormGroup,
-  GlIcon,
   GlLink,
   GlDropdown,
   GlDropdownItem,
@@ -48,7 +47,6 @@ export default {
     GlCard,
     GlForm,
     GlFormGroup,
-    GlIcon,
     GlLink,
     GlDropdown,
     GlDropdownItem,
@@ -74,9 +72,6 @@ export default {
       error(e) {
         Sentry.captureException(e);
         this.showErrors(ERROR_FETCH_SCANNER_PROFILES);
-      },
-      skip() {
-        return !this.glFeatures.securityOnDemandScansScannerProfiles;
       },
     },
     siteProfiles: {
@@ -129,9 +124,7 @@ export default {
       scannerProfiles: [],
       siteProfiles: [],
       form: {
-        ...(this.glFeatures.securityOnDemandScansScannerProfiles
-          ? { dastScannerProfileId: initField(null) }
-          : {}),
+        dastScannerProfileId: initField(null),
         dastSiteProfileId: initField(null),
       },
       loading: false,
@@ -295,7 +288,7 @@ export default {
                 {{ s__('OnDemandScans|Scanner settings') }}
               </h3>
             </div>
-            <div v-if="glFeatures.securityOnDemandScansScannerProfiles" class="col-5 gl-text-right">
+            <div class="col-5 gl-text-right">
               <gl-button
                 :href="scannerProfiles.length ? scannerProfilesLibraryPath : null"
                 :disabled="!scannerProfiles.length"
@@ -310,109 +303,80 @@ export default {
           </div>
         </template>
 
-        <template v-if="glFeatures.securityOnDemandScansScannerProfiles">
-          <gl-form-group v-if="scannerProfiles.length">
-            <template #label>
-              {{ s__('OnDemandScans|Use existing scanner profile') }}
-            </template>
-            <gl-dropdown
-              v-model="form.dastScannerProfileId.value"
-              :text="scannerProfileText"
-              class="mw-460"
-              data-testid="scanner-profiles-dropdown"
+        <gl-form-group v-if="scannerProfiles.length">
+          <template #label>
+            {{ s__('OnDemandScans|Use existing scanner profile') }}
+          </template>
+          <gl-dropdown
+            v-model="form.dastScannerProfileId.value"
+            :text="scannerProfileText"
+            class="mw-460"
+            data-testid="scanner-profiles-dropdown"
+          >
+            <gl-dropdown-item
+              v-for="scannerProfile in scannerProfiles"
+              :key="scannerProfile.id"
+              :is-checked="form.dastScannerProfileId.value === scannerProfile.id"
+              is-check-item
+              @click="setScannerProfile(scannerProfile)"
             >
-              <gl-dropdown-item
-                v-for="scannerProfile in scannerProfiles"
-                :key="scannerProfile.id"
-                :is-checked="form.dastScannerProfileId.value === scannerProfile.id"
-                is-check-item
-                @click="setScannerProfile(scannerProfile)"
-              >
-                {{ scannerProfile.profileName }}
-              </gl-dropdown-item>
-            </gl-dropdown>
-            <template v-if="selectedScannerProfile">
-              <hr />
-              <div data-testid="scanner-profile-summary">
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="row">
-                      <div class="col-md-3">{{ s__('DastProfiles|Scan mode') }}:</div>
-                      <div class="col-md-9">
-                        <strong>{{ s__('DastProfiles|Passive') }}</strong>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div class="row">
-                  <div class="col-md-6">
-                    <div class="row">
-                      <div class="col-md-3">{{ s__('DastProfiles|Spider timeout') }}:</div>
-                      <div class="col-md-9">
-                        <strong>
-                          {{ n__('%d minute', '%d minutes', selectedScannerProfile.spiderTimeout) }}
-                        </strong>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-md-6">
-                    <div class="row">
-                      <div class="col-md-3">{{ s__('DastProfiles|Target timeout') }}:</div>
-                      <div class="col-md-9">
-                        <strong>
-                          {{ n__('%d second', '%d seconds', selectedScannerProfile.targetTimeout) }}
-                        </strong>
-                      </div>
+              {{ scannerProfile.profileName }}
+            </gl-dropdown-item>
+          </gl-dropdown>
+          <template v-if="selectedScannerProfile">
+            <hr />
+            <div data-testid="scanner-profile-summary">
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="row">
+                    <div class="col-md-3">{{ s__('DastProfiles|Scan mode') }}:</div>
+                    <div class="col-md-9">
+                      <strong>{{ s__('DastProfiles|Passive') }}</strong>
                     </div>
                   </div>
                 </div>
               </div>
-            </template>
-          </gl-form-group>
-          <template v-else>
-            <p class="gl-text-gray-700">
-              {{
-                s__(
-                  'OnDemandScans|No profile yet. In order to create a new scan, you need to have at least one completed scanner profile.',
-                )
-              }}
-            </p>
-            <gl-button
-              :href="newScannerProfilePath"
-              variant="success"
-              category="secondary"
-              data-testid="create-scanner-profile-link"
-            >
-              {{ s__('OnDemandScans|Create a new scanner profile') }}
-            </gl-button>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="row">
+                    <div class="col-md-3">{{ s__('DastProfiles|Spider timeout') }}:</div>
+                    <div class="col-md-9">
+                      <strong>
+                        {{ n__('%d minute', '%d minutes', selectedScannerProfile.spiderTimeout) }}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="row">
+                    <div class="col-md-3">{{ s__('DastProfiles|Target timeout') }}:</div>
+                    <div class="col-md-9">
+                      <strong>
+                        {{ n__('%d second', '%d seconds', selectedScannerProfile.targetTimeout) }}
+                      </strong>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </template>
-        </template>
+        </gl-form-group>
         <template v-else>
-          <gl-form-group class="gl-mt-4">
-            <template #label>
-              {{ s__('OnDemandScans|Scan mode') }}
-              <gl-icon
-                v-gl-tooltip.hover
-                name="information-o"
-                class="gl-vertical-align-text-bottom gl-text-gray-600"
-                :title="s__('OnDemandScans|Only a passive scan can be performed on demand.')"
-              />
-            </template>
-            {{ s__('OnDemandScans|Passive') }}
-          </gl-form-group>
-
-          <gl-form-group class="gl-mt-7 gl-mb-2">
-            <template #label>
-              {{ s__('OnDemandScans|Attached branch') }}
-              <gl-icon
-                v-gl-tooltip.hover
-                name="information-o"
-                class="gl-vertical-align-text-bottom gl-text-gray-600"
-                :title="s__('OnDemandScans|Attached branch is where the scan job runs.')"
-              />
-            </template>
-            {{ defaultBranch }}
-          </gl-form-group>
+          <p class="gl-text-gray-700">
+            {{
+              s__(
+                'OnDemandScans|No profile yet. In order to create a new scan, you need to have at least one completed scanner profile.',
+              )
+            }}
+          </p>
+          <gl-button
+            :href="newScannerProfilePath"
+            variant="success"
+            category="secondary"
+            data-testid="create-scanner-profile-link"
+          >
+            {{ s__('OnDemandScans|Create a new scanner profile') }}
+          </gl-button>
         </template>
       </gl-card>
 
