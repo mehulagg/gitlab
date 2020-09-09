@@ -578,8 +578,20 @@ module Gitlab
       # rubocop: disable CodeReuse/ActiveRecord
       def usage_activity_by_stage_package(time_period)
         {
+          users: distinct_count(::Packages::Event.with_user.where(time_period), :originator),
+          published: published_packages(time_period),
           projects_with_packages: distinct_count(::Project.with_packages.where(time_period), :creator_id)
         }
+      end
+
+      def published_packages(time_period)
+        packages_counts = {}
+
+        Packages::Package.package_types.keys.each do |package_type|
+          packages_counts[package_type] = count(::Packages::Event.with_scope(package_type).where(time_period))
+        end
+
+        total = packages_counts.inject(0) { |count, total| total += count[1] }
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

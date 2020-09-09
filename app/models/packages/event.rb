@@ -22,4 +22,9 @@ class Packages::Event < ApplicationRecord
   }
 
   enum originator_type: { user: 0, deploy_token: 1, guest: 2 }
+
+  scope :with_scope, -> (scope) { where(scope: scope) }
+  scope :with_user, -> { where(originator_type: :user) }
+  scope :with_deploy_token, -> { where(originator_type: :deploy_token) }
+  scope :with_guest, -> { where(originator_type: :guest) }
 end
