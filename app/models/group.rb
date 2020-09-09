@@ -547,26 +547,30 @@ class Group < Namespace
   end
 
   def disable_shared_runners!
-    group_ids = self_and_descendants
+    update!(shared_runners_enabled: false)
+
+    group_ids = descendants
     return if group_ids.empty?
 
+    # note: this skips the validation on descendant groups, but that's ok because
+    # it only triggers in cases where we are setting this to true.
     Group.by_id(group_ids).update_all(shared_runners_enabled: false)
 
     all_projects.update_all(shared_runners_enabled: false)
   end
 
   def allow_descendants_override_disabled_shared_runners!
-    raise UpdateSharedRunnersError, 'Shared Runners enabled' if shared_runners_enabled?
-
     update!(allow_descendants_override_disabled_shared_runners: true)
   end
 
   def disallow_descendants_override_disabled_shared_runners!
-    raise UpdateSharedRunnersError, 'Shared Runners enabled' if shared_runners_enabled?
+    update!(allow_descendants_override_disabled_shared_runners: false)
 
-    group_ids = self_and_descendants
+    group_ids = descendants
     return if group_ids.empty?
 
+    # note: this skips the validation on descendant groups, but that's ok because
+    # it only triggers in cases where we are setting this to true.
     Group.by_id(group_ids).update_all(allow_descendants_override_disabled_shared_runners: false)
 
     all_projects.update_all(shared_runners_enabled: false)
@@ -597,6 +601,9 @@ class Group < Namespace
   def changing_shared_runners_enabled_is_allowed
     return unless new_record? || changes.has_key?(:shared_runners_enabled)
 
+    # note: the #disable_shared_runners! methods assumes validation can only trigger when enabling shared_runners_enabled
+    # please remember to update this method if you're changing the validation logic
+
     if shared_runners_enabled && !parent_allows_shared_runners?
       errors.add(:shared_runners_enabled, _('cannot be enabled because parent group has shared Runners disabled.'))
     end
@@ -604,6 +611,10 @@ class Group < Namespace
 
   def changing_allow_descendants_override_disabled_shared_runners_is_allowed
     return unless new_record? || changes.has_key?(:allow_descendants_override_disabled_shared_runners)
+
+    # note: the #disallow_descendants_override_disabled_shared_runners! methods assumes validation can only trigger
+    # when enabling allow_descendants_override_disabled_shared_runners
+    # please remember to update this method if you're changing the validation logic
 
     if allow_descendants_override_disabled_shared_runners && shared_runners_enabled
       errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be enabled if shared runners are enabled.'))

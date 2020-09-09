@@ -1575,7 +1575,7 @@ RSpec.describe Group do
 
       it 'raises error and does not change config' do
         expect { subject }
-          .to raise_error(described_class::UpdateSharedRunnersError, 'Shared Runners enabled')
+          .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Allow descendants override disabled shared runners cannot be enabled if shared runners are enabled.')
           .and not_change { group.reload.allow_descendants_override_disabled_shared_runners }
           .and not_change { group.reload.shared_runners_enabled }
           .and not_change { sub_group.reload.allow_descendants_override_disabled_shared_runners }
@@ -1600,22 +1600,6 @@ RSpec.describe Group do
           .and not_change { sub_group.reload.shared_runners_enabled }
           .and change { sub_group.reload.allow_descendants_override_disabled_shared_runners }.from(true).to(false)
           .and change { project.reload.shared_runners_enabled }.from(true).to(false)
-      end
-    end
-
-    context 'top level group that has shared Runners enabled' do
-      let_it_be(:group) { create(:group, shared_runners_enabled: true) }
-      let_it_be(:sub_group) { create(:group, :shared_runners_disabled, parent: group) }
-      let_it_be(:project) { create(:project, shared_runners_enabled: false, group: sub_group) }
-
-      it 'results error and does not change config' do
-        expect { subject }
-          .to raise_error(described_class::UpdateSharedRunnersError, 'Shared Runners enabled')
-          .and not_change { group.reload.allow_descendants_override_disabled_shared_runners }
-          .and not_change { group.reload.shared_runners_enabled }
-          .and not_change { sub_group.reload.allow_descendants_override_disabled_shared_runners }
-          .and not_change { sub_group.reload.shared_runners_enabled }
-          .and not_change { project.reload.shared_runners_enabled }
       end
     end
   end
