@@ -219,7 +219,7 @@ RSpec.describe Group do
       end
     end
 
-    describe '#validate_allow_descendants_override_disabled_shared_runners_allowed_by_parent' do
+    describe 'validation #allow_descendants_override_disabled_shared_runners_allowed_by_parent' do
       context 'without a parent' do
         let(:group) { create(:group, :allow_descendants_override_disabled_shared_runners, :shared_runners_disabled) }
 
