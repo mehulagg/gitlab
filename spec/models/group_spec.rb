@@ -179,7 +179,7 @@ RSpec.describe Group do
       end
     end
 
-    describe '#validate_shared_runners_allowed_by_parent' do
+    describe 'validation #shared_runners_allowed_by_parent' do
       context 'without a parent' do
         let(:group) { create(:group, shared_runners_enabled: true) }
 
