@@ -784,23 +784,21 @@ RSpec.describe Projects::CreateService, '#execute' do
   end
 
   context 'shared Runners config' do
-    context 'parent group is present' do
+    context 'parent group is present and allows desired config' do
       using RSpec::Parameterized::TableSyntax
 
       where(:shared_runners_group_config, :desired_config_for_new_project, :expected_result_for_project) do
         true  | true  | true
         true  | false | false
         true  | nil   | true
-        false | true  | false
         false | false | false
-        false | nil   | false
       end
 
       with_them do
         let(:group) { create(:group) }
 
         before do
-          expect_any_instance_of(Group).to receive(:shared_runners_allowed?).twice.and_return(shared_runners_group_config)
+          allow_any_instance_of(Group).to receive(:shared_runners_allowed?).and_return(shared_runners_group_config)
           group.add_owner(user)
 
           user.refresh_authorized_projects # Ensure cache is warm
@@ -813,6 +811,35 @@ RSpec.describe Projects::CreateService, '#execute' do
 
           expect(project).to be_valid
           expect(project.shared_runners_enabled).to eq(expected_result_for_project)
+        end
+      end
+    end
+
+    context 'parent group is present and disallows desired config' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:shared_runners_group_config, :desired_config_for_new_project, :expected_result_for_project) do
+        false | true  | false
+        false | nil   | false
+      end
+
+      with_them do
+        let(:group) { create(:group) }
+
+        before do
+          allow_any_instance_of(Group).to receive(:shared_runners_allowed?).and_return(shared_runners_group_config)
+          group.add_owner(user)
+
+          user.refresh_authorized_projects # Ensure cache is warm
+        end
+
+        it 'created project follows the parent config' do
+          params = opts.merge(namespace_id: group.id)
+          params = params.merge(shared_runners_enabled: desired_config_for_new_project) unless desired_config_for_new_project.nil?
+          project = create_project(user, params)
+
+          expect(project).to be_invalid
+          expect(project.errors[:shared_runners_enabled]).to include('cannot be enabled because parent group does not allow it')
         end
       end
     end

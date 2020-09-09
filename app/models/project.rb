@@ -2510,12 +2510,6 @@ class Project < ApplicationRecord
     GroupDeployKey.for_groups(group.self_and_ancestors_ids)
   end
 
-  def inherit_group_shared_runners_settings
-    return if group.nil? || group&.shared_runners_allowed?
-
-    self.shared_runners_enabled = false
-  end
-
   private
 
   def find_service(services, name)
