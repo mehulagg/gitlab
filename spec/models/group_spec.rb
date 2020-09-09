@@ -179,7 +179,7 @@ RSpec.describe Group do
       end
     end
 
-    describe 'validation #shared_runners_allowed_by_parent' do
+    describe 'validation #changing_shared_runners_enabled_is_allowed' do
       context 'without a parent' do
         let(:group) { create(:group, shared_runners_enabled: true) }
 
@@ -195,7 +195,7 @@ RSpec.describe Group do
 
           it 'is invalid' do
             expect(sub_group).to be_invalid
-            expect(sub_group.errors[:shared_runners]).to include('cannot be enabled because parent group has shared Runners disabled.')
+            expect(sub_group.errors[:shared_runners_enabled]).to include('cannot be enabled because parent group has shared Runners disabled.')
           end
         end
 
@@ -219,12 +219,23 @@ RSpec.describe Group do
       end
     end
 
-    describe 'validation #allow_descendants_override_disabled_shared_runners_allowed_by_parent' do
+    describe 'validation #changing_allow_descendants_override_disabled_shared_runners_is_allowed' do
       context 'without a parent' do
-        let(:group) { create(:group, :allow_descendants_override_disabled_shared_runners, :shared_runners_disabled) }
+          context 'with shared runners disabled' do
+          let(:group) { build(:group, :allow_descendants_override_disabled_shared_runners, :shared_runners_disabled) }
 
-        it 'is valid' do
-          expect(group).to be_valid
+          it 'is valid' do
+            expect(group).to be_valid
+          end
+        end
+
+        context 'with shared runners enabled' do
+          let(:group) { build(:group, :allow_descendants_override_disabled_shared_runners) }
+
+          it 'is valid' do
+            expect(group).to be_invalid
+            expect(group.errors[:allow_descendants_override_disabled_shared_runners]).to include('cannot be enabled if shared runners are enabled.')
+          end
         end
       end
 

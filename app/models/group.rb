@@ -77,8 +77,8 @@ class Group < Namespace
   validate :visibility_level_allowed_by_projects
   validate :visibility_level_allowed_by_sub_groups
   validate :visibility_level_allowed_by_parent
-  validate :shared_runners_allowed_by_parent, if: :should_validate_shared_runners_allowed_by_parent
-  validate :allow_descendants_override_disabled_shared_runners_allowed_by_parent, if: :should_validate_allow_descendants_override_disabled_shared_runners
+  validate :changing_shared_runners_enabled_is_allowed
+  validate :changing_allow_descendants_override_disabled_shared_runners_is_allowed
   validates :variables, variable_duplicates: true
 
   validates :two_factor_grace_period, presence: true, numericality: { greater_than_or_equal_to: 0 }
@@ -594,26 +594,24 @@ class Group < Namespace
     errors.add(:visibility_level, "#{visibility} is not allowed since the parent group has a #{parent.visibility} visibility.")
   end
 
-  def should_validate_shared_runners_allowed_by_parent
-    new_record? || changes.has_key?(:shared_runners_enabled)
+  def changing_shared_runners_enabled_is_allowed
+    return unless new_record? || changes.has_key?(:shared_runners_enabled)
+
+    if shared_runners_enabled && !parent_allows_shared_runners?
+      errors.add(:shared_runners_enabled, _('cannot be enabled because parent group has shared Runners disabled.'))
+    end
   end
 
-  def should_validate_allow_descendants_override_disabled_shared_runners
-    new_record? || changes.has_key?(:allow_descendants_override_disabled_shared_runners)
-  end
+  def changing_allow_descendants_override_disabled_shared_runners_is_allowed
+    return unless new_record? || changes.has_key?(:allow_descendants_override_disabled_shared_runners)
 
-  def shared_runners_allowed_by_parent
-    return unless shared_runners_enabled
-    return if parent_allows_shared_runners?
+    if allow_descendants_override_disabled_shared_runners && shared_runners_enabled
+      errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be enabled if shared runners are enabled.'))
+    end
 
-    errors.add(:shared_runners, _('cannot be enabled because parent group has shared Runners disabled.'))
-  end
-
-  def allow_descendants_override_disabled_shared_runners_allowed_by_parent
-    return unless allow_descendants_override_disabled_shared_runners
-    return if parent_allows_shared_runners?
-
-    errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be enabled because parent group does not allow it.'))
+    if allow_descendants_override_disabled_shared_runners && !parent_allows_shared_runners?
+      errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be enabled because parent group does not allow it.'))
+    end
   end
 
   def visibility_level_allowed_by_projects
