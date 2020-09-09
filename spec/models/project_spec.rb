@@ -5812,33 +5812,29 @@ RSpec.describe Project do
     end
   end
 
-  describe 'validate #changing_shared_runners_enabled_is_allowed' do
+  describe 'validation #changing_shared_runners_enabled_is_allowed' do
     using RSpec::Parameterized::TableSyntax
 
-    where(:shared_runners_parent_group_config, :parent_group_allow_override, :project_shared_runners_desired_config, :expected_outcome, :update_status) do
-      false | false | false | false | true
-      true  | false | false | false | true
-      false | false | true  | false | false
-      true  | false | true  | true  | true
-      false | true  | false | false | true
-      # true  | true  | false | false | true # <- this combination is invalid at the parent group level, leaving as comment to make explicit
-      false | true  | true  | true  | true
-      # true  | true  | true  | true  | true # <- this combination is invalid at the parent group level, leaving as comment to make explicit
+    where(:group_shared_runners_allowed, :project_shared_runners_enabled, :valid_record) do
+      true  | true  | true
+      true  | false | true
+      false | true  | false
+      false | false | true
     end
 
     with_them do
-      let(:group) { create(:group, shared_runners_enabled: shared_runners_parent_group_config, allow_descendants_override_disabled_shared_runners: parent_group_allow_override) }
-      let(:project) { create(:project, namespace: group, shared_runners_enabled: false) }
+      let(:group) { create(:group) }
+      let(:project) { build(:project, namespace: group, shared_runners_enabled: project_shared_runners_enabled) }
 
-      it 'parent restrictions are fullfiled' do
-        result = project.update(shared_runners_enabled: project_shared_runners_desired_config)
+      before do
+        allow_any_instance_of(Group).to receive(:shared_runners_allowed?).and_return(group_shared_runners_allowed)
+      end
 
-        expect(result).to eq(update_status)
-        expect(project.reload.shared_runners_enabled).to eq(expected_outcome)
+      it 'validates the configuration' do
+        expect(project.valid?).to eq(valid_record)
 
-        unless update_status
-          expect(project.errors).to have_key(:shared_runners_enabled)
-          expect(project.errors[:shared_runners_enabled].first).to eq('cannot be enabled because parent group does not allow it')
+        unless valid_record
+          expect(project.errors[:shared_runners_enabled]).to contain_exactly('cannot be enabled because parent group does not allow it')
         end
       end
     end
