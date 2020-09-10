@@ -75,6 +75,16 @@ RSpec.describe Issue, :elastic do
     expect(described_class.elastic_search('bla-bla', options: { project_ids: :any, public_and_internal_projects: true }).total_count).to eq(3)
   end
 
+  it "names elasticsearch queries" do |example|
+    expect_named_queries(example) do |inspector|
+      described_class.elastic_search('*').total_count
+
+      expect(inspector).to have_named_query('doc:is_a:issue')
+      expect(inspector).to have_named_query('issue:match:search_terms')
+      expect(inspector).to have_named_query('issue:authorized:project')
+    end
+  end
+
   it "searches by iid and scopes to type: issue only" do
     issue = nil
 

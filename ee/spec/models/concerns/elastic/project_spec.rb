@@ -198,6 +198,15 @@ RSpec.describe Project, :elastic do
     expect(described_class.elastic_search('tesla', options: { project_ids: project_ids }).total_count).to eq(2)
   end
 
+  it "names elasticsearch queries" do |example|
+    expect_named_queries(example) do |inspector|
+      described_class.elastic_search('*').total_count
+
+      expect(inspector).to have_named_query('doc:is_a:project')
+      expect(inspector).to have_named_query('project:match:search_terms')
+    end
+  end
+
   it "returns json with all needed elements" do
     project = create :project
 

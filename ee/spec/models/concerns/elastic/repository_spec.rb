@@ -31,6 +31,21 @@ RSpec.describe Repository, :elastic do
     expect(project.repository.elastic_search(partial_ref + '*')[:commits][:total_count]).to eq(1)
   end
 
+  it "names elasticsearch queries" do |example|
+    project = create :project, :repository
+
+    expect_named_queries(example) do |inspector|
+      project.repository.elastic_search('*')
+
+      expect(inspector).to have_named_query('doc:is_a:blob')
+      expect(inspector).to have_named_query('doc:is_a:wiki_blob')
+      expect(inspector).to have_named_query('blob:match:search_terms')
+
+      expect(inspector).to have_named_query('doc:is_a:commit')
+      expect(inspector).to have_named_query('commit:match:search_terms')
+    end
+  end
+
   it 'can filter blobs' do
     project = create :project, :repository
     index!(project)

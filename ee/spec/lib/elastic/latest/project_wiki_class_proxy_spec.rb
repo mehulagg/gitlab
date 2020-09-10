@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-RSpec.describe Elastic::Latest::ProjectWikiClassProxy do
+RSpec.describe Elastic::Latest::ProjectWikiClassProxy, :elastic do
   let_it_be(:project) { create(:project, :wiki_repo) }
 
   subject { described_class.new(project.wiki.repository) }
 
-  describe '#elastic_search_as_wiki_page', :elastic do
+  describe '#elastic_search_as_wiki_page' do
     let_it_be(:page) { create(:wiki_page, wiki: project.wiki) }
 
     before do
@@ -29,6 +29,15 @@ RSpec.describe Elastic::Latest::ProjectWikiClassProxy do
       expect(result.startline).to eq(1)
       expect(result.data).to include(page.content)
       expect(result.project).to eq(project)
+    end
+  end
+
+  it 'names elasticsearch queries' do |example|
+    expect_named_queries(example) do |inspector|
+      subject.elastic_search_as_wiki_page('*')
+
+      expect(inspector).to have_named_query('doc:is_a:wiki_blob')
+      expect(inspector).to have_named_query('blob:match:search_terms')
     end
   end
 end

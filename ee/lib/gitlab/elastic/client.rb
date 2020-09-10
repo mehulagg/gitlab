@@ -9,7 +9,7 @@ module Gitlab
 
       # Takes a hash as returned by `ApplicationSetting#elasticsearch_config`,
       # and configures itself based on those parameters
-      def self.build(config)
+      def self.build(config, &block)
         base_config = {
           urls: config[:url],
           request_timeout: config[:client_request_timeout],
@@ -23,9 +23,11 @@ module Gitlab
 
           ::Elasticsearch::Client.new(base_config) do |fmid|
             fmid.request(:aws_sigv4, credentials_provider: creds, service: 'es', region: region)
+
+            yield fmid if block_given?
           end
         else
-          ::Elasticsearch::Client.new(base_config)
+          ::Elasticsearch::Client.new(base_config, &block)
         end
       end
 

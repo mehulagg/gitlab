@@ -6,24 +6,25 @@ module Elastic
       include StateFilter
 
       def elastic_search(query, options: {})
-        query_hash =
-          if query =~ /#(\d+)\z/
-            iid_query_hash(Regexp.last_match(1))
-          else
-            fields = %w(title^2 description)
+        query_hash = if query =~ /#(\d+)\z/
+                       iid_query_hash(Regexp.last_match(1))
+                     else
+                       fields = %w(title^2 description)
 
-            # We can only allow searching the iid field if the query is
-            # just a number, otherwise Elasticsearch will error since this
-            # field is type integer.
-            fields << "iid^3" if query =~ /\A\d+\z/
+                       # We can only allow searching the iid field if the query is
+                       # just a number, otherwise Elasticsearch will error since this
+                       # field is type integer.
+                       fields << "iid^3" if query =~ /\A\d+\z/
 
-            basic_query_hash(fields, query)
-          end
+                       basic_query_hash(fields, query)
+                     end
 
         options[:features] = 'issues'
-        query_hash = project_ids_filter(query_hash, options)
-        query_hash = confidentiality_filter(query_hash, options)
-        query_hash = state_filter(query_hash, options)
+        QueryFactory.query_context(:issue) do
+          query_hash = QueryFactory.query_context(:authorized) { project_ids_filter(query_hash, options) }
+          query_hash = QueryFactory.query_context(:confidentiality) { confidentiality_filter(query_hash, options) }
+          query_hash = QueryFactory.query_context(:match) { state_filter(query_hash, options) }
+        end
 
         search(query_hash, options)
       end
@@ -45,13 +46,14 @@ module Elastic
           return query_hash if authorized_project_ids.to_set == scoped_project_ids.to_set
         end
 
-        filter = { term: { confidential: false } }
+        context = QueryFactory.current_query_context
+        filter = { term: { confidential: { _name: context.name(:non_confidential), value: false } } }
 
         if current_user
           filter = {
               bool: {
                 should: [
-                  { term: { confidential: false } },
+                  { term: { confidential: { _name: context.name(:non_confidential), value: false } } },
                   {
                     bool: {
                       must: [
@@ -59,9 +61,9 @@ module Elastic
                         {
                           bool: {
                             should: [
-                              { term: { author_id: current_user.id } },
-                              { term: { assignee_id: current_user.id } },
-                              { terms: { project_id: authorized_project_ids } }
+                              { term: { author_id: { _name: context.name(:as_author), value: current_user.id } } },
+                              { term: { assignee_id: { _name: context.name(:as_assignee), value: current_user.id } } },
+                              { terms: { _name: context.name(:project, :membership, :id), project_id: authorized_project_ids } }
                             ]
                           }
                         }
