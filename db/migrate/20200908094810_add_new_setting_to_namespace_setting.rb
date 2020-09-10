@@ -13,7 +13,7 @@ class AddNewSettingToNamespaceSetting < ActiveRecord::Migration[6.0]
 
   def down
     with_lock_retries do
-      remove_column :namespace_settings, :allow_mfa_for_subgroups, :boolean, default: true, null: false
+      remove_column :namespace_settings, :allow_mfa_for_subgroups
     end
   end
 end
