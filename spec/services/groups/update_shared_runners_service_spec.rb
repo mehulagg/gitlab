@@ -183,8 +183,8 @@ RSpec.describe Groups::UpdateSharedRunnersService do
 
           it 'disables shared Runners and disable allow_descendants_override_disabled_shared_runners' do
             # need to skip the validation to test that it goes from true to false, as true is an invalid case
-            group.shared_runners_enabled = true;
-            group.save(validate: false)
+            group.shared_runners_enabled = true
+            group.save!(validate: false)
 
             expect { subject }
               .to change { group.reload.shared_runners_enabled }.from(true).to(false)
