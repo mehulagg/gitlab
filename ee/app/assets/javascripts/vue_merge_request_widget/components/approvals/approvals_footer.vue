@@ -1,5 +1,5 @@
 <script>
-import { GlDeprecatedButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import ApprovalsList from './approvals_list.vue';
@@ -7,7 +7,7 @@ import ApprovalsList from './approvals_list.vue';
 export default {
   components: {
     GlIcon,
-    GlDeprecatedButton,
+    GlButton,
     GlLoadingIcon,
     UserAvatarList,
     ApprovalsList,
@@ -67,15 +67,14 @@ export default {
 <template>
   <div>
     <div class="mr-widget-extension d-flex align-items-center pl-3">
-      <button
-        class="btn btn-blank square s32 gl-mr-3"
-        type="button"
+      <gl-button
+        class="square s32 gl-mr-3"
         :aria-label="ariaLabel"
         @click="toggle"
       >
         <gl-loading-icon v-if="!isCollapsed && isLoadingRules" />
         <gl-icon v-else :name="angleIcon" :size="16" />
-      </button>
+      </gl-button>
       <template v-if="isCollapsed">
         <user-avatar-list :items="suggestedApproversTrimmed" :breakpoint="0" empty-text="" />
         <gl-deprecated-button variant="link" @click="toggle">{{
