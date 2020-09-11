@@ -3,6 +3,8 @@
 module Gitlab
   module Restore
     class ImportTask
+      class Error < StandardError; end
+
       module CommandLine
         include Gitlab::ImportExport::CommandLineUtil
         extend self
@@ -18,16 +20,15 @@ module Gitlab
       end
       private_constant :CommandLine
 
+      GROUP_IMPORT_TYPES = %i[all group].freeze
+      PROJECT_IMPORT_TYPES = %i[all project].freeze
+      ALL_IMPORT_TYPES = (GROUP_IMPORT_TYPES + PROJECT_IMPORT_TYPES).uniq.freeze
+
       def initialize(username:, export_file:, group_path:, import_type:, logger:)
-        unless File.exist?(export_file)
-          raise ArgumentError, "Bundle #{export_file} does not exist"
-        end
-
-        @user = User.find_by!(username: username) # rubocop: disable CodeReuse/ActiveRecord
-
+        @export_file = export_file
+        @username = username
         @given_group_path = group_path
         @import_type = import_type.to_sym
-
         @export_file = export_file
         @logger = logger
 
@@ -35,30 +36,67 @@ module Gitlab
       end
 
       def execute
+        validate!
+
         CommandLine.mkdir_p(base_path)
         CommandLine.untar_zxf(archive: export_file, dir: base_path)
 
-        import_groups if %i[group all].include?(import_type)
-        import_all_projects if %i[project all].include?(import_type)
+        import_groups if GROUP_IMPORT_TYPES.include?(import_type)
+        import_all_projects if PROJECT_IMPORT_TYPES.include?(import_type)
       ensure
         FileUtils.rm_rf(base_path)
       end
 
       private
 
-      attr_reader :user, :export_file, :logger, :shared, :import_type
+      attr_reader :username, :export_file, :logger, :shared, :import_type
+
+      def user
+        @user ||= User.find_by!(username: username) # rubocop: disable CodeReuse/ActiveRecord
+      end
+
+      def validate!
+        raise Error, 'Unrecognised import_type param' unless ALL_IMPORT_TYPES.include?(import_type)
+
+        ensure_file_exists!
+        ensure_correct_user!
+        ensure_group_exists! if import_type == :project
+      end
+
+      def ensure_group_exists!
+        if group.nil?
+          raise Error, "Unable to import projects as there is no existing group with the path #{@given_group_path}"
+        end
+      end
+
+      def ensure_file_exists!
+        unless File.exist?(export_file)
+          raise Error, "Bundle #{export_file} does not exist"
+        end
+      end
+
+      def ensure_correct_user!
+        user # && ask the user to confirm
+      end
 
       def group
-        @group ||= begin
-          Group.find_by_full_path(@given_group_path) ||
-            ::Groups::CreateService
-            .new(user, name: @given_group_path.split('/').last, path: @given_group_path)
-            .execute
-        end
+        @group if defined?(@group)
+
+        @group = if (existing_group = Group.find_by_full_path(@given_group_path))
+                   existing_group
+                 elsif GROUP_IMPORT_TYPES.include?(import_type)
+                   ::Groups::CreateService.new(
+                     user,
+                     name: @given_group_path.split('/').last,
+                     path: @given_group_path
+                   ).execute
+                 end
       end
 
       def import_groups
         filename = Dir.glob(bundle_path('*.tar.gz')).first
+
+        raise Error, 'Could not find tar.gz file in the root of the bundle' unless filename.present?
 
         group.import_export_upload =
           ImportExportUpload.new(import_file: File.new(filename))
@@ -131,7 +169,7 @@ module Gitlab
 
       def base_path
         @base_path ||= Gitlab::ImportExport.export_path(
-          relative_path: "#{group.path}-restore"
+          relative_path: "#{@given_group_path}-restore"
         )
       end
     end
