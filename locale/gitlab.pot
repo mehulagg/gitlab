@@ -13933,6 +13933,39 @@ msgstr ""
 msgid "InviteMembersBanner|We noticed that you haven't invited anyone to this group. Invite your colleagues so you can discuss issues, collaborate on merge requests, and share your knowledge."
 msgstr ""
 
+msgid "InviteMembersModal|%{linkStart}Read more%{linkEnd} about role permissions"
+msgstr ""
+
+msgid "InviteMembersModal|Access expiration date (optional)"
+msgstr ""
+
+msgid "InviteMembersModal|Cancel"
+msgstr ""
+
+msgid "InviteMembersModal|Choose a role permission"
+msgstr ""
+
+msgid "InviteMembersModal|GitLab member or Email address"
+msgstr ""
+
+msgid "InviteMembersModal|Invite"
+msgstr ""
+
+msgid "InviteMembersModal|Invite team members"
+msgstr ""
+
+msgid "InviteMembersModal|Search for members to invite"
+msgstr ""
+
+msgid "InviteMembersModal|User not invited. Feature coming soon!"
+msgstr ""
+
+msgid "InviteMembersModal|Users were succesfully added"
+msgstr ""
+
+msgid "InviteMembers|Invite team members"
+msgstr ""
+
 msgid "Invited"
 msgstr ""
 
