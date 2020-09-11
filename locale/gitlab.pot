@@ -10854,6 +10854,9 @@ msgstr ""
 msgid "FeatureFlags|Loading feature flags"
 msgstr ""
 
+msgid "FeatureFlags|Loading user lists"
+msgstr ""
+
 msgid "FeatureFlags|More information"
 msgstr ""
 
@@ -10911,6 +10914,9 @@ msgstr ""
 msgid "FeatureFlags|There was an error fetching the feature flags."
 msgstr ""
 
+msgid "FeatureFlags|There was an error fetching the user lists."
+msgstr ""
+
 msgid "FeatureFlags|There was an error retrieving user lists"
 msgstr ""
 
@@ -10924,6 +10930,9 @@ msgid "FeatureFlags|User IDs"
 msgstr ""
 
 msgid "FeatureFlags|User List"
+msgstr ""
+
+msgid "FeatureFlags|User Lists"
 msgstr ""
 
 msgid "FeatureFlag|List"
@@ -14940,9 +14949,6 @@ msgid "List view"
 msgstr ""
 
 msgid "List your Bitbucket Server repositories"
-msgstr ""
-
-msgid "Lists"
 msgstr ""
 
 msgid "Live preview"
