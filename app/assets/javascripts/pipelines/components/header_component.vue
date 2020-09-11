@@ -4,7 +4,6 @@ import Flash from '~/flash';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import getPipelineQuery from '../graphql/queries/get_pipeline_header_data.query.graphql';
-import { PIPELINE_CANCELED, PIPELINE_FAILED, PIPELINE_RUNNING } from '../constants';
 import ciHeader from '~/vue_shared/components/header_ci_component.vue';
 import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
 
@@ -74,15 +73,6 @@ export default {
     isLoadingInitialQuery() {
       return this.$apollo.queries.pipeline.loading && !this.hasPipelineData;
     },
-    canCancelPipeline() {
-      return this.paths.cancel && this.pipeline.status === PIPELINE_RUNNING;
-    },
-    canRetryPipeline() {
-      return (
-        this.paths.retry &&
-        (this.pipeline.status === PIPELINE_CANCELED || this.pipeline.status === PIPELINE_FAILED)
-      );
-    },
     status() {
       return this?.pipeline.status;
     },
@@ -135,7 +125,7 @@ export default {
       item-name="Pipeline"
     >
       <gl-button
-        v-if="canRetryPipeline"
+        v-if="pipeline.retryable"
         :loading="isRetrying"
         :disabled="isRetrying"
         category="secondary"
@@ -148,7 +138,7 @@ export default {
       </gl-button>
 
       <gl-button
-        v-if="canCancelPipeline"
+        v-if="pipeline.cancelable"
         :loading="isCanceling"
         :disabled="isCanceling"
         variant="danger"
@@ -159,7 +149,7 @@ export default {
       </gl-button>
 
       <gl-button
-        v-if="paths.delete"
+        v-if="pipeline.userPermissions.destroyPipeline"
         v-gl-modal="$options.DELETE_MODAL_ID"
         :loading="isDeleting"
         :disabled="isDeleting"

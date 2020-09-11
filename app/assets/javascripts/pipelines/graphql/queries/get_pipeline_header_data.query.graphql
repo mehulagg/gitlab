@@ -5,6 +5,11 @@ query getPipelineHeaderData($fullPath: ID!, $iid: ID!) {
     pipeline(iid: $iid) {
       id
       status
+      retryable
+      cancelable
+      userPermissions {
+        destroyPipeline
+      }
       detailedStatus {
         detailsPath
         icon
