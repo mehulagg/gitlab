@@ -36,7 +36,7 @@ RSpec.describe Gitlab::Graphql::MarkdownField do
 
       it 'renders markdown from the same property as the field name without the `_html` suffix' do
         field = class_with_markdown_field(:note_html, null: false).fields['noteHtml']
-
+        binding.pry
         expect(field.to_graphql.resolve(thing_with_markdown, {}, context)).to eq(expected_markdown)
       end
 
@@ -51,6 +51,7 @@ RSpec.describe Gitlab::Graphql::MarkdownField do
   def class_with_markdown_field(name, **args)
     Class.new(GraphQL::Schema::Object) do
       prepend Gitlab::Graphql::MarkdownField
+      graphql_name 'MarkdownFieldTest'
 
       markdown_field name, **args
     end

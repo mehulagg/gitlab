@@ -10,11 +10,9 @@ module Gitlab
           @method_name = method_name
         end
 
-        def proc
-          -> (object, _args, ctx) do
-            # We need to `dup` the context so the MarkdownHelper doesn't modify it
-            ::MarkupHelper.markdown_field(object, method_name, ctx.to_h.dup)
-          end
+        def resolve(object, context)
+          # We need to `dup` the context so the MarkdownHelper doesn't modify it
+          ::MarkupHelper.markdown_field(object, method_name, context.to_h.dup)
         end
       end
     end

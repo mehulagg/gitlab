@@ -12,13 +12,18 @@ module Gitlab
           end
 
           method_name = kwargs.delete(:method) || name.to_s.sub(/_html$/, '')
-          kwargs[:resolve] = Gitlab::Graphql::MarkdownField::Resolver.new(method_name.to_sym).proc
+          resolver_method = "#{name}_resolve".to_sym
+          kwargs[:resolver_method] = resolver_method
 
           kwargs[:description] ||= "The GitLab Flavored Markdown rendering of `#{method_name}`"
           # Adding complexity to rendered notes since that could cause queries.
           kwargs[:complexity] ||= 5
 
           field name, GraphQL::STRING_TYPE, **kwargs
+
+          define_method resolver_method do
+            ::Gitlab::Graphql::MarkdownField::Resolver.new(method_name.to_sym).resolve(object, context)
+          end
         end
       end
     end
