@@ -523,6 +523,10 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+
+  &.inline {
+    display: inline;
+  }
 }
 
 .dropdown-menu-user-username {
@@ -531,6 +535,10 @@
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+
+  &.inline {
+    display: inline;
+  }
 }
 
 .dropdown-select {
