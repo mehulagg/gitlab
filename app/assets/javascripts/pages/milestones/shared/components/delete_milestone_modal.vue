@@ -3,14 +3,14 @@ import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import DeprecatedModal from '~/vue_shared/components/deprecated_modal.vue';
+import import { GlModal } from '@gitlab/ui';
 import { n__, s__, sprintf } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import eventHub from '../event_hub';
 
 export default {
   components: {
-    DeprecatedModal,
+    GlModal,
   },
   directives: {
     SafeHtml,
@@ -119,7 +119,7 @@ Once deleted, it cannot be undone or recovered.`),
 </script>
 
 <template>
-  <deprecated-modal
+  <gl-modal
     id="delete-milestone-modal"
     :title="title"
     :text="text"
@@ -130,5 +130,5 @@ Once deleted, it cannot be undone or recovered.`),
     <template #body="props">
       <p v-safe-html="props.text"></p>
     </template>
-  </deprecated-modal>
+  </gl-modal>
 </template>
