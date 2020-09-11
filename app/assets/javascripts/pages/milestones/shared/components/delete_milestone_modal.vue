@@ -120,7 +120,7 @@ Once deleted, it cannot be undone or recovered.`),
 
 <template>
   <gl-modal
-    id="delete-milestone-modal"
+    modal-id="delete-milestone-modal"
     :title="title"
     :text="text"
     :primary-button-label="s__('Milestones|Delete milestone')"
