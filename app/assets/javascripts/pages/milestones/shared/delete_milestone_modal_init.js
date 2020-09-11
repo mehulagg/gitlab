@@ -42,8 +42,11 @@ export default () => {
 
   const deleteMilestoneButtons = document.querySelectorAll('.js-delete-milestone-button');
   deleteMilestoneButtons.forEach(button => {
-    button.addEventListener('click', onDeleteButtonClick);
+  button.addEventListener('click', {
+    // delete-milestone-modal is the modal id
+    this.$root.$emit('bv::show::modal', 'delete-milestone-modal', '.js-delete-milestone-button');
   });
+});
 
   eventHub.$once('deleteMilestoneModal.mounted', () => {
     deleteMilestoneButtons.forEach(button => {
