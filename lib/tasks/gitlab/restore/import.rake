@@ -21,8 +21,6 @@ namespace :gitlab do
 
       logger = Logger.new($stdout)
 
-      Group.where('id > 100').destroy_all
-
       begin
         warn_user_is_not_gitlab
 
