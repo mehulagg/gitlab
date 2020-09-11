@@ -82,7 +82,35 @@ RSpec.describe Backup::Repositories do
     end
 
     [4, 10].each do |max_storage_concurrency|
-      context "max_storage_concurrency #{max_storage_concurrency}", quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/241701' do
+      context "max_storage_concurrency #{max_storage_concurrency}" do
+        around do |example|
+          done = Queue.new
+          start = Time.zone.now
+
+          Thread.new do
+            puts "Thread watchdog starting"
+            loop do
+              puts "Thread watchdog sleeping"
+              sleep(1)
+              break if done.closed?
+
+              if start < 1.minute.ago
+                puts "Possible deadlock!!! See https://gitlab.com/gitlab-org/gitlab/-/issues/241701"
+                Thread.list.each do |t|
+                  puts "=" * 20, t.backtrace
+                end
+                break
+              end
+            end
+          end
+
+          example.run
+
+        ensure
+          puts "Thread watchdog complete"
+          done.close
+        end
+
         it 'creates the expected number of threads' do
           expect(Thread).to receive(:new)
             .exactly(storage_keys.length * (max_storage_concurrency + 1)).times
