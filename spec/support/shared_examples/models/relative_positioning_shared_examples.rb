@@ -120,16 +120,16 @@ RSpec.shared_examples 'a class that supports relative positioning' do
     it 'does not have an N+1 issue' do
       create_items_with_positions(10..12)
 
-      a, b, c, d, e, f = create_items_with_positions([nil, nil, nil, nil, nil, nil])
+      a, b, c, d, e, f, *xs = create_items_with_positions([nil] * 10)
 
       baseline = ActiveRecord::QueryRecorder.new do
-        described_class.move_nulls_to_end([a, e])
+        described_class.move_nulls_to_end([a, b])
       end
 
-      expect { described_class.move_nulls_to_end([b, c, d]) }
+      expect { described_class.move_nulls_to_end([c, d, e, f]) }
         .not_to exceed_query_limit(baseline)
 
-      expect { described_class.move_nulls_to_end([f]) }
+      expect { described_class.move_nulls_to_end(xs) }
         .not_to exceed_query_limit(baseline.count)
     end
   end

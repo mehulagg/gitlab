@@ -200,4 +200,9 @@ module RelativePositioning
   # Override if you want to be notified of failures to move
   def could_not_move(exception)
   end
+
+  # Override to customize reset behaviour
+  def reset_relative_position
+    reset.relative_position
+  end
 end

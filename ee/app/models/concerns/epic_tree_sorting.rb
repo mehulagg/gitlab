@@ -38,9 +38,23 @@ module EpicTreeSorting
     def exclude_self(relation, excluded: self)
       return relation unless excluded&.id.present?
 
-      object_type = excluded.try(:object_type) || excluded.class.table_name.singularize
+      relation.where.not(*excluded.filter_epic_tree_node)
+    end
 
-      relation.where.not('object_type = ? AND id = ?', object_type, excluded.id)
+    override :reset_relative_position
+    def reset_relative_position
+      current = scoped_items
+        .where(*filter_epic_tree_node)
+        .pluck(:relative_position)
+        .first
+
+      self.relative_position = current
+    end
+
+    def filter_epic_tree_node
+      type = try(:object_type) || self.class.table_name.singularize
+
+      ['object_type = ? AND id = ?', type, id]
     end
   end
 end

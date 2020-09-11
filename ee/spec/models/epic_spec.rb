@@ -627,7 +627,7 @@ RSpec.describe Epic do
     context 'there is a parent' do
       it_behaves_like "a class that supports relative positioning" do
         let_it_be(:parent) { create(:epic) }
-        let(:factory) { :epic }
+        let(:factory) { :epic_tree_node }
         let(:default_params) { { parent: parent, group: parent.group } }
       end
     end
