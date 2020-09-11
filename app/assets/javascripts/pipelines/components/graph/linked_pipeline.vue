@@ -2,8 +2,10 @@
 import { GlTooltipDirective, GlButton, GlLink, GlLoadingIcon } from '@gitlab/ui';
 import CiStatus from '~/vue_shared/components/ci_icon.vue';
 import { __, sprintf } from '~/locale';
+import { UPSTREAM, DOWNSTREAM } from './constants';
 
 export default {
+  name: 'LinkedPipeline',
   directives: {
     GlTooltip: GlTooltipDirective,
   },
@@ -14,23 +16,22 @@ export default {
     GlLoadingIcon,
   },
   props: {
-    pipeline: {
-      type: Object,
-      required: true,
-    },
-    projectId: {
-      type: Number,
-      required: true,
-    },
     columnTitle: {
       type: String,
       required: true,
     },
-  },
-  data() {
-    return {
-      expanded: false,
-    };
+    expanded: {
+      type: Boolean,
+      required: true,
+    },
+    pipeline: {
+      type: Object,
+      required: true,
+    },
+    type: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     tooltipText() {
@@ -41,36 +42,41 @@ export default {
       return `js-linked-pipeline-${this.pipeline.id}`;
     },
     pipelineStatus() {
-      return this.pipeline.details.status;
+      return this.pipeline.status;
     },
     projectName() {
       return this.pipeline.project.name;
     },
     downstreamTitle() {
-      return this.childPipeline ? __('child-pipeline') : this.pipeline.project.name;
+      return this.pipeline.multiproject ? this.pipeline.project.name : __('child-pipeline');
     },
     parentPipeline() {
-      // Refactor string match when BE returns Upstream/Downstream indicators
-      return this.projectId === this.pipeline.project.id && this.columnTitle === __('Upstream');
+      return this.type === UPSTREAM;
     },
     childPipeline() {
-      // Refactor string match when BE returns Upstream/Downstream indicators
-      return this.projectId === this.pipeline.project.id && this.isDownstream;
+      return this.type === DOWNSTREAM;
     },
     label() {
+      if (this.pipeline.multiproject) {
+        return __('Multi-project');
+      }
+
       if (this.parentPipeline) {
         return __('Parent');
       } else if (this.childPipeline) {
         return __('Child');
       }
-      return __('Multi-project');
+
     },
     isDownstream() {
       return this.columnTitle === __('Downstream');
     },
+    sourceJob() {
+      return this.pipeline.sourceJob || this.pipeline.source_job;
+    },
     sourceJobInfo() {
       return this.isDownstream
-        ? sprintf(__('Created by %{job}'), { job: this.pipeline.source_job.name })
+        ? sprintf(__('Created by %{job}'), { job: this.sourceJob.name })
         : '';
     },
     expandedIcon() {
@@ -85,16 +91,16 @@ export default {
   },
   methods: {
     onClickLinkedPipeline() {
-      this.$root.$emit('bv::hide::tooltip', this.buttonId);
-      this.expanded = !this.expanded;
-      this.$emit('pipelineClicked', this.$refs.linkedPipeline);
-      this.$emit('pipelineExpandToggle', this.pipeline.source_job.name, this.expanded);
+      // this.$root.$emit('bv::hide::tooltip', this.buttonId);
+      this.hideTooltips();
+      this.$emit('pipelineClicked');
+      this.$emit('pipelineExpandToggle', this.sourceJob.name, this.expanded);
     },
     hideTooltips() {
       this.$root.$emit('bv::hide::tooltip');
     },
     onDownstreamHovered() {
-      this.$emit('downstreamHovered', this.pipeline.source_job.name);
+      this.$emit('downstreamHovered', this.sourceJob.name);
     },
     onDownstreamHoverLeave() {
       this.$emit('downstreamHovered', '');
@@ -104,7 +110,8 @@ export default {
 </script>
 
 <template>
-  <li
+
+  <div
     ref="linkedPipeline"
     v-gl-tooltip
     class="linked-pipeline build"
@@ -149,5 +156,5 @@ export default {
         @click="onClickLinkedPipeline"
       />
     </div>
-  </li>
+  </div>
 </template>

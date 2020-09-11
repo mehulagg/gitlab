@@ -1,10 +1,17 @@
 <script>
-import LinkedPipeline from './linked_pipeline.vue';
+import { GlLoadingIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
+import getPipelineDetails from '../../graphql/queries/get_pipeline_details.query.graphql';
+import LinkedPipeline from './linked_pipeline.vue';
+import { UPSTREAM, DOWNSTREAM } from './constants';
+import { unwrapPipelineData } from './utils';
 
 export default {
+  name: 'LinkedPipelinesColumn',
   components: {
+    GlLoadingIcon,
     LinkedPipeline,
+    PipelineGraph: () => import('./graph_component.vue'),
   },
   props: {
     columnTitle: {
@@ -15,14 +22,16 @@ export default {
       type: Array,
       required: true,
     },
-    graphPosition: {
+    type: {
       type: String,
       required: true,
     },
-    projectId: {
-      type: Number,
-      required: true,
-    },
+  },
+  data() {
+    return {
+      currentPipeline: null,
+      pipelineExpanded: false,
+    }
   },
   computed: {
     columnClass() {
@@ -32,19 +41,60 @@ export default {
       };
       return `graph-position-${this.graphPosition} ${positionValues[this.graphPosition]}`;
     },
-    // Refactor string match when BE returns Upstream/Downstream indicators
+    graphPosition() {
+      return this.isUpstream ? 'left' : 'right';
+    },
     isUpstream() {
-      return this.columnTitle === __('Upstream');
+      return this.type === UPSTREAM;
     },
   },
   methods: {
-    onPipelineClick(downstreamNode, pipeline, index) {
-      this.$emit('linkedPipelineClick', pipeline, index, downstreamNode);
+    isExpanded(id){
+      return Boolean(this.currentPipeline?.id && id === this.currentPipeline.id);
+    },
+    onPipelineClick(pipeline, index) {
+
+      // if it is expanded already, close it and clear
+      if (this.currentPipeline?.id === pipeline.id) {
+        this.pipelineExpanded = false;
+        this.currentPipeline = null;
+        return;
+      }
+
+      // if it is already showing a different pipeline, then
+      // this will be a no-op, but that doesn't matter
+      // this.pipelineExpanded = true;
+
+      this.pipelineExpanded = !this.pipelineExpanded
+
+
+      // if the pipleine has been loaded before, this will return the cached value
+      // otherwise it will make a request to the API
+      this.$apollo.addSmartQuery('currentPipeline', {
+        query: getPipelineDetails,
+        variables() {
+          return {
+            projectPath: 'root/kinder-pipe', // pipeline.projectPath
+            iid: 16, // pipeline.id
+          };
+        },
+        update(data) {
+          return unwrapPipelineData(pipeline.id, data);
+        },
+        error(err){
+          console.error('graphQL error:', err);
+        }
+      })
     },
     onDownstreamHovered(jobName) {
       this.$emit('downstreamHovered', jobName);
     },
     onPipelineExpandToggle(jobName, expanded) {
+      // Highlighting only applies to downstream pipelines
+      if (this.isUpstream) {
+        return;
+      }
+
       this.$emit('pipelineExpandToggle', jobName, expanded);
     },
   },
@@ -52,24 +102,34 @@ export default {
 </script>
 
 <template>
-  <div :class="columnClass" class="stage-column linked-pipelines-column">
-    <div class="stage-name linked-pipelines-column-title">{{ columnTitle }}</div>
-    <div v-if="isUpstream" class="cross-project-triangle"></div>
-    <ul>
-      <linked-pipeline
-        v-for="(pipeline, index) in linkedPipelines"
-        :key="pipeline.id"
-        :class="{
-          active: pipeline.isExpanded,
-          'left-connector': pipeline.isExpanded && graphPosition === 'left',
-        }"
-        :pipeline="pipeline"
-        :column-title="columnTitle"
-        :project-id="projectId"
-        @pipelineClicked="onPipelineClick($event, pipeline, index)"
-        @downstreamHovered="onDownstreamHovered"
-        @pipelineExpandToggle="onPipelineExpandToggle"
-      />
-    </ul>
+  <div class="gl-display-flex">
+    <div :class="columnClass" class="stage-column linked-pipelines-column">
+      <div class="stage-name linked-pipelines-column-title">{{ columnTitle }}</div>
+      <ul>
+        <li v-for="(pipeline, index) in linkedPipelines" class="gl-display-flex" :class="{'gl-flex-direction-row-reverse': isUpstream}">
+          <linked-pipeline
+            :key="pipeline.id"
+            class="gl-display-inline-block"
+            :pipeline="pipeline"
+            :column-title="columnTitle"
+            :type="type"
+            :expanded="(isExpanded(pipeline.id))"
+            @downstreamHovered="onDownstreamHovered"
+            @pipelineClicked="onPipelineClick(pipeline, index)"
+            @pipelineExpandToggle="onPipelineExpandToggle"
+          />
+          <div v-if="pipelineExpanded" class="gl-display-inline-block" :style="{ width: 'max-content', background: 'mistyrose'}">
+            <gl-loading-icon v-if="$apollo.queries.currentPipeline.loading" class="m-auto" size="lg" />
+            <pipeline-graph
+              v-else
+              :type="type"
+              class="d-inline-block"
+              :pipeline="currentPipeline"
+              :is-linked-pipeline="true"
+            />
+          </div>
+        </li>
+      </ul>
+    </div>
   </div>
 </template>

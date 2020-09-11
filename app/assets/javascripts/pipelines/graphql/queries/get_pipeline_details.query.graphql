@@ -1,0 +1,36 @@
+query getPipelineDetails($projectPath: ID!, $iid: ID!) {
+  project(fullPath: $projectPath) {
+    pipeline(iid: $iid) {
+      iid
+      upstream @client
+      downstream @client
+      stages {
+        nodes {
+          name
+          status @client
+          groups {
+            nodes {
+              status @client
+              name
+              size
+              jobs {
+                nodes {
+                  name
+                  needs {
+                    nodes {
+                      name
+                    }
+                  }
+                  status @client
+                  scheduled @client
+                  scheduledAt @client
+                  # should we combine these?
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

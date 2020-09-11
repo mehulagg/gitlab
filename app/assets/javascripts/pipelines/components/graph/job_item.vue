@@ -12,14 +12,13 @@ import delayedJobMixin from '~/jobs/mixins/delayed_job_mixin';
  *
  * {
  *   "id": 4256,
- *   "name": "test",
+ *   "name": "test", USED
  *   "status": {
- *     "icon": "status_success",
- *     "text": "passed",
- *     "label": "passed",
- *     "group": "success",
- *     "tooltip": "passed",
- *     "details_path": "/root/ci-mock/builds/4256",
+ *     "icon": "status_success", USED
+ *     "group": "success", USED
+ *     "tooltip": "passed", USED
+ *     "has_details": "true", USED, PREVIOUSLY UNLISTED
+ *     "details_path": "/root/ci-mock/builds/4256", USED
  *     "action": {
  *       "icon": "retry",
  *       "title": "Retry",
@@ -90,6 +89,7 @@ export default {
 
       if (statusTooltip) {
         if (this.isDelayedJob) {
+          // fix this not to rely on the string interpolation from the backend 
           textBuilder.push(sprintf(statusTooltip, { remainingTime: this.remainingTime }));
         } else {
           textBuilder.push(statusTooltip);
