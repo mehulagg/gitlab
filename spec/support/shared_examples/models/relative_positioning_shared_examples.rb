@@ -31,6 +31,41 @@ RSpec.shared_examples 'a class that supports relative positioning' do
     end
   end
 
+  def as_item(item)
+    item # Override to perform a transformation, if necessary
+  end
+
+  def as_items(items)
+    items.map { |item| as_item(item) }
+  end
+
+  describe '#scoped_items' do
+    it 'includes all items with the same scope' do
+      scope = as_items([item1, item2, new_item, create_item])
+      irrelevant = create(factory, {}) # This should not share the scope
+      context = RelativePositioning.mover.context(item1)
+
+      same_scope = as_items(context.scoped_items)
+
+      expect(same_scope).to include(*scope)
+      expect(same_scope).not_to include(as_item(irrelevant))
+    end
+  end
+
+  describe '#relative_siblings' do
+    it 'includes all items with the same scope, except self' do
+      scope = as_items([item2, new_item, create_item])
+      irrelevant = create(factory, {}) # This should not share the scope
+      context = RelativePositioning.mover.context(item1)
+
+      siblings = as_items(context.relative_siblings)
+
+      expect(siblings).to include(*scope)
+      expect(siblings).not_to include(as_item(item1))
+      expect(siblings).not_to include(as_item(irrelevant))
+    end
+  end
+
   describe '.move_nulls_to_end' do
     let(:item3) { create_item }
     let(:sibling_query) { item1.class.relative_positioning_query_base(item1) }
@@ -47,7 +82,7 @@ RSpec.shared_examples 'a class that supports relative positioning' do
       expect(item1.relative_position).to be(1000)
 
       expect(sibling_query.where(relative_position: nil)).not_to exist
-      expect(sibling_query.reorder(:relative_position, :id)).to eq([item1, item2, item3])
+      expect(as_items(sibling_query.reorder(:relative_position, :id))).to eq(as_items([item1, item2, item3]))
     end
 
     it 'preserves relative position' do
@@ -149,7 +184,7 @@ RSpec.shared_examples 'a class that supports relative positioning' do
 
       expect(items.sort_by(&:relative_position)).to eq(items)
       expect(sibling_query.where(relative_position: nil)).not_to exist
-      expect(sibling_query.reorder(:relative_position, :id)).to eq(items)
+      expect(as_items(sibling_query.reorder(:relative_position, :id))).to eq(as_items(items))
       expect(item3.relative_position).to be(1000)
     end
 

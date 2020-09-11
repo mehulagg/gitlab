@@ -18,6 +18,8 @@ class EpicIssue < ApplicationRecord
 
   validate :validate_confidential_epic
 
+  delegate :group, to: :epic
+
   private
 
   def validate_confidential_epic

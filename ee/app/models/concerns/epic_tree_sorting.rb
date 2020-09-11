@@ -7,9 +7,22 @@ module EpicTreeSorting
 
   class_methods do
     def relative_positioning_query_base(object)
+      group_id = object.try(:group_id) || object.group.id
+
+      issue_selection = <<~SELECT_LIST
+        id, relative_position, epic_id as parent_id, epic_id,
+        #{group_id}::int as group_id,
+        'epic_issue' as object_type
+      SELECT_LIST
+      epic_selection = <<~SELECT_LIST
+        id, relative_position, parent_id, parent_id as epic_id,
+        group_id,
+        'epic' as object_type
+      SELECT_LIST
+
       from_union([
-        EpicIssue.select("id, relative_position, epic_id as parent_id, epic_id, 'epic_issue' as object_type").in_epic(object.parent_ids),
-        Epic.select("id, relative_position, parent_id, parent_id as epic_id, 'epic' as object_type").where(parent_id: object.parent_ids)
+        EpicIssue.select(issue_selection).in_epic(object.parent_ids),
+        Epic.select(epic_selection).in_parents(object.parent_ids).in_selected_groups(group_id)
       ])
     end
 
@@ -43,7 +56,7 @@ module EpicTreeSorting
 
     override :reset_relative_position
     def reset_relative_position
-      current = scoped_items
+      current = self.class.relative_positioning_query_base(self)
         .where(*filter_epic_tree_node)
         .pluck(:relative_position)
         .first

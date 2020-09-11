@@ -31,6 +31,11 @@ RSpec.describe EpicIssue do
       let_it_be(:epic) { create(:epic) }
       let(:factory) { :epic_tree_node }
       let(:default_params) { { parent: epic, group: epic.group } }
+      let(:irrelevant) { epic }
+
+      def as_item(item)
+        item.send(:filter_epic_tree_node).drop(1)
+      end
     end
 
     context 'with a mixed tree level' do

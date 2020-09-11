@@ -9,7 +9,7 @@ FactoryBot.define do
 
     relative_position { RelativePositioning::START_POSITION }
 
-    group
+    group { parent.group }
 
     initialize_with do
       g = group # Need to call so it does not get assigned
