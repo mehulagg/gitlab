@@ -46,12 +46,23 @@ module Gitlab
         end
       end
 
+      # Pull the highlight attribute out of Elasticsearch results
+      # and map it to the result id
       def highlight_map(scope)
-        case scope
-        when 'issues'
-          issues.map { |issue| puts issue.highlight }
-          Hash[issues.map { |issue| [issue[:_source][:id], issue.highlight] }]
-        end
+        results = case scope
+                  when 'projects'
+                    projects
+                  when 'issues'
+                    issues
+                  when 'merge_requests'
+                    merge_requests
+                  when 'milestones'
+                    milestones
+                  when 'notes'
+                    notes
+                  end
+
+        results.to_h { |x| [x[:_source][:id], x[:highlight]] } if results.present?
       end
 
       def formatted_count(scope)
