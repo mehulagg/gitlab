@@ -18,7 +18,7 @@ module Gitlab
       end
       private_constant :CommandLine
 
-      def initialize(username:, export_file:, group_path:, logger:)
+      def initialize(username:, export_file:, group_path:, import_type:, logger:)
         unless File.exist?(export_file)
           raise ArgumentError, "Bundle #{export_file} does not exist"
         end
@@ -26,6 +26,7 @@ module Gitlab
         @user = User.find_by!(username: username) # rubocop: disable CodeReuse/ActiveRecord
 
         @given_group_path = group_path
+        @import_type = import_type.to_sym
 
         @export_file = export_file
         @logger = logger
@@ -37,15 +38,15 @@ module Gitlab
         CommandLine.mkdir_p(base_path)
         CommandLine.untar_zxf(archive: export_file, dir: base_path)
 
-        import_groups
-        import_all_projects
+        import_groups if %i[group all].include?(import_type)
+        import_all_projects if %i[project all].include?(import_type)
       ensure
         FileUtils.rm_rf(base_path)
       end
 
       private
 
-      attr_reader :user, :export_file, :logger, :shared
+      attr_reader :user, :export_file, :logger, :shared, :import_type
 
       def group
         @group ||= begin

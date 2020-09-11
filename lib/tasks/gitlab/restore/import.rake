@@ -6,16 +6,17 @@
 #   - username: User used to do the import
 #   - path of the file: path to the .tar.gz file
 #   - group full path: Full path of the root group
+#   - import type: what should be imported. Valid options are `all`, `group`, and `project`
 #
 # @example
-#   bundle exec rake "gitlab:restore:import[root, /path/to/file.tar.gz, foo/bar/xpto, Xpto]"
+#   bundle exec rake "gitlab:restore:import[root, /path/to/file.tar.gz, foo/bar/xpto, all]"
 namespace :gitlab do
   namespace :restore do
     desc <<~EOM
     GitLab | EXPERIMENTAL | Import full group tree with projects
     Files must be exported with "rake gitlab:restore:import"'
     EOM
-    task :import, [:username, :export_file, :group_path] => :gitlab_environment do |_t, args|
+    task :import, [:username, :export_file, :group_path, :import_type] => :gitlab_environment do |_t, args|
       # Load it here to avoid polluting Rake tasks with Sidekiq test warnings
       require 'sidekiq/testing'
 
@@ -36,6 +37,7 @@ namespace :gitlab do
           username: args.username,
           export_file: args.export_file,
           group_path: args.group_path,
+          import_type: args.import_type,
           logger: logger
         ).execute
 
