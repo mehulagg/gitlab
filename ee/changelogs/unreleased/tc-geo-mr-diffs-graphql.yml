@@ -1,0 +1,5 @@
+---
+title: 'Geo: Implement GraphQL endpoint for Merge Request diffs'
+merge_request: 42363
+author:
+type: added

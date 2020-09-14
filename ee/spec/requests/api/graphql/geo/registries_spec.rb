@@ -4,6 +4,13 @@ require 'spec_helper'
 
 RSpec.describe 'Gets registries' do
   it_behaves_like 'gets registries for', {
+    field_name: 'mergeRequestDiffRegistries',
+    registry_class_name: 'MergeRequestDiffRegistry',
+    registry_factory: :geo_merge_request_diff_registry,
+    registry_foreign_key_field_name: 'mergeRequestDiffId'
+  }
+
+  it_behaves_like 'gets registries for', {
     field_name: 'packageFileRegistries',
     registry_class_name: 'PackageFileRegistry',
     registry_factory: :geo_package_file_registry,
