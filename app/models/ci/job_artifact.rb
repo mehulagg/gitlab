@@ -283,6 +283,15 @@ module Ci
       max_size&.megabytes.to_i
     end
 
+    def to_deleted_object_attrs
+      {
+        file_store: file_store,
+        store_dir: file.store_dir.to_s.presence,
+        file: file_identifier,
+        pick_up_at: expire_at || Time.current
+      }
+    end
+
     private
 
     def set_size
