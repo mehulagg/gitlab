@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gitlab 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-18 11:00+1200\n"
-"PO-Revision-Date: 2020-09-18 11:00+1200\n"
+"POT-Creation-Date: 2020-09-22 16:21+0100\n"
+"PO-Revision-Date: 2020-09-22 16:21+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -25901,6 +25901,9 @@ msgstr ""
 msgid "This attachment has been truncated to avoid exceeding the maximum allowed attachment size of 15MB. %{written_count} of %{issues_count} issues have been included. Consider re-exporting with a narrower selection of issues."
 msgstr ""
 
+msgid "This attachment has been truncated to avoid exceeding the maximum allowed attachment size of 15MB. %{written_count} of %{merge_requests_count} issues have been included. Consider re-exporting with a narrower selection of issues."
+msgstr ""
+
 msgid "This block is self-referential"
 msgstr ""
 
@@ -29485,6 +29488,9 @@ msgid "Your CSV export has started. It will be emailed to %{email} when complete
 msgstr ""
 
 msgid "Your CSV export of %{issues_count} from project %{project_link} has been added to this email as an attachment."
+msgstr ""
+
+msgid "Your CSV export of %{merge_requests_count} from project %{project_link} has been added to this email as an attachment."
 msgstr ""
 
 msgid "Your CSV export of %{written_count} from project %{project_name} (%{project_url}) has been added to this email as an attachment."

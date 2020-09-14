@@ -104,8 +104,6 @@
   - 1
 - - expire_build_instance_artifacts
   - 1
-- - export_csv
-  - 1
 - - external_service_reactive_caching
   - 1
 - - file_hook
@@ -139,6 +137,8 @@
 - - invalid_gpg_signature_update
   - 2
 - - irker
+  - 1
+- - issuable_export_csv
   - 1
 - - issue_placement
   - 2
