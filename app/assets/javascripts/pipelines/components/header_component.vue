@@ -1,5 +1,6 @@
 <script>
 import { GlLoadingIcon, GlModal, GlModalDirective, GlButton } from '@gitlab/ui';
+import { isEmpty } from 'lodash';
 import Flash from '~/flash';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
@@ -68,7 +69,7 @@ export default {
       );
     },
     hasPipelineData() {
-      return Object.keys(this.pipeline).length > 0;
+      return this.pipeline && !isEmpty(this.pipeline);
     },
     isLoadingInitialQuery() {
       return this.$apollo.queries.pipeline.loading && !this.hasPipelineData;
