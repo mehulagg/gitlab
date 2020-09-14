@@ -13,4 +13,4 @@
   - if search_service.use_elasticsearch? && @search_highlight[issue.id]&.description.present?
     = Truncato.truncate(@search_highlight[issue.id].description.first, count_tags: false, count_tail: false, max_length: 200).html_safe
   - elsif issue.description.present?
-    = simple_search_highlight_and_truncate(issue.description, @search_term, highlighter: '<em>\1</em>')
+    = simple_search_highlight_and_truncate(issue.description, @search_term, highlighter: '<span class="gl-text-black-normal gl-font-weight-bold">\1</span>')
