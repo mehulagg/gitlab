@@ -215,7 +215,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def export_csv
-    ExportCsvWorker.perform_async(current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
+    IssuableExportCsvWorker.perform_async(:issue, current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
 
     index_path = project_issues_path(project)
     message = _('Your CSV export has started. It will be emailed to %{email} when complete.') % { email: current_user.notification_email }
