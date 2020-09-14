@@ -6,6 +6,7 @@
 #
 # Arguments:
 #   vulnerable: any object that has a #vulnerabilities method that returns a collection of `Vulnerability`s
+#   current_user: only return vulnerabilities visible for given user
 #   params: optional! a hash with one or more of the following:
 #     project_ids: if `vulnerable` includes multiple projects (like a Group), this filter will restrict
 #                   the vulnerabilities returned to those in the group's projects that also match these IDs
@@ -20,8 +21,9 @@ module Security
   class VulnerabilitiesFinder
     include FinderMethods
 
-    def initialize(vulnerable, params = {})
+    def initialize(vulnerable, params = {}, current_user = nil)
       @params = params
+      @current_user = current_user
       @vulnerabilities = vulnerable.vulnerabilities
     end
 
@@ -39,7 +41,7 @@ module Security
 
     private
 
-    attr_reader :params, :vulnerabilities
+    attr_reader :params, :current_user, :vulnerabilities
 
     def filter_by_projects
       if params[:project_id].present?

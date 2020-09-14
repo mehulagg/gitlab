@@ -50,7 +50,7 @@ module Resolvers
     private
 
     def vulnerabilities(params)
-      Security::VulnerabilitiesFinder.new(vulnerable, params).execute
+      Security::VulnerabilitiesFinder.new(vulnerable, params, current_user).execute
     end
   end
 end

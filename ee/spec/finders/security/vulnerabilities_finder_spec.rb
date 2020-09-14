@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe Security::VulnerabilitiesFinder do
   let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user) }
 
   let_it_be(:vulnerability1) do
     create(:vulnerability, :with_findings, :with_issue_links, severity: :low, report_type: :sast, state: :detected, project: project)
@@ -20,7 +21,11 @@ RSpec.describe Security::VulnerabilitiesFinder do
   let(:filters) { {} }
   let(:vulnerable) { project }
 
-  subject { described_class.new(vulnerable, filters).execute }
+  before do
+    project.add_developer(user)
+  end
+
+  subject { described_class.new(vulnerable, filters.merge(current_user: user)).execute }
 
   it 'returns vulnerabilities of a project' do
     expect(subject).to match_array(project.vulnerabilities)
