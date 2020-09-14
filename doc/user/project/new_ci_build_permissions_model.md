@@ -73,7 +73,7 @@ Let's consider the following scenario:
 ## Job token
 
 A unique job token is generated for each job and provides the user read
-access all projects that would be normally accessible to the user creating that
+access to all projects that would be normally accessible to the user creating that
 job. The unique job token does not have any write permissions, but there
 is a [proposal to add support](https://gitlab.com/gitlab-org/gitlab/-/issues/35067).
 
