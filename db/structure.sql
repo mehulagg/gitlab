@@ -21401,6 +21401,12 @@ CREATE INDEX terraform_states_verification_failure_partial ON public.terraform_s
 
 CREATE INDEX tmp_build_stage_position_index ON public.ci_builds USING btree (stage_id, stage_idx) WHERE (stage_idx IS NOT NULL);
 
+CREATE INDEX tmp_idx_blocked_by_type_links ON public.issue_links USING btree (link_type, target_id) WHERE (link_type = 2);
+
+CREATE INDEX tmp_idx_blocking_type_links ON public.issue_links USING btree (link_type, source_id) WHERE (link_type = 1);
+
+CREATE INDEX tmp_idx_index_issues_with_outdate_blocking_count ON public.issues USING btree (state_id, blocking_issues_count) WHERE (blocking_issues_count = 0);
+
 CREATE INDEX tmp_index_for_email_unconfirmation_migration ON public.emails USING btree (id) WHERE (confirmed_at IS NOT NULL);
 
 CREATE INDEX tmp_index_for_fixing_inconsistent_vulnerability_occurrences ON public.vulnerability_occurrences USING btree (id) WHERE ((length(location_fingerprint) = 40) AND (report_type = 2));
