@@ -57,6 +57,8 @@ query(
         }
         commitCount
         userNotesCount
+        approved
+        # approvals_left
       }
     }
   }

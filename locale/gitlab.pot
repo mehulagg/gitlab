@@ -15749,6 +15749,9 @@ msgstr ""
 msgid "MergeConflict|origin//their changes"
 msgstr ""
 
+msgid "MergeRequestAnalytics|%{approvalsLeft} left"
+msgstr ""
+
 msgid "MergeRequestAnalytics|Assignees"
 msgstr ""
 

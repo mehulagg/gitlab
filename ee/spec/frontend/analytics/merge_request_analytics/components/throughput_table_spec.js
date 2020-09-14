@@ -228,7 +228,7 @@ describe('ThroughputTable', () => {
           expect(icon.props('name')).toBe('comments');
         });
 
-        it('includes a pipeline icon and when available', async () => {
+        it('includes a pipeline icon when available', async () => {
           const iconName = 'status_canceled';
 
           additionalData({
@@ -247,6 +247,39 @@ describe('ThroughputTable', () => {
 
           expect(icon.find(GlIcon).exists()).toBe(true);
           expect(icon.props('name')).toBe(iconName);
+        });
+
+        describe('approval details', () => {
+          it('displays the approval icon', async () => {
+            const iconName = 'approval';
+
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+            const icon = approved.find(GlIcon);
+
+            expect(icon.find(GlIcon).exists()).toBe(true);
+            expect(icon.props('name')).toBe(iconName);
+          });
+        });
+
+        it('displays the approved text when approved', async () => {
+          const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+
+          expect(approved.text()).toBe('Approved');
+          expect(approved.classes()).toContain('gl-text-green-500');
+        });
+
+        it('displays the remaining approvals count when not approved', async () => {
+          additionalData({
+            approved: false,
+            approvals_left: 1,
+          });
+
+          await wrapper.vm.$nextTick();
+
+          const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+
+          expect(approved.text()).toBe('1 left');
+          expect(approved.classes()).not.toContain('gl-text-green-500');
         });
       });
 
