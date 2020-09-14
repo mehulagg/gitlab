@@ -23,7 +23,7 @@ query getPipelineHeaderData($fullPath: ID!, $iid: ID!) {
         email
         avatarUrl
         status {
-          messageHtml
+          message
           emoji
         }
       }

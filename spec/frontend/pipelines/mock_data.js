@@ -332,6 +332,9 @@ threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21);
 export const mockPipelineHeader = {
   detailedStatus: {},
   id: 123,
+  userPermissions: {
+    destroyPipeline: true,
+  },
   createdAt: threeWeeksAgo.toISOString(),
   user: {
     name: 'Foo',
@@ -344,6 +347,8 @@ export const mockPipelineHeader = {
 export const mockFailedPipelineHeader = {
   ...mockPipelineHeader,
   status: PIPELINE_FAILED,
+  retryable: true,
+  cancelable: false,
   detailedStatus: {
     group: 'failed',
     icon: 'status_failed',
@@ -356,6 +361,8 @@ export const mockFailedPipelineHeader = {
 export const mockRunningPipelineHeader = {
   ...mockPipelineHeader,
   status: PIPELINE_RUNNING,
+  retryable: false,
+  cancelable: true,
   detailedStatus: {
     group: 'running',
     icon: 'status_running',
@@ -368,6 +375,8 @@ export const mockRunningPipelineHeader = {
 export const mockCancelledPipelineHeader = {
   ...mockPipelineHeader,
   status: PIPELINE_CANCELED,
+  retryable: true,
+  cancelable: false,
   detailedStatus: {
     group: 'cancelled',
     icon: 'status_cancelled',
@@ -380,6 +389,8 @@ export const mockCancelledPipelineHeader = {
 export const mockSuccessfulPipelineHeader = {
   ...mockPipelineHeader,
   status: 'SUCCESS',
+  retryable: false,
+  cancelable: false,
   detailedStatus: {
     group: 'success',
     icon: 'status_success',

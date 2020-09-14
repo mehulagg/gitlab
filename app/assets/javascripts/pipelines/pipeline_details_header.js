@@ -9,7 +9,6 @@ const apolloProvider = new VueApollo({
   defaultClient: createDefaultClient(),
 });
 
-// eslint-disable-next-line import/prefer-default-export
 export const createPipelineHeaderApp = () => {
   const el = document.querySelector('#js-pipeline-header-vue');
   const { cancelPath, deletePath, fullPath, pipelineId, pipelineIid, retryPath } = el?.dataset;

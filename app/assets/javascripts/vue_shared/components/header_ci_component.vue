@@ -72,10 +72,10 @@ export default {
       return this.user?.avatarUrl || this.user?.avatar_url;
     },
     statusTooltipHTML() {
-      // GraphQL returns `status.messageHtml` and Rest `status_tooltip_html`
-      const { messageHtml, emoji } = this.user?.status || {};
+      // GraphQL returns `status.message` and Rest `status_tooltip_html`
+      const { message, emoji } = this.user?.status || {};
       const emojiHtml = emoji ? glEmojiTag(emoji) : '';
-      const statusMessage = `${emojiHtml}${messageHtml || ''}`;
+      const statusMessage = `${emojiHtml}${message || ''}`;
 
       return statusMessage || this.user?.status_tooltip_html;
     },
@@ -90,7 +90,7 @@ export default {
 </script>
 
 <template>
-  <header class="page-content-header ci-header-container">
+  <header class="page-content-header ci-header-container" data-testid="pipeline-header-content">
     <section class="header-main-content">
       <ci-icon-badge :status="status" />
 
