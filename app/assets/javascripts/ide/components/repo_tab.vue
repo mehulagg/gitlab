@@ -73,10 +73,8 @@ export default {
 
 <template>
   <gl-tab
-    :class="{
-      active: tab.active,
-      disabled: tab.pending,
-    }"
+    :active="tab.active"
+    :disabled="tab.pending"
     :title="tab.name"
     @click="clickFile(tab)"
     @mouseover="mouseOverTab"
