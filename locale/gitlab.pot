@@ -19410,7 +19410,7 @@ msgstr ""
 msgid "Profiles|The maximum file size allowed is 200KB."
 msgstr ""
 
-msgid "Profiles|This doesn't look like a public SSH key, are you sure you want to add it?  It will be publicly visible."
+msgid "Profiles|This doesn't look like a public SSH key, are you sure you want to add it? It will be publicly visible."
 msgstr ""
 
 msgid "Profiles|This email will be displayed on your public profile"
