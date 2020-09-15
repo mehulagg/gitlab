@@ -18339,7 +18339,7 @@ msgstr ""
 msgid "Paste issue link"
 msgstr ""
 
-msgid "Paste your public SSH key, which is usually contained in the file '~/.ssh/id_ed25519.pub' or '~/.ssh/id_rsa.pub' and begins with 'ssh-ed25519' or 'ssh-rsa'. Don't use your private SSH key."
+msgid "Paste your public SSH key, which is usually contained in the file '~/.ssh/id_ed25519.pub' or '~/.ssh/id_rsa.pub' and begins with 'ssh-ed25519' or 'ssh-rsa'. This will be publicly visible, so don't use your private SSH key."
 msgstr ""
 
 msgid "Patch to apply"
@@ -19320,7 +19320,7 @@ msgstr ""
 msgid "Profiles|Full name"
 msgstr ""
 
-msgid "Profiles|Give your individual key a title. This will be publically visible."
+msgid "Profiles|Give your individual key a title."
 msgstr ""
 
 msgid "Profiles|Include private contributions on my profile"
@@ -19410,7 +19410,7 @@ msgstr ""
 msgid "Profiles|The maximum file size allowed is 200KB."
 msgstr ""
 
-msgid "Profiles|This doesn't look like a public SSH key, are you sure you want to add it?"
+msgid "Profiles|This doesn't look like a public SSH key, are you sure you want to add it?  It will be publicly visible."
 msgstr ""
 
 msgid "Profiles|This email will be displayed on your public profile"
