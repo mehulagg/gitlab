@@ -3,37 +3,60 @@ import { groupBy } from 'lodash';
 import {
   GlDropdown,
   GlDropdownDivider,
-  GlDropdownHeader,
+  GlDropdownSectionHeader,
   GlSearchBoxByType,
   GlIcon,
 } from '@gitlab/ui';
 
-import projectSpecificScanners from '../../graphql/project_specific_scanners.query.graphql';
+import { ALL } from '../../store/modules/filters/constants';
 import { setFilter, createScannerSelection } from '../../store/modules/filters/utils';
 import { parseSpecificFilters } from '../../utils/filters_utils';
 import { modifyReportTypeFilter } from '../../helpers';
+import projectSpecificScanners from '../../graphql/project_specific_scanners.query.graphql';
+import groupSpecificScanners from '../../graphql/group_specific_scanners.query.graphql';
+import instanceSpecificScanners from '../../graphql/instance_specific_scanners.query.graphql';
 
 export default {
+  inject: ['dashboardType'],
+  scannerFilterConfigs: {
+    project: {
+      query: projectSpecificScanners,
+    },
+    group: {
+      query: groupSpecificScanners,
+    },
+    instance: {
+      query: instanceSpecificScanners,
+    },
+  },
   components: {
     GlDropdown,
     GlDropdownDivider,
-    GlDropdownHeader,
+    GlDropdownSectionHeader,
     GlSearchBoxByType,
     GlIcon,
   },
   apollo: {
     specificFilters: {
-      query: projectSpecificScanners,
+      query() {
+        return this.$options.scannerFilterConfigs[this.dashboardType].query;
+      },
       variables() {
         return {
-          fullPath: this.path,
+          fullPath: this.queryPath,
         };
       },
-      update: ({
-        project: {
-          vulnerabilityScanners: { nodes },
-        },
-      }) => parseSpecificFilters(nodes),
+      update: data => {
+        let nodes;
+        if (data.instanceSecurityDashboard) {
+          nodes = data.instanceSecurityDashboard.vulnerabilityScanners.nodes;
+        } else if (data.group) {
+          nodes = data.group.vulnerabilityScanners.nodes;
+        } else if (data.project) {
+          nodes = data.project.vulnerabilityScanners.nodes;
+        }
+        return parseSpecificFilters(nodes);
+      },
     },
   },
   props: {
@@ -41,7 +64,7 @@ export default {
       type: Object,
       required: true,
     },
-    path: {
+    queryPath: {
       type: String,
       required: true,
     },
@@ -92,6 +115,12 @@ export default {
       });
       const updatedSelection = createScannerSelection(filter[0].selection, filter[0].options);
       this.$emit('onFilterChange', [{ ...filter[0], selection: updatedSelection }]);
+    },
+    isNotVendorAll(vendor) {
+      return vendor.name !== ALL;
+    },
+    isDisabled(option) {
+      return option.id !== ALL && !option.scanners?.length;
     },
     isSelected(option) {
       return this.selection.has(option.id);
@@ -148,14 +177,18 @@ export default {
         :class="{ 'dropdown-content': filterId === 'project_id' }"
       >
         <span v-for="vendor in filteredOptions" :key="vendor.name">
-          <gl-dropdown-divider />
-          <gl-dropdown-header>{{ vendor.name }}</gl-dropdown-header>
+          <gl-dropdown-divider v-if="isNotVendorAll(vendor)" />
+          <gl-dropdown-section-header v-if="isNotVendorAll(vendor)">{{
+            vendor.name
+          }}</gl-dropdown-section-header>
           <button
             v-for="option in vendor.options"
             :key="option.name || option.id"
             role="menuitem"
             type="button"
             class="dropdown-item"
+            :class="{ 'gl-pointer-events-all': isDisabled(option) }"
+            :disabled="isDisabled(option)"
             @click="clickFilter(option)"
           >
             <span class="d-flex">
@@ -166,7 +199,7 @@ export default {
               />
               <span
                 class="gl-white-space-nowrap gl-ml-2"
-                :class="{ 'gl-pl-5': !isSelected(option) }"
+                :class="{ 'gl-pl-5': !isSelected(option), 'gl-text-gray-300': isDisabled(option) }"
               >
                 {{ option.name }}
               </span>

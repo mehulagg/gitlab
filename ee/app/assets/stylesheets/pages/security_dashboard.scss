@@ -67,3 +67,7 @@ $selection-summary-height: 68px;
   flex: 1 1 40%;
   margin: 1rem;
 }
+
+.gl-pointer-events-all {
+  pointer-events: all !important;
+}

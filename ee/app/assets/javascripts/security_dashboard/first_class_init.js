@@ -64,6 +64,7 @@ export default (el, dashboardType) => {
       emptyStateSvgPath: el.dataset.emptyStateSvgPath,
       notEnabledScannersHelpPath: el.dataset.notEnabledScannersHelpPath,
       noPipelineRunScannersHelpPath: el.dataset.noPipelineRunScannersHelpPath,
+      dashboardType,
       ...provide,
     }),
     render(createElement) {

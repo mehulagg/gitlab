@@ -72,10 +72,15 @@ export const initFirstClassVulnerabilityFilters = projects => {
   return filters;
 };
 
+// Define scannerFilter separate from the other filters because it has its own component
 export const scannerFilter = {
   name: s__('Reports|Scanner'),
   id: 'reportType',
   options: [BASE_FILTERS.report_type, ...parseReportTypes(REPORT_TYPES).gitlabFilters],
+  // idSelection is what is used to retain being able to easily add/remove filters, like the
+  // `selection` property in the above filters. Then the below selection property is created
+  // from this property and used for GraphQL queries and the route query, which both take a
+  // specific format
   idSelection: new Set([ALL]),
   selection: { reportType: [], scanner: [] },
 };

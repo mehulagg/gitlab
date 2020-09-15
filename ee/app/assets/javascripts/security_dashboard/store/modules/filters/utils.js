@@ -61,8 +61,12 @@ export const rehydrateScannerSelection = (options, reportType, scanner) => {
     const filteredOptions = options.filter(option => option.reportType === curr);
     filteredOptions.forEach(option => {
       // Find the filters with the given scanners in the URL and add them to the set
-      if (filteredOptions.length === 1 || scanners.every(val => option.scanners.includes(val))) {
-        // TODO: fix this
+      // This is broken because this runs before the dynamic filters are retrieved and because
+      // I do no know why I added filteredOptions.length === 1, but it seems like a good safeguard
+      if (
+        filteredOptions.length === 1 ||
+        (Boolean(option.scanners.length) && scanners.some(val => option.scanners.includes(val)))
+      ) {
         acc.add(option.id);
         updatedScanner = difference(updatedScanner, option.scanners);
       }
