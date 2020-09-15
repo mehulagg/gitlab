@@ -47,7 +47,7 @@ module QA
           Runtime::Feature.disable_and_verify(feature_flag) # [TODO]: Developer to remove when feature flag is removed
         end
 
-        it 'can trigger pipeline' do
+        it 'can trigger pipeline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/946' do
           Page::Project::Pipeline::Index.perform do |index|
             expect(index).not_to have_pipeline # should not auto trigger pipeline
             index.click_run_pipeline_button
