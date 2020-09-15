@@ -24,6 +24,16 @@ RSpec.describe Groups::Analytics::RepositoryAnalyticsController do
 
     specify { is_expected.to have_gitlab_http_status(:success) }
 
+    it 'tracks a pageview event in snowplow' do
+      expect(Gitlab::Tracking).to receive(:event).with(
+        'Groups::Analytics::RepositoryAnalyticsController',
+        'view_group_repository_analytics',
+        label: 'group_id',
+        value: group.id
+      )
+      subject
+    end
+
     context 'when license is missing' do
       before do
         stub_licensed_features(feature_name => false)
