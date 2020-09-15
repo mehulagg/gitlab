@@ -18,6 +18,8 @@ export default () => {
     button.querySelector('.js-loading-icon').classList.add('hidden');
   };
 
+  const deleteMilestoneButtons = document.querySelectorAll('.js-delete-milestone-button');
+
   const onRequestStarted = milestoneUrl => {
     const button = document.querySelector(
       `.js-delete-milestone-button[data-milestone-url="${milestoneUrl}"]`,
@@ -26,33 +28,6 @@ export default () => {
     button.querySelector('.js-loading-icon').classList.remove('hidden');
     eventHub.$once('deleteMilestoneModal.requestFinished', onRequestFinished);
   };
-
-  const onDeleteButtonClick = event => {
-    const button = event.currentTarget;
-    const modalProps = {
-      milestoneId: parseInt(button.dataset.milestoneId, 10),
-      milestoneTitle: button.dataset.milestoneTitle,
-      milestoneUrl: button.dataset.milestoneUrl,
-      issueCount: parseInt(button.dataset.milestoneIssueCount, 10),
-      mergeRequestCount: parseInt(button.dataset.milestoneMergeRequestCount, 10),
-    };
-    eventHub.$once('deleteMilestoneModal.requestStarted', onRequestStarted);
-    eventHub.$emit('deleteMilestoneModal.props', modalProps);
-  };
-
-  const deleteMilestoneButtons = document.querySelectorAll('.js-delete-milestone-button');
-  deleteMilestoneButtons.forEach(button => {
-  button.addEventListener('click', {
-    // delete-milestone-modal is the modal id
-    this.$root.$emit('bv::show::modal', 'delete-milestone-modal', '.js-delete-milestone-button');
-  });
-});
-
-  eventHub.$once('deleteMilestoneModal.mounted', () => {
-    deleteMilestoneButtons.forEach(button => {
-      button.removeAttribute('disabled');
-    });
-  });
 
   return new Vue({
     el: '#delete-milestone-modal',
@@ -72,7 +47,21 @@ export default () => {
     },
     mounted() {
       eventHub.$on('deleteMilestoneModal.props', this.setModalProps);
-      eventHub.$emit('deleteMilestoneModal.mounted');
+      deleteMilestoneButtons.forEach(button => {
+        button.removeAttribute('disabled');
+        button.addEventListener('click', () => {
+          this.$root.$emit('bv::show::modal', 'delete-milestone-modal');
+          const modalProps = {
+            milestoneId: parseInt(button.dataset.milestoneId, 10),
+            milestoneTitle: button.dataset.milestoneTitle,
+            milestoneUrl: button.dataset.milestoneUrl,
+            issueCount: parseInt(button.dataset.milestoneIssueCount, 10),
+            mergeRequestCount: parseInt(button.dataset.milestoneMergeRequestCount, 10),
+          };
+          eventHub.$once('deleteMilestoneModal.requestStarted', onRequestStarted);
+          eventHub.$emit('deleteMilestoneModal.props', modalProps);
+        });
+      });
     },
     beforeDestroy() {
       eventHub.$off('deleteMilestoneModal.props', this.setModalProps);

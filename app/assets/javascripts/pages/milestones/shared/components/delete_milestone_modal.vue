@@ -1,9 +1,8 @@
 <script>
-import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { GlSafeHtmlDirective as SafeHtml, GlModal } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import { GlModal } from '@gitlab/ui';
 import { n__, s__, sprintf } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import eventHub from '../event_hub';
@@ -76,6 +75,12 @@ Once deleted, it cannot be undone or recovered.`),
         milestoneTitle: this.milestoneTitle,
       });
     },
+    primaryProps() {
+      return {
+        text: s__('Delete milestone'),
+        attributes: [{ variant: 'danger' }, { category: 'primary' }],
+      };
+    },
   },
   methods: {
     onSubmit() {
@@ -115,6 +120,9 @@ Once deleted, it cannot be undone or recovered.`),
         });
     },
   },
+  cancelProps: {
+    text: s__('Cancel'),
+  },
 };
 </script>
 
@@ -122,13 +130,10 @@ Once deleted, it cannot be undone or recovered.`),
   <gl-modal
     modal-id="delete-milestone-modal"
     :title="title"
-    :text="text"
-    :primary-button-label="s__('Milestones|Delete milestone')"
-    kind="danger"
-    @submit="onSubmit"
+    :action-primary="primaryProps"
+    :action-cancel="$options.cancelProps"
+    @primary="onSubmit"
   >
-    <template #body="props">
-      <p v-safe-html="props.text"></p>
-    </template>
+    <p v-safe-html="text"></p>
   </gl-modal>
 </template>
