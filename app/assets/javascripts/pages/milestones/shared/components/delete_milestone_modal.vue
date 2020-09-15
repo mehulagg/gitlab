@@ -3,7 +3,7 @@ import { GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import import { GlModal } from '@gitlab/ui';
+import { GlModal } from '@gitlab/ui';
 import { n__, s__, sprintf } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import eventHub from '../event_hub';
