@@ -16,4 +16,11 @@ RSpec.describe 'Gets registries' do
     registry_factory: :geo_terraform_state_registry,
     registry_foreign_key_field_name: 'terraformStateId'
   }
+
+  it_behaves_like 'gets registries for', {
+    field_name: 'terraformStateVersionRegistries',
+    registry_class_name: 'TerraformStateVersionRegistry',
+    registry_factory: :geo_terraform_state_version_registry,
+    registry_foreign_key_field_name: 'terraformStateVersionId'
+  }
 end
