@@ -196,8 +196,7 @@ RSpec.describe 'Clusters', :js do
     end
 
     it 'user sees a table with one cluster' do
-      # One is the header row, the other the cluster row
-      expect(page).to have_selector('.gl-responsive-table-row', count: 2)
+      expect(page).to have_selector('.qa-clusters-table tbody tr', count: 1)
     end
 
     context 'when user clicks on a cluster' do
