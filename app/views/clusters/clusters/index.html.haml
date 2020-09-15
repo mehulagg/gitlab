@@ -12,7 +12,7 @@
         = s_('ClusterIntegration|Kubernetes clusters can be used to deploy applications and to provide Review Apps for this project')
       = render 'clusters/clusters/buttons'
 
-    - if Feature.enabled?(:clusters_list_redesign)
+    - if Feature.enabled?(:clusters_list_redesign, default_enabled: true)
       #js-clusters-list-app{ data: js_clusters_list_data(clusterable.index_path(format: :json)) }
     - else
       - if @has_ancestor_clusters
