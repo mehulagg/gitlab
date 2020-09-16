@@ -4,12 +4,14 @@ module EE
   module Users
     module CreateService
       extend ::Gitlab::Utils::Override
+      include ::AdminNotify
 
       override :after_create_hook
       def after_create_hook(user, reset_token)
         super
 
         log_audit_event(user) if audit_required?
+        notify_admins
       end
 
       private
