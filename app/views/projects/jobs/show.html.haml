@@ -3,7 +3,7 @@
 - page_title "#{@build.name} (##{@build.id})", _("Jobs")
 
 - content_for :page_specific_javascripts do
-  = stylesheet_link_tag 'page_bundles/xterm'
+  = stylesheet_link_tag '_page_bundles/xterm'
 
 = render_if_exists "shared/shared_runners_minutes_limit_flash_message"
 

@@ -2,7 +2,7 @@
   This file contains only imports of Bootstrap, GitLab UI and GitLab mixins,
   variables and functions, in the correct order.
 
-  It is meant to be used in page_bundles, but SHOULD NOT introduce any
+  It is meant to be used in _page_bundles, but SHOULD NOT introduce any
   styles of it's own. We actually check in CI that compiling _this_ file doesn't
   result in any additional styles.
 
