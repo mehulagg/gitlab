@@ -6,8 +6,12 @@ export function iconForTestStatus(status) {
       return 'status_success_borderless';
     case 'failed':
       return 'status_failed_borderless';
-    default:
+    case 'error':
+      return 'status_warning_borderless';
+    case 'skipped':
       return 'status_skipped_borderless';
+    default:
+      return 'status_notfound_borderless';
   }
 }
 
