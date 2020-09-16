@@ -20,6 +20,8 @@ RSpec.describe Security::VulnerabilitiesFinder do
   let(:filters) { {} }
   let(:vulnerable) { project }
 
+  subject { described_class.new(vulnerable, filters).execute }
+
   it 'returns vulnerabilities of a project' do
     expect(subject).to match_array(project.vulnerabilities)
   end

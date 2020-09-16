@@ -9,7 +9,7 @@ module API
 
     helpers do
       def vulnerabilities_by(project)
-        Security::VulnerabilitiesFinder.new(project, {}).execute
+        Security::VulnerabilitiesFinder.new(project).execute
       end
 
       def find_vulnerability!
