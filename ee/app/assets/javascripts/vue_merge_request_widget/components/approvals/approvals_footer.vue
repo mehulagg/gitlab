@@ -68,12 +68,7 @@ export default {
 <template>
   <div>
     <div class="mr-widget-extension d-flex align-items-center pl-3">
-      <gl-button
-        class="gl-mr-3"
-        category="tertiary"
-        :aria-label="ariaLabel"
-        @click="toggle"
-      >
+      <gl-button class="gl-mr-3" category="tertiary" :aria-label="ariaLabel" @click="toggle">
         <gl-loading-icon v-if="!isCollapsed && isLoadingRules" class="gl-mr-0!" />
         <gl-icon v-else :name="angleIcon" :size="16" class="gl-mr-0!" />
       </gl-button>
