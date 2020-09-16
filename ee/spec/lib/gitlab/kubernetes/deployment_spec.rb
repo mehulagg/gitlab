@@ -7,7 +7,7 @@ RSpec.describe Gitlab::Kubernetes::Deployment do
 
   let(:pods) { {} }
 
-  subject(:deployment) { described_class.new(params, pods: pods) }
+  subject(:deployment) { described_class.new(params, pods: pods, default_track_value: 'stable') }
 
   describe '#name' do
     let(:params) { named(:selected) }
