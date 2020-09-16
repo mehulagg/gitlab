@@ -30,7 +30,7 @@ module Gitlab
         @status == :found
       end
 
-      def self.from_deployments(*deployments_attrs, pods_attrs: {}, legacy_deployments: [])
+      def self.from_deployments(*deployments_attrs, pods_attrs: [], legacy_deployments: [])
         return new([], status: :not_found, legacy_deployments: legacy_deployments) if deployments_attrs.empty?
 
         deployments = deployments_attrs.map do |attrs|
