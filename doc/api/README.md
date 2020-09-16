@@ -683,5 +683,5 @@ specifically used by GitLab.com, see
 By default GitLab will be serving `application/json` content type. 
 However some of the API calls do support other content types like `text/plain`. 
 
-Starting with 13.5 we don't support `text/plain` in most of API calls unless its 
+Starting with 13.5, we no longer support `text/plain` for most API calls unless it's 
 explicitly documented. See [the issue](https://gitlab.com/gitlab-org/gitlab/-/issues/250342) for more details.
