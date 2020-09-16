@@ -121,6 +121,16 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
       it { is_expected.to eq(50) }
     end
 
+    context 'with one deployment' do
+      it 'sets the completion percentage when a deployment has more running pods than desired' do
+        deployments = [kube_deployment(name: 'one', track: 'one', replicas: 2)]
+        pods = create_pods(name: 'one', track: 'one', count: 3)
+        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+
+        expect(rollout_status.completion).to eq(100)
+      end
+    end
+
     context 'with two deployments on different tracks' do
       it 'sets the completion percentage when all pods are complete' do
         deployments = [
