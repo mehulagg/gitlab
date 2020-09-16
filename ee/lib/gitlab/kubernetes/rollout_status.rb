@@ -107,7 +107,6 @@ module Gitlab
               'track' => track
             }
           }
-
         })
       end
     end
