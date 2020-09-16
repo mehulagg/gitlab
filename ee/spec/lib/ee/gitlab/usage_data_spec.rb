@@ -37,7 +37,6 @@ RSpec.describe Gitlab::UsageData do
       create(:service, project: projects[1], type: 'JenkinsService', active: true)
       create(:jira_service, project: projects[0], issues_enabled: true, project_key: 'GL')
 
-      create(:project_tracing_setting, project: projects[0])
       create(:operations_feature_flag, project: projects[0])
 
       create(:issue, project: projects[1])
@@ -107,7 +106,6 @@ RSpec.describe Gitlab::UsageData do
         projects_mirrored_with_pipelines_enabled
         projects_reporting_ci_cd_back_to_github
         projects_with_prometheus_alerts
-        projects_with_tracing_enabled
         sast_jobs
         secret_detection_jobs
         status_page_incident_publishes
@@ -422,20 +420,17 @@ RSpec.describe Gitlab::UsageData do
         create(:users_ops_dashboard_project, user: user)
         create(:prometheus_service, project: project)
         create(:project_error_tracking_setting, project: project)
-        create(:project_tracing_setting, project: project)
       end
 
       expect(described_class.usage_activity_by_stage_monitor({})).to include(
         operations_dashboard_users_with_projects_added: 2,
         projects_prometheus_active: 2,
-        projects_with_error_tracking_enabled: 2,
-        projects_with_tracing_enabled: 2
+        projects_with_error_tracking_enabled: 2
       )
       expect(described_class.usage_activity_by_stage_monitor(described_class.last_28_days_time_period)).to include(
         operations_dashboard_users_with_projects_added: 1,
         projects_prometheus_active: 1,
-        projects_with_error_tracking_enabled: 1,
-        projects_with_tracing_enabled: 1
+        projects_with_error_tracking_enabled: 1
       )
     end
   end

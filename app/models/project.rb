@@ -565,6 +565,7 @@ class Project < ApplicationRecord
   }
 
   scope :imported_from, -> (type) { where(import_type: type) }
+  scope :with_tracing_enabled, -> { joins(:tracing_setting) }
 
   enum auto_cancel_pending_pipelines: { disabled: 0, enabled: 1 }
 
