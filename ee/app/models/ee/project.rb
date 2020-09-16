@@ -42,7 +42,6 @@ module EE
       has_one :github_service
       has_one :gitlab_slack_application_service
 
-      has_one :tracing_setting, class_name: 'ProjectTracingSetting'
       has_one :status_page_setting, inverse_of: :project, class_name: 'StatusPage::ProjectSetting'
       has_one :compliance_framework_setting, class_name: 'ComplianceManagement::ComplianceFramework::ProjectSettings', inverse_of: :project
       has_one :security_setting, class_name: 'ProjectSecuritySetting'
@@ -233,10 +232,6 @@ module EE
 
     def can_store_security_reports?
       namespace.store_security_reports_available? || public?
-    end
-
-    def tracing_external_url
-      self.tracing_setting.try(:external_url)
     end
 
     def latest_pipeline_with_security_reports(only_successful: false)
