@@ -10,7 +10,7 @@ import { EpicFilterType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
 import { fullEpicId } from '../boards_util';
-import { formatListIssues, fullBoardId } from '~/boards/boards_util';
+import { formatListIssues, formatListsPageInfo, fullBoardId } from '~/boards/boards_util';
 
 import createDefaultClient from '~/lib/graphql';
 import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
@@ -46,7 +46,7 @@ const fetchAndFormatListIssues = (state, extraVariables) => {
     })
     .then(({ data }) => {
       const { lists } = data[boardType]?.board;
-      return formatListIssues(lists);
+      return { listIssues: formatListIssues(lists), listPageInfo: formatListsPageInfo(lists) };
     });
 };
 
@@ -168,7 +168,7 @@ export default {
     notImplemented();
   },
 
-  fetchIssuesForList: ({ state, commit }, listId, noEpicIssues = false) => {
+  fetchIssuesForList: ({ state, commit }, { listId, fetchNext = false, noEpicIssues = false }) => {
     const { filterParams } = state;
 
     const variables = {
@@ -176,11 +176,13 @@ export default {
       filters: noEpicIssues
         ? { ...filterParams, epicWildcardId: EpicFilterType.none }
         : filterParams,
+      after: fetchNext ? state.pageInfoByListId[listId].endCursor : undefined,
     };
 
     return fetchAndFormatListIssues(state, variables)
-      .then(listIssues => {
-        commit(types.RECEIVE_ISSUES_FOR_LIST_SUCCESS, { listIssues, listId });
+      .then(({ listIssues, listPageInfo }) => {
+        commit(types.RECEIVE_ISSUES_FOR_LIST_SUCCESS, { listIssues, listPageInfo, listId });
+        commit(types.RECEIVE_ISSUES_FOR_LIST_SUCCESS, { listIssues, listPageInfo, listId });
       })
       .catch(() => commit(types.RECEIVE_ISSUES_FOR_LIST_FAILURE, listId));
   },
@@ -195,7 +197,7 @@ export default {
     };
 
     return fetchAndFormatListIssues(state, variables)
-      .then(listIssues => {
+      .then(({ listIssues }) => {
         commit(types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, { ...listIssues, epicId });
       })
       .catch(() => commit(types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, epicId));

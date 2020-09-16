@@ -67,7 +67,7 @@ export default {
     filterParams: {
       handler() {
         if (this.isUnassignedIssuesLane) {
-          this.fetchIssuesForList(this.list.id);
+          this.fetchIssuesForList({ listId: this.list.id });
         }
       },
       deep: true,

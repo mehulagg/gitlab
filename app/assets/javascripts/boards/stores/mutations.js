@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { sortBy, pull } from 'lodash';
+import { sortBy, pull, union } from 'lodash';
 import { formatIssue, moveIssueListHelper } from '../boards_util';
 import * as mutationTypes from './mutation_types';
 import { s__ } from '~/locale';
@@ -89,10 +89,18 @@ export default {
     notImplemented();
   },
 
-  [mutationTypes.RECEIVE_ISSUES_FOR_LIST_SUCCESS]: (state, { listIssues, listId }) => {
+  [mutationTypes.RECEIVE_ISSUES_FOR_LIST_SUCCESS]: (
+    state,
+    { listIssues, listPageInfo, listId },
+  ) => {
     const { listData, issues } = listIssues;
     Vue.set(state, 'issues', { ...state.issues, ...issues });
-    Vue.set(state.issuesByListId, listId, listData[listId]);
+    Vue.set(
+      state.issuesByListId,
+      listId,
+      union(state.issuesByListId[listId] || [], listData[listId]),
+    );
+    Vue.set(state.pageInfoByListId, listId, listPageInfo[listId]);
     const listIndex = state.boardLists.findIndex(l => l.id === listId);
     Vue.set(state.boardLists[listIndex], 'loading', false);
   },

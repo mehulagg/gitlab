@@ -250,6 +250,13 @@ describe('fetchIssuesForList', () => {
     boardType: 'group',
   };
 
+  const mockIssuesNodes = mockIssues.map(issue => ({ node: issue }));
+
+  const pageInfo = {
+    endCursor: '',
+    hasNextPage: false,
+  };
+
   const queryResponse = {
     data: {
       group: {
@@ -259,7 +266,8 @@ describe('fetchIssuesForList', () => {
               {
                 id: listId,
                 issues: {
-                  nodes: mockIssues,
+                  edges: mockIssuesNodes,
+                  pageInfo,
                 },
               },
             ],
@@ -271,17 +279,21 @@ describe('fetchIssuesForList', () => {
 
   const formattedIssues = formatListIssues(queryResponse.data.group.board.lists);
 
+  const listPageInfo = {
+    [listId]: pageInfo,
+  };
+
   it('should commit mutation RECEIVE_ISSUES_FOR_LIST_SUCCESS on success', done => {
     jest.spyOn(gqlClient, 'query').mockResolvedValue(queryResponse);
 
     testAction(
       actions.fetchIssuesForList,
-      listId,
+      { listId },
       state,
       [
         {
           type: types.RECEIVE_ISSUES_FOR_LIST_SUCCESS,
-          payload: { listIssues: formattedIssues, listId },
+          payload: { listIssues: formattedIssues, listPageInfo, listId },
         },
       ],
       [],
@@ -294,7 +306,7 @@ describe('fetchIssuesForList', () => {
 
     testAction(
       actions.fetchIssuesForList,
-      listId,
+      { listId },
       state,
       [{ type: types.RECEIVE_ISSUES_FOR_LIST_FAILURE, payload: listId }],
       [],

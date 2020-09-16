@@ -19,7 +19,11 @@ export function formatListIssues(listIssues) {
   const issues = {};
 
   const listData = listIssues.nodes.reduce((map, list) => {
-    const sortedIssues = sortBy(list.issues.nodes, 'relativePosition');
+    let sortedIssues = list.issues.edges.map(issueNode => ({
+      ...issueNode.node,
+    }));
+    sortedIssues = sortBy(sortedIssues, 'relativePosition');
+
     return {
       ...map,
       [list.id]: sortedIssues.map(i => {
@@ -40,6 +44,16 @@ export function formatListIssues(listIssues) {
   }, {});
 
   return { listData, issues };
+}
+
+export function formatListsPageInfo(lists) {
+  const listData = lists.nodes.reduce((map, list) => {
+    return {
+      ...map,
+      [list.id]: list.issues.pageInfo,
+    };
+  }, {});
+  return listData;
 }
 
 export function fullBoardId(boardId) {

@@ -7,15 +7,22 @@ query ListIssues(
   $filters: BoardIssueInput
   $isGroup: Boolean = false
   $isProject: Boolean = false
+  $after: String
 ) {
   group(fullPath: $fullPath) @include(if: $isGroup) {
     board(id: $boardId) {
       lists(id: $id) {
         nodes {
           id
-          issues(filters: $filters) {
-            nodes {
-              ...IssueNode
+          issues(first: 10, filters: $filters, after: $after) {
+            edges {
+              node {
+                ...IssueNode
+              }
+            }
+            pageInfo {
+              endCursor
+              hasNextPage
             }
           }
         }
@@ -27,9 +34,15 @@ query ListIssues(
       lists(id: $id) {
         nodes {
           id
-          issues(filters: $filters) {
-            nodes {
-              ...IssueNode
+          issues(first: 5, filters: $filters, after: $after) {
+            edges {
+              node {
+                ...IssueNode
+              }
+            }
+            pageInfo {
+              endCursor
+              hasNextPage
             }
           }
         }

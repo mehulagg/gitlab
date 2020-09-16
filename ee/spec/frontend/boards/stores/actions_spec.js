@@ -186,7 +186,7 @@ describe('fetchIssuesForEpic', () => {
               {
                 id: listId,
                 issues: {
-                  nodes: [mockIssue],
+                  edges: [{ node: [mockIssue] }],
                 },
               },
             ],

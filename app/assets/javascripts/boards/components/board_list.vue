@@ -14,6 +14,8 @@ import {
   sortableEnd,
 } from '../mixins/sortable_default_options';
 
+// This component is being replaced in favor of './board_list_new.vue' for GraphQL boards
+
 if (gon.features && gon.features.multiSelectBoard) {
   Sortable.mount(new MultiDrag());
 }
@@ -72,7 +74,6 @@ export default {
       deep: true,
     },
     issues() {
-      if (this.glFeatures.graphqlBoardLists) return;
       this.$nextTick(() => {
         if (
           this.scrollHeight() <= this.listHeight() &&
@@ -98,6 +99,7 @@ export default {
     eventHub.$on(`scroll-board-list-${this.list.id}`, this.scrollToTop);
   },
   mounted() {
+    // TODO: Use Draggable in ./board_list_new.vue to drag & drop issue
     const multiSelectOpts = {};
     if (gon.features && gon.features.multiSelectBoard) {
       multiSelectOpts.multiDrag = true;
@@ -403,8 +405,6 @@ export default {
       this.showIssueForm = !this.showIssueForm;
     },
     onScroll() {
-      if (this.glFeatures.graphqlBoardLists) return;
-
       if (!this.list.loadingMore && this.scrollTop() > this.scrollHeight() - this.scrollOffset) {
         this.loadNextPage();
       }
