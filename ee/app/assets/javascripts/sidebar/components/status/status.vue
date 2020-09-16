@@ -1,7 +1,7 @@
 <script>
 import {
   GlIcon,
-  GlDeprecatedButton as GlButton,
+  GlButton,
   GlLoadingIcon,
   GlTooltipDirective as GlTooltip,
   GlDropdownItem,
@@ -58,6 +58,9 @@ export default {
     },
     statusText() {
       return this.status ? healthStatusTextMap[this.status] : s__('Sidebar|None');
+    },
+    dropdownHeaderText() {
+      return s__('Sidebar|Assign health status');
     },
     dropdownText() {
       return this.status ? healthStatusTextMap[this.status] : s__('Select health status');
@@ -151,8 +154,9 @@ export default {
         <span v-gl-tooltip.topleft="editTooltip" data-testid="editButtonTooltip" tabindex="0">
           <gl-button
             ref="editButton"
-            variant="link"
-            class="edit-link btn-link-hover"
+            category="tertiary"
+            variant="default"
+            size="small"
             :disabled="!isEditable"
             @click.stop="toggleFormDropdown"
             @keydown.esc="hideDropdown"
@@ -164,52 +168,36 @@ export default {
 
       <div
         data-testid="dropdownWrapper"
-        class="dropdown dropdown-menu-selectable"
+        class="dropdown"
         :class="{ show: isDropdownShowing, 'gl-display-none': !isDropdownShowing }"
       >
         <gl-dropdown
           ref="dropdown"
           class="gl-w-full"
+          :header-text="dropdownHeaderText"
           :text="dropdownText"
           @keydown.esc.native="hideDropdown"
           @hide="hideDropdown"
         >
-          <div class="dropdown-title gl-display-flex">
-            <span class="health-title gl-ml-auto">{{ s__('Sidebar|Assign health status') }}</span>
-            <gl-button
-              :aria-label="__('Close')"
-              variant="link"
-              class="dropdown-title-button dropdown-menu-close gl-ml-auto gl-text-gray-200!"
-              icon="close"
-              @click="hideDropdown"
-            />
-          </div>
-
           <div class="dropdown-content dropdown-body">
-            <gl-dropdown-item @click="handleDropdownClick(null)">
-              <gl-button
-                variant="link"
-                class="dropdown-item health-dropdown-item"
-                :class="{ 'is-active': isSelected(null) }"
+            <gl-dropdown-item 
+              @click="handleDropdownClick(null)"
+              :is-check-item="true"
+              :is-checked="isSelected(null)"
               >
-                {{ s__('Sidebar|No status') }}
-              </gl-button>
+              {{ s__('Sidebar|No status') }}
             </gl-dropdown-item>
 
-            <gl-dropdown-divider class="divider health-divider" />
+            <gl-dropdown-divider />
 
             <gl-dropdown-item
               v-for="option in statusOptions"
               :key="option.key"
+              :is-check-item="true"
+              :is-checked="isSelected(option.key)"
               @click="handleDropdownClick(option.key)"
             >
-              <gl-button
-                variant="link"
-                class="dropdown-item health-dropdown-item"
-                :class="{ 'is-active': isSelected(option.key) }"
-              >
-                {{ option.value }}
-              </gl-button>
+              {{ option.value }}
             </gl-dropdown-item>
           </div>
         </gl-dropdown>
