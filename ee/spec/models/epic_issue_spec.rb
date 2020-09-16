@@ -34,7 +34,7 @@ RSpec.describe EpicIssue do
       let(:irrelevant) { epic }
 
       def as_item(item)
-        item.send(:filter_epic_tree_node).drop(1)
+        item.epic_tree_node_identity
       end
     end
 

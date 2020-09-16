@@ -8,16 +8,18 @@ module EpicTreeSorting
   class_methods do
     def relative_positioning_query_base(object)
       group_id = object.try(:group_id) || object.group.id
+      epic_issue_type = EpicIssue.underscore
+      epic_type = Epic.underscore
 
       issue_selection = <<~SELECT_LIST
         id, relative_position, epic_id as parent_id, epic_id,
         #{group_id}::int as group_id,
-        'epic_issue' as object_type
+        '#{epic_issue_type}' as object_type
       SELECT_LIST
       epic_selection = <<~SELECT_LIST
         id, relative_position, parent_id, parent_id as epic_id,
         group_id,
-        'epic' as object_type
+        '#{epic_type}' as object_type
       SELECT_LIST
 
       from_union([
@@ -51,23 +53,27 @@ module EpicTreeSorting
     def exclude_self(relation, excluded: self)
       return relation unless excluded&.id.present?
 
-      relation.where.not(*excluded.filter_epic_tree_node)
+      relation.where.not(*excluded.epic_tree_node_filter_condition)
     end
 
     override :reset_relative_position
     def reset_relative_position
       current = self.class.relative_positioning_query_base(self)
-        .where(*filter_epic_tree_node)
+        .where(*epic_tree_node_filter_condition)
         .pluck(:relative_position)
         .first
 
       self.relative_position = current
     end
 
-    def filter_epic_tree_node
-      type = try(:object_type) || self.class.table_name.singularize
+    def epic_tree_node_filter_condition
+      ['object_type = ? AND id = ?', *epic_tree_node_identity]
+    end
 
-      ['object_type = ? AND id = ?', type, id]
+    def epic_tree_node_identity
+      type = try(:object_type) || self.class.underscore
+
+      [type, id]
     end
   end
 end
