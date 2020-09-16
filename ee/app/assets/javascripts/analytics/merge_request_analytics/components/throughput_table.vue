@@ -246,7 +246,7 @@ export default {
               :data-testid="$options.testIds.APPROVED"
             >
               <gl-icon name="approval" class="gl-mr-2" /><span>{{
-                formatApprovalText(item.approved, 1)
+                formatApprovalText(item.approved, item.approvalsLeft)
               }}</span>
             </li>
           </ul>
