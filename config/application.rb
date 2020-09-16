@@ -222,6 +222,7 @@ module Gitlab
     config.assets.paths << "#{config.root}/ee/app/assets/stylesheets/_page_bundles" if Gitlab.ee?
     config.assets.paths << "#{config.root}/app/assets/stylesheets/_page_bundles"
     config.assets.precompile << "_mixins_and_variables_and_functions.css"
+    config.assets.precompile << "cycle_analytics.css"
     config.assets.precompile << "ide.css"
     config.assets.precompile << "jira_connect.css"
     config.assets.precompile << "todos.css"
