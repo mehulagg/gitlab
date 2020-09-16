@@ -28,7 +28,7 @@ module EE
           pods = filter_by_project_environment(data[:pods], project.full_path_slug, environment.slug)
           legacy_deployments = filter_by_legacy_label(data[:deployments], project.full_path_slug, environment.slug)
 
-          ::Gitlab::Kubernetes::RolloutStatus.from_deployments(*deployments, pods: pods, legacy_deployments: legacy_deployments)
+          ::Gitlab::Kubernetes::RolloutStatus.from_deployments(*deployments, pods_attrs: pods, legacy_deployments: legacy_deployments)
         end
 
         private

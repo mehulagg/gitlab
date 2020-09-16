@@ -27,7 +27,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
     ]
   end
 
-  subject(:rollout_status) { described_class.from_deployments(*specs, pods: pods, legacy_deployments: legacy_deployments) }
+  subject(:rollout_status) { described_class.from_deployments(*specs, pods_attrs: pods, legacy_deployments: legacy_deployments) }
 
   describe '#has_legacy_app_label?' do
     let(:specs) { [] }
@@ -125,7 +125,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
       it 'sets the completion percentage when a deployment has more running pods than desired' do
         deployments = [kube_deployment(name: 'one', track: 'one', replicas: 2)]
         pods = create_pods(name: 'one', track: 'one', count: 3)
-        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: pods)
 
         expect(rollout_status.completion).to eq(100)
       end
@@ -138,7 +138,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
           kube_deployment(name: 'two', track: 'two', replicas: 2)
         ]
         pods = create_pods(name: 'one', track: 'one', count: 2) + create_pods(name: 'two', track: 'two', count: 2)
-        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: pods)
 
         expect(rollout_status.completion).to eq(100)
       end
@@ -151,7 +151,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
           kube_deployment(name: 'two', track: 'stable', replicas: 2)
         ]
         pods = create_pods(name: 'one', track: 'stable', count: 2) + create_pods(name: 'two', track: 'stable', count: 2)
-        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: pods)
 
         expect(rollout_status.completion).to eq(100)
       end
@@ -162,7 +162,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
           kube_deployment(name: 'two', track: 'stable', replicas: 2)
         ]
         pods = create_pods(name: 'one', track: 'stable', count: 2)
-        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: pods)
 
         expect(rollout_status.completion).to eq(25)
       end
@@ -172,7 +172,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
           kube_deployment(name: 'one', track: 'stable', replicas: 3),
           kube_deployment(name: 'two', track: 'stable', replicas: 7)
         ]
-        rollout_status = described_class.from_deployments(*deployments, pods: [])
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: [])
 
         expect(rollout_status.completion).to eq(0)
       end
@@ -185,7 +185,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
           kube_deployment(name: 'two', track: nil, replicas: 3)
         ]
         pods = create_pods(name: 'one', track: 'stable', count: 3) + create_pods(name: 'two', track: nil, count: 3)
-        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: pods)
 
         expect(rollout_status.completion).to eq(100)
       end
@@ -196,7 +196,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
           kube_deployment(name: 'two', track: nil, replicas: 7)
         ]
         pods = create_pods(name: 'one', track: 'stable', count: 2) + create_pods(name: 'two', track: nil, count: 1)
-        rollout_status = described_class.from_deployments(*deployments, pods: pods)
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: pods)
 
         expect(rollout_status.completion).to eq(33)
       end
@@ -206,7 +206,7 @@ RSpec.describe Gitlab::Kubernetes::RolloutStatus do
           kube_deployment(name: 'one', track: 'stable', replicas: 1),
           kube_deployment(name: 'two', track: nil, replicas: 1)
         ]
-        rollout_status = described_class.from_deployments(*deployments, pods: [])
+        rollout_status = described_class.from_deployments(*deployments, pods_attrs: [])
 
         expect(rollout_status.completion).to eq(0)
       end
