@@ -42,6 +42,6 @@ module LicenseMonitoringHelper
   end
 
   def remaining_user_count
-    strong_memoize(:remaining_user_count) { current_license.restricted_user_count }
+    strong_memoize(:remaining_user_count) { current_license.remaining_user_count }
   end
 end
