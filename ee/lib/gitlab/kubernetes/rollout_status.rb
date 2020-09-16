@@ -42,9 +42,12 @@ module Gitlab
           ::Gitlab::Kubernetes::Pod.new(attrs, default_track_value: ::Gitlab::Kubernetes::Pod::STABLE_TRACK_VALUE)
         end
 
-        rollout_status_pods = create_rollout_status_pods(deployments, pods)
+        matching_pods = take_pods_matching_any_deployment_track(deployments, pods)
+        extra_pending_pods = create_inferred_pending_pods(deployments, matching_pods)
+        rollout_status_pods = matching_pods + extra_pending_pods
+        sorted_rollout_status_pods = rollout_status_pods.sort_by(&:order).map(&:to_hash)
 
-        new(deployments, pods: rollout_status_pods, legacy_deployments: legacy_deployments)
+        new(deployments, pods: sorted_rollout_status_pods, legacy_deployments: legacy_deployments)
       end
 
       def self.loading
@@ -72,20 +75,19 @@ module Gitlab
 
       attr_reader :legacy_deployments
 
-      def self.create_rollout_status_pods(deployments, pods)
+      def self.take_pods_matching_any_deployment_track(deployments, pods)
         deployment_tracks = deployments.map(&:track)
-        filtered_pods = pods.select { |p| deployment_tracks.include?(p.track) }
+        pods.select { |p| deployment_tracks.include?(p.track) }
+      end
 
+      def self.create_inferred_pending_pods(deployments, pods_matching_deployment_tracks)
         wanted_instances = sum_hashes(deployments.map { |d| { d.track => d.wanted_instances } })
-        present_instances = sum_hashes(filtered_pods.map { |p| { p.track => 1 } })
+        present_instances = sum_hashes(pods_matching_deployment_tracks.map { |p| { p.track => 1 } })
         pending_instances = subtract_hashes(wanted_instances, present_instances)
 
-        pending_pods = pending_instances.flat_map do |track, num|
+        pending_instances.flat_map do |track, num|
           Array.new(num, pending_pod_for(track))
         end
-        total_pods = filtered_pods + pending_pods
-
-        total_pods.sort_by(&:order).map(&:to_hash)
       end
 
       def self.sum_hashes(hashes)
