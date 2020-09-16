@@ -77,56 +77,58 @@ export default {
 
 <template>
   <div class="block milestone">
-    <div class="title gl-mb-3">
-      {{ __('Milestone') }}
-      <button v-if="canEdit" type="button" class="edit-link btn btn-blank float-right">
-        {{ __('Edit') }}
-      </button>
-    </div>
-    <div :class="milestoneTitleClass" class="value">{{ milestoneTitle }}</div>
-    <div class="selectbox" style="display: none;">
-      <input :value="milestoneId" name="milestone_id" type="hidden" />
-      <div class="dropdown">
-        <button
-          ref="dropdownButton"
-          :data-selected="selected"
-          :data-project-id="projectId"
-          :data-group-id="groupId"
-          :data-show-no="true"
-          :data-show-any="true"
-          :data-show-started="true"
-          :data-show-upcoming="true"
-          :data-use-id="true"
-          class="dropdown-menu-toggle wide"
-          data-toggle="dropdown"
-          type="button"
-        >
-          {{ __('Milestone') }}
-          <gl-icon
-            name="chevron-down"
-            class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
-            :size="16"
-          />
+    <div class="issuable-sidebar-block-content">
+      <div class="title gl-mb-3">
+        {{ __('Milestone') }}
+        <button v-if="canEdit" type="button" class="edit-link btn btn-blank float-right">
+          {{ __('Edit') }}
         </button>
-        <div class="dropdown-menu dropdown-select dropdown-menu-selectable">
-          <div class="dropdown-input">
-            <input
-              type="search"
-              class="dropdown-input-field"
-              :placeholder="__('Search milestones')"
-              autocomplete="off"
-            />
+      </div>
+      <div :class="milestoneTitleClass" class="value">{{ milestoneTitle }}</div>
+      <div class="selectbox" style="display: none;">
+        <input :value="milestoneId" name="milestone_id" type="hidden" />
+        <div class="dropdown">
+          <button
+            ref="dropdownButton"
+            :data-selected="selected"
+            :data-project-id="projectId"
+            :data-group-id="groupId"
+            :data-show-no="true"
+            :data-show-any="true"
+            :data-show-started="true"
+            :data-show-upcoming="true"
+            :data-use-id="true"
+            class="dropdown-menu-toggle wide"
+            data-toggle="dropdown"
+            type="button"
+          >
+            {{ __('Milestone') }}
             <gl-icon
-              name="search"
-              class="dropdown-input-search gl-absolute gl-top-3 gl-right-5 gl-text-gray-300 gl-pointer-events-none"
+              name="chevron-down"
+              class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
+              :size="16"
             />
-            <gl-icon
-              name="close"
-              class="dropdown-input-clear js-dropdown-input-clear gl-right-5 gl-absolute gl-top-3 gl-text-gray-500"
-            />
+          </button>
+          <div class="dropdown-menu dropdown-select dropdown-menu-selectable">
+            <div class="dropdown-input">
+              <input
+                type="search"
+                class="dropdown-input-field"
+                :placeholder="__('Search milestones')"
+                autocomplete="off"
+              />
+              <gl-icon
+                name="search"
+                class="dropdown-input-search gl-absolute gl-top-3 gl-right-5 gl-text-gray-300 gl-pointer-events-none"
+              />
+              <gl-icon
+                name="close"
+                class="dropdown-input-clear js-dropdown-input-clear gl-right-5 gl-absolute gl-top-3 gl-text-gray-500"
+              />
+            </div>
+            <div class="dropdown-content"></div>
+            <div class="dropdown-loading"><gl-loading-icon /></div>
           </div>
-          <div class="dropdown-content"></div>
-          <div class="dropdown-loading"><gl-loading-icon /></div>
         </div>
       </div>
     </div>

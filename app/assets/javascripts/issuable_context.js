@@ -27,8 +27,8 @@ export default class IssuableContext {
       .on('click', '.issuable-sidebar .dropdown-content a', e => e.preventDefault());
 
     $(document)
-      .off('click', '.edit-link')
-      .on('click', '.edit-link', function onClickEdit(e) {
+      .off('click', '.js-sidebar-dropdown-toggle')
+      .on('click', '.js-sidebar-dropdown-toggle', function onClickEdit(e) {
         e.preventDefault();
         const $block = $(this).parents('.block');
         const $selectbox = $block.find('.selectbox');

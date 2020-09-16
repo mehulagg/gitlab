@@ -41,7 +41,7 @@ export default {
     <gl-loading-icon v-if="loading" inline class="align-bottom" />
     <a
       v-if="editable"
-      class="js-sidebar-dropdown-toggle edit-link float-right"
+      class="js-sidebar-dropdown-toggle float-right btn btn-default btn-sm gl-button btn-default-tertiary"
       href="#"
       data-track-event="click_edit_button"
       data-track-label="right_sidebar"

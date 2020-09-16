@@ -7,34 +7,39 @@
   .issuable-sidebar.hidden
     = form_tag [:bulk_update, group, type], method: :post, class: "bulk-update" do
       .block.issuable-sidebar-header
-        .filter-item.inline.update-issues-btn.float-left
-          = button_tag _('Update all'), class: "btn update-selected-issues btn-info", disabled: true
-        = button_tag _('Cancel'), class: "btn btn-default js-bulk-update-menu-hide float-right"
+        .issuable-sidebar-block-content.centered
+          .filter-item.inline.update-issues-btn.float-left
+            = button_tag _('Update all'), class: "btn update-selected-issues btn-info", disabled: true
+          = button_tag _('Cancel'), class: "btn btn-default js-bulk-update-menu-hide float-right"
       - if epic_bulk_edit_flag
         .block
-          .title
-            = _('Epic')
-          .filter-item.epic-bulk-edit
-            #js-epic-select-root{ data: { group_id: group.id, show_header: "true" } }
-          %input{ id: 'issue_epic_id', type: 'hidden', name: 'update[epic_id]' }
+          .issuable-sidebar-block-content.centered
+            .title
+              = _('Epic')
+            .filter-item.epic-bulk-edit
+              #js-epic-select-root{ data: { group_id: group.id, show_header: "true" } }
+            %input{ id: 'issue_epic_id', type: 'hidden', name: 'update[epic_id]' }
       - unless type == :epics
         .block
-          .title
-            = _('Milestone')
-          .filter-item
-            = dropdown_tag(_('Select milestone'), options: { title: _('Assign milestone'), toggle_class: 'js-milestone-select js-extra-options js-filter-submit js-filter-bulk-update', filter: true, dropdown_class: 'dropdown-menu-selectable dropdown-menu-milestone', placeholder: _('Search milestones'), data: { show_no: true, field_name: 'update[milestone_id]', group_id: group&.id, use_id: true, default_label: _('Milestone') } })
+          .issuable-sidebar-block-content.centered
+            .title
+              = _('Milestone')
+            .filter-item
+              = dropdown_tag(_('Select milestone'), options: { title: _('Assign milestone'), toggle_class: 'js-milestone-select js-extra-options js-filter-submit js-filter-bulk-update', filter: true, dropdown_class: 'dropdown-menu-selectable dropdown-menu-milestone', placeholder: _('Search milestones'), data: { show_no: true, field_name: 'update[milestone_id]', group_id: group&.id, use_id: true, default_label: _('Milestone') } })
       .block
-        .title
-          = _('Labels')
-        .filter-item.labels-filter
-          = render "shared/issuable/label_dropdown", classes: ["js-filter-bulk-update", "js-multiselect"], dropdown_title: _('Apply a label'), show_create: false, show_footer: false, extra_options: false, filter_submit: false, data_options: { persist_when_hide: "true", field_name: "update[label_ids][]", show_no: false, show_any: false, use_id: true, default_label: "Labels" }, label_name: _('Select labels'), no_default_styles: true, edit_context: group
+        .issuable-sidebar-block-content.centered
+          .title
+            = _('Labels')
+          .filter-item.labels-filter
+            = render "shared/issuable/label_dropdown", classes: ["js-filter-bulk-update", "js-multiselect"], dropdown_title: _('Apply a label'), show_create: false, show_footer: false, extra_options: false, filter_submit: false, data_options: { persist_when_hide: "true", field_name: "update[label_ids][]", show_no: false, show_any: false, use_id: true, default_label: "Labels" }, label_name: _('Select labels'), no_default_styles: true, edit_context: group
       - if bulk_issue_health_status_flag
         .block
-          .title
-            = _('Health status')
-          .filter-item.health-status.health-status-filter
-            #js-bulk-update-health-status-root
-          %input{ id: 'issue_health_status_value', type: 'hidden', name: 'update[health_status]' }
+          .issuable-sidebar-block-content.centered
+            .title
+              = _('Health status')
+            .filter-item.health-status.health-status-filter
+              #js-bulk-update-health-status-root
+            %input{ id: 'issue_health_status_value', type: 'hidden', name: 'update[health_status]' }
 
       = hidden_field_tag 'update[issuable_ids]', []
       = hidden_field_tag :state_event, params[:state_event]

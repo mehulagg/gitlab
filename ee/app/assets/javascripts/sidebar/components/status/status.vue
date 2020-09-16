@@ -137,12 +137,13 @@ export default {
 
 <template>
   <div class="block health-status">
-    <div ref="status" v-gl-tooltip.left="statusTooltip" class="sidebar-collapsed-icon">
-      <gl-icon name="status-health" :size="14" />
+    <div class="issuable-sidebar-block-content">
+      <div ref="status" v-gl-tooltip.left="statusTooltip" class="sidebar-collapsed-icon">
+        <gl-icon name="status-health" :size="14" />
 
-      <gl-loading-icon v-if="isFetching" />
-      <p v-else class="collapse-truncated-title gl-px-2">{{ statusText }}</p>
-    </div>
+        <gl-loading-icon v-if="isFetching" />
+        <p v-else class="collapse-truncated-title gl-px-2">{{ statusText }}</p>
+      </div>
 
     <div class="hide-collapsed">
       <p class="title gl-display-flex justify-content-between">
@@ -214,11 +215,12 @@ export default {
         </gl-dropdown>
       </div>
 
-      <gl-loading-icon v-if="isFetching" :inline="true" />
-      <p v-else-if="!isDropdownShowing" class="value gl-m-0" :class="{ 'no-value': !status }">
-        <span v-if="status" class="text-plain gl-font-weight-bold">{{ statusText }}</span>
-        <span v-else>{{ __('None') }}</span>
-      </p>
+        <gl-loading-icon v-if="isFetching" :inline="true" />
+        <p v-else-if="!isDropdownShowing" class="value gl-m-0" :class="{ 'no-value': !status }">
+          <span v-if="status" class="text-plain gl-font-weight-bold">{{ statusText }}</span>
+          <span v-else>{{ __('None') }}</span>
+        </p>
+      </div>
     </div>
   </div>
 </template>

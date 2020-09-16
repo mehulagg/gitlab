@@ -70,48 +70,50 @@ export default {
 
 <template>
   <div class="block issuable-sidebar-item confidentiality">
-    <div
-      ref="collapseIcon"
-      v-gl-tooltip.viewport.left
-      :title="tooltipLabel"
-      class="sidebar-collapsed-icon"
-      @click="toggleForm"
-    >
-      <gl-icon :name="confidentialityIcon" aria-hidden="true" />
-    </div>
-    <div class="title hide-collapsed">
-      {{ __('Confidentiality') }}
-      <a
-        v-if="isEditable"
-        ref="editLink"
-        class="float-right confidential-edit"
-        href="#"
-        data-track-event="click_edit_button"
-        data-track-label="right_sidebar"
-        data-track-property="confidentiality"
-        @click.prevent="toggleForm"
-        >{{ __('Edit') }}</a
+    <div class="issuable-sidebar-block-content">
+      <div
+        ref="collapseIcon"
+        v-gl-tooltip.viewport.left
+        :title="tooltipLabel"
+        class="sidebar-collapsed-icon"
+        @click="toggleForm"
       >
-    </div>
-    <div class="value sidebar-item-value hide-collapsed">
-      <edit-form
-        v-if="edit"
-        :confidential="confidential"
-        :full-path="fullPath"
-        :issuable-type="issuableType"
-      />
-      <div v-if="!confidential" class="no-value sidebar-item-value" data-testid="not-confidential">
-        <gl-icon :size="16" name="eye" aria-hidden="true" class="sidebar-item-icon inline" />
-        {{ __('Not confidential') }}
+        <gl-icon :name="confidentialityIcon" aria-hidden="true" />
       </div>
-      <div v-else class="value sidebar-item-value hide-collapsed">
-        <gl-icon
-          :size="16"
-          name="eye-slash"
-          aria-hidden="true"
-          class="sidebar-item-icon inline is-active"
+      <div class="title hide-collapsed">
+        {{ __('Confidentiality') }}
+        <a
+          v-if="isEditable"
+          ref="editLink"
+          class="float-right confidential-edit btn btn-default btn-sm gl-button btn-default-tertiary"
+          href="#"
+          data-track-event="click_edit_button"
+          data-track-label="right_sidebar"
+          data-track-property="confidentiality"
+          @click.prevent="toggleForm"
+          >{{ __('Edit') }}</a
+        >
+      </div>
+      <div class="value sidebar-item-value hide-collapsed">
+        <edit-form
+          v-if="edit"
+          :confidential="confidential"
+          :full-path="fullPath"
+          :issuable-type="issuableType"
         />
-        {{ confidentialText }}
+        <div v-if="!confidential" class="no-value sidebar-item-value" data-testid="not-confidential">
+          <gl-icon :size="16" name="eye" aria-hidden="true" class="sidebar-item-icon inline" />
+          {{ __('Not confidential') }}
+        </div>
+        <div v-else class="value sidebar-item-value hide-collapsed">
+          <gl-icon
+            :size="16"
+            name="eye-slash"
+            aria-hidden="true"
+            class="sidebar-item-icon inline is-active"
+          />
+          {{ confidentialText }}
+        </div>
       </div>
     </div>
   </div>

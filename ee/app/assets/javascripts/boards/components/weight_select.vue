@@ -69,27 +69,29 @@ export default {
 
 <template>
   <div class="block weight">
-    <div class="title gl-mb-3">
-      {{ __('Weight') }}
-      <gl-button v-if="canEdit" variant="link" class="float-right" @click="showDropdown">
-        {{ __('Edit') }}
-      </gl-button>
-    </div>
-    <div :class="valueClass" :hidden="!dropdownHidden" class="value">{{ valueText }}</div>
-
-    <gl-deprecated-dropdown
-      ref="dropdown"
-      :hidden="dropdownHidden"
-      :text="valueText"
-      class="w-100"
-      menu-class="w-100"
-      toggle-class="d-flex justify-content-between"
-    >
-      <div ref="weight-select" @click="selectWeight">
-        <gl-deprecated-dropdown-item v-for="weight in weights" :key="weight" :value="weight">
-          {{ weight }}
-        </gl-deprecated-dropdown-item>
+    <div class="issuable-sidebar-block-content">
+      <div class="title gl-mb-3">
+        {{ __('Weight') }}
+        <gl-button v-if="canEdit" variant="default" category="tertiary" class="float-right" @click="showDropdown">
+          {{ __('Edit') }}
+        </gl-button>
       </div>
-    </gl-deprecated-dropdown>
+      <div :class="valueClass" :hidden="!dropdownHidden" class="value">{{ valueText }}</div>
+
+      <gl-deprecated-dropdown
+        ref="dropdown"
+        :hidden="dropdownHidden"
+        :text="valueText"
+        class="w-100"
+        menu-class="w-100"
+        toggle-class="d-flex justify-content-between"
+      >
+        <div ref="weight-select" @click="selectWeight">
+          <gl-deprecated-dropdown-item v-for="weight in weights" :key="weight" :value="weight">
+            {{ weight }}
+          </gl-deprecated-dropdown-item>
+        </div>
+      </gl-deprecated-dropdown>
+    </div>
   </div>
 </template>

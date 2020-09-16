@@ -31,12 +31,14 @@ export default {
 
 <template>
   <div class="block subscriptions">
-    <subscriptions
-      :loading="store.isFetching.subscriptions"
-      :project-emails-disabled="store.projectEmailsDisabled"
-      :subscribe-disabled-description="store.subscribeDisabledDescription"
-      :subscribed="store.subscribed"
-      @toggleSubscription="onToggleSubscription"
-    />
+    <div class="issuable-sidebar-block-content centered">
+      <subscriptions
+        :loading="store.isFetching.subscriptions"
+        :project-emails-disabled="store.projectEmailsDisabled"
+        :subscribe-disabled-description="store.subscribeDisabledDescription"
+        :subscribed="store.subscribed"
+        @toggleSubscription="onToggleSubscription"
+      />
+    </div>
   </div>
 </template>

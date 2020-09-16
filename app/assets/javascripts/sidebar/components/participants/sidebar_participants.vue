@@ -22,10 +22,12 @@ export default {
 
 <template>
   <div class="block participants">
-    <participants
-      :loading="store.isFetching.participants"
-      :participants="store.participants"
-      :number-of-less-participants="7"
-    />
+    <div class="issuable-sidebar-block-content">
+      <participants
+        :loading="store.isFetching.participants"
+        :participants="store.participants"
+        :number-of-less-participants="7"
+      />
+    </div>
   </div>
 </template>

@@ -131,13 +131,9 @@
 
     .block {
       padding: 16px 0;
-      width: 250px;
+      width: 100%;
       border-bottom: 1px solid $border-color;
     }
-  }
-
-  .issuable-sidebar {
-    padding: 0 3px;
   }
 }
 

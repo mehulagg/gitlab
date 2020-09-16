@@ -211,10 +211,12 @@ export default {
       />
 
       <div class="block participants">
-        <sidebar-participants
-          :participants="participants"
-          @toggleSidebar="toggleSidebar({ sidebarCollapsed })"
-        />
+        <div class="issuable-sidebar-block-content">
+          <sidebar-participants
+            :participants="participants"
+            @toggleSidebar="toggleSidebar({ sidebarCollapsed })"
+          />
+        </div>
       </div>
       <sidebar-subscription :sidebar-collapsed="sidebarCollapsed" />
     </div>

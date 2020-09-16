@@ -3,19 +3,20 @@
     %aside.right-sidebar.right-sidebar-expanded.issue-boards-sidebar{ "v-show" => "showSidebar" }
       .issuable-sidebar
         .block.issuable-sidebar-header.position-relative
-          %span.issuable-header-text.hide-collapsed.float-left
-            %strong.bold
-              {{ issue.title }}
-            %br/
-            %span
-              = render_if_exists "shared/boards/components/sidebar/issue_project_path"
-              = precede "#" do
-                {{ issue.iid }}
-          %a.gutter-toggle.position-absolute.position-top-0.position-right-0{ role: "button",
-            href: "#",
-            "@click.prevent" => "closeSidebar",
-            "aria-label" => "Toggle sidebar" }
-            = custom_icon("icon_close", size: 15)
+          .issuable-sidebar-block-content.centered
+            %span.issuable-header-text.hide-collapsed.float-left
+              %strong.bold
+                {{ issue.title }}
+              %br/
+              %span
+                = render_if_exists "shared/boards/components/sidebar/issue_project_path"
+                = precede "#" do
+                  {{ issue.iid }}
+            %a.gutter-toggle.float-right.btn.btn-default.btn-sm.gl-button.btn-icon.btn-default-tertiary{ role: "button",
+              href: "#",
+              "@click.prevent" => "closeSidebar",
+              "aria-label" => "Toggle sidebar" }
+              = sprite_icon("close")
         .js-issuable-update
           = render "shared/boards/components/sidebar/assignee"
           = render_if_exists "shared/boards/components/sidebar/epic"

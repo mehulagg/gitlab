@@ -78,51 +78,53 @@ export default {
 
 <template>
   <div class="block issuable-sidebar-item lock">
-    <div
-      v-tooltip
-      :title="tooltipLabel"
-      class="sidebar-collapsed-icon"
-      data-testid="sidebar-collapse-icon"
-      data-container="body"
-      data-placement="left"
-      data-boundary="viewport"
-      @click="toggleForm"
-    >
-      <gl-icon :name="lockStatus.icon" class="sidebar-item-icon is-active" />
-    </div>
-
-    <div class="title hide-collapsed">
-      {{ sprintf(__('Lock %{issuableDisplayName}'), { issuableDisplayName: issuableDisplayName }) }}
-      <a
-        v-if="isEditable"
-        class="float-right lock-edit"
-        href="#"
-        data-testid="edit-link"
-        data-track-event="click_edit_button"
-        data-track-label="right_sidebar"
-        data-track-property="lock_issue"
-        @click.prevent="toggleForm"
+    <div class="issuable-sidebar-block-content">
+      <div
+        v-tooltip
+        :title="tooltipLabel"
+        class="sidebar-collapsed-icon"
+        data-testid="sidebar-collapse-icon"
+        data-container="body"
+        data-placement="left"
+        data-boundary="viewport"
+        @click="toggleForm"
       >
-        {{ __('Edit') }}
-      </a>
-    </div>
+        <gl-icon :name="lockStatus.icon" class="sidebar-item-icon is-active" />
+      </div>
 
-    <div class="value sidebar-item-value hide-collapsed">
-      <edit-form
-        v-if="isLockDialogOpen"
-        data-testid="edit-form"
-        :is-locked="isLocked"
-        :issuable-display-name="issuableDisplayName"
-      />
+      <div class="title hide-collapsed">
+        {{ sprintf(__('Lock %{issuableDisplayName}'), { issuableDisplayName: issuableDisplayName }) }}
+        <a
+          v-if="isEditable"
+          class="float-right lock-edit btn btn-default btn-sm gl-button btn-default-tertiary"
+          href="#"
+          data-testid="edit-link"
+          data-track-event="click_edit_button"
+          data-track-label="right_sidebar"
+          data-track-property="lock_issue"
+          @click.prevent="toggleForm"
+        >
+          {{ __('Edit') }}
+        </a>
+      </div>
 
-      <div data-testid="lock-status" class="sidebar-item-value" :class="lockStatus.class">
-        <gl-icon
-          :size="16"
-          :name="lockStatus.icon"
-          class="sidebar-item-icon"
-          :class="lockStatus.iconClass"
+      <div class="value sidebar-item-value hide-collapsed">
+        <edit-form
+          v-if="isLockDialogOpen"
+          data-testid="edit-form"
+          :is-locked="isLocked"
+          :issuable-display-name="issuableDisplayName"
         />
-        {{ lockStatus.displayText }}
+
+        <div data-testid="lock-status" class="sidebar-item-value" :class="lockStatus.class">
+          <gl-icon
+            :size="16"
+            :name="lockStatus.icon"
+            class="sidebar-item-icon"
+            :class="lockStatus.iconClass"
+          />
+          {{ lockStatus.displayText }}
+        </div>
       </div>
     </div>
   </div>

@@ -245,8 +245,6 @@
       color: rgba($gray-normal, 0.2);
     }
 
-    .confidential-edit,
-    .lock-edit,
     .edit-link {
       @extend .btn-link;
     }
@@ -302,6 +300,19 @@
   &.right-sidebar-expanded {
     width: $gutter-width;
 
+    .block {
+      width: $gutter-width;
+
+      .issuable-sidebar-block-content {
+        @include gl-mx-6;
+        @include gl-mr-5;
+
+        &.centered {
+          @include gl-mr-6;
+        }
+      }
+    }
+
     .value {
       line-height: 1;
 
@@ -309,10 +320,6 @@
         margin-top: 10px;
         display: block;
       }
-    }
-
-    .issuable-sidebar {
-      padding: 0 20px;
     }
 
     .issuable-sidebar-header {
@@ -883,8 +890,8 @@
 
   .time-tracking-help-state {
     background: $white;
-    margin: 16px -20px -20px;
-    padding: 16px 20px;
+    margin: 16px -24px -24px;
+    padding: 16px 24px;
     border-top: 1px solid $border-gray-light;
     border-bottom: 1px solid $border-gray-light;
 

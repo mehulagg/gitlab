@@ -1,6 +1,6 @@
 <script>
 import $ from 'jquery';
-import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon, GlButton } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import Tracking from '~/tracking';
 import eventHub from '~/sidebar/event_hub';
@@ -11,6 +11,7 @@ export default {
   components: {
     GlIcon,
     GlLoadingIcon,
+    GlButton,
   },
   directives: {
     tooltip,
@@ -140,71 +141,76 @@ export default {
 
 <template>
   <div :class="{ 'collapse-after-update': collapsedAfterUpdate }" class="block weight">
-    <div
-      v-tooltip
-      :title="tooltipTitle"
-      class="sidebar-collapsed-icon js-weight-collapsed-block"
-      data-container="body"
-      data-placement="left"
-      data-boundary="viewport"
-      @click="onCollapsedClick"
-    >
-      <gl-icon :size="16" name="weight" />
-      <gl-loading-icon v-if="fetching" class="js-weight-collapsed-loading-icon" />
-      <span v-else class="js-weight-collapsed-weight-label">
-        {{ collapsedWeightLabel
-        }}<template v-if="weight > $options.maxDisplayWeight"
-          >&hellip;</template
-        >
-      </span>
-    </div>
-    <div class="title hide-collapsed">
-      {{ s__('Sidebar|Weight') }}
-      <gl-loading-icon v-if="fetching || loading" :inline="true" class="js-weight-loading-icon" />
-      <a
-        v-if="editable"
-        class="float-right edit-link js-weight-edit-link"
-        data-qa-selector="edit_weight_link"
-        href="#"
-        @click.prevent="onEditClick(!shouldShowEditField)"
-        >{{ __('Edit') }}</a
+    <div class="issuable-sidebar-block-content">
+      <div
+        v-tooltip
+        :title="tooltipTitle"
+        class="sidebar-collapsed-icon js-weight-collapsed-block"
+        data-container="body"
+        data-placement="left"
+        data-boundary="viewport"
+        @click="onCollapsedClick"
       >
-    </div>
-    <div v-if="shouldShowEditField" class="hide-collapsed">
-      <input
-        ref="editableField"
-        :value="weight"
-        class="form-control"
-        data-qa-selector="weight_input_field"
-        type="text"
-        :placeholder="__('Enter a number')"
-        @blur="onSubmit"
-        @keydown.enter="onSubmit"
-      />
-      <span v-if="!hasValidInput" class="gl-field-error">
-        <gl-icon :size="24" name="merge-request-close-m" />
-        {{ s__('Sidebar|Only numeral characters allowed') }}
-      </span>
-    </div>
-    <div v-if="shouldShowWeight" class="value hide-collapsed js-weight-weight-label">
-      <span v-if="!isNoValue">
-        <strong class="js-weight-weight-label-value" data-qa-selector="weight_label_value">{{
-          weight
-        }}</strong>
-        <span v-if="editable">
-          -
-          <a
-            class="btn-default-hover-link js-weight-remove-link"
-            data-qa-selector="remove_weight_link"
-            href="#"
-            @click="removeWeight"
-            >{{ __('remove weight') }}</a
+        <gl-icon :size="16" name="weight" />
+        <gl-loading-icon v-if="fetching" class="js-weight-collapsed-loading-icon" />
+        <span v-else class="js-weight-collapsed-weight-label">
+          {{ collapsedWeightLabel
+          }}<template v-if="weight > $options.maxDisplayWeight"
+            >&hellip;</template
           >
         </span>
-      </span>
-      <span v-else class="no-value" data-qa-selector="weight_no_value_content">{{
-        noValueLabel
-      }}</span>
+      </div>
+      <div class="title hide-collapsed">
+        {{ s__('Sidebar|Weight') }}
+        <gl-loading-icon v-if="fetching || loading" :inline="true" class="js-weight-loading-icon" />
+        <gl-button
+          v-if="editable"
+          variant="default"
+          category="tertiary"
+          size="small"
+          class="float-right js-weight-edit-link"
+          data-qa-selector="edit_weight_link"
+          href="#"
+          @click.prevent="onEditClick(!shouldShowEditField)"
+          >{{ __('Edit') }}</gl-button
+        >
+      </div>
+      <div v-if="shouldShowEditField" class="hide-collapsed">
+        <input
+          ref="editableField"
+          :value="weight"
+          class="form-control"
+          data-qa-selector="weight_input_field"
+          type="text"
+          :placeholder="__('Enter a number')"
+          @blur="onSubmit"
+          @keydown.enter="onSubmit"
+        />
+        <span v-if="!hasValidInput" class="gl-field-error">
+          <gl-icon :size="24" name="merge-request-close-m" />
+          {{ s__('Sidebar|Only numeral characters allowed') }}
+        </span>
+      </div>
+      <div v-if="shouldShowWeight" class="value hide-collapsed js-weight-weight-label">
+        <span v-if="!isNoValue">
+          <strong class="js-weight-weight-label-value" data-qa-selector="weight_label_value">{{
+            weight
+          }}</strong>
+          <span v-if="editable">
+            -
+            <a
+              class="btn-default-hover-link js-weight-remove-link"
+              data-qa-selector="remove_weight_link"
+              href="#"
+              @click="removeWeight"
+              >{{ __('remove weight') }}</a
+            >
+          </span>
+        </span>
+        <span v-else class="no-value" data-qa-selector="weight_no_value_content">{{
+          noValueLabel
+        }}</span>
+      </div>
     </div>
   </div>
 </template>

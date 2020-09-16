@@ -391,21 +391,6 @@
 }
 
 .right-sidebar.issue-boards-sidebar {
-  .gutter-toggle {
-    bottom: 15px;
-    width: 22px;
-    padding-left: $gl-padding-32;
-
-    svg {
-      position: absolute;
-      top: 50%;
-      right: 0;
-      margin-top: (-11px / 2);
-      height: $gl-font-size-12;
-      width: $gl-font-size-12;
-    }
-  }
-
   .issuable-header-text {
     @include overflow-break-word();
     padding-right: 35px;

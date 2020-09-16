@@ -1,5 +1,6 @@
 - if current_user
   .block.subscriptions
-    %subscriptions{ ":loading" => "issue.isFetching && issue.isFetching.subscriptions",
-      ":subscribed" => "issue.subscribed",
-      ":id" => "issue.id" }
+    .issuable-sidebar-block-content.centered
+      %subscriptions{ ":loading" => "issue.isFetching && issue.isFetching.subscriptions",
+        ":subscribed" => "issue.subscribed",
+        ":id" => "issue.id" }
