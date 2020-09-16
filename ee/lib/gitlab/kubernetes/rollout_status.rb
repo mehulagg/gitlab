@@ -33,10 +33,14 @@ module Gitlab
       def self.from_deployments(*deployments, pods: {}, legacy_deployments: [])
         return new([], status: :not_found, legacy_deployments: legacy_deployments) if deployments.empty?
 
-        deployments = deployments.map { |deploy| ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods) }
+        deployments = deployments.map do |deploy|
+          ::Gitlab::Kubernetes::Deployment.new(deploy, pods: pods, default_track_value: ::Gitlab::Kubernetes::Deployment::STABLE_TRACK_VALUE)
+        end
         deployments.sort_by!(&:order)
 
-        pods = pods.map { |pod| ::Gitlab::Kubernetes::Pod.new(pod) }
+        pods = pods.map do |pod|
+          ::Gitlab::Kubernetes::Pod.new(pod, default_track_value: ::Gitlab::Kubernetes::Pod::STABLE_TRACK_VALUE)
+        end
 
         rollout_status_pods = create_rollout_status_pods(deployments, pods)
 

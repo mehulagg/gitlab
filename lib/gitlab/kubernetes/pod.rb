@@ -12,12 +12,13 @@ module Gitlab
 
       STABLE_TRACK_VALUE = 'stable'
 
-      def initialize(attributes = {})
+      def initialize(attributes = {}, default_track_value: nil)
         @attributes = attributes
+        @default_track_value = default_track_value
       end
 
       def track
-        attributes.dig('metadata', 'labels', 'track') || STABLE_TRACK_VALUE
+        attributes.dig('metadata', 'labels', 'track') || @default_track_value
       end
 
       def name

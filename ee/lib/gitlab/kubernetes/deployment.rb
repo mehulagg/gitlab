@@ -7,9 +7,10 @@ module Gitlab
 
       STABLE_TRACK_VALUE = 'stable'.freeze
 
-      def initialize(attributes = {}, pods: {})
+      def initialize(attributes = {}, pods: {}, default_track_value: nil)
         @attributes = attributes
         @pods = pods
+        @default_track_value = default_track_value
       end
 
       def name
@@ -25,7 +26,7 @@ module Gitlab
       end
 
       def track
-        labels.fetch('track', STABLE_TRACK_VALUE)
+        labels.fetch('track', @default_track_value)
       end
 
       def stable?
@@ -88,7 +89,7 @@ module Gitlab
       end
 
       def has_same_track?(pod)
-        pod_track = pod.dig('metadata', 'labels', 'track') || STABLE_TRACK_VALUE
+        pod_track = pod.dig('metadata', 'labels', 'track') || @default_track_value
 
         pod_track == track
       end
