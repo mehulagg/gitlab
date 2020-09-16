@@ -46,15 +46,24 @@ export const diffHasAllCollapsedDiscussions = (state, getters) => diff => {
  * @param {Object} diff
  * @returns {Boolean}
  */
-export const diffHasExpandedDiscussions = (state, getters) => diff => {
-  const discussions = getters.getDiffFileDiscussions(diff);
+export const diffHasExpandedDiscussions = state => diff => {
+  const lines = {
+    [INLINE_DIFF_VIEW_TYPE]: diff.highlighted_diff_lines,
+    [PARALLEL_DIFF_VIEW_TYPE]: diff.parallel_diff_lines.reduce((acc, line) => {
+      if (line.left) {
+        acc.push(line.left);
+      }
 
-  return (
-    (discussions &&
-      discussions.length &&
-      discussions.find(discussion => discussion.expanded) !== undefined) ||
-    false
-  );
+      if (line.right) {
+        acc.push(line.right);
+      }
+
+      return acc;
+    }, []),
+  };
+  return lines[state.diffViewType]
+    .filter(l => l.discussions.length >= 1)
+    .some(l => l.discussionsExpanded);
 };
 
 /**
