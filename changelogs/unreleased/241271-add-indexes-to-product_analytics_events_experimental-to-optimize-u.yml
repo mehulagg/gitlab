@@ -1,0 +1,5 @@
+---
+title: Add category and action indexes to product_analytics_events_experimental
+merge_request: 42531
+author:
+type: performance
