@@ -101,7 +101,11 @@ export default {
           :full-path="fullPath"
           :issuable-type="issuableType"
         />
-        <div v-if="!confidential" class="no-value sidebar-item-value" data-testid="not-confidential">
+        <div
+          v-if="!confidential"
+          class="no-value sidebar-item-value"
+          data-testid="not-confidential"
+        >
           <gl-icon :size="16" name="eye" aria-hidden="true" class="sidebar-item-icon inline" />
           {{ __('Not confidential') }}
         </div>

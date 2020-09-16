@@ -20469,19 +20469,7 @@ msgstr ""
 msgid "Promotions|Epics let you manage your portfolio of projects more efficiently and with less effort by tracking groups of issues that share a theme, across projects and milestones."
 msgstr ""
 
-msgid "Promotions|Improve issues management with Issue weight and GitLab Enterprise Edition."
-msgstr ""
-
 msgid "Promotions|Improve milestones with Burndown Charts."
-msgstr ""
-
-msgid "Promotions|Learn more"
-msgstr ""
-
-msgid "Promotions|Not now, thanks!"
-msgstr ""
-
-msgid "Promotions|See the other features in the %{subscription_link_start}bronze plan%{subscription_link_end}"
 msgstr ""
 
 msgid "Promotions|Start GitLab Ultimate trial"
@@ -20506,15 +20494,6 @@ msgid "Promotions|Upgrade your plan to activate Contribution Analytics."
 msgstr ""
 
 msgid "Promotions|Upgrade your plan to improve milestones with Burndown Charts."
-msgstr ""
-
-msgid "Promotions|Weight"
-msgstr ""
-
-msgid "Promotions|Weighting your issue"
-msgstr ""
-
-msgid "Promotions|When you have a lot of issues, it can be hard to get an overview. By adding a weight to your issues, you can get a better idea of the effort, cost, required time, or value of each, and so better manage them."
 msgstr ""
 
 msgid "Promotions|With Contribution Analytics you can have an overview for the activity of issues, merge requests, and push events of your organization and its members."

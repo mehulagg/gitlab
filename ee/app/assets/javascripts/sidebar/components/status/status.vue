@@ -148,60 +148,60 @@ export default {
         <p v-else class="collapse-truncated-title gl-px-2">{{ statusText }}</p>
       </div>
 
-    <div class="hide-collapsed">
-      <p class="title gl-display-flex justify-content-between">
-        <span data-testid="statusTitle">{{ s__('Sidebar|Health status') }}</span>
-        <span v-gl-tooltip.topleft="editTooltip" data-testid="editButtonTooltip" tabindex="0">
-          <gl-button
-            ref="editButton"
-            category="tertiary"
-            variant="default"
-            size="small"
-            :disabled="!isEditable"
-            @click.stop="toggleFormDropdown"
-            @keydown.esc="hideDropdown"
-          >
-            {{ __('Edit') }}
-          </gl-button>
-        </span>
-      </p>
-
-      <div
-        data-testid="dropdownWrapper"
-        class="dropdown"
-        :class="{ show: isDropdownShowing, 'gl-display-none': !isDropdownShowing }"
-      >
-        <gl-dropdown
-          ref="dropdown"
-          class="gl-w-full"
-          :header-text="dropdownHeaderText"
-          :text="dropdownText"
-          @keydown.esc.native="hideDropdown"
-          @hide="hideDropdown"
-        >
-          <div class="dropdown-content dropdown-body">
-            <gl-dropdown-item 
-              @click="handleDropdownClick(null)"
-              :is-check-item="true"
-              :is-checked="isSelected(null)"
-              >
-              {{ s__('Sidebar|No status') }}
-            </gl-dropdown-item>
-
-            <gl-dropdown-divider />
-
-            <gl-dropdown-item
-              v-for="option in statusOptions"
-              :key="option.key"
-              :is-check-item="true"
-              :is-checked="isSelected(option.key)"
-              @click="handleDropdownClick(option.key)"
+      <div class="hide-collapsed">
+        <p class="title gl-display-flex justify-content-between">
+          <span data-testid="statusTitle">{{ s__('Sidebar|Health status') }}</span>
+          <span v-gl-tooltip.topleft="editTooltip" data-testid="editButtonTooltip" tabindex="0">
+            <gl-button
+              ref="editButton"
+              category="tertiary"
+              variant="default"
+              size="small"
+              :disabled="!isEditable"
+              @click.stop="toggleFormDropdown"
+              @keydown.esc="hideDropdown"
             >
-              {{ option.value }}
-            </gl-dropdown-item>
-          </div>
-        </gl-dropdown>
-      </div>
+              {{ __('Edit') }}
+            </gl-button>
+          </span>
+        </p>
+
+        <div
+          data-testid="dropdownWrapper"
+          class="dropdown"
+          :class="{ show: isDropdownShowing, 'gl-display-none': !isDropdownShowing }"
+        >
+          <gl-dropdown
+            ref="dropdown"
+            class="gl-w-full"
+            :header-text="dropdownHeaderText"
+            :text="dropdownText"
+            @keydown.esc.native="hideDropdown"
+            @hide="hideDropdown"
+          >
+            <div class="dropdown-content dropdown-body">
+              <gl-dropdown-item
+                :is-check-item="true"
+                :is-checked="isSelected(null)"
+                @click="handleDropdownClick(null)"
+              >
+                {{ s__('Sidebar|No status') }}
+              </gl-dropdown-item>
+
+              <gl-dropdown-divider />
+
+              <gl-dropdown-item
+                v-for="option in statusOptions"
+                :key="option.key"
+                :is-check-item="true"
+                :is-checked="isSelected(option.key)"
+                @click="handleDropdownClick(option.key)"
+              >
+                {{ option.value }}
+              </gl-dropdown-item>
+            </div>
+          </gl-dropdown>
+        </div>
 
         <gl-loading-icon v-if="isFetching" :inline="true" />
         <p v-else-if="!isDropdownShowing" class="value gl-m-0" :class="{ 'no-value': !status }">

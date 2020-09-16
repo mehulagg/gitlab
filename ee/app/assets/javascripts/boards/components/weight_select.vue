@@ -72,7 +72,13 @@ export default {
     <div class="issuable-sidebar-block-content">
       <div class="title gl-mb-3">
         {{ __('Weight') }}
-        <gl-button v-if="canEdit" variant="default" category="tertiary" class="float-right" @click="showDropdown">
+        <gl-button
+          v-if="canEdit"
+          variant="default"
+          category="tertiary"
+          class="float-right"
+          @click="showDropdown"
+        >
           {{ __('Edit') }}
         </gl-button>
       </div>

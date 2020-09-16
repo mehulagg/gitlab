@@ -35,7 +35,7 @@ RSpec.describe 'Issues > User sees live update', :js do
       expect(find('.issuable-sidebar-item.confidentiality')).to have_css('.is-active')
       expect(find('.issuable-sidebar-item.confidentiality')).not_to have_css('.not-active')
 
-      find('.btn').click
+      find('.confidential-edit').click
       expect(page).to have_css('.sidebar-item-warning-message')
 
       within('.sidebar-item-warning-message') do
