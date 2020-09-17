@@ -230,6 +230,7 @@ module ApplicationSettingsHelper
       :hashed_storage_enabled,
       :help_page_hide_commercial_content,
       :help_page_support_url,
+      :help_page_documentation_url,
       :help_page_text,
       :hide_third_party_offers,
       :home_page_url,

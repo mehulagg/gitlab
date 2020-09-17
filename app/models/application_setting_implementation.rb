@@ -194,6 +194,10 @@ module ApplicationSettingImplementation
     ::Gitlab::Database.cached_column_exists?(:application_settings, :help_page_support_url)
   end
 
+  def help_page_documentation_url_column_exists?
+    ::Gitlab::Database.cached_column_exists?(:application_settings, :help_page_documentation_url)
+  end
+
   def disabled_oauth_sign_in_sources=(sources)
     sources = (sources || []).map(&:to_s) & Devise.omniauth_providers.map(&:to_s)
     super(sources)
