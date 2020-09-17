@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe ApplicationHelper do
+  include StubVersion
+
   describe 'current_controller?' do
     before do
       stub_controller_name('foo')

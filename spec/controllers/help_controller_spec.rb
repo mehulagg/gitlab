@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe HelpController do
+  include StubVersion
+
   let(:user) { create(:user) }
 
   before do
@@ -110,6 +112,30 @@ RSpec.describe HelpController do
         it 'renders HTML' do
           expect(response).to render_template('show.html.haml')
           expect(response.media_type).to eq 'text/html'
+        end
+      end
+
+      context 'when a custom help_page_documentation_url is set' do
+        before do
+          stub_application_setting(help_page_documentation_url: documentation_url)
+          stub_version(gitlab_version, 'deadbeaf')
+          get :show, params: { path: path }, format: 'html'
+        end
+
+        let(:gitlab_version) { '13.4.0-ee' }
+        let(:documentation_url) { 'https://docs.gitlab.com' }
+        let(:path) { 'ssh/README' }
+
+        it 'redirects user to custom documentation url' do
+          expect(response).to redirect_to("#{documentation_url}/13.4/ee/#{path}.html")
+        end
+
+        context 'when it is a pre-release' do
+          let(:gitlab_version) { '13.4.0-pre' }
+
+          it 'redirects user to custom documentation url' do
+            expect(response).to redirect_to("#{documentation_url}/ee/#{path}.html")
+          end
         end
       end
 
