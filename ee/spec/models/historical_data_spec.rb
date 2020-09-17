@@ -176,7 +176,6 @@ RSpec.describe HistoricalData do
       end
     end
   end
-
   
   describe '.validate_active_user_count'  do
     let_it_be(:historical_data) { build(:historical_data) }
