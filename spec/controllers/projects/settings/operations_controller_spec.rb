@@ -6,9 +6,12 @@ RSpec.describe Projects::Settings::OperationsController do
   let_it_be(:user) { create(:user) }
   let_it_be(:project, reload: true) { create(:project) }
 
+  before_all do
+    project.add_maintainer(user)
+  end
+
   before do
     sign_in(user)
-    project.add_maintainer(user)
   end
 
   shared_examples 'PATCHable' do
@@ -163,10 +166,6 @@ RSpec.describe Projects::Settings::OperationsController do
       context 'updating each incident management setting' do
         let(:new_incident_management_settings) { {} }
 
-        before do
-          project.add_maintainer(user)
-        end
-
         shared_examples 'a gitlab tracking event' do |params, event_key|
           it "creates a gitlab tracking event #{event_key}" do
             new_incident_management_settings = params
@@ -194,10 +193,6 @@ RSpec.describe Projects::Settings::OperationsController do
     end
 
     describe 'POST #reset_pagerduty_token' do
-      before do
-        project.add_maintainer(user)
-      end
-
       context 'with existing incident management setting has active PagerDuty webhook' do
         let!(:incident_management_setting) do
           create(:project_incident_management_setting, project: project, pagerduty_active: true)
@@ -392,10 +387,6 @@ RSpec.describe Projects::Settings::OperationsController do
     end
 
     describe 'POST #reset_alerting_token' do
-      before do
-        project.add_maintainer(user)
-      end
-
       context 'with existing alerting setting' do
         let!(:alerting_setting) do
           create(:project_alerting_setting, project: project)
@@ -475,6 +466,42 @@ RSpec.describe Projects::Settings::OperationsController do
           params: project_params(project),
           format: :json
       end
+    end
+  end
+
+  context 'tracing integration' do
+    describe 'GET #show' do
+      context 'with existing setting' do
+        let_it_be(:setting) do
+          create(:project_tracing_setting, project: project)
+        end
+
+        it 'loads existing setting' do
+          get :show, params: project_params(project)
+
+          expect(controller.helpers.tracing_setting).to eq(setting)
+        end
+      end
+
+      context 'without an existing setting' do
+        it 'builds a new setting' do
+          get :show, params: project_params(project)
+
+          expect(controller.helpers.tracing_setting).to be_new_record
+        end
+      end
+    end
+
+    describe 'PATCH #update' do
+      let(:params) do
+        {
+          tracing_setting_attributes: {
+            external_url: 'https://gitlab.com'
+          }
+        }
+      end
+
+      it_behaves_like 'PATCHable'
     end
   end
 
