@@ -18,10 +18,12 @@ module Autocomplete
     end
 
     def execute
+      return [] unless vulnerable.feature_available?(:security_dashboard)
+
       ::Security::VulnerabilitiesFinder # rubocop: disable CodeReuse/Finder
         .new(vulnerable, params)
         .execute
-        .select { |vulnerability| vulnerability.visible_to_user?(current_user) }
+        .visible_to_user_and_access_level(current_user, ::Gitlab::Access::DEVELOPER)
     end
   end
 end
