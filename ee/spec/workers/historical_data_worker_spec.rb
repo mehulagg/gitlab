@@ -24,7 +24,7 @@ RSpec.describe HistoricalDataWorker do
       end
 
       it 'tracks historical data' do
-        expect(HistoricalData).to receive(:track!)
+        expect(HistoricalData).to receive(:track!).and_call_original
 
         subject.perform
       end
