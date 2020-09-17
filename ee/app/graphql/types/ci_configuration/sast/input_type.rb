@@ -14,6 +14,10 @@ module Types
         argument :pipeline, [::Types::CiConfiguration::Sast::EntityInputType],
           description: 'List of pipeline entities related to SAST configuration',
           required: false
+
+        argument :analyzers, [::Types::CiConfiguration::Sast::AnalyzersEntityInputType],
+          description: 'List of analyzers and related variables for the SAST configuration',
+          required: false
       end
     end
   end
