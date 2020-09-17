@@ -1,10 +1,10 @@
 <script>
-import { GlLoadingIcon, GlLink } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton } from '@gitlab/ui';
 
 export default {
   components: {
     GlLoadingIcon,
-    GlLink,
+    GlButton,
   },
   props: {
     canEdit: {
@@ -31,10 +31,13 @@ export default {
       <gl-loading-icon v-show="isLoading" inline />
     </div>
     <template v-if="canEdit">
-      <gl-link
-        class="edit-link float-right sidebar-dropdown-toggle"
+      <gl-button
+        class="sidebar-dropdown-toggle"
+        category="tertiary"
+        variant="default"
+        size="small"
         @click="$emit('onClickEdit', $event)"
-        >{{ __('Edit') }}</gl-link
+        >{{ __('Edit') }}</gl-button
       >
     </template>
   </div>

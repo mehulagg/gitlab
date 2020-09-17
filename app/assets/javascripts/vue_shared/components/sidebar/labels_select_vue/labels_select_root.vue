@@ -242,32 +242,34 @@ export default {
       'is-embedded': isDropdownVariantEmbedded,
     }"
   >
-    <template v-if="isDropdownVariantSidebar">
-      <dropdown-value-collapsed
-        ref="dropdownButtonCollapsed"
-        :labels="selectedLabels"
-        @onValueClick="handleCollapsedValueClick"
-      />
-      <dropdown-title
-        :allow-label-edit="allowLabelEdit"
-        :labels-select-in-progress="labelsSelectInProgress"
-      />
-      <dropdown-value>
-        <slot></slot>
-      </dropdown-value>
-      <dropdown-button v-show="dropdownButtonVisible" class="gl-mt-2" />
-      <dropdown-contents
-        v-if="dropdownButtonVisible && showDropdownContents"
-        ref="dropdownContents"
-      />
-    </template>
-    <template v-if="isDropdownVariantStandalone || isDropdownVariantEmbedded">
-      <dropdown-button v-show="dropdownButtonVisible" />
-      <dropdown-contents
-        v-if="dropdownButtonVisible && showDropdownContents"
-        ref="dropdownContents"
-        :render-on-top="!contentIsOnViewport"
-      />
-    </template>
+    <div class="issuable-sidebar-block-content">
+      <template v-if="isDropdownVariantSidebar">
+        <dropdown-value-collapsed
+          ref="dropdownButtonCollapsed"
+          :labels="selectedLabels"
+          @onValueClick="handleCollapsedValueClick"
+        />
+        <dropdown-title
+          :allow-label-edit="allowLabelEdit"
+          :labels-select-in-progress="labelsSelectInProgress"
+        />
+        <dropdown-value>
+          <slot></slot>
+        </dropdown-value>
+        <dropdown-button v-show="dropdownButtonVisible" class="gl-mt-2" />
+        <dropdown-contents
+          v-if="dropdownButtonVisible && showDropdownContents"
+          ref="dropdownContents"
+        />
+      </template>
+      <template v-if="isDropdownVariantStandalone || isDropdownVariantEmbedded">
+        <dropdown-button v-show="dropdownButtonVisible" />
+        <dropdown-contents
+          v-if="dropdownButtonVisible && showDropdownContents"
+          ref="dropdownContents"
+          :render-on-top="!contentIsOnViewport"
+        />
+      </template>
+    </div>
   </div>
 </template>

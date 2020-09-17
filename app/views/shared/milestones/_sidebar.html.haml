@@ -4,7 +4,7 @@
 %aside.right-sidebar.js-right-sidebar{ data: { "offset-top" => affix_offset, "spy" => "affix", "always-show-toggle" => true }, class: sidebar_gutter_collapsed_class, 'aria-live' => 'polite' }
   .issuable-sidebar.milestone-sidebar
     .block.milestone-progress.issuable-sidebar-header
-      .issuable-sidebar-block-content
+      .issuable-sidebar-block-content.centered
         %a.gutter-toggle.float-right.js-sidebar-toggle.has-tooltip.btn.btn-default.btn-sm.gl-button.btn-icon.btn-default-tertiary{ role: "button", href: "#", "aria-label" => s_('MilestoneSidebar|Toggle sidebar'), title: sidebar_gutter_tooltip_text, data: { container: 'body', placement: 'left', boundary: 'viewport' } }
           = sidebar_gutter_toggle_icon
         .title.hide-collapsed

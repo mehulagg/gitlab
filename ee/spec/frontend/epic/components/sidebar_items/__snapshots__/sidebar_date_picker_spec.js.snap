@@ -4,103 +4,107 @@ exports[`SidebarDatePicker renders expected template 1`] = `
 <div
   class="block date epic-date"
 >
-  <collapsed-calendar-icon-stub
-    class="sidebar-collapsed-icon"
-    containerclass=""
-    showicon="true"
-    text="None"
-    tooltiptext=""
-  />
-   
   <div
-    class="title"
+    class="issuable-sidebar-block-content"
   >
-    
-    Date
-    
-    <!---->
+    <collapsed-calendar-icon-stub
+      class="sidebar-collapsed-icon"
+      containerclass=""
+      showicon="true"
+      text="None"
+      tooltiptext=""
+    />
      
     <div
-      class="float-right d-flex"
+      class="title"
     >
-      <gl-icon-stub
-        class="help-icon gl-mr-2"
-        name="question-o"
-        size="16"
-        tabindex="0"
-      />
-       
-      <gl-button-stub
-        buttontextclasses=""
-        category="primary"
-        class="btn-sidebar-action"
-        icon=""
-        size="medium"
-        variant="link"
-      >
-        
-        Edit
       
-      </gl-button-stub>
-       
+      Date
+      
       <!---->
-    </div>
-  </div>
-   
-  <div
-    class="value"
-  >
-    <div
-      class="value-type-fixed text-secondary is-option-selected d-flex"
-    >
-      <input
-        name="datetype_test"
-        type="radio"
-      />
        
-      <span
-        class="gl-ml-2"
+      <div
+        class="float-right d-flex"
       >
-        Fixed:
-      </span>
-       
-      <span
-        class="d-flex value-content gl-ml-1"
-      >
-        <span
-          class="no-value"
+        <gl-icon-stub
+          class="help-icon gl-mr-2 gl-mt-2"
+          name="question-o"
+          size="16"
+          tabindex="0"
+        />
+         
+        <gl-button-stub
+          buttontextclasses=""
+          category="tertiary"
+          class="btn-sidebar-action"
+          icon=""
+          size="small"
+          variant="default"
         >
-           None 
-        </span>
-      </span>
+          
+          Edit
+        
+        </gl-button-stub>
+         
+        <!---->
+      </div>
     </div>
      
-    <abbr
-      class="value-type-dynamic text-secondary d-flex gl-mt-3"
-      data-html="true"
-      data-original-title="Select an issue with milestone to set date"
-      data-placement="bottom"
-      title=""
+    <div
+      class="value"
     >
-      <input
-        name="datetype_test"
-        type="radio"
-      />
-       
-      <span
-        class="gl-ml-2"
+      <div
+        class="value-type-fixed text-secondary is-option-selected d-flex"
       >
-        Inherited:
-      </span>
+        <input
+          name="datetype_test"
+          type="radio"
+        />
+         
+        <span
+          class="gl-ml-2"
+        >
+          Fixed:
+        </span>
+         
+        <span
+          class="d-flex value-content gl-ml-1"
+        >
+          <span
+            class="no-value"
+          >
+             None 
+          </span>
+        </span>
+      </div>
        
-      <span
-        class="value-content gl-ml-1"
+      <abbr
+        class="value-type-dynamic text-secondary d-flex gl-mt-3"
+        data-html="true"
+        data-original-title="Select an issue with milestone to set date"
+        data-placement="bottom"
+        title=""
       >
-        None
-      </span>
-       
-      <!---->
-    </abbr>
+        <input
+          name="datetype_test"
+          type="radio"
+        />
+         
+        <span
+          class="gl-ml-2"
+        >
+          Inherited:
+        </span>
+         
+        <span
+          class="value-content gl-ml-1"
+        >
+          None
+        </span>
+         
+        <!---->
+      </abbr>
+    </div>
   </div>
 </div>
 `;

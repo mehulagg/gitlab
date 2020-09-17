@@ -87,7 +87,7 @@ describe('AssigneeTitle component', () => {
       editable: false,
     });
 
-    expect(wrapper.vm.$el.querySelector('.edit-link')).toBeNull();
+    expect(wrapper.vm.$el.querySelector('.js-sidebar-dropdown-toggle')).toBeNull();
   });
 
   it('renders edit link when editable', () => {
@@ -96,7 +96,7 @@ describe('AssigneeTitle component', () => {
       editable: true,
     });
 
-    expect(wrapper.vm.$el.querySelector('.edit-link')).not.toBeNull();
+    expect(wrapper.vm.$el.querySelector('.js-sidebar-dropdown-toggle')).not.toBeNull();
   });
 
   it('tracks the event when edit is clicked', () => {

@@ -3,7 +3,7 @@
     %aside.right-sidebar.right-sidebar-expanded.issue-boards-sidebar{ "v-show" => "showSidebar" }
       .issuable-sidebar
         .block.issuable-sidebar-header.position-relative
-          .issuable-sidebar-block-content.centered
+          .issuable-sidebar-block-content.centered.gl-display-flex
             %span.issuable-header-text.hide-collapsed.float-left
               %strong.bold
                 {{ issue.title }}
@@ -12,7 +12,7 @@
                 = render_if_exists "shared/boards/components/sidebar/issue_project_path"
                 = precede "#" do
                   {{ issue.iid }}
-            %a.gutter-toggle.float-right.btn.btn-default.btn-sm.gl-button.btn-icon.btn-default-tertiary{ role: "button",
+            %a.gutter-toggle.float-right.gl-align-self-center.btn.btn-default.btn-sm.gl-button.btn-icon.btn-default-tertiary{ role: "button",
               href: "#",
               "@click.prevent" => "closeSidebar",
               "aria-label" => "Toggle sidebar" }

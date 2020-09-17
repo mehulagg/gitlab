@@ -6,43 +6,47 @@ exports[`Confidential Issue Sidebar Block renders for confidential = false and i
   iid=""
 >
   <div
-    class="sidebar-collapsed-icon"
-    title="Not confidential"
+    class="issuable-sidebar-block-content"
   >
-    <gl-icon-stub
-      aria-hidden="true"
-      name="eye"
-      size="16"
-    />
-  </div>
-   
-  <div
-    class="title hide-collapsed"
-  >
-    
-    Confidentiality
-    
-    <!---->
-  </div>
-   
-  <div
-    class="value sidebar-item-value hide-collapsed"
-  >
-    <!---->
-     
     <div
-      class="no-value sidebar-item-value"
-      data-testid="not-confidential"
+      class="sidebar-collapsed-icon"
+      title="Not confidential"
     >
       <gl-icon-stub
         aria-hidden="true"
-        class="sidebar-item-icon inline"
         name="eye"
         size="16"
       />
+    </div>
+     
+    <div
+      class="title hide-collapsed"
+    >
       
-      Not confidential
-    
+      Confidentiality
+      
+      <!---->
+    </div>
+     
+    <div
+      class="value sidebar-item-value hide-collapsed"
+    >
+      <!---->
+       
+      <div
+        class="no-value sidebar-item-value"
+        data-testid="not-confidential"
+      >
+        <gl-icon-stub
+          aria-hidden="true"
+          class="sidebar-item-icon inline"
+          name="eye"
+          size="16"
+        />
+        
+        Not confidential
+      
+      </div>
     </div>
   </div>
 </div>
@@ -54,51 +58,55 @@ exports[`Confidential Issue Sidebar Block renders for confidential = false and i
   iid=""
 >
   <div
-    class="sidebar-collapsed-icon"
-    title="Not confidential"
+    class="issuable-sidebar-block-content"
   >
-    <gl-icon-stub
-      aria-hidden="true"
-      name="eye"
-      size="16"
-    />
-  </div>
-   
-  <div
-    class="title hide-collapsed"
-  >
-    
-    Confidentiality
-    
-    <a
-      class="float-right confidential-edit"
-      data-track-event="click_edit_button"
-      data-track-label="right_sidebar"
-      data-track-property="confidentiality"
-      href="#"
-    >
-      Edit
-    </a>
-  </div>
-   
-  <div
-    class="value sidebar-item-value hide-collapsed"
-  >
-    <!---->
-     
     <div
-      class="no-value sidebar-item-value"
-      data-testid="not-confidential"
+      class="sidebar-collapsed-icon"
+      title="Not confidential"
     >
       <gl-icon-stub
         aria-hidden="true"
-        class="sidebar-item-icon inline"
         name="eye"
         size="16"
       />
+    </div>
+     
+    <div
+      class="title hide-collapsed"
+    >
       
-      Not confidential
-    
+      Confidentiality
+      
+      <a
+        class="float-right confidential-edit btn btn-default btn-sm gl-button btn-default-tertiary"
+        data-track-event="click_edit_button"
+        data-track-label="right_sidebar"
+        data-track-property="confidentiality"
+        href="#"
+      >
+        Edit
+      </a>
+    </div>
+     
+    <div
+      class="value sidebar-item-value hide-collapsed"
+    >
+      <!---->
+       
+      <div
+        class="no-value sidebar-item-value"
+        data-testid="not-confidential"
+      >
+        <gl-icon-stub
+          aria-hidden="true"
+          class="sidebar-item-icon inline"
+          name="eye"
+          size="16"
+        />
+        
+        Not confidential
+      
+      </div>
     </div>
   </div>
 </div>
@@ -110,42 +118,46 @@ exports[`Confidential Issue Sidebar Block renders for confidential = true and is
   iid=""
 >
   <div
-    class="sidebar-collapsed-icon"
-    title="Confidential"
+    class="issuable-sidebar-block-content"
   >
-    <gl-icon-stub
-      aria-hidden="true"
-      name="eye-slash"
-      size="16"
-    />
-  </div>
-   
-  <div
-    class="title hide-collapsed"
-  >
-    
-    Confidentiality
-    
-    <!---->
-  </div>
-   
-  <div
-    class="value sidebar-item-value hide-collapsed"
-  >
-    <!---->
+    <div
+      class="sidebar-collapsed-icon"
+      title="Confidential"
+    >
+      <gl-icon-stub
+        aria-hidden="true"
+        name="eye-slash"
+        size="16"
+      />
+    </div>
+     
+    <div
+      class="title hide-collapsed"
+    >
+      
+      Confidentiality
+      
+      <!---->
+    </div>
      
     <div
       class="value sidebar-item-value hide-collapsed"
     >
-      <gl-icon-stub
-        aria-hidden="true"
-        class="sidebar-item-icon inline is-active"
-        name="eye-slash"
-        size="16"
-      />
+      <!---->
+       
+      <div
+        class="value sidebar-item-value hide-collapsed"
+      >
+        <gl-icon-stub
+          aria-hidden="true"
+          class="sidebar-item-icon inline is-active"
+          name="eye-slash"
+          size="16"
+        />
+        
+        This issue is confidential
       
-      This issue is confidential
-    
+      </div>
     </div>
   </div>
 </div>
@@ -157,50 +169,54 @@ exports[`Confidential Issue Sidebar Block renders for confidential = true and is
   iid=""
 >
   <div
-    class="sidebar-collapsed-icon"
-    title="Confidential"
+    class="issuable-sidebar-block-content"
   >
-    <gl-icon-stub
-      aria-hidden="true"
-      name="eye-slash"
-      size="16"
-    />
-  </div>
-   
-  <div
-    class="title hide-collapsed"
-  >
-    
-    Confidentiality
-    
-    <a
-      class="float-right confidential-edit"
-      data-track-event="click_edit_button"
-      data-track-label="right_sidebar"
-      data-track-property="confidentiality"
-      href="#"
+    <div
+      class="sidebar-collapsed-icon"
+      title="Confidential"
     >
-      Edit
-    </a>
-  </div>
-   
-  <div
-    class="value sidebar-item-value hide-collapsed"
-  >
-    <!---->
+      <gl-icon-stub
+        aria-hidden="true"
+        name="eye-slash"
+        size="16"
+      />
+    </div>
+     
+    <div
+      class="title hide-collapsed"
+    >
+      
+      Confidentiality
+      
+      <a
+        class="float-right confidential-edit btn btn-default btn-sm gl-button btn-default-tertiary"
+        data-track-event="click_edit_button"
+        data-track-label="right_sidebar"
+        data-track-property="confidentiality"
+        href="#"
+      >
+        Edit
+      </a>
+    </div>
      
     <div
       class="value sidebar-item-value hide-collapsed"
     >
-      <gl-icon-stub
-        aria-hidden="true"
-        class="sidebar-item-icon inline is-active"
-        name="eye-slash"
-        size="16"
-      />
+      <!---->
+       
+      <div
+        class="value sidebar-item-value hide-collapsed"
+      >
+        <gl-icon-stub
+          aria-hidden="true"
+          class="sidebar-item-icon inline is-active"
+          name="eye-slash"
+          size="16"
+        />
+        
+        This issue is confidential
       
-      This issue is confidential
-    
+      </div>
     </div>
   </div>
 </div>

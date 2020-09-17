@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
-import { GlLoadingIcon, GlLink } from '@gitlab/ui';
+import { GlLoadingIcon, GlButton } from '@gitlab/ui';
 
 import DropdownTitle from 'ee/vue_shared/components/sidebar/epics_select/dropdown_title.vue';
 
@@ -56,7 +56,7 @@ describe('EpicsSelect', () => {
         });
 
         return wrapper.vm.$nextTick().then(() => {
-          const editEl = wrapper.find(GlLink);
+          const editEl = wrapper.find(GlButton);
 
           expect(editEl.exists()).toBe(true);
           expect(editEl.classes()).toContain('sidebar-dropdown-toggle');

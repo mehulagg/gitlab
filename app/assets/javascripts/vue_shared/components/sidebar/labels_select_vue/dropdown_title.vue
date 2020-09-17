@@ -28,7 +28,9 @@ export default {
     <template v-if="allowLabelEdit">
       <gl-loading-icon v-show="labelsSelectInProgress" inline />
       <gl-button
-        variant="link"
+        variant="default"
+        category="tertiary"
+        size="small"
         class="float-right js-sidebar-dropdown-toggle"
         data-qa-selector="labels_edit_button"
         @click="toggleDropdownContents"

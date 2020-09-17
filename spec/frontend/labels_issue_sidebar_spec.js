@@ -16,7 +16,7 @@ let saveLabelCount = 0;
 let mock;
 
 function testLabelClicks(labelOrder, done) {
-  $('.edit-link')
+  $('[data-qa-selector="labels_edit_button"]')
     .get(0)
     .click();
 
@@ -35,7 +35,7 @@ function testLabelClicks(labelOrder, done) {
       }
     });
 
-    $('.edit-link')
+    $('[data-qa-selector="labels_edit_button"]')
       .get(0)
       .click();
 

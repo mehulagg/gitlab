@@ -58,7 +58,7 @@ describe('Assignee select component', () => {
     it('hides Edit button', done => {
       vm.canEdit = false;
       Vue.nextTick(() => {
-        expect(vm.$el.querySelector('.edit-link')).toBeFalsy();
+        expect(vm.$el.querySelector('.js-sidebar-dropdown-toggle')).toBeFalsy();
         done();
       });
     });
@@ -66,7 +66,7 @@ describe('Assignee select component', () => {
     it('shows Edit button if true', done => {
       vm.canEdit = true;
       Vue.nextTick(() => {
-        expect(vm.$el.querySelector('.edit-link')).toBeTruthy();
+        expect(vm.$el.querySelector('.js-sidebar-dropdown-toggle')).toBeTruthy();
         done();
       });
     });
@@ -98,7 +98,7 @@ describe('Assignee select component', () => {
       });
 
       it('sets assignee', done => {
-        vm.$el.querySelector('.edit-link').click();
+        vm.$el.querySelector('.js-sidebar-dropdown-toggle').click();
 
         jest.runOnlyPendingTimers();
 

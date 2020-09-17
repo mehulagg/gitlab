@@ -134,7 +134,6 @@ export default {
     :labels-manage-path="labelsWebUrl"
     :labels-filter-base-path="epicsWebUrl"
     variant="sidebar"
-    class="block labels js-labels-block"
     @updateSelectedLabels="handleUpdateSelectedLabels"
     @onDropdownClose="handleDropdownClose"
     @toggleCollapse="toggleSidebarRevealLabelsDropdown"

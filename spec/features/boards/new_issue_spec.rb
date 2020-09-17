@@ -102,7 +102,7 @@ RSpec.describe 'Issue Boards new issue', :js do
       wait_for_requests
 
       page.within(first('.issue-boards-sidebar')) do
-        find('.labels .edit-link').click
+        find('.labels .js-sidebar-dropdown-toggle').click
 
         wait_for_requests
 

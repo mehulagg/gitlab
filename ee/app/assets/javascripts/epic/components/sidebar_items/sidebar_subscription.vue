@@ -24,11 +24,13 @@ export default {
 
 <template>
   <div class="block subscription">
-    <subscription
-      :loading="epicSubscriptionToggleInProgress"
-      :subscribed="subscribed"
-      @toggleSubscription="toggleEpicSubscription"
-      @toggleSidebar="toggleSidebar({ sidebarCollapsed })"
-    />
+    <div class="issuable-sidebar-block-content centered">
+      <subscription
+        :loading="epicSubscriptionToggleInProgress"
+        :subscribed="subscribed"
+        @toggleSubscription="toggleEpicSubscription"
+        @toggleSidebar="toggleSidebar({ sidebarCollapsed })"
+      />
+    </div>
   </div>
 </template>

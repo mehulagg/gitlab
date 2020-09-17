@@ -193,7 +193,7 @@ RSpec.describe "Issues > User edits issue", :js do
             expect(page).to have_content "None"
           end
 
-          find('.block.milestone .edit-link').click
+          find('.block.milestone .js-sidebar-dropdown-toggle').click
           sleep 2 # wait for ajax stuff to complete
           first('.dropdown-content li').click
           sleep 2

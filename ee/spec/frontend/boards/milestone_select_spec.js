@@ -56,7 +56,7 @@ describe('Milestone select component', () => {
     it('hides Edit button', done => {
       vm.canEdit = false;
       Vue.nextTick(() => {
-        expect(vm.$el.querySelector('.edit-link')).toBeFalsy();
+        expect(vm.$el.querySelector('.js-sidebar-dropdown-toggle')).toBeFalsy();
         done();
       });
     });
@@ -64,7 +64,7 @@ describe('Milestone select component', () => {
     it('shows Edit button if true', done => {
       vm.canEdit = true;
       Vue.nextTick(() => {
-        expect(vm.$el.querySelector('.edit-link')).toBeTruthy();
+        expect(vm.$el.querySelector('.js-sidebar-dropdown-toggle')).toBeTruthy();
         done();
       });
     });
@@ -102,7 +102,7 @@ describe('Milestone select component', () => {
 
       it('sets Any milestone', async done => {
         vm.board.milestone_id = 0;
-        vm.$el.querySelector('.edit-link').click();
+        vm.$el.querySelector('.js-sidebar-dropdown-toggle').click();
 
         await vm.$nextTick();
         jest.runOnlyPendingTimers();
@@ -119,7 +119,7 @@ describe('Milestone select component', () => {
       });
 
       it('sets No milestone', done => {
-        vm.$el.querySelector('.edit-link').click();
+        vm.$el.querySelector('.js-sidebar-dropdown-toggledit-link').click();
 
         jest.runOnlyPendingTimers();
 
@@ -135,7 +135,7 @@ describe('Milestone select component', () => {
       });
 
       it('sets milestone', done => {
-        vm.$el.querySelector('.edit-link').click();
+        vm.$el.querySelector('.js-sidebar-dropdown-toggle').click();
 
         jest.runOnlyPendingTimers();
 

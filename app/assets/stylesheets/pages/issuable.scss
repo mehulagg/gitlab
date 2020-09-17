@@ -291,6 +291,10 @@
     overflow-y: scroll;
     overflow-x: hidden;
     -webkit-overflow-scrolling: touch;
+
+    .gutter-toggle {
+      border-radius: 0;
+    }
   }
 
   &.affix-top .issuable-sidebar {
@@ -355,7 +359,7 @@
     }
 
     .gutter-toggle {
-      margin-top: 7px;
+      margin-top: 8px;
       border-left: 1px solid $border-gray-normal;
       text-align: center;
     }

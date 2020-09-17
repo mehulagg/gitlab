@@ -187,42 +187,44 @@ export default {
 
 <template>
   <div class="js-epic-block" :class="{ 'block epic': isDropdownVariantSidebar }">
-    <dropdown-value-collapsed v-if="isDropdownVariantSidebar" :epic="selectedEpic" />
-    <dropdown-title
-      v-if="isDropdownVariantSidebar"
-      :can-edit="canEdit"
-      :block-title="blockTitle"
-      :is-loading="dropdownSelectInProgress"
-      @onClickEdit="handleEditClick"
-    />
-    <dropdown-value v-if="isDropdownVariantSidebar" v-show="!showDropdown" :epic="selectedEpic">
-      <slot></slot>
-    </dropdown-value>
-    <div
-      v-if="canEdit || isDropdownVariantStandalone"
-      v-show="showDropdown"
-      class="epic-dropdown-container"
-    >
-      <div ref="dropdown" class="dropdown">
-        <dropdown-button
-          ref="dropdownButton"
-          :selected-epic-title="selectedEpic.title"
-          :toggle-text-class="dropdownButtonTextClass"
-        />
-        <div class="dropdown-menu dropdown-select dropdown-menu-epics dropdown-menu-selectable">
-          <dropdown-header v-if="isDropdownVariantSidebar || showHeader" />
-          <dropdown-search-input @onSearchInput="setSearchQuery" />
-          <dropdown-contents
-            v-if="!epicsFetchInProgress"
-            :epics="groupEpics"
-            :selected-epic="selectedEpic"
-            @onItemSelect="handleItemSelect"
+    <div class="issuable-sidebar-block-content">
+      <dropdown-value-collapsed v-if="isDropdownVariantSidebar" :epic="selectedEpic" />
+      <dropdown-title
+        v-if="isDropdownVariantSidebar"
+        :can-edit="canEdit"
+        :block-title="blockTitle"
+        :is-loading="dropdownSelectInProgress"
+        @onClickEdit="handleEditClick"
+      />
+      <dropdown-value v-if="isDropdownVariantSidebar" v-show="!showDropdown" :epic="selectedEpic">
+        <slot></slot>
+      </dropdown-value>
+      <div
+        v-if="canEdit || isDropdownVariantStandalone"
+        v-show="showDropdown"
+        class="epic-dropdown-container"
+      >
+        <div ref="dropdown" class="dropdown">
+          <dropdown-button
+            ref="dropdownButton"
+            :selected-epic-title="selectedEpic.title"
+            :toggle-text-class="dropdownButtonTextClass"
           />
-          <gl-loading-icon
-            v-if="epicsFetchInProgress"
-            class="dropdown-contents-loading"
-            size="md"
-          />
+          <div class="dropdown-menu dropdown-select dropdown-menu-epics dropdown-menu-selectable">
+            <dropdown-header v-if="isDropdownVariantSidebar || showHeader" />
+            <dropdown-search-input @onSearchInput="setSearchQuery" />
+            <dropdown-contents
+              v-if="!epicsFetchInProgress"
+              :epics="groupEpics"
+              :selected-epic="selectedEpic"
+              @onItemSelect="handleItemSelect"
+            />
+            <gl-loading-icon
+              v-if="epicsFetchInProgress"
+              class="dropdown-contents-loading"
+              size="md"
+            />
+          </div>
         </div>
       </div>
     </div>

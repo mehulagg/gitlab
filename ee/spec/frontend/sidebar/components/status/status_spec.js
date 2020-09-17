@@ -226,7 +226,7 @@ describe('Status', () => {
 
         expect(
           getDropdownElement(wrapper)
-            .find('.health-title')
+            .find('.gl-new-dropdown-header-top')
             .text(),
         ).toContain(message);
       });

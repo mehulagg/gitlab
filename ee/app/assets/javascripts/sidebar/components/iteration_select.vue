@@ -170,8 +170,10 @@ export default {
       {{ $options.iterationText }}
       <gl-button
         v-if="canEdit"
-        variant="link"
-        class="js-sidebar-dropdown-toggle edit-link gl-shadow-none float-right gl-reset-color! btn-link-hover"
+        variant="default"
+        category="tertiary"
+        size="small"
+        class="js-sidebar-dropdown-toggle float-right"
         data-testid="iteration-edit-link"
         data-track-label="right_sidebar"
         data-track-property="iteration"

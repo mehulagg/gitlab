@@ -87,7 +87,7 @@ RSpec.describe 'Merge request > User edits assignees sidebar', :js do
         project.add_developer(user)
         visit project_merge_request_path(project, merge_request)
 
-        find('.block.assignee .edit-link').click
+        find('.block.assignee .js-sidebar-dropdown-toggle').click
 
         wait_for_requests
       end
@@ -104,7 +104,7 @@ RSpec.describe 'Merge request > User edits assignees sidebar', :js do
         project.add_maintainer(user)
         visit project_merge_request_path(project, merge_request)
 
-        find('.block.assignee .edit-link').click
+        find('.block.assignee .js-sidebar-dropdown-toggle').click
 
         wait_for_requests
       end

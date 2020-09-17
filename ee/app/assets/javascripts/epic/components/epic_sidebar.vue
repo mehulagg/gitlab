@@ -199,9 +199,13 @@ export default {
         :max-date="dueDateForCollapsedSidebar"
         @toggleCollapse="toggleSidebar({ sidebarCollapsed })"
       />
-      <sidebar-labels :can-update="canUpdate" :sidebar-collapsed="sidebarCollapsed" />
+      <div class="block labels js-labels-block">
+        <sidebar-labels :can-update="canUpdate" :sidebar-collapsed="sidebarCollapsed" />
+      </div>
       <div v-if="allowSubEpics" class="block ancestors">
-        <ancestors-tree :ancestors="ancestors" :is-fetching="false" />
+        <div class="issuable-sidebar-block-content">
+          <ancestors-tree :ancestors="ancestors" :is-fetching="false" />
+        </div>
       </div>
 
       <confidential-issue-sidebar
