@@ -798,7 +798,7 @@ $note-form-margin-left: 72px;
 }
 
 .note-role {
-  margin: 0 3px;
+  margin: 0 8px;
 }
 
 .note-role-special {
@@ -935,6 +935,15 @@ $note-form-margin-left: 72px;
   outline: 0;
   transition: color $general-hover-transition-duration $general-hover-transition-curve;
 
+  &[disabled] {
+    padding: 0 8px !important;
+    box-shadow: none !important;
+
+    .gl-button-loading-indicator {
+      margin-right: 0 !important;
+    }
+  }
+
   &.is-disabled {
     cursor: default;
   }
@@ -942,16 +951,22 @@ $note-form-margin-left: 72px;
   &:not(.is-disabled) {
     &:hover,
     &:focus {
-      color: $green-600;
+      svg {
+        color: $green-600;
+      }
     }
   }
 
   &.is-active {
-    color: $green-600;
+    svg {
+      @include gl-text-green-500;
+    }
 
     &:hover,
     &:focus {
-      color: $green-700;
+      svg {
+        color: $green-700;
+      }
     }
   }
 
