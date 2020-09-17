@@ -175,6 +175,7 @@ module EE
                                                                 start: approval_merge_request_rule_minimum_id,
                                                                 finish: approval_merge_request_rule_maximum_id),
                 merge_requests_with_optional_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_optional, :merge_request_id),
+                merge_requests_with_overridden_project_rules: merge_requests_with_overridden_project_rules,
                 merge_requests_with_required_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_required, :merge_request_id),
                 projects_mirrored_with_pipelines_enabled: count(::Project.mirrored_with_enabled_pipelines),
                 projects_reporting_ci_cd_back_to_github: count(::GithubService.active),
@@ -227,6 +228,7 @@ module EE
                                                             start: approval_merge_request_rule_minimum_id,
                                                             finish: approval_merge_request_rule_maximum_id),
             merge_requests_with_optional_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_optional.where(time_period), :merge_request_id),
+            merge_requests_with_overridden_project_rules: merge_requests_with_overridden_project_rules(time_period),
             merge_requests_with_required_codeowners: distinct_count(::ApprovalMergeRequestRule.code_owner_approval_required.where(time_period), :merge_request_id),
             projects_imported_from_github: distinct_count(::Project.github_imported.where(time_period), :creator_id),
             projects_with_repositories_enabled: distinct_count(::Project.with_repositories_enabled.where(time_period),
@@ -373,13 +375,13 @@ module EE
 
         def approval_merge_request_rule_minimum_id
           strong_memoize(:approval_merge_request_rule_minimum_id) do
-            ::ApprovalMergeRequestRule.minimum(:id)
+            ::ApprovalMergeRequestRule.minimum(:merge_request_id)
           end
         end
 
         def approval_merge_request_rule_maximum_id
           strong_memoize(:approval_merge_request_rule_maximum_id) do
-            ::ApprovalMergeRequestRule.maximum(:id)
+            ::ApprovalMergeRequestRule.maximum(:merge_request_id)
           end
         end
 
@@ -391,7 +393,42 @@ module EE
           ::Gitlab::Auth::Ldap::Config.available_servers
         end
 
-        # rubocop:disable CodeReuse/ActiveRecord
+        def merge_requests_with_overridden_project_rules(time_period = nil)
+          sql =
+            <<~SQL
+          (EXISTS (
+            SELECT
+              1
+            FROM
+              approval_merge_request_rule_sources
+            WHERE
+              approval_merge_request_rule_sources.approval_merge_request_rule_id = approval_merge_request_rules.id
+              AND NOT EXISTS (
+                SELECT
+                  1
+                FROM
+                  approval_project_rules
+                WHERE
+                  approval_project_rules.id = approval_merge_request_rule_sources.approval_project_rule_id
+                  AND EXISTS (
+                    SELECT
+                      1
+                    FROM
+                      projects
+                    WHERE
+                      projects.id = approval_project_rules.project_id
+                      AND projects.disable_overriding_approvers_per_merge_request = FALSE))))
+              OR("approval_merge_request_rules"."modified_from_project_rule" = TRUE)
+            SQL
+
+          distinct_count(
+            ::ApprovalMergeRequestRule.where(time_period).where(sql),
+            :merge_request_id,
+            start: approval_merge_request_rule_minimum_id,
+            finish: approval_merge_request_rule_maximum_id
+          )
+        end
+
         def projects_jira_issuelist_active
           # rubocop: disable UsageData/LargeTable:
           min_id = JiraTrackerData.where(issues_enabled: true).minimum(:service_id)
