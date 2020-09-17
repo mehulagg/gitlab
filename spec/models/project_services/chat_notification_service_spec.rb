@@ -29,6 +29,47 @@ RSpec.describe ChatNotificationService do
     end
   end
 
+  describe '#execute deployment' do
+    subject(:chat_service) { described_class.new }
+
+    let(:user) { create(:user) }
+    let(:project) { create(:project, :repository) }
+    let(:webhook_url) { 'https://example.gitlab.com/' }
+    #let(:data) { Gitlab::DataBuilder::Deployment.build_sample }
+
+    before do
+      allow(chat_service).to receive_messages(
+        project: project,
+        project_id: project.id,
+        service_hook: true,
+        webhook: webhook_url,
+        branches_to_be_notified: "default_and_protected"
+      )
+
+      WebMock.stub_request(:post, webhook_url)
+
+      subject.active = true
+    end
+
+    context 'deployment to default branch' do
+      let(:data) { Gitlab::DataBuilder::Deployment.build_sample }
+
+      it 'returns true' do
+        expect(chat_service).to receive(:notify).and_return(true)
+        expect(chat_service.execute(data)).to be true
+      end
+    end
+
+    context 'deployment to unprotected branch' do
+      let(:data) { Gitlab::DataBuilder::Deployment.build_sample("refs/heads/not_protected") }
+
+      it 'returns false' do
+        expect(chat_service).to receive(:notify).and_return(true)
+        expect(chat_service.execute(data)).to be false
+      end
+    end
+  end
+
   describe '#execute' do
     subject(:chat_service) { described_class.new }
 

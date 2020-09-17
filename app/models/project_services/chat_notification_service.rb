@@ -138,7 +138,7 @@ class ChatNotificationService < Service
     when "wiki_page"
       ChatMessage::WikiPageMessage.new(data)
     when "deployment"
-      ChatMessage::DeploymentMessage.new(data)
+      ChatMessage::DeploymentMessage.new(data) if notify_for_ref?(data)
     end
   end
 
