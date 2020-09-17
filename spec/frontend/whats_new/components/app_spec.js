@@ -1,6 +1,7 @@
 import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { GlDrawer } from '@gitlab/ui';
+import { mockTracking, unmockTracking } from 'helpers/tracking_helper';
 import App from '~/whats_new/components/app.vue';
 
 const localVue = createLocalVue();
@@ -12,6 +13,7 @@ describe('App', () => {
   let actions;
   let state;
   let propsData = { features: '[ {"title":"Whats New Drawer"} ]' };
+  let trackingSpy;
 
   const buildWrapper = () => {
     actions = {
@@ -36,11 +38,16 @@ describe('App', () => {
   };
 
   beforeEach(() => {
+    document.body.dataset.page = 'test-page';
+    document.body.dataset.namespaceId = 'namespace-840';
+
+    trackingSpy = mockTracking('_category_', null, jest.spyOn);
     buildWrapper();
   });
 
   afterEach(() => {
     wrapper.destroy();
+    unmockTracking();
   });
 
   const getDrawer = () => wrapper.find(GlDrawer);
@@ -51,6 +58,10 @@ describe('App', () => {
 
   it('dispatches openDrawer when mounted', () => {
     expect(actions.openDrawer).toHaveBeenCalled();
+    expect(trackingSpy).toHaveBeenCalledWith(undefined, 'click_whats_new_drawer', {
+      label: 'namespace_id',
+      value: 'namespace-840',
+    });
   });
 
   it('dispatches closeDrawer when clicking close', () => {
