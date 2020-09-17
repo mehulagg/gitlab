@@ -130,7 +130,7 @@ RSpec.describe DesignManagement::SaveDesignsService do
 
       context 'when the design collection is in the process of being copied', :clean_gitlab_redis_shared_state do
         before do
-          issue.design_collection.queue_copy!
+          issue.design_collection.start_copy!
         end
 
         it_behaves_like 'a service error'

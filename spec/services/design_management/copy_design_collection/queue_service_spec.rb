@@ -28,7 +28,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::QueueService, :clean_gitl
     end
 
     it 'returns an error if design collection copy_state is not queuable' do
-      target_issue.design_collection.queue_copy!
+      target_issue.design_collection.start_copy!
 
       expect(subject).to be_kind_of(ServiceResponse)
       expect(subject).to be_error
@@ -36,7 +36,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::QueueService, :clean_gitl
     end
 
     it 'sets the design collection copy state' do
-      expect { subject }.to change { target_issue.design_collection.copy_state }.from('ready').to('pending')
+      expect { subject }.to change { target_issue.design_collection.copy_state }.from('ready').to('in_progress')
     end
 
     it 'queues a DesignManagement::CopyDesignCollectionWorker' do

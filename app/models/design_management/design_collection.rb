@@ -58,10 +58,6 @@ module DesignManagement
       designs.current.where(filename: filenames)
     end
 
-    def copy_in_progress?
-      copy_pending? || copy_copying?
-    end
-
     private
 
     def update_stored_copy_state!

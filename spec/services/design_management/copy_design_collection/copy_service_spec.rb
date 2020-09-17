@@ -50,7 +50,7 @@ RSpec.describe DesignManagement::CopyDesignCollection::CopyService, :clean_gitla
 
       context 'when the target design collection has been queued' do
         before do
-          target_issue.design_collection.queue_copy!
+          target_issue.design_collection.start_copy!
         end
 
         include_examples 'service error', message: 'Design collection has no designs'

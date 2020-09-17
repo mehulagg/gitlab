@@ -26,13 +26,12 @@ module DesignManagement
 
       def execute
         return error('User cannot copy design collection to issue') unless user_can_copy?
-        return error('Target design collection must first be queued') unless target_design_collection.can_start_copy?
+        return error('Target design collection must first be queued') unless target_design_collection.copy_in_progress?
         return error('Design collection has no designs') if design_collection.empty?
         return error('Target design collection already has designs') unless target_design_collection.empty?
 
         with_temporary_branch do
           ActiveRecord::Base.transaction do
-            target_design_collection.start_copy!
             design_ids = copy_designs!
 
             new_designs = DesignManagement::Design.unscoped.find(design_ids)

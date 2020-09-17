@@ -14,9 +14,9 @@ module DesignManagement
 
       def execute
         return error('User cannot copy designs to issue') unless user_can_copy?
-        return error('Target design collection copy state must be `ready`') unless target_design_collection.can_queue_copy?
+        return error('Target design collection copy state must be `ready`') unless target_design_collection.can_start_copy?
 
-        target_design_collection.queue_copy!
+        target_design_collection.start_copy!
 
         DesignManagement::CopyDesignCollectionWorker.perform_async(current_user.id, issue.id, target_issue.id)
 
