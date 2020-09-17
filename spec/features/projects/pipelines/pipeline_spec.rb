@@ -173,8 +173,7 @@ RSpec.describe 'Pipeline', :js do
     end
 
     describe 'user status' do
-      let!(:status) { create(:user_status, user: pipeline.user, emoji: 'smirk', message: 'Authoring this object') }
-      
+      let!(:status) { create(:user_status, user: pipeline.user, emoji: 'smirk', message: 'Authoring this object') }      
       it 'shows the user status' do
         visit project_pipeline_path(project, pipeline)
 
