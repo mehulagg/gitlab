@@ -297,6 +297,13 @@ Settings.pages['external_http'] ||= false unless Settings.pages['external_http']
 Settings.pages['external_https'] ||= false unless Settings.pages['external_https'].present?
 Settings.pages['artifacts_server'] ||= Settings.pages['enabled'] if Settings.pages['artifacts_server'].nil?
 Settings.pages['secret_file'] ||= Rails.root.join('.gitlab_pages_secret')
+# We want pages zip archives to be stored on the same directory as old pages hierarchical structure
+# this will allow us to easier migrate existing instances with NFS
+Settings.pages['storage_path']      = Settings.pages['path']
+# @zip is chosen to avoid conflict with namespace name because we use the same directory for storage
+# @ is not valid character for namespace
+Settings.pages['base_dir']          = '@zip'
+Settings.pages['object_store']      = ObjectStoreSettings.legacy_parse(Settings.pages['object_store'])
 
 #
 # Geo
