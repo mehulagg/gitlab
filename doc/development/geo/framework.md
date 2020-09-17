@@ -637,7 +637,7 @@ the Admin Area UI, and Prometheus!
          include ::Types::Geo::RegistryType
 
          graphql_name 'WidgetRegistry'
-         description 'Represents the sync and verification state of a widget'
+         description 'Represents the Geo sync and verification state of a widget'
 
          field :widget_id, GraphQL::ID_TYPE, null: false, description: 'ID of the Widget'
        end

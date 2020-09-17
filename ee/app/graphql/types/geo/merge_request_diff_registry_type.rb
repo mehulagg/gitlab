@@ -7,7 +7,7 @@ module Types
       include ::Types::Geo::RegistryType
 
       graphql_name 'MergeRequestDiffRegistry'
-      description 'Represents the sync and verification state of a Merge Request diff'
+      description 'Represents the Geo sync and verification state of a Merge Request diff'
 
       field :merge_request_diff_id, GraphQL::ID_TYPE, null: false, description: 'ID of the Merge Request diff'
     end

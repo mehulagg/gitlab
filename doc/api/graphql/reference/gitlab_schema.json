@@ -27922,7 +27922,7 @@
         {
           "kind": "OBJECT",
           "name": "MergeRequestDiffRegistry",
-          "description": "Represents the sync and verification state of a Merge Request diff",
+          "description": "Represents the Geo sync and verification state of a Merge Request diff",
           "fields": [
             {
               "name": "createdAt",
@@ -34418,7 +34418,7 @@
         {
           "kind": "OBJECT",
           "name": "PackageFileRegistry",
-          "description": "Represents the sync and verification state of a package file",
+          "description": "Represents the Geo sync and verification state of a package file",
           "fields": [
             {
               "name": "createdAt",
@@ -49207,7 +49207,7 @@
         {
           "kind": "OBJECT",
           "name": "TerraformStateRegistry",
-          "description": "Represents the sync and verification state of a terraform state",
+          "description": "Represents the Geo sync and verification state of a terraform state",
           "fields": [
             {
               "name": "createdAt",
