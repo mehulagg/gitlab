@@ -50,12 +50,13 @@
       = s_('AdminArea|Bots')
     %td.p-3.text-right
       = @users_statistics&.bots.to_i
-
   %tr.bg-gray-light.gl-text-gray-900
     %td.p-3
       %strong
-        = s_('AdminArea|Active users')
-        = render_if_exists 'admin/dashboard/billable_users_text'
+        - if Gitlab.ee? && License.current&.paid?
+          = s_('AdminArea|Billable users')
+        - else
+          = s_('AdminArea|Active users')
     %td.p-3.text-right
       %strong
         = @users_statistics&.active.to_i
