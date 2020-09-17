@@ -172,15 +172,16 @@ RSpec.describe 'Pipeline', :js do
       end
     end
 
-    it 'shows the user status' do
+    describe 'user status' do
       let!(:status) { create(:user_status, user: pipeline.user, emoji: 'smirk', message: 'Authoring this object') }
+      
+      it 'shows the user status' do
+        visit project_pipeline_path(project, pipeline)
 
-      visit project_pipeline_path(project, pipeline)
-
-      within '[data-testid="pipeline-header-content"]' do
-        expect(page).to have_content(status.message)
-        expect(page).to have_selector("[title='#{status.emoji}']")
-      end
+        within '[data-testid="pipeline-header-content"]' do
+          expect(page).to have_content(status.message)
+          expect(page).to have_selector("[title='#{status.emoji}']")
+        end
     end
 
     describe 'pipeline graph' do
