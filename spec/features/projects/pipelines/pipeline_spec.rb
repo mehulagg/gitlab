@@ -182,6 +182,7 @@ RSpec.describe 'Pipeline', :js do
           expect(page).to have_content(status.message)
           expect(page).to have_selector("[title='#{status.emoji}']")
         end
+      end
     end
 
     describe 'pipeline graph' do
