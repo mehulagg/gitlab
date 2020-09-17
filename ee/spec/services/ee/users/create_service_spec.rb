@@ -49,19 +49,5 @@ RSpec.describe Users::CreateService do
         end
       end
     end
-
-    context 'when approaching active user count threshold' do
-      let(:admins) { create_list(:admin, 3) }
-
-      before do
-        allow(Gitlab).to receive(:ee?).and_return(true)
-      end
-
-      it 'sends email to admins' do
-        expect(LicenseMailer).to receive(:approaching_active_user_count_limit).with(admins)
-
-        operation
-      end
-    end
   end
 end

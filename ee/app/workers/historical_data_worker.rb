@@ -12,6 +12,7 @@ class HistoricalDataWorker # rubocop:disable Scalability/IdempotentWorker
   def perform
     return if License.current.nil? || License.current&.trial?
 
-    HistoricalData.track!
+    historical_data = HistoricalData.track!
+    historical_data.validate_active_user_count
   end
 end

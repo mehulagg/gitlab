@@ -176,4 +176,42 @@ RSpec.describe HistoricalData do
       end
     end
   end
+
+  
+  describe '.validate_active_user_count'  do
+    let_it_be(:historical_data) { build(:historical_data) }
+
+    subject { historical_data.validate_active_user_count }
+
+    context 'when approaching active user count threshold' do
+      let_it_be(:admin_email) { 'foo@example.com' }
+      let_it_be(:admin) { create(:admin, email: admin_email) }
+      let_it_be(:license) { create(:license) }
+
+      before do
+        allow(Gitlab).to receive(:ee?).and_return(true)
+      end
+
+      context 'when license is presented' do
+        before do
+          allow(License).to receive(:current).and_return(license)
+          allow(License.current).to receive(:active_user_count_threshold_reached?).and_return(true)
+        end
+
+        it 'sends email to admins' do
+          expect(LicenseMailer).to receive(:approaching_active_user_count_limit).with([admin_email])
+
+          subject
+        end
+      end
+
+      context 'when license is nil' do
+        it 'does not send email' do
+          expect(LicenseMailer).not_to receive(:approaching_active_user_count_limit)
+
+          subject
+        end
+      end
+    end
+  end
 end
