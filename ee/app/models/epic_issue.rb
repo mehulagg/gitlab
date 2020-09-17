@@ -18,7 +18,9 @@ class EpicIssue < ApplicationRecord
 
   validate :validate_confidential_epic
 
-  delegate :group, to: :epic
+  def root_epic_tree_node?
+    false
+  end
 
   private
 

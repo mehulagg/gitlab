@@ -621,10 +621,10 @@ RSpec.describe Epic do
     let_it_be(:group) { create(:group) }
 
     context 'there is no parent' do
-      it_behaves_like "a class that supports relative positioning" do
-        let(:factory) { :epic }
-        let(:default_params) { { group: group } }
-      end
+      let_it_be(:factory) { :epic }
+      let_it_be(:default_params) { { group: group } }
+
+      it_behaves_like "no-op relative positioning"
     end
 
     context 'there is a parent' do

@@ -687,3 +687,119 @@ RSpec.shared_examples 'a class that supports relative positioning' do
     (RelativePositioning::MIN_POSITION..).take(size)
   end
 end
+
+RSpec.shared_examples 'no-op relative positioning' do
+  def create_item(**params)
+    create(factory, params.merge(default_params))
+  end
+
+  let_it_be(:item1) { create_item }
+  let_it_be(:item2) { create_item }
+  let_it_be(:new_item) { create_item(relative_position: nil) }
+
+  def any_relative_positions
+    new_item.class.reorder(:relative_position, :id).pluck(:id, :relative_position)
+  end
+
+  shared_examples 'a no-op method' do
+    it 'does not raise errors' do
+      expect { perform }.not_to raise_error
+    end
+
+    it 'does not perform any DB queries' do
+      expect { perform }.not_to exceed_query_limit(0)
+    end
+
+    it 'does not change any relative_position' do
+      expect { perform }.not_to change { any_relative_positions }
+    end
+  end
+
+  describe '.scoped_items' do
+    subject { RelativePositioning.mover.context(item1).scoped_items }
+
+    it 'is empty' do
+      expect(subject).to be_empty
+    end
+  end
+
+  describe '.relative_siblings' do
+    subject { RelativePositioning.mover.context(item1).relative_siblings }
+
+    it 'is empty' do
+      expect(subject).to be_empty
+    end
+  end
+
+  describe '.move_nulls_to_end' do
+    subject { item1.class.move_nulls_to_end([new_item, item1]) }
+
+    it_behaves_like 'a no-op method' do
+      def perform
+        subject
+      end
+    end
+
+    it 'does not move any items' do
+      expect(subject).to eq(0)
+    end
+  end
+
+  describe '.move_nulls_to_start' do
+    subject { item1.class.move_nulls_to_start([new_item, item1]) }
+
+    it_behaves_like 'a no-op method' do
+      def perform
+        subject
+      end
+    end
+
+    it 'does not move any items' do
+      expect(subject).to eq(0)
+    end
+  end
+
+  describe 'instance methods' do
+    subject { new_item }
+
+    describe '#move_to_start' do
+      it_behaves_like 'a no-op method' do
+        def perform
+          subject.move_to_start
+        end
+      end
+    end
+
+    describe '#move_to_end' do
+      it_behaves_like 'a no-op method' do
+        def perform
+          subject.move_to_end
+        end
+      end
+    end
+
+    describe '#move_between' do
+      it_behaves_like 'a no-op method' do
+        def perform
+          subject.move_between(item1, item2)
+        end
+      end
+    end
+
+    describe '#move_before' do
+      it_behaves_like 'a no-op method' do
+        def perform
+          subject.move_before(item1)
+        end
+      end
+    end
+
+    describe '#move_after' do
+      it_behaves_like 'a no-op method' do
+        def perform
+          subject.move_after(item1)
+        end
+      end
+    end
+  end
+end
