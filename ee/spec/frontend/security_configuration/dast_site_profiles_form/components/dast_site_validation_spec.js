@@ -5,10 +5,10 @@ import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
 import { createMockClient } from 'mock-apollo-client';
 import { GlLoadingIcon } from '@gitlab/ui';
 import waitForPromises from 'jest/helpers/wait_for_promises';
-import DastSiteValidation from 'ee/dast_site_profiles_form/components/dast_site_validation.vue';
-import dastSiteValidationCreateMutation from 'ee/dast_site_profiles_form/graphql/dast_site_validation_create.mutation.graphql';
-import dastSiteValidationQuery from 'ee/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
-import * as responses from 'ee_jest/dast_site_profiles_form/mock_data/apollo_mock';
+import DastSiteValidation from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_validation.vue';
+import dastSiteValidationCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation_create.mutation.graphql';
+import dastSiteValidationQuery from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
+import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import download from '~/lib/utils/downloader';
 
 jest.mock('~/lib/utils/downloader');

@@ -2,7 +2,7 @@ import { merge } from 'lodash';
 import { mount, shallowMount, createWrapper } from '@vue/test-utils';
 import { within } from '@testing-library/dom';
 import { GlModal } from '@gitlab/ui';
-import DastProfilesList from 'ee/dast_profiles/components/dast_profiles_list.vue';
+import DastProfilesList from 'ee/security_configuration/dast_profiles/components/dast_profiles_list.vue';
 
 const TEST_ERROR_MESSAGE = 'something went wrong';
 

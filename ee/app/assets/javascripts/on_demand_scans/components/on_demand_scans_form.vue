@@ -14,8 +14,8 @@ import {
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import dastScannerProfilesQuery from 'ee/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
-import dastSiteProfilesQuery from 'ee/dast_profiles/graphql/dast_site_profiles.query.graphql';
+import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
+import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
 import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';

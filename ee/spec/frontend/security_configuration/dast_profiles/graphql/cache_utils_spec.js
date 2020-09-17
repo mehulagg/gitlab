@@ -2,7 +2,7 @@ import {
   appendToPreviousResult,
   removeProfile,
   dastProfilesDeleteResponse,
-} from 'ee/dast_profiles/graphql/cache_utils';
+} from 'ee/security_configuration/dast_profiles/graphql/cache_utils';
 
 describe('EE - DastProfiles GraphQL CacheUtils', () => {
   describe('appendToPreviousResult', () => {

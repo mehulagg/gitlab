@@ -6,13 +6,13 @@ import { createMockClient } from 'mock-apollo-client';
 import { GlForm, GlModal } from '@gitlab/ui';
 import waitForPromises from 'jest/helpers/wait_for_promises';
 import { TEST_HOST } from 'helpers/test_constants';
-import DastSiteProfileForm from 'ee/dast_site_profiles_form/components/dast_site_profile_form.vue';
-import DastSiteValidation from 'ee/dast_site_profiles_form/components/dast_site_validation.vue';
-import dastSiteValidationQuery from 'ee/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
-import dastSiteProfileCreateMutation from 'ee/dast_site_profiles_form/graphql/dast_site_profile_create.mutation.graphql';
-import dastSiteProfileUpdateMutation from 'ee/dast_site_profiles_form/graphql/dast_site_profile_update.mutation.graphql';
-import dastSiteTokenCreateMutation from 'ee/dast_site_profiles_form/graphql/dast_site_token_create.mutation.graphql';
-import * as responses from 'ee_jest/dast_site_profiles_form/mock_data/apollo_mock';
+import DastSiteProfileForm from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_profile_form.vue';
+import DastSiteValidation from 'ee/security_configuration/dast_site_profiles_form/components/dast_site_validation.vue';
+import dastSiteValidationQuery from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
+import dastSiteProfileCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_create.mutation.graphql';
+import dastSiteProfileUpdateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_profile_update.mutation.graphql';
+import dastSiteTokenCreateMutation from 'ee/security_configuration/dast_site_profiles_form/graphql/dast_site_token_create.mutation.graphql';
+import * as responses from 'ee_jest/security_configuration/dast_site_profiles_form/mock_data/apollo_mock';
 import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -24,7 +24,7 @@ const localVue = createLocalVue();
 localVue.use(VueApollo);
 
 const fullPath = 'group/project';
-const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans/profiles`;
+const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/security/configuration/dast_profiles`;
 const profileName = 'My DAST site profile';
 const targetUrl = 'http://example.com';
 const tokenId = '3455';

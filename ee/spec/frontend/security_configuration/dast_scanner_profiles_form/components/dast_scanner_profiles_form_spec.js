@@ -3,9 +3,9 @@ import { within } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlForm, GlModal } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
-import DastScannerProfileForm from 'ee/dast_scanner_profiles/components/dast_scanner_profile_form.vue';
-import dastScannerProfileCreateMutation from 'ee/dast_scanner_profiles/graphql/dast_scanner_profile_create.mutation.graphql';
-import dastScannerProfileUpdateMutation from 'ee/dast_scanner_profiles/graphql/dast_scanner_profile_update.mutation.graphql';
+import DastScannerProfileForm from 'ee/security_configuration/dast_scanner_profiles/components/dast_scanner_profile_form.vue';
+import dastScannerProfileCreateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_create.mutation.graphql';
+import dastScannerProfileUpdateMutation from 'ee/security_configuration/dast_scanner_profiles/graphql/dast_scanner_profile_update.mutation.graphql';
 import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -13,7 +13,7 @@ jest.mock('~/lib/utils/url_utility', () => ({
 }));
 
 const projectFullPath = 'group/project';
-const profilesLibraryPath = `${TEST_HOST}/${projectFullPath}/-/on_demand_scans/profiles`;
+const profilesLibraryPath = `${TEST_HOST}/${projectFullPath}/-/security/configuration/dast_profiles`;
 const profileName = 'My DAST scanner profile';
 const spiderTimeout = 12;
 const targetTimeout = 20;
