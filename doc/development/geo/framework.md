@@ -676,6 +676,12 @@ the Admin Area UI, and Prometheus!
    }
    ```
 
+1. Update the GraphQL reference documentation:
+
+   ```shell
+   bundle exec rake gitlab:graphql:compile_docs
+   ```
+
 Individual widget synchronization and verification data should now be available
 via the GraphQL API!
 
