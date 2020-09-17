@@ -3,6 +3,8 @@
 module Gitlab
   module Restore
     class ImportTask
+      require 'sidekiq/testing'
+
       class Error < StandardError; end
 
       module CommandLine
@@ -41,8 +43,12 @@ module Gitlab
         CommandLine.mkdir_p(base_path)
         CommandLine.untar_zxf(archive: export_file, dir: base_path)
 
-        import_groups if GROUP_IMPORT_TYPES.include?(import_type)
-        import_all_projects if PROJECT_IMPORT_TYPES.include?(import_type)
+        Sidekiq::Testing.fake! do
+          import_groups if GROUP_IMPORT_TYPES.include?(import_type)
+          import_all_projects if PROJECT_IMPORT_TYPES.include?(import_type)
+
+          Sidekiq::Worker.drain_all
+        end
       ensure
         FileUtils.rm_rf(base_path)
       end
@@ -125,18 +131,20 @@ module Gitlab
 
         logger.info "> Importing project from #{filename} to #{group.full_path}/#{project_path}"
 
-        project = Project.create!(
-          creator: user,
-          namespace_id: group.id,
-          path: project_path,
-          name: project_path,
-          import_type: "gitlab_project"
+        service = Projects::GitlabProjectsImportService.new(
+          user,
+          {
+            namespace_id: group.id,
+            path: project_path,
+            file: File.new(filename)
+          }
         )
 
-        project.import_export_upload =
-          ImportExportUpload.new(import_file: File.new(filename))
+        project = service.execute
 
-        Projects::ImportService.new(project, user).execute
+        if project.import_failures.exists?
+          logger.info ">>> Project import errors: #{project.import_failures.pluck(:exception_message).join("\n")}"
+        end
       end
 
       def path_without_root(path)

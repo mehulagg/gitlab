@@ -232,6 +232,8 @@ RSpec.describe Gitlab::Restore::ImportTask do
 
           before do
             create(:group, path: 'apples', parent: existing_group)
+
+            existing_group.add_owner(user)
           end
 
           it 'does not create any groups' do
