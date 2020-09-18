@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
+  using RSpec::Parameterized::TableSyntax
+
   describe '#parse!' do
     let_it_be(:pipeline) { create(:ci_pipeline) }
 
@@ -11,7 +13,10 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
     subject(:parser) { described_class.new }
 
     context "when parsing valid reports" do
-      where(report_format: %i(sast sast_deprecated))
+      where(:report_format, :scanner_length) do
+        :sast               | 4
+        :sast_deprecated    | 3
+      end
 
       with_them do
         let(:report) { Gitlab::Ci::Reports::Security::Report.new(artifact.file_type, pipeline, created_at) }
@@ -26,7 +31,7 @@ RSpec.describe Gitlab::Ci::Parsers::Security::Sast do
         it "parses all identifiers and findings" do
           expect(report.findings.length).to eq(33)
           expect(report.identifiers.length).to eq(17)
-          expect(report.scanners.length).to eq(3)
+          expect(report.scanners.length).to eq(scanner_length)
         end
 
         it 'generates expected location' do
