@@ -28,6 +28,11 @@ export default {
     DropdownValueCollapsed,
   },
   props: {
+    allowLabelClose: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     allowLabelEdit: {
       type: Boolean,
       required: true,
@@ -252,7 +257,10 @@ export default {
         :allow-label-edit="allowLabelEdit"
         :labels-select-in-progress="labelsSelectInProgress"
       />
-      <dropdown-value>
+      <dropdown-value
+        :allow-label-close="allowLabelClose"
+        @onLabelClose="$emit('onLabelClose', $event)"
+      >
         <slot></slot>
       </dropdown-value>
       <dropdown-button v-show="dropdownButtonVisible" class="gl-mt-2" />
