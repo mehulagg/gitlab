@@ -59,7 +59,7 @@ module QA
         elsif (Time.now - start_time) / 60 >= p3_threshold
           raise "Search succeeded, but only after P3 threshold time of #{p3_threshold} minutes. Recommend filing P3 bug."
         else
-          puts "Search sucessfully completed before #{p3_threshold} minutes."
+          QA::Runtime::Logger.debug("Search sucessfully completed before #{p3_threshold} minutes.")
         end
       end
     end
