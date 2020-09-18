@@ -1,6 +1,6 @@
 <script>
 import { mapActions } from 'vuex';
-import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlLoadingIcon, GlIcon, GlButton } from '@gitlab/ui';
 import { getIssueStatusFromLicenseStatus } from 'ee/vue_shared/license_compliance/store/utils';
 import { LICENSE_MANAGEMENT } from 'ee/vue_shared/license_compliance/store/constants';
 import { s__ } from '~/locale';
@@ -16,6 +16,7 @@ export default {
   components: {
     GlDropdown,
     GlDropdownItem,
+    GlButton,
     GlLoadingIcon,
     GlIcon,
     IssueStatusIcon,
@@ -88,13 +89,14 @@ export default {
         <button
           :disabled="loading"
           class="btn btn-blank js-remove-button"
+          category="tertiary"
           type="button"
           data-toggle="modal"
           data-target="#modal-license-delete-confirmation"
           @click="setLicenseInModal(license)"
         >
           <gl-icon name="remove" />
-        </button>
+        </gl-button>
       </div>
     </div>
   </div>
