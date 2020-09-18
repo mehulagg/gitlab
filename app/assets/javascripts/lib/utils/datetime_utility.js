@@ -322,6 +322,13 @@ export const totalDaysInQuarter = quarter =>
   quarter.reduce((acc, month) => acc + totalDaysInMonth(month), 0);
 
 /**
+ * Returns the start date of a given month.
+ *
+ * @param {Date} date
+ */
+export const getStartOfMonth = date => new Date(date.getFullYear(), date.getMonth(), 1);
+
+/**
  * Returns list of Dates referring to Sundays of the month
  * based on provided date
  *

@@ -500,6 +500,17 @@ describe('getDateInFuture', () => {
   });
 });
 
+describe('getStartOfMonth', () => {
+  const date = new Date('2019-07-16T00:00:00.000Z');
+
+  it('returns the start date of the month', () => {
+    const startDate = datetimeUtility.getStartOfMonth(date);
+    const expectedStartDate = new Date('2019-07-01T00:00:00.000Z');
+
+    expect(startDate).toStrictEqual(expectedStartDate);
+  });
+});
+
 describe('isValidDate', () => {
   it.each`
     valueToCheck                              | isValid
