@@ -1,5 +1,5 @@
 ---
 title: Validate active user count once per day
-merge_request:
+merge_request: 42453
 author:
 type: added
