@@ -44,7 +44,12 @@ export default {
       </gl-button>
     </div>
 
-    <gl-table :items="agents" :fields="fields" stacked="md">
+    <gl-table
+      :items="agents"
+      :fields="fields"
+      stacked="md"
+      data-qa-selector="cluster_agent_list_table"
+    >
       <template #cell(configuration)=" { item }">
         <gl-link v-if="item.configFolder" :href="item.configFolder.webPath">
           {{ item.configFolder.path }}

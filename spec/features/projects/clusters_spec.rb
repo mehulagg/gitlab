@@ -20,7 +20,7 @@ RSpec.describe 'Clusters', :js do
     end
 
     it 'sees empty state' do
-      expect(page).to have_link('Add Kubernetes cluster')
+      expect(page).to have_link('Integrate with a cluster certificate')
       expect(page).to have_selector('.empty-state')
     end
   end
@@ -42,7 +42,7 @@ RSpec.describe 'Clusters', :js do
 
       context 'when user filled form with environment scope' do
         before do
-          click_link 'Add Kubernetes cluster'
+          click_link 'Connect cluster with certificate'
           click_link 'Connect existing cluster'
           fill_in 'cluster_name', with: 'staging-cluster'
           fill_in 'cluster_environment_scope', with: 'staging/*'
@@ -71,7 +71,7 @@ RSpec.describe 'Clusters', :js do
 
       context 'when user updates duplicated environment scope' do
         before do
-          click_link 'Add Kubernetes cluster'
+          click_link 'Connect cluster with certificate'
           click_link 'Connect existing cluster'
           fill_in 'cluster_name', with: 'staging-cluster'
           fill_in 'cluster_environment_scope', with: '*'
@@ -117,7 +117,7 @@ RSpec.describe 'Clusters', :js do
 
       context 'when user filled form with environment scope' do
         before do
-          click_link 'Add Kubernetes cluster'
+          click_link 'Connect cluster with certificate'
           click_link 'Create new cluster'
           click_link 'Google GKE'
 
@@ -162,7 +162,7 @@ RSpec.describe 'Clusters', :js do
 
       context 'when user updates duplicated environment scope' do
         before do
-          click_link 'Add Kubernetes cluster'
+          click_link 'Connect cluster with certificate'
           click_link 'Create new cluster'
           click_link 'Google GKE'
 
@@ -216,7 +216,7 @@ RSpec.describe 'Clusters', :js do
     before do
       visit project_clusters_path(project)
 
-      click_link 'Add Kubernetes cluster'
+      click_link 'Integrate with a cluster certificate'
       click_link 'Create new cluster'
     end
 
