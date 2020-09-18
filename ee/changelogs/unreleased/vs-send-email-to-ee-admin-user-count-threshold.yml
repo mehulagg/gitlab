@@ -1,5 +1,5 @@
 ---
-title: Validate active user count once per day
+title: Send email reminder when approaching active user limit
 merge_request: 42453
 author:
 type: added
