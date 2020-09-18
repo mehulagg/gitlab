@@ -76,4 +76,11 @@ namespace :import do
   end
 
   resource :phabricator, only: [:create, :new], controller: :phabricator
+
+  namespace :v2 do
+    resource :gitlab_group do
+      post :configure
+      get :status
+    end
+  end
 end
