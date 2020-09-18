@@ -5,29 +5,33 @@ require 'spec_helper'
 RSpec.describe LicenseMailer do
   include EmailSpec::Matchers
 
-  let(:recipients) { %w(bob@example.com john@example.com) }
-  let(:license) { create(:license, plan: License::STARTER_PLAN, restrictions: { active_user_count: 21 }) }
-
-  before do
-    allow(License).to receive(:current).and_return(license)
-    allow(License.current).to receive(:current_active_users_count).and_return(active_user_count)
-  end
-
-  shared_examples 'mail format' do
-    it { is_expected.to have_subject subject_text }
-    it { is_expected.to bcc_to recipients }
-    it { is_expected.to have_body_text "your subscription #{subscription_name}" }
-    it { is_expected.to have_body_text "You have #{active_user_count}" }
-    it { is_expected.to have_body_text "the user limit of #{license.restricted_user_count}" }
-  end
+  let_it_be(:recipients) { %w(admin@example.com another_admin@example.com) }
+  let_it_be(:license) { create_current_license({ plan: License::STARTER_PLAN, restrictions: { active_user_count: 21 } }) }
 
   describe '#approaching_active_user_count_limit' do
-    let(:subject_text) { "Your subscription is nearing its user limit" }
-    let(:subscription_name) { "GitLab Enterprise Edition Starter" }
-    let(:active_user_count) { 20 }
+    let_it_be(:subject_text) { "Your subscription is nearing its user limit" }
+    let_it_be(:subscription_name) { "GitLab Enterprise Edition Starter" }
+    let_it_be(:active_user_count) { 20 }
 
     subject { described_class.approaching_active_user_count_limit(recipients) }
 
-    it_behaves_like 'mail format'
+    before do
+      allow(license).to receive(:current_active_users_count).and_return(active_user_count)
+      allow(License).to receive(:current).and_return(license)
+    end
+
+    context 'when license presented' do
+      it { is_expected.to have_subject subject_text }
+      it { is_expected.to bcc_to recipients }
+      it { is_expected.to have_body_text "your subscription #{subscription_name}" }
+      it { is_expected.to have_body_text "You have #{active_user_count} active users" }
+      it { is_expected.to have_body_text "the user limit of #{license.restricted_user_count}" }
+    end
+
+    context 'when license is not presented' do
+      it 'does not send email' do
+        expect { subject }.not_to change(ActionMailer::Base.deliveries, :count)
+      end
+    end
   end
 end

@@ -5,6 +5,14 @@ require 'spec_helper'
 RSpec.describe HistoricalDataWorker do
   subject { described_class.new }
 
+  shared_examples 'not approaching active user count threshold' do
+    it 'does not validate active user count' do
+      expect(HistoricalData).not_to receive(:send_email_reminder_if_approaching_user_limit!)
+
+      subject.perform
+    end
+  end
+
   describe '#perform' do
     context 'with a trial license' do
       before do
@@ -16,6 +24,8 @@ RSpec.describe HistoricalDataWorker do
 
         subject.perform
       end
+
+      it_behaves_like 'not approaching active user count threshold'
     end
 
     context 'with a non trial license' do
@@ -24,20 +34,30 @@ RSpec.describe HistoricalDataWorker do
       end
 
       it 'tracks historical data' do
-        expect(HistoricalData).to receive(:track!).and_call_original
+        expect(HistoricalData).to receive(:track!)
+
+        subject.perform
+      end
+
+      it 'validates active user count' do
+        expect(HistoricalData).to receive(:send_email_reminder_if_approaching_user_limit!)
 
         subject.perform
       end
     end
 
-    context 'when there is not a license key' do
-      it 'does not track historical data' do
+    context 'when there is no a license key' do
+      before do
         License.destroy_all # rubocop: disable Cop/DestroyAll
+      end
 
+      it 'does not track historical data' do
         expect(HistoricalData).not_to receive(:track!)
 
         subject.perform
       end
+
+      it_behaves_like 'not approaching active user count threshold'
     end
   end
 end

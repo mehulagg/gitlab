@@ -11849,9 +11849,6 @@ msgstr ""
 msgid "GitLab Billing Team."
 msgstr ""
 
-msgid "GitLab Enterprise Edition %{plan}"
-msgstr ""
-
 msgid "GitLab Group Runners can execute code for all the projects in this group."
 msgstr ""
 

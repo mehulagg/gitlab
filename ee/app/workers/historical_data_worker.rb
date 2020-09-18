@@ -10,9 +10,9 @@ class HistoricalDataWorker # rubocop:disable Scalability/IdempotentWorker
   feature_category :billing
 
   def perform
-    return if License.current.nil? || License.current&.trial?
+    return if License.current.nil? || License.current.trial?
 
-    historical_data = HistoricalData.track!
-    historical_data.validate_active_user_count
+    HistoricalData.track!
+    HistoricalData.send_email_reminder_if_approaching_user_limit!
   end
 end

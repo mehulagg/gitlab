@@ -6,6 +6,8 @@ class LicenseMailer < ApplicationMailer
   layout 'mailer'
 
   def approaching_active_user_count_limit(recipients)
+    return if License.current.nil?
+
     @license = License.current
 
     mail(
