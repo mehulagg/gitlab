@@ -53,6 +53,18 @@ module QA
           element :diffs_tab
         end
 
+        view 'app/assets/javascripts/diffs/components/compare_dropdown_layout.vue' do
+          element :dropdown_content
+        end
+
+        view 'app/assets/javascripts/diffs/components/compare_versions.vue' do
+          element :target_version_dropdown
+        end
+
+        view 'app/assets/javascripts/diffs/components/diff_file_header.vue' do
+          element :file_name_content
+        end
+
         view 'app/assets/javascripts/diffs/components/inline_diff_table_row.vue' do
           element :new_diff_line
         end
@@ -90,12 +102,20 @@ module QA
           has_no_element? :start_review
         end
 
+        def click_target_version_dropdown
+          click_element(:target_version_dropdown)
+        end
+
         def comment_now
           click_element :comment_now
 
           # After clicking the button, wait for it to disappear
           # before moving on to the next part of the test
           has_no_element? :comment_now
+        end
+
+        def version_dropdown_content
+          find_element(:dropdown_content).text
         end
 
         def submit_pending_reviews
@@ -158,6 +178,10 @@ module QA
 
         def fast_forward_possible?
           has_no_text?('Fast-forward merge is not possible')
+        end
+
+        def has_file?(file_name)
+          has_element?(:file_name_content, text: file_name)
         end
 
         def has_merge_button?
