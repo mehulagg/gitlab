@@ -358,6 +358,16 @@ module EE
       end
     end
 
+    def gitlab_bot?
+      strong_memoize(:gitlab_bot) do
+        if ::Gitlab.com?
+          bot? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
+        else
+          false
+        end
+      end
+    end
+
     def security_dashboard
       InstanceSecurityDashboard.new(self)
     end
