@@ -5,25 +5,38 @@ module Ci
     include Gitlab::Routing
     include Gitlab::Allowable
 
-    expose :has_token_exposed do |trigger|
-      can?(options[:current_user], :admin_trigger, trigger)
-    end
-    expose :token do |trigger|
-      can?(options[:current_user], :admin_trigger, trigger) ? trigger.token : trigger.short_token
-    end
-
     expose :description
     expose :owner, using: UserEntity
     expose :last_used
 
+    expose :token do |trigger|
+      can_admin_trigger?(trigger) ? trigger.token : trigger.short_token
+    end
+
+    expose :has_token_exposed do |trigger|
+      can_admin_trigger?(trigger)
+    end
+
     expose :can_access_project do |trigger|
       trigger.can_access_project?
     end
-    expose :edit_project_trigger_path do |trigger|
-      can?(options[:current_user], :admin_trigger, trigger) ? edit_project_trigger_path(options[:project], trigger) : nil
+
+    expose :project_trigger_path, if: -> (trigger) { can_manage_trigger?(trigger) } do |trigger|
+      project_trigger_path(options[:project], trigger)
     end
-    expose :project_trigger_path do |trigger|
-      can?(options[:current_user], :manage_trigger, trigger) ? project_trigger_path(options[:project], trigger) : nil
+
+    expose :edit_project_trigger_path, if: -> (trigger) { can_admin_trigger?(trigger) } do |trigger|
+      edit_project_trigger_path(options[:project], trigger)
+    end
+
+    private
+
+    def can_manage_trigger?(trigger)
+      can?(options[:current_user], :manage_trigger, trigger)
+    end
+
+    def can_admin_trigger?(trigger)
+      can?(options[:current_user], :admin_trigger, trigger)
     end
   end
 end
