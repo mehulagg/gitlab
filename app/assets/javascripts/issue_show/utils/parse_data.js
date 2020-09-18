@@ -7,10 +7,9 @@ export const parseIssuableData = () => {
   try {
     if (cachedParsedData) return cachedParsedData;
 
-    const initialDataEl = document.getElementById('js-issuable-app-initial-data');
+    const initialDataEl = document.getElementById('js-issuable-app');
 
-    const parsedData = JSON.parse(initialDataEl.textContent.replace(/&quot;/g, '"'));
-
+    const parsedData = JSON.parse(initialDataEl.dataset.initial.replace(/&quot;/g, '"'));
     parsedData.initialTitleHtml = sanitize(parsedData.initialTitleHtml);
     parsedData.initialDescriptionHtml = sanitize(parsedData.initialDescriptionHtml);
 
