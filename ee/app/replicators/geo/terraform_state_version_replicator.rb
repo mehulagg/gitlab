@@ -11,10 +11,5 @@ module Geo
     def self.model
       ::Terraform::StateVersion
     end
-
-    # Remove with https://gitlab.com/gitlab-org/gitlab/-/issues/249176
-    def self.replication_enabled_by_default?
-      false
-    end
   end
 end

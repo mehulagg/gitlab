@@ -23,9 +23,5 @@ module Geo
     def self.model
       ::Terraform::State
     end
-
-    def self.replication_enabled_by_default?
-      false
-    end
   end
 end
