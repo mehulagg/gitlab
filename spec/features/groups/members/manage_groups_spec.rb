@@ -65,6 +65,44 @@ RSpec.describe 'Groups > Members > Manage groups', :js do
     end
   end
 
+  it 'updates expiry date' do
+    create(:group_group_link, shared_group: shared_group, shared_with_group: shared_with_group)
+
+    visit group_group_members_path(shared_group)
+    click_groups_tab
+
+    expires_at = 3.days.from_now
+
+    fill_in "member_expires_at_#{shared_with_group.id}", with: expires_at.strftime("%F")
+    find('body').click
+    wait_for_requests
+
+    page.within(find('li.group_member')) do
+      expect(page).to have_content('Expires in')
+    end
+  end
+
+  it 'clears expiry date' do
+    expires_at = 3.days.from_now
+
+    create(:group_group_link, shared_group: shared_group, shared_with_group: shared_with_group, expires_at: expires_at.strftime("%F"))
+
+    visit group_group_members_path(shared_group)
+    click_groups_tab
+
+    page.within(find('li.group_member')) do
+      expect(page).to have_content('Expires in')
+
+      page.within(find('.js-edit-member-form')) do
+        find('.js-clear-input').click
+      end
+
+      wait_for_requests
+
+      expect(page).not_to have_content('Expires in')
+    end
+  end
+
   def add_group(id, role)
     page.click_link 'Invite group'
     page.within ".invite-group-form" do

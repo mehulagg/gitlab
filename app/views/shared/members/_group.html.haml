@@ -13,10 +13,11 @@
       = link_to group.full_name, group_path(group), class: 'member'
       .cgray
         Given access #{time_ago_with_tooltip(group_link.created_at)}
-        - if group_link.expires?
-          ·
-          %span{ class: ('text-warning' if group_link.expires_soon?) }
-            = _("Expires in %{expires_at}").html_safe % { expires_at: distance_of_time_in_words_to_now(group_link.expires_at) }
+        %span.js-expires-in{ style: ('display: none;' unless group_link.expires?) }
+          &middot;
+          %span.js-expires-in-text{ class: ('text-warning' if group_link.expires_soon?) }
+            - if group_link.expires?
+              = _("Expires in %{expires_at}").html_safe % { expires_at: distance_of_time_in_words_to_now(group_link.expires_at) }
   .controls.member-controls.align-items-center
     = form_tag group_link_path, method: :put, remote: true, class: 'js-edit-member-form form-group d-sm-flex' do
       = hidden_field_tag "group_link[group_access]", group_link.group_access

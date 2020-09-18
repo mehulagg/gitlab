@@ -2,6 +2,7 @@ import $ from 'jquery';
 import { Rails } from '~/lib/utils/rails_ujs';
 import { disableButtonIfEmptyField } from '~/lib/utils/common_utils';
 import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import { __, sprintf } from '~/locale';
 
 export default class Members {
   constructor() {
@@ -63,8 +64,28 @@ export default class Members {
     $dateInput.disable();
   }
 
-  formSuccess(e) {
-    const { $toggle, $dateInput } = this.getMemberListItems($(e.currentTarget).closest('.member'));
+  formSuccess(e, data) {
+    const { $toggle, $dateInput, $expiresIn, $expiresInText } = this.getMemberListItems(
+      $(e.currentTarget).closest('.member'),
+    );
+
+    const expiresIn = data?.expires_in;
+
+    if (expiresIn) {
+      $expiresIn.show();
+
+      $expiresInText.text(sprintf(__('Expires in %{expires_at}'), { expires_at: expiresIn }));
+
+      const { expires_soon: expiresSoon } = data;
+
+      if (expiresSoon) {
+        $expiresInText.addClass('text-warning');
+      } else {
+        $expiresInText.removeClass('text-warning');
+      }
+    } else {
+      $expiresIn.hide();
+    }
 
     $toggle.enable();
     $dateInput.enable();
@@ -76,6 +97,8 @@ export default class Members {
 
     return {
       $memberListItem,
+      $expiresIn: $memberListItem.find('.js-expires-in'),
+      $expiresInText: $memberListItem.find('.js-expires-in-text'),
       $toggle: $memberListItem.find('.dropdown-menu-toggle'),
       $dateInput: $memberListItem.find('.js-access-expiration-date'),
     };

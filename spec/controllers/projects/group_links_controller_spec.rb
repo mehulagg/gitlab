@@ -142,4 +142,40 @@ RSpec.describe Projects::GroupLinksController do
       end
     end
   end
+
+  describe '#update' do
+    let!(:link) do
+      create(
+        :project_group_link,
+        {
+          project: project,
+          group: group
+        }
+      )
+    end
+
+    it 'returns correct json response' do
+      travel_to Time.zone.parse('2016-08-06 08:00') do
+        expires_at = 1.month.from_now.to_date
+
+        put(
+          :update,
+          params: {
+            namespace_id: project.namespace.to_param,
+            project_id: project.to_param,
+            id: link.id,
+            group_link: { group_access: Gitlab::Access::GUEST, expires_at: expires_at }
+          },
+          format: :json
+        )
+
+        expected_json = {
+          expires_in: 'about 1 month',
+          expires_soon: false
+        }.to_json
+
+        expect(response.body).to eq(expected_json)
+      end
+    end
+  end
 end

@@ -24,6 +24,17 @@ class Groups::GroupLinksController < Groups::ApplicationController
 
   def update
     Groups::GroupLinks::UpdateService.new(@group_link).execute(group_link_params)
+
+    respond_to do |format|
+      format.json do
+        if @group_link.expires?
+          render json: {
+            expires_in: helpers.distance_of_time_in_words_to_now(@group_link.expires_at),
+            expires_soon: @group_link.expires_soon?
+          }
+        end
+      end
+    end
   end
 
   def destroy
