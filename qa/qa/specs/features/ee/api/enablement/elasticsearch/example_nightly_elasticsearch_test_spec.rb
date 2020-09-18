@@ -5,9 +5,9 @@ require 'securerandom'
 
 module QA
   RSpec.describe 'Enablement:Search' do
-    describe 'When using elasticsearch API to search for a known blob', :orchestrated, :elasticsearch, :requires_admin do
-      p1_threshold = 10
-      p2_threshold = 5
+    describe 'When using elasticsearch API to search for a known blob', :orchestrated, :elasticsearch, :requires_admin, only: { subdomain: :nightly } do
+      p1_threshold = 15
+      p2_threshold = 10
       p3_threshold = 3
       let(:project_file_content) { "elasticsearch: #{SecureRandom.hex(8)}" }
       let(:api_client) { Runtime::API::Client.new(:gitlab) }
@@ -53,11 +53,11 @@ module QA
         end
 
         if (Time.now - start_time) / 60 >= p1_threshold
-          raise "Search for term failed during P1 threshold time of 10 minutes."
+          raise "Search failed during P1 threshold time of #{p1_threshold} minutes. Recommend filing P1 bug."
         elsif (Time.now - start_time) / 60 >= p2_threshold
-          raise "Search for term succeeded, but only after P2 threshold time of 5 minutes."
+          raise "Search succeeded, but only after P2 threshold time of #{p2_threshold} minutes. Recommend filing P2 bug."
         elsif (Time.now - start_time) / 60 >= p3_threshold
-          raise "Search for term succeeded, but only after P3 threshold time of 3 minutes."
+          raise "Search succeeded, but only after P3 threshold time of #{p3_threshold} minutes. Recommend filing P3 bug."
         else
           puts "Search sucessfully completed before #{p3_threshold} minutes."
         end
