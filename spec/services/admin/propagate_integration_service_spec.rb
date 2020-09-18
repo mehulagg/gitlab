@@ -11,7 +11,6 @@ RSpec.describe Admin::PropagateIntegrationService do
     end
 
     let_it_be(:project) { create(:project) }
-    let(:excluded_attributes) { %w[id project_id group_id inherit_from_id instance template created_at updated_at] }
     let!(:instance_integration) do
       JiraService.create!(
         instance: true,
@@ -66,41 +65,11 @@ RSpec.describe Admin::PropagateIntegrationService do
     context 'with inherited integration' do
       let(:integration) { inherited_integration }
 
-      it 'updates the integration' do
+      it 'calls to PropagateIntegrationProjectWorker' do
+        expect(PropagateIntegrationInheritWorker).to receive(:perform_async)
+          .with(instance_integration.id, inherited_integration.id, inherited_integration.id)
+
         described_class.propagate(instance_integration)
-
-        expect(integration.reload.inherit_from_id).to eq(instance_integration.id)
-        expect(integration.attributes.except(*excluded_attributes))
-          .to eq(instance_integration.attributes.except(*excluded_attributes))
-      end
-
-      context 'with integration with data fields' do
-        let(:excluded_attributes) { %w[id service_id created_at updated_at] }
-
-        it 'updates the data fields from the integration' do
-          described_class.propagate(instance_integration)
-
-          expect(integration.reload.data_fields.attributes.except(*excluded_attributes))
-            .to eq(instance_integration.data_fields.attributes.except(*excluded_attributes))
-        end
-      end
-    end
-
-    context 'with not inherited integration' do
-      let(:integration) { not_inherited_integration }
-
-      it 'does not update the integration' do
-        expect { described_class.propagate(instance_integration) }
-          .not_to change { instance_integration.attributes.except(*excluded_attributes) }
-      end
-    end
-
-    context 'with different type inherited integration' do
-      let(:integration) { different_type_inherited_integration }
-
-      it 'does not update the integration' do
-        expect { described_class.propagate(instance_integration) }
-          .not_to change { instance_integration.attributes.except(*excluded_attributes) }
       end
     end
 
