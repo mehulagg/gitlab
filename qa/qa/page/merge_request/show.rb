@@ -95,11 +95,11 @@ module QA
         end
 
         def start_review
-          click_element :start_review
+          click_element(:start_review)
 
           # After clicking the button, wait for it to disappear
           # before moving on to the next part of the test
-          has_no_element? :start_review
+          has_no_element?(:start_review)
         end
 
         def click_target_version_dropdown
@@ -107,11 +107,11 @@ module QA
         end
 
         def comment_now
-          click_element :comment_now
+          click_element(:comment_now)
 
           # After clicking the button, wait for it to disappear
           # before moving on to the next part of the test
-          has_no_element? :comment_now
+          has_no_element?(:comment_now)
         end
 
         def version_dropdown_content
@@ -119,30 +119,30 @@ module QA
         end
 
         def submit_pending_reviews
-          within_element :review_bar do
-            click_element :review_preview_toggle
-            click_element :submit_review
+          within_element(:review_bar) do
+            click_element(:review_preview_toggle)
+            click_element(:submit_review)
 
             # After clicking the button, wait for it to disappear
             # before moving on to the next part of the test
-            has_no_element? :submit_review
+            has_no_element?(:submit_review)
           end
         end
 
         def discard_pending_reviews
-          within_element :review_bar do
-            click_element :discard_review
+          within_element(:review_bar) do
+            click_element(:discard_review)
           end
-          click_element :modal_delete_pending_comments
+          click_element(:modal_delete_pending_comments)
         end
 
         def resolve_review_discussion
-          scroll_to_element :start_review
-          check_element :resolve_review_discussion_checkbox
+          scroll_to_element(:start_review)
+          check_element(:resolve_review_discussion_checkbox)
         end
 
         def unresolve_review_discussion
-          check_element :unresolve_review_discussion_checkbox
+          check_element(:unresolve_review_discussion_checkbox)
         end
 
         def add_comment_to_diff(text)
@@ -214,7 +214,7 @@ module QA
             !find_element(:squash_checkbox).disabled?
           end
 
-          click_element :squash_checkbox
+          click_element(:squash_checkbox)
         end
 
         def merge!
@@ -259,7 +259,7 @@ module QA
             !find_element(:mr_rebase_button).disabled?
           end
 
-          click_element :mr_rebase_button
+          click_element(:mr_rebase_button)
 
           success = wait_until do
             has_text?('Fast-forward merge without a merge commit')
@@ -275,12 +275,12 @@ module QA
         end
 
         def view_email_patches
-          click_element :download_dropdown
+          click_element(:download_dropdown)
           visit_link_in_element(:download_email_patches)
         end
 
         def view_plain_diff
-          click_element :download_dropdown
+          click_element(:download_dropdown)
           visit_link_in_element(:download_plain_diff)
         end
 
