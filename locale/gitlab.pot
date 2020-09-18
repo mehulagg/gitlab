@@ -20623,6 +20623,9 @@ msgstr ""
 msgid "ProtectedBranch|Code owner approval"
 msgstr ""
 
+msgid "ProtectedBranch|Does not apply to users allowed to merge or push."
+msgstr ""
+
 msgid "ProtectedBranch|Protect"
 msgstr ""
 
