@@ -28,9 +28,9 @@ module QA
         #
         Runtime::Release.perform_before_hooks
 
-        Runtime::Feature.enable(options[:enable_feature]) if options.key?(:enable_feature)
+        Runtime::Feature.enable_and_verify(options[:enable_feature]) if options.key?(:enable_feature)
 
-        Runtime::Feature.disable(options[:disable_feature]) if options.key?(:disable_feature) && (@feature_enabled = Runtime::Feature.enabled?(options[:disable_feature]))
+        Runtime::Feature.disable_and_verify(options[:disable_feature]) if options.key?(:disable_feature) && (@feature_enabled = Runtime::Feature.enabled?(options[:disable_feature]))
 
         Specs::Runner.perform do |specs|
           specs.tty = true
@@ -38,8 +38,8 @@ module QA
           specs.options = args if args.any?
         end
       ensure
-        Runtime::Feature.disable(options[:enable_feature]) if options.key?(:enable_feature)
-        Runtime::Feature.enable(options[:disable_feature]) if options.key?(:disable_feature) && @feature_enabled
+        Runtime::Feature.disable_and_verify(options[:enable_feature]) if options.key?(:enable_feature)
+        Runtime::Feature.enable_and_verify(options[:disable_feature]) if options.key?(:disable_feature) && @feature_enabled
       end
 
       def extract_option(name, options, args)
