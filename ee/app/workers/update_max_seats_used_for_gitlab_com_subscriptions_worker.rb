@@ -39,6 +39,10 @@ class UpdateMaxSeatsUsedForGitlabComSubscriptionsWorker # rubocop:disable Scalab
     end
   end
 
+  def self.last_enqueue_time
+    Sidekiq::Cron::Job.find('update_max_seats_used_for_gitlab_com_subscriptions_worker')&.last_enqueue_time
+  end
+
   private
 
   def track_error(subscription)
