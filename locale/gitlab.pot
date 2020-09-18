@@ -5290,6 +5290,27 @@ msgstr ""
 msgid "Cluster type must be specificed for Stages::ClusterEndpointInserter"
 msgstr ""
 
+msgid "ClusterAgents|Configuration"
+msgstr ""
+
+msgid "ClusterAgents|Connect your cluster with the GitLab Agent"
+msgstr ""
+
+msgid "ClusterAgents|Integrate Kubernetes with a GitLab Agent"
+msgstr ""
+
+msgid "ClusterAgents|Integrate with the GitLab Agent"
+msgstr ""
+
+msgid "ClusterAgents|Learn about managing your clusters with a GitLab Agent"
+msgstr ""
+
+msgid "ClusterAgents|Name"
+msgstr ""
+
+msgid "ClusterAgents|The GitLab Kubernetes Agent allows an Infrastructure as Code, GitOps approach to integrating Kubernetes clusters with GitLab. Learn more about the GitLab Kubernetes Agent."
+msgstr ""
+
 msgid "ClusterAgent|This feature is only available for premium plans"
 msgstr ""
 
@@ -5470,6 +5491,12 @@ msgstr ""
 msgid "ClusterIntegration|Clusters are utilized by selecting the nearest ancestor with a matching environment scope. For example, project clusters will override group clusters. %{linkStart}More information%{linkEnd}"
 msgstr ""
 
+msgid "ClusterIntegration|Clusters connected with a certificate"
+msgstr ""
+
+msgid "ClusterIntegration|Connect cluster with certificate"
+msgstr ""
+
 msgid "ClusterIntegration|Connect existing cluster"
 msgstr ""
 
@@ -5620,6 +5647,9 @@ msgstr ""
 msgid "ClusterIntegration|Fluentd is an open source data collector, which lets you unify the data collection and consumption for a better use and understanding of data. It requires at least one of the following logs to be successfully installed."
 msgstr ""
 
+msgid "ClusterIntegration|GitLab Agent managed clusters"
+msgstr ""
+
 msgid "ClusterIntegration|GitLab Container Network Policies"
 msgstr ""
 
@@ -5695,7 +5725,10 @@ msgstr ""
 msgid "ClusterIntegration|Instance type"
 msgstr ""
 
-msgid "ClusterIntegration|Integrate Kubernetes cluster automation"
+msgid "ClusterIntegration|Integrate Kubernetes with a cluster certificate"
+msgstr ""
+
+msgid "ClusterIntegration|Integrate with a cluster certificate"
 msgstr ""
 
 msgid "ClusterIntegration|Issuer Email"
@@ -5744,9 +5777,6 @@ msgid "ClusterIntegration|Kubernetes cluster was successfully created."
 msgstr ""
 
 msgid "ClusterIntegration|Kubernetes clusters allow you to use review apps, deploy your applications, run your pipelines, and much more in an easy way."
-msgstr ""
-
-msgid "ClusterIntegration|Kubernetes clusters can be used to deploy applications and to provide Review Apps for this project"
 msgstr ""
 
 msgid "ClusterIntegration|Kubernetes version"

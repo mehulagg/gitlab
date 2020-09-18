@@ -1,0 +1,29 @@
+- if clusters.empty?
+  = render 'empty_state'
+- else
+  .top-area.adjust
+    .gl-display-block.gl-text-right.gl-my-4.gl-w-full
+      - if clusterable.can_add_cluster?
+        = link_to s_('ClusterIntegration|Connect cluster with certificate'), clusterable.new_path, class: 'btn btn-success js-add-cluster gl-py-2'
+      - else
+        %span.btn.btn-add-cluster.disabled.js-add-cluster.gl-py-2
+          = s_("ClusterIntegration|Connect cluster with certificate")
+
+  - if Feature.enabled?(:clusters_list_redesign)
+    #js-clusters-list-app{ data: js_clusters_list_data(clusterable.index_path(format: :json)) }
+  - else
+    - if @has_ancestor_clusters
+      .bs-callout.bs-callout-info
+        = s_('ClusterIntegration|Clusters are utilized by selecting the nearest ancestor with a matching environment scope. For example, project clusters will override group clusters.')
+        %strong
+          = link_to _('More information'), help_page_path('user/group/clusters/index', anchor: 'cluster-precedence')
+    .clusters-table.js-clusters-list
+      .gl-responsive-table-row.table-row-header{ role: "row" }
+        .table-section.section-60{ role: "rowheader" }
+          = s_("ClusterIntegration|Kubernetes cluster")
+        .table-section.section-30{ role: "rowheader" }
+          = s_("ClusterIntegration|Environment scope")
+        .table-section.section-10{ role: "rowheader" }
+      - @clusters.each do |cluster|
+        = render "cluster", cluster: cluster.present(current_user: current_user)
+    = paginate clusters, theme: "gitlab"

@@ -1,6 +1,17 @@
 # frozen_string_literal: true
 
 module ClustersHelper
+  def cluster_list_tabs(_clusterable)
+    # _clusterable used for ee tabs
+    [
+      {
+        id: 'certificate-clusters',
+        class: 'active',
+        text: s_('ClusterIntegration|Clusters connected with a certificate')
+      }
+    ]
+  end
+
   def create_new_cluster_label(provider: nil)
     case provider
     when 'aws'
@@ -10,6 +21,10 @@ module ClustersHelper
     else
       s_('ClusterIntegration|Create new cluster')
     end
+  end
+
+  def js_cluster_agents_list(clusterable)
+    # Only displays for ee
   end
 
   def js_clusters_list_data(path = nil)
@@ -109,3 +124,5 @@ module ClustersHelper
     can?(user, :admin_cluster, cluster)
   end
 end
+
+ClustersHelper.prepend_if_ee('EE::ClustersHelper')
