@@ -13561,7 +13561,8 @@ CREATE TABLE namespace_settings (
     created_at timestamp with time zone NOT NULL,
     updated_at timestamp with time zone NOT NULL,
     namespace_id integer NOT NULL,
-    prevent_forking_outside_group boolean DEFAULT false NOT NULL
+    prevent_forking_outside_group boolean DEFAULT false NOT NULL,
+    default_branch_name text
 );
 
 CREATE TABLE namespace_statistics (
