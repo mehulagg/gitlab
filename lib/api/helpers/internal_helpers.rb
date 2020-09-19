@@ -31,8 +31,7 @@ module API
       def access_checker_for(actor, protocol)
         access_checker_klass.new(actor.key_or_user, container, protocol,
           authentication_abilities: ssh_authentication_abilities,
-          namespace_path: namespace_path,
-          repository_path: project_path,
+          repository_path: params[:project],
           redirected_path: redirected_path)
       end
 
@@ -96,7 +95,7 @@ module API
       end
       # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
-      # Project id to pass between components that don't share/don't have
+      # Repository id to pass between components that don't share/don't have
       # access to the same filesystem mounts
       def gl_repository
         repo_type.identifier_for_container(container)
@@ -106,8 +105,7 @@ module API
         repository.full_path
       end
 
-      # Return the repository depending on whether we want the wiki or the
-      # regular repository
+      # Return the repository for the given type
       def repository
         @repository ||= repo_type.repository_for(container)
       end

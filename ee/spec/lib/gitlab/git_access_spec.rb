@@ -13,6 +13,7 @@ RSpec.describe Gitlab::GitAccess do
   let(:repository) { project.repository }
   let(:namespace_path) { nil }
   let(:project_path) { nil }
+  let(:repository_path) { "#{namespace_path}/#{project_path}" }
   let(:protocol) { 'web' }
   let(:authentication_abilities) { %i[read_project download_code push_code] }
   let(:redirected_path) { nil }
@@ -737,8 +738,7 @@ RSpec.describe Gitlab::GitAccess do
       project,
       protocol,
       authentication_abilities: authentication_abilities,
-      namespace_path: namespace_path,
-      repository_path: project_path,
+      repository_path: repository_path,
       redirected_path: redirected_path
     )
   end

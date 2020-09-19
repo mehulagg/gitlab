@@ -24,7 +24,6 @@ module Gitlab
 
     override :check_container!
     def check_container!
-      check_namespace!
       ensure_project_on_push!
 
       super
@@ -38,13 +37,25 @@ module Gitlab
       @namespace ||= Namespace.find_by_full_path(namespace_path)
     end
 
+    def namespace_path
+      @namespace_path ||= File.dirname(repository_path).tap do |path|
+        @namespace_path = '' if path == '.'
+      end
+    end
+
+    def project_path
+      @project_path ||= File.basename(repository_path)
+    end
+
     def ensure_project_on_push!
       return if project || deploy_key?
       return unless receive_pack? && changes == ANY && authentication_abilities.include?(:push_code)
+
+      check_namespace!
       return unless user&.can?(:create_projects, namespace)
 
       project_params = {
-        path: repository_path,
+        path: project_path,
         namespace_id: namespace.id,
         visibility_level: Gitlab::VisibilityLevel::PRIVATE
       }

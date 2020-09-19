@@ -12,6 +12,7 @@ RSpec.describe Gitlab::GitAccess do
   let(:project) { create(:project, :repository) }
   let(:project_path) { project&.path }
   let(:namespace_path) { project&.namespace&.path }
+  let(:repository_path) { "#{namespace_path}/#{project_path}" }
   let(:protocol) { 'ssh' }
   let(:authentication_abilities) { %i[read_project download_code push_code] }
   let(:redirected_path) { nil }
@@ -447,7 +448,7 @@ RSpec.describe Gitlab::GitAccess do
         let(:public_project) { create(:project, :public, :repository) }
         let(:project_path) { public_project.path }
         let(:namespace_path) { public_project.namespace.path }
-        let(:access) { access_class.new(nil, public_project, 'web', authentication_abilities: [:download_code], repository_path: project_path, namespace_path: namespace_path) }
+        let(:access) { access_class.new(nil, public_project, 'web', authentication_abilities: [:download_code], repository_path: repository_path) }
 
         context 'when repository is enabled' do
           it 'give access to download code' do
@@ -1156,7 +1157,7 @@ RSpec.describe Gitlab::GitAccess do
   def access
     access_class.new(actor, project, protocol,
                         authentication_abilities: authentication_abilities,
-                        namespace_path: namespace_path, repository_path: project_path,
+                        repository_path: repository_path,
                         redirected_path: redirected_path, auth_result_type: auth_result_type)
   end
 

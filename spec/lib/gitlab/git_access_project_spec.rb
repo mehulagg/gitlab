@@ -9,6 +9,7 @@ RSpec.describe Gitlab::GitAccessProject do
   let(:actor) { user }
   let(:project_path) { project.path }
   let(:namespace_path) { project&.namespace&.path }
+  let(:repository_path) { "#{namespace_path}/#{project_path}" }
   let(:protocol) { 'ssh' }
   let(:authentication_abilities) { %i[read_project download_code push_code] }
   let(:changes) { Gitlab::GitAccess::ANY }
@@ -17,7 +18,7 @@ RSpec.describe Gitlab::GitAccessProject do
   let(:access) do
     described_class.new(actor, container, protocol,
                         authentication_abilities: authentication_abilities,
-                        repository_path: project_path, namespace_path: namespace_path)
+                        repository_path: repository_path)
   end
 
   describe '#check_namespace!' do

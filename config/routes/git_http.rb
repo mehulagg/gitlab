@@ -32,18 +32,8 @@ concern :lfsable do
   end
 end
 
-# Git route for personal and project snippets
-scope(path: ':namespace_id/:repository_id',
-      format: nil,
-      constraints: { namespace_id: Gitlab::PathRegex.personal_and_project_snippets_path_regex, repository_id: /\d+\.git/ },
-      module: :repositories) do
-  concerns :gitactionable
-end
-
-scope(path: '*namespace_id/:repository_id',
-      format: nil,
-      constraints: { namespace_id: Gitlab::PathRegex.full_namespace_route_regex }) do
-  scope(constraints: { repository_id: Gitlab::PathRegex.project_git_route_regex }) do
+scope(path: '*repository_path', format: false) do
+  scope(constraints: { repository_path: Gitlab::PathRegex.repository_git_route_regex }) do
     scope(module: :repositories) do
       concerns :gitactionable
       concerns :lfsable
@@ -51,10 +41,10 @@ scope(path: '*namespace_id/:repository_id',
   end
 
   # Redirect /group/project.wiki.git to the project wiki
-  scope(format: true, constraints: { repository_id: Gitlab::PathRegex.project_wiki_git_route_regex, format: :git }) do
+  scope(constraints: { repository_path: Gitlab::PathRegex.repository_wiki_git_route_regex }) do
     wiki_redirect = redirect do |params, request|
-      project_id = params[:repository_id].delete_suffix('.wiki')
-      path = [params[:namespace_id], project_id, 'wikis'].join('/')
+      container_path = params[:repository_path].delete_suffix('.wiki.git')
+      path = File.join(container_path, '-', 'wikis')
       path << "?#{request.query_string}" unless request.query_string.blank?
       path
     end
@@ -63,18 +53,16 @@ scope(path: '*namespace_id/:repository_id',
   end
 
   # Redirect /group/project/info/refs to /group/project.git/info/refs
-  scope(constraints: { repository_id: Gitlab::PathRegex.project_route_regex }) do
+  scope(constraints: { repository_path: Gitlab::PathRegex.repository_route_regex }) do
     # Allow /info/refs, /info/refs?service=git-upload-pack, and
     # /info/refs?service=git-receive-pack, but nothing else.
     #
     git_http_handshake = lambda do |request|
-      ::Constraints::ProjectUrlConstrainer.new.matches?(request, existence_check: false) &&
-        (request.query_string.blank? ||
-         request.query_string.match(/\Aservice=git-(upload|receive)-pack\z/))
+      ::Constraints::RepositoryRedirectUrlConstrainer.new.matches?(request)
     end
 
     ref_redirect = redirect do |params, request|
-      path = "#{params[:namespace_id]}/#{params[:repository_id]}.git/info/refs"
+      path = "#{params[:repository_path]}.git/info/refs"
       path << "?#{request.query_string}" unless request.query_string.blank?
       path
     end

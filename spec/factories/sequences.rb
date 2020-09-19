@@ -13,4 +13,5 @@ FactoryBot.define do
   sequence(:past_time) { |n| 4.hours.ago + (2 * n).seconds }
   sequence(:iid)
   sequence(:sha) { |n| Digest::SHA1.hexdigest("commit-like-#{n}") }
+  sequence(:oid) { |n| Digest::SHA2.hexdigest("oid-like-#{n}") }
 end
