@@ -31,6 +31,8 @@ module Gitlab
     end
 
     def self.find_container(type, full_path)
+      return [nil, nil, nil] if full_path.blank?
+
       if type.snippet?
         snippet, redirected_path = find_snippet(full_path)
 
@@ -47,26 +49,24 @@ module Gitlab
     end
 
     def self.find_project(project_path)
-      return [nil, nil] if project_path.blank?
-
       project = Project.find_by_full_path(project_path, follow_redirects: true)
-      redirected_path = redirected?(project, project_path) ? project_path : nil
+      redirected_path = project_path if redirected?(project, project_path)
 
       [project, redirected_path]
     end
 
-    def self.redirected?(project, project_path)
-      project && project.full_path.casecmp(project_path) != 0
+    def self.redirected?(container, container_path)
+      container && container.full_path.casecmp(container_path) != 0
     end
 
     # Snippet_path can be either:
     # - snippets/1
     # - h5bp/html5-boilerplate/snippets/53
     def self.find_snippet(snippet_path)
-      return [nil, nil] if snippet_path.blank?
-
       snippet_id, project_path = extract_snippet_info(snippet_path)
-      project, redirected_path = find_project(project_path)
+      return [nil, nil] unless snippet_id
+
+      project, redirected_path = find_project(project_path) if project_path
 
       [Snippet.find_by_id_and_project(id: snippet_id, project: project), redirected_path]
     end
@@ -74,19 +74,23 @@ module Gitlab
     # Wiki path can be either:
     # - namespace/project
     # - group/subgroup/project
+    #
+    # And also in EE:
+    # - group
+    # - group/subgroup
     def self.find_wiki(wiki_path)
-      return [nil, nil] if wiki_path.blank?
+      container_path = wiki_path.delete_suffix('.wiki')
+      container = Routable.find_by_full_path(container_path, follow_redirects: true)
+      redirected_path = container_path if redirected?(container, container_path)
 
-      project, redirected_path = find_project(wiki_path)
-
-      [project&.wiki, redirected_path]
+      [container&.try(:wiki), redirected_path]
     end
 
     def self.extract_snippet_info(snippet_path)
       path_segments = snippet_path.split('/')
       snippet_id = path_segments.pop
-      path_segments.pop # Remove snippets from path
-      project_path = File.join(path_segments)
+      path_segments.pop # Remove 'snippets' from path
+      project_path = File.join(path_segments).presence
 
       [snippet_id, project_path]
     end

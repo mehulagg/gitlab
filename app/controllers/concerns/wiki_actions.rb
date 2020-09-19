@@ -179,6 +179,10 @@ module WikiActions
   end
   # rubocop:enable Gitlab/ModuleWithInstanceVariables
 
+  def git_access
+    render 'shared/wikis/git_access'
+  end
+
   private
 
   def container
