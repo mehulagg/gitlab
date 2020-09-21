@@ -205,6 +205,16 @@ RSpec.describe Member do
       it { expect(described_class.non_request).to include @accepted_request_member }
     end
 
+    describe '.not_accepted_invitations' do
+      let(:not_accepted_invitation) { create(:project_member, :invited) }
+      let(:accepted_invitation) { create(:project_member, :invited, invite_accepted_at: Date.today) }
+
+      subject { described_class.not_accepted_invitations }
+
+      it { is_expected.to include(not_accepted_invitation) }
+      it { is_expected.not_to include(accepted_invitation) }
+    end
+
     describe '.not_accepted_invitations_by_user' do
       let(:invited_by_user) { create(:project_member, :invited, project: project, created_by: @owner_user) }
 
@@ -216,6 +226,27 @@ RSpec.describe Member do
       subject { described_class.not_accepted_invitations_by_user(@owner_user) }
 
       it { is_expected.to contain_exactly(invited_by_user) }
+    end
+
+    describe '.not_accepted_or_expired_recent_invitations' do
+      let(:recent_invitation_not_expiring) { create(:group_member, :invited, created_at: 1.day.ago) }
+      let(:recent_invitation_expiring_tomorrow) { create(:group_member, :invited, created_at: 1.day.ago, expires_at: 1.day.from_now) }
+
+      before do
+        create(:group_member, created_at: 2.days.ago) # not an invitation
+        create(:group_member, :invited, created_at: 1.day.ago, invite_accepted_at: Date.today) # invitation already accepted
+        create(:group_member, :invited, created_at: 1.day.ago, expires_at: Date.today) # expires before tomorrow
+        create(:group_member, :invited, created_at: 11.days.ago) # created more than 10 days ago
+        create(:group_member, :invited, created_at: 3.hours.ago) # created less than 1 day ago
+      end
+
+      subject { described_class.not_accepted_or_expired_recent_invitations }
+
+      around do |example|
+        travel_to(Time.zone.local(2020, 9, 3, 14, 23, 44)) { example.run }
+      end
+
+      it { is_expected.to contain_exactly(recent_invitation_not_expiring, recent_invitation_expiring_tomorrow) }
     end
 
     describe '.search_invite_email' do
