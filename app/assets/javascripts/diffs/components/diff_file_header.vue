@@ -156,7 +156,9 @@ export default {
     },
     showEditButton() {
       return (
-        this.diffFile.blob?.readable_text && !this.diffFile.deleted_file && this.diffFile.edit_path
+        this.diffFile.blob?.readable_text &&
+        !this.diffFile.deleted_file &&
+        (this.diffFile.edit_path || this.diffFile.ide_edit_path)
       );
     },
   },
@@ -296,15 +298,25 @@ export default {
           <gl-dropdown-item ref="viewButton" :href="diffFile.view_path" target="_blank">
             {{ viewFileButtonText }}
           </gl-dropdown-item>
-          <gl-dropdown-item
-            v-if="showEditButton"
-            ref="editButton"
-            :href="diffFile.edit_path"
-            class="js-edit-blob"
-            @click="showForkMessage"
-          >
-            {{ __('Edit file') }}
-          </gl-dropdown-item>
+          <template v-if="showEditButton">
+            <gl-dropdown-item
+              v-if="diffFile.edit_path"
+              ref="editButton"
+              :href="diffFile.edit_path"
+              class="js-edit-blob"
+              @click="showForkMessage"
+            >
+              {{ __('Edit in single-file editor') }}
+            </gl-dropdown-item>
+            <gl-dropdown-item
+              v-if="diffFile.edit_path"
+              ref="ideEditButton"
+              :href="diffFile.ide_edit_path"
+              class="js-ide-edit-blob"
+            >
+              {{ __('Edit in Web IDE') }}
+            </gl-dropdown-item>
+          </template>
 
           <gl-dropdown-divider v-if="!diffFile.is_fully_expanded || diffHasDiscussions(diffFile)" />
 

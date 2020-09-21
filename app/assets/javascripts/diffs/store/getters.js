@@ -61,7 +61,7 @@ export const diffHasExpandedDiscussions = state => diff => {
       return acc;
     }, []),
   };
-  return lines[state.diffViewType]
+  return lines[window.gon?.features?.unifiedDiffLines ? 'inline' : state.diffViewType]
     .filter(l => l.discussions.length >= 1)
     .some(l => l.discussionsExpanded);
 };
