@@ -6,6 +6,8 @@ module EpicTreeSorting
   include RelativePositioning
 
   class_methods do
+    extend ::Gitlab::Utils::Override
+
     def relative_positioning_query_base(object)
       # Only non-root nodes are sortable.
       return none if object.root_epic_tree_node?
@@ -30,6 +32,7 @@ module EpicTreeSorting
       :epic_id
     end
 
+    override :move_nulls
     def move_nulls(objects, **args)
       super(objects&.reject(&:root_epic_tree_node?), **args)
     end
