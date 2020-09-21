@@ -6355,6 +6355,9 @@ msgstr ""
 msgid "Collapse"
 msgstr ""
 
+msgid "Collapse all threads"
+msgstr ""
+
 msgid "Collapse approvers"
 msgstr ""
 
@@ -10423,6 +10426,9 @@ msgid "Expand all"
 msgstr ""
 
 msgid "Expand all files"
+msgstr ""
+
+msgid "Expand all threads"
 msgstr ""
 
 msgid "Expand approvers"
@@ -26730,9 +26736,6 @@ msgid "Toggle Markdown preview"
 msgstr ""
 
 msgid "Toggle Sidebar"
-msgstr ""
-
-msgid "Toggle all threads"
 msgstr ""
 
 msgid "Toggle backtrace"
