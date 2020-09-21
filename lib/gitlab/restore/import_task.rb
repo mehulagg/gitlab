@@ -131,11 +131,9 @@ module Gitlab
 
         service = Projects::GitlabProjectsImportService.new(
           user,
-          {
-            namespace_id: group.id,
-            path: project_path,
-            file: File.new(filename)
-          }
+          namespace_id: group.id,
+          path: project_path,
+          file: File.new(filename)
         )
 
         project = service.execute
