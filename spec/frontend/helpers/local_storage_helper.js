@@ -35,7 +35,11 @@ export const createLocalStorageSpy = () => {
     clear: jest.fn(() => {
       storage = {};
     }),
-    getItem: jest.fn(key => storage[key]),
+    getItem: jest.fn(key => {
+      const item = storage[key];
+
+      return item === undefined ? null : item;
+    }),
     setItem: jest.fn((key, value) => {
       storage[key] = value;
     }),
