@@ -35,7 +35,7 @@ module Elastic
         project_ids = options[:project_ids]
         confidential_filter = options[:confidential]
 
-        if confidential_filter.present? && %w(yes no).include?(confidential_filter) && Feature.enabled?(:search_filter_by_confidential)
+        if Feature.enabled?(:search_filter_by_confidential) && confidential_filter.present? && %w(yes no).include?(confidential_filter)
           query_hash[:query][:bool][:filter] << { term: { confidential: confidential_filter == 'yes' } }
         end
 
