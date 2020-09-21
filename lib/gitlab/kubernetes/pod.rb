@@ -33,16 +33,6 @@ module Gitlab
         attributes.dig('status', 'phase')
       end
 
-      def to_hash
-        {
-          status: status&.downcase,
-          pod_name: name,
-          tooltip: "#{name} (#{status})",
-          track: track,
-          stable: stable?
-        }
-      end
-
       def order
         stable? ? 1 : 0
       end

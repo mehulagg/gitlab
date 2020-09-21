@@ -45,7 +45,9 @@ module Gitlab
         matching_pods = take_pods_matching_any_deployment_track(deployments, pods)
         extra_pending_pods = create_inferred_pending_pods(deployments, matching_pods)
         rollout_status_pods = matching_pods + extra_pending_pods
-        sorted_rollout_status_pods = rollout_status_pods.sort_by(&:order).map(&:to_hash)
+        sorted_rollout_status_pods = rollout_status_pods.sort_by(&:order).map do |pod|
+          to_hash(pod)
+        end
 
         new(deployments, pods: sorted_rollout_status_pods, legacy_deployments: legacy_deployments)
       end
@@ -110,6 +112,16 @@ module Gitlab
             }
           }
         })
+      end
+
+      def self.to_hash(pod)
+        {
+          status: pod.status&.downcase,
+          pod_name: pod.name,
+          tooltip: "#{pod.name} (#{pod.status})",
+          track: pod.track,
+          stable: pod.stable?
+        }
       end
     end
   end
