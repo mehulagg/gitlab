@@ -1,17 +1,5 @@
 #import "ee_else_ce/boards/queries/board_list.fragment.graphql"
-
-fragment BoardEpicNode on BoardEpic {
-  state
-  reference(full: true)
-  relationPath
-  createdAt
-  closedAt
-  hasChildren
-  hasIssues
-  group {
-    fullPath
-  }
-}
+#import "./board_epic.fragment.graphql"
 
 query BoardEE(
   $fullPath: ID!

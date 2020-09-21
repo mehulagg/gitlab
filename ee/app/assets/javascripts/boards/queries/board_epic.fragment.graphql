@@ -1,0 +1,10 @@
+fragment BoardEpicNode on BoardEpic {
+  id
+  iid
+  title
+  state
+  reference
+  webUrl
+  createdAt
+  closedAt
+}
