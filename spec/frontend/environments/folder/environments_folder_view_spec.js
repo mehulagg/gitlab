@@ -46,9 +46,9 @@ describe('Environments Folder View', () => {
     wrapper = mount(EnvironmentsFolderViewComponent, { propsData: mockData });
   };
 
-  const findEnvironmentsTabAvailable = () => wrapper.find('.js-environments-tab-available');
+  const findEnvironmentsTabAvailable = () => wrapper.find('.js-environments-tab-available > a');
 
-  const findEnvironmentsTabStopped = () => wrapper.find('.js-environments-tab-stopped');
+  const findEnvironmentsTabStopped = () => wrapper.find('.js-environments-tab-stopped > a');
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
