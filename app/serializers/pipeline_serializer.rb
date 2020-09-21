@@ -44,7 +44,7 @@ class PipelineSerializer < BaseSerializer
       :latest_statuses_ordered_by_stage,
       :latest_builds_report_results,
       :manual_actions,
-      :retryable_builds_without_project,
+      :retryable_builds,
       :scheduled_actions,
       :stages,
       :latest_statuses,
@@ -65,7 +65,7 @@ class PipelineSerializer < BaseSerializer
         triggered_by_pipeline: [{ project: [:route, { namespace: :route }] }, :user],
         triggered_pipelines: [
           {
-            project: [:route, { namespace: :route }],
+            project: [:route, { namespace: :route }]
           },
           :source_job,
           :latest_statuses,
