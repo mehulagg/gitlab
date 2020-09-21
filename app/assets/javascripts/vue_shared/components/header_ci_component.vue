@@ -1,11 +1,11 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlTooltipDirective, GlLink, GlDeprecatedButton } from '@gitlab/ui';
-import { __, sprintf } from '~/locale';
+import { GlTooltipDirective, GlLink, GlDeprecatedButton, GlTooltip } from '@gitlab/ui';
 import CiIconBadge from './ci_badge_link.vue';
 import TimeagoTooltip from './time_ago_tooltip.vue';
 import UserAvatarImage from './user_avatar/user_avatar_image.vue';
 import { glEmojiTag } from '../../emoji';
+import { __, sprintf } from '../../locale';
 
 /**
  * Renders header component for job and pipeline page based on UI mockups
@@ -21,10 +21,12 @@ export default {
     UserAvatarImage,
     GlLink,
     GlDeprecatedButton,
+    GlTooltip,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  EMOJI_REF: 'EMOJI_REF',
   props: {
     status: {
       type: Object,
@@ -72,12 +74,17 @@ export default {
       return this.user?.avatarUrl || this.user?.avatar_url;
     },
     statusTooltipHTML() {
-      // GraphQL returns `status.message` and Rest `status_tooltip_html`
-      const { message, emoji } = this.user?.status || {};
+      // Rest `status_tooltip_html` which is a ready to work
+      // html for the emoji and the status text inside a tooltip.
+      // GraphQL returns `status.emoji` and `status.message` which
+      // needs to be combined to make the html we want.
+      const { emoji } = this.user?.status || {};
       const emojiHtml = emoji ? glEmojiTag(emoji) : '';
-      const statusMessage = `${emojiHtml}${message || ''}`;
 
-      return statusMessage || this.user?.status_tooltip_html;
+      return emojiHtml || this.user?.status_tooltip_html;
+    },
+    message() {
+      return this.user?.status?.message;
     },
   },
 
@@ -119,7 +126,15 @@ export default {
 
           {{ user.name }}
         </gl-link>
-        <span v-if="statusTooltipHTML" v-html="statusTooltipHTML"></span>
+        <gl-tooltip v-if="message" :target="() => $refs[$options.EMOJI_REF]">
+          {{ message }}
+        </gl-tooltip>
+        <span
+          v-if="statusTooltipHTML"
+          :ref="$options.EMOJI_REF"
+          :data-testid="message"
+          v-html="statusTooltipHTML"
+        ></span>
       </template>
     </section>
 

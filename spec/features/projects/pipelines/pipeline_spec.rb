@@ -179,7 +179,7 @@ RSpec.describe 'Pipeline', :js do
         visit project_pipeline_path(project, pipeline)
 
         within '[data-testid="pipeline-header-content"]' do
-          expect(page).to have_content(status.message)
+          expect(page).to have_selector("[data-testid='#{status.message}']")
           expect(page).to have_selector("[data-name='#{status.emoji}']")
         end
       end

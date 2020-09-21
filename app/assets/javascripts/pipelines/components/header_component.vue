@@ -1,12 +1,12 @@
 <script>
-import { GlLoadingIcon, GlModal, GlModalDirective, GlButton } from '@gitlab/ui';
-import { isEmpty } from 'lodash';
+import { GlAlert, GlButton, GlLoadingIcon, GlModal, GlModalDirective } from '@gitlab/ui';
 import Flash from '~/flash';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import getPipelineQuery from '../graphql/queries/get_pipeline_header_data.query.graphql';
 import ciHeader from '~/vue_shared/components/header_ci_component.vue';
 import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
+import getPipelineQuery from '../graphql/queries/get_pipeline_header_data.query.graphql';
+import { LOAD_FAILURE, DEFAULT } from '../constants';
 
 const DELETE_MODAL_ID = 'pipeline-delete-modal';
 
@@ -14,12 +14,16 @@ export default {
   name: 'PipelineHeaderSection',
   components: {
     ciHeader,
+    GlAlert,
     GlButton,
     GlLoadingIcon,
     GlModal,
   },
   directives: {
     GlModal: GlModalDirective,
+  },
+  errorTexts: {
+    [LOAD_FAILURE]: __('We are currently unable to fetch data for the pipeline header.'),
   },
   inject: {
     // Receive `cancel`, `delete`, `fullProject` and `retry`
@@ -43,6 +47,9 @@ export default {
         };
       },
       update: data => data.project.pipeline,
+      error() {
+        this.reportFailure(LOAD_FAILURE);
+      },
       pollInterval: 10000,
       watchLoading(isLoading) {
         if (!isLoading) {
@@ -56,7 +63,8 @@ export default {
   },
   data() {
     return {
-      pipeline: {},
+      pipeline: null,
+      failureType: null,
       isCanceling: false,
       isRetrying: false,
       isDeleting: false,
@@ -68,20 +76,40 @@ export default {
         'Are you sure you want to delete this pipeline? Doing so will expire all pipeline caches and delete all related objects, such as builds, logs, artifacts, and triggers. This action cannot be undone.',
       );
     },
+    hasError() {
+      return this.failureType;
+    },
     hasPipelineData() {
-      return this.pipeline && !isEmpty(this.pipeline);
+      return this.pipeline;
     },
     isLoadingInitialQuery() {
       return this.$apollo.queries.pipeline.loading && !this.hasPipelineData;
     },
     status() {
-      return this?.pipeline.status;
+      return this.pipeline?.status;
     },
     shouldRenderContent() {
       return !this.isLoadingInitialQuery && this.hasPipelineData;
     },
+    failure() {
+      switch (this.failureType) {
+        case LOAD_FAILURE:
+          return {
+            text: this.$options.errorTexts[LOAD_FAILURE],
+            variant: 'danger',
+          };
+        default:
+          return {
+            text: this.$options.errorTexts[DEFAULT],
+            variant: 'danger',
+          };
+      }
+    },
   },
   methods: {
+    reportFailure(errorType) {
+      this.failureType = errorType;
+    },
     async postAction(path) {
       try {
         await axios.post(path);
@@ -92,11 +120,11 @@ export default {
     },
     async cancelPipeline() {
       this.isCanceling = true;
-      await this.postAction(this.paths.cancel);
+      this.postAction(this.paths.cancel);
     },
     async retryPipeline() {
       this.isRetrying = true;
-      await this.postAction(this.paths.retry);
+      this.postAction(this.paths.retry);
     },
     async deletePipeline() {
       this.isDeleting = true;
@@ -117,6 +145,7 @@ export default {
 </script>
 <template>
   <div class="pipeline-header-container">
+    <gl-alert v-if="hasError" :variant="failure.variant">{{ failure.text }}</gl-alert>
     <ci-header
       v-if="shouldRenderContent"
       :status="pipeline.detailedStatus"

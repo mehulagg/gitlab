@@ -25,3 +25,6 @@ export const RAW_TEXT_WARNING = s__(
 export const PIPELINE_RUNNING = 'RUNNING';
 export const PIPELINE_CANCELED = 'CANCELED';
 export const PIPELINE_FAILED = 'FAILED';
+
+export const LOAD_FAILURE = 'LOAD_FAILURE';
+export const DEFAULT = 'DEFAULT';
