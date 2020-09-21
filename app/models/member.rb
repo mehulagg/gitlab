@@ -78,7 +78,13 @@ class Member < ApplicationRecord
   scope :request, -> { where.not(requested_at: nil) }
   scope :non_request, -> { where(requested_at: nil) }
 
-  scope :not_accepted_invitations_by_user, -> (user) { invite.where(invite_accepted_at: nil, created_by: user) }
+  scope :not_accepted_invitations, -> { invite.where(invite_accepted_at: nil) }
+  scope :not_accepted_invitations_by_user, -> (user) { not_accepted_invitations.where(created_by: user) }
+  scope :not_accepted_or_expired_recent_invitations, -> (today = Date.current) do
+    not_accepted_invitations
+    .where(created_at: today - 10..today)
+    .where(arel_table[:expires_at].gt(today).or(arel_table[:expires_at].eq(nil)))
+  end
 
   scope :has_access, -> { active.where('access_level > 0') }
 
