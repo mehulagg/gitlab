@@ -17,12 +17,17 @@ module Autocomplete
       @params = params
     end
 
+    DEFAULT_AUTOCOMPLETE_LIMIT = 5
+
     def execute
       return [] unless vulnerable.feature_available?(:security_dashboard)
 
       ::Security::VulnerabilitiesFinder # rubocop: disable CodeReuse/Finder
         .new(vulnerable, params)
         .execute
+        .autocomplete_search(params[:search].to_s)
+        .with_limit(DEFAULT_AUTOCOMPLETE_LIMIT)
+        .order_id_desc
         .visible_to_user_and_access_level(current_user, ::Gitlab::Access::DEVELOPER)
     end
   end

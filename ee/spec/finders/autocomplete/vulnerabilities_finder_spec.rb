@@ -7,21 +7,20 @@ RSpec.describe Autocomplete::VulnerabilitiesFinder do
     let!(:group) { create(:group) }
     let!(:project) { create(:project, group: group) }
     let!(:vulnerability) { create(:vulnerability, project: project) }
+    let(:params) { {} }
 
     let_it_be(:user) { create(:user) }
 
-    subject { described_class.new(user, vulnerable).execute }
+    subject { described_class.new(user, vulnerable, params).execute }
 
-    context 'when vulnerable is project' do
-      let(:vulnerable) { project }
-
+    shared_examples 'autocomplete vulnerabilities finder' do
       context 'when user does not have access to project' do
         it { is_expected.to be_empty }
       end
 
       context 'when user does has access to project' do
         before do
-          project.add_developer(user)
+          vulnerable.add_developer(user)
         end
 
         context 'when security dashboards are not enabled' do
@@ -34,34 +33,54 @@ RSpec.describe Autocomplete::VulnerabilitiesFinder do
           end
 
           it { is_expected.to include(vulnerability) }
+
+          context 'when multiple vulnerabilities are found' do
+            before do
+              create_list(:vulnerability, 10, project: project)
+            end
+
+            it 'returns max 5 items' do
+              expect(subject.count).to eq(5)
+            end
+
+            it 'is sorted descending by id' do
+              expect(subject).to be_sorted(:id, :desc)
+            end
+          end
+
+          context 'when search is provided in params' do
+            context 'and it matches ID of vulnerability' do
+              let(:params) { { search: vulnerability.id.to_s } }
+
+              it { is_expected.to include(vulnerability) }
+            end
+
+            context 'and it matches title of vulnerability' do
+              let(:params) { { search: vulnerability.title } }
+
+              it { is_expected.to include(vulnerability) }
+            end
+
+            context 'and it does not match neither title or id of vulnerability' do
+              let(:params) { { search: non_existing_record_id.to_s } }
+
+              it { is_expected.to be_empty }
+            end
+          end
         end
       end
     end
 
-    context 'when vulnerable is group' do
+    context 'when vulnerable is project' do
       let(:vulnerable) { project }
 
-      context 'when user does not have access to group' do
-        it { is_expected.to be_empty }
-      end
+      it_behaves_like 'autocomplete vulnerabilities finder'
+    end
 
-      context 'when user does has access to group' do
-        before do
-          group.add_developer(user)
-        end
+    context 'when vulnerable is group' do
+      let(:vulnerable) { group }
 
-        context 'when security dashboards are not enabled' do
-          it { is_expected.to be_empty }
-        end
-
-        context 'when security dashboards are enabled' do
-          before do
-            stub_licensed_features(security_dashboard: true)
-          end
-
-          it { is_expected.to include(vulnerability) }
-        end
-      end
+      it_behaves_like 'autocomplete vulnerabilities finder'
     end
   end
 end
