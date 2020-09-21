@@ -137,15 +137,14 @@ RSpec.describe 'Triggers', :js do
   end
 
   context 'when ci_pipeline_triggers_settings_vue_ui is enabled' do
-    before do
-      stub_feature_flags(ci_pipeline_triggers_settings_vue_ui: true)
-    end
-
     it_behaves_like 'triggers page'
   end
 
   context 'when ci_pipeline_triggers_settings_vue_ui is disabled' do
+    before do
+      stub_feature_flags(ci_pipeline_triggers_settings_vue_ui: false)
+    end
+
     it_behaves_like 'triggers page'
   end
-
 end

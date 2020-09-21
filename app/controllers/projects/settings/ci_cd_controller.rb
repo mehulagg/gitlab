@@ -119,8 +119,6 @@ module Projects
       end
 
       def define_triggers_variables
-        # Note: When FF ci_pipeline_triggers_settings_vue_ui is removed,
-        # @triggers should be removed as well.
         @triggers = @project.triggers
           .present(current_user: current_user)
 
