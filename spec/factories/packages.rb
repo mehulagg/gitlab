@@ -96,12 +96,15 @@ FactoryBot.define do
 
       transient do
         without_package_files { false }
+        without_project_username { false }
       end
 
-      after :build do |package|
-        package.conan_metadatum.package_username = Packages::Conan::Metadatum.package_username_from(
-          full_path: package.project.full_path
-        )
+      after :build do |package, evaluator|
+        unless evaluator.without_project_username
+          package.conan_metadatum.package_username = Packages::Conan::Metadatum.package_username_from(
+            full_path: package.project.full_path
+          )
+        end
       end
 
       sequence(:name) { |n| "package-#{n}" }

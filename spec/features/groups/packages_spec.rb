@@ -38,7 +38,7 @@ RSpec.describe 'Group Packages' do
 
     context 'when there are packages' do
       let_it_be(:second_project) { create(:project, name: 'second-project', group: group) }
-      let_it_be(:conan_package) { create(:conan_package, project: project, name: 'zzz', created_at: 1.day.ago, version: '1.0.0') }
+      let_it_be(:conan_package) { create(:conan_package, without_project_username: true, project: project, name: 'zzz', created_at: 1.day.ago, version: '1.0.0') }
       let_it_be(:maven_package) { create(:maven_package, project: second_project, name: 'aaa', created_at: 2.days.ago, version: '2.0.0') }
       let_it_be(:packages) { [conan_package, maven_package] }
 
