@@ -50,7 +50,7 @@ module QA
           end
 
           def click_run_pipeline_button
-            click_element :run_pipeline_button
+            click_element :run_pipeline_button, Page::Project::Pipeline::New
           end
         end
       end
