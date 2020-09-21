@@ -12,9 +12,11 @@ import {
   GlInputGroupText,
   GlLoadingIcon,
 } from '@gitlab/ui';
+import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 import download from '~/lib/utils/downloader';
 import {
   DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
+  DAST_SITE_VALIDATION_METHOD_HTTP_HEADER,
   DAST_SITE_VALIDATION_METHODS,
   DAST_SITE_VALIDATION_STATUS,
 } from '../constants';
@@ -24,6 +26,7 @@ import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graph
 export default {
   name: 'DastSiteValidation',
   components: {
+    ClipboardButton,
     GlAlert,
     GlButton,
     GlCard,
@@ -97,6 +100,9 @@ export default {
     isTextFileValidation() {
       return this.validationMethod === DAST_SITE_VALIDATION_METHOD_TEXT_FILE;
     },
+    isHttpHeaderValidation() {
+      return this.validationMethod === DAST_SITE_VALIDATION_METHOD_HTTP_HEADER;
+    },
     textFileName() {
       return `GitLab-DAST-Site-Validation-${this.token}.txt`;
     },
@@ -165,6 +171,7 @@ export default {
       {{ s__('DastProfiles|Site is not validated yet, please follow the steps.') }}
     </gl-alert>
     <gl-form-group :label="s__('DastProfiles|Step 1 - Choose site validation method')">
+      <!-- @TODO - stacked is set to "true" in @gitlab/ui and can't be overriden as-is-->
       <gl-form-radio-group v-model="validationMethod" :options="$options.validationMethodOptions" />
     </gl-form-group>
     <gl-form-group
@@ -182,6 +189,18 @@ export default {
       >
         {{ textFileName }}
       </gl-button>
+    </gl-form-group>
+    <!-- @TODO: Add "Learn more" link -->
+    <gl-form-group
+      v-else-if="isHttpHeaderValidation"
+      :label="s__('DastProfiles|Step 2 - Add following http header to your site')"
+    >
+      <!-- @TODO: move header-string to computed prop -->
+      <code class="p-2 gl-bg-black gl-text-white">{{ `gitlab-dast:uuid-code-${token}` }}</code>
+      <clipboard-button
+        :text="`gitlab-dast:uuid-code-${token}`"
+        :title="__('Copy meta tag to clipboard')"
+      />
     </gl-form-group>
     <gl-form-group :label="locationStepLabel" class="mw-460">
       <gl-form-input-group>
