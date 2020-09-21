@@ -29,4 +29,19 @@ module ProfilesHelper
   def user_profile?
     params[:controller] == 'users'
   end
+
+  def ssh_key_delete_modal_data(key, is_admin)
+    {
+        qa_selector: 'delete-key-button',
+        path: path_to_key(key, is_admin),
+        method: 'delete',
+        modal_attributes: {
+            modalId: 'user-profile-ssh-key-delete-modal',
+            title: _('Are you sure you want to delete the %{key} SSH key?') % { key: key.title },
+            message: _('This action cannot be undone, and will permanently delete the %{key} SSH key') % { key: key.title },
+            okVariant: 'danger',
+            okTitle: _('Delete')
+        }
+    }
+  end
 end
