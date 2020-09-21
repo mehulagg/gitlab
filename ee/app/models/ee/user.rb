@@ -360,7 +360,7 @@ module EE
 
     def gitlab_bot?
       strong_memoize(:gitlab_bot) do
-          bot? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
+        bot? && ::Gitlab::Com.gitlab_com_group_member_id?(id)
       end
     end
 

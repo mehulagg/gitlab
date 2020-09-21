@@ -1285,7 +1285,6 @@ RSpec.describe User do
   end
 
   describe '#gitlab_bot?' do
-
     subject { user.gitlab_bot? }
 
     let_it_be(:gitlab_group) { create(:group, name: 'gitlab-com') }
