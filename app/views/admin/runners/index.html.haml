@@ -39,7 +39,9 @@
       = render partial: 'ci/runner/how_to_setup_runner',
                 locals: { registration_token: Gitlab::CurrentSettings.runners_registration_token,
                           type: 'shared',
-                          reset_token_url: reset_registration_token_admin_application_settings_path }
+                          reset_token_url: reset_registration_token_admin_application_settings_path,
+                          instructions_path: runner_setup_scripts_admin_runners_path,
+                          platforms_path: runner_setup_platforms_path }
 
 .row
   .col-sm-9

@@ -5,6 +5,7 @@ import registrySettingsApp from '~/registry/settings/registry_settings_bundle';
 import initVariableList from '~/ci_variable_list';
 import initDeployFreeze from '~/deploy_freeze';
 import initSettingsPipelinesTriggers from '~/ci_settings_pipeline_triggers';
+import { initInstallRunner } from '~/pages/shared/mount_runner_instructions';
 
 document.addEventListener('DOMContentLoaded', () => {
   // Initialize expandable settings panels
@@ -45,4 +46,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initDeployFreeze();
 
   initSettingsPipelinesTriggers();
+  initInstallRunner();
 });
