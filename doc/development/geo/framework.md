@@ -556,6 +556,10 @@ Metrics are gathered by `Geo::MetricsUpdateWorker`, persisted in
    end
    ```
 
+1. Make sure the factory also allows setting a `project` attribute. If the model
+   does not have a direct relation to a project, you can use a `transient`
+   attribute. Check out `spec/factories/merge_request_diffs.rb` for an example.
+
 Widget replication and verification metrics should now be available in the API,
 the Admin Area UI, and Prometheus!
 

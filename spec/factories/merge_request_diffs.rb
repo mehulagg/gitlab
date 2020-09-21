@@ -2,8 +2,12 @@
 
 FactoryBot.define do
   factory :merge_request_diff do
+    transient do
+      project { build(:project) }
+    end
+
     merge_request do
-      build(:merge_request) do |merge_request|
+      build(:merge_request, project: project) do |merge_request|
         # MergeRequest should not create a MergeRequestDiff in the callback
         allow(merge_request).to receive(:ensure_merge_request_diff)
       end

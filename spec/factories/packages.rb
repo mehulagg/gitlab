@@ -142,12 +142,13 @@ FactoryBot.define do
   end
 
   factory :package_file, class: 'Packages::PackageFile' do
-    package
+    package { association :package, project: project }
 
     file_name { 'somefile.txt' }
 
     transient do
       file_fixture { 'spec/fixtures/packages/conan/recipe_files/conanfile.py' }
+      project { build(:project) }
     end
 
     after(:build) do |package_file, evaluator|

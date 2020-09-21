@@ -3,12 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Geo::GeoNodeStatusCheck do
+  include ::EE::GeoHelpers
+
   let(:current_node) { create(:geo_node) }
   let(:geo_node_status) do
     build(:geo_node_status, :replicated_and_verified, geo_node: current_node)
   end
 
   let(:subject) { described_class.new(geo_node_status, current_node) }
+
+  before do
+    stub_current_geo_node(current_node)
+  end
 
   describe '#replication_verification_complete?' do
     before do

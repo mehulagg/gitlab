@@ -21,6 +21,7 @@ RSpec.describe 'gitlab:geo rake tasks', :geo do
     end
 
     before do
+      stub_current_geo_node(current_node)
       allow(GeoNodeStatus).to receive(:current_node_status).and_return(geo_node_status)
       allow(Gitlab.config.geo.registry_replication).to receive(:enabled).and_return(true)
 

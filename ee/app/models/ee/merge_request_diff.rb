@@ -24,8 +24,8 @@ module EE
       scope :has_external_diffs, -> { with_files.where(stored_externally: true) }
       scope :project_id_in, ->(ids) { where(merge_request_id: ::MergeRequest.where(target_project_id: ids)) }
 
-      scope :checksummed, -> { has_external_diffs.where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksummed) }
-      scope :checksum_failed, -> { has_external_diffs.where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksum_failed) }
+      scope :checksummed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksummed) }
+      scope :checksum_failed, -> { where(merge_request_diff_detail: ::MergeRequestDiffDetail.checksum_failed) }
     end
 
     class_methods do
