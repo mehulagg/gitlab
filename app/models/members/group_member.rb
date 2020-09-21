@@ -60,6 +60,12 @@ class GroupMember < Member
     super
   end
 
+  def send_reminder(reminder_index)
+    run_after_commit_or_now { notification_service.invite_group_member_reminder(self, @raw_invite_token, reminder_index) }
+
+    super
+  end
+
   def post_create_hook
     run_after_commit_or_now { notification_service.new_group_member(self) }
 

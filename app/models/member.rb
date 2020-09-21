@@ -370,6 +370,14 @@ class Member < ApplicationRecord
     send_invite
   end
 
+  def send_invitation_reminder(reminder_index)
+    return unless invite?
+
+    generate_invite_token! unless @raw_invite_token
+
+    send_reminder(reminder_index)
+  end
+
   def create_notification_setting
     user.notification_settings.find_or_create_for(source)
   end
@@ -407,6 +415,10 @@ class Member < ApplicationRecord
   private
 
   def send_invite
+    # override in subclass
+  end
+
+  def send_reminder(reminder_index)
     # override in subclass
   end
 
