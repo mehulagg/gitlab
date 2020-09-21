@@ -63,7 +63,7 @@ module Gitlab
         raise Gitlab::ImportExport::Error, 'Unrecognised import_type param' unless ALL_IMPORT_TYPES.include?(import_type)
 
         ensure_file_exists!
-        ensure_correct_user!
+        user # trigger the User.find_by! to ensure the user exists
         ensure_group_exists! if import_type == :project
       end
 
@@ -77,10 +77,6 @@ module Gitlab
         unless File.exist?(export_file)
           raise Gitlab::ImportExport::Error, "Bundle #{export_file} does not exist"
         end
-      end
-
-      def ensure_correct_user!
-        user # && ask the user to confirm
       end
 
       def group
@@ -124,6 +120,7 @@ module Gitlab
         end
       end
 
+      # rubocop: disable CodeReuse/ActiveRecord
       def import_project(group:, filename:)
         project_path = project_path_from(filename)
 
@@ -142,6 +139,7 @@ module Gitlab
           logger.info ">>> Project import errors: #{project.import_failures.pluck(:exception_message).join("\n")}"
         end
       end
+      # rubocop: enable CodeReuse/ActiveRecord
 
       def path_without_root(path)
         if path.include?('/')
