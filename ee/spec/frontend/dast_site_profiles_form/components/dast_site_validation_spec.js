@@ -18,11 +18,13 @@ localVue.use(VueApollo);
 
 const fullPath = 'group/project';
 const targetUrl = 'https://example.com/';
+const tokenId = '1';
 const token = 'validation-token-123';
 
 const defaultProps = {
   fullPath,
   targetUrl,
+  tokenId,
   token,
 };
 
@@ -82,9 +84,11 @@ describe('DastSiteValidation', () => {
   const createFullComponent = componentFactory(mount);
 
   const withinComponent = () => within(wrapper.element);
-  const findDownloadButton = () =>
-    wrapper.find('[data-testid="download-dast-text-file-validation-button"]');
-  const findValidateButton = () => wrapper.find('[data-testid="validate-dast-site-button"]');
+  const findByTestId = id => wrapper.find(`[data-testid="${id}"`);
+  const findDownloadButton = () => findByTestId('download-dast-text-file-validation-button');
+  const findValidationPathPrefix = () => findByTestId('dast-site-validation-path-prefix');
+  const findValidationPathInput = () => findByTestId('dast-site-validation-path-input');
+  const findValidateButton = () => findByTestId('validate-dast-site-button');
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
   const findErrorMessage = () =>
     withinComponent().queryByText(
@@ -132,6 +136,35 @@ describe('DastSiteValidation', () => {
         fileData: btoa(token),
       });
     });
+
+    describe.each`
+      targetUrl                            | expectedPrefix                 | expectedValue
+      ${'https://example.com'}             | ${'https://example.com/'}      | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
+      ${'https://example.com/'}            | ${'https://example.com/'}      | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
+      ${'https://example.com/foo/bar'}     | ${'https://example.com/'}      | ${'foo/bar/GitLab-DAST-Site-Validation-validation-token-123.txt'}
+      ${'https://sub.example.com/foo/bar'} | ${'https://sub.example.com/'}  | ${'foo/bar/GitLab-DAST-Site-Validation-validation-token-123.txt'}
+      ${'https://example.com:3000'}        | ${'https://example.com:3000/'} | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
+      ${''}                                | ${''}                          | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
+    `(
+      'validation path input when target URL is $targetUrl',
+      ({ targetUrl: url, expectedPrefix, expectedValue }) => {
+        beforeEach(() => {
+          createFullComponent({
+            propsData: {
+              targetUrl: url,
+            },
+          });
+        });
+
+        it(`prefix is set to ${expectedPrefix}`, () => {
+          expect(findValidationPathPrefix().text()).toBe(expectedPrefix);
+        });
+
+        it(`input value defaults to ${expectedValue}`, () => {
+          expect(findValidationPathInput().element.value).toBe(expectedValue);
+        });
+      },
+    );
   });
 
   describe('validation', () => {
@@ -147,6 +180,15 @@ describe('DastSiteValidation', () => {
       it('while validating, shows a loading state', () => {
         expect(findLoadingIcon().exists()).toBe(true);
         expect(wrapper.text()).toContain('Validating...');
+      });
+
+      it('triggers the dastSiteValidationCreate GraphQL mutation', () => {
+        expect(requestHandlers.dastSiteValidationCreate).toHaveBeenCalledWith({
+          projectFullPath: fullPath,
+          dastSiteTokenId: tokenId,
+          validationPath: wrapper.vm.validationPath,
+          strategy: wrapper.vm.validationMethod,
+        });
       });
 
       it('on success, emits success event', async () => {
