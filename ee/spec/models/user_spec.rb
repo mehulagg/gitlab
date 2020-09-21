@@ -1285,21 +1285,58 @@ RSpec.describe User do
   end
 
   describe '#gitlab_bot?' do
-    using RSpec::Parameterized::TableSyntax
 
     subject { user.gitlab_bot? }
 
     let_it_be(:gitlab_group) { create(:group, name: 'gitlab-com') }
+    let_it_be(:random_group) { create(:group, name: 'random-group') }
 
-    context 'based on user type' do
-      context 'when user is a bot' do
-        let(:user) { build(:user, user_type: :alert_bot) }
+    context 'based on group membership' do
+      context 'when user belongs to gitlab-com group' do
+        let(:user) { create(:user, user_type: :alert_bot) }
 
         before do
+          allow(Gitlab).to receive(:com?).and_return(true)
           gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
         end
 
         it { is_expected.to be true }
+      end
+
+      context 'when user does not belongs to gitlab-com group' do
+        let(:user) { create(:user, user_type: :alert_bot) }
+
+        before do
+          allow(Gitlab).to receive(:com?).and_return(true)
+          random_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be false }
+      end
+    end
+
+    context 'based on user type' do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(true)
+        gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+      end
+
+      context 'when user is a bot' do
+        let(:user) { create(:user, user_type: :alert_bot) }
+
+        it { is_expected.to be true }
+      end
+
+      context 'when user is a human' do
+        let(:user) { create(:user, user_type: :human) }
+
+        it { is_expected.to be false }
+      end
+
+      context 'when user is ghost' do
+        let(:user) { create(:user, :ghost) }
+
+        it { is_expected.to be false }
       end
     end
   end
