@@ -108,7 +108,7 @@ RSpec.describe Gitlab::Restore::ImportTask do
         expect { service.execute }
           .to change { Project.count + Group.count }
           .by(0)
-          .and raise_error(described_class::Error, 'Bundle invalid/path/to/file.tar.gz does not exist')
+          .and raise_error(Gitlab::ImportExport::Error, 'Bundle invalid/path/to/file.tar.gz does not exist')
       end
     end
 
@@ -181,7 +181,7 @@ RSpec.describe Gitlab::Restore::ImportTask do
           expect { service.execute }
             .to change { Project.count + Group.count }
             .by(0)
-            .and raise_error(described_class::Error, 'Could not find tar.gz file in the root of the bundle')
+            .and raise_error(Gitlab::ImportExport::Error, 'Could not find tar.gz file in the root of the bundle')
         end
       end
     end
@@ -296,7 +296,7 @@ RSpec.describe Gitlab::Restore::ImportTask do
           expect { service.execute }
             .to change { Project.count + Group.count }
             .by(0)
-            .and raise_error(described_class::Error, /there is no existing group with the path test-group/)
+            .and raise_error(Gitlab::ImportExport::Error, /there is no existing group with the path test-group/)
         end
       end
     end
@@ -316,12 +316,12 @@ RSpec.describe Gitlab::Restore::ImportTask do
         expect { service.execute }
           .to change { Project.count + Group.count }
           .by(0)
-          .and raise_error(described_class::Error, 'Unrecognised import_type param')
+          .and raise_error(Gitlab::ImportExport::Error, 'Unrecognised import_type param')
       end
 
       it 'does not leave behind working files' do
         expect { service.execute }
-          .to raise_error(described_class::Error, 'Unrecognised import_type param')
+          .to raise_error(Gitlab::ImportExport::Error, 'Unrecognised import_type param')
 
         expect(Dir.exist?(File.join(storage_path, 'test-group-restore'))).to be_falsey
       end

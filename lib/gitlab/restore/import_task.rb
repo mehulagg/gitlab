@@ -5,8 +5,6 @@ module Gitlab
     class ImportTask
       require 'sidekiq/testing'
 
-      class Error < StandardError; end
-
       module CommandLine
         include Gitlab::ImportExport::CommandLineUtil
         extend self
@@ -62,7 +60,7 @@ module Gitlab
       end
 
       def validate!
-        raise Error, 'Unrecognised import_type param' unless ALL_IMPORT_TYPES.include?(import_type)
+        raise Gitlab::ImportExport::Error, 'Unrecognised import_type param' unless ALL_IMPORT_TYPES.include?(import_type)
 
         ensure_file_exists!
         ensure_correct_user!
@@ -71,13 +69,13 @@ module Gitlab
 
       def ensure_group_exists!
         if group.nil?
-          raise Error, "Unable to import projects as there is no existing group with the path #{@given_group_path}"
+          raise Gitlab::ImportExport::Error, "Unable to import projects as there is no existing group with the path #{@given_group_path}"
         end
       end
 
       def ensure_file_exists!
         unless File.exist?(export_file)
-          raise Error, "Bundle #{export_file} does not exist"
+          raise Gitlab::ImportExport::Error, "Bundle #{export_file} does not exist"
         end
       end
 
@@ -102,7 +100,7 @@ module Gitlab
       def import_groups
         filename = Dir.glob(bundle_path('*.tar.gz')).first
 
-        raise Error, 'Could not find tar.gz file in the root of the bundle' unless filename.present?
+        raise Gitlab::ImportExport::Error, 'Could not find tar.gz file in the root of the bundle' unless filename.present?
 
         group.import_export_upload =
           ImportExportUpload.new(import_file: File.new(filename))
