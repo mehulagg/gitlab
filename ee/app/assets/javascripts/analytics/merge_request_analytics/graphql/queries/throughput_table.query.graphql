@@ -1,3 +1,5 @@
+#import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
+
 query(
   $fullPath: ID!
   $startDate: Time!
@@ -9,9 +11,11 @@ query(
   $milestoneTitle: String
   $sourceBranches: [String!]
   $targetBranches: [String!]
+  $after: String
 ) {
   project(fullPath: $fullPath) {
     mergeRequests(
+      after: $after
       first: $limit
       mergedAfter: $startDate
       mergedBefore: $endDate
@@ -23,6 +27,9 @@ query(
       sourceBranches: $sourceBranches
       targetBranches: $targetBranches
     ) {
+      pageInfo {
+        ...PageInfo
+      }
       nodes {
         iid
         title
