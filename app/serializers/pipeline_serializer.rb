@@ -44,9 +44,10 @@ class PipelineSerializer < BaseSerializer
       :latest_statuses_ordered_by_stage,
       :latest_builds_report_results,
       :manual_actions,
-      :retryable_builds,
+      :retryable_builds_without_project,
       :scheduled_actions,
       :stages,
+      :latest_statuses,
       :trigger_requests,
       :user,
       {
