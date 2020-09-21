@@ -2,8 +2,8 @@
 
 module QA
   RSpec.describe 'Verify' do
-    describe 'Run pipeline', :docker, :runner, :requires_admin, :skip_live_env do
-      # [TODO]: Developer to remove :requires_admin and :skip_live_env once FF is removed
+    describe 'Run pipeline', :requires_admin, :skip_live_env do
+      # [TODO]: Developer to remove :requires_admin and :skip_live_env once FF is removed in https://gitlab.com/gitlab-org/gitlab/-/issues/229632
 
       context 'with web only rule' do
         let(:feature_flag) { 'new_pipeline_form' }
@@ -53,10 +53,7 @@ module QA
             index.click_run_pipeline_button
           end
 
-          Page::Project::Pipeline::New.perform do |new|
-            new.click_run_pipeline_button
-            expect(new).not_to have_danger_alert # to make sure bug !230929 does not resurface
-          end
+          Page::Project::Pipeline::New.perform(&:click_run_pipeline_button)
 
           Page::Project::Pipeline::Show.perform do |pipeline|
             expect(pipeline).to have_job(job_name)

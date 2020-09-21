@@ -195,7 +195,6 @@ export default {
       variant="danger"
       class="gl-mb-4"
       data-testid="run-pipeline-error-alert"
-      data-qa-selector="danger_alert_content"
       >{{ error }}</gl-alert
     >
     <gl-alert
