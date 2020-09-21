@@ -9,6 +9,7 @@ import * as types from '~/notes/stores/mutation_types';
 describe('DiscussionCounter component', () => {
   let store;
   let wrapper;
+  let setExpandDiscussionsFn;
   const localVue = createLocalVue();
 
   localVue.use(Vuex);
@@ -16,6 +17,7 @@ describe('DiscussionCounter component', () => {
   beforeEach(() => {
     window.mrTabs = {};
     const { state, getters, mutations, actions } = notesModule();
+    setExpandDiscussionsFn = jest.fn().mockImplementation(actions.setExpandDiscussions);
 
     store = new Vuex.Store({
       state: {
@@ -24,7 +26,10 @@ describe('DiscussionCounter component', () => {
       },
       getters,
       mutations,
-      actions,
+      actions: {
+        ...actions,
+        setExpandDiscussions: setExpandDiscussionsFn,
+      },
     });
     store.dispatch('setNoteableData', {
       ...noteableDataMock,
@@ -103,10 +108,9 @@ describe('DiscussionCounter component', () => {
     it('calls button handler when clicked', () => {
       updateStoreWithExpanded(true);
 
-      wrapper.setMethods({ handleExpandDiscussions: jest.fn() });
       toggleAllButton.trigger('click');
 
-      expect(wrapper.vm.handleExpandDiscussions).toHaveBeenCalledTimes(1);
+      expect(setExpandDiscussionsFn).toHaveBeenCalledTimes(1);
     });
 
     it('collapses all discussions if expanded', () => {
