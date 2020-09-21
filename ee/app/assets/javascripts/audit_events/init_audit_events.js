@@ -7,14 +7,7 @@ import createStore from './store';
 
 export default selector => {
   const el = document.querySelector(selector);
-  const {
-    events,
-    isLastPage,
-    filterTokenOptions,
-    filterQaSelector,
-    tableQaSelector,
-    exportUrl,
-  } = el.dataset;
+  const { events, isLastPage, filterTokenOptions, exportUrl } = el.dataset;
 
   const store = createStore();
   store.dispatch('initializeAuditEvents');
@@ -30,8 +23,6 @@ export default selector => {
           filterTokenOptions: JSON.parse(filterTokenOptions).map(filterTokenOption =>
             convertObjectPropsToCamelCase(filterTokenOption),
           ),
-          filterQaSelector,
-          tableQaSelector,
           exportUrl,
         },
       }),

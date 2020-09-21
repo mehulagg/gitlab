@@ -51,23 +51,6 @@ describe('AuditEventsTable component', () => {
         expect(getCell(0, 0).text()).toBe('There are no records to show');
       });
     });
-
-    it('should not set the QA selector if not provided', () => {
-      wrapper.vm.$nextTick(() => {
-        expect(
-          wrapper.find('[data-testid="audit-events-table"]').attributes('data-qa-selector'),
-        ).toBeUndefined();
-      });
-    });
-
-    it('should set the QA selector if provided', () => {
-      wrapper.setProps({ qaSelector: 'qa_selector' });
-      wrapper.vm.$nextTick(() => {
-        expect(
-          wrapper.find('[data-testid="audit-events-table"]').attributes('data-qa-selector'),
-        ).toEqual('qa_selector');
-      });
-    });
   });
 
   describe('Pagination behaviour', () => {

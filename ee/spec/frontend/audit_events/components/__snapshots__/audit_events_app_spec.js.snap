@@ -23,7 +23,6 @@ exports[`AuditEventsApp when initialized matches the snapshot 1`] = `
       >
         <div
           class="input-group bg-white flex-grow-1"
-          data-qa-selector="filter_qa_selector"
           data-testid="audit-events-filter"
         >
           <gl-filtered-search-stub
@@ -59,7 +58,6 @@ exports[`AuditEventsApp when initialized matches the snapshot 1`] = `
   <audit-events-table-stub
     events="[object Object]"
     islastpage="true"
-    qaselector="table_qa_selector"
   />
 </div>
 `;
