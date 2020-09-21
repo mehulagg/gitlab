@@ -14,6 +14,7 @@ import SidebarSeverity from './components/severity/sidebar_severity.vue';
 import Translate from '../vue_shared/translate';
 import createDefaultClient from '~/lib/graphql';
 import { isInIssuePage, parseBoolean } from '~/lib/utils/common_utils';
+import { parseIssuableData } from '~/issue_show/utils/parse_data';
 import createFlash from '~/flash';
 import { __ } from '~/locale';
 import labelsSelectModule from '~/vue_shared/components/sidebar/labels_select_vue/store';
@@ -22,9 +23,10 @@ Vue.use(Translate);
 Vue.use(VueApollo);
 Vue.use(Vuex);
 
+const { issueType } = parseIssuableData();
+
 function getSidebarOptions(sidebarOptEl = document.querySelector('.js-sidebar-options')) {
   return JSON.parse(sidebarOptEl.innerHTML);
-}
 
 function mountAssigneesComponent(mediator) {
   const el = document.getElementById('js-vue-sidebar-assignees');
@@ -50,7 +52,7 @@ function mountAssigneesComponent(mediator) {
           projectPath: fullPath,
           field: el.dataset.field,
           signedIn: el.hasAttribute('data-signed-in'),
-          issuableType: isInIssuePage() ? 'issue' : 'merge_request',
+          issuableType: isInIssuePage() || issueType === 'incident' ? 'issue' : 'merge_request',
         },
       }),
   });
@@ -127,7 +129,7 @@ function mountLockComponent() {
   const initialData = JSON.parse(dataNode.innerHTML);
 
   let importStore;
-  if (isInIssuePage()) {
+  if (isInIssuePage() || issueType === 'incident') {
     importStore = import(/* webpackChunkName: 'notesStore' */ '~/notes/stores').then(
       ({ store }) => store,
     );

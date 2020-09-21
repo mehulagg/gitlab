@@ -108,7 +108,6 @@ export default {
     'newIssuePath',
     'incidentTemplateName',
     'incidentType',
-    'issuePath',
     'publishedAvailable',
     'emptyListSvgPath',
     'textQuery',
@@ -320,7 +319,7 @@ export default {
       return Boolean(assignees.nodes?.length);
     },
     navigateToIncidentDetails({ iid }) {
-      return visitUrl(joinPaths(this.issuePath, iid));
+      return visitUrl(joinPaths('incidents', iid));
     },
     handlePageChange(page) {
       const { startCursor, endCursor } = this.incidents.pageInfo;
