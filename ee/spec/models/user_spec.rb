@@ -1284,6 +1284,26 @@ RSpec.describe User do
     end
   end
 
+  describe '#gitlab_bot?' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { user.gitlab_bot? }
+
+    let_it_be(:gitlab_group) { create(:group, name: 'gitlab-com') }
+
+    context 'based on user type' do
+      context 'when user is a bot' do
+        let(:user) { build(:user, user_type: :alert_bot) }
+
+        before do
+          gitlab_group.add_user(user, Gitlab::Access::DEVELOPER)
+        end
+
+        it { is_expected.to be true }
+      end
+    end
+  end
+
   describe '#security_dashboard' do
     let(:user) { create(:user) }
 
