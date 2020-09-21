@@ -9,7 +9,9 @@ class PropagateIntegrationGroupWorker
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(integration_id, min_id, max_id)
-    integration = Service.find(integration_id)
+    integration = Service.find_by_id(integration_id)
+    return unless integration
+
     batch_ids = Group.where(id: min_id..max_id).without_integration(integration).pluck(:id)
 
     BulkCreateIntegrationService.new(integration, batch_ids, 'group').execute
