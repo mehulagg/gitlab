@@ -1,39 +1,49 @@
-import Vue from 'vue';
-import { createComponentWithStore } from 'helpers/vue_mount_component_helper';
+import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
+import Vuex from 'vuex';
 import { createStore } from '~/ide/stores';
-import ideSidebar from '~/ide/components/ide_side_bar.vue';
+import IdeSidebar from '~/ide/components/ide_side_bar.vue';
+import IdeTree from '~/ide/components/ide_tree.vue';
 import { leftSidebarViews } from '~/ide/constants';
 import { projectData } from '../mock_data';
 
+const localVue = createLocalVue();
+localVue.use(Vuex);
+
 describe('IdeSidebar', () => {
-  let vm;
+  let wrapper;
   let store;
 
-  beforeEach(() => {
+  function createComponent(mountFn = mount) {
     store = createStore();
-
-    const Component = Vue.extend(ideSidebar);
 
     store.state.currentProjectId = 'abcproject';
     store.state.projects.abcproject = projectData;
 
-    vm = createComponentWithStore(Component, store).$mount();
-  });
+    return mountFn(IdeSidebar, {
+      store,
+      localVue,
+    });
+  }
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
   });
 
   it('renders a sidebar', () => {
-    expect(vm.$el.querySelector('.multi-file-commit-panel-inner')).not.toBeNull();
+    wrapper = createComponent();
+
+    expect(wrapper.vm.$el.querySelector('.multi-file-commit-panel-inner')).not.toBeNull();
   });
 
   it('renders loading icon component', done => {
-    vm.$store.state.loading = true;
+    wrapper = createComponent();
 
-    vm.$nextTick(() => {
-      expect(vm.$el.querySelector('.multi-file-loading-container')).not.toBeNull();
-      expect(vm.$el.querySelectorAll('.multi-file-loading-container').length).toBe(3);
+    store.state.loading = true;
+
+    wrapper.vm.$nextTick(() => {
+      expect(wrapper.vm.$el.querySelector('.multi-file-loading-container')).not.toBeNull();
+      expect(wrapper.vm.$el.querySelectorAll('.multi-file-loading-container').length).toBe(3);
 
       done();
     });
@@ -41,17 +51,32 @@ describe('IdeSidebar', () => {
 
   describe('activityBarComponent', () => {
     it('renders tree component', () => {
-      expect(vm.$el.querySelector('.ide-file-list')).not.toBeNull();
+      wrapper = createComponent();
+
+      expect(wrapper.vm.$el.querySelector('.ide-file-list')).not.toBeNull();
     });
 
     it('renders commit component', done => {
-      vm.$store.state.currentActivityView = leftSidebarViews.commit.name;
+      wrapper = createComponent();
 
-      vm.$nextTick(() => {
-        expect(vm.$el.querySelector('.multi-file-commit-panel-section')).not.toBeNull();
+      wrapper.vm.$store.state.currentActivityView = leftSidebarViews.commit.name;
+
+      wrapper.vm.$nextTick(() => {
+        expect(wrapper.vm.$el.querySelector('.multi-file-commit-panel-section')).not.toBeNull();
 
         done();
       });
     });
+  });
+
+  it('keeps the current activity view components alive', () => {
+    wrapper = createComponent(shallowMount);
+
+    expect(
+      wrapper
+        .find('keep-alive-stub')
+        .find(IdeTree)
+        .exists(),
+    ).toBe(true);
   });
 });
