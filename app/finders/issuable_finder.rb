@@ -59,6 +59,7 @@ class IssuableFinder
       milestone_title
       release_tag
       my_reaction_emoji
+      state
       search
       in
     ]
@@ -147,6 +148,7 @@ class IssuableFinder
     items = by_negated_milestone(items)
     items = by_negated_release(items)
     items = by_negated_my_reaction_emoji(items)
+    items = by_negated_state(items)
     by_negated_iids(items)
   end
 
@@ -290,6 +292,14 @@ class IssuableFinder
     items = items.closed_after(params[:closed_after]) if params[:closed_after].present?
     items = items.closed_before(params[:closed_before]) if params[:closed_before].present?
 
+    items
+  end
+
+  def by_negated_state(items)
+    return items unless not_params[:state].present?
+
+    items.without_state_id(not_params[:state].to_sym)
+  rescue IndexError
     items
   end
 

@@ -38,6 +38,23 @@ module Resolvers
       0
     end
 
+    def self.negatable_arguments(&blk)
+      arguments = Module.new do
+        extend ActiveSupport::Concern
+
+        included(&blk)
+      end
+
+      include arguments
+
+      negated = Class.new(Types::BaseInputObject) do
+        graphql_name "Negated#{name}Arguments"
+        include arguments
+      end
+
+      argument :not, negated, required: false, description: 'Negated arguments'
+    end
+
     def self.resolver_complexity(args, child_complexity:)
       complexity = 1
       complexity += 1 if args[:sort]

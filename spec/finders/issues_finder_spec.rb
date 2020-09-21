@@ -498,6 +498,36 @@ RSpec.describe IssuesFinder do
         end
       end
 
+      context 'filtering by not state' do
+        let(:default_params) { { scope: scope } }
+
+        context 'with not opened' do
+          let(:params) { { not: { state: 'opened' } } }
+
+          it 'returns only opened issues' do
+            expect(issues).not_to include(issue1, issue2, issue3, issue4)
+            expect(issues).to include(closed_issue)
+          end
+        end
+
+        context 'with closed' do
+          let(:params) { { not: { state: 'closed' } } }
+
+          it 'returns only closed issues' do
+            expect(issues).not_to include(closed_issue)
+            expect(issues).to include(issue1, issue2, issue3, issue4)
+          end
+        end
+
+        context 'with invalid state' do
+          let(:params) { { not: { state: 'invalid_state' } } }
+
+          it 'returns all issues' do
+            expect(issues).to contain_exactly(issue1, issue2, issue3, closed_issue, issue4)
+          end
+        end
+      end
+
       context 'filtering by state' do
         context 'with opened' do
           let(:params) { { state: 'opened' } }

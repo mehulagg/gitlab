@@ -26,7 +26,8 @@ RSpec.shared_context 'IssuesFinder#execute context' do
   let!(:label_link2) { create(:label_link, label: label2, target: issue3) }
   let(:search_user) { user }
   let(:params) { {} }
-  let(:issues) { described_class.new(search_user, params.reverse_merge(scope: scope, state: 'opened')).execute }
+  let(:default_params) { { scope: scope, state: 'opened' } }
+  let(:issues) { described_class.new(search_user, params.reverse_merge(default_params)).execute }
 
   before_all do
     project1.add_maintainer(user)
