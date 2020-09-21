@@ -16932,6 +16932,9 @@ msgstr ""
 msgid "New Identity"
 msgstr ""
 
+msgid "New Incident"
+msgstr ""
+
 msgid "New Issue"
 msgid_plural "New Issues"
 msgstr[0] ""

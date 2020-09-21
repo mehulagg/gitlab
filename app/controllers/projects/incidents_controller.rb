@@ -12,11 +12,13 @@ class Projects::IncidentsController < Projects::ApplicationController
 
   private
 
+  # rubocop: disable CodeReuse/ActiveRecord
   def incident
     strong_memoize(:incident) do
       incident_finder.execute.includes(author: :status).first!
     end
   end
+  # rubocop: enable CodeReuse/ActiveRecord
 
   def load_incident
     @issue = incident # hack to make copied HAML view work
