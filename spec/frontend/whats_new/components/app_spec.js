@@ -1,7 +1,10 @@
 import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { GlDrawer } from '@gitlab/ui';
+import MockAdapter from 'axios-mock-adapter';
+import waitForPromises from 'helpers/wait_for_promises';
 import App from '~/whats_new/components/app.vue';
+import axios from '~/lib/utils/axios_utils';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -11,7 +14,8 @@ describe('App', () => {
   let store;
   let actions;
   let state;
-  let propsData = { features: '[ {"title":"Whats New Drawer"} ]', storageKey: 'storage-key' };
+  const propsData = { storageKey: 'storage-key' };
+  let axiosMock;
 
   const buildWrapper = () => {
     actions = {
@@ -35,12 +39,16 @@ describe('App', () => {
     });
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    axiosMock = new MockAdapter(axios);
+    axiosMock.onGet('/-/whats_new').replyOnce(200, [{ title: 'Whats New Drawer' }]);
     buildWrapper();
+    await waitForPromises();
   });
 
   afterEach(() => {
     wrapper.destroy();
+    axiosMock.restore();
   });
 
   const getDrawer = () => wrapper.find(GlDrawer);
@@ -67,14 +75,7 @@ describe('App', () => {
     expect(getDrawer().props('open')).toBe(openState);
   });
 
-  it('renders features when provided as props', () => {
+  it('renders features when provided via ajax', () => {
     expect(wrapper.find('h5').text()).toBe('Whats New Drawer');
-  });
-
-  it('handles bad json argument gracefully', () => {
-    propsData = { features: 'this is not json', storageKey: 'storage-key' };
-    buildWrapper();
-
-    expect(getDrawer().exists()).toBe(true);
   });
 });

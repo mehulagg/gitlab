@@ -1,46 +1,35 @@
 # frozen_string_literal: true
 
 module WhatsNewHelper
-  EMPTY_JSON = ''.to_json
+  include Gitlab::WhatsNew
 
   def whats_new_most_recent_release_items_count
-    items = parsed_most_recent_release_items
+    Rails.cache.fetch('whats_new_most_recent_release_items_count', expires_in: CACHE_DURATION) do
+      items = parsed_most_recent_release_items
 
-    return unless items.is_a?(Array)
+      return unless items.is_a?(Array) # rubocop:disable Cop/AvoidReturnFromBlocks
 
-    items.count
+      items.count
+    end
   end
 
   def whats_new_storage_key
-    items = parsed_most_recent_release_items
+    Rails.cache.fetch('whats_new_storage_key', expires_in: CACHE_DURATION) do
+      items = parsed_most_recent_release_items
 
-    return unless items.is_a?(Array)
+      return unless items.is_a?(Array) # rubocop:disable Cop/AvoidReturnFromBlocks
 
-    release = items.first.try(:[], 'release')
+      release = items.first.try(:[], 'release')
 
-    ['display-whats-new-notification', release].compact.join('-')
-  end
-
-  def whats_new_most_recent_release_items
-    YAML.load_file(most_recent_release_file_path).to_json
-
-  rescue => e
-    Gitlab::ErrorTracking.track_exception(e, yaml_file_path: most_recent_release_file_path)
-
-    EMPTY_JSON
+      ['display-whats-new-notification', release].compact.join('-')
+    end
   end
 
   private
 
   def parsed_most_recent_release_items
-    Gitlab::Json.parse(whats_new_most_recent_release_items)
-  end
-
-  def most_recent_release_file_path
-    Dir.glob(files_path).max
-  end
-
-  def files_path
-    Rails.root.join('data', 'whats_new', '*.yml')
+    Rails.cache.fetch('parsed_most_recent_release_items', expires_in: CACHE_DURATION) do
+      Gitlab::Json.parse(whats_new_most_recent_release_items)
+    end
   end
 end
