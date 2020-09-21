@@ -1,0 +1,12 @@
+mutation issueSetEpic($input: IssueSetEpicInput!) {
+  issueSetEpic(input: $input) {
+    issue {
+      epic {
+        id
+        iid
+        title
+      }
+    }
+    errors
+  }
+}

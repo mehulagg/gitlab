@@ -39,7 +39,7 @@ export default {
       type="search"
       @keyup="handleKeyUp"
     />
-    <gl-icon v-show="!query" name="search" />
+    <gl-icon v-show="!query" class="dropdown-input-search" name="search" />
     <gl-button
       variant="link"
       icon="close"
