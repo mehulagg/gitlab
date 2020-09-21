@@ -12,7 +12,9 @@ describe('Local Storage Sync', () => {
   };
 
   afterEach(() => {
-    wrapper.destroy();
+    if (wrapper) {
+      wrapper.destroy();
+    }
     wrapper = null;
     localStorage.clear();
   });
@@ -122,6 +124,36 @@ describe('Local Storage Sync', () => {
 
       return wrapper.vm.$nextTick().then(() => {
         expect(localStorage.getItem(storageKey)).toBe(newValue);
+      });
+    });
+  });
+
+  describe('with "json" set to "false"', () => {
+    it.each([1, true, [], {}])(
+      'throws a validation error when passed in a non-string value',
+      nonStringValue => {
+        expect(() => {
+          createComponent({
+            props: {
+              storageKey: 'storageKey',
+              value: nonStringValue,
+            },
+          });
+        }).toThrow(/invalid prop/i);
+      },
+    );
+  });
+
+  describe.skip('with "json" set to "true"', () => {
+    it('parses the given value before returning', () => {
+      const storageKey = 'issue_list_order';
+
+      createComponent({
+        props: {
+          storageKey,
+          value: 'ascending',
+          json: true,
+        },
       });
     });
   });
