@@ -4,22 +4,9 @@ module EE
   module ClustersHelper
     extend ::Gitlab::Utils::Override
 
-    override :cluster_list_tabs
-    def cluster_list_tabs(clusterable)
-      return super unless display_cluster_agents?(clusterable)
-
-      [
-        {
-          id: 'agent-clusters',
-          class: 'active',
-          text: s_('ClusterIntegration|GitLab Agent managed clusters')
-        },
-        {
-          id: 'certificate-clusters',
-          class: '',
-          text: s_('ClusterIntegration|Clusters connected with a certificate')
-        }
-      ]
+    override :display_cluster_agents?
+    def display_cluster_agents?(clusterable)
+      clusterable.is_a?(Project) && clusterable.feature_available?(:cluster_agents)
     end
 
     override :js_cluster_agents_list
@@ -36,12 +23,6 @@ module EE
           project_path: clusterable.full_path
         }
       )
-    end
-
-    private
-
-    def display_cluster_agents?(clusterable)
-      clusterable.is_a?(Project) && clusterable.feature_available?(:cluster_agents)
     end
   end
 end

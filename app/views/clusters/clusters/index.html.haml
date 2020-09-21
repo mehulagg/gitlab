@@ -4,17 +4,23 @@
 = render_gcp_signup_offer
 
 .clusters-container.gl-my-2
-  .js-toggle-container
-    %ul.nav-links.nav-tabs.nav{ role: 'tablist' }
-      - cluster_list_tabs(clusterable).each do |tab|
+  - if display_cluster_agents?(clusterable)
+    .js-toggle-container
+      %ul.nav-links.nav-tabs.nav{ role: 'tablist' }
         %li.nav-item{ role: 'presentation' }
-          %a.nav-link{ href: "##{tab[:id]}-pane", id: "#{tab[:id]}-tab", class: tab[:class], data: { toggle: 'tab' }, role: 'tab' }
-            %span= tab[:text]
+          %a.nav-link{ href: "#agent-clusters-pane", id: "agent-clusters-tab", class: 'active', data: { toggle: 'tab' }, role: 'tab' }
+            %span= s_('ClusterIntegration|GitLab Agent managed clusters')
 
-    .tab-content
-      - cluster_list_tabs(clusterable).each do |tab|
-        .tab-pane{ id: "#{tab[:id]}-pane", class: tab[:class], role: 'tabpanel' }
-          - if tab[:id] == 'certificate-clusters'
-            = render 'cluster_list', clusters: @clusters
-          - elsif tab[:id] == 'agent-clusters'
-            = js_cluster_agents_list(clusterable)
+        %li.nav-item{ role: 'presentation' }
+          %a.nav-link{ href: "#certificate-clusters-pane", id: "certificate-clusters-tab", class: '', data: { toggle: 'tab' }, role: 'tab' }
+            %span= s_('ClusterIntegration|Clusters connected with a certificate')
+
+      .tab-content
+        .tab-pane{ id: 'agent-clusters-pane', class: 'active', role: 'tabpanel' }
+          = js_cluster_agents_list(clusterable)
+
+        .tab-pane{ id: 'certificate-clusters-pane', class: '', role: 'tabpanel' }
+          = render 'cluster_list', clusters: @clusters
+
+  - else
+    = render 'cluster_list', clusters: @clusters
