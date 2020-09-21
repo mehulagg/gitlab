@@ -64,11 +64,12 @@ export default class Members {
     $dateInput.disable();
   }
 
-  formSuccess(e, data) {
+  formSuccess(e) {
     const { $toggle, $dateInput, $expiresIn, $expiresInText } = this.getMemberListItems(
       $(e.currentTarget).closest('.member'),
     );
 
+    const [data] = e.detail;
     const expiresIn = data?.expires_in;
 
     if (expiresIn) {
