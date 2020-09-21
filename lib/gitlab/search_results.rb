@@ -194,7 +194,7 @@ module Gitlab
 
         params[:state] = filters[:state] if filters.key?(:state)
 
-        if filters.key?(:confidential) && %w(yes no).include?(filters[:confidential]) && Feature.enabled?(:search_filter_by_confidential)
+        if Feature.enabled?(:search_filter_by_confidential) && filters.key?(:confidential) && %w(yes no).include?(filters[:confidential])
           params[:confidential] = filters[:confidential] == 'yes'
         end
       end
