@@ -34,6 +34,7 @@ describe('Pipeline details header', () => {
 
   const createComponent = (pipelineMock = mockRunningPipelineHeader, { isLoading } = false) => {
     glModalDirective = jest.fn();
+
     const $apollo = {
       queries: {
         pipeline: {
@@ -78,7 +79,7 @@ describe('Pipeline details header', () => {
 
   describe('initial loading', () => {
     beforeEach(() => {
-      wrapper = createComponent({}, { isLoading: true });
+      wrapper = createComponent(null, { isLoading: true });
     });
 
     it('shows a loading state while graphQL is fetching data', () => {
