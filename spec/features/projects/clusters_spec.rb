@@ -196,7 +196,7 @@ RSpec.describe 'Clusters', :js do
     end
 
     it 'user sees a table with one cluster' do
-      expect(page).to have_selector('.qa-clusters-table tbody tr', count: 1)
+      expect(page).to have_selector('[data-testid="cluster_list_table"] tbody tr', count: 1)
     end
 
     context 'when user clicks on a cluster' do
