@@ -3,6 +3,7 @@
 module Gitlab
   module Redis
     class HLL
+      BATCH_SIZE = 300
       KEY_REGEX = %r{\A(\w|-|:)*\{\w*\}(\w|-|:)*\z}.freeze
       KeyFormatError = Class.new(StandardError)
 
@@ -12,6 +13,10 @@ module Gitlab
 
       def self.add(params)
         self.new.add(params)
+      end
+
+      def self.add_pipelined(params)
+        self.new.add_pipelined(params)
       end
 
       def count(keys:)
@@ -29,16 +34,27 @@ module Gitlab
       #   2020-216-{project_action}
       #   i_{analytics}_dev_ops_score-2020-32
       def add(key:, value:, expiry:)
-        unless KEY_REGEX.match?(key)
-          raise KeyFormatError.new("Invalid key format. #{key} key should have changeable parts in curly braces. See https://docs.gitlab.com/ee/development/redis.html#multi-key-commands")
-        end
+        validate_key!(key)
 
         Gitlab::Redis::SharedState.with do |redis|
           redis.multi do |multi|
-            multi.pfadd(key, value)
+            if value.is_a?(Array)
+              value.each_slice(BATCH_SIZE) { |batch| multi.pfadd(key, batch) }
+            else
+              multi.pfadd(key, value)
+            end
+
             multi.expire(key, expiry)
           end
         end
+      end
+
+      private
+
+      def validate_key!(key)
+        return if KEY_REGEX.match?(key)
+
+        raise KeyFormatError.new("Invalid key format. #{key} key should have changeable parts in curly braces. See https://docs.gitlab.com/ee/development/redis.html#multi-key-commands")
       end
     end
   end
