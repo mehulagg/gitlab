@@ -153,6 +153,7 @@ namespace :admin do
 
     collection do
       get :tag_list, format: :json
+      get :setup_scripts
     end
   end
 

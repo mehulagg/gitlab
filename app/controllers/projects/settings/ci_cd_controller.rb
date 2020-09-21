@@ -48,7 +48,31 @@ module Projects
         redirect_to namespace_project_settings_ci_cd_path
       end
 
+      def runner_setup_scripts
+        if script_params[:os] && script_params[:arch]
+          instructions = Gitlab::Ci::RunnerInstructions.new(current_user: current_user, os: params[:os], arch: params[:arch])
+          render json: {
+            install: instructions.install_script,
+            register: instructions.register_command
+          }
+        else
+          available_platforms = Gitlab::Ci::RunnerInstructions::OS.deep_dup.merge(Gitlab::Ci::RunnerInstructions::OTHER_ENVIRONMENTS).map do |name, value|
+            value[:name] = name
+            value[:supported_architectures] = (value.delete(:download_locations) || {}).keys
+            value
+          end
+
+          render json: { available_platforms: available_platforms }
+        end
+      rescue ArgumentError => e
+        render json: { error: e.message }, status: :bad_request
+      end
+
       private
+
+      def script_params
+        params.permit(:os, :arch)
+      end
 
       def update_params
         params.require(:project).permit(*permitted_project_params)
