@@ -12,8 +12,8 @@ module Ci
       service.execute
     end
 
-    def remaining_work
-      service.remaining_count(limit: remaining_capacity)
+    def remaining_work_count(*args)
+      @remaining_work_count ||= service.remaining_count(limit: remaining_capacity)
     end
 
     def max_running_jobs

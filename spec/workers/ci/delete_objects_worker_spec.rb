@@ -9,11 +9,9 @@ RSpec.describe Ci::DeleteObjectsWorker do
 
   describe '#perform' do
     it 'executes a service' do
-      expect(worker).to receive(:max_running_jobs).thrice.and_call_original
-
       expect_next_instance_of(Ci::DeleteObjectsService) do |instance|
         expect(instance).to receive(:execute)
-        expect(instance).to receive(:remaining_count).and_call_original
+        expect(instance).to receive(:remaining_count).once.and_call_original
       end
 
       worker.perform
