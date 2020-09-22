@@ -66,6 +66,8 @@ module SearchHelper
       ns_('SearchResults|user', 'SearchResults|users', count)
     when 'wiki_blobs'
       ns_('SearchResults|wiki result', 'SearchResults|wiki results', count)
+    when 'epics'
+      ns_('SearchResults|epic', 'SearchResults|epics', count)
     else
       raise "Unrecognized search scope '#{scope}'"
     end

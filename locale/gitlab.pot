@@ -16,6 +16,9 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
+msgid " %{group_name}&%{epic_iid} &middot; opened %{epic_created} by %{author}"
+msgstr ""
+
 msgid " %{project_name}#%{issue_iid} &middot; opened %{issue_created} by %{author}"
 msgstr ""
 
@@ -22379,6 +22382,11 @@ msgstr[1] ""
 
 msgid "SearchResults|commit"
 msgid_plural "SearchResults|commits"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "SearchResults|epic"
+msgid_plural "SearchResults|epics"
 msgstr[0] ""
 msgstr[1] ""
 

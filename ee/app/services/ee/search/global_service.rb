@@ -49,13 +49,20 @@ module EE
 
       override :allowed_scopes
       def allowed_scopes
-        return super unless use_elasticsearch?
+        return add_epics_scope(super) unless use_elasticsearch?
 
         strong_memoize(:ee_allowed_scopes) do
           super.tap do |ce_scopes|
-            ce_scopes.concat(%w[notes wiki_blobs blobs commits])
+            add_epics_scope ce_scopes.concat(%w[notes wiki_blobs blobs commits])
           end
         end
+      end
+
+      private
+
+      def add_epics_scope(allowed)
+        allowed << 'epics' if ::Feature.enabled?(:epics_search) && ::License.feature_available?(:epics)
+        allowed
       end
     end
   end

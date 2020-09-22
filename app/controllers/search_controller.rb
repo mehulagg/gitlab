@@ -8,7 +8,8 @@ class SearchController < ApplicationController
 
   SCOPE_PRELOAD_METHOD = {
     projects: :with_web_entity_associations,
-    issues: :with_web_entity_associations
+    issues: :with_web_entity_associations,
+    epics: :with_web_entity_associations
   }.freeze
 
   track_redis_hll_event :show, name: 'i_search_total', feature: :search_track_unique_users, feature_default_enabled: true
@@ -36,6 +37,7 @@ class SearchController < ApplicationController
 
     @scope = search_service.scope
     @show_snippets = search_service.show_snippets?
+    @show_epics = search_service.show_epics?
     @search_results = search_service.search_results
     @search_objects = search_service.search_objects(preload_method)
 

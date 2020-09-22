@@ -19,5 +19,12 @@ module EE
 
       super
     end
+
+    def show_epics?
+      return false unless ::Feature.enabled?(:epics_search)
+      return false unless ::License.feature_available?(:epics)
+
+      true
+    end
   end
 end
