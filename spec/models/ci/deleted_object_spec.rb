@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Ci::DeletedObject do
+RSpec.describe Ci::DeletedObject, :aggregate_failures do
   describe 'attributes' do
     it { is_expected.to respond_to(:file) }
     it { is_expected.to respond_to(:store_dir) }
@@ -14,7 +14,7 @@ RSpec.describe Ci::DeletedObject do
     context 'with data' do
       let!(:artifact) { create(:ci_job_artifact, :archive, :expired) }
 
-      it 'imports data', :aggregate_failures do
+      it 'imports data' do
         expect { described_class.bulk_import(Ci::JobArtifact.all) }.to change { described_class.count }.by(1)
 
         deleted_artifact = described_class.first
@@ -26,7 +26,7 @@ RSpec.describe Ci::DeletedObject do
       end
     end
 
-    context 'with invalid data', :aggregate_failures do
+    context 'with invalid data' do
       let!(:artifact) { create(:ci_job_artifact) }
 
       it 'does not import anything' do
