@@ -40,7 +40,7 @@ module Clusters
       end
 
       def update_role_arn!
-        role.update!(params)
+        role.update!(params.slice(:role_arn))
       end
 
       def credentials

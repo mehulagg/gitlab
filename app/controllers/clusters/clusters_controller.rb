@@ -273,7 +273,7 @@ class Clusters::ClustersController < Clusters::BaseController
   end
 
   def aws_role_params
-    params.require(:cluster).permit(:role_arn)
+    params.require(:cluster).permit(:role_arn, :role_region)
   end
 
   def generate_gcp_authorize_url

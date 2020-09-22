@@ -150,7 +150,7 @@ export default {
       type="submit"
       :disabled="submitButtonDisabled"
       :loading="isCreatingRole"
-      @click.prevent="createRole({ roleArn, externalId })"
+      @click.prevent="createRole({ roleArn, roleRegion, externalId })"
     >
       {{ submitButtonLabel }}
     </gl-button>

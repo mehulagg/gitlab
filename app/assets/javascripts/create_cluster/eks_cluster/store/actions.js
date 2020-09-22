@@ -25,10 +25,13 @@ export const setKubernetesVersion = ({ commit }, payload) => {
 export const createRole = ({ dispatch, state: { createRolePath } }, payload) => {
   dispatch('requestCreateRole');
 
+  const region = payload.roleRegion.length ? payload.roleRegion : setAWSConfig.DEFAULT_REGION;
+
   return axios
     .post(createRolePath, {
       role_arn: payload.roleArn,
       role_external_id: payload.externalId,
+      role_region: region,
     })
     .then(({ data }) => dispatch('createRoleSuccess', convertObjectPropsToCamelCase(data)))
     .catch(error => dispatch('createRoleError', { error }));
