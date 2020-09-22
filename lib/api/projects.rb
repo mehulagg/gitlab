@@ -586,6 +586,21 @@ module API
           render_api_error!("Failed to transfer project #{user_project.errors.messages}", 400)
         end
       end
+
+      desc 'Validation of .gitlab-ci.yml content'
+      params do
+        optional :dry_run, type: Boolean, default: false
+      end
+      get ':id/ci/lint' do
+        authorize! :read_project, user_project
+
+        content = user_project.repository.gitlab_ci_yml_for(user_project.commit.id, user_project.ci_config_path_or_default)
+        result = Gitlab::Ci::Lint
+          .new(project: user_project, current_user: current_user)
+          .validate(content, dry_run: params[:dry_run])
+
+        present result, with: Entities::Ci::Lint::Result, current_user: current_user
+      end
     end
   end
 end

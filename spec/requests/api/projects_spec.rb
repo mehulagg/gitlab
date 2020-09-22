@@ -3416,6 +3416,81 @@ RSpec.describe API::Projects do
     end
   end
 
+  describe 'GET /projects/:id/ci/lint' do
+    subject(:ci_lint) { get api("/projects/#{project.id}/ci/lint", api_user) }
+
+    let(:api_user) { create(:user) }
+
+    context 'when unauthenticated' do
+      it 'returns authentication error' do
+        ci_lint
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'when authenticated as project member' do
+      before do
+        project.add_developer(api_user)
+      end
+
+      context 'with valid .gitlab-ci.yml content' do
+        let(:yaml_content) do
+          { include: { local: 'another-gitlab-ci.yml' }, test: { stage: 'test', script: 'echo 1' } }.to_yaml
+        end
+
+        let(:included_content) do
+          { another_test: { stage: 'test', script: 'echo 1' } }.to_yaml
+        end
+
+        before do
+          project.repository.create_file(
+            project.creator,
+            '.gitlab-ci.yml',
+            yaml_content,
+            message: 'Automatically created .gitlab-ci.yml',
+            branch_name: 'master'
+          )
+
+          project.repository.create_file(
+            project.creator,
+            'another-gitlab-ci.yml',
+            included_content,
+            message: 'Automatically created another-gitlab-ci.yml',
+            branch_name: 'master'
+          )
+        end
+
+        it 'passes validation' do
+          ci_lint
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response).to be_an Hash
+          expect(json_response['valid']).to eq(true)
+          expect(json_response['errors']).to eq([])
+        end
+      end
+
+      context 'with invalid .gitlab-ci.yml content' do
+        let(:yaml_content) do
+          { image: 'ruby:2.7', services: ['postgres'] }.to_yaml
+        end
+
+        before do
+          stub_ci_pipeline_yaml_file(yaml_content)
+        end
+
+        it 'responds with errors about invalid configuration' do
+          ci_lint
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response['valid']).to eq(false)
+          expect(json_response['errors']).to eq(['jobs config should contain at least one visible job'])
+        end
+      end
+    end
+  end
+
   it_behaves_like 'custom attributes endpoints', 'projects' do
     let(:attributable) { project }
     let(:other_attributable) { project2 }
