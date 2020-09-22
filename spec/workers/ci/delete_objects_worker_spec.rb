@@ -5,6 +5,8 @@ require 'spec_helper'
 RSpec.describe Ci::DeleteObjectsWorker do
   let(:worker) { described_class.new }
 
+  it { expect(described_class.idempotent?).to be_truthy }
+
   describe '#perform' do
     it 'executes a service' do
       expect(worker).to receive(:max_running_jobs).thrice.and_call_original
