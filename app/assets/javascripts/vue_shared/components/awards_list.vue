@@ -1,7 +1,7 @@
 <script>
 /* eslint-disable vue/no-v-html */
 import { groupBy } from 'lodash';
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlButton } from '@gitlab/ui';
 import tooltip from '~/vue_shared/directives/tooltip';
 import { glEmojiTag } from '../../emoji';
 import { __, sprintf } from '~/locale';
@@ -12,6 +12,7 @@ const NO_USER_ID = -1;
 export default {
   components: {
     GlIcon,
+    GlButton,
   },
   directives: {
     tooltip,
@@ -150,7 +151,7 @@ export default {
 
 <template>
   <div class="awards js-awards-block">
-    <button
+    <gl-button
       v-for="awardList in groupedAwards"
       :key="awardList.name"
       v-tooltip
@@ -159,21 +160,19 @@ export default {
       data-boundary="viewport"
       data-testid="award-button"
       class="btn award-control"
-      type="button"
       @click="handleAward(awardList.name)"
     >
       <span data-testid="award-html" v-html="awardList.html"></span>
       <span class="award-control-text js-counter">{{ awardList.list.length }}</span>
-    </button>
+    </gl-button>
     <div v-if="canAwardEmoji" class="award-menu-holder">
-      <button
+      <gl-button
         v-tooltip
         :class="addButtonClass"
         class="award-control btn js-add-award"
         title="Add reaction"
         :aria-label="__('Add reaction')"
         data-boundary="viewport"
-        type="button"
       >
         <span class="award-control-icon award-control-icon-neutral">
           <gl-icon aria-hidden="true" name="slight-smile" />
@@ -188,7 +187,7 @@ export default {
           aria-hidden="true"
           class="fa fa-spinner fa-spin award-control-icon award-control-icon-loading"
         ></i>
-      </button>
+      </gl-button>
     </div>
   </div>
 </template>
