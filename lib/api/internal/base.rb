@@ -17,7 +17,6 @@ module API
       helpers ::API::Helpers::InternalHelpers
 
       UNKNOWN_CHECK_RESULT_ERROR = 'Unknown check result'.freeze
-      MAINTENANCE_MODE_ENABLED = 'Git push is not allowed because maintenance mode is on'.freeze
 
       VALID_PAT_SCOPES = Set.new(
         Gitlab::Auth::API_SCOPES + Gitlab::Auth::REPOSITORY_SCOPES + Gitlab::Auth::REGISTRY_SCOPES
@@ -35,17 +34,9 @@ module API
           project.http_url_to_repo
         end
 
-        def maintenance_mode?
-          Gitlab::CurrentSettings.current_application_settings.maintenance_mode
-        end
-
         def check_allowed(params)
           # This is a separate method so that EE can alter its behaviour more
           # easily.
-
-          if params[:action] == 'git-receive-pack' && maintenance_mode?
-            return response_with_status(code: 401, success: false, message: MAINTENANCE_MODE_ENABLED)
-          end
 
           # Stores some Git-specific env thread-safely
           env = parse_env

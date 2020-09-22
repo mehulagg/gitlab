@@ -1073,18 +1073,21 @@ RSpec.describe API::Internal::Base do
       end
 
       context 'when action is git push' do
-        it 'does not allow access' do
+        it 'returns forbidden' do
           push(key, project)
 
           expect(response).to have_gitlab_http_status(:unauthorized)
           expect(json_response["status"]).to be_falsey
-          expect(json_response["message"]).to eq(described_class::MAINTENANCE_MODE_ENABLED)
+          expect(json_response["message"]).to eq(
+            'Git push over SSH is not allowed because this GitLab instance'\
+            ' is currently in maintenance mode.'
+          )
           expect(user.reload.last_activity_on).to be_nil
         end
       end
 
       context 'when action is not git push' do
-        it 'checks git access' do
+        it 'returns success' do
           push(key, project, action: 'git-upload-pack')
 
           expect(response).to have_gitlab_http_status(:success)

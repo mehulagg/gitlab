@@ -1,0 +1,5 @@
+---
+title: Check maintenance mode when checking git access over SSH
+merge_request: 41600
+author:
+type: changed

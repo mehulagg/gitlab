@@ -87,6 +87,33 @@ RSpec.describe Gitlab::GitAccess do
     end
   end
 
+  describe '#check_maintenance_mode!' do
+    before do
+      project.add_maintainer(user)
+    end
+
+    context 'over SSH' do
+      context 'maintenance mode enabled' do
+        before do
+          stub_application_setting(maintenance_mode: true)
+        end
+
+        it 'blocks git push' do
+          aggregate_failures do
+            expect { push_access_check }.to raise_forbidden(
+              described_class::ERROR_MESSAGES[:maintenance_mode_ssh])
+          end
+        end
+      end
+
+      context 'maintenance mode disabled' do
+        it 'allows git push' do
+          expect { push_access_check }.not_to raise_error
+        end
+      end
+    end
+  end
+
   describe '#check_project_accessibility!' do
     context 'when the project exists' do
       context 'when actor exists' do
