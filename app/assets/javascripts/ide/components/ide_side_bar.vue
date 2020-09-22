@@ -36,7 +36,7 @@ export default {
     class="multi-file-commit-panel flex-column"
   >
     <template v-if="loading">
-      <div class="multi-file-commit-panel-inner">
+      <div class="multi-file-commit-panel-inner" data-testid="ide-side-bar-inner">
         <div v-for="n in 3" :key="n" class="multi-file-loading-container">
           <gl-skeleton-loading />
         </div>
@@ -46,7 +46,7 @@ export default {
       <ide-project-header :project="currentProject" />
       <div class="ide-context-body d-flex flex-fill">
         <activity-bar />
-        <div class="multi-file-commit-panel-inner">
+        <div class="multi-file-commit-panel-inner" data-testid="ide-side-bar-inner">
           <div class="multi-file-commit-panel-inner-content">
             <keep-alive>
               <component :is="currentActivityView" />
