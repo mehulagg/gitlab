@@ -2,7 +2,7 @@
 /* eslint-disable vue/no-v-html */
 import { createNamespacedHelpers, mapState, mapActions, mapGetters } from 'vuex';
 import { escape } from 'lodash';
-import { GlFormGroup, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
+import { GlFormCheckbox, GlFormGroup, GlFormInput, GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 import ClusterFormDropdown from '~/create_cluster/components/cluster_form_dropdown.vue';
 import { KUBERNETES_VERSIONS } from '../constants';
@@ -26,9 +26,12 @@ const { mapState: mapInstanceTypesState } = createNamespacedHelpers('instanceTyp
 export default {
   components: {
     ClusterFormDropdown,
+    GlFormCheckbox,
     GlFormGroup,
     GlFormInput,
-    GlFormCheckbox,
+    GlIcon,
+    GlLink,
+    GlSprintf,
     LoadingButton,
   },
   props: {
@@ -164,18 +167,9 @@ export default {
         false,
       );
     },
-    regionsDropdownHelpText() {
-      return sprintf(
-        s__(
-          'ClusterIntegration|Learn more about %{startLink}Regions %{externalLinkIcon}%{endLink}.',
-        ),
-        {
-          startLink:
-            '<a href="https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/" target="_blank" rel="noopener noreferrer">',
-          externalLinkIcon: this.externalLinkIcon,
-          endLink: '</a>',
-        },
-        false,
+    regionsHelpText() {
+      return s__(
+        'ClusterIntegration|The region you would like to use for this cluster. Regions may be restricted based on your role permissions. Learn more about %{linkStart}Regions%{linkEnd}.',
       );
     },
     keyPairDropdownHelpText() {
@@ -371,19 +365,25 @@ export default {
       <p class="form-text text-muted" v-html="roleDropdownHelpText"></p>
     </div>
 
-    <gl-form-group
-      :label="s__('ClusterIntegration|Region')"
-      :description="
-        s__('ClusterIntegration|Enter the region you would like to use for this cluster')
-      "
-    >
+    <gl-form-group :label="s__('ClusterIntegration|Region')">
       <gl-form-input
         id="eks-region"
         :value="selectedRegion"
-        @input="setRegionAndFetchVpcsAndKeyPairs($event)"
+        @blur="setRegionAndFetchVpcsAndKeyPairs($event.target.value)"
       />
 
-      <p class="form-text text-muted" v-html="regionsDropdownHelpText"></p>
+      <gl-sprintf :message="regionsHelpText">
+        <template #link="{ content }">
+          <gl-link
+            href="https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/"
+            target="_blank"
+          >
+            {{ content }}
+
+            <gl-icon name="external-link" />
+          </gl-link>
+        </template>
+      </gl-sprintf>
     </gl-form-group>
 
     <div class="form-group">
