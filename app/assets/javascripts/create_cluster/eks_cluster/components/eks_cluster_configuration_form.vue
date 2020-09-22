@@ -2,7 +2,7 @@
 /* eslint-disable vue/no-v-html */
 import { createNamespacedHelpers, mapState, mapActions, mapGetters } from 'vuex';
 import { escape } from 'lodash';
-import { GlFormInput, GlFormCheckbox } from '@gitlab/ui';
+import { GlFormGroup, GlFormInput, GlFormCheckbox } from '@gitlab/ui';
 import { sprintf, s__ } from '~/locale';
 import ClusterFormDropdown from '~/create_cluster/components/cluster_form_dropdown.vue';
 import { KUBERNETES_VERSIONS } from '../constants';
@@ -28,6 +28,7 @@ const { mapState: mapInstanceTypesState } = createNamespacedHelpers('instanceTyp
 export default {
   components: {
     ClusterFormDropdown,
+    GlFormGroup,
     GlFormInput,
     GlFormCheckbox,
     LoadingButton,
@@ -373,24 +374,22 @@ export default {
       />
       <p class="form-text text-muted" v-html="roleDropdownHelpText"></p>
     </div>
-    <div class="form-group">
-      <label class="label-bold" for="eks-role">{{ s__('ClusterIntegration|Region') }}</label>
-      <cluster-form-dropdown
-        field-id="eks-region"
-        field-name="eks-region"
+
+    <gl-form-group
+      :label="s__('ClusterIntegration|Region')"
+      :description="
+        s__('ClusterIntegration|Enter the region you would like to use for this cluster')
+      "
+    >
+      <gl-form-input
+        id="eks-region"
         :value="selectedRegion"
-        :items="regions"
-        :loading="isLoadingRegions"
-        :loading-text="s__('ClusterIntegration|Loading Regions')"
-        :placeholder="s__('ClusterIntergation|Select a region')"
-        :search-field-placeholder="s__('ClusterIntegration|Search regions')"
-        :empty-text="s__('ClusterIntegration|No region found')"
-        :has-errors="Boolean(loadingRegionsError)"
-        :error-message="s__('ClusterIntegration|Could not load regions from your AWS account')"
         @input="setRegionAndFetchVpcsAndKeyPairs($event)"
       />
+
       <p class="form-text text-muted" v-html="regionsDropdownHelpText"></p>
-    </div>
+    </gl-form-group>
+
     <div class="form-group">
       <label class="label-bold" for="eks-key-pair">{{
         s__('ClusterIntegration|Key pair name')
