@@ -6,10 +6,7 @@ module Ci
     include LimitedCapacity::Worker
 
     feature_category :continuous_integration
-    # We need to implement the `:none` strategy before enabling `idempotent!`
-    # `deduplicate :none` allows running multiple jobs concurrently
-    # idempotent!
-    # deduplicate :none
+    idempotent!
 
     def perform_work(*args)
       service.execute
