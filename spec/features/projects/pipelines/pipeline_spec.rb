@@ -172,10 +172,10 @@ RSpec.describe 'Pipeline', :js do
       end
     end
 
-    describe 'user status' do
+    describe 'pipelines details view' do
       let!(:status) { create(:user_status, user: pipeline.user, emoji: 'smirk', message: 'Authoring this object') }
 
-      it 'shows the user status' do
+      it 'pipeline header shows the user status and emoji' do
         visit project_pipeline_path(project, pipeline)
 
         within '[data-testid="pipeline-header-content"]' do
