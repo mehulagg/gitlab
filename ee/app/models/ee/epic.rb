@@ -26,6 +26,14 @@ module EE
 
       belongs_to :closed_by, class_name: 'User'
 
+      def self.epic_tree_node_query(node)
+        selection = <<~SELECT_LIST
+          id, relative_position, parent_id, parent_id as epic_id, '#{underscore}' as object_type
+        SELECT_LIST
+
+        select(selection).in_parents(node.parent_ids)
+      end
+
       def reopen
         return if opened?
 

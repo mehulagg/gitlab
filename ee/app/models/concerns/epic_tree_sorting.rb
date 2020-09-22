@@ -5,6 +5,10 @@ module EpicTreeSorting
   include FromUnion
   include RelativePositioning
 
+  def self.implementations
+    @impls ||= [].to_set
+  end
+
   class_methods do
     extend ::Gitlab::Utils::Override
 
@@ -12,20 +16,7 @@ module EpicTreeSorting
       # Only non-root nodes are sortable.
       return none if object.root_epic_tree_node?
 
-      issue_type = EpicIssue.underscore
-      epic_type = Epic.underscore
-
-      issue_selection = <<~SELECT_LIST
-        id, relative_position, epic_id as parent_id, epic_id, '#{issue_type}' as object_type
-      SELECT_LIST
-      epic_selection = <<~SELECT_LIST
-        id, relative_position, parent_id, parent_id as epic_id, '#{epic_type}' as object_type
-      SELECT_LIST
-
-      from_union([
-        EpicIssue.select(issue_selection).in_epic(object.parent_ids),
-        Epic.select(epic_selection).in_parents(object.parent_ids)
-      ])
+      from_union(EpicTreeSorting.implementations.map { |model| model.epic_tree_node_query(object) })
     end
 
     def relative_positioning_parent_column
@@ -40,6 +31,8 @@ module EpicTreeSorting
 
   included do
     extend ::Gitlab::Utils::Override
+
+    EpicTreeSorting.implementations << self
 
     override :move_between
     def move_between(*)
