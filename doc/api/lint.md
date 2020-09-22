@@ -4,7 +4,9 @@ group: Continuous Integration
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# Validate the `.gitlab-ci.yml` (API)
+# CI Lint
+
+## Validate basic logic and syntax of the `.gitlab-ci.yml` (API)
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/5953) in GitLab 8.12.
 
@@ -51,5 +53,48 @@ Example responses:
   ```json
   {
     "error": "content is missing"
+  }
+  ```
+
+## Validate project scoped CI config (API)
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/231352) in GitLab 13.5.
+
+Checks if your project `.gitlab-ci.yml` config is valid. This endpoint uses all
+namespace specific data (variables, local includes, ...) available.
+
+```plaintext
+GET /projects/:id/ci/lint
+```
+
+| Attribute  | Type    | Required | Description |
+| ---------- | ------- | -------- | -------- |
+| `dry_run`  | boolean | no       | whether to use static checking or run pipeline creation simulation |
+
+```shell
+curl "https://gitlab.example.com/api/v4/projects/:id/ci/lint"
+```
+
+Example responses:
+
+- Valid config:
+
+  ```json
+  {
+    "valid": true,
+    "errors": [],
+    "warnings": []
+  }
+  ```
+
+- Invalid config:
+
+  ```json
+  {
+    "valid": false,
+    "errors": [
+      "jobs config should contain at least one visible job"
+    ],
+    "warnings": []
   }
   ```
