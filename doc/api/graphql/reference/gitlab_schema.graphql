@@ -1225,7 +1225,7 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   ): EpicConnection
 
   """
-  Timestamp of the epic's closure
+  Timestamp of when the epic was closed
   """
   closedAt: Time
 
@@ -1235,7 +1235,7 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   confidential: Boolean
 
   """
-  Timestamp of the epic's creation
+  Timestamp of when the epic was created
   """
   createdAt: Time
 
@@ -1530,7 +1530,7 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   title: String
 
   """
-  Timestamp of the epic's last activity
+  Timestamp of when the epic was updated
   """
   updatedAt: Time
 
@@ -1547,7 +1547,7 @@ type BoardEpic implements CurrentUserTodos & Noteable {
   """
   User preferences for the epic on the issue board
   """
-  userPreferences: EpicUserPreferences
+  userPreferences: BoardEpicUserPreferences
 
   """
   Web path of the epic
@@ -1593,6 +1593,16 @@ type BoardEpicEdge {
   The item at the end of the edge.
   """
   node: BoardEpic
+}
+
+"""
+Represents user preferences for a board epic
+"""
+type BoardEpicUserPreferences {
+  """
+  Indicates epic should be displayed as collapsed
+  """
+  collapsed: Boolean!
 }
 
 """
@@ -5684,7 +5694,7 @@ type Epic implements CurrentUserTodos & Noteable {
   ): EpicConnection
 
   """
-  Timestamp of the epic's closure
+  Timestamp of when the epic was closed
   """
   closedAt: Time
 
@@ -5694,7 +5704,7 @@ type Epic implements CurrentUserTodos & Noteable {
   confidential: Boolean
 
   """
-  Timestamp of the epic's creation
+  Timestamp of when the epic was created
   """
   createdAt: Time
 
@@ -5989,7 +5999,7 @@ type Epic implements CurrentUserTodos & Noteable {
   title: String
 
   """
-  Timestamp of the epic's last activity
+  Timestamp of when the epic was updated
   """
   updatedAt: Time
 
@@ -6771,16 +6781,6 @@ type EpicTreeReorderPayload {
   Errors encountered during execution of the mutation.
   """
   errors: [String!]!
-}
-
-"""
-Represents user preferences for a board epic
-"""
-type EpicUserPreferences {
-  """
-  Whether epic should be collapsed
-  """
-  collapsed: Boolean!
 }
 
 """

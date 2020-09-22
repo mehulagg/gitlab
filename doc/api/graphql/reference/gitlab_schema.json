@@ -3245,7 +3245,7 @@
             },
             {
               "name": "closedAt",
-              "description": "Timestamp of the epic's closure",
+              "description": "Timestamp of when the epic was closed",
               "args": [
 
               ],
@@ -3273,7 +3273,7 @@
             },
             {
               "name": "createdAt",
-              "description": "Timestamp of the epic's creation",
+              "description": "Timestamp of when the epic was created",
               "args": [
 
               ],
@@ -4040,7 +4040,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "Timestamp of the epic's last activity",
+              "description": "Timestamp of when the epic was updated",
               "args": [
 
               ],
@@ -4096,7 +4096,7 @@
               ],
               "type": {
                 "kind": "OBJECT",
-                "name": "EpicUserPreferences",
+                "name": "BoardEpicUserPreferences",
                 "ofType": null
               },
               "isDeprecated": false,
@@ -4255,6 +4255,37 @@
                 "kind": "OBJECT",
                 "name": "BoardEpic",
                 "ofType": null
+              },
+              "isDeprecated": false,
+              "deprecationReason": null
+            }
+          ],
+          "inputFields": null,
+          "interfaces": [
+
+          ],
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "OBJECT",
+          "name": "BoardEpicUserPreferences",
+          "description": "Represents user preferences for a board epic",
+          "fields": [
+            {
+              "name": "collapsed",
+              "description": "Indicates epic should be displayed as collapsed",
+              "args": [
+
+              ],
+              "type": {
+                "kind": "NON_NULL",
+                "name": null,
+                "ofType": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
               },
               "isDeprecated": false,
               "deprecationReason": null
@@ -15833,7 +15864,7 @@
             },
             {
               "name": "closedAt",
-              "description": "Timestamp of the epic's closure",
+              "description": "Timestamp of when the epic was closed",
               "args": [
 
               ],
@@ -15861,7 +15892,7 @@
             },
             {
               "name": "createdAt",
-              "description": "Timestamp of the epic's creation",
+              "description": "Timestamp of when the epic was created",
               "args": [
 
               ],
@@ -16628,7 +16659,7 @@
             },
             {
               "name": "updatedAt",
-              "description": "Timestamp of the epic's last activity",
+              "description": "Timestamp of when the epic was updated",
               "args": [
 
               ],
@@ -18837,37 +18868,6 @@
                       "ofType": null
                     }
                   }
-                }
-              },
-              "isDeprecated": false,
-              "deprecationReason": null
-            }
-          ],
-          "inputFields": null,
-          "interfaces": [
-
-          ],
-          "enumValues": null,
-          "possibleTypes": null
-        },
-        {
-          "kind": "OBJECT",
-          "name": "EpicUserPreferences",
-          "description": "Represents user preferences for a board epic",
-          "fields": [
-            {
-              "name": "collapsed",
-              "description": "Whether epic should be collapsed",
-              "args": [
-
-              ],
-              "type": {
-                "kind": "NON_NULL",
-                "name": null,
-                "ofType": {
-                  "kind": "SCALAR",
-                  "name": "Boolean",
-                  "ofType": null
                 }
               },
               "isDeprecated": false,

@@ -72,6 +72,7 @@ RSpec.describe 'get list of boards' do
 
       aggregate_failures 'board epics response' do
         epics = board_data['epics']['nodes']
+
         expect(epics.size).to eq(1)
         expect(epics.first['title']).to eq(epic1.title)
         expect(epics.first['userPreferences']['collapsed']).to eq(true)

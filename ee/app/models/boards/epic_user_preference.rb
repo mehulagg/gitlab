@@ -10,8 +10,8 @@ module Boards
 
     validates :user, uniqueness: { scope: [:board_id, :epic_id] }
 
-    scope :for_user_board_epic_ids, -> (user, board, epic_ids) do
-      where(user_id: user.id, board_id: board.id, epic_id: epic_ids)
+    scope :for_boards_and_epics, -> (board_ids, epic_ids) do
+      where(board_id: board_ids, epic_id: epic_ids)
     end
   end
 end

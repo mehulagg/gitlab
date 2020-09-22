@@ -69,11 +69,11 @@ module Types
           description: 'Number of downvotes the epic has received'
 
     field :closed_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's closure"
+          description: 'Timestamp of when the epic was closed'
     field :created_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's creation"
+          description: 'Timestamp of when the epic was created'
     field :updated_at, Types::TimeType, null: true,
-          description: "Timestamp of the epic's last activity"
+          description: 'Timestamp of when the epic was updated'
 
     field :children, ::Types::EpicType.connection_type, null: true,
           description: 'Children (sub-epics) of the epic',
