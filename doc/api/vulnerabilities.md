@@ -223,11 +223,12 @@ Example response:
 
 ## Revert vulnerability to detected state
 
-Reverts a given vulnerability to detected state. Returns status code `304` if the vulnerability is already in detected state.
+Reverts a given vulnerability to the detected state. Returns status code `304` if the vulnerability
+is already in the detected state.
 
-If an authenticated user does not have permission to
+If an authenticated user doesn't have permission to
 [dismiss vulnerabilities](../user/permissions.md#project-members-permissions),
-this request will result in a `403` status code.
+this request results in a `403` status code.
 
 ```plaintext
 POST /vulnerabilities/:id/revert
