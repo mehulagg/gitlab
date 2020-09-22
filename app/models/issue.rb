@@ -101,7 +101,7 @@ class Issue < ApplicationRecord
   scope :order_relative_position_asc, -> { reorder(::Gitlab::Database.nulls_last_order('relative_position', 'ASC')) }
   scope :order_closed_date_desc, -> { reorder(closed_at: :desc) }
   scope :order_created_at_desc, -> { reorder(created_at: :desc) }
-  scope :order_severity, -> (sort_order) { includes(:alert_management_alert).merge(AlertManagement::Alert.order_severity(sort_order)) }
+  scope :order_severity, -> (sort_order) { left_joins(:alert_management_alert).merge(AlertManagement::Alert.order_severity(sort_order)) }
 
   scope :preload_associated_models, -> { preload(:assignees, :labels, project: :namespace) }
   scope :with_web_entity_associations, -> { preload(:author, :project) }

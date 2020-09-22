@@ -182,6 +182,23 @@ RSpec.describe Issue do
         end
       end
     end
+
+    context 'status page published' do
+      let_it_be(:not_published) { create(:issue) }
+      let_it_be(:published)     { create(:issue, :published) }
+
+      describe '.order_status_page_published_first' do
+        subject { described_class.order_status_page_published_first }
+
+        it { is_expected.to eq([published, not_published]) }
+      end
+
+      describe '.order_status_page_published_last' do
+        subject { described_class.order_status_page_published_last }
+
+        it { is_expected.to eq([not_published, published]) }
+      end
+    end
   end
 
   describe 'validations' do

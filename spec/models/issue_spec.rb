@@ -146,6 +146,43 @@ RSpec.describe Issue do
     end
   end
 
+  describe '.order_severity' do
+    subject { described_class.order_severity(sort_order) }
+
+    let_it_be(:issue_1) { create(:issue, project: reusable_project) }
+    let_it_be(:issue_2) { create(:issue, project: reusable_project) }
+
+    let(:sort_order) { :desc }
+
+    context 'no alert' do
+      it { is_expected.to contain_exactly(issue_1, issue_2) }
+    end
+
+    context 'with alerts' do
+      using RSpec::Parameterized::TableSyntax
+
+      let_it_be(:high_severity) { create(:alert_management_alert, issue: issue_1, severity: :high) }
+      let_it_be(:low_severity) { create(:alert_management_alert, issue: issue_2, severity: :low) }
+      let_it_be(:issue_without_alert) { create(:issue, project: reusable_project) }
+
+      where(:order, :expected_severity) do
+        :desc  | ['high', 'low', nil]
+        :asc   | [nil, 'low', 'high']
+      end
+
+      with_them do
+        let(:sort_order) { order }
+
+        it 'sorts correctly by alert severity', :aggregate_failures do
+          issue_alerts = subject.map(&:alert_management_alert)
+          ordered_severity = issue_alerts.map { |alert| alert&.severity }
+
+          expect(ordered_severity).to eq(expected_severity)
+        end
+      end
+    end
+  end
+
   describe '#order_by_position_and_priority' do
     let(:project) { reusable_project }
     let(:p1) { create(:label, title: 'P1', project: project, priority: 1) }

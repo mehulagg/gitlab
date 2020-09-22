@@ -223,6 +223,24 @@ RSpec.describe Resolvers::IssuesResolver do
             expect(resolve_issues(sort: :milestone_due_desc).items).to eq([milestone_issue3, milestone_issue2, milestone_issue1])
           end
         end
+
+        context 'when sorting by alert severity' do
+          let_it_be(:project) { create(:project) }
+          let_it_be(:alert_high) { create(:alert_management_alert, project: project, severity: :high) }
+          let_it_be(:issue_high) { create(:incident, project: project, alert_management_alert: alert_high) }
+          let_it_be(:alert_low) { create(:alert_management_alert, project: project, severity: :low) }
+          let_it_be(:issue_low) { create(:incident, project: project, alert_management_alert: alert_low) }
+
+          let_it_be(:issue_no_alert) { create(:incident, project: project) }
+
+          it 'sorts issues ascending' do
+            expect(resolve_issues(sort: :severity_asc)).to eq([issue_no_alert, issue_low, issue_high])
+          end
+
+          it 'sorts issues descending' do
+            expect(resolve_issues(sort: :severity_desc)).to eq([issue_high, issue_low, issue_no_alert])
+          end
+        end
       end
 
       it 'returns issues user can see' do
