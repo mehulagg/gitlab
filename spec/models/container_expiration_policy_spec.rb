@@ -130,12 +130,4 @@ RSpec.describe ContainerExpirationPolicy, type: :model do
       end
     end
   end
-
-  describe '.for_project' do
-    let_it_be(:policy) { create(:container_expiration_policy) }
-
-    subject { described_class.for_project(policy.project) }
-
-    it { is_expected.to contain_exactly(policy) }
-  end
 end
