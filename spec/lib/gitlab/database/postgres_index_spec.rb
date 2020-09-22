@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Gitlab::Database::Reindexing::Index do
+RSpec.describe Gitlab::Database::PostgresIndex do
   before do
     ActiveRecord::Base.connection.execute(<<~SQL)
       CREATE INDEX foo_idx ON public.users (name);
@@ -13,20 +13,36 @@ RSpec.describe Gitlab::Database::Reindexing::Index do
   end
 
   def find(name)
-    described_class.find_with_schema(name)
+    described_class.by_identifier(name)
   end
 
-  describe '.find_with_schema' do
-    it 'returns an instance of Gitlab::Database::Reindexing::Index when the index is present' do
-      expect(find('public.foo_idx')).to be_a(Gitlab::Database::Reindexing::Index)
+  describe '.by_identifier' do
+    it 'finds the index' do
+      expect(find('public.foo_idx')).to be_a(Gitlab::Database::PostgresIndex)
     end
 
-    it 'returns nil if the index is not present' do
-      expect(find('public.idontexist')).to be_nil
+    it 'raises an error if not found' do
+      expect { find('public.idontexist') }.to raise_error(ActiveRecord::RecordNotFound)
     end
 
     it 'raises ArgumentError if given a non-fully qualified index name' do
       expect { find('foo') }.to raise_error(ArgumentError, /not fully qualified/)
+    end
+  end
+
+  describe '#regular' do
+    it 'excludes unique indexes' do
+      expect(described_class.regular).to all(have_attributes(is_unique: false))
+    end
+
+    it 'excludes indexes of partitions' do
+      expect(described_class.regular).to all(satisfy("not be a partitioned index") { |index| index.schema !~ /^gitlab_partitions/ })
+    end
+  end
+
+  describe '#random_few' do
+    it 'limits to two records by default' do
+      expect(described_class.random_few.size).to eq(2)
     end
   end
 
