@@ -10,6 +10,10 @@ class MemberInvitationReminderEmailsWorker # rubocop:disable Scalability/Idempot
   def perform
     return unless Gitlab::Experimentation.enabled?(:invitation_reminders)
 
-    # To keep this MR small, implementation will be done in another MR: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/42981/diffs?commit_id=8063606e0f83957b2dd38d660ee986f24dee6138
+    GroupMember.not_accepted_or_expired_recent_invitations.find_in_batches do |invitations|
+      invitations.each do |invitation|
+        Members::InvitationReminderEmailService.new(invitation).execute
+      end
+    end
   end
 end
