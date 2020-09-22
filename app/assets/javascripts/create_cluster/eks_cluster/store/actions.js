@@ -1,5 +1,5 @@
 import * as types from './mutation_types';
-import { setAWSConfig } from '../services/aws_services_facade';
+import { setAWSConfig, DEFAULT_REGION } from '../services/aws_services_facade';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -25,7 +25,7 @@ export const setKubernetesVersion = ({ commit }, payload) => {
 export const createRole = ({ dispatch, state: { createRolePath } }, payload) => {
   dispatch('requestCreateRole');
 
-  const region = payload.roleRegion.length ? payload.roleRegion : setAWSConfig.DEFAULT_REGION;
+  const region = payload.roleRegion || DEFAULT_REGION;
 
   return axios
     .post(createRolePath, {

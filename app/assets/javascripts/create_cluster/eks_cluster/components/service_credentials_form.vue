@@ -30,7 +30,7 @@ export default {
   data() {
     return {
       roleArn: this.$store.state.roleArn,
-      roleRegion: this.$store.state.roleRegion,
+      roleRegion: '',
     };
   },
   computed: {

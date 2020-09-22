@@ -13,7 +13,6 @@ export default () => ({
   externalId: '',
 
   roleArn: '',
-  roleRegion: '',
 
   clusterName: '',
   environmentScope: '*',
