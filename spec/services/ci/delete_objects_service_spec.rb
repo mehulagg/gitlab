@@ -5,9 +5,10 @@ require 'spec_helper'
 RSpec.describe Ci::DeleteObjectsService do
   let(:service) { described_class.new }
   let!(:artifact) { create(:ci_job_artifact, :archive) }
+  let(:data) { [artifact] }
 
   before do
-    Ci::DeletedObject.bulk_import([artifact])
+    Ci::DeletedObject.bulk_import(data)
   end
 
   describe '#execute' do
@@ -19,6 +20,14 @@ RSpec.describe Ci::DeleteObjectsService do
 
     it 'deletes files' do
       expect { subject }.to change { artifact.file.exists? }
+    end
+
+    context 'when trying to execute without records' do
+      let(:data) { [] }
+
+      it 'does not change the number of objects' do
+        expect { subject }.not_to change { Ci::DeletedObject.count }
+      end
     end
 
     context 'when trying to remove the same file multiple times' do
