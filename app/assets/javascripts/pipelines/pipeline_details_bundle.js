@@ -135,7 +135,7 @@ export default () => {
   createPipelinesDetailApp(mediator);
 
   if (gon.features.graphqlPipelineHeader) {
-    createPipelineHeaderApp();
+    createPipelineHeaderApp(SELECTORS.PIPELINE_HEADER);
   } else {
     createLegacyPipelineHeaderApp(mediator);
   }

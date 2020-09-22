@@ -1,8 +1,6 @@
-import {
-  PIPELINE_CANCELED,
-  PIPELINE_FAILED,
-  PIPELINE_RUNNING,
-} from '../../../app/assets/javascripts/pipelines/constants';
+const PIPELINE_RUNNING = 'RUNNING';
+const PIPELINE_CANCELED = 'CANCELED';
+const PIPELINE_FAILED = 'FAILED';
 
 export const pipelineWithStages = {
   id: 20333396,

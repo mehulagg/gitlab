@@ -1,12 +1,11 @@
 <script>
 import { GlAlert, GlButton, GlLoadingIcon, GlModal, GlModalDirective } from '@gitlab/ui';
-import Flash from '~/flash';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import ciHeader from '~/vue_shared/components/header_ci_component.vue';
 import { setUrlFragment, redirectTo } from '~/lib/utils/url_utility';
 import getPipelineQuery from '../graphql/queries/get_pipeline_header_data.query.graphql';
-import { LOAD_FAILURE, DEFAULT } from '../constants';
+import { LOAD_FAILURE, POST_FAILURE, DELETE_FAILURE, DEFAULT } from '../constants';
 
 const DELETE_MODAL_ID = 'pipeline-delete-modal';
 
@@ -24,6 +23,9 @@ export default {
   },
   errorTexts: {
     [LOAD_FAILURE]: __('We are currently unable to fetch data for the pipeline header.'),
+    [POST_FAILURE]: __('An error occurred while making the request.'),
+    [DELETE_FAILURE]: __('An error occurred while deleting the pipeline.'),
+    [DEFAULT]: __('An unknown error occurred.'),
   },
   inject: {
     // Receive `cancel`, `delete`, `fullProject` and `retry`
@@ -80,7 +82,7 @@ export default {
       return this.failureType;
     },
     hasPipelineData() {
-      return this.pipeline;
+      return Boolean(this.pipeline);
     },
     isLoadingInitialQuery() {
       return this.$apollo.queries.pipeline.loading && !this.hasPipelineData;
@@ -96,6 +98,16 @@ export default {
         case LOAD_FAILURE:
           return {
             text: this.$options.errorTexts[LOAD_FAILURE],
+            variant: 'danger',
+          };
+        case POST_FAILURE:
+          return {
+            text: this.$options.errorTexts[POST_FAILURE],
+            variant: 'danger',
+          };
+        case DELETE_FAILURE:
+          return {
+            text: this.$options.errorTexts[DELETE_FAILURE],
             variant: 'danger',
           };
         default:
@@ -115,7 +127,7 @@ export default {
         await axios.post(path);
         this.$apollo.queries.pipeline.refetch();
       } catch {
-        Flash(__('An error occurred while making the request.'));
+        this.reportFailure(POST_FAILURE);
       }
     },
     async cancelPipeline() {
@@ -135,7 +147,7 @@ export default {
         redirectTo(setUrlFragment(request.responseURL, 'delete_success'));
       } catch {
         this.$apollo.queries.pipeline.startPolling();
-        Flash(__('An error occurred while deleting the pipeline.'));
+        this.reportFailure(DELETE_FAILURE);
         this.isDeleting = false;
       }
     },

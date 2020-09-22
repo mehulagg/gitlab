@@ -46,6 +46,9 @@ export default {
     },
   },
   computed: {
+    title() {
+      return !this.showText ? this.status?.text : '';
+    },
     detailsPath() {
       // For now, this can either come from graphQL with camelCase or REST API in snake_case
       return this.status.detailsPath || this.status.details_path;
@@ -58,7 +61,7 @@ export default {
 };
 </script>
 <template>
-  <a v-gl-tooltip :href="detailsPath" :class="cssClass" :title="!showText ? status.text : ''">
+  <a v-gl-tooltip :href="detailsPath" :class="cssClass" :title="title">
     <ci-icon :status="status" :css-classes="iconClasses" />
 
     <template v-if="showText">
