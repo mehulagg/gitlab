@@ -18,7 +18,7 @@ class EpicIssue < ApplicationRecord
 
   validate :validate_confidential_epic
 
-  def root_epic_tree_node?
+  def epic_tree_root?
     false
   end
 

@@ -26,14 +26,6 @@ module EE
 
       belongs_to :closed_by, class_name: 'User'
 
-      def self.epic_tree_node_query(node)
-        selection = <<~SELECT_LIST
-          id, relative_position, parent_id, parent_id as epic_id, '#{underscore}' as object_type
-        SELECT_LIST
-
-        select(selection).in_parents(node.parent_ids)
-      end
-
       def reopen
         return if opened?
 
@@ -131,8 +123,16 @@ module EE
       before_save :set_fixed_start_date, if: :start_date_is_fixed?
       before_save :set_fixed_due_date, if: :due_date_is_fixed?
 
-      def root_epic_tree_node?
+      def epic_tree_root?
         parent_id.nil?
+      end
+
+      def self.epic_tree_node_query(node)
+        selection = <<~SELECT_LIST
+          id, relative_position, parent_id, parent_id as epic_id, '#{underscore}' as object_type
+        SELECT_LIST
+
+        select(selection).in_parents(node.parent_ids)
       end
 
       private

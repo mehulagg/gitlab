@@ -14,7 +14,7 @@ module EpicTreeSorting
 
     def relative_positioning_query_base(object)
       # Only non-root nodes are sortable.
-      return none if object.root_epic_tree_node?
+      return none if object.epic_tree_root?
 
       from_union(EpicTreeSorting.implementations.map { |model| model.epic_tree_node_query(object) })
     end
@@ -25,7 +25,7 @@ module EpicTreeSorting
 
     override :move_nulls
     def move_nulls(objects, **args)
-      super(objects&.reject(&:root_epic_tree_node?), **args)
+      super(objects&.reject(&:epic_tree_root?), **args)
     end
   end
 
@@ -36,27 +36,27 @@ module EpicTreeSorting
 
     override :move_between
     def move_between(*)
-      super unless root_epic_tree_node?
+      super unless epic_tree_root?
     end
 
     override :move_after
     def move_after(*)
-      super unless root_epic_tree_node?
+      super unless epic_tree_root?
     end
 
     override :move_before
     def move_before(*)
-      super unless root_epic_tree_node?
+      super unless epic_tree_root?
     end
 
     override :move_to_end
     def move_to_end
-      super unless root_epic_tree_node?
+      super unless epic_tree_root?
     end
 
     override :move_to_start
     def move_to_start
-      super unless root_epic_tree_node?
+      super unless epic_tree_root?
     end
 
     override :update_relative_siblings
