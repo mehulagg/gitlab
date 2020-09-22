@@ -435,3 +435,7 @@ export function getHTTPProtocol(url) {
   const protocol = url.split(':');
   return protocol.length > 1 ? protocol[0] : undefined;
 }
+
+export function stripFilename(path = '') {
+  return path.replace( /[^\/]*$/, '');
+}
