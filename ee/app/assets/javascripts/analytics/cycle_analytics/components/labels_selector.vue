@@ -2,8 +2,8 @@
 import Api from 'ee/api';
 import { debounce } from 'lodash';
 import {
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
   GlIcon,
   GlLoadingIcon,
   GlSearchBoxByType,
@@ -17,8 +17,8 @@ import { DATA_REFETCH_DELAY } from '../../shared/constants';
 export default {
   name: 'LabelsSelector',
   components: {
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlIcon,
     GlLoadingIcon,
     GlSearchBoxByType,
@@ -126,7 +126,7 @@ export default {
 };
 </script>
 <template>
-  <gl-deprecated-dropdown class="w-100" toggle-class="overflow-hidden" :right="right">
+  <gl-dropdown class="gl-pl-0 gl-w-full" toggle-class="overflow-hidden" :right="right" category="tertiary" variant="default" size="medium">
     <template #button-content>
       <slot name="label-dropdown-button">
         <span v-if="selectedLabel">
@@ -142,17 +142,17 @@ export default {
     </template>
     <template>
       <slot name="label-dropdown-list-header">
-        <gl-deprecated-dropdown-item
+        <gl-dropdown-item
           :active="!selectedLabelId.length"
           @click.prevent="$emit('clearLabel')"
           >{{ __('Select a label') }}
-        </gl-deprecated-dropdown-item>
+        </gl-dropdown-item>
       </slot>
       <div class="mb-3 px-3">
         <gl-search-box-by-type v-model.trim="searchTerm" class="mb-2" />
       </div>
       <div class="mb-3 px-3">
-        <gl-deprecated-dropdown-item
+        <gl-dropdown-item
           v-for="label in labels"
           :key="label.id"
           :class="{
@@ -170,7 +170,7 @@ export default {
           <span :style="{ backgroundColor: label.color }" class="d-inline-block dropdown-label-box">
           </span>
           {{ labelTitle(label) }}
-        </gl-deprecated-dropdown-item>
+        </gl-dropdown-item>
         <div v-show="loading" class="text-center">
           <gl-loading-icon :inline="true" size="md" />
         </div>
@@ -179,5 +179,5 @@ export default {
         </div>
       </div>
     </template>
-  </gl-deprecated-dropdown>
+  </gl-dropdown>
 </template>
