@@ -664,6 +664,19 @@ describe('URL utility', () => {
     });
   });
 
+  describe('cleanLeadingSeparator', () => {
+    it.each`
+      path            | expected
+      ${'/foo/bar'}   | ${'foo/bar'}
+      ${'foo/bar'}    | ${'foo/bar'}
+      ${'//foo/bar'}  | ${'foo/bar'}
+      ${'/./foo/bar'} | ${'./foo/bar'}
+      ${''}           | ${''}
+    `('$path becomes $expected', ({ path, expected }) => {
+      expect(urlUtils.cleanLeadingSeparator(path)).toBe(expected);
+    });
+  });
+
   describe('joinPaths', () => {
     it.each`
       paths                                       | expected
