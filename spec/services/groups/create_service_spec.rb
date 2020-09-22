@@ -146,7 +146,7 @@ RSpec.describe Groups::CreateService, '#execute' do
       where(:shared_runners_config, :descendants_override_disabled_shared_runners_config) do
         true  | false
         false | false
-        true  | true
+        # true  | true # invalid at the group level, leaving as comment to make explicit
         false | true
       end
 

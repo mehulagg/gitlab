@@ -1190,7 +1190,7 @@ class Project < ApplicationRecord
   def changing_shared_runners_enabled_is_allowed
     return unless new_record? || changes.has_key?(:shared_runners_enabled)
 
-    if shared_runners_enabled && !shared_runners_enabled_allowed_by_group?
+    if shared_runners_enabled && !shared_runners_allowed_for_group?
       errors.add(:shared_runners_enabled, _('cannot be enabled because parent group does not allow it'))
     end
   end
@@ -2510,6 +2510,18 @@ class Project < ApplicationRecord
     GroupDeployKey.for_groups(group.self_and_ancestors_ids)
   end
 
+  def shared_runners_enabled_for_group?
+    return true unless group
+
+    group.shared_runners_enabled?
+  end
+
+  def shared_runners_allowed_for_group?
+    return true unless group
+
+    group.shared_runners_allowed?
+  end
+
   private
 
   def find_service(services, name)
@@ -2675,12 +2687,6 @@ class Project < ApplicationRecord
     [].tap do |out|
       objects.each_batch { |relation| out.concat(relation.pluck(:oid)) }
     end
-  end
-
-  def shared_runners_enabled_allowed_by_group?
-    return true unless group
-
-    group.shared_runners_allowed?
   end
 end
 

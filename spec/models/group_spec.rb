@@ -181,7 +181,7 @@ RSpec.describe Group do
 
     describe 'validation #changing_shared_runners_enabled_is_allowed' do
       context 'without a parent' do
-        let(:group) { create(:group, shared_runners_enabled: true) }
+        let(:group) { build(:group, shared_runners_enabled: true) }
 
         it 'is valid' do
           expect(group).to be_valid
@@ -221,7 +221,7 @@ RSpec.describe Group do
 
     describe 'validation #changing_allow_descendants_override_disabled_shared_runners_is_allowed' do
       context 'without a parent' do
-          context 'with shared runners disabled' do
+        context 'with shared runners disabled' do
           let(:group) { build(:group, :allow_descendants_override_disabled_shared_runners, :shared_runners_disabled) }
 
           it 'is valid' do
@@ -250,9 +250,18 @@ RSpec.describe Group do
           end
         end
 
-        context 'when parent allows shared runners' do
+        context 'when parent allows shared runners and setting to true' do
           let(:parent) { create(:group, shared_runners_enabled: true) }
           let(:sub_group) { build(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners, parent_id: parent.id) }
+
+          it 'is valid' do
+            expect(sub_group).to be_valid
+          end
+        end
+
+        context 'when parent allows shared runners and setting to false' do
+          let(:parent) { create(:group, shared_runners_enabled: true) }
+          let(:sub_group) { build(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false, parent_id: parent.id) }
 
           it 'is valid' do
             expect(sub_group).to be_valid
@@ -1418,7 +1427,7 @@ RSpec.describe Group do
 
       where(:shared_runners_enabled, :allow_descendants_override, :expected_shared_runners_allowed) do
         true  | false | true
-        true  | true  | true
+        # true  | true  | true # invalid at the parent group level, leaving as comment to make explicit
         false | false | false
         false | true  | true
       end
@@ -1478,7 +1487,7 @@ RSpec.describe Group do
 
       it 'raises error and does not enable shared Runners' do
         expect { subject }
-          .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Shared runners cannot be enabled because parent group has shared Runners disabled.')
+          .to raise_error(ActiveRecord::RecordInvalid, 'Validation failed: Shared runners enabled cannot be enabled because parent group has shared Runners disabled.')
           .and not_change { parent.reload.shared_runners_enabled }
           .and not_change { group.reload.shared_runners_enabled }
           .and not_change { project.reload.shared_runners_enabled }

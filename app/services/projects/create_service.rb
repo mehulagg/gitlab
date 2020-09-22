@@ -19,7 +19,9 @@ module Projects
 
       @project = Project.new(params)
 
-      inherit_group_shared_runners_settings
+      # If a project is newly created it should have shared runners settings
+      # based on group.shared_runners_enabled?. This is like the "default value"
+      @project.shared_runners_enabled = false unless @project.shared_runners_enabled_for_group?
 
       # Make sure that the user is allowed to use the specified visibility level
       if project_visibility.restricted?
@@ -270,14 +272,6 @@ module Projects
       @project_visibility ||= Gitlab::VisibilityLevelChecker
         .new(current_user, @project, project_params: { import_data: @import_data })
         .level_restricted?
-    end
-
-    # If a project is newly created it should have shared runners settings
-    # based on group.shared_runners_enabled?. This is like the "default value"
-    def inherit_group_shared_runners_settings
-      return if @project.group.nil? || @project.group.shared_runners_enabled?
-
-      @project.shared_runners_enabled = false
     end
   end
 end

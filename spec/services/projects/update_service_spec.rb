@@ -172,7 +172,7 @@ RSpec.describe Projects::UpdateService do
           it 'does not enable shared runners' do
             result = update_project(project, user, shared_runners_enabled: true)
 
-            expect(result).to eq({ status: :error, message: 'Shared runners cannot be enabled because parent group does not allow it' })
+            expect(result).to eq({ status: :error, message: 'Shared runners enabled cannot be enabled because parent group does not allow it' })
             expect(project.reload.shared_runners_enabled).to be_falsey
           end
         end
