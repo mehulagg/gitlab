@@ -82,7 +82,7 @@ describe('Pipeline details header', () => {
       wrapper = createComponent(null, { isLoading: true });
     });
 
-    it('shows a loading state while graphQL is fetching data', () => {
+    it('shows a loading state while graphQL is fetching initial data', () => {
       expect(findLoadingIcon().exists()).toBe(true);
     });
   });

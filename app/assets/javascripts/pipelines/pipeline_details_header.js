@@ -9,8 +9,10 @@ const apolloProvider = new VueApollo({
   defaultClient: createDefaultClient(),
 });
 
-export const createPipelineHeaderApp = el => {
-  if (!document.querySelector(el)) {
+export const createPipelineHeaderApp = elSelector => {
+  const el = document.querySelector(elSelector);
+
+  if (!el) {
     return;
   }
 
