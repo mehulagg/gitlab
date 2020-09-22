@@ -70,6 +70,12 @@ RSpec.describe Terraform::State do
       let(:terraform_state) { create(:terraform_state, :with_file) }
 
       it { is_expected.to eq terraform_state.file }
+
+      context 'and a version exists (migration to versioned in progress)' do
+        let!(:migrated_version) { create(:terraform_state_version, terraform_state: terraform_state) }
+
+        it { is_expected.to eq terraform_state.latest_version.file }
+      end
     end
   end
 
@@ -97,6 +103,18 @@ RSpec.describe Terraform::State do
         expect { subject }.not_to change { Terraform::StateVersion.count }
 
         expect(terraform_state.latest_file.read).to eq(data)
+      end
+
+      context 'and a version exists (migration to versioned in progress)' do
+        let!(:migrated_version) { create(:terraform_state_version, terraform_state: terraform_state, version: 0) }
+
+        it 'creates a new version and marks the state as versioned' do
+          expect { subject }.to change { Terraform::StateVersion.count }
+
+          expect(terraform_state.reload.latest_version.version).to eq(version)
+          expect(terraform_state.latest_version.file.read).to eq(data)
+          expect(terraform_state).to be_versioning_enabled
+        end
       end
     end
   end

@@ -30,7 +30,11 @@ module Terraform
     end
 
     def latest_file
-      versioning_enabled ? latest_version&.file : file
+      if versioning_enabled?
+        latest_version&.file
+      else
+        latest_version&.file || file
+      end
     end
 
     def local?
@@ -43,13 +47,24 @@ module Terraform
 
     def update_file!(data, version:)
       if versioning_enabled?
-        new_version = versions.build(version: version)
-        new_version.assign_attributes(created_by_user: locked_by_user, file: data)
-        new_version.save!
+        create_new_version!(data: data, version: version)
+      elsif latest_version.present?
+        transaction do
+          update!(versioning_enabled: true)
+          create_new_version!(data: data, version: version)
+        end
       else
         self.file = data
         save!
       end
+    end
+
+    private
+
+    def create_new_version!(data:, version:)
+      new_version = versions.build(version: version)
+      new_version.assign_attributes(created_by_user: locked_by_user, file: data)
+      new_version.save!
     end
   end
 end
