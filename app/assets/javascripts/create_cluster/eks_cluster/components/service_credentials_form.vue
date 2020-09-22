@@ -1,6 +1,6 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlFormGroup, GlFormInput, GlButton } from '@gitlab/ui';
+import { GlButton, GlFormGroup, GlFormInput, GlIcon, GlLink, GlSprintf } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 import { sprintf, s__, __ } from '~/locale';
@@ -8,9 +8,12 @@ import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
 export default {
   components: {
+    GlButton,
     GlFormGroup,
     GlFormInput,
-    GlButton,
+    GlIcon,
+    GlLink,
+    GlSprintf,
     ClipboardButton,
   },
   props: {
@@ -77,6 +80,11 @@ export default {
         false,
       );
     },
+    provisionRegionHelpText() {
+      return s__(
+        'ClusterIntegration|The Amazon Region associated with your Provision Role. Region %{codeStart}us-east-2%{codeEnd} will be used if no region is entered. Learn more about %{linkStart}Regions%{linkEnd}',
+      );
+    },
   },
   methods: {
     ...mapActions(['createRole']),
@@ -133,15 +141,27 @@ export default {
       <p class="form-text text-muted" v-html="provisionRoleArnHelpText"></p>
     </div>
 
-    <gl-form-group
-      :label="s__('ClusterIntegration|Provision Role Region')"
-      :description="
-        s__(
-          'ClusterIntegration|The Amazon Region associated with your Provision Role ARN. Region us-east-2 will be used if no region is entered.',
-        )
-      "
-    >
+    <gl-form-group :label="s__('ClusterIntegration|Provision Role Region')">
       <gl-form-input id="eks-role-region" v-model="roleRegion" />
+
+      <template #description>
+        <gl-sprintf :message="provisionRegionHelpText">
+          <template #code="{ content }">
+            <code>{{ content }}</code>
+          </template>
+
+          <template #link="{ content }">
+            <gl-link
+              href="https://aws.amazon.com/about-aws/global-infrastructure/regional-product-services/"
+              target="_blank"
+            >
+              {{ content }}
+
+              <gl-icon name="external-link" />
+            </gl-link>
+          </template>
+        </gl-sprintf>
+      </template>
     </gl-form-group>
 
     <gl-button
