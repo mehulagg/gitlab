@@ -19,13 +19,13 @@ export default {
       default: null,
     },
   },
-  computed: {
-    ...mapState(['open']),
-  },
   data() {
     return {
       features: null
     }
+  },
+  computed: {
+    ...mapState(['open']),
   },
   mounted() {
     this.openDrawer(this.$props.storageKey);

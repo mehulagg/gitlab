@@ -2,6 +2,9 @@ import { createLocalVue, mount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import { GlDrawer } from '@gitlab/ui';
 import App from '~/whats_new/components/app.vue';
+import MockAdapter from 'axios-mock-adapter';
+import axios from '~/lib/utils/axios_utils';
+import { TEST_HOST } from 'spec/test_constants';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
@@ -11,7 +14,8 @@ describe('App', () => {
   let store;
   let actions;
   let state;
-  let propsData = { features: '[ {"title":"Whats New Drawer"} ]', storageKey: 'storage-key' };
+  let propsData = { storageKey: 'storage-key' };
+  let axiosMock;
 
   const buildWrapper = () => {
     actions = {
@@ -36,11 +40,16 @@ describe('App', () => {
   };
 
   beforeEach(() => {
+    axiosMock = new MockAdapter(axios);
+    axiosMock.onGet('/-/whats_new').replyOnce(200, {
+      data: [ {"title":"Whats New Drawer"} ]
+    });
     buildWrapper();
   });
 
   afterEach(() => {
     wrapper.destroy();
+    axiosMock.restore();
   });
 
   const getDrawer = () => wrapper.find(GlDrawer);
@@ -69,12 +78,5 @@ describe('App', () => {
 
   it('renders features when provided as props', () => {
     expect(wrapper.find('h5').text()).toBe('Whats New Drawer');
-  });
-
-  it('handles bad json argument gracefully', () => {
-    propsData = { features: 'this is not json', storageKey: 'storage-key' };
-    buildWrapper();
-
-    expect(getDrawer().exists()).toBe(true);
   });
 });
