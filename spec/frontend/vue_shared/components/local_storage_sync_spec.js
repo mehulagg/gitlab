@@ -128,7 +128,7 @@ describe('Local Storage Sync', () => {
     });
   });
 
-  describe('with "json" set to "false"', () => {
+  describe('with default props', () => {
     it.each([1, true, [], {}])(
       'throws a validation error when passed in a non-string value',
       nonStringValue => {
@@ -144,16 +144,54 @@ describe('Local Storage Sync', () => {
     );
   });
 
-  describe.skip('with "json" set to "true"', () => {
-    it('parses the given value before returning', () => {
-      const storageKey = 'issue_list_order';
+  describe('with "json" prop set to "true"', () => {
+    const storageKey = 'storageKey';
 
-      createComponent({
-        props: {
-          storageKey,
-          value: 'ascending',
-          json: true,
-        },
+    describe.each`
+      value             | serializedValue
+      ${null}           | ${'null'}
+      ${''}             | ${'""'}
+      ${true}           | ${'true'}
+      ${false}          | ${'false'}
+      ${42}             | ${'42'}
+      ${'42'}           | ${'"42"'}
+      ${['test']}       | ${'["test"]'}
+      ${{ foo: 'bar' }} | ${'{"foo":"bar"}'}
+    `('given $value', ({ value, serializedValue }) => {
+      describe('is a new value', () => {
+        beforeEach(() => {
+          createComponent({
+            props: {
+              storageKey,
+              value: 'initial',
+              json: true,
+            },
+          });
+
+          wrapper.setProps({ value });
+        });
+
+        it('serializes the value correctly to localStorage', () => {
+          expect(localStorage.getItem(storageKey)).toBe(serializedValue);
+        });
+      });
+
+      describe('is already stored', () => {
+        beforeEach(() => {
+          localStorage.setItem(storageKey, serializedValue);
+
+          createComponent({
+            props: {
+              storageKey,
+              value: 'initial',
+              json: true,
+            },
+          });
+        });
+
+        it('emits an input event with the deserialized value', () => {
+          expect(wrapper.emitted('input')).toEqual([[value]]);
+        });
       });
     });
   });
