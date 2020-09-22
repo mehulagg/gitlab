@@ -1,0 +1,10 @@
+<%= s_('InviteReminderEmail|Hey there!') %>
+
+<%= s_('InviteReminderEmail|This is a friendly reminder that %{inviter} invited you to join the %{project_or_group_name} %{project_or_group} as a %{role}.') % { inviter: sanitize_name(member.created_by.name), project_or_group_name: member_source.human_name, project_or_group: member_source.model_name.singular, role: member.human_access.downcase } %>
+
+<% if member.expires_at %>
+<%= s_('InviteReminderEmail|This invitation will expire on %{expires_at}.') % { expires_at: I18n.l(member.expires_at, format: :long) } %>
+
+<% end %>
+<%= s_('InviteReminderEmail|Accept invitation: %{invite_url}') % { invite_url: invite_url(@token) } %>
+<%= s_('InviteReminderEmail|Decline invitation: %{decline_url}') % { decline_url: decline_invite_url(@token) } %>

@@ -79,6 +79,39 @@ module Emails
       end
     end
 
+    def member_invited_reminder_email(member_source_type, member_id, token, reminder_index)
+      @member_source_type = member_source_type
+      @member_id = member_id
+      @token = token
+
+      return unless member_exists? && member.created_by && member.invite_to_unknown_user?
+
+      options = case reminder_index
+                when 0
+                  {
+                    subject: member.expires_at ? "#{member.created_by.name} is waiting for you to join GitLab" : "#{member.created_by.name}'s invitation to GitLab is pending",
+                    template: 'member_invited_first_reminder_email'
+                  }
+                when 1
+                  {
+                    subject: "#{member.created_by.name} is waiting for you to join GitLab",
+                    template: 'member_invited_second_reminder_email'
+                  }
+                when 2
+                  {
+                    subject: member.expires_at ? "#{member.created_by.name}'s invite to joining GitLab is expiring soon" : "#{member.created_by.name} is still waiting for you to join GitLab",
+                    template: 'member_invited_third_reminder_email'
+                  }
+                end
+
+      member_email_with_layout(
+        {
+          to: member.invite_email,
+          layout: 'experiment_mailer'
+        }.merge(options)
+      )
+    end
+
     def member_invite_accepted_email(member_source_type, member_id)
       @member_source_type = member_source_type
       @member_id = member_id

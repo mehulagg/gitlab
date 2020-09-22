@@ -1496,7 +1496,7 @@ RSpec.describe Notify do
       end
     end
 
-    def invite_to_group(group, inviter:, user: nil)
+    def invite_to_group(group, inviter:, user: nil, expires_at: nil)
       create(
         :group_member,
         :developer,
@@ -1504,7 +1504,8 @@ RSpec.describe Notify do
         invite_token: '1234',
         invite_email: 'toto@example.com',
         user: user,
-        created_by: inviter
+        created_by: inviter,
+        expires_at: expires_at
       )
     end
 
@@ -1604,6 +1605,81 @@ RSpec.describe Notify do
           )
 
           subject.deliver_now
+        end
+      end
+    end
+
+    describe 'group invitation reminder' do
+      let(:owner) { create(:user).tap { |u| group.add_user(u, Gitlab::Access::OWNER) } }
+      let(:group_member) { invite_to_group(group, inviter: inviter) }
+      let(:inviter) { owner }
+
+      describe 'the first reminder' do
+        subject { described_class.member_invited_reminder_email('Group', group_member.id, group_member.invite_token, 0) }
+
+        it_behaves_like 'an email sent from GitLab'
+        it_behaves_like 'it should not have Gmail Actions links'
+        it_behaves_like 'a user cannot unsubscribe through footer link'
+
+        it 'contains all the useful information' do
+          is_expected.to have_subject "#{owner.name}'s invitation to GitLab is pending"
+          is_expected.to have_body_text group.human_name
+          is_expected.to have_body_text group_member.human_access.downcase
+          is_expected.to have_body_text invite_url(group_member.invite_token)
+          is_expected.to have_body_text decline_invite_url(group_member.invite_token)
+        end
+
+        context 'with an expiry date' do
+          let(:group_member) { invite_to_group(group, inviter: inviter, expires_at: Date.tomorrow) }
+
+          it { is_expected.to have_subject "#{owner.name} is waiting for you to join GitLab" }
+          it { is_expected.to have_body_text I18n.l(group_member.expires_at, format: :long) }
+        end
+      end
+
+      describe 'the second reminder' do
+        subject { described_class.member_invited_reminder_email('Group', group_member.id, group_member.invite_token, 1) }
+
+        it_behaves_like 'an email sent from GitLab'
+        it_behaves_like 'it should not have Gmail Actions links'
+        it_behaves_like 'a user cannot unsubscribe through footer link'
+
+        it 'contains all the useful information' do
+          is_expected.to have_subject "#{owner.name} is waiting for you to join GitLab"
+          is_expected.to have_body_text group.human_name
+          is_expected.to have_body_text group_member.human_access.downcase
+          is_expected.to have_body_text invite_url(group_member.invite_token)
+          is_expected.to have_body_text decline_invite_url(group_member.invite_token)
+        end
+
+        context 'with an expiry date' do
+          let(:group_member) { invite_to_group(group, inviter: inviter, expires_at: Date.tomorrow) }
+
+          it { is_expected.to have_subject "#{owner.name} is waiting for you to join GitLab" }
+          it { is_expected.to have_body_text I18n.l(group_member.expires_at, format: :long) }
+        end
+      end
+
+      describe 'the third reminder' do
+        subject { described_class.member_invited_reminder_email('Group', group_member.id, group_member.invite_token, 2) }
+
+        it_behaves_like 'an email sent from GitLab'
+        it_behaves_like 'it should not have Gmail Actions links'
+        it_behaves_like 'a user cannot unsubscribe through footer link'
+
+        it 'contains all the useful information' do
+          is_expected.to have_subject "#{owner.name} is still waiting for you to join GitLab"
+          is_expected.to have_body_text group.human_name
+          is_expected.to have_body_text group_member.human_access.downcase
+          is_expected.to have_body_text invite_url(group_member.invite_token)
+          is_expected.to have_body_text decline_invite_url(group_member.invite_token)
+        end
+
+        context 'with an expiry date' do
+          let(:group_member) { invite_to_group(group, inviter: inviter, expires_at: Date.tomorrow) }
+
+          it { is_expected.to have_subject "#{owner.name}'s invite to joining GitLab is expiring soon" }
+          it { is_expected.to have_body_text I18n.l(group_member.expires_at, format: :long) }
         end
       end
     end

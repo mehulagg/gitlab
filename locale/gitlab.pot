@@ -13933,6 +13933,75 @@ msgstr ""
 msgid "InviteMembersBanner|We noticed that you haven't invited anyone to this group. Invite your colleagues so you can discuss issues, collaborate on merge requests, and share your knowledge."
 msgstr ""
 
+msgid "InviteReminderEmail|%{inviter} is waiting for you"
+msgstr ""
+
+msgid "InviteReminderEmail|%{inviter} is waiting for you to join the %{project_or_group_name} %{project_or_group} as a %{role}."
+msgstr ""
+
+msgid "InviteReminderEmail|%{inviter}'s invitation"
+msgstr ""
+
+msgid "InviteReminderEmail|%{inviter}'s invitation to join the %{project_or_group_name} %{project_or_group} as a %{role} is expiring on %{expires_at}."
+msgstr ""
+
+msgid "InviteReminderEmail|%{project_or_group} as a %{role}"
+msgstr ""
+
+msgid "InviteReminderEmail|%{project_or_group} as a %{role}."
+msgstr ""
+
+msgid "InviteReminderEmail|Accept invitation"
+msgstr ""
+
+msgid "InviteReminderEmail|Accept invitation: %{invite_url}"
+msgstr ""
+
+msgid "InviteReminderEmail|Decline invitation"
+msgstr ""
+
+msgid "InviteReminderEmail|Decline invitation: %{decline_url}"
+msgstr ""
+
+msgid "InviteReminderEmail|Hey there %{wave_emoji}"
+msgstr ""
+
+msgid "InviteReminderEmail|Hey there!"
+msgstr ""
+
+msgid "InviteReminderEmail|In case you missed it..."
+msgstr ""
+
+msgid "InviteReminderEmail|Invitation pending"
+msgstr ""
+
+msgid "InviteReminderEmail|It's been 10 days since %{inviter} invited you"
+msgstr ""
+
+msgid "InviteReminderEmail|It's been 10 days since %{inviter} invited you to join the %{project_or_group_name} %{project_or_group} as a %{role}. What would you like to do?"
+msgstr ""
+
+msgid "InviteReminderEmail|This invitation will expire on %{expires_at}."
+msgstr ""
+
+msgid "InviteReminderEmail|This invitation will expire on %{strong_start}%{expires_at}%{strong_end}."
+msgstr ""
+
+msgid "InviteReminderEmail|This is a friendly reminder that %{inviter} invited you"
+msgstr ""
+
+msgid "InviteReminderEmail|This is a friendly reminder that %{inviter} invited you to join the %{project_or_group_name} %{project_or_group} as a %{role}."
+msgstr ""
+
+msgid "InviteReminderEmail|What would you like to do?"
+msgstr ""
+
+msgid "InviteReminderEmail|is expiring on %{strong_start}%{expires_at}%{strong_end}."
+msgstr ""
+
+msgid "InviteReminderEmail|to join the %{strong_start}%{project_or_group_name}%{strong_end}"
+msgstr ""
+
 msgid "Invited"
 msgstr ""
 

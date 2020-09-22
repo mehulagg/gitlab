@@ -2334,6 +2334,22 @@ RSpec.describe NotificationService, :mailer do
       end
     end
 
+    describe '#invite_group_member_reminder' do
+      let(:group_member) { create(:group_member) }
+
+      subject { notification.invite_group_member_reminder(group_member, 'token', 0) }
+
+      it 'calls the Notify.invite_group_member_reminder method with the right params' do
+        expect(Notify).to receive(:member_invited_reminder_email).with('Group', group_member.id, 'token', 0).at_least(:once).and_call_original
+
+        subject
+      end
+
+      it 'sends exactly one email' do
+        expect { subject }.to change { ActionMailer::Base.deliveries.size }.by(1)
+      end
+    end
+
     describe '#decline_group_invite' do
       let(:creator) { create(:user) }
       let(:group) { create(:group) }

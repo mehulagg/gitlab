@@ -1,0 +1,18 @@
+%tr
+  %td.text-content
+    %h2.invite-header
+      = s_('InviteReminderEmail|In case you missed it...')
+    %p.invite-body
+      - if member.expires_at
+        = html_escape(s_("InviteReminderEmail|%{inviter}'s invitation")) % { inviter: (link_to member.created_by.name, user_url(member.created_by)).html_safe }
+        = html_escape(s_('InviteReminderEmail|to join the %{strong_start}%{project_or_group_name}%{strong_end}')) % { strong_start: '<strong>'.html_safe, strong_end: '</strong>'.html_safe, project_or_group_name: member_source.human_name }
+        = s_('InviteReminderEmail|%{project_or_group} as a %{role}') % { project_or_group: member_source.model_name.singular, role: member.human_access.downcase }
+        = html_escape(s_('InviteReminderEmail|is expiring on %{strong_start}%{expires_at}%{strong_end}.')) % { strong_start: '<strong>'.html_safe, strong_end: '</strong>'.html_safe, expires_at: I18n.l(member.expires_at, format: :long) }
+      - else
+        = html_escape(s_("InviteReminderEmail|It's been 10 days since %{inviter} invited you")) % { inviter: (link_to member.created_by.name, user_url(member.created_by)).html_safe }
+        = html_escape(s_('InviteReminderEmail|to join the %{strong_start}%{project_or_group_name}%{strong_end}')) % { strong_start: '<strong>'.html_safe, strong_end: '</strong>'.html_safe, project_or_group_name: member_source.human_name }
+        = s_('InviteReminderEmail|%{project_or_group} as a %{role}.') % { project_or_group: member_source.model_name.singular, role: member.human_access.downcase }
+        = s_('InviteReminderEmail|What would you like to do?')
+    %p.invite-actions
+      = link_to s_('InviteReminderEmail|Accept invitation'), invite_url(@token), class: 'invite-btn-join'
+      = link_to s_('InviteReminderEmail|Decline invitation'), decline_invite_url(@token), class: 'invite-btn-decline'

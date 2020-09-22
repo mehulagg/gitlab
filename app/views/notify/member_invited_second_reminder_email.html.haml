@@ -1,0 +1,13 @@
+%tr
+  %td.text-content
+    %h2.invite-header
+      = html_escape(s_('InviteReminderEmail|Hey there %{wave_emoji}')) % { wave_emoji: Gitlab::Emoji.gl_emoji_tag('wave').html_safe }
+    %p.invite-body
+      = html_escape(s_('InviteReminderEmail|This is a friendly reminder that %{inviter} invited you')) % { inviter: (link_to member.created_by.name, user_url(member.created_by)).html_safe }
+      = html_escape(s_('InviteReminderEmail|to join the %{strong_start}%{project_or_group_name}%{strong_end}')) % { strong_start: '<strong>'.html_safe, strong_end: '</strong>'.html_safe, project_or_group_name: member_source.human_name }
+      = s_('InviteReminderEmail|%{project_or_group} as a %{role}.') % { project_or_group: member_source.model_name.singular, role: member.human_access.downcase }
+      - if member.expires_at
+        = html_escape(s_('InviteReminderEmail|This invitation will expire on %{strong_start}%{expires_at}%{strong_end}.')) % { strong_start: '<strong>'.html_safe, strong_end: '</strong>'.html_safe, expires_at: I18n.l(member.expires_at, format: :long) }
+    %p.invite-actions
+      = link_to s_('InviteReminderEmail|Accept invitation'), invite_url(@token), class: 'invite-btn-join'
+      = link_to s_('InviteReminderEmail|Decline invitation'), decline_invite_url(@token), class: 'invite-btn-decline'
