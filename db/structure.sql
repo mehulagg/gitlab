@@ -14185,7 +14185,7 @@ CREATE TABLE pages_deployments (
     updated_at timestamp with time zone NOT NULL,
     project_id bigint NOT NULL,
     ci_build_id bigint,
-    file_store smallint NOT NULL,
+    file_store smallint DEFAULT 1 NOT NULL,
     size integer NOT NULL,
     file text NOT NULL,
     CONSTRAINT check_f0fe8032dd CHECK ((char_length(file) <= 255))
