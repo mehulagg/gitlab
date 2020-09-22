@@ -262,4 +262,32 @@ RSpec.describe ProtectedBranch do
       expect(described_class.by_name('')).to be_empty
     end
   end
+
+  describe '.protected_ref_accessible_to?' do
+    let(:ref) { build(:protected_branch, name: 'protected_branch') }
+    let(:entity) { create(:user) }
+    let(:project) { create(:project) }
+    let(:action) { :push }
+
+    subject do
+      described_class.protected_ref_accessible_to?(ref,
+                                                   entity,
+                                                   project: project,
+                                                   action: action,
+                                                   protected_refs: [ref])
+    end
+
+    context 'when the repository is empty and the default branch is protected' do
+      before do
+        allow(project).to receive(:empty_repo?).and_return(true)
+        allow(project).to receive(:default_branch_protected?).and_return(true)
+      end
+
+      it 'is true when the entity has access to the default branch' do
+        allow(entity).to receive(:check_access_for_default_branch).with(project).and_return(true)
+
+        expect(subject).to be_truthy
+      end
+    end
+  end
 end

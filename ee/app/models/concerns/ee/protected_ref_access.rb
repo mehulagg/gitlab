@@ -68,15 +68,6 @@ module EE
       super
     end
 
-    override :check_access
-    def check_access(user)
-      return true if user.admin?
-      return user.id == self.user_id if self.user.present?
-      return group.users.exists?(user.id) if self.group.present?
-
-      super
-    end
-
     # We don't need to validate the license if this access applies to a role.
     #
     # If it applies to a user/group we can only skip validation `nil`-validation

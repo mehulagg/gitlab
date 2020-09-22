@@ -139,6 +139,19 @@ module EE
       end
     end
 
+    override :check_protected_ref_access
+    def check_protected_ref_access(access_level_obj, project)
+      return true if admin?
+
+      al_user_id = access_level_obj.user_id
+      return self.id == al_user_id if al_user_id.present?
+
+      al_group = access_level_obj.group
+      return al_group.users.exists?(self.id) if al_group.present?
+
+      super
+    end
+
     def cannot_be_admin_and_auditor
       if admin? && auditor?
         errors.add(:admin, 'user cannot also be an Auditor.')

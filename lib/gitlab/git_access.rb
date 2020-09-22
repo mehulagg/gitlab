@@ -448,6 +448,8 @@ module Gitlab
                          CiAccess.new
                        elsif user && request_from_ci_build?
                          BuildAccess.new(user, container: container)
+                       # elsif deploy_key?
+                       #   DeployKeyAccess.new(deploy_key, project: project)
                        else
                          UserAccess.new(user, container: container)
                        end

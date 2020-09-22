@@ -6,6 +6,7 @@ class DeployKey < Key
 
   has_many :deploy_keys_projects, inverse_of: :deploy_key, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :projects, through: :deploy_keys_projects
+  has_many :protected_branch_push_access_levels, dependent: :destroy, class_name: "::ProtectedBranch::PushAccessLevel" # rubocop:disable Cop/ActiveRecordDependent
 
   scope :in_projects, ->(projects) { joins(:deploy_keys_projects).where('deploy_keys_projects.project_id in (?)', projects) }
   scope :are_public,  -> { where(public: true) }
@@ -53,5 +54,13 @@ class DeployKey < Key
 
   def projects_with_write_access
     Project.with_route.where(id: deploy_keys_projects.with_write_access.select(:project_id))
+  end
+
+  def check_access_for_default_branch(project)
+    true
+  end
+
+  def check_protected_ref_access(access_level, project)
+    access_level&.deploy_key_id == self.id
   end
 end

@@ -4981,4 +4981,92 @@ RSpec.describe User do
     it_behaves_like 'bot user avatars', :alert_bot, 'alert-bot.png'
     it_behaves_like 'bot user avatars', :support_bot, 'support-bot.png'
   end
+
+  describe '#check_access_for_default_branch' do
+    let_it_be(:project) { create(:project) }
+    let(:user) { create(:user) }
+
+    subject { user.check_access_for_default_branch(project) }
+
+    it 'is true if the user is an admin' do
+      user.admin = true
+
+      expect(subject).to be_truthy
+    end
+
+    it 'is true if the user is a maintainer for that project' do
+      project.add_maintainer(user)
+
+      expect(subject).to be_truthy
+    end
+
+    it 'is false if the user is a developer for that project' do
+      project.add_developer(user)
+
+      expect(subject).to be_falsey
+    end
+  end
+
+  describe '#check_protected_ref_access' do
+    let(:access_level) { create(:protected_branch_push_access_level) }
+    let(:project) { create(:project) }
+    let(:user) { create(:user) }
+
+    subject { user.check_protected_ref_access(access_level, project) }
+
+    it 'is true if the user is an admin' do
+      user.admin = true
+
+      expect(subject).to be_truthy
+    end
+
+    it 'is false if the user cannot push to the project' do
+      expect(subject).to be_falsey
+    end
+
+    context 'when the user can push code to the project' do
+      before do
+        allow(Ability).to receive(:allowed?).and_call_original
+        allow(Ability).to receive(:allowed?).with(user, :push_code, project).and_return(true)
+      end
+
+      context 'and the access_level is tied to a deploy key' do
+        let(:deploy_key) { create(:deploy_key, user: user) }
+        let(:protected_branch) { create(:protected_branch, project: project) }
+        let(:access_level) { create(:protected_branch_push_access_level, protected_branch: protected_branch, deploy_key: deploy_key) }
+
+        before do
+          create(:deploy_keys_project, :write_access, project: project, deploy_key: deploy_key)
+        end
+
+        it { is_expected.to be_truthy }
+
+        context 'and that deploy key belongs to another user' do
+          let(:deploy_key) { create(:deploy_key, user: create(:user)) }
+
+          it { is_expected.to be_falsey }
+        end
+      end
+
+      context 'and there is no deploy key tied to access_level' do
+        it 'is true if the user has same access has required by access_level object' do
+          project.add_developer(user)
+
+          expect(subject).to be_truthy
+        end
+
+        it 'is true if the user has higher access has required by access_level object' do
+          project.add_maintainer(user)
+
+          expect(subject).to be_truthy
+        end
+
+        it 'is false if the user has lower access has required by access_level object' do
+          project.add_guest(user)
+
+          expect(subject).to be_falsey
+        end
+      end
+    end
+  end
 end

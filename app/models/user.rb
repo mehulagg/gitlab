@@ -1748,6 +1748,25 @@ class User < ApplicationRecord
     created_at > Devise.confirm_within.ago
   end
 
+  def check_access_for_default_branch(project)
+    admin? || project.team.max_member_access(id) > Gitlab::Access::DEVELOPER
+  end
+
+  def check_protected_ref_access(access_level_obj, project)
+    return true if admin?
+    return false unless can?(:push_code, project)
+
+    al_deploy_key = access_level_obj.deploy_key
+
+    has_access = if al_deploy_key.present?
+                   al_deploy_key.user_id == id
+                 else
+                   project.team.max_member_access(id) >= access_level_obj.access_level
+                 end
+
+    has_access
+  end
+
   protected
 
   # override, from Devise::Validatable
