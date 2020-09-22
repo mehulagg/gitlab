@@ -141,8 +141,9 @@ describe('DastSiteValidation', () => {
       targetUrl                            | expectedPrefix                 | expectedValue
       ${'https://example.com'}             | ${'https://example.com/'}      | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
       ${'https://example.com/'}            | ${'https://example.com/'}      | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
-      ${'https://example.com/foo/bar'}     | ${'https://example.com/'}      | ${'foo/bar/GitLab-DAST-Site-Validation-validation-token-123.txt'}
-      ${'https://sub.example.com/foo/bar'} | ${'https://sub.example.com/'}  | ${'foo/bar/GitLab-DAST-Site-Validation-validation-token-123.txt'}
+      ${'https://example.com/foo/bar'}     | ${'https://example.com/'}      | ${'foo/GitLab-DAST-Site-Validation-validation-token-123.txt'}
+      ${'https://example.com/foo/bar/'}    | ${'https://example.com/'}      | ${'foo/bar/GitLab-DAST-Site-Validation-validation-token-123.txt'}
+      ${'https://sub.example.com/foo/bar'} | ${'https://sub.example.com/'}  | ${'foo/GitLab-DAST-Site-Validation-validation-token-123.txt'}
       ${'https://example.com:3000'}        | ${'https://example.com:3000/'} | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
       ${''}                                | ${''}                          | ${'GitLab-DAST-Site-Validation-validation-token-123.txt'}
     `(

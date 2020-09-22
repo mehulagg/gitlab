@@ -436,6 +436,11 @@ export function getHTTPProtocol(url) {
   return protocol.length > 1 ? protocol[0] : undefined;
 }
 
+/**
+ * Strips the filename from the given path by removing every non-slash character from the end of the
+ * passed parameter.
+ * @param {string} path
+ */
 export function stripFilename(path = '') {
-  return path.replace( /[^\/]*$/, '');
+  return path.replace(/[^/]+$/, '');
 }

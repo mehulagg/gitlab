@@ -800,4 +800,18 @@ describe('URL utility', () => {
       expect(urlUtils.getHTTPProtocol(url)).toBe(expectation);
     });
   });
+
+  describe('stripFilename', () => {
+    it.each`
+      path                     | expected
+      ${''}                    | ${''}
+      ${'index.html'}          | ${''}
+      ${'/'}                   | ${'/'}
+      ${'/foo/bar'}            | ${'/foo/'}
+      ${'/foo/bar/'}           | ${'/foo/bar/'}
+      ${'/foo/bar/index.html'} | ${'/foo/bar/'}
+    `('strips the filename from $path => $expected', ({ path, expected }) => {
+      expect(urlUtils.stripFilename(path)).toBe(expected);
+    });
+  });
 });
