@@ -21,7 +21,7 @@ RSpec.describe Backup::Repositories do
       allow(Gitlab.config.repositories.storages).to receive(:keys).and_return(storage_keys)
     end
 
-    let_it_be(:projects) { create_list(:project, 5, :repository, :wiki_repo) }
+    let_it_be(:projects) { create_list(:project, 5, :repository) }
 
     let(:storage_keys) { %w[default test_second_storage] }
 
@@ -63,7 +63,7 @@ RSpec.describe Backup::Repositories do
           subject.dump(max_concurrency: 1, max_storage_concurrency: 1)
         end.count
 
-        create_list(:project, 2, :repository, :wiki_repo)
+        create_list(:project, 2, :repository)
 
         expect do
           subject.dump(max_concurrency: 1, max_storage_concurrency: 1)
@@ -71,7 +71,7 @@ RSpec.describe Backup::Repositories do
       end
 
       context 'legacy storage' do
-        let_it_be(:project) { create(:project, :repository, :legacy_storage, :wiki_repo) }
+        let_it_be(:project) { create(:project, :repository, :legacy_storage) }
 
         it 'creates repository bundle' do
           subject.dump(max_concurrency: 1, max_storage_concurrency: 1)
@@ -135,7 +135,7 @@ RSpec.describe Backup::Repositories do
             subject.dump(max_concurrency: 1, max_storage_concurrency: max_storage_concurrency)
           end.count
 
-          create_list(:project, 2, :repository, :wiki_repo)
+          create_list(:project, 2, :repository)
 
           expect do
             subject.dump(max_concurrency: 1, max_storage_concurrency: max_storage_concurrency)
@@ -146,7 +146,7 @@ RSpec.describe Backup::Repositories do
   end
 
   describe '#restore' do
-    let_it_be(:project) { create(:project, :wiki_repo) }
+    let_it_be(:project) { create(:project) }
 
     describe 'command failure' do
       before do
