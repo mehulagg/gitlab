@@ -1,5 +1,5 @@
 <script>
-import { groupBy } from 'lodash';
+import { get, groupBy } from 'lodash';
 import {
   GlDropdown,
   GlDropdownDivider,
@@ -21,12 +21,15 @@ export default {
   scannerFilterConfigs: {
     project: {
       query: projectSpecificScanners,
+      pathToNodes: ['project', 'vulnerabilityScanners', 'nodes'],
     },
     group: {
       query: groupSpecificScanners,
+      pathToNodes: ['group', 'vulnerabilityScanners', 'nodes'],
     },
     instance: {
       query: instanceSpecificScanners,
+      pathToNodes: ['instanceSecurityDashboard', 'vulnerabilityScanners', 'nodes'],
     },
   },
   components: {
@@ -46,15 +49,9 @@ export default {
           fullPath: this.queryPath,
         };
       },
-      update: data => {
-        let nodes;
-        if (data.instanceSecurityDashboard) {
-          nodes = data.instanceSecurityDashboard.vulnerabilityScanners.nodes;
-        } else if (data.group) {
-          nodes = data.group.vulnerabilityScanners.nodes;
-        } else if (data.project) {
-          nodes = data.project.vulnerabilityScanners.nodes;
-        }
+      update(data) {
+        const path = this.$options.scannerFilterConfigs[this.dashboardType].pathToNodes;
+        const nodes = get(data, path);
         return parseSpecificFilters(nodes);
       },
     },
@@ -183,7 +180,7 @@ export default {
           }}</gl-dropdown-section-header>
           <button
             v-for="option in vendor.options"
-            :key="option.name || option.id"
+            :key="option.id"
             role="menuitem"
             type="button"
             class="dropdown-item"

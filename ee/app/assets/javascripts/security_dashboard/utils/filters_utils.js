@@ -1,5 +1,4 @@
 const gl = 'GitLab';
-const createName = (name, vendor = gl) => `${name} - ${vendor}`;
 const createReportTypeScannerId = (reportType, vendor = gl) => `${reportType}-${vendor}`;
 
 /**
@@ -72,14 +71,14 @@ export const parseSpecificFilters = nodes => {
  * [
  *   {
  *      "id": "dependency_scanning-Custom Scanner",
- *      "name": "Dependency Scanning - Custom Scanner",
+ *      "name": "Dependency Scanning",
  *      "reportType": "DEPENDENCY_SCANNING"
  *      "scanners": ["custom_scanner_dependency_scanning-01", "custom_scanner_dependency_scanning-02"]
  *      "vendor": "Custom Scanner",
  *   },
  *   {
  *      "id": "SAST-Custom Scanner",
- *      "name": "SAST - Custom Scanner",
+ *      "name": "SAST",
  *      "reportType": "SAST"
  *      "scanners": ["custom_scanner_sast"]
  *      "vendor": "Custom Scanner",
@@ -94,7 +93,7 @@ export const createCustomFilters = (reportTypes, specificFilters) =>
         const name = reportTypes[reportType.toLowerCase()];
         const customFilter = {
           id: createReportTypeScannerId(reportType, vendor),
-          name: createName(name, vendor),
+          name,
           reportType,
           scanners,
           vendor,
@@ -117,14 +116,14 @@ export const createCustomFilters = (reportTypes, specificFilters) =>
  * [
  *   {
  *      "id": "dependency_scanning-GitLab",
- *      "name": "Dependency Scanning - GitLab",
+ *      "name": "Dependency Scanning",
  *      "reportType": "DEPENDENCY_SCANNING"
  *      "scanners": ["bundler_audit"]
  *      "vendor": "GitLab",
  *   },
  *   {
  *      "id": "sast-GitLab",
- *      "name": "SAST - GitLab",
+ *      "name": "SAST",
  *      "reportType": "sast"
  *      "scanners": ["brakeman", "gosec"]
  *      "vendor": "GitLab",
@@ -142,7 +141,7 @@ export const createGitlabFilters = (reportTypes, specificFilters) =>
 
     const filter = {
       id: createReportTypeScannerId(reportType),
-      name: createName(name),
+      name,
       reportType: reportType.toUpperCase(),
       scanners,
       vendor,

@@ -47,39 +47,25 @@ export const createScannerSelection = (selection, options) =>
 /**
  * Recreates the scanner filter selection from the URL
  * @param {Array} options all the scanner filter options
- * @param {String|Array|} reportType the reportTypes parsed from the URL
- * @param {Array} scanners the scanners parsed from the URL
- * @returns {Set} the collection of ids of selected scanner filters
+ * @param {String|Array|} id the id of the scanner filters parsed from the URL
+ * @returns {Objectl} the collection of ids of selected scanner filters and their respective
+ *                    reportTypes/scanners ready for GraphQL
  */
-export const rehydrateScannerSelection = (options, reportType, scanner) => {
-  const reportTypes = convertToArray(reportType);
-  const scanners = scanner ? convertToArray(scanner) : [];
-  let updatedScanner = [...scanners];
-
-  const idSelection = reportTypes.reduce((acc, curr) => {
-    // Find all the filters with the given reportType in the URL
-    const filteredOptions = options.filter(option => option.reportType === curr);
-    filteredOptions.forEach(option => {
-      // Find the filters with the given scanners in the URL and add them to the set
-      // This is broken because this runs before the dynamic filters are retrieved and because
-      // I do no know why I added filteredOptions.length === 1, but it seems like a good safeguard
-      if (
-        filteredOptions.length === 1 ||
-        (Boolean(option.scanners.length) && scanners.some(val => option.scanners.includes(val)))
-      ) {
-        acc.add(option.id);
-        updatedScanner = difference(updatedScanner, option.scanners);
-      }
-    });
-    return acc;
-  }, new Set());
+export const rehydrateScannerSelection = (options, id) => {
+  const ids = convertToArray(id);
+  const selection = ids.reduce(
+    (acc, curr) => {
+      const currOption = options.find(option => option.id === curr);
+      acc.reportType.push(currOption.reportType);
+      acc.scanner.push(...currOption.scanners);
+      return acc;
+    },
+    { reportType: [], scanner: [] },
+  );
 
   return {
-    idSelection,
-    selection: {
-      reportType: reportTypes,
-      scanner: scanners,
-    },
+    idSelection: new Set(ids),
+    selection,
   };
 };
 
