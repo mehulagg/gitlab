@@ -20,7 +20,11 @@ RSpec.describe Analytics::InstanceStatistics::Measurement, type: :model do
         issues: 3,
         merge_requests: 4,
         groups: 5,
-        pipelines: 6
+        pipelines: 6,
+        pipelines_succeeded: 7,
+        pipelines_failed: 8,
+        pipelines_canceled: 9,
+        pipelines_skipped: 10
       }.with_indifferent_access)
     end
   end

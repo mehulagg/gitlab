@@ -26,4 +26,18 @@ RSpec.describe Analytics::InstanceStatistics::CountJobTriggerWorker do
       expect(Analytics::InstanceStatistics::CounterJobWorker.jobs.count).to eq(0)
     end
   end
+
+  context 'when the `store_ci_pipeline_counts_by_status` feature flag is off' do
+    let(:expected_count) { Analytics::InstanceStatistics::Measurement.identifiers.size - Analytics::InstanceStatistics::Measurement::CI_PIPELINE_STATUS_MAPPING.size }
+
+    before do
+      stub_feature_flags(store_ci_pipeline_counts_by_status: false)
+    end
+
+    it 'does not trigger worker for Ci::Pipeline status specific counts' do
+      subject.perform
+
+      expect(Analytics::InstanceStatistics::CounterJobWorker.jobs.count).to eq(expected_count)
+    end
+  end
 end

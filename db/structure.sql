@@ -19712,7 +19712,7 @@ CREATE INDEX index_ci_pipelines_on_project_id_and_user_id_and_status_and_ref ON 
 
 CREATE INDEX index_ci_pipelines_on_project_idandrefandiddesc ON ci_pipelines USING btree (project_id, ref, id DESC);
 
-CREATE INDEX index_ci_pipelines_on_status ON ci_pipelines USING btree (status);
+CREATE INDEX index_ci_pipelines_on_status_and_id ON ci_pipelines USING btree (status, id);
 
 CREATE INDEX index_ci_pipelines_on_user_id_and_created_at_and_config_source ON ci_pipelines USING btree (user_id, created_at, config_source);
 

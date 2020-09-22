@@ -17,10 +17,9 @@ module Analytics
         return if Feature.disabled?(:store_instance_statistics_measurements, default_enabled: true)
 
         recorded_at = Time.zone.now
-        measurement_identifiers = Analytics::InstanceStatistics::Measurement.identifiers
 
         worker_arguments = Gitlab::Analytics::InstanceStatistics::WorkersArgumentBuilder.new(
-          measurement_identifiers: measurement_identifiers.values,
+          measurement_identifiers: measurement_identifier_values,
           recorded_at: recorded_at
         ).execute
 
@@ -29,6 +28,19 @@ module Analytics
           CounterJobWorker.perform_in(perform_in, *args)
 
           perform_in += DEFAULT_DELAY
+        end
+      end
+
+      private
+
+      def measurement_identifier_values
+        identifiers = Analytics::InstanceStatistics::Measurement.identifiers
+
+        if Feature.enabled?(:store_ci_pipeline_counts_by_status)
+          identifiers.values
+        else
+          keys = Analytics::InstanceStatistics::Measurement::CI_PIPELINE_STATUS_MAPPING.keys
+          identifiers.except(*keys).values
         end
       end
     end
