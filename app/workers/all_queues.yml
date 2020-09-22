@@ -1274,7 +1274,7 @@
   :urgency: :low
   :resource_boundary: :unknown
   :weight: 1
-  :idempotent:
+  :idempotent: true
   :tags: []
 - :name: create_commit_signature
   :feature_category: :source_code_management
