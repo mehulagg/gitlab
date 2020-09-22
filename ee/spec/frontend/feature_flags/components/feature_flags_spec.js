@@ -3,7 +3,7 @@ import MockAdapter from 'axios-mock-adapter';
 import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
 import Api from 'ee/api';
 import { createStore } from 'ee/feature_flags/store';
-import FeatureFlagsTab from 'ee/feature_flags/components/tab.vue';
+import FeatureFlagsTab from 'ee/feature_flags/components/feature_flags_tab.vue';
 import FeatureFlagsComponent from 'ee/feature_flags/components/feature_flags.vue';
 import FeatureFlagsTable from 'ee/feature_flags/components/feature_flags_table.vue';
 import UserListsTable from 'ee/feature_flags/components/user_lists_table.vue';
@@ -44,7 +44,7 @@ describe('Feature flags', () => {
         featureFlagsHelpPagePath: '/help/feature-flags',
       },
       stubs: {
-        Tab: FeatureFlagsTab,
+        FeatureFlagsTab,
       },
     });
   };

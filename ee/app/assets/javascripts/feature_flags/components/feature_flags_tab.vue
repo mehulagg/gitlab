@@ -44,8 +44,8 @@ export default {
   },
   inject: ['errorStateSvgPath', 'featureFlagsHelpPagePath'],
   computed: {
-    hasCount() {
-      return this.count !== null;
+    itemCount() {
+      return this.count ?? 0;
     },
   },
   methods: {
@@ -61,8 +61,8 @@ export default {
 <template>
   <gl-tab @click="onClick">
     <template #title>
-      <span>{{ title }}</span>
-      <gl-badge v-if="hasCount" size="sm" class="gl-tab-counter-badge">{{ count }}</gl-badge>
+      <span data-testid="feature-flags-tab-title">{{ title }}</span>
+      <gl-badge size="sm" class="gl-tab-counter-badge">{{ itemCount }}</gl-badge>
     </template>
     <template>
       <gl-alert

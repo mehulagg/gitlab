@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
-import { GlAlert, GlLoadingIcon, GlEmptyState, GlLink } from '@gitlab/ui';
-import Tab from 'ee/feature_flags/components/tab.vue';
+import { GlAlert, GlBadge, GlEmptyState, GlLink, GlLoadingIcon, GlTabs } from '@gitlab/ui';
+import FeatureFlagsTab from 'ee/feature_flags/components/feature_flags_tab.vue';
 
 const DEFAULT_PROPS = {
   title: 'test',
@@ -19,20 +19,33 @@ const DEFAULT_PROVIDE = {
   featureFlagsHelpPagePath: '/help/page/path',
 };
 
-describe('ee/feature_flags/components/tab.vue', () => {
+describe('ee/feature_flags/components/feature_flags_tab.vue', () => {
   let wrapper;
 
   const factory = (props = {}) =>
-    mount(Tab, {
-      propsData: {
-        ...DEFAULT_PROPS,
-        ...props,
+    mount(
+      {
+        components: {
+          GlTabs,
+          FeatureFlagsTab,
+        },
+        render(h) {
+          return h(GlTabs, [
+            h(FeatureFlagsTab, { props: this.$attrs, on: this.$listeners }, this.$slots.default),
+          ]);
+        },
       },
-      provide: DEFAULT_PROVIDE,
-      slots: {
-        default: '<p data-testid="test-slot">testing</p>',
+      {
+        propsData: {
+          ...DEFAULT_PROPS,
+          ...props,
+        },
+        provide: DEFAULT_PROVIDE,
+        slots: {
+          default: '<p data-testid="test-slot">testing</p>',
+        },
       },
-    });
+    );
 
   afterEach(() => {
     if (wrapper?.destroy) {
@@ -58,7 +71,7 @@ describe('ee/feature_flags/components/tab.vue', () => {
     it('should emit a dismiss event for a dismissed alert', () => {
       alerts.at(0).vm.$emit('dismiss');
 
-      expect(wrapper.emitted('dismissAlert')).toEqual([[0]]);
+      expect(wrapper.find(FeatureFlagsTab).emitted('dismissAlert')).toEqual([[0]]);
     });
   });
 
@@ -114,14 +127,42 @@ describe('ee/feature_flags/components/tab.vue', () => {
   describe('slot', () => {
     let slot;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       wrapper = factory();
+      await wrapper.vm.$nextTick();
+
       slot = wrapper.find('[data-testid="test-slot"]');
     });
 
     it('should display the passed slot', () => {
       expect(slot.exists()).toBe(true);
       expect(slot.text()).toBe('testing');
+    });
+  });
+
+  describe('count', () => {
+    it('should display a count if there is one', async () => {
+      wrapper = factory();
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find(GlBadge).text()).toBe(DEFAULT_PROPS.count.toString());
+    });
+    it('should display 0 if there is no count', async () => {
+      wrapper = factory({ count: undefined });
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find(GlBadge).text()).toBe('0');
+    });
+  });
+
+  describe('title', () => {
+    it('should show the title', async () => {
+      wrapper = factory();
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find('[data-testid="feature-flags-tab-title"]').text()).toBe(
+        DEFAULT_PROPS.title,
+      );
     });
   });
 });

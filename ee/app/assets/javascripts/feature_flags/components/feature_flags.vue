@@ -3,7 +3,7 @@ import { createNamespacedHelpers } from 'vuex';
 import { isEmpty } from 'lodash';
 import { GlButton, GlModalDirective, GlTabs } from '@gitlab/ui';
 import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '../constants';
-import Tab from './tab.vue';
+import FeatureFlagsTab from './feature_flags_tab.vue';
 import FeatureFlagsTable from './feature_flags_table.vue';
 import UserListsTable from './user_lists_table.vue';
 import store from '../store';
@@ -19,10 +19,7 @@ import ConfigureFeatureFlagsModal from './configure_feature_flags_modal.vue';
 
 const { mapState, mapActions } = createNamespacedHelpers('index');
 
-const scopes = {
-  [FEATURE_FLAG_SCOPE]: FEATURE_FLAG_SCOPE,
-  [USER_LIST_SCOPE]: USER_LIST_SCOPE,
-};
+const SCOPES = { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE };
 
 export default {
   store,
@@ -32,7 +29,7 @@ export default {
     TablePagination,
     GlButton,
     GlTabs,
-    Tab,
+    FeatureFlagsTab,
     ConfigureFeatureFlagsModal,
   },
   directives: {
@@ -88,15 +85,14 @@ export default {
     },
   },
   data() {
-    const scope = getParameterByName('scope') || this.$options.scopes.featureFlags;
+    const scope = getParameterByName('scope') || SCOPES.FEATURE_FLAG_SCOPE;
     return {
       scope,
       page: getParameterByName('page') || '1',
       isUserListAlertDismissed: false,
-      selectedTab: Object.values(scopes).indexOf(scope),
+      selectedTab: Object.values(SCOPES).indexOf(scope),
     };
   },
-  scopes,
   computed: {
     ...mapState([
       FEATURE_FLAG_SCOPE,
@@ -133,6 +129,12 @@ export default {
     },
     shouldRenderErrorState() {
       return this.hasError && !this.isLoading;
+    },
+    shouldRenderFeatureFlags() {
+      return this.shouldRenderTable(SCOPES.FEATURE_FLAG_SCOPE);
+    },
+    shouldRenderUserLists() {
+      return this.shouldRenderTable(SCOPES.USER_LIST_SCOPE);
     },
     hasNewPath() {
       return !isEmpty(this.newFeatureFlagPath);
@@ -171,6 +173,12 @@ export default {
         page: '1',
       });
     },
+    onFeatureFlagsTab() {
+      this.onChangeTab(SCOPES.FEATURE_FLAG_SCOPE);
+    },
+    onUserListsTab() {
+      this.onChangeTab(SCOPES.USER_LIST_SCOPE);
+    },
     onChangePage(page) {
       this.updateFeatureFlagOptions({
         scope: this.scope,
@@ -188,7 +196,7 @@ export default {
 
       historyPushState(buildUrlWithCurrentLocation(`?${queryString}`));
       this.setFeatureFlagsOptions(parameters);
-      if (this.scope === this.$options.scopes.featureFlags) {
+      if (this.scope === SCOPES.FEATURE_FLAG_SCOPE) {
         this.fetchFeatureFlags();
       } else {
         this.fetchUserLists();
@@ -244,7 +252,7 @@ export default {
           class="gl-mb-3"
           data-testid="ff-new-list-button"
         >
-          {{ s__('FeatureFlags|New list') }}
+          {{ s__('FeatureFlags|New user list') }}
         </gl-button>
 
         <gl-button
@@ -257,7 +265,7 @@ export default {
         </gl-button>
       </div>
       <gl-tabs v-model="selectedTab" class="gl-align-items-center gl-w-full">
-        <tab
+        <feature-flags-tab
           :title="s__('FeatureFlags|Feature Flags')"
           :count="count.featureFlags"
           :alerts="alerts"
@@ -269,16 +277,16 @@ export default {
           :empty-title="emptyStateTitle"
           data-testid="feature-flags-tab"
           @dismissAlert="clearAlert"
-          @changeTab="onChangeTab($options.scopes.featureFlags)"
+          @changeTab="onFeatureFlagsTab"
         >
           <feature-flags-table
-            v-if="shouldRenderTable($options.scopes.featureFlags)"
+            v-if="shouldRenderFeatureFlags"
             :csrf-token="csrfToken"
             :feature-flags="featureFlags"
             @toggle-flag="toggleFeatureFlag"
           />
-        </tab>
-        <tab
+        </feature-flags-tab>
+        <feature-flags-tab
           :title="s__('FeatureFlags|User Lists')"
           :count="count.userLists"
           :alerts="alerts"
@@ -290,14 +298,14 @@ export default {
           :empty-title="emptyStateTitle"
           data-testid="user-lists-tab"
           @dismissAlert="clearAlert"
-          @changeTab="onChangeTab($options.scopes.userLists)"
+          @changeTab="onUserListsTab"
         >
           <user-lists-table
-            v-if="shouldRenderTable($options.scopes.userLists)"
+            v-if="shouldRenderUserLists"
             :user-lists="userLists"
             @delete="deleteUserList"
           />
-        </tab>
+        </feature-flags-tab>
         <template #tabs-end>
           <div
             class="gl-display-none gl-display-md-flex gl-align-items-center gl-flex-fill-1 gl-justify-content-end"
@@ -322,7 +330,7 @@ export default {
               class="mb-0 mr-3"
               data-testid="ff-new-list-button"
             >
-              {{ s__('FeatureFlags|New list') }}
+              {{ s__('FeatureFlags|New user list') }}
             </gl-button>
 
             <gl-button

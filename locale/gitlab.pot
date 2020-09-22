@@ -10875,7 +10875,7 @@ msgstr ""
 msgid "FeatureFlags|New feature flag"
 msgstr ""
 
-msgid "FeatureFlags|New list"
+msgid "FeatureFlags|New user list"
 msgstr ""
 
 msgid "FeatureFlags|Percent of users"
