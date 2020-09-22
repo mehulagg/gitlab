@@ -39,12 +39,12 @@ The author then adds a comment to this piece of code and adds a link to the issu
   }.freeze
   ```
 
-- Use the experiment in a controller:
+- Standard use for the experiment in a controller:
 
   ```ruby
   class RegistrationController < ApplicationController
    def show
-     # experiment_enabled?(:feature_name) is also available in views and helpers
+     # experiment_enabled?(:experiment_key) is also available in views and helpers
      if experiment_enabled?(:signup_flow)
        # render the experiment
      else
@@ -54,6 +54,26 @@ The author then adds a comment to this piece of code and adds a link to the issu
   end
   ```
 
+- Making the experiment available to the frontend in a controller:
+
+  ```ruby
+  before_action do
+    push_experiment_frontend_feature_flag(:signup_flow)
+  end 
+  ```
+  
+  - This will check if the experiment is enabled and push that result to the frontend.
+  
+  You can then check the state of the feature flag in JavaScript as follows:
+  
+  ```javascript
+  import { experimentEnabled } from '~/experimentation';
+  
+  if ( experimentEnabled('signupFlow') ) {
+    // ...
+  }
+  ```
+  
 - Track necessary events. See the [telemetry guide](../telemetry/index.md) for details.
 - After the merge request is merged, use [`chatops`](../../ci/chatops/README.md) in the
 [appropriate channel](../feature_flags/controls.md#communicate-the-change) to start the experiment for 10% of the users.

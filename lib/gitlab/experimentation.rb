@@ -91,6 +91,13 @@ module Gitlab
         }
       end
 
+      def push_experiment_frontend_feature_flag(experiment_key)
+        var_name = Experimentation.feature_flag_name(experiment_key).camelize(:lower)
+        enabled = experiment_enabled?(experiment_key)
+
+        gon.push({ features: { var_name => enabled } }, true)
+      end
+
       def experiment_enabled?(experiment_key)
         return false if dnt_enabled?
 
@@ -187,6 +194,10 @@ module Gitlab
         enabled?(experiment_key) &&
           experiment(experiment_key).enabled_for_experimentation_subject?(experimentation_subject_index)
       end
+
+      def feature_flag_name(key)
+        "#{key}_experiment_percentage"
+      end
     end
 
     Experiment = Struct.new(:key, :environment, :tracking_category, keyword_init: true) do
@@ -210,7 +221,7 @@ module Gitlab
 
       # When a feature does not exist, the `percentage_of_time_value` method will return 0
       def experiment_percentage
-        @experiment_percentage ||= Feature.get(:"#{key}_experiment_percentage").percentage_of_time_value # rubocop:disable Gitlab/AvoidFeatureGet
+        @experiment_percentage ||= Feature.get(:"#{Experimentation.feature_flag_name(key)}").percentage_of_time_value # rubocop:disable Gitlab/AvoidFeatureGet
       end
     end
   end

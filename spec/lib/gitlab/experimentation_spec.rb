@@ -69,6 +69,20 @@ RSpec.describe Gitlab::Experimentation do
       end
     end
 
+    describe '#push_experiment_frontend_feature_flag' do
+      it 'pushes a feature flag to the frontend' do
+        gon = instance_double('gon')
+        features = { features: { 'myFeatureFlagExperimentPercentage' => true } }
+
+        stub_experiment_for_user(my_feature_flag: true)
+        allow(controller).to receive(:gon).and_return(gon)
+
+        expect(gon).to receive(:push).with(features, true)
+
+        controller.push_experiment_frontend_feature_flag(:my_feature_flag)
+      end
+    end
+
     describe '#experiment_enabled?' do
       subject { controller.experiment_enabled?(:test_experiment) }
 
