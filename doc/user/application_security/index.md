@@ -226,11 +226,11 @@ automatically generates. The following scanners are supported:
   `yarn`.
 - [Container Scanning](container_scanning/index.md)
 
-When an automatic solution is available, the button in the header will show "Resolve with merge request":
+When a solution is available, the button in the header will show "Resolve with merge request":
 
 ![Resolve with Merge Request button](img/vulnerability_page_merge_request_button_v13_1.png)
 
-Selecting the button will create a merge request with the automatic solution.
+Selecting the button will create a merge request with the solution.
 
 #### Manually applying the suggested patch
 
