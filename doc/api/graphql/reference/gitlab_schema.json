@@ -23990,6 +23990,18 @@
               "deprecationReason": null
             },
             {
+              "name": "SEVERITY_ASC",
+              "description": "Severity from less critical to more critical",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "SEVERITY_DESC",
+              "description": "Severity from more critical to less critical",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
               "name": "WEIGHT_ASC",
               "description": "Weight by ascending order",
               "isDeprecated": false,
@@ -23998,6 +24010,18 @@
             {
               "name": "WEIGHT_DESC",
               "description": "Weight by descending order",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "PUBLISHED_ASC",
+              "description": "Published issues shown last",
+              "isDeprecated": false,
+              "deprecationReason": null
+            },
+            {
+              "name": "PUBLISHED_DESC",
+              "description": "Published issues shown first",
               "isDeprecated": false,
               "deprecationReason": null
             }

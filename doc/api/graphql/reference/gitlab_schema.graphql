@@ -8687,9 +8687,29 @@ enum IssueSort {
   PRIORITY_DESC
 
   """
+  Published issues shown last
+  """
+  PUBLISHED_ASC
+
+  """
+  Published issues shown first
+  """
+  PUBLISHED_DESC
+
+  """
   Relative position by ascending order
   """
   RELATIVE_POSITION_ASC
+
+  """
+  Severity from less critical to more critical
+  """
+  SEVERITY_ASC
+
+  """
+  Severity from more critical to less critical
+  """
+  SEVERITY_DESC
 
   """
   Weight by ascending order

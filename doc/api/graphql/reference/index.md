@@ -3154,7 +3154,11 @@ Values for sorting issues.
 | `MILESTONE_DUE_DESC` | Milestone due date by descending order |
 | `PRIORITY_ASC` | Priority by ascending order |
 | `PRIORITY_DESC` | Priority by descending order |
+| `PUBLISHED_ASC` | Published issues shown last |
+| `PUBLISHED_DESC` | Published issues shown first |
 | `RELATIVE_POSITION_ASC` | Relative position by ascending order |
+| `SEVERITY_ASC` | Severity from less critical to more critical |
+| `SEVERITY_DESC` | Severity from more critical to less critical |
 | `WEIGHT_ASC` | Weight by ascending order |
 | `WEIGHT_DESC` | Weight by descending order |
 | `created_asc` | Created at ascending order |
