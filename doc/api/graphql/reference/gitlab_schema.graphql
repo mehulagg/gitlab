@@ -6876,6 +6876,11 @@ type Group {
     milestoneTitle: [String]
 
     """
+    Negated arguments
+    """
+    not: NegatedArguments
+
+    """
     Search query for issue title or description
     """
     search: String
@@ -11127,6 +11132,13 @@ enum NamespaceProjectSort {
   SIMILARITY
 }
 
+input NegatedArguments {
+  """
+  Current state of this issue
+  """
+  state: IssuableState
+}
+
 input NegatedBoardIssueInput {
   """
   Filter by assignee username
@@ -12331,6 +12343,11 @@ type Project {
     milestoneTitle: [String]
 
     """
+    Negated arguments
+    """
+    not: NegatedArguments
+
+    """
     Search query for issue title or description
     """
     search: String
@@ -12524,6 +12541,11 @@ type Project {
     Milestone applied to this issue
     """
     milestoneTitle: [String]
+
+    """
+    Negated arguments
+    """
+    not: NegatedArguments
 
     """
     Search query for issue title or description

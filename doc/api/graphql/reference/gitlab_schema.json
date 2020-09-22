@@ -19028,6 +19028,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "not",
+                  "description": "Negated arguments",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "NegatedArguments",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "sort",
                   "description": "Sort issues by this criteria",
                   "type": {
@@ -33149,6 +33159,27 @@
         },
         {
           "kind": "INPUT_OBJECT",
+          "name": "NegatedArguments",
+          "description": null,
+          "fields": null,
+          "inputFields": [
+            {
+              "name": "state",
+              "description": "Current state of this issue",
+              "type": {
+                "kind": "ENUM",
+                "name": "IssuableState",
+                "ofType": null
+              },
+              "defaultValue": null
+            }
+          ],
+          "interfaces": null,
+          "enumValues": null,
+          "possibleTypes": null
+        },
+        {
+          "kind": "INPUT_OBJECT",
           "name": "NegatedBoardIssueInput",
           "description": null,
           "fields": null,
@@ -36617,6 +36648,16 @@
                   "defaultValue": null
                 },
                 {
+                  "name": "not",
+                  "description": "Negated arguments",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "NegatedArguments",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
                   "name": "sort",
                   "description": "Sort issues by this criteria",
                   "type": {
@@ -37036,6 +37077,16 @@
                   "type": {
                     "kind": "ENUM",
                     "name": "IssuableState",
+                    "ofType": null
+                  },
+                  "defaultValue": null
+                },
+                {
+                  "name": "not",
+                  "description": "Negated arguments",
+                  "type": {
+                    "kind": "INPUT_OBJECT",
+                    "name": "NegatedArguments",
                     "ofType": null
                   },
                   "defaultValue": null
