@@ -1,5 +1,8 @@
 - commit = @repository.commit(tag.dereferenced_target)
 - release = @releases.find { |release| release.tag == tag.name }
+- modal_attributes = { title: s_('Geo|Remove tracking database entry'), message: s_('Geo|Tracking database entry will be removed. Are you sure?'), okVariant: 'danger', okTitle: s_('Geo|Remove entry') }.to_json
+-#  title: s_('TagsPage|Delete tag'), confirm: s_('TagsPage|Deleting the %{tag_name} tag cannot be undone. Are you sure?') % { tag_name: tag.name }
+
 %li.flex-row.allow-wrap
   .row-main-content
     = sprite_icon('tag')
@@ -38,5 +41,6 @@
     - if can?(current_user, :admin_tag, @project)
       = link_to edit_project_tag_release_path(@project, tag.name), class: 'btn btn-edit has-tooltip', title: s_('TagsPage|Edit release notes'), data: { container: "body" } do
         = sprite_icon("pencil")
-      = link_to project_tag_path(@project, tag.name), class: "btn btn-remove remove-row has-tooltip gl-ml-3 #{protected_tag?(@project, tag) ? 'disabled' : ''}", title: s_('TagsPage|Delete tag'), method: :delete, data: { confirm: s_('TagsPage|Deleting the %{tag_name} tag cannot be undone. Are you sure?') % { tag_name: tag.name }, container: 'body' }, remote: true do
+      -# = link_to project_tag_path(@project, tag.name), class: "js-remove-tag btn btn-remove remove-row has-tooltip gl-ml-3 #{protected_tag?(@project, tag) ? 'disabled' : ''}", title: s_('TagsPage|Delete tag'), data: { confirm: s_('TagsPage|Deleting the %{tag_name} tag cannot be undone. Are you sure?') % { tag_name: tag.name }, container: 'body' } do
+      %button{ type: "button", class: "js-remove-tag js-confirm-modal-button btn btn-remove remove-row has-tooltip gl-ml-3 #{protected_tag?(@project, tag) ? 'disabled' : ''}", title: s_('TagsPage|Delete tag'), data: { container: 'body', target: project_tag_path(@project, tag.name), modal_attributes: modal_attributes } }
         = sprite_icon("remove")
