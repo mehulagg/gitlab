@@ -66,6 +66,7 @@ module Projects
       end
 
       if template_file
+        data[:template_name] = params.delete(:template_name).presence
         params[:import_type] = 'gitlab_project'
       end
 

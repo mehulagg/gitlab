@@ -8,7 +8,7 @@ module Projects
 
     def initialize(user, params)
       @current_user, @params = user, params.to_h.dup
-      @template_name = @params.delete(:template_name).presence
+      @template_name = @params[:template_name]
     end
 
     def execute
