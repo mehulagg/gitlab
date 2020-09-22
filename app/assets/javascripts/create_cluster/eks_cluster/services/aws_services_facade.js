@@ -8,13 +8,8 @@ const lookupVpcName = ({ Tags: tags, VpcId: id }) => {
   return nameTag ? nameTag.Value : id;
 };
 
-export const DEFAULT_REGION = 'us-east-2';
-
 export const setAWSConfig = ({ awsCredentials }) => {
-  AWS.config = {
-    ...awsCredentials,
-    region: DEFAULT_REGION,
-  };
+  AWS.config = awsCredentials;
 };
 
 export const fetchRoles = () => {

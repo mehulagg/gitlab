@@ -1,5 +1,6 @@
 import * as types from './mutation_types';
-import { setAWSConfig, DEFAULT_REGION } from '../services/aws_services_facade';
+import { setAWSConfig } from '../services/aws_services_facade';
+import { DEFAULT_REGION } from '../constants';
 import axios from '~/lib/utils/axios_utils';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
@@ -33,7 +34,14 @@ export const createRole = ({ dispatch, state: { createRolePath } }, payload) => 
       role_external_id: payload.externalId,
       role_region: region,
     })
-    .then(({ data }) => dispatch('createRoleSuccess', convertObjectPropsToCamelCase(data)))
+    .then(({ data }) => {
+      const awsData = {
+        ...convertObjectPropsToCamelCase(data),
+        region,
+      };
+
+      dispatch('createRoleSuccess', awsData);
+    })
     .catch(error => dispatch('createRoleError', { error }));
 };
 
