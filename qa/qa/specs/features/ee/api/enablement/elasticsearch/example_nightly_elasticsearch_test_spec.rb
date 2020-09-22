@@ -5,7 +5,7 @@ require 'securerandom'
 
 module QA
   RSpec.describe 'Enablement:Search' do
-    describe 'When using elasticsearch API to search for a known blob', :orchestrated, :elasticsearch, :requires_admin, only: { subdomain: :nightly } do
+    describe 'When using elasticsearch API to search for a known blob', :orchestrated, :elasticsearch, :requires_admin, only_run_in_pipeline: :nightly do
       p1_threshold = 15
       p2_threshold = 10
       p3_threshold = 3
@@ -45,7 +45,7 @@ module QA
           get Runtime::Search.create_search_request(api_client, 'blobs', project_file_content).url
           expect_status(QA::Support::Api::HTTP_STATUS_OK)
 
-          if json_body[0][:data].match(project_file_content) && json_body[0][:project_id].equal(project.id)
+          if !json_body.empty? && json_body[0][:data].match(project_file_content) && json_body[0][:project_id].equal?(project.id)
             break
           end
 
