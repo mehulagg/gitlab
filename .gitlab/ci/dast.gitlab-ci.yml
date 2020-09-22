@@ -1,12 +1,6 @@
 .dast_conf:
-  tags:
-    - prm
-  # For scheduling dast job
-  extends:
-    - .reports:schedule-dast
   image:
     name: "registry.gitlab.com/gitlab-org/security-products/dast:$DAST_VERSION"
-  resource_group: dast_scan
   variables:
     DAST_USERNAME_FIELD: "user[login]"
     DAST_PASSWORD_FIELD: "user[password]"
@@ -32,7 +26,7 @@
     # Sort ids in DAST_RULES ascendingly, which is required when using DAST_RULES as argument to enable_rule
     - 'DAST_RULES=$(echo $DAST_RULES | tr "," "\n" | sort -n | paste -sd ",")'
   needs: ["review-deploy"]
-  stage: dast
+  stage: qa
   # Default job timeout set to 90m and dast rules needs 2h to so that it won't timeout.
   timeout: 2h
   # Add retry because of intermittent connection problems. See https://gitlab.com/gitlab-org/gitlab/-/issues/244313
@@ -45,70 +39,70 @@
     expire_in: 1 week  # GitLab-specific
 
 # DAST scan with a subset of Release scan rules.
-DAST-fullscan-ruleset1:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user1"
-  script:
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 10019 | enable_rule 10020 | enable_rule 10021 | enable_rule 10023 | enable_rule 10024 | enable_rule 10025 | enable_rule 10037 | enable_rule 10040 | enable_rule 10054 | enable_rule 10055 | enable_rule 10056)
-    - echo $DAST_EXCLUDE_RULES
-    - /analyze -t $DAST_WEBSITE -d
+# DAST-fullscan-ruleset1:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user1"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 10019 | enable_rule 10020 | enable_rule 10021 | enable_rule 10023 | enable_rule 10024 | enable_rule 10025 | enable_rule 10037 | enable_rule 10040 | enable_rule 10054 | enable_rule 10055 | enable_rule 10056)
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
 
-# DAST scan with a subset of Release scan rules.
-DAST-fullscan-ruleset2:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user2"
-  script:
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 90011 | enable_rule 90020 | enable_rule 90022 | enable_rule 90033)
-    - echo $DAST_EXCLUDE_RULES
-    - /analyze -t $DAST_WEBSITE -d
+# # DAST scan with a subset of Release scan rules.
+# DAST-fullscan-ruleset2:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user2"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 90011 | enable_rule 90020 | enable_rule 90022 | enable_rule 90033)
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
 
-# DAST scan with a subset of Release scan rules.
-DAST-fullscan-ruleset3:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user3"
-  script:
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40016 | enable_rule 40017 | enable_rule 50000 | enable_rule 50001)
-    - echo $DAST_EXCLUDE_RULES
-    - /analyze -t $DAST_WEBSITE -d
+# # DAST scan with a subset of Release scan rules.
+# DAST-fullscan-ruleset3:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user3"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40016 | enable_rule 40017 | enable_rule 50000 | enable_rule 50001)
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
 
-# DAST scan with a subset of Release scan rules.
-DAST-fullscan-ruleset4:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user4"
-  script:
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 0 | enable_rule 2 | enable_rule 3 | enable_rule 7 )
-    - echo $DAST_EXCLUDE_RULES
-    - /analyze -t $DAST_WEBSITE -d
+# # DAST scan with a subset of Release scan rules.
+# DAST-fullscan-ruleset4:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user4"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 0 | enable_rule 2 | enable_rule 3 | enable_rule 7 )
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
 
-# DAST scan with a subset of Release scan rules.
-DAST-fullscan-ruleset5:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user5"
-  script:
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 10010 | enable_rule 10011 | enable_rule 10015 | enable_rule 10017 | enable_rule 10019)
-    - echo $DAST_EXCLUDE_RULES
-    - /analyze -t $DAST_WEBSITE -d
+# # DAST scan with a subset of Release scan rules.
+# DAST-fullscan-ruleset5:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user5"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 10010 | enable_rule 10011 | enable_rule 10015 | enable_rule 10017 | enable_rule 10019)
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
 
-# DAST scan with a subset of Release scan rules.
-DAST-fullscan-ruleset6:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user6"
-  script:
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 30001 | enable_rule 40009)
-    - echo $DAST_EXCLUDE_RULES
-    - /analyze -t $DAST_WEBSITE -d
+# # DAST scan with a subset of Release scan rules.
+# DAST-fullscan-ruleset6:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user6"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 30001 | enable_rule 40009)
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
 
 # Enable when https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39749 is fixed
 # DAST scan with a subset of Beta scan rules.
@@ -148,56 +142,86 @@ DAST-fullscan-ruleset6:
 #     - /analyze -t $DAST_WEBSITE -d
 
 # DAST scan with rule - 90020 Remote OS Command Injection
-DAST-fullscan-rule-90020:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user10"
-  script:
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 90020)
-    - echo $DAST_EXCLUDE_RULES
-    - /analyze -t $DAST_WEBSITE -d
+# DAST-fullscan-rule-90020:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user10"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 90020)
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
 
 # DAST scan with rule - 40018 SQL Injection - Active/release
-DAST-fullscan-rule-40018:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user11"
-  script:
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40018)
-    - echo $DAST_EXCLUDE_RULES
-    - /analyze -t $DAST_WEBSITE -d
+# DAST-fullscan-rule-40018:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user11"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40018)
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
 
 # DAST scan with rule - 40014 Cross Site Scripting (Persistent) - Active/release
-DAST-fullscan-rule-40014:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user12"
-  script:
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40014)
-    - echo $DAST_EXCLUDE_RULES
-    - /analyze -t $DAST_WEBSITE -d
+# DAST-fullscan-rule-40014:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user12"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40014)
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
 
 # DAST scan with rule - 6 Path travesal
-DAST-fullscan-rule-6:
-  extends:
-    - .dast_conf
-  variables:
-    DAST_USERNAME: "user13"
-  script:
-    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 6)
-    - echo $DAST_EXCLUDE_RULES
-    - /analyze -t $DAST_WEBSITE -d
+# DAST-fullscan-rule-6:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user13"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 6)
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
 
 # DAST scan with rule - 40012 Cross Site Scripting (Reflected)
-DAST-fullscan-rule-40012:
+# DAST-fullscan-rule-40012:
+#   extends:
+#     - .dast_conf
+#   variables:
+#     DAST_USERNAME: "user14"
+#   script:
+#     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40012)
+#     - echo $DAST_EXCLUDE_RULES
+#     - /analyze -t $DAST_WEBSITE -d
+
+DAST-url-scan-1:
   extends:
     - .dast_conf
   variables:
     DAST_USERNAME: "user14"
   script:
+    - export DAST_PATHS=$(cat urls1.txt)
     - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40012)
-    - echo $DAST_EXCLUDE_RULES
+    - /analyze -t $DAST_WEBSITE -d
+
+DAST-url-scan-2:
+  extends:
+    - .dast_conf
+  variables:
+    DAST_USERNAME: "user14"
+  script:
+    - export DAST_PATHS=$(cat urls2.txt)
+    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40012)
+    - /analyze -t $DAST_WEBSITE -d
+
+DAST-url-scan-3:
+  extends:
+    - .dast_conf
+  variables:
+    DAST_USERNAME: "user14"
+  script:
+    - export DAST_PATHS=$(cat urls3.txt)
+    - export DAST_EXCLUDE_RULES=$(echo $DAST_RULES | enable_rule 40012)
     - /analyze -t $DAST_WEBSITE -d
