@@ -286,7 +286,7 @@ module Ci
     def to_deleted_object_attrs
       {
         file_store: file_store,
-        store_dir: file.store_dir.to_s.presence,
+        store_dir: file.store_dir.to_s,
         file: file_identifier,
         pick_up_at: expire_at || Time.current
       }
