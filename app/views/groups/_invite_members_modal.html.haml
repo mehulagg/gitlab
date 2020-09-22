@@ -1,4 +1,4 @@
-- if Feature.enabled?(:invite_members_group_modal, group) && can?(current_user, :admin_group_member, group)
+- if invite_members_allowed?(group)
   .js-invite-members-modal{ data: { group_id: group.id,
     group_name: group.name,
     access_levels: GroupMember.access_level_roles.to_json,

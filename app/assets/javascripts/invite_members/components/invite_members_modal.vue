@@ -138,7 +138,6 @@ export default {
     :modal-id="modalId"
     size="sm"
     :title="$options.labels.modalTitle"
-    modal-class="set-user-status-modal"
     :ok-title="$options.labels.inviteButtonText"
     :cancel-title="$options.labels.cancelButtonText"
     ok-variant="success"

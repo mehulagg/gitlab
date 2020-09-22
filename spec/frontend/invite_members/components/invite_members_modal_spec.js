@@ -38,33 +38,24 @@ describe('InviteMembersModal', () => {
   const findDatepicker = () => wrapper.find(GlDatepicker);
   const findLink = () => wrapper.find(GlLink);
 
-  const modalTitle = 'Invite team members';
-  const inviteButtonText = 'Invite';
-  const cancelButtonText = 'Cancel';
-  const selectedRoleName = 'Guest';
-
   describe('rendering the modal', () => {
     beforeEach(() => {
       wrapper = createComponent();
     });
 
-    describe('setting the correct modal attributes', () => {
-      it('sets the correct Modal title', () => {
-        expect(findModal().attributes('title')).toBe(modalTitle);
-      });
+    it('renders the modal with the correct attributes', () => {
+      const expectedModalAttributes = {
+        title: 'Invite team members',
+        'ok-title': 'Invite',
+        'cancel-title': 'Cancel',
+      };
 
-      it('sets the Invite button text', () => {
-        expect(findModal().attributes('ok-title')).toBe(inviteButtonText);
-      });
-
-      it('sets the Cancel button text', () => {
-        expect(findModal().attributes('cancel-title')).toBe(cancelButtonText);
-      });
+      expect(findModal().attributes()).toMatchObject(expectedModalAttributes);
     });
 
     describe('rendering the access levels dropdown', () => {
       it('sets the default dropdown text to the default access level name', () => {
-        expect(findDropdown().attributes('text')).toBe(selectedRoleName);
+        expect(findDropdown().attributes('text')).toBe('Guest');
       });
 
       it('renders dropdown items for each accessLevel', () => {
