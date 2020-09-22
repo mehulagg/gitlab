@@ -13,7 +13,7 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import download from '~/lib/utils/downloader';
-import { cleanLeadingSeparator } from '~/lib/utils/url_utility';
+import { cleanLeadingSeparator, joinPaths } from '~/lib/utils/url_utility';
 import {
   DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
   DAST_SITE_VALIDATION_METHODS,
@@ -128,7 +128,7 @@ export default {
       immediate: true,
       handler() {
         if (!this.validationPathInputTouched) {
-          this.validationPath = [this.path, this.textFileName].join('/').replace(/^\//, '');
+          this.validationPath = joinPaths(this.path, this.textFileName);
         }
       },
     },
