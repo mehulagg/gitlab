@@ -13,6 +13,7 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import download from '~/lib/utils/downloader';
+import { cleanLeadingSeparator } from '~/lib/utils/url_utility';
 import {
   DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
   DAST_SITE_VALIDATION_METHODS,
@@ -107,7 +108,7 @@ export default {
       return this.urlObject.origin ? `${this.urlObject.origin}/` : '';
     },
     path() {
-      return (this.urlObject.pathname || '').substring(1);
+      return cleanLeadingSeparator(this.urlObject.pathname || '');
     },
     isTextFileValidation() {
       return this.validationMethod === DAST_SITE_VALIDATION_METHOD_TEXT_FILE;
