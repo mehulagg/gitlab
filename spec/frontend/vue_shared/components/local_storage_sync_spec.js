@@ -155,6 +155,7 @@ describe('Local Storage Sync', () => {
       ${false}          | ${'false'}
       ${42}             | ${'42'}
       ${'42'}           | ${'"42"'}
+      ${'{ foo: '}      | ${'"{ foo: "'}
       ${['test']}       | ${'["test"]'}
       ${{ foo: 'bar' }} | ${'{"foo":"bar"}'}
     `('given $value', ({ value, serializedValue }) => {
