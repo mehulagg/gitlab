@@ -1,11 +1,10 @@
 <script>
-import { GlLink, GlTooltipDirective, GlSprintf } from '@gitlab/ui';
+import { GlLink, GlTooltipDirective } from '@gitlab/ui';
 import { formatDate } from '~/lib/utils/datetime_utility';
 
 export default {
   components: {
     GlLink,
-    GlSprintf,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -31,11 +30,7 @@ export default {
     <div class="gl-pr-3">
       <span class="gl-font-weight-bold">{{ s__('HighlightBar|Original alert:') }}</span>
       <gl-link v-gl-tooltip :title="alert.title" :href="alert.detailsUrl">
-        <gl-sprintf :message="__('Alert #%{alertId}')">
-          <template #alertId>
-            <span>{{ alert.iid }}</span>
-          </template>
-        </gl-sprintf>
+        #{{ alert.iid }}
       </gl-link>
     </div>
 
