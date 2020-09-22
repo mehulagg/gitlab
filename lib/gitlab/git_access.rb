@@ -29,7 +29,7 @@ module Gitlab
       read_only: 'The repository is temporarily read-only. Please try again later.',
       cannot_push_to_read_only: "You can't push code to a read-only GitLab instance.",
       push_code: 'You are not allowed to push code to this project.',
-      maintenance_mode_ssh: 'Git push over SSH is not allowed because this GitLab instance is currently in (read-only) maintenance  mode.'
+      maintenance_mode: 'Git push is not allowed because this GitLab instance is currently in (read-only) maintenance  mode.'
     }.freeze
 
     INTERNAL_TIMEOUT = 50.seconds.freeze
@@ -141,11 +141,7 @@ module Gitlab
     def check_maintenance_mode!
       return unless Gitlab::CurrentSettings.current_application_settings.maintenance_mode
 
-      raise ForbiddenError, error_message(:maintenance_mode_ssh) if git_push_over_ssh?
-    end
-
-    def git_push_over_ssh?
-      cmd == 'git-receive-pack' && protocol == 'ssh'
+      raise ForbiddenError, error_message(:maintenance_mode) if cmd == 'git-receive-pack'
     end
 
     def check_container!

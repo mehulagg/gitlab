@@ -1079,8 +1079,7 @@ RSpec.describe API::Internal::Base do
           expect(response).to have_gitlab_http_status(:unauthorized)
           expect(json_response["status"]).to be_falsey
           expect(json_response["message"]).to eq(
-            'Git push over SSH is not allowed because this GitLab instance'\
-            ' is currently in maintenance mode.'
+            'Git push is not allowed because this GitLab instance is currently in (read-only) maintenance  mode.'
           )
           expect(user.reload.last_activity_on).to be_nil
         end
