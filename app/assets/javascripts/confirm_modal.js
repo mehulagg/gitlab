@@ -1,14 +1,15 @@
 import Vue from 'vue';
 import ConfirmModal from '~/vue_shared/components/confirm_modal.vue';
 
-const mountConfirmModal = () => {
+const mountConfirmModal = optionalProps => {
+  console.log('optionalProps', optionalProps);
   return new Vue({
     render(h) {
       return h(ConfirmModal, {
-        props: { selector: '.js-confirm-modal-button' },
+        props: { selector: '.js-confirm-modal-button', ...optionalProps },
       });
     },
   }).$mount();
 };
 
-export default () => mountConfirmModal();
+export default (optionalProps = {}) => mountConfirmModal(optionalProps);

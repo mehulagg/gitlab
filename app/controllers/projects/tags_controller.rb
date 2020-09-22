@@ -74,8 +74,8 @@ class Projects::TagsController < Projects::ApplicationController
   end
 
   def destroy
-    result = ::Tags::DestroyService.new(project, current_user).execute(params)
-    # result = ::Tags::DestroyService.new(project, current_user).execute(params[:id])
+    # result = ::Tags::DestroyService.new(project, current_user).execute(params)
+    result = ::Tags::DestroyService.new(project, nil).execute(params[:id])
 
     respond_to do |format|
       if result[:status] == :success
@@ -92,7 +92,7 @@ class Projects::TagsController < Projects::ApplicationController
             alert: @error, status: :see_other
         end
 
-        format.js do
+        format.json do
           render status: :ok
         end
       end
