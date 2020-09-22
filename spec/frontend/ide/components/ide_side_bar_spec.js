@@ -35,7 +35,7 @@ describe('IdeSidebar', () => {
   it('renders a sidebar', () => {
     wrapper = createComponent();
 
-    expect(wrapper.find('[data-testid="ide-side-bar-inner"]')).not.toBeNull();
+    expect(wrapper.find('[data-testid="ide-side-bar-inner"]').exists()).toBe(true);
   });
 
   it('renders loading components', async () => {
