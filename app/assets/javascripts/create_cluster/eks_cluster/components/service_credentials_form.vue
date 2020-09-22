@@ -1,6 +1,6 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlFormInput, GlButton } from '@gitlab/ui';
+import { GlFormGroup, GlFormInput, GlButton } from '@gitlab/ui';
 import { escape } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 import { sprintf, s__, __ } from '~/locale';
@@ -8,6 +8,7 @@ import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
 export default {
   components: {
+    GlFormGroup,
     GlFormInput,
     GlButton,
     ClipboardButton,
@@ -29,6 +30,7 @@ export default {
   data() {
     return {
       roleArn: this.$store.state.roleArn,
+      roleRegion: this.$store.state.roleRegion,
     };
   },
   computed: {
@@ -130,6 +132,18 @@ export default {
       <gl-form-input id="eks-provision-role-arn" v-model="roleArn" />
       <p class="form-text text-muted" v-html="provisionRoleArnHelpText"></p>
     </div>
+
+    <gl-form-group
+      :label="s__('ClusterIntegration|Provision Role Region')"
+      :description="
+        s__(
+          'ClusterIntegration|The Amazon Region associated with your Provision Role ARN. Region us-east-2 will be used if no region is entered.',
+        )
+      "
+    >
+      <gl-form-input id="eks-role-region" v-model="roleRegion" />
+    </gl-form-group>
+
     <gl-button
       variant="success"
       category="primary"
