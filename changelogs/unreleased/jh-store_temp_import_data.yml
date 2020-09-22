@@ -1,0 +1,5 @@
+---
+title: Create a model to store temporary data used for a GitLab import
+merge_request: 42978
+author:
+type: changed

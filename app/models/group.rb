@@ -66,6 +66,7 @@ class Group < Namespace
   has_many :import_failures, inverse_of: :group
 
   has_one :import_state, class_name: 'GroupImportState', inverse_of: :group
+  has_one :import_data, class_name: 'GroupImportData', inverse_of: :group
 
   has_many :group_deploy_keys_groups, inverse_of: :group
   has_many :group_deploy_keys, through: :group_deploy_keys_groups
