@@ -10,7 +10,7 @@ RSpec.describe PropagateIntegrationProjectWorker do
 
     it 'calls to BulkCreateIntegrationService' do
       expect(BulkCreateIntegrationService).to receive(:new)
-        .with(integration, [project1.id, project2.id], 'project')
+        .with(integration, match_array([project1, project2]), 'project')
         .and_return(double(execute: nil))
 
       subject.perform(integration.id, project1.id, project2.id)

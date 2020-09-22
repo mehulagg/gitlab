@@ -1,14 +1,14 @@
 # frozen_string_literal: true
 
 class BulkCreateIntegrationService
-  def initialize(integration, batch_ids, association)
+  def initialize(integration, batch, association)
     @integration = integration
-    @batch_ids = batch_ids
+    @batch = batch
     @association = association
   end
 
   def execute
-    service_list = ServiceList.new(batch_ids, service_hash, association).to_array
+    service_list = ServiceList.new(batch, service_hash, association).to_array
 
     Service.transaction do
       results = bulk_insert(*service_list)
@@ -19,13 +19,13 @@ class BulkCreateIntegrationService
         bulk_insert(*data_list)
       end
 
-      run_callbacks(batch_ids) if association == 'project'
+      run_callbacks(batch) if association == 'project'
     end
   end
 
   private
 
-  attr_reader :integration, :batch_ids, :association
+  attr_reader :integration, :batch, :association
 
   def bulk_insert(klass, columns, values_array)
     items_to_insert = values_array.map { |array| Hash[columns.zip(array)] }
@@ -34,13 +34,13 @@ class BulkCreateIntegrationService
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
-  def run_callbacks(batch_ids)
+  def run_callbacks(batch)
     if integration.issue_tracker?
-      Project.where(id: batch_ids).update_all(has_external_issue_tracker: true)
+      Project.where(id: batch.select(:id)).update_all(has_external_issue_tracker: true)
     end
 
     if integration.type == 'ExternalWikiService'
-      Project.where(id: batch_ids).update_all(has_external_wiki: true)
+      Project.where(id: batch.select(:id)).update_all(has_external_wiki: true)
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord

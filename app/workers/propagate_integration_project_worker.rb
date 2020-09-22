@@ -12,9 +12,9 @@ class PropagateIntegrationProjectWorker
     integration = Service.find_by_id(integration_id)
     return unless integration
 
-    batch_ids = Project.where(id: min_id..max_id).without_integration(integration).pluck(:id)
+    batch = Project.where(id: min_id..max_id).without_integration(integration)
 
-    BulkCreateIntegrationService.new(integration, batch_ids, 'project').execute
+    BulkCreateIntegrationService.new(integration, batch, 'project').execute
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end
