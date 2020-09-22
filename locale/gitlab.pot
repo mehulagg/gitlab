@@ -8294,6 +8294,9 @@ msgstr ""
 msgid "Delete list"
 msgstr ""
 
+msgid "Delete milestone"
+msgstr ""
+
 msgid "Delete pipeline"
 msgstr ""
 
@@ -16345,9 +16348,6 @@ msgid "Milestones|Close Milestone"
 msgstr ""
 
 msgid "Milestones|Completed Issues (closed)"
-msgstr ""
-
-msgid "Milestones|Delete milestone"
 msgstr ""
 
 msgid "Milestones|Delete milestone %{milestoneTitle}?"
