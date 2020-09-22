@@ -77,6 +77,11 @@ msgstr ""
 msgid "\"el\" parameter is required for createInstance()"
 msgstr ""
 
+msgid "%d Package"
+msgid_plural "%d Packages"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%d Scanned URL"
 msgid_plural "%d Scanned URLs"
 msgstr[0] ""
@@ -18143,6 +18148,9 @@ msgstr ""
 msgid "PackageRegistry|NuGet Command"
 msgstr ""
 
+msgid "PackageRegistry|Package Registry"
+msgstr ""
+
 msgid "PackageRegistry|Pip Command"
 msgstr ""
 
@@ -18195,6 +18203,9 @@ msgid "PackageRegistry|Unable to load package"
 msgstr ""
 
 msgid "PackageRegistry|Upcoming package managers"
+msgstr ""
+
+msgid "PackageRegistry|Use GitLab as a private repository for your package managers. %{docLinkStart}More information%{docLinkEnd}"
 msgstr ""
 
 msgid "PackageRegistry|You are about to delete %{name}, this operation is irreversible, are you sure?"
