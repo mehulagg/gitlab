@@ -267,13 +267,13 @@ RSpec.describe Projects::UpdateService, '#execute' do
     end
 
     context 'when framework is not blank' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.without(project_setting.framework).sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { create(:compliance_framework) }
+      let(:opts) { { compliance_framework_setting_attributes: { framework: framework.id } } }
 
       it 'saves the framework' do
         update_project(project, user, opts)
 
-        expect(project.reload.compliance_framework_setting.framework).to eq(framework)
+        expect(project.reload.compliance_framework_setting.compliance_management_framework).to eq(framework)
       end
     end
 
@@ -300,8 +300,8 @@ RSpec.describe Projects::UpdateService, '#execute' do
         project.update!(compliance_framework_setting: project_setting)
       end
 
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.without(project_setting.framework).sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { create(:compliance_framework) }
+      let(:opts) { { compliance_framework_setting_attributes: { framework: framework.id } } }
 
       it 'does not save the new framework and retains the old setting' do
         update_project(project, user, opts)
@@ -311,8 +311,8 @@ RSpec.describe Projects::UpdateService, '#execute' do
     end
 
     context 'the project never had the feature' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { create(:compliance_framework) }
+      let(:opts) { { compliance_framework_setting_attributes: { framework: framework.id } } }
 
       it 'does not save the framework' do
         update_project(project, user, opts)

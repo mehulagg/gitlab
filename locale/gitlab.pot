@@ -8,6 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gitlab 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-09-23 11:06+0100\n"
+"PO-Revision-Date: 2020-09-23 11:06+0100\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -6588,36 +6590,6 @@ msgid "Compliance frameworks"
 msgstr ""
 
 msgid "ComplianceDashboard|created by:"
-msgstr ""
-
-msgid "ComplianceFramework|GDPR"
-msgstr ""
-
-msgid "ComplianceFramework|GDPR - General Data Protection Regulation"
-msgstr ""
-
-msgid "ComplianceFramework|HIPAA"
-msgstr ""
-
-msgid "ComplianceFramework|HIPAA - Health Insurance Portability and Accountability Act"
-msgstr ""
-
-msgid "ComplianceFramework|PCI-DSS"
-msgstr ""
-
-msgid "ComplianceFramework|PCI-DSS - Payment Card Industry-Data Security Standard"
-msgstr ""
-
-msgid "ComplianceFramework|SOC 2"
-msgstr ""
-
-msgid "ComplianceFramework|SOC 2 - Service Organization Control 2"
-msgstr ""
-
-msgid "ComplianceFramework|SOX"
-msgstr ""
-
-msgid "ComplianceFramework|SOX - Sarbanes-Oxley"
 msgstr ""
 
 msgid "ComplianceFramework|This project is regulated by %{framework}."

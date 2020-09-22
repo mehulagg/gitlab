@@ -226,7 +226,7 @@ module EE
       strong_memoize(:has_regulated_settings) do
         next false unless compliance_framework_setting
 
-        compliance_framework_id = ::ComplianceManagement::ComplianceFramework::FRAMEWORKS[compliance_framework_setting.framework.to_sym]
+        compliance_framework_id = compliance_framework_setting.framework
         ::Gitlab::CurrentSettings.current_application_settings.compliance_frameworks.include?(compliance_framework_id)
       end
     end

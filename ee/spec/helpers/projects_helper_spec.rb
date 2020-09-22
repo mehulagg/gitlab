@@ -48,7 +48,7 @@ RSpec.describe ProjectsHelper do
     it 'returns true if compliance framework setting is present' do
       project = build(:project, :with_compliance_framework)
 
-      expect(helper.show_compliance_framework_badge?(project)).to be_truthy
+      expect(helper.show_compliance_framework_badge?(project)).to be true
     end
   end
 
