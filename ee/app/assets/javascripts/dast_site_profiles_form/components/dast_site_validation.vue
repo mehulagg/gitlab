@@ -99,7 +99,7 @@ export default {
     urlObject() {
       try {
         return new URL(this.targetUrl);
-      } catch (_) {
+      } catch {
         return {};
       }
     },
