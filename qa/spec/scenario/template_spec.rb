@@ -14,7 +14,7 @@ describe QA::Scenario::Template do
   it 'allows a feature to be enabled' do
     subject.perform({ enable_feature: 'a-feature' })
 
-    expect(feature).to have_received(:enable).with('a-feature')
+    expect(feature).to have_received(:enable_and_verify).with('a-feature')
   end
 
   it 'allows a feature to be disabled' do
@@ -23,7 +23,7 @@ describe QA::Scenario::Template do
 
     subject.perform({ disable_feature: 'another-feature' })
 
-    expect(feature).to have_received(:disable).with('another-feature')
+    expect(feature).to have_received(:disable_and_verify).with('another-feature')
   end
 
   it 'does not disable a feature if already disabled' do
@@ -32,7 +32,7 @@ describe QA::Scenario::Template do
 
     subject.perform({ disable_feature: 'another-feature' })
 
-    expect(feature).not_to have_received(:disable).with('another-feature')
+    expect(feature).not_to have_received(:disable_and_verify).with('another-feature')
   end
 
   it 'ensures an enabled feature is disabled afterwards' do
@@ -40,8 +40,8 @@ describe QA::Scenario::Template do
 
     expect { subject.perform({ enable_feature: 'a-feature' }) }.to raise_error('failed test')
 
-    expect(feature).to have_received(:enable).with('a-feature')
-    expect(feature).to have_received(:disable).with('a-feature')
+    expect(feature).to have_received(:enable_and_verify).with('a-feature')
+    expect(feature).to have_received(:disable_and_verify).with('a-feature')
   end
 
   it 'ensures a disabled feature is enabled afterwards' do
@@ -52,8 +52,8 @@ describe QA::Scenario::Template do
 
     expect { subject.perform({ disable_feature: 'another-feature' }) }.to raise_error('failed test')
 
-    expect(feature).to have_received(:disable).with('another-feature')
-    expect(feature).to have_received(:enable).with('another-feature')
+    expect(feature).to have_received(:disable_and_verify).with('another-feature')
+    expect(feature).to have_received(:enable_and_verify).with('another-feature')
   end
 
   it 'ensures a disabled feature is not enabled afterwards if it was disabled earlier' do
@@ -64,7 +64,7 @@ describe QA::Scenario::Template do
 
     expect { subject.perform({ disable_feature: 'another-feature' }) }.to raise_error('failed test')
 
-    expect(feature).not_to have_received(:disable).with('another-feature')
-    expect(feature).not_to have_received(:enable).with('another-feature')
+    expect(feature).not_to have_received(:disable_and_verify).with('another-feature')
+    expect(feature).not_to have_received(:enable_and_verify).with('another-feature')
   end
 end
