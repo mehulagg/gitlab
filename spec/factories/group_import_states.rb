@@ -3,7 +3,6 @@
 FactoryBot.define do
   factory :group_import_state, class: 'GroupImportState', traits: %i[created] do
     association :group, factory: :group
-    association :user, factory: :user
 
     trait :created do
       status { 0 }

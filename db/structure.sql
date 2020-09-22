@@ -18086,9 +18086,6 @@ ALTER TABLE vulnerability_scanners
 ALTER TABLE packages_package_files
     ADD CONSTRAINT check_4c5e6bb0b3 CHECK ((file_store IS NOT NULL)) NOT VALID;
 
-ALTER TABLE group_import_states
-    ADD CONSTRAINT check_cda75c7c3f CHECK ((user_id IS NOT NULL)) NOT VALID;
-
 ALTER TABLE ONLY ci_build_needs
     ADD CONSTRAINT ci_build_needs_pkey PRIMARY KEY (id);
 
