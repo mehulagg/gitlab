@@ -21,20 +21,6 @@ export const fetchRoles = () => {
     .then(({ Roles: roles }) => roles.map(({ RoleName: name, Arn: value }) => ({ name, value })));
 };
 
-export const fetchRegions = () => {
-  const ec2 = new EC2();
-
-  return ec2
-    .describeRegions()
-    .promise()
-    .then(({ Regions: regions }) =>
-      regions.map(({ RegionName: name }) => ({
-        name,
-        value: name,
-      })),
-    );
-};
-
 export const fetchKeyPairs = ({ region }) => {
   const ec2 = new EC2({ region });
 

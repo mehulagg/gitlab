@@ -9,9 +9,7 @@ import { KUBERNETES_VERSIONS } from '../constants';
 import LoadingButton from '~/vue_shared/components/loading_button.vue';
 
 const { mapState: mapRolesState, mapActions: mapRolesActions } = createNamespacedHelpers('roles');
-const { mapState: mapRegionsState, mapActions: mapRegionsActions } = createNamespacedHelpers(
-  'regions',
-);
+const { mapState: mapRegionsState } = createNamespacedHelpers('regions');
 const { mapState: mapKeyPairsState, mapActions: mapKeyPairsActions } = createNamespacedHelpers(
   'keyPairs',
 );
@@ -273,7 +271,6 @@ export default {
     },
   },
   mounted() {
-    this.fetchRegions();
     this.fetchRoles();
   },
   methods: {
@@ -292,7 +289,6 @@ export default {
       'setNodeCount',
       'setGitlabManagedCluster',
     ]),
-    ...mapRegionsActions({ fetchRegions: 'fetchItems' }),
     ...mapVpcActions({ fetchVpcs: 'fetchItems' }),
     ...mapSubnetActions({ fetchSubnets: 'fetchItems' }),
     ...mapRolesActions({ fetchRoles: 'fetchItems' }),
