@@ -72,6 +72,11 @@ export default {
       default: false,
     },
   },
+  data() {
+    return {
+      moreActionsShown: false,
+    };
+  },
   computed: {
     ...mapGetters('diffs', ['diffHasExpandedDiscussions', 'diffHasDiscussions']),
     diffContentIDSelector() {
@@ -192,6 +197,9 @@ export default {
         }
       }
     },
+    setMoreActionsShown(val) {
+      this.moreActionsShown = val;
+    },
   },
 };
 </script>
@@ -199,6 +207,7 @@ export default {
 <template>
   <div
     ref="header"
+    :class="{ 'gl-z-dropdown-menu!': moreActionsShown }"
     class="js-file-title file-title file-title-flex-parent"
     @click.self="handleToggleFile"
   >
@@ -279,7 +288,10 @@ export default {
         <gl-dropdown
           v-gl-tooltip.hover.focus="__('More actions')"
           right
+          lazy
           toggle-class="btn-icon js-diff-more-actions"
+          @show="setMoreActionsShown(true)"
+          @hidden="setMoreActionsShown(false)"
         >
           <template #button-content>
             <gl-icon name="ellipsis_v" class="mr-0" />
@@ -318,28 +330,32 @@ export default {
             </gl-dropdown-item>
           </template>
 
-          <gl-dropdown-divider v-if="!diffFile.is_fully_expanded || diffHasDiscussions(diffFile)" />
+          <template v-if="!diffFile.viewer.collapsed">
+            <gl-dropdown-divider
+              v-if="!diffFile.is_fully_expanded || diffHasDiscussions(diffFile)"
+            />
 
-          <gl-dropdown-item
-            v-if="diffHasDiscussions(diffFile)"
-            ref="toggleDiscussionsButton"
-            data-qa-selector="toggle_comments_button"
-            @click="toggleFileDiscussionWrappers(diffFile)"
-          >
-            <template v-if="diffHasExpandedDiscussions(diffFile)">
-              {{ __('Hide comments on this file') }}
-            </template>
-            <template v-else>
-              {{ __('Show comments on this file') }}
-            </template>
-          </gl-dropdown-item>
-          <gl-dropdown-item
-            v-if="!diffFile.is_fully_expanded"
-            ref="expandDiffToFullFileButton"
-            @click="toggleFullDiff(diffFile.file_path)"
-          >
-            {{ expandDiffToFullFileTitle }}
-          </gl-dropdown-item>
+            <gl-dropdown-item
+              v-if="diffHasDiscussions(diffFile)"
+              ref="toggleDiscussionsButton"
+              data-qa-selector="toggle_comments_button"
+              @click="toggleFileDiscussionWrappers(diffFile)"
+            >
+              <template v-if="diffHasExpandedDiscussions(diffFile)">
+                {{ __('Hide comments on this file') }}
+              </template>
+              <template v-else>
+                {{ __('Show comments on this file') }}
+              </template>
+            </gl-dropdown-item>
+            <gl-dropdown-item
+              v-if="!diffFile.is_fully_expanded"
+              ref="expandDiffToFullFileButton"
+              @click="toggleFullDiff(diffFile.file_path)"
+            >
+              {{ expandDiffToFullFileTitle }}
+            </gl-dropdown-item>
+          </template>
         </gl-dropdown>
       </gl-button-group>
     </div>

@@ -13,6 +13,10 @@
     box-shadow: 0 -2px 0 0 var(--white);
     cursor: pointer;
 
+    .dropdown-menu {
+      cursor: auto;
+    }
+
     @media (min-width: map-get($grid-breakpoints, md)) {
       // The `+11` is to ensure the file header border shows when scrolled -
       // the bottom of the compare-versions header and the top of the file header
