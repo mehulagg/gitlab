@@ -19,17 +19,27 @@ class CleanupContainerRepositoryLimitedCapacityWorker
   def perform_work
     return unless container_repository
 
+    log_info(container_repository_id: container_repository.id, cleanup_status: :starting)
+
     result = Projects::ContainerRepository::CleanupTagsService
       .new(project, nil, policy_params.merge(container_expiration_policy: true))
       .execute(container_repository)
 
+    log_info(container_repository_id: container_repository.id, cleanup_status: :done, service_result_status: result[:status], service_result_message: result[:message])
+
     return if result[:status] == :success
 
     reenqueue_container_repository_id(container_repository.id)
+
+    log_info(container_repository_id: container_repository.id, cleanup_status: :re_enqueued)
   end
 
   def remaining_work_count
-    Sidekiq.redis { |r| r.llen(CONTAINER_REPOSITORY_IDS_QUEUE) }
+    work_count = Sidekiq.redis { |redis| redis.llen(CONTAINER_REPOSITORY_IDS_QUEUE) }
+
+    log_info(work_count: work_count)
+
+    work_count
   end
 
   def max_running_jobs
@@ -65,5 +75,9 @@ class CleanupContainerRepositoryLimitedCapacityWorker
       # redis client
       redis.rpush(CONTAINER_REPOSITORY_IDS_QUEUE, id)
     end
+  end
+
+  def log_info(extra_structure)
+    logger.info(structured_payload(extra_structure))
   end
 end

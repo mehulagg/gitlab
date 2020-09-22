@@ -30,6 +30,9 @@ RSpec.describe CleanupContainerRepositoryLimitedCapacityWorker, :clean_gitlab_re
           expect(Projects::ContainerRepository::CleanupTagsService)
             .to receive(:new).with(project, nil, service_params).and_return(service)
           expect(service).to receive(:execute).with(repository).and_return(status: :success)
+          expect_log_info(container_repository_id: repository.id, cleanup_status: :starting)
+          expect_log_info(container_repository_id: repository.id, cleanup_status: :done, service_result_status: :success, service_result_message: nil)
+
           expect { subject }.to change { ids_queue }.from(repository_ids).to(other_repository_ids)
         end
       end
@@ -38,6 +41,10 @@ RSpec.describe CleanupContainerRepositoryLimitedCapacityWorker, :clean_gitlab_re
         it 're enqueues the repository id' do
           expect(Projects::ContainerRepository::CleanupTagsService)
             .to receive(:new).and_return(double(execute: { status: :error, message: 'timeout' }))
+          expect_log_info(container_repository_id: repository.id, cleanup_status: :starting)
+          expect_log_info(container_repository_id: repository.id, cleanup_status: :done, service_result_status: :error, service_result_message: 'timeout')
+          expect_log_info(container_repository_id: repository.id, cleanup_status: :re_enqueued)
+
           expect { subject }.to change { ids_queue }.from(repository_ids).to(other_repository_ids + [repository_id])
         end
       end
@@ -73,10 +80,22 @@ RSpec.describe CleanupContainerRepositoryLimitedCapacityWorker, :clean_gitlab_re
       end
 
       it { is_expected.to eq(repository_ids.size) }
+
+      it 'logs the work count' do
+        expect_log_info(work_count: repository_ids.size)
+
+        subject
+      end
     end
 
     context 'with no container repository ids enqueued' do
       it { is_expected.to eq(0) }
+
+      it 'logs 0 work count' do
+        expect_log_info(work_count: 0)
+
+        subject
+      end
     end
   end
 
@@ -98,5 +117,10 @@ RSpec.describe CleanupContainerRepositoryLimitedCapacityWorker, :clean_gitlab_re
 
   def ids_queue
     Sidekiq.redis { |r| r.lrange(redis_key, 0, 10) }
+  end
+
+  def expect_log_info(structure)
+    expect(worker.logger)
+      .to receive(:info).with(worker.structured_payload(structure))
   end
 end
