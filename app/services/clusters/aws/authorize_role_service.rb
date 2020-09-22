@@ -44,7 +44,7 @@ module Clusters
       end
 
       def credentials
-        provider = ::Clusters::Providers::Aws.new(region: params[:region])
+        provider = ::Clusters::Providers::Aws.new(region: params[:role_region])
         Clusters::Aws::FetchCredentialsService.new(role, provider: provider).execute
       end
     end
