@@ -576,3 +576,12 @@ Should an error occur during a push, GitLab will display an "Error" highlight fo
 ### 13:Received RST_STREAM with error code 2 with GitHub
 
 If you receive an "13:Received RST_STREAM with error code 2" while mirroring to a GitHub repository, your GitHub settings might be set to block pushes that expose your email address used in commits. Either set your email address on GitHub to be public, or disable the [Block command line pushes that expose my email](https://github.com/settings/emails) setting.
+
+### Error `pre-receive hook failed` in pull-mirrored repositories
+
+If you encounter the error **Pre-receive hook failed** in a pull-mirrored repository:
+
+1. Find a matching timestamp in the error [logged by Gitaly](../../../administration/logs.md#gitaly-logs);
+   for example, by running `grep 'not allowed to push code to protected branches' /var/log/gitlab/gitaly/current`. **(CORE ONLY)**
+1. Check the [branch protection rules](../protected_branches.md#restricting-push-and-merge-access-to-certain-users-starter).
+   If it's set to **No one**, you might need to switch to **Maintainers** or higher permissions.
