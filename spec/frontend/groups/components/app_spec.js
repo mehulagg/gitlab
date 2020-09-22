@@ -2,6 +2,8 @@ import '~/flash';
 import $ from 'jquery';
 import Vue from 'vue';
 import AxiosMockAdapter from 'axios-mock-adapter';
+import { GlModal } from '@gitlab/ui';
+import { shallowMount } from '@vue/test-utils';
 import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
 import appComponent from '~/groups/components/app.vue';
@@ -23,26 +25,46 @@ import {
   mockPageInfo,
 } from '../mock_data';
 
-const createComponent = (hideProjects = false) => {
-  const Component = Vue.extend(appComponent);
-  const store = new GroupsStore(false);
-  const service = new GroupsService(mockEndpoint);
-
-  store.state.pageInfo = mockPageInfo;
-
-  return new Component({
-    propsData: {
-      store,
-      service,
-      hideProjects,
-    },
-  });
-};
-
 describe('AppComponent', () => {
   let vm;
   let mock;
   let getGroupsSpy;
+
+  const store = new GroupsStore(false);
+  const service = new GroupsService(mockEndpoint);
+
+  const createComponent = (hideProjects = false) => {
+    const Component = Vue.extend(appComponent);
+
+    store.state.pageInfo = mockPageInfo;
+
+    return new Component({
+      propsData: {
+        store,
+        service,
+        hideProjects,
+      },
+    });
+  };
+
+  let wrapper;
+
+  const createShallowComponent = (hideProjects = false) => {
+    wrapper = shallowMount(appComponent, {
+      propsData: {
+        store,
+        service,
+        hideProjects,
+      },
+    });
+  };
+
+  afterEach(() => {
+    if (wrapper) {
+      wrapper.destroy();
+      wrapper = null;
+    }
+  });
 
   beforeEach(() => {
     mock = new AxiosMockAdapter(axios);
@@ -298,7 +320,7 @@ describe('AppComponent', () => {
         const group = { ...mockParentGroupItem };
         vm.showLeaveGroupModal(group, mockParentGroupItem);
 
-        eventHub.$emit('cancel')
+        eventHub.$emit('cancel');
       });
     });
 
@@ -487,14 +509,13 @@ describe('AppComponent', () => {
     });
 
     it('renders modal confirmation dialog', () => {
-      vm.groupLeaveConfirmationMessage = 'Are you sure you want to leave the "foo" group?';
-      return vm.$nextTick().then(() => {
-        const modalDialogEl = vm.$el.querySelector('.gl-modal');
+      createShallowComponent();
 
-        expect(modalDialogEl).not.toBe(null);
-        expect(modalDialogEl.querySelector('.modal-title').innerText.trim()).toBe('Are you sure?');
-        expect(modalDialogEl.querySelector('.btn.btn-warning').innerText.trim()).toBe('Leave');
-      });
+      const findGlModal = wrapper.find(GlModal);
+
+      expect(findGlModal.exists()).toBe(true);
+      expect(findGlModal.attributes('title')).toBe('Are you sure?');
+      expect(findGlModal.props('actionPrimary').text).toBe('Leave group');
     });
   });
 });

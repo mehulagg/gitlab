@@ -15,8 +15,8 @@ import groupsComponent from './groups.vue';
 
 export default {
   components: {
-    GlModal,
     groupsComponent,
+    GlModal,
     GlLoadingIcon,
   },
   props: {
@@ -249,7 +249,7 @@ export default {
       class="loading-animation prepend-top-20"
     />
     <groups-component
-      v-if="!isLoading"
+      v-else
       :groups="groups"
       :search-empty="isSearchEmpty"
       :search-empty-message="searchEmptyMessage"
