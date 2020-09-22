@@ -142,7 +142,7 @@ export default {
     </div>
 
     <gl-form-group :label="s__('ClusterIntegration|Provision Role Region')">
-      <gl-form-input id="eks-role-region" v-model="roleRegion" />
+      <gl-form-input id="eks-role-region" v-model="roleRegion" type="text" />
 
       <template #description>
         <gl-sprintf :message="provisionRegionHelpText">

@@ -368,6 +368,7 @@ export default {
     <gl-form-group :label="s__('ClusterIntegration|Region')">
       <gl-form-input
         id="eks-region"
+        type="text"
         :value="selectedRegion"
         @blur="setRegionAndFetchVpcsAndKeyPairs($event.target.value)"
       />
