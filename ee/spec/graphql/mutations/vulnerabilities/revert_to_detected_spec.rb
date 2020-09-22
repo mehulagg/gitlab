@@ -17,7 +17,7 @@ RSpec.describe Mutations::Vulnerabilities::RevertToDetected do
         stub_licensed_features(security_dashboard: true)
       end
 
-      context 'when user doe not have access to the project' do
+      context 'when user does not have access to the project' do
         it 'raises an error' do
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
         end
