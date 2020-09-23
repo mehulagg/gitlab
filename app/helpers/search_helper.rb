@@ -295,10 +295,15 @@ module SearchHelper
   end
 
   def simple_search_highlight_and_truncate(text, phrase, options = {})
-    truncate_length = options.delete(:length) { 200 }
-    text = truncate(text, length: truncate_length)
-    phrase = phrase.split
-    highlight(text, phrase, options)
+    text = Truncato.truncate(
+      text,
+      count_tags: false,
+      max_length: options.delete(:length) { 200 }
+    )
+
+    highlight(sanitize(text),
+              phrase.split,
+              options)
   end
 
   def show_user_search_tab?
