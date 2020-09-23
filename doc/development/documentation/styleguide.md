@@ -1625,6 +1625,10 @@ heading level.
 
 ### Text for documentation requiring version text
 
+Whenever you add version text to a section, to render correctly it must both be
+on its own line and surrounded by blank lines. The following items relate to
+adding version text to sections:
+
 - For features that need to declare the GitLab version that the feature was
   introduced. Text similar to the following should be added immediately below
   the heading as a blockquote:
@@ -1674,9 +1678,16 @@ heading level.
    and replaced by [Feature name](link-to-feature-documentation).
    ```
 
-NOTE: **Note:**
-Version text must be on its own line and surrounded by blank lines to render
-correctly.
+If needed, you can also add version information in-line. For example, a new
+feature is added to a function, but there's no need for a new section or other
+high-level call-out. In this case, add `([introduced/deprecated in GitLab X.X]<link-to-issue>)`.
+The link to an issue isn't required, but should be added if it's available. For
+example:
+
+```markdown
+The strong consistency voting strategy (introduced in GitLab 13.4) requires
+only the primary and half of the secondaries need to agree. 
+```
 
 ### Versions in the past or future
 
