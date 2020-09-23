@@ -25,7 +25,7 @@ export default {
 
 <template>
   <div
-    class="gl-border-solid gl-border-1 gl-border-gray-100 gl-p-5 gl-mb-3 gl-rounded-base gl-display-flex gl-justify-content-space-between"
+    class="gl-border-solid gl-border-1 gl-border-gray-100 gl-p-5 gl-mb-3 gl-rounded-base gl-display-flex gl-justify-content-space-between gl-xs-flex-direction-column"
   >
     <div class="gl-pr-3">
       <span class="gl-font-weight-bold">{{ s__('HighlightBar|Original alert:') }}</span>
