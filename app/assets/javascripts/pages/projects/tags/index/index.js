@@ -1,5 +1,6 @@
 import axios from '~/lib/utils/axios_utils';
 import initConfirmModal from '~/confirm_modal';
+import createFlash from '~/flash';
 
 document.addEventListener('DOMContentLoaded', () => {
   initConfirmModal({
@@ -11,7 +12,8 @@ document.addEventListener('DOMContentLoaded', () => {
           console.log('DONESKIESSSSS');
         })
         .catch(error => {
-          console.log('FAILLLLED', error);
+          console.log('FAIL!!!!', error.message);
+          createFlash({ message: error });
         });
     },
   });
