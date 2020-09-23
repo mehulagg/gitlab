@@ -503,7 +503,7 @@ supported by consolidated configuration form, refer to the following guides:
 |Object storage type|Supported by consolidated configuration?|
 |-------------------|----------------------------------------|
 | [Backups](../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage)|No|
-| [Job artifacts](job_artifacts.md#using-object-storage) and [incremental logging](job_logs.md#new-incremental-logging-architecture) | Yes |
+| [Job artifacts](job_artifacts.md#using-object-storage) and logs | Yes |
 | [LFS objects](lfs/index.md#storing-lfs-objects-in-remote-object-storage) | Yes |
 | [Uploads](uploads.md#using-object-storage) | Yes |
 | [Container Registry](packages/container_registry.md#use-object-storage) (optional feature) | No |
@@ -520,12 +520,13 @@ supported by consolidated configuration form, refer to the following guides:
 If you're working to [scale out](reference_architectures/index.md) your GitLab implementation,
 or add fault tolerance and redundancy, you may be
 looking at removing dependencies on block or network filesystems.
-See the following guides and
+See the following additional guides and
 [note that Pages requires disk storage](#gitlab-pages-requires-nfs):
 
 1. Make sure the [`git` user home directory](https://docs.gitlab.com/omnibus/settings/configuration.html#moving-the-home-directory-for-a-user) is on local disk.
 1. Configure [database lookup of SSH keys](operations/fast_ssh_key_lookup.md)
    to eliminate the need for a shared `authorized_keys` file.
+1. [Eliminating local disk usage for job logs](job_logs.md#eliminating-local-disk-usage).
 
 ## Warnings, limitations, and known issues
 
