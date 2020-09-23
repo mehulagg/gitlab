@@ -26,40 +26,6 @@ describe('Batch comments publish dropdown component', () => {
     vm.$destroy();
   });
 
-  it('toggles dropdown when clicking button', done => {
-    createComponent();
-
-    jest.spyOn(vm.$store, 'dispatch');
-
-    vm.$el.querySelector('.review-preview-dropdown-toggle').click();
-
-    expect(vm.$store.dispatch).toHaveBeenCalledWith(
-      'batchComments/toggleReviewDropdown',
-      expect.anything(),
-    );
-
-    setImmediate(() => {
-      expect(vm.$el.classList).toContain('show');
-
-      done();
-    });
-  });
-
-  it('toggles dropdown when clicking body', () => {
-    createComponent();
-
-    vm.$store.state.batchComments.showPreviewDropdown = true;
-
-    jest.spyOn(vm.$store, 'dispatch').mockImplementation();
-
-    document.body.click();
-
-    expect(vm.$store.dispatch).toHaveBeenCalledWith(
-      'batchComments/toggleReviewDropdown',
-      undefined,
-    );
-  });
-
   it('renders list of drafts', () => {
     createComponent(store => {
       Object.assign(store.state.notes, {
