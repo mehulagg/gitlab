@@ -94,7 +94,7 @@ module SystemNotes
     # Returns the created Note object
     def change_issuable_reviewers(old_reviewers)
       unassigned_users = old_reviewers - noteable.reviewers
-      added_users = noteable.reviewers.to_a - old_reviewers
+      added_users = noteable.reviewers - old_reviewers
       text_parts = []
 
       Gitlab::I18n.with_default_locale do
