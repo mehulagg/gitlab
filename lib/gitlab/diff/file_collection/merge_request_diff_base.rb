@@ -67,7 +67,10 @@ module Gitlab
 
         def merged_diff_options(diff_options)
           max_diff_options = ::Commit.max_diff_options(project: @merge_request_diff.project)
-          diff_options.present? ? diff_options.merge(max_diff_options) : max_diff_options
+          soft_diff_options = ::Gitlab::Git::DiffCollection.default_limits(project: @merge_request_diff.project)
+          merged_diff_options = soft_diff_options.merge(max_diff_options)
+
+          diff_options.present? ? diff_options.merge(merged_diff_options) : merged_diff_options
         end
       end
     end

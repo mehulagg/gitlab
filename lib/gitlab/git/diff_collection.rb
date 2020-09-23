@@ -11,8 +11,12 @@ module Gitlab
 
       delegate :max_files, :max_lines, :max_bytes, :safe_max_files, :safe_max_lines, :safe_max_bytes, to: :limits
 
-      def self.default_limits
-        { max_files: 100, max_lines: 5000 }
+      def self.default_limits(project: nil)
+        if Feature.enabled?(:increased_diff_limits, project)
+          { safe_max_files: 200, safe_max_lines: 7500, max_files: 100, max_lines: 5000 }
+        else
+          { safe_max_files: 100, safe_max_lines: 5000, max_files: 100, max_lines: 5000 }
+        end
       end
 
       def self.limits(options = {})
@@ -22,8 +26,8 @@ module Gitlab
         limits[:max_lines] = options.fetch(:max_lines, defaults[:max_lines])
         limits[:max_bytes] = limits[:max_files] * 5.kilobytes # Average 5 KB per file
 
-        limits[:safe_max_files] = [limits[:max_files], defaults[:max_files]].min
-        limits[:safe_max_lines] = [limits[:max_lines], defaults[:max_lines]].min
+        limits[:safe_max_files] = [limits[:max_files], defaults[:safe_max_files]].min
+        limits[:safe_max_lines] = [limits[:max_lines], defaults[:safe_max_lines]].min
         limits[:safe_max_bytes] = limits[:safe_max_files] * 5.kilobytes # Average 5 KB per file
         limits[:max_patch_bytes] = Gitlab::Git::Diff.patch_hard_limit_bytes
 
