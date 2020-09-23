@@ -49,7 +49,7 @@ RSpec.describe Gitlab::Webpack::Manifest do
     describe ".asset_paths" do
       it_behaves_like "a valid manifest"
 
-      it "errors if we can't find the manifest" do
+      it "errors if we can't find the manifest", quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/255176' do
         ::Rails.configuration.webpack.manifest_filename = "broken.json"
         stub_request(:get, "http://hostname:2000/public_path/broken.json").to_raise(SocketError)
 
@@ -93,7 +93,7 @@ RSpec.describe Gitlab::Webpack::Manifest do
       allow(File).to receive(:read).with(::Rails.root.join("manifest_output/my_manifest.json")).and_return(manifest)
     end
 
-    describe ".asset_paths" do
+    describe ".asset_paths", quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/255176' do
       it_behaves_like "a valid manifest"
 
       it "errors if we can't find the manifest" do
