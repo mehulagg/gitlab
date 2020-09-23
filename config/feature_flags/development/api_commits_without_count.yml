@@ -1,0 +1,7 @@
+---
+name: api_commits_without_count
+introduced_by_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/254994
+type: development
+group: team::Scalability
+default_enabled: false
