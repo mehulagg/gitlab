@@ -145,6 +145,7 @@ class Issue < ApplicationRecord
 
   after_commit :expire_etag_cache, unless: :importing?
   after_save :ensure_metrics, unless: :importing?
+  after_save :record_create_action, unless: :importing?
 
   attr_spammable :title, spam_title: true
   attr_spammable :description, spam_description: true
@@ -418,6 +419,10 @@ class Issue < ApplicationRecord
   def ensure_metrics
     super
     metrics.record!
+  end
+
+  def record_create_action
+    Gitlab::UsageDataCounters::IssueActivityUniqueCounter.track_issue_created_action(author: author)
   end
 
   # Returns `true` if the given User can read the current Issue.
