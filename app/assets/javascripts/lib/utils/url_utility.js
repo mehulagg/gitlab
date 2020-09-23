@@ -441,6 +441,6 @@ export function getHTTPProtocol(url) {
  * passed parameter.
  * @param {string} path
  */
-export function stripFilename(path = '') {
+export function stripPathTail(path = '') {
   return path.replace(/[^/]+$/, '');
 }

@@ -801,7 +801,7 @@ describe('URL utility', () => {
     });
   });
 
-  describe('stripFilename', () => {
+  describe('stripPathTail', () => {
     it.each`
       path                     | expected
       ${''}                    | ${''}
@@ -811,7 +811,7 @@ describe('URL utility', () => {
       ${'/foo/bar/'}           | ${'/foo/bar/'}
       ${'/foo/bar/index.html'} | ${'/foo/bar/'}
     `('strips the filename from $path => $expected', ({ path, expected }) => {
-      expect(urlUtils.stripFilename(path)).toBe(expected);
+      expect(urlUtils.stripPathTail(path)).toBe(expected);
     });
   });
 });
