@@ -393,8 +393,8 @@ In order to prevent Path Traversal vulnerabilities, user-controlled filenames or
 #### GitLab specific validations
 
 The methods `Gitlab::Utils.check_path_traversal!()` and `Gitlab::Utils.check_allowed_absolute_path!()`
-can be used to validate user-supplied paths and prevent Path Traversal vulnerabilities.
-`check_path_traversal!()` will detect Path Traversal payloads included on relative paths, and
+can be used to validate user-supplied paths and prevent vulnerabilities.
+`check_path_traversal!()` will detect Path Traversal payloads included on paths, and
 `check_allowed_absolute_path!()` will detect payloads included on absolute paths. By default, absolute
 paths are not allowed, so you will need to pass a list of allowed absolute paths to the `path_allowlist`
 parameter when using `check_allowed_absolute_path!()`.
@@ -406,13 +406,13 @@ path = Gitlab::Utils.check_path_traversal!(path)
 Gitlab::Utils.check_allowed_absolute_path!(path, path_allowlist)
 ```
 
-In case the checks have to be done on the API side, there's also the [`FilePath`](https://gitlab.com/gitlab-org/security/gitlab/-/blob/master/lib/api/validations/validators/file_path.rb)
-Grape validator, which is based on `check_path_traversal!()` and `check_allowed_absolute_path!()`.
+In the REST API, we have the [`FilePath`](https://gitlab.com/gitlab-org/security/gitlab/-/blob/master/lib/api/validations/validators/file_path.rb)
+validator that can be used to perform the checking on any file path argument the endpoints have.
 It can be used as follows:
 
 ```ruby
 requires :file_path, type: String, file_path: { allowlist: ['/foo/bar/', '/home/foo/', '/app/home'] }
 ```
 
-Remember that absolute paths are not allowed by default. If allowing an absolute path is required, you
+**Note:** Absolute paths are not allowed by default. If allowing an absolute path is required, you
 will need to provide an array of paths to the parameter `allowlist`.  
