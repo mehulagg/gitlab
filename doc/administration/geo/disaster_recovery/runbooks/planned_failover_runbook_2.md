@@ -26,16 +26,20 @@ with one secondary. The following [2000 user reference architecture](https://doc
 graph TD
    subgraph main[Geo deployment]
       subgraph Primary[Primary site, multi-node]
-         Node_1[Rails node]
-         Node_2[PostgreSQL node]
-         Node_3[Gitaly node]
-         Node_3[Redis node]
-         Node_3[Monitoring node]
+         Node_1[Rails node 1]
+         Node_2[Rails node 2]
+         Node_3[PostgreSQL node]
+         Node_4[Gitaly node]
+         Node_5[Redis node]
+         Node_6[Monitoring node]
       end
       subgraph Secondary[Secondary site, multi-node]
-         Node_4[Application node]
-         Node_5[Database node]
-         Node_6[Gitaly node]
+         Node_7[Rails node 1]
+         Node_8[Rails node 2]
+         Node_9[PostgreSQL node]
+         Node_10[Gitaly node]
+         Node_11[Redis node]
+         Node_12[Monitoring node]
       end
    end
 ```
@@ -223,7 +227,7 @@ conjunction with multiple servers, as it can only
 perform changes on a **secondary** with only a single machine. Instead, you must
 do this manually.
 
-1. SSH in to the database node in the **secondary** and trigger PostgreSQL to
+1. SSH in to the PostgreSQL node in the **secondary** and trigger PostgreSQL to
    promote to read-write:
 
    ```shell
@@ -247,8 +251,8 @@ do this manually.
    After making these changes [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure) each
    machine so the changes take effect.
 
-1. Promote the **secondary** to **primary**. SSH into a single application
-   server (also called a Rails node) and execute:
+1. Promote the **secondary** to **primary**. SSH into a single Rails node
+   server and execute:
 
    ```shell
    sudo gitlab-rake geo:set_secondary_as_primary
