@@ -93,34 +93,46 @@ export default {
       :variant="status.variant"
       :title="__('Status:')"
       :dismissible="false"
+      data-testid="ci-lint-status"
       >{{ status.text }}</gl-alert
     >
 
-    <pre v-if="shouldShowError" class="gl-mb-5">{{ errors.join('\n') }}</pre>
+    <pre v-if="shouldShowError" class="gl-mb-5" data-testid="ci-lint-errors">{{
+      errors.join('\n')
+    }}</pre>
 
     <ci-lint-warnings
       v-if="shouldShowWarning"
       :warnings="warnings"
+      data-testid="ci-lint-warnings"
       @dismiss="isWarningDismissed = true"
     />
 
-    <gl-table v-if="shouldShowTable" :items="jobs" :fields="$options.fields" bordered>
+    <gl-table
+      v-if="shouldShowTable"
+      :items="jobs"
+      :fields="$options.fields"
+      bordered
+      data-testid="ci-lint-table"
+    >
       <template #cell(parameter)="{ item }">
-        <span> {{ formatParameterValue(item) }} </span>
+        <span data-testid="ci-lint-job-name"> {{ formatParameterValue(item) }} </span>
       </template>
       <template #cell(value)="{ item }">
-        <pre v-if="shouldShowScript(item.before_script)">{{
+        <pre v-if="shouldShowScript(item.before_script)" data-testid="ci-lint-before-script">{{
           formatScript(item.before_script)
         }}</pre>
-        <pre v-if="shouldShowScript(item.script)">{{ formatScript(item.script) }}</pre>
-        <pre v-if="shouldShowScript(item.after_script)">{{ formatScript(item.after_script) }}</pre>
+        <pre>{{ formatScript(item.script) }}</pre>
+        <pre v-if="shouldShowScript(item.after_script)" data-testid="ci-lint-after-script">{{
+          formatScript(item.after_script)
+        }}</pre>
 
         <ul class="gl-list-style-none gl-pl-0 gl-mb-0">
           <li>
             <b>{{ __('Tag list:') }}</b>
             {{ item.tag_list.join(', ') }}
           </li>
-          <div v-if="!dryRun">
+          <div v-if="!dryRun" data-testid="ci-lint-only-except">
             <li>
               <b>{{ __('Only policy:') }}</b>
               {{ formatRefs(item.only) }}
