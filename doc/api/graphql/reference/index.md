@@ -327,6 +327,7 @@ Represents the total number of issues and their weights for a particular day.
 | `detailedStatus` | DetailedStatus | Detailed status of the group |
 | `name` | String | Name of the job group |
 | `size` | Int | Size of the group |
+| `status` | String | Status of the job group |
 
 ### CiJob
 
@@ -342,6 +343,7 @@ Represents the total number of issues and their weights for a particular day.
 | ----- | ---- | ----------- |
 | `detailedStatus` | DetailedStatus | Detailed status of the stage |
 | `name` | String | Name of the stage |
+| `status` | String | Status of the stage |
 
 ### ClusterAgent
 

@@ -2055,6 +2055,11 @@ type CiGroup {
   Size of the group
   """
   size: Int
+
+  """
+  Status of the job group
+  """
+  status: String
 }
 
 """
@@ -2209,6 +2214,11 @@ type CiStage {
   Name of the stage
   """
   name: String
+
+  """
+  Status of the stage
+  """
+  status: String
 }
 
 """
