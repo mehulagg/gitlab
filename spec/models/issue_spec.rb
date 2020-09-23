@@ -31,7 +31,7 @@ RSpec.describe Issue do
 
     describe 'versions.most_recent' do
       it 'returns the most recent version' do
-        issue = create(:issuee, project: reusable_project)
+        issue = create(:issue, project: reusable_project)
         create_list(:design_version, 2, issue: issue)
         last_version = create(:design_version, issue: issue)
 
@@ -514,6 +514,17 @@ RSpec.describe Issue do
     end
   end
 
+  it_behaves_like 'an editable mentionable' do
+    subject { create(:issue, project: create(:project, :repository)) }
+
+    let(:backref_text) { "issue #{subject.to_reference}" }
+    let(:set_mentionable_text) { ->(txt) { subject.description = txt } }
+  end
+
+  it_behaves_like 'a Taskable' do
+    let(:subject) { create :issue }
+  end
+
   describe "#to_branch_name" do
     let_it_be(:issue) { create(:issue, project: reusable_project, title: 'testing-issue') }
 
@@ -589,11 +600,13 @@ RSpec.describe Issue do
 
     context 'using a private project' do
       it 'does not include mentioned users that do not have access to the project' do
-        issue = create(:issue, project: reusable_project)
+        project = create(:project)
+        issue = create(:issue, project: project)
+        user = create(:user)
 
         create(:note_on_issue,
                noteable: issue,
-               project: reusable_project,
+               project: project,
                note: user.to_reference)
 
         expect(issue.participants).not_to include(user)
@@ -621,7 +634,7 @@ RSpec.describe Issue do
   end
 
   describe '#visible_to_user?' do
-    let(:project) { build(:project) }
+    let(:project) { reusable_project }
     let(:issue)   { build(:issue, project: project) }
 
     subject { issue.visible_to_user?(user) }
@@ -642,6 +655,10 @@ RSpec.describe Issue do
 
     context 'without a user' do
       let(:user) { nil }
+
+      before do
+        project.project_feature.update_attribute(:issues_access_level, ProjectFeature::PUBLIC)
+      end
 
       it 'returns true when the issue is publicly visible' do
         expect(issue).to receive(:publicly_visible?).and_return(true)
@@ -1039,6 +1056,10 @@ RSpec.describe Issue do
       expect(described_class.service_desk).to include(service_desk_issue)
       expect(described_class.service_desk).not_to include(regular_issue)
     end
+  end
+
+  it_behaves_like 'throttled touch' do
+    subject { create(:issue, updated_at: 1.hour.ago) }
   end
 
   describe "#labels_hook_attrs" do
