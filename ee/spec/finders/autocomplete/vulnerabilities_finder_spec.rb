@@ -4,9 +4,9 @@ require 'spec_helper'
 
 RSpec.describe Autocomplete::VulnerabilitiesFinder do
   describe '#execute' do
-    let!(:group) { create(:group) }
-    let!(:project) { create(:project, group: group) }
-    let!(:vulnerability) { create(:vulnerability, project: project) }
+    let_it_be(:group, refind: true) { create(:group) }
+    let_it_be(:project, refind: true) { create(:project, group: group) }
+    let_it_be(:vulnerability) { create(:vulnerability, project: project) }
     let(:params) { {} }
 
     let_it_be(:user) { create(:user) }
@@ -18,7 +18,7 @@ RSpec.describe Autocomplete::VulnerabilitiesFinder do
         it { is_expected.to be_empty }
       end
 
-      context 'when user does has access to project' do
+      context 'when user has access to project' do
         before do
           vulnerable.add_developer(user)
         end
@@ -32,7 +32,7 @@ RSpec.describe Autocomplete::VulnerabilitiesFinder do
             stub_licensed_features(security_dashboard: true)
           end
 
-          it { is_expected.to include(vulnerability) }
+          it { is_expected.to match_array([vulnerability]) }
 
           context 'when multiple vulnerabilities are found' do
             before do
@@ -52,13 +52,13 @@ RSpec.describe Autocomplete::VulnerabilitiesFinder do
             context 'and it matches ID of vulnerability' do
               let(:params) { { search: vulnerability.id.to_s } }
 
-              it { is_expected.to include(vulnerability) }
+              it { is_expected.to match_array([vulnerability]) }
             end
 
             context 'and it matches title of vulnerability' do
               let(:params) { { search: vulnerability.title } }
 
-              it { is_expected.to include(vulnerability) }
+              it { is_expected.to match_array([vulnerability]) }
             end
 
             context 'and it does not match neither title or id of vulnerability' do
