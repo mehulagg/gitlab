@@ -44,6 +44,14 @@ RSpec.describe Ci::CompareLicenseScanningReportsService do
         expect(subject[:status]).to eq(:parsed)
         expect(subject[:data]['new_licenses'].count).to be > 1
       end
+
+      it 'loads the data efficiently' do
+        control_count = ActiveRecord::QueryRecorder.new { service.execute(nil, head_pipeline) }.count
+
+        base_pipeline = create(:ee_ci_pipeline, :with_license_scanning_report, project: project, user: maintainer)
+
+        expect { service.execute(base_pipeline, head_pipeline) }.not_to exceed_query_limit(control_count)
+      end
     end
 
     context 'when base and head pipelines have test reports' do
