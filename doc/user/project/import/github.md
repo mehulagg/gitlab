@@ -37,8 +37,7 @@ This process does not migrate or import any types of groups or organizations fro
 
 ### Use cases
 
-The steps you take depend on your instance of GitHub, whether you have a self-managed instance
-of GitLab, or are using GitLab.com:
+The steps you take depend on whether you are importing from GitHub.com or GitHub Enterprise, as well as whether you are importing to GitLab.com or self-managed GitLab instance.
 
 - If you're using GitLab.com, you can alternatively import GitHub repositories
   using a [personal access token](#using-a-github-token). We do not recommend
