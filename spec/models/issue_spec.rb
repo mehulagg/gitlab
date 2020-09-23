@@ -312,7 +312,6 @@ RSpec.describe Issue do
   end
 
   describe '#related_issues' do
-    # let_it_be(:user) { create(:user) }
     let_it_be(:authorized_project) { create(:project) }
     let_it_be(:authorized_project2) { create(:project) }
     let_it_be(:unauthorized_project) { create(:project) }
