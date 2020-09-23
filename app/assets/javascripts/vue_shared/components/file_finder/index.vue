@@ -230,13 +230,10 @@ export default {
           @keydown="onKeydown($event)"
           @keyup="onKeyup($event)"
         />
-        <i
-          :class="{
-            hidden: showClearInputButton,
-          }"
-          aria-hidden="true"
-          class="fa fa-search dropdown-input-search"
-        ></i>
+        <gl-icon
+          name="search"
+          :class="['dropdown-input-search', { hidden: showClearInputButton }]"
+        />
         <gl-icon
           name="close"
           class="dropdown-input-clear"

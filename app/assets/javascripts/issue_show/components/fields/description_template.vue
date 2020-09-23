@@ -82,7 +82,7 @@ export default {
           :placeholder="__('Filter')"
           autocomplete="off"
         />
-        <i aria-hidden="true" class="fa fa-search dropdown-input-search"> </i>
+        <gl-icon name="search" class="dropdown-input-search" />
         <gl-icon
           name="close"
           class="dropdown-input-clear js-dropdown-input-clear"
