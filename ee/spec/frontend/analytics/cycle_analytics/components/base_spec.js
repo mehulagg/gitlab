@@ -191,86 +191,281 @@ describe('Cycle Analytics component', () => {
     expect(wrapper.find(ValueStreamSelect).exists()).toBe(flag);
   };
 
-  describe('displays the components as required', () => {
-    describe('without a group', () => {
-      beforeEach(async () => {
-        const { group, ...stateWithoutGroup } = initialCycleAnalyticsState;
-        mock = new MockAdapter(axios);
-        wrapper = await createComponent({
-          featureFlags: {
-            hasPathNavigation: true,
-          },
-          initialState: stateWithoutGroup,
-        });
-      });
-
-      afterEach(() => {
-        wrapper.destroy();
-        mock.restore();
-        wrapper = null;
-      });
-
-      it('displays an empty state', () => {
-        const emptyState = wrapper.find(GlEmptyState);
-
-        expect(emptyState.exists()).toBe(true);
-        expect(emptyState.props('svgPath')).toBe(emptyStateSvgPath);
-      });
-
-      it('does not display the projects filter', () => {
-        displaysProjectsDropdownFilter(false);
-      });
-
-      it('does not display the date range picker', () => {
-        displaysDateRangePicker(false);
-      });
-
-      it('does not display the metrics cards', () => {
-        displaysMetrics(false);
-      });
-
-      it('does not display the stage table', () => {
-        displaysStageTable(false);
-      });
-
-      it('does not display the duration chart', () => {
-        displaysDurationChart(false);
-      });
-
-      it('does not display the add stage button', () => {
-        displaysAddStageButton(false);
-      });
-
-      it('does not display the path navigation', () => {
-        displaysPathNavigation(false);
-      });
-
-      it('does not display the value stream select component', () => {
-        displaysValueStreamSelect(false);
+  describe('without a group', () => {
+    beforeEach(async () => {
+      const { group, ...stateWithoutGroup } = initialCycleAnalyticsState;
+      mock = new MockAdapter(axios);
+      wrapper = await createComponent({
+        featureFlags: {
+          hasPathNavigation: true,
+        },
+        initialState: stateWithoutGroup,
       });
     });
 
-    describe('with a group', () => {
-      beforeEach(async () => {
+    afterEach(() => {
+      wrapper.destroy();
+      mock.restore();
+      wrapper = null;
+    });
+
+    it('displays an empty state', () => {
+      const emptyState = wrapper.find(GlEmptyState);
+
+      expect(emptyState.exists()).toBe(true);
+      expect(emptyState.props('svgPath')).toBe(emptyStateSvgPath);
+    });
+
+    it('does not display the projects filter', () => {
+      displaysProjectsDropdownFilter(false);
+    });
+
+    it('does not display the date range picker', () => {
+      displaysDateRangePicker(false);
+    });
+
+    it('does not display the metrics cards', () => {
+      displaysMetrics(false);
+    });
+
+    it('does not display the stage table', () => {
+      displaysStageTable(false);
+    });
+
+    it('does not display the duration chart', () => {
+      displaysDurationChart(false);
+    });
+
+    it('does not display the add stage button', () => {
+      displaysAddStageButton(false);
+    });
+
+    it('does not display the path navigation', () => {
+      displaysPathNavigation(false);
+    });
+
+    it('does not display the value stream select component', () => {
+      displaysValueStreamSelect(false);
+    });
+  });
+
+  describe('the user does not have access to the group', () => {
+    beforeEach(async () => {
+      mock = new MockAdapter(axios);
+      mockRequiredRoutes(mock);
+
+      wrapper = await createComponent({
+        featureFlags: {
+          hasPathNavigation: true,
+        },
+      });
+
+      await store.dispatch('receiveCycleAnalyticsDataError', {
+        response: { status: httpStatusCodes.FORBIDDEN },
+      });
+    });
+
+    it('renders the no access information', () => {
+      const emptyState = wrapper.find(GlEmptyState);
+
+      expect(emptyState.exists()).toBe(true);
+      expect(emptyState.props('svgPath')).toBe(noAccessSvgPath);
+    });
+
+    it('does not display the projects filter', () => {
+      displaysProjectsDropdownFilter(false);
+    });
+
+    it('does not display the date range picker', () => {
+      displaysDateRangePicker(false);
+    });
+
+    it('does not display the metrics', () => {
+      displaysMetrics(false);
+    });
+
+    it('does not display the stage table', () => {
+      displaysStageTable(false);
+    });
+
+    it('does not display the add stage button', () => {
+      displaysAddStageButton(false);
+    });
+
+    it('does not display the tasks by type chart', () => {
+      displaysTypeOfWork(false);
+    });
+
+    it('does not display the duration chart', () => {
+      displaysDurationChart(false);
+    });
+
+    describe('path navigation', () => {
+      describe('disabled', () => {
+        it('does not display the path navigation', () => {
+          displaysPathNavigation(false);
+        });
+      });
+
+      describe('enabled', () => {
+        beforeEach(async () => {
+          wrapper = await createComponent({
+            withValueStreamSelected: false,
+            withStageSelected: true,
+            pathNavigationEnabled: true,
+          });
+
+          mock = new MockAdapter(axios);
+          mockRequiredRoutes(mock);
+          mock.onAny().reply(httpStatusCodes.FORBIDDEN);
+
+          await waitForPromises();
+        });
+
+        afterEach(() => {
+          mock.restore();
+        });
+
+        it('does not display the path navigation', () => {
+          displaysPathNavigation(false);
+        });
+      });
+    });
+  });
+
+  describe('the user has access to the group', () => {
+    beforeEach(async () => {
+      mock = new MockAdapter(axios);
+      mockRequiredRoutes(mock);
+      wrapper = await createComponent({
+        withStageSelected: true,
+        featureFlags: {
+          hasPathNavigation: true,
+        },
+      });
+    });
+
+    afterEach(() => {
+      wrapper.destroy();
+      mock.restore();
+      wrapper = null;
+    });
+
+    it('hides the empty state', () => {
+      expect(wrapper.find(GlEmptyState).exists()).toBe(false);
+    });
+
+    it('displays the projects filter', () => {
+      displaysProjectsDropdownFilter(true);
+
+      expect(wrapper.find(ProjectsDropdownFilter).props()).toEqual(
+        expect.objectContaining({
+          queryParams: wrapper.vm.projectsQueryParams,
+          multiSelect: wrapper.vm.$options.multiProjectSelect,
+        }),
+      );
+    });
+
+    describe('hasCreateMultipleValueStreams = true', () => {
+      beforeEach(() => {
         mock = new MockAdapter(axios);
         mockRequiredRoutes(mock);
+      });
+
+      it('hides the value stream select component', () => {
+        displaysValueStreamSelect(false);
+      });
+
+      it('displays the value stream select component', async () => {
         wrapper = await createComponent({
           featureFlags: {
-            hasPathNavigation: true,
+            hasCreateMultipleValueStreams: true,
+          },
+        });
+
+        displaysValueStreamSelect(true);
+      });
+    });
+
+    describe('when analyticsSimilaritySearch feature flag is on', () => {
+      beforeEach(async () => {
+        wrapper = await createComponent({
+          withStageSelected: true,
+          featureFlags: {
+            hasAnalyticsSimilaritySearch: true,
           },
         });
       });
 
-      afterEach(() => {
-        wrapper.destroy();
-        mock.restore();
-        wrapper = null;
+      it('uses similarity as the order param', () => {
+        displaysProjectsDropdownFilter(true);
+
+        expect(wrapper.find(ProjectsDropdownFilter).props().queryParams.order_by).toEqual(
+          'similarity',
+        );
+      });
+    });
+
+    it('displays the date range picker', () => {
+      displaysDateRangePicker(true);
+    });
+
+    it('displays the metrics', () => {
+      displaysMetrics(true);
+    });
+
+    it('displays the stage table', () => {
+      displaysStageTable(true);
+    });
+
+    it('displays the filter bar', () => {
+      displaysFilterBar(true);
+    });
+
+    it('displays the add stage button', async () => {
+      wrapper = await createComponent({
+        opts: {
+          stubs: {
+            StageTable,
+            StageTableNav,
+            AddStageButton,
+          },
+        },
+        withStageSelected: true,
       });
 
-      describe('the user has access to the group', () => {
+      await wrapper.vm.$nextTick();
+      displaysAddStageButton(true);
+    });
+
+    it('displays the tasks by type chart', async () => {
+      wrapper = await createComponent({ shallow: false, withStageSelected: true });
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('.js-tasks-by-type-chart').exists()).toBe(true);
+    });
+
+    it('displays the duration chart', () => {
+      displaysDurationChart(true);
+    });
+
+    describe('path navigation', () => {
+      describe('disabled', () => {
         beforeEach(async () => {
-          mock = new MockAdapter(axios);
-          mockRequiredRoutes(mock);
+          wrapper = await createComponent({
+            withStageSelected: true,
+            featureFlags: {
+              hasPathNavigation: false,
+            },
+          });
+        });
+
+        it('does not display the path navigation', () => {
+          displaysPathNavigation(false);
+        });
+      });
+
+      describe('enabled', () => {
+        beforeEach(async () => {
           wrapper = await createComponent({
             withStageSelected: true,
             featureFlags: {
@@ -279,78 +474,50 @@ describe('Cycle Analytics component', () => {
           });
         });
 
-        it('hides the empty state', () => {
-          expect(wrapper.find(GlEmptyState).exists()).toBe(false);
+        it('displays the path navigation', () => {
+          displaysPathNavigation(true);
         });
+      });
+    });
 
-        it('displays the projects filter', () => {
-          displaysProjectsDropdownFilter(true);
+    describe('StageTable', () => {
+      beforeEach(async () => {
+        mock = new MockAdapter(axios);
+        mockRequiredRoutes(mock);
 
-          expect(wrapper.find(ProjectsDropdownFilter).props()).toEqual(
-            expect.objectContaining({
-              queryParams: wrapper.vm.projectsQueryParams,
-              multiSelect: wrapper.vm.$options.multiProjectSelect,
-            }),
-          );
+        wrapper = await createComponent({
+          opts: {
+            stubs: {
+              StageTable,
+              StageTableNav,
+              StageNavItem,
+            },
+          },
+          withValueStreamSelected: false,
+          withStageSelected: true,
         });
+      });
 
-        describe('hasCreateMultipleValueStreams = true', () => {
-          beforeEach(() => {
-            mock = new MockAdapter(axios);
-            mockRequiredRoutes(mock);
-          });
+      it('has the first stage selected by default', async () => {
+        const first = findStageNavItemAtIndex(0);
+        const second = findStageNavItemAtIndex(1);
 
-          it('hides the value stream select component', () => {
-            displaysValueStreamSelect(false);
-          });
+        expect(first.props('isActive')).toBe(true);
+        expect(second.props('isActive')).toBe(false);
+      });
 
-          it('displays the value stream select component', async () => {
-            wrapper = await createComponent({
-              featureFlags: {
-                hasCreateMultipleValueStreams: true,
-              },
-            });
+      it('can navigate to different stages', async () => {
+        findStageNavItemAtIndex(2).trigger('click');
 
-            displaysValueStreamSelect(true);
-          });
-        });
+        await wrapper.vm.$nextTick();
+        const first = findStageNavItemAtIndex(0);
+        const third = findStageNavItemAtIndex(2);
+        expect(third.props('isActive')).toBe(true);
+        expect(first.props('isActive')).toBe(false);
+      });
 
-        describe('when analyticsSimilaritySearch feature flag is on', () => {
-          beforeEach(async () => {
-            wrapper = await createComponent({
-              withStageSelected: true,
-              featureFlags: {
-                hasAnalyticsSimilaritySearch: true,
-              },
-            });
-          });
-
-          it('uses similarity as the order param', () => {
-            displaysProjectsDropdownFilter(true);
-
-            expect(wrapper.find(ProjectsDropdownFilter).props().queryParams.order_by).toEqual(
-              'similarity',
-            );
-          });
-        });
-
-        it('displays the date range picker', () => {
-          displaysDateRangePicker(true);
-        });
-
-        it('displays the metrics', () => {
-          displaysMetrics(true);
-        });
-
-        it('displays the stage table', () => {
-          displaysStageTable(true);
-        });
-
-        it('displays the filter bar', () => {
-          displaysFilterBar(true);
-        });
-
-        it('displays the add stage button', async () => {
+      describe('Add stage button', () => {
+        beforeEach(async () => {
           wrapper = await createComponent({
             opts: {
               stubs: {
@@ -361,186 +528,14 @@ describe('Cycle Analytics component', () => {
             },
             withStageSelected: true,
           });
+        });
+
+        it('can navigate to the custom stage form', async () => {
+          expect(wrapper.find(CustomStageForm).exists()).toBe(false);
+          findAddStageButton().trigger('click');
 
           await wrapper.vm.$nextTick();
-          displaysAddStageButton(true);
-        });
-
-        it('displays the tasks by type chart', async () => {
-          wrapper = await createComponent({ shallow: false, withStageSelected: true });
-          await wrapper.vm.$nextTick();
-          expect(wrapper.find('.js-tasks-by-type-chart').exists()).toBe(true);
-        });
-
-        it('displays the duration chart', () => {
-          displaysDurationChart(true);
-        });
-
-        describe('path navigation', () => {
-          describe('disabled', () => {
-            beforeEach(async () => {
-              wrapper = await createComponent({
-                withStageSelected: true,
-                featureFlags: {
-                  hasPathNavigation: false,
-                },
-              });
-            });
-
-            it('does not display the path navigation', () => {
-              displaysPathNavigation(false);
-            });
-          });
-
-          describe('enabled', () => {
-            beforeEach(async () => {
-              wrapper = await createComponent({
-                withStageSelected: true,
-                featureFlags: {
-                  hasPathNavigation: true,
-                },
-              });
-            });
-
-            it('displays the path navigation', () => {
-              displaysPathNavigation(true);
-            });
-          });
-        });
-
-        describe('StageTable', () => {
-          beforeEach(async () => {
-            mock = new MockAdapter(axios);
-            mockRequiredRoutes(mock);
-
-            wrapper = await createComponent({
-              opts: {
-                stubs: {
-                  StageTable,
-                  StageTableNav,
-                  StageNavItem,
-                },
-              },
-              withValueStreamSelected: false,
-              withStageSelected: true,
-            });
-          });
-
-          it('has the first stage selected by default', async () => {
-            const first = findStageNavItemAtIndex(0);
-            const second = findStageNavItemAtIndex(1);
-
-            expect(first.props('isActive')).toBe(true);
-            expect(second.props('isActive')).toBe(false);
-          });
-
-          it('can navigate to different stages', async () => {
-            findStageNavItemAtIndex(2).trigger('click');
-
-            await wrapper.vm.$nextTick();
-            const first = findStageNavItemAtIndex(0);
-            const third = findStageNavItemAtIndex(2);
-            expect(third.props('isActive')).toBe(true);
-            expect(first.props('isActive')).toBe(false);
-          });
-
-          describe('Add stage button', () => {
-            beforeEach(async () => {
-              wrapper = await createComponent({
-                opts: {
-                  stubs: {
-                    StageTable,
-                    StageTableNav,
-                    AddStageButton,
-                  },
-                },
-                withStageSelected: true,
-              });
-            });
-
-            it('can navigate to the custom stage form', async () => {
-              expect(wrapper.find(CustomStageForm).exists()).toBe(false);
-              findAddStageButton().trigger('click');
-
-              await wrapper.vm.$nextTick();
-              expect(wrapper.find(CustomStageForm).exists()).toBe(true);
-            });
-          });
-        });
-
-        describe('the user does not have access to the group', () => {
-          beforeEach(async () => {
-            await store.dispatch('receiveCycleAnalyticsDataError', {
-              response: { status: httpStatusCodes.FORBIDDEN },
-            });
-          });
-
-          it('renders the no access information', () => {
-            const emptyState = wrapper.find(GlEmptyState);
-
-            expect(emptyState.exists()).toBe(true);
-            expect(emptyState.props('svgPath')).toBe(noAccessSvgPath);
-          });
-
-          it('does not display the projects filter', () => {
-            displaysProjectsDropdownFilter(false);
-          });
-
-          it('does not display the date range picker', () => {
-            displaysDateRangePicker(false);
-          });
-
-          it('does not display the metrics', () => {
-            displaysMetrics(false);
-          });
-
-          it('does not display the stage table', () => {
-            displaysStageTable(false);
-          });
-
-          it('does not display the add stage button', () => {
-            displaysAddStageButton(false);
-          });
-
-          it('does not display the tasks by type chart', () => {
-            displaysTypeOfWork(false);
-          });
-
-          it('does not display the duration chart', () => {
-            displaysDurationChart(false);
-          });
-
-          describe('path navigation', () => {
-            describe('disabled', () => {
-              it('does not display the path navigation', () => {
-                displaysPathNavigation(false);
-              });
-            });
-
-            describe('enabled', () => {
-              beforeEach(async () => {
-                wrapper = await createComponent({
-                  withValueStreamSelected: false,
-                  withStageSelected: true,
-                  pathNavigationEnabled: true,
-                });
-
-                mock = new MockAdapter(axios);
-                mockRequiredRoutes(mock);
-                mock.onAny().reply(httpStatusCodes.FORBIDDEN);
-
-                await waitForPromises();
-              });
-
-              afterEach(() => {
-                mock.restore();
-              });
-
-              it('does not display the path navigation', () => {
-                displaysPathNavigation(false);
-              });
-            });
-          });
+          expect(wrapper.find(CustomStageForm).exists()).toBe(true);
         });
       });
     });
