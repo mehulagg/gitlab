@@ -34,7 +34,7 @@ module Gitlab
         return new([], status: :not_found, legacy_deployments: legacy_deployments) if deployments_attrs.empty?
 
         deployments = deployments_attrs.map do |attrs|
-          ::Gitlab::Kubernetes::Deployment.new(attrs, pods: pods_attrs, default_track_value: ::Gitlab::Kubernetes::Deployment::STABLE_TRACK_VALUE)
+          ::Gitlab::Kubernetes::Deployment.new(attrs, pods: pods_attrs)
         end
         deployments.sort_by!(&:order)
 
@@ -51,7 +51,7 @@ module Gitlab
         @legacy_deployments = legacy_deployments
 
         pods = pods_attrs.map do |attrs|
-          ::Gitlab::Kubernetes::Pod.new(attrs, default_track_value: ::Gitlab::Kubernetes::Pod::STABLE_TRACK_VALUE)
+          ::Gitlab::Kubernetes::Pod.new(attrs)
         end
 
         matching_pods = take_pods_matching_any_deployment_track(deployments, pods)
