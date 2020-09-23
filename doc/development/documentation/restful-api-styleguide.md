@@ -64,45 +64,6 @@ Example response:
 ```
 ````
 
-## Fake user information
-
-You may need to demonstrate an API call or a cURL command that includes the name
-and email address of a user. Don't use real user information in API calls:
-
-- **Email addresses**: Use an email address ending in `example.com`.
-- **Names**: Use strings like `Example Username`. Alternatively, use diverse or
-  non-gendered names with common surnames, such as `Sidney Jones`, `Zhang Wei`,
-  or `Maria Garcia`.
-
-## Fake URLs
-
-When including sample URLs in the documentation, use:
-
-- `example.com` when the domain name is generic.
-- `gitlab.example.com` when referring to self-managed instances of GitLab.
-
-## Fake tokens
-
-There may be times where a token is needed to demonstrate an API call using
-cURL or a variable used in CI. It is strongly advised not to use real tokens in
-documentation even if the probability of a token being exploited is low.
-
-You can use the following fake tokens as examples:
-
-| Token type            | Token value                                                        |
-|:----------------------|:-------------------------------------------------------------------|
-| Private user token    | `<your_access_token>`                                              |
-| Personal access token | `n671WNGecHugsdEDPsyo`                                             |
-| Application ID        | `2fcb195768c39e9a94cec2c2e32c59c0aad7a3365c10892e8116b5d83d4096b6` |
-| Application secret    | `04f294d1eaca42b8692017b426d53bbc8fe75f827734f0260710b83a556082df` |
-| CI/CD variable        | `Li8j-mLUVA3eZYjPfd_H`                                             |
-| Specific runner token | `yrnZW46BrtBFqM7xDzE7dddd`                                         |
-| Shared runner token   | `6Vk7ZsosqQyfreAxXTZr`                                             |
-| Trigger token         | `be20d8dcc028677c931e04f3871a9b`                                   |
-| Webhook secret token  | `6XhDroRcYPM5by_h-HLY`                                             |
-| Health check token    | `Tu7BgjR9qeZTEyRzGG2P`                                             |
-| Request profile token | `7VgpS4Ax5utVD2esNstz`                                             |
-
 ## Method description
 
 Use the following table headers to describe the methods. Attributes should
@@ -140,6 +101,11 @@ Rendered example:
 
 The following sections include a set of [cURL](https://curl.haxx.se) examples
 you can use in the API documentation.
+
+CAUTION: **Caution:**
+Do not use information for real users, URLs, or tokens. For documentation, refer to our
+relevant style guide sections on [Fake user information](styleguide.md#fake-user-information),
+[Fake URLs](styleguide.md#fake-urls), and [Fake tokens](#fake-tokens).
 
 ### Simple cURL command
 

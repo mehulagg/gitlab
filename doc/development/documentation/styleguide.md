@@ -471,6 +471,46 @@ more precise and functional, such as `primary` and `secondary`.
 
 For more information see the following [Internet Draft specification](https://tools.ietf.org/html/draft-knodel-terminology-02).
 
+### Fake user information
+
+You may need to include user information in entries such as a REST call or user profile.
+Don't use real user information or email addresses in GitLab documentation. For email
+addresses and names, do use:
+
+- **Email addresses**: Use an email address ending in `example.com`.
+- **Names**: Use strings like `Example Username`. Alternatively, use diverse or
+  non-gendered names with common surnames, such as `Sidney Jones`, `Zhang Wei`,
+  or `Maria Garcia`.
+
+### Fake URLs
+
+When including sample URLs in the documentation, use:
+
+- `example.com` when the domain name is generic.
+- `gitlab.example.com` when referring to self-managed instances of GitLab.
+
+### Fake tokens
+
+There may be times where a token is needed to demonstrate an API call using
+cURL or a variable used in CI. It is strongly advised not to use real tokens in
+documentation even if the probability of a token being exploited is low.
+
+You can use the following fake tokens as examples:
+
+| Token type            | Token value                                                        |
+|:----------------------|:-------------------------------------------------------------------|
+| Private user token    | `<your_access_token>`                                              |
+| Personal access token | `n671WNGecHugsdEDPsyo`                                             |
+| Application ID        | `2fcb195768c39e9a94cec2c2e32c59c0aad7a3365c10892e8116b5d83d4096b6` |
+| Application secret    | `04f294d1eaca42b8692017b426d53bbc8fe75f827734f0260710b83a556082df` |
+| CI/CD variable        | `Li8j-mLUVA3eZYjPfd_H`                                             |
+| Specific runner token | `yrnZW46BrtBFqM7xDzE7dddd`                                         |
+| Shared runner token   | `6Vk7ZsosqQyfreAxXTZr`                                             |
+| Trigger token         | `be20d8dcc028677c931e04f3871a9b`                                   |
+| Webhook secret token  | `6XhDroRcYPM5by_h-HLY`                                             |
+| Health check token    | `Tu7BgjR9qeZTEyRzGG2P`                                             |
+| Request profile token | `7VgpS4Ax5utVD2esNstz`                                             |
+
 ### Language to avoid
 
 When creating documentation, limit or avoid the use of the following verb
