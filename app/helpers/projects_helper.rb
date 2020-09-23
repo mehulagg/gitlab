@@ -772,8 +772,6 @@ module ProjectsHelper
   end
 
   def project_access_token_available?(project)
-    return false if ::Gitlab.com?
-
     ::Feature.enabled?(:resource_access_token, project, default_enabled: true)
   end
 end

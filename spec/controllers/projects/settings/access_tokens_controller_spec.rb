@@ -22,14 +22,6 @@ RSpec.describe Projects::Settings::AccessTokensController do
 
       it { is_expected.to have_gitlab_http_status(:not_found) }
     end
-
-    context 'when environment is Gitlab.com' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(true)
-      end
-
-      it { is_expected.to have_gitlab_http_status(:not_found) }
-    end
   end
 
   describe '#index' do
@@ -184,7 +176,6 @@ RSpec.describe Projects::Settings::AccessTokensController do
   end
 
   def enable_feature
-    allow(Gitlab).to receive(:com?).and_return(false)
     stub_feature_flags(resource_access_token: true)
   end
 end
