@@ -18,15 +18,10 @@ module Gitlab
               @package_version = package_version
             end
 
-            # temporary, untill existing data updated in DB
-            def new_fingerprint
-              Digest::SHA1.hexdigest("#{docker_image_name_without_tag}:#{package_name}")
-            end
-
             private
 
             def fingerprint_data
-              "#{operating_system}:#{package_name}"
+              "#{docker_image_name_without_tag}:#{package_name}"
             end
 
             def docker_image_name_without_tag
