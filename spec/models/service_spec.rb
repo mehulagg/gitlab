@@ -360,7 +360,7 @@ RSpec.describe Service do
         end
 
         shared_examples 'service creation from an integration' do
-          it 'creates a correct service' do
+          it 'creates a correct service for a project integration' do
             service = described_class.build_from_integration(project.id, integration)
 
             expect(service).to be_active
@@ -372,6 +372,20 @@ RSpec.describe Service do
             expect(service.instance).to eq(false)
             expect(service.project).to eq(project)
             expect(service.group).to eq(nil)
+          end
+
+          it 'creates a correct service for a group integration' do
+            service = described_class.build_from_integration(group.id, integration, false)
+
+            expect(service).to be_active
+            expect(service.url).to eq(url)
+            expect(service.api_url).to eq(api_url)
+            expect(service.username).to eq(username)
+            expect(service.password).to eq(password)
+            expect(service.template).to eq(false)
+            expect(service.instance).to eq(false)
+            expect(service.project).to eq(nil)
+            expect(service.group).to eq(group)
           end
         end
 

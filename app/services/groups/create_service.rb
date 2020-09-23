@@ -28,9 +28,12 @@ module Groups
         @group.build_chat_team(name: response['name'], team_id: response['id'])
       end
 
-      if @group.save
-        @group.add_owner(current_user)
-        add_settings_record
+      Group.transaction do
+        if @group.save
+          @group.add_owner(current_user)
+          @group.create_namespace_settings
+          create_services_from_active_default_integrations(@group)
+        end
       end
 
       @group
@@ -84,8 +87,23 @@ module Groups
       params[:visibility_level] = Gitlab::CurrentSettings.current_application_settings.default_group_visibility
     end
 
-    def add_settings_record
-      @group.create_namespace_settings
+    # rubocop: disable CodeReuse/ActiveRecord
+    def create_services_from_active_default_integrations(group)
+      group_ids = group.ancestors.select(:id)
+
+      Service.from_union([
+        Service.active.where(instance: true),
+        Service.active.where(group_id: group_ids)
+      ]).order(by_type_group_ids_and_instance(group_ids)).group_by(&:type).each do |type, records|
+        Service.build_from_integration(group.id, records.first, false).save!
+      end
+    end
+    # rubocop: enable CodeReuse/ActiveRecord
+
+    def by_type_group_ids_and_instance(group_ids)
+      array = group_ids.to_sql.present? ? "array(#{group_ids.to_sql})" : 'ARRAY[]'
+
+      Arel.sql("type ASC, array_position(#{array}::bigint[], services.group_id), instance DESC")
     end
   end
 end
