@@ -51,8 +51,8 @@ the `author` field. GitLab team members **should not**.
   fixing a bug introduced during a monthly release candidate) **should not**
   have a changelog entry.
 - Any developer-facing change (e.g., refactoring, technical debt remediation,
-  test suite changes) **should not** have a changelog entry. Example: "Reduce
-  database records created during Cycle Analytics model spec."
+  test suite changes) **should not** have a changelog entry. Example: “Reduce
+  database records created during Cycle Analytics model spec.”
 
 ## Writing good changelog entries
 
