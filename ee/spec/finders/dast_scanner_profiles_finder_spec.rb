@@ -3,11 +3,11 @@
 require 'spec_helper'
 
 RSpec.describe DastScannerProfilesFinder do
-  let!(:current_user) { create(:user) }
-  let!(:dast_scanner_profile1) { create(:dast_scanner_profile) }
-  let!(:project1) { dast_scanner_profile1.project }
-  let!(:dast_scanner_profile2) { create(:dast_scanner_profile) }
-  let!(:project2) { dast_scanner_profile2.project }
+  let_it_be(:current_user) { create(:user) }
+  let_it_be(:dast_scanner_profile1) { create(:dast_scanner_profile) }
+  let(:project1) { dast_scanner_profile1.project }
+  let_it_be(:dast_scanner_profile2) { create(:dast_scanner_profile) }
+  let(:project2) { dast_scanner_profile2.project }
 
   let(:params) { {} }
 
