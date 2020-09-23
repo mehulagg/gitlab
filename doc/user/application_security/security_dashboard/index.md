@@ -164,7 +164,9 @@ button located at top right of the **Security Dashboard**. When the report
 is ready, the CSV report downloads to your local machine. The report contains all
 vulnerabilities for the projects defined in the **Security Dashboard**,
 as filters don't apply to the export function.
+
 The fields in the export include:
+
 - Scanner Type
 - Scanner Name
 - Status
@@ -173,6 +175,7 @@ The fields in the export include:
 - Severity
 - [CVE](https://cve.mitre.org/)
 - Additional Info
+
 ![Export vulnerabilities](img/instance_security_dashboard_export_csv_v13_4.png)
 
 NOTE: **Note:**
