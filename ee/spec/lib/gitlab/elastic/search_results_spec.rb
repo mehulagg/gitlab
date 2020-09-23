@@ -84,11 +84,12 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
   describe 'parse_search_result' do
     let(:project) { double(:project) }
+    let(:content) { "foo\nbar\nbaz\n" }
     let(:blob) do
       {
         'blob' => {
           'commit_sha' => 'sha',
-          'content' => "foo\nbar\nbaz\n",
+          'content' => content,
           'path' => 'path/file.ext'
         }
       }
@@ -125,6 +126,60 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
         project: project,
         data: "bar\n"
       )
+    end
+
+    context 'when the highlighting finds the same terms multiple times' do
+      let(:content) do
+        <<~END
+        bar
+        bar
+        foo
+        bar # this is the highlighted bar
+        baz
+        boo
+        bar
+        END
+      end
+
+      it 'does not mistake a line that happens to include the same term that was highlighted on a later line' do
+        highlighted_content = <<~END
+        bar
+        bar
+        foo
+        gitlabelasticsearch→bar←gitlabelasticsearch # this is the highlighted bar
+        baz
+        boo
+        bar
+        END
+
+        result = {
+          '_source' => blob,
+          'highlight' => {
+            'blob.content' => [highlighted_content]
+          }
+        }
+
+        parsed = described_class.parse_search_result(result, project)
+
+        expected_data = <<~END
+        bar
+        foo
+        bar # this is the highlighted bar
+        baz
+        boo
+        END
+
+        expect(parsed).to be_kind_of(::Gitlab::Search::FoundBlob)
+        expect(parsed).to have_attributes(
+          id: nil,
+          path: 'path/file.ext',
+          basename: 'path/file',
+          ref: 'sha',
+          startline: 2,
+          project: project,
+          data: expected_data
+        )
+      end
     end
   end
 

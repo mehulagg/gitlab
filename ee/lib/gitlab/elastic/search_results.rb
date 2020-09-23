@@ -142,16 +142,12 @@ module Gitlab
         project_id = result['_source']['project_id'].to_i
         total_lines = content.lines.size
 
-        term =
-          if result['highlight']
-            highlighted = result['highlight']['blob.content']
-            highlighted && highlighted[0].match(/gitlabelasticsearch→(.*?)←gitlabelasticsearch/)[1]
-          end
+        highlight_content = result.dig('highlight', 'blob.content')&.first
 
         found_line_number = 0
 
-        content.each_line.each_with_index do |line, index|
-          if term && line.include?(term)
+        highlight_content.each_line.each_with_index do |line, index|
+          if line.include?('gitlabelasticsearch→')
             found_line_number = index
             break
           end

@@ -159,7 +159,7 @@ module Elastic
           query_hash[:highlight] = {
             pre_tags: ["gitlabelasticsearch→"],
             post_tags: ["←gitlabelasticsearch"],
-            order: "score",
+            number_of_fragments: 0, # highlighted text fragments do not work well for code as we want to show a few whole lines of code. We need to get the whole content to determine the exact line number that was highlighted.
             fields: {
               "blob.content" => {},
               "blob.file_name" => {}
