@@ -26,7 +26,6 @@ RSpec.describe 'Users > Terms' do
     expect(page).not_to have_content('Continue')
   end
 
-
   context 'when user is a project bot' do
     let(:project_bot) { create(:user, :project_bot) }
 
