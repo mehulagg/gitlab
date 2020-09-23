@@ -72,7 +72,7 @@ The following languages and dependency managers are supported:
 
 Plans are underway for supporting the following languages, dependency managers, and dependency files. For details, see the issue link for each.
 
-| Package Manager(s) | Language  | Supported files | Scan tool(s) |
+| Package Managers | Languages  | Supported files | Scan tools |
 | ------------------- | --------- | --------------- | ------------ |
 | [Pipenv](https://pipenv.pypa.io/en/latest/) | Python | `Pipfile.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) | [GitLab#11756](https://gitlab.com/gitlab-org/gitlab/-/issues/11756) |
 | [Poetry](https://python-poetry.org/) | Python | `poetry.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) | [GitLab#7006](https://gitlab.com/gitlab-org/gitlab/-/issues/7006) |
