@@ -128,7 +128,12 @@ module Clusters
       end
 
       def registry_ca
-        @registry_ca ||= File.open(Gitlab.config.registry.ca, &:read)
+        @registry_ca ||= begin
+          path = Gitlab.config.registry.ca
+          return unless path.present?
+
+          File.open(path, &:read)
+        end
       end
 
       def content_values
