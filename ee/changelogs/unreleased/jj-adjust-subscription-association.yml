@@ -1,5 +1,0 @@
----
-title: Don’t create new gitlab_subscription records on nested attributes to namespaces
-merge_request: 40537
-author:
-type: fixed

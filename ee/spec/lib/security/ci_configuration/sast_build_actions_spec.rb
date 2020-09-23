@@ -55,6 +55,10 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
           expect(result.first[:action]).to eq('update')
           expect(result.first[:content]).to eq(sast_yaml_two_includes)
         end
+
+        it 'reports defaults have been overwritten' do
+          expect(result.first[:default_values_overwritten]).to eq(true)
+        end
       end
     end
 
@@ -77,6 +81,10 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
 
       it 'generates the correct YML' do
         expect(result.first[:content]).to eq(sast_yaml_with_no_variables_set)
+      end
+
+      it 'reports defaults have not been overwritten' do
+        expect(result.first[:default_values_overwritten]).to eq(false)
       end
     end
 

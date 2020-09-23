@@ -47,7 +47,7 @@ RSpec.describe 'CodeReviewAnalytics Filtered Search', :js do
         create(:labeled_merge_request, title: "Bug fix with label#2", source_project: project, source_branch: "branch-with-label-2", labels: [label])
       end
 
-      it 'filters the list of merge requests' do
+      it 'filters the list of merge requests', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/250638' do
         has_merge_requests(3)
 
         select_label_on_dropdown(label.title)

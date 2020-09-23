@@ -52,6 +52,14 @@ module EE
       end
     end
 
+    override :highlight_and_truncate_issue
+    def highlight_and_truncate_issue(issue, search_term, search_highlight)
+      return super unless search_service.use_elasticsearch? && search_highlight[issue.id]&.description.present?
+
+      # We use Elasticsearch highlighting for results from Elasticsearch
+      Truncato.truncate(search_highlight[issue.id].description.first, count_tags: false, count_tail: false, max_length: 200).html_safe
+    end
+
     def revert_to_basic_search_filter_url
       search_params = params
         .permit(::SearchHelper::SEARCH_PERMITTED_PARAMS)

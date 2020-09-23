@@ -35,8 +35,11 @@ describe('DynamicFields component', () => {
   });
 
   describe.each([true, false])('given the disabled prop is %p', disabled => {
+    let entities;
+
     beforeEach(() => {
-      createComponent({ entities: [], disabled }, mount);
+      entities = makeEntities(2);
+      createComponent({ entities, disabled }, mount);
     });
 
     it('uses a fieldset as the root element', () => {
@@ -46,6 +49,16 @@ describe('DynamicFields component', () => {
     // https://developer.mozilla.org/en-US/docs/Web/HTML/Element/fieldset#attr-disabled
     it(`${disabled ? 'sets' : 'does not set'} the disabled attribute on the root element`, () => {
       expect('disabled' in wrapper.attributes()).toBe(disabled);
+    });
+
+    it('passes the disabled prop to child fields', () => {
+      entities.forEach((entity, i) => {
+        expect(
+          findFields()
+            .at(i)
+            .props('disabled'),
+        ).toBe(disabled);
+      });
     });
   });
 

@@ -241,11 +241,6 @@ module Gitlab
         consume_method = "consume_event_#{event_name}".to_sym
         raise NotImplementedError, "Consume method not implemented: '#{consume_method}'" unless self.methods.include?(consume_method)
 
-        # Inject model_record based on included class
-        if model_record
-          event_data[:model_record] = model_record
-        end
-
         send(consume_method, **event_data) # rubocop:disable GitlabSecurity/PublicSend
       end
 

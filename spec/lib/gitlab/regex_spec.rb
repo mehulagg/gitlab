@@ -434,4 +434,31 @@ RSpec.describe Gitlab::Regex do
     it { is_expected.not_to match('%2e%2e%2f1.2.3') }
     it { is_expected.not_to match('') }
   end
+
+  describe '.generic_package_file_name_regex' do
+    subject { described_class.generic_package_file_name_regex }
+
+    it { is_expected.to match('123') }
+    it { is_expected.to match('foo') }
+    it { is_expected.to match('foo.bar.baz-2.0-20190901.47283-1.jar') }
+    it { is_expected.not_to match('../../foo') }
+    it { is_expected.not_to match('..\..\foo') }
+    it { is_expected.not_to match('%2f%2e%2e%2f%2essh%2fauthorized_keys') }
+    it { is_expected.not_to match('$foo/bar') }
+    it { is_expected.not_to match('my file name') }
+    it { is_expected.not_to match('!!()()') }
+  end
+
+  describe '.prefixed_semver_regex' do
+    subject { described_class.prefixed_semver_regex }
+
+    it { is_expected.to match('v1.2.3') }
+    it { is_expected.to match('v1.2.3-beta') }
+    it { is_expected.to match('v1.2.3-alpha.3') }
+    it { is_expected.not_to match('v1') }
+    it { is_expected.not_to match('v1.2') }
+    it { is_expected.not_to match('v1./2.3') }
+    it { is_expected.not_to match('v../../../../../1.2.3') }
+    it { is_expected.not_to match('v%2e%2e%2f1.2.3') }
+  end
 end

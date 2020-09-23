@@ -252,6 +252,44 @@ RSpec.describe Vulnerabilities::Finding do
     end
   end
 
+  describe '.dismissed' do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:project2) { create(:project) }
+    let!(:finding1) { create(:vulnerabilities_finding, project: project) }
+    let!(:finding2) { create(:vulnerabilities_finding, project: project, report_type: :dast) }
+    let!(:finding3) { create(:vulnerabilities_finding, project: project2) }
+
+    before do
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        project: finding1.project,
+        project_fingerprint: finding1.project_fingerprint
+      )
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        project_fingerprint: finding2.project_fingerprint,
+        project: project2
+      )
+      create(
+        :vulnerability_feedback,
+        :dismissal,
+        category: :sast,
+        project_fingerprint: finding2.project_fingerprint,
+        project: finding2.project
+      )
+    end
+
+    it 'returns all dismissed findings' do
+      expect(described_class.dismissed).to contain_exactly(finding1)
+    end
+
+    it 'returns dismissed findings for project' do
+      expect(project.vulnerability_findings.dismissed).to contain_exactly(finding1)
+    end
+  end
+
   describe '.batch_count_by_project_and_severity' do
     let(:pipeline) { create(:ci_pipeline, :success, project: project) }
     let(:project) { create(:project) }

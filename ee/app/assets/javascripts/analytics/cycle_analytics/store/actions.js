@@ -14,27 +14,17 @@ import {
 const appendExtension = path => (path.indexOf('.') > -1 ? path : `${path}.json`);
 
 export const setPaths = ({ dispatch }, options) => {
-  const { group, milestonesPath = '', labelsPath = '' } = options;
-  // TODO: After we remove instance VSA we can rely on the paths from the BE
-  // https://gitlab.com/gitlab-org/gitlab/-/issues/223735
-  const groupPath = group?.parentId || group?.fullPath || '';
-  const milestonesEndpoint = milestonesPath || `/groups/${groupPath}/-/milestones`;
-  const labelsEndpoint = labelsPath || `/groups/${groupPath}/-/labels`;
+  const { groupPath, milestonesPath = '', labelsPath = '' } = options;
 
   return dispatch('filters/setEndpoints', {
-    labelsEndpoint: appendExtension(labelsEndpoint),
-    milestonesEndpoint: appendExtension(milestonesEndpoint),
+    labelsEndpoint: appendExtension(labelsPath),
+    milestonesEndpoint: appendExtension(milestonesPath),
     groupEndpoint: groupPath,
   });
 };
 
 export const setFeatureFlags = ({ commit }, featureFlags) =>
   commit(types.SET_FEATURE_FLAGS, featureFlags);
-
-export const setSelectedGroup = ({ commit, dispatch }, group) => {
-  commit(types.SET_SELECTED_GROUP, group);
-  return dispatch('filters/initialize', { groupPath: group.full_path });
-};
 
 export const setSelectedProjects = ({ commit }, projects) =>
   commit(types.SET_SELECTED_PROJECTS, projects);
@@ -71,7 +61,7 @@ export const fetchStageData = ({ dispatch, getters }, stageId) => {
     groupId: currentGroupPath,
     valueStreamId: currentValueStreamId,
     stageId,
-    cycleAnalyticsRequestParams,
+    params: cycleAnalyticsRequestParams,
   })
     .then(checkForDataError)
     .then(({ data }) => dispatch('receiveStageDataSuccess', data))
@@ -114,7 +104,7 @@ export const fetchStageMedianValues = ({ dispatch, commit, getters }) => {
         groupId: currentGroupPath,
         valueStreamId: currentValueStreamId,
         stageId,
-        cycleAnalyticsRequestParams,
+        params: cycleAnalyticsRequestParams,
       }),
     ),
   )
@@ -193,7 +183,7 @@ export const fetchGroupStagesAndEvents = ({ dispatch, getters }) => {
   return Api.cycleAnalyticsGroupStagesAndEvents({
     groupId,
     valueStreamId,
-    data: {
+    params: {
       start_date: created_after,
       project_ids,
     },
@@ -293,12 +283,13 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
     selectedMilestone,
     selectedAssigneeList,
     selectedLabelList,
+    group,
   } = initialData;
   commit(types.SET_FEATURE_FLAGS, featureFlags);
 
-  if (initialData.group?.fullPath) {
+  if (group?.fullPath) {
     return Promise.all([
-      dispatch('setPaths', { group: initialData.group, milestonesPath, labelsPath }),
+      dispatch('setPaths', { group, milestonesPath, labelsPath }),
       dispatch('filters/initialize', {
         selectedAuthor,
         selectedMilestone,
@@ -311,6 +302,7 @@ export const initializeCycleAnalytics = ({ dispatch, commit }, initialData = {})
       .then(() => dispatch('fetchCycleAnalyticsData'))
       .then(() => dispatch('initializeCycleAnalyticsSuccess'));
   }
+
   return dispatch('initializeCycleAnalyticsSuccess');
 };
 

@@ -7,9 +7,7 @@ class Service < ApplicationRecord
   include Importable
   include ProjectServicesLoggable
   include DataFields
-  include IgnorableColumns
-
-  ignore_columns %i[default], remove_with: '13.5', remove_after: '2020-10-22'
+  include FromUnion
 
   SERVICE_NAMES = %w[
     alerts asana assembla bamboo bugzilla buildkite campfire confluence custom_issue_tracker discord
@@ -227,7 +225,8 @@ class Service < ApplicationRecord
 
     service.template = false
     service.instance = false
-    service.inherit_from_id = integration.id if integration.instance?
+    service.group = nil
+    service.inherit_from_id = integration.id if integration.instance? || integration.group
     service.project_id = project_id
     service.active = false if service.invalid?
     service

@@ -96,6 +96,12 @@ From GitLab 13.1 onwards, the YAML front matter of Markdown files is hidden on t
 WYSIWYG editor to avoid unintended changes. To edit it, use the Markdown editing mode, the regular
 GitLab file editor, or the Web IDE.
 
+NOTE: **Note:**
+A new configuration file for the Static Site Editor was [introduced](https://gitlab.com/groups/gitlab-org/-/epics/4267)
+in GitLab 13.4. Beginning in 13.5, the `.gitlab/static-site-editor.yml` file will store additional
+configuration options for the editor. When the functionality of the existing `data/config.yml` file
+is replicated in the new configuration file, `data/config.yml` will be formally deprecated.
+
 ### Use the Static Site Editor to edit your content
 
 For instance, suppose you are a recently hired technical writer at a large

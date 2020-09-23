@@ -108,6 +108,7 @@ class License < ApplicationRecord
     required_ci_templates
     scoped_labels
     smartcard_auth
+    swimlanes
     group_timelogs
     type_of_work_analytics
     minimal_access_role

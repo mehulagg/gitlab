@@ -23,6 +23,7 @@ module QA
             # Alias QA::Runtime::Scenario.gitlab_address to @address since
             # some components depends on QA::Runtime::Scenario.gitlab_address.
             QA::Runtime::Scenario.define(:gitlab_address, QA::Runtime::Scenario.geo_primary_address)
+            QA::Runtime::Scenario.define(:network, 'geo')
 
             unless options[:geo_skip_setup?]
               Geo::Primary.act do

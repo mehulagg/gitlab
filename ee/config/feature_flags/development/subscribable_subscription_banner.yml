@@ -1,7 +1,7 @@
 ---
 name: subscribable_subscription_banner
-introduced_by_url: 
-rollout_issue_url: 
-group: 
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/31497
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/230858
+group: group::retention
 type: development
 default_enabled: false

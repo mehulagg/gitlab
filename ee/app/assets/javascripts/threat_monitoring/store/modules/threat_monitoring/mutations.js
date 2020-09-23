@@ -21,8 +21,12 @@ export default {
   },
   [types.SET_CURRENT_ENVIRONMENT_ID](state, payload) {
     state.currentEnvironmentId = payload;
+    state.allEnvironments = false;
   },
   [types.SET_CURRENT_TIME_WINDOW](state, payload) {
     state.currentTimeWindow = payload;
+  },
+  [types.SET_ALL_ENVIRONMENTS](state) {
+    state.allEnvironments = true;
   },
 };

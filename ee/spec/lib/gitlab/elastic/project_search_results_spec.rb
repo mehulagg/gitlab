@@ -167,33 +167,6 @@ RSpec.describe Gitlab::Elastic::ProjectSearchResults, :elastic do
     end
   end
 
-  context 'user search' do
-    let(:query) { project.owner.username }
-
-    before do
-      expect(Gitlab::ProjectSearchResults).to receive(:new).and_call_original
-    end
-
-    it { expect(results.objects('users')).to eq([project.owner]) }
-    it { expect(results.limited_users_count).to eq(1) }
-
-    describe 'pagination' do
-      let(:query) { }
-
-      let_it_be(:user2) { create(:user).tap { |u| project.add_user(u, Gitlab::Access::REPORTER) } }
-
-      it 'returns the correct page of results' do
-        # UsersFinder defaults to order_id_desc, the newer result will be first
-        expect(results.objects('users', page: 1, per_page: 1)).to eq([user2])
-        expect(results.objects('users', page: 2, per_page: 1)).to eq([project.owner])
-      end
-
-      it 'returns the correct number of results for one page' do
-        expect(results.objects('users', page: 1, per_page: 2).count).to eq(2)
-      end
-    end
-  end
-
   context 'query performance' do
     let(:project) { create(:project, :public, :repository, :wiki_repo) }
     let(:query) { '*' }

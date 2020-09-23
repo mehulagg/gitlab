@@ -1,7 +1,7 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 
-import { __ } from '~/locale';
+import { s__, __ } from '~/locale';
 import createFlash from '~/flash';
 import axios from '~/lib/utils/axios_utils';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
@@ -87,7 +87,7 @@ export default {
       },
       error(error) {
         createFlash({
-          message: __('Something went wrong while fetching test cases list.'),
+          message: s__('TestCases|Something went wrong while fetching test cases list.'),
           captureError: true,
           error,
         });
@@ -112,7 +112,7 @@ export default {
       },
       error(error) {
         createFlash({
-          message: __('Something went wrong while fetching count of test cases.'),
+          message: s__('TestCases|Something went wrong while fetching count of test cases.'),
           captureError: true,
           error,
         });
@@ -333,7 +333,7 @@ export default {
     :tabs="$options.TestCaseTabs"
     :tab-counts="testCasesCount"
     :current-tab="currentState"
-    :search-input-placeholder="__('Search test cases')"
+    :search-input-placeholder="s__('TestCases|Search test cases')"
     :search-tokens="getFilteredSearchTokens()"
     :sort-options="$options.AvailableSortOptions"
     :initial-filter-value="getFilteredSearchValue()"
@@ -354,7 +354,7 @@ export default {
   >
     <template v-if="canCreateTestCase" #nav-actions>
       <gl-button :href="testCaseNewPath" category="primary" variant="success">{{
-        __('New test case')
+        s__('TestCases|New test case')
       }}</gl-button>
     </template>
     <template #empty-state>

@@ -3920,6 +3920,11 @@ A collection of designs
 """
 type DesignCollection {
   """
+  Copy state of the design collection
+  """
+  copyState: DesignCollectionCopyState
+
+  """
   Find a specific design
   """
   design(
@@ -4044,6 +4049,26 @@ type DesignCollection {
     """
     last: Int
   ): DesignVersionConnection!
+}
+
+"""
+Copy state of a DesignCollection
+"""
+enum DesignCollectionCopyState {
+  """
+  The DesignCollection encountered an error during a copy
+  """
+  ERROR
+
+  """
+  The DesignCollection is being copied
+  """
+  IN_PROGRESS
+
+  """
+  The DesignCollection has no copy in progress
+  """
+  READY
 }
 
 """
@@ -6779,6 +6804,11 @@ type Group {
     Username of a user assigned to the issue
     """
     assigneeUsername: String
+
+    """
+    Username of the author of the issue
+    """
+    authorUsername: String
 
     """
     Returns the elements in the list that come before the specified cursor.
@@ -10812,7 +10842,7 @@ type Mutation {
   Toggles the resolved state of a discussion
   """
   discussionToggleResolve(input: DiscussionToggleResolveInput!): DiscussionToggleResolvePayload
-  dismissVulnerability(input: DismissVulnerabilityInput!): DismissVulnerabilityPayload
+  dismissVulnerability(input: DismissVulnerabilityInput!): DismissVulnerabilityPayload @deprecated(reason: "Use vulnerabilityDismiss. Deprecated in 13.5")
   epicAddIssue(input: EpicAddIssueInput!): EpicAddIssuePayload
   epicSetSubscription(input: EpicSetSubscriptionInput!): EpicSetSubscriptionPayload
   epicTreeReorder(input: EpicTreeReorderInput!): EpicTreeReorderPayload
@@ -10875,6 +10905,8 @@ type Mutation {
   updateNote(input: UpdateNoteInput!): UpdateNotePayload
   updateRequirement(input: UpdateRequirementInput!): UpdateRequirementPayload
   updateSnippet(input: UpdateSnippetInput!): UpdateSnippetPayload
+  vulnerabilityConfirm(input: VulnerabilityConfirmInput!): VulnerabilityConfirmPayload
+  vulnerabilityDismiss(input: VulnerabilityDismissInput!): VulnerabilityDismissPayload
   vulnerabilityResolve(input: VulnerabilityResolveInput!): VulnerabilityResolvePayload
 }
 
@@ -11503,6 +11535,11 @@ enum PackageTypeEnum {
   Packages from the generic package manager
   """
   GENERIC
+
+  """
+  Packages from the golang package manager
+  """
+  GOLANG
 
   """
   Packages from the maven package manager
@@ -12249,6 +12286,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Username of the author of the issue
+    """
+    authorUsername: String
+
+    """
     Issues closed after this date
     """
     closedAfter: Time
@@ -12339,6 +12381,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Username of the author of the issue
+    """
+    authorUsername: String
+
+    """
     Issues closed after this date
     """
     closedAfter: Time
@@ -12417,6 +12464,11 @@ type Project {
     Username of a user assigned to the issue
     """
     assigneeUsername: String
+
+    """
+    Username of the author of the issue
+    """
+    authorUsername: String
 
     """
     Returns the elements in the list that come before the specified cursor.
@@ -14001,6 +14053,11 @@ type Query {
     Search query for project name, path, or description
     """
     search: String
+
+    """
+    Include namespace in project search
+    """
+    searchNamespaces: Boolean
   ): ProjectConnection
 
   """
@@ -14249,6 +14306,16 @@ type Query {
     """
     startDate: ISO8601Date!
   ): VulnerabilitiesCountByDayAndSeverityConnection @deprecated(reason: "Use `vulnerabilitiesCountByDay`. Deprecated in 13.3")
+
+  """
+  Find a vulnerability
+  """
+  vulnerability(
+    """
+    The Global ID of the Vulnerability
+    """
+    id: VulnerabilityID!
+  ): Vulnerability
 }
 
 """
@@ -18666,7 +18733,7 @@ type VulnerabilitiesCountByDayEdge {
 """
 Represents a vulnerability
 """
-type Vulnerability {
+type Vulnerability implements Noteable {
   """
   Description of the vulnerability
   """
@@ -18676,6 +18743,31 @@ type Vulnerability {
   Timestamp of when the vulnerability was first detected
   """
   detectedAt: Time!
+
+  """
+  All discussions on this noteable
+  """
+  discussions(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): DiscussionConnection!
 
   """
   GraphQL ID of the vulnerability
@@ -18721,6 +18813,31 @@ type Vulnerability {
   Location metadata for the vulnerability. Its fields depend on the type of security scan that found the vulnerability
   """
   location: VulnerabilityLocation
+
+  """
+  All notes on this noteable
+  """
+  notes(
+    """
+    Returns the elements in the list that come after the specified cursor.
+    """
+    after: String
+
+    """
+    Returns the elements in the list that come before the specified cursor.
+    """
+    before: String
+
+    """
+    Returns the first _n_ elements from the list.
+    """
+    first: Int
+
+    """
+    Returns the last _n_ elements from the list.
+    """
+    last: Int
+  ): NoteConnection!
 
   """
   Primary identifier of the vulnerability.
@@ -18781,6 +18898,41 @@ type Vulnerability {
 }
 
 """
+Autogenerated input type of VulnerabilityConfirm
+"""
+input VulnerabilityConfirmInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  ID of the vulnerability to be confirmed
+  """
+  id: VulnerabilityID!
+}
+
+"""
+Autogenerated return type of VulnerabilityConfirm
+"""
+type VulnerabilityConfirmPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The vulnerability after state change
+  """
+  vulnerability: Vulnerability
+}
+
+"""
 The connection type for Vulnerability.
 """
 type VulnerabilityConnection {
@@ -18798,6 +18950,46 @@ type VulnerabilityConnection {
   Information to aid in pagination.
   """
   pageInfo: PageInfo!
+}
+
+"""
+Autogenerated input type of VulnerabilityDismiss
+"""
+input VulnerabilityDismissInput {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Reason why vulnerability should be dismissed
+  """
+  comment: String
+
+  """
+  ID of the vulnerability to be dismissed
+  """
+  id: ID!
+}
+
+"""
+Autogenerated return type of VulnerabilityDismiss
+"""
+type VulnerabilityDismissPayload {
+  """
+  A unique identifier for the client performing the mutation.
+  """
+  clientMutationId: String
+
+  """
+  Errors encountered during execution of the mutation.
+  """
+  errors: [String!]!
+
+  """
+  The vulnerability after dismissal
+  """
+  vulnerability: Vulnerability
 }
 
 """
@@ -19141,7 +19333,7 @@ input VulnerabilityResolveInput {
   clientMutationId: String
 
   """
-  ID of the vulnerability to be resolveed
+  ID of the vulnerability to be resolved
   """
   id: VulnerabilityID!
 }

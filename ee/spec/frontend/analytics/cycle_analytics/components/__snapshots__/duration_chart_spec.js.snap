@@ -1,9 +1,28 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DurationChart renders the duration chart 1`] = `
-"<div class=\\"gl-display-flex gl-flex-direction-column\\">
-  <h4 class=\\"gl-mt-0\\">Days to completion</h4>
-  <stagedropdownfilter-stub stages=\\"[object Object],[object Object],[object Object]\\" label=\\"stage dropdown\\" class=\\"gl-ml-auto\\"></stagedropdownfilter-stub>
-  <scatterplot-stub xaxistitle=\\"Date\\" yaxistitle=\\"Total days to completion\\" scatterdata=\\"2019-01-01,29,2019-01-01,2019-01-02,100,2019-01-02\\" medianlinedata=\\"\\" tooltipdateformat=\\"mmm d, yyyy\\"></scatterplot-stub>
-</div>"
+<div
+  class="gl-display-flex gl-flex-direction-column"
+  data-testid="vsa-duration-chart"
+>
+  <h4
+    class="gl-mt-0"
+  >
+    Days to completion
+  </h4>
+   
+  <stagedropdownfilter-stub
+    class="gl-ml-auto"
+    label="stage dropdown"
+    stages="[object Object],[object Object],[object Object]"
+  />
+   
+  <scatterplot-stub
+    medianlinedata=""
+    scatterdata="2019-01-01,29,2019-01-01,2019-01-02,100,2019-01-02"
+    tooltipdateformat="mmm d, yyyy"
+    xaxistitle="Date"
+    yaxistitle="Total days to completion"
+  />
+</div>
 `;

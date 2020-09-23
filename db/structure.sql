@@ -9146,7 +9146,6 @@ CREATE TABLE application_settings (
     snowplow_enabled boolean DEFAULT false NOT NULL,
     snowplow_collector_hostname character varying,
     snowplow_cookie_domain character varying,
-    instance_statistics_visibility_private boolean DEFAULT false NOT NULL,
     web_ide_clientside_preview_enabled boolean DEFAULT false NOT NULL,
     user_show_add_ssh_key_message boolean DEFAULT true NOT NULL,
     custom_project_templates_group_id integer,
@@ -9196,7 +9195,6 @@ CREATE TABLE application_settings (
     throttle_incident_management_notification_enabled boolean DEFAULT false NOT NULL,
     throttle_incident_management_notification_period_in_seconds integer DEFAULT 3600,
     throttle_incident_management_notification_per_period integer DEFAULT 3600,
-    snowplow_iglu_registry_url character varying(255),
     push_event_hooks_limit integer DEFAULT 3 NOT NULL,
     push_event_activities_limit integer DEFAULT 3 NOT NULL,
     custom_http_clone_url_root character varying(511),
@@ -11083,7 +11081,8 @@ CREATE TABLE container_repositories (
     name character varying NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    status smallint
+    status smallint,
+    expiration_policy_started_at timestamp with time zone
 );
 
 CREATE SEQUENCE container_repositories_id_seq
@@ -12488,6 +12487,7 @@ CREATE TABLE group_import_states (
     status smallint DEFAULT 0 NOT NULL,
     jid text,
     last_error text,
+    user_id bigint,
     CONSTRAINT check_87b58f6b30 CHECK ((char_length(last_error) <= 255)),
     CONSTRAINT check_96558fff96 CHECK ((char_length(jid) <= 100))
 );
@@ -13727,7 +13727,8 @@ CREATE TABLE notification_settings (
     notification_email character varying,
     fixed_pipeline boolean,
     new_release boolean,
-    moved_project boolean DEFAULT true NOT NULL
+    moved_project boolean DEFAULT true NOT NULL,
+    change_reviewer_merge_request boolean
 );
 
 CREATE SEQUENCE notification_settings_id_seq
@@ -14121,7 +14122,8 @@ CREATE TABLE packages_package_files (
     verified_at timestamp with time zone,
     verification_failure character varying(255),
     verification_retry_count integer,
-    verification_checksum bytea
+    verification_checksum bytea,
+    CONSTRAINT check_4c5e6bb0b3 CHECK ((file_store IS NOT NULL))
 );
 
 CREATE SEQUENCE packages_package_files_id_seq
@@ -14362,7 +14364,8 @@ CREATE TABLE plan_limits (
     npm_max_file_size bigint DEFAULT 524288000 NOT NULL,
     nuget_max_file_size bigint DEFAULT 524288000 NOT NULL,
     pypi_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
-    generic_packages_max_file_size bigint DEFAULT '5368709120'::bigint NOT NULL
+    generic_packages_max_file_size bigint DEFAULT '5368709120'::bigint NOT NULL,
+    golang_max_file_size bigint DEFAULT 104857600 NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -18082,8 +18085,8 @@ ALTER TABLE design_management_designs
 ALTER TABLE vulnerability_scanners
     ADD CONSTRAINT check_37608c9db5 CHECK ((char_length(vendor) <= 255)) NOT VALID;
 
-ALTER TABLE packages_package_files
-    ADD CONSTRAINT check_4c5e6bb0b3 CHECK ((file_store IS NOT NULL)) NOT VALID;
+ALTER TABLE group_import_states
+    ADD CONSTRAINT check_cda75c7c3f CHECK ((user_id IS NOT NULL)) NOT VALID;
 
 ALTER TABLE ONLY ci_build_needs
     ADD CONSTRAINT ci_build_needs_pkey PRIMARY KEY (id);
@@ -19479,6 +19482,8 @@ CREATE UNIQUE INDEX index_atlassian_identities_on_extern_uid ON atlassian_identi
 
 CREATE INDEX index_authentication_events_on_provider ON authentication_events USING btree (provider);
 
+CREATE INDEX index_authentication_events_on_provider_user_id_created_at ON authentication_events USING btree (provider, user_id, created_at) WHERE (result = 1);
+
 CREATE INDEX index_authentication_events_on_user_id ON authentication_events USING btree (user_id);
 
 CREATE INDEX index_award_emoji_on_awardable_type_and_awardable_id ON award_emoji USING btree (awardable_type, awardable_id);
@@ -19782,8 +19787,6 @@ CREATE UNIQUE INDEX index_ci_variables_on_project_id_and_key_and_environment_sco
 CREATE INDEX index_cluster_agent_tokens_on_agent_id ON cluster_agent_tokens USING btree (agent_id);
 
 CREATE UNIQUE INDEX index_cluster_agent_tokens_on_token_encrypted ON cluster_agent_tokens USING btree (token_encrypted);
-
-CREATE INDEX index_cluster_agents_on_project_id ON cluster_agents USING btree (project_id);
 
 CREATE UNIQUE INDEX index_cluster_agents_on_project_id_and_name ON cluster_agents USING btree (project_id, name);
 
@@ -20216,6 +20219,8 @@ CREATE UNIQUE INDEX index_group_group_links_on_shared_group_and_shared_with_grou
 CREATE INDEX index_group_group_links_on_shared_with_group_id ON group_group_links USING btree (shared_with_group_id);
 
 CREATE INDEX index_group_import_states_on_group_id ON group_import_states USING btree (group_id);
+
+CREATE INDEX index_group_import_states_on_user_id ON group_import_states USING btree (user_id) WHERE (user_id IS NOT NULL);
 
 CREATE UNIQUE INDEX index_group_stages_on_group_id_group_value_stream_id_and_name ON analytics_cycle_analytics_group_stages USING btree (group_id, group_value_stream_id, name);
 
@@ -20674,8 +20679,6 @@ CREATE INDEX index_packages_maven_metadata_on_package_id_and_path ON packages_ma
 CREATE INDEX index_packages_nuget_dl_metadata_on_dependency_link_id ON packages_nuget_dependency_link_metadata USING btree (dependency_link_id);
 
 CREATE UNIQUE INDEX index_packages_on_project_id_name_version_unique_when_generic ON packages_packages USING btree (project_id, name, version) WHERE (package_type = 7);
-
-CREATE INDEX index_packages_package_files_file_store_is_null ON packages_package_files USING btree (id) WHERE (file_store IS NULL);
 
 CREATE INDEX index_packages_package_files_on_file_store ON packages_package_files USING btree (file_store);
 
@@ -21328,6 +21331,8 @@ CREATE INDEX index_user_highest_roles_on_user_id_and_highest_access_level ON use
 CREATE UNIQUE INDEX index_user_interacted_projects_on_project_id_and_user_id ON user_interacted_projects USING btree (project_id, user_id);
 
 CREATE INDEX index_user_interacted_projects_on_user_id ON user_interacted_projects USING btree (user_id);
+
+CREATE INDEX index_user_preferences_on_gitpod_enabled ON user_preferences USING btree (gitpod_enabled);
 
 CREATE UNIQUE INDEX index_user_preferences_on_user_id ON user_preferences USING btree (user_id);
 
@@ -22114,6 +22119,9 @@ ALTER TABLE ONLY merge_requests
 
 ALTER TABLE ONLY merge_request_metrics
     ADD CONSTRAINT fk_7f28d925f3 FOREIGN KEY (merged_by_id) REFERENCES users(id) ON DELETE SET NULL;
+
+ALTER TABLE ONLY group_import_states
+    ADD CONSTRAINT fk_8053b3ebd6 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 ALTER TABLE ONLY sprints
     ADD CONSTRAINT fk_80aa8a1f95 FOREIGN KEY (group_id) REFERENCES namespaces(id) ON DELETE CASCADE;

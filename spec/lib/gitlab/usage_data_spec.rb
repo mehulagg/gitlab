@@ -29,7 +29,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
                     user_minimum_id user_maximum_id unique_visit_service
                     deployment_minimum_id deployment_maximum_id
                     approval_merge_request_rule_minimum_id
-                    approval_merge_request_rule_maximum_id)
+                    approval_merge_request_rule_maximum_id
+                    auth_providers)
         values.each do |key|
           expect(described_class).to receive(:clear_memoization).with(key)
         end
@@ -167,6 +168,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
   describe 'usage_activity_by_stage_manage' do
     it 'includes accurate usage_activity_by_stage data' do
+      described_class.clear_memoization(:auth_providers)
+
       stub_config(
         omniauth:
           { providers: omniauth_providers }
@@ -174,21 +177,29 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       for_defined_days_back do
         user = create(:user)
+        user2 = create(:user)
         create(:event, author: user)
         create(:group_member, user: user)
+        create(:authentication_event, user: user, provider: :ldapmain, result: :success)
+        create(:authentication_event, user: user2, provider: :ldapsecondary, result: :success)
+        create(:authentication_event, user: user2, provider: :group_saml, result: :success)
+        create(:authentication_event, user: user2, provider: :group_saml, result: :success)
+        create(:authentication_event, user: user, provider: :group_saml, result: :failed)
       end
 
       expect(described_class.usage_activity_by_stage_manage({})).to include(
         events: 2,
         groups: 2,
-        users_created: 4,
-        omniauth_providers: ['google_oauth2']
+        users_created: 6,
+        omniauth_providers: ['google_oauth2'],
+        user_auth_by_provider: { 'group_saml' => 2, 'ldap' => 4 }
       )
       expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
         events: 1,
         groups: 1,
-        users_created: 2,
-        omniauth_providers: ['google_oauth2']
+        users_created: 3,
+        omniauth_providers: ['google_oauth2'],
+        user_auth_by_provider: { 'group_saml' => 1, 'ldap' => 2 }
       )
     end
 
@@ -242,6 +253,20 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           }
         }
       )
+    end
+
+    it 'includes group imports usage data' do
+      for_defined_days_back do
+        user = create(:user)
+        group = create(:group)
+        group.add_owner(user)
+        create(:group_import_state, group: group, user: user)
+      end
+
+      expect(described_class.usage_activity_by_stage_manage({}))
+        .to include(groups_imported: 2)
+      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period))
+        .to include(groups_imported: 1)
     end
 
     def omniauth_providers
@@ -474,6 +499,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       expect(count_data[:projects_with_packages]).to eq(2)
       expect(count_data[:packages]).to eq(4)
+      expect(count_data[:user_preferences_user_gitpod_enabled]).to eq(1)
     end
 
     it 'gathers object store usage correctly' do
@@ -1161,11 +1187,13 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       categories.each do |category|
         keys = ::Gitlab::UsageDataCounters::HLLRedisCounter.events_for_category(category)
 
+        metrics = keys.map { |key| "#{key}_weekly" } + keys.map { |key| "#{key}_monthly" }
+
         if ineligible_total_categories.exclude?(category)
-          keys.append("#{category}_total_unique_counts_weekly", "#{category}_total_unique_counts_monthly")
+          metrics.append("#{category}_total_unique_counts_weekly", "#{category}_total_unique_counts_monthly")
         end
 
-        expect(subject[:redis_hll_counters][category].keys).to match_array(keys)
+        expect(subject[:redis_hll_counters][category].keys).to match_array(metrics)
       end
     end
   end

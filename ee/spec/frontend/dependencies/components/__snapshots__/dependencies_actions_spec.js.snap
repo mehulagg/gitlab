@@ -79,6 +79,7 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
     </gl-dropdown-stub>
      
     <gl-button-stub
+      buttontextclasses=""
       category="primary"
       class="flex-grow-0 js-sort-order"
       icon=""
@@ -94,6 +95,7 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
   </div>
    
   <gl-button-stub
+    buttontextclasses=""
     category="primary"
     class="js-download"
     download="dependencies.json"

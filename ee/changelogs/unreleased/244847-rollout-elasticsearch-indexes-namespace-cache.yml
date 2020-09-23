@@ -1,5 +1,0 @@
----
-title: Enable elasticsearch namespace enabled cache by default
-merge_request: 41875
-author:
-type: performance

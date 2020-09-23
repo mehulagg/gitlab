@@ -1,5 +1,6 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
+import { GlAlert } from '@gitlab/ui';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import TasksByTypeChart from './tasks_by_type/tasks_by_type_chart.vue';
 import TasksByTypeFilters from './tasks_by_type/tasks_by_type_filters.vue';
@@ -9,7 +10,7 @@ import { TASKS_BY_TYPE_SUBJECT_ISSUE } from '../constants';
 
 export default {
   name: 'TypeOfWorkCharts',
-  components: { ChartSkeletonLoader, TasksByTypeChart, TasksByTypeFilters },
+  components: { ChartSkeletonLoader, GlAlert, TasksByTypeChart, TasksByTypeFilters },
   computed: {
     ...mapState('typeOfWork', [
       'isLoadingTasksByTypeChart',
@@ -28,7 +29,7 @@ export default {
         startDate,
         endDate,
         selectedProjectIds,
-        selectedGroup: { name: groupName },
+        currentGroup: { name: groupName },
       } = this.selectedTasksByTypeFilters;
 
       const selectedProjectCount = selectedProjectIds.length;
@@ -88,9 +89,9 @@ export default {
         :group-by="tasksByTypeChartData.groupBy"
         :series-names="tasksByTypeChartData.seriesNames"
       />
-      <div v-else class="bs-callout bs-callout-info">
-        <p>{{ error }}</p>
-      </div>
+      <gl-alert v-else variant="info" :dismissible="false" class="gl-mt-3">
+        {{ error }}
+      </gl-alert>
     </div>
   </div>
 </template>

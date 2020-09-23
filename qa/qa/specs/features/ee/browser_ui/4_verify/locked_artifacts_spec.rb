@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  RSpec.describe 'Verify', :docker, :runner, :requires_admin do
+  RSpec.describe 'Verify', :runner, :requires_admin do
     describe 'Artifacts' do
       context 'when locked' do
         let(:file_name) { 'artifact.txt' }

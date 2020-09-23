@@ -79,7 +79,7 @@ export default {
 
       // not including a project_ids param is the same as selecting all the projects
       if (!this.selectAllProjects) {
-        queryParams.set('project_ids', this.selectedProjectIdsParam);
+        this.selectedProjectIds.forEach(id => queryParams.append('project_ids[]', id));
       }
 
       return `${this.groupAnalyticsCoverageReportsPath}&${queryParams.toString()}`;
@@ -105,7 +105,7 @@ export default {
         project.name.toLowerCase().includes(this.projectSearchTerm.toLowerCase()),
       );
     },
-    selectedProjectIdsParam() {
+    selectedProjectIds() {
       return this.groupProjects.filter(project => project.isSelected).map(project => project.id);
     },
   },

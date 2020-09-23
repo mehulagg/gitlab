@@ -5,21 +5,26 @@ group: Threat Insights
 info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
-# GitLab Security Dashboard **(ULTIMATE)**
+# GitLab Security Dashboard, Security Center, and Vulnerability Reports **(ULTIMATE)**
 
-The Security Dashboard is a good place to get an overview of all the security
-vulnerabilities in your groups, projects, and pipelines.
+GitLab provides a comprehensive set of features for viewing and managing vulnerabilities:
+
+- Security dashboards: An overview of the security status in your instance, groups, and projects.
+- Vulnerability reports: Detailed lists of all vulnerabilities for the instance, group, project, or
+  pipeline. This is where you triage and manage vulnerabilities.
+- Security Center: A dedicated area for vulnerability management at the instance level. This
+  includes a security dashboard, vulnerability report, and settings.
 
 You can also drill down into a vulnerability and get extra information. This includes the project it
 comes from, any related file(s), and metadata that helps you analyze the risk it poses. You can also
 dismiss a vulnerability or create an issue for it.
 
-To benefit from the Security Dashboard you must first configure one of the
+To benefit from these features, you must first configure one of the
 [security scanners](../index.md).
 
 ## Supported reports
 
-The Security Dashboard displays vulnerabilities detected by scanners such as:
+The vulnerability report displays vulnerabilities detected by scanners such as:
 
 - [Container Scanning](../container_scanning/index.md)
 - [Dynamic Application Security Testing](../dast/index.md)
@@ -29,7 +34,7 @@ The Security Dashboard displays vulnerabilities detected by scanners such as:
 
 ## Requirements
 
-To use the instance, group, project, or pipeline security dashboard:
+To use the security dashboards and vulnerability reports:
 
 1. At least one project inside a group must be configured with at least one of
    the [supported reports](#supported-reports).
@@ -86,8 +91,9 @@ You can also dismiss vulnerabilities in the table:
 
 The group Security Dashboard gives an overview of the vulnerabilities in the default branches of the
 projects in a group and its subgroups. Access it by navigating to **Security > Security Dashboard**
-for your group. By default, the Security Dashboard displays all detected and confirmed
-vulnerabilities.
+after selecting your group. By default, the Security Dashboard displays all detected and confirmed
+vulnerabilities. If you don't see the vulnerabilities over time graph, the likely cause is that you
+have not selected a group.
 
 NOTE: **Note:**
 The Security Dashboard only shows projects with [security reports](#supported-reports) enabled in a
@@ -96,53 +102,58 @@ group.
 ![Dashboard with action buttons and metrics](img/group_security_dashboard_v13_3.png)
 
 There is a timeline chart that shows how many open
-vulnerabilities your projects had at various points in time. You can filter among 30, 60, and
-90 days, with the default being 90. Hover over the chart to get more details about
-the open vulnerabilities at a specific time.
+vulnerabilities your projects had at various points in time. You can display the vulnerability
+trends over a 30, 60, or 90-day time frame (the default is 90 days). Hover over the chart to get
+more details about the open vulnerabilities at a specific time.
 
 Next to the timeline chart is a list of projects, grouped and sorted by the severity of the vulnerability found:
 
-- F: 1 or more "critical"
-- D: 1 or more "high" or "unknown"
-- C: 1 or more "medium"
-- B: 1 or more "low"
-- A: 0 vulnerabilities
+- F: One or more "critical"
+- D: One or more "high" or "unknown"
+- C: One or more "medium"
+- B: One or more "low"
+- A: Zero vulnerabilities
 
 Projects with no vulnerability tests configured will not appear in the list. Additionally, dismissed
-vulnerabilities are not included either.
+vulnerabilities are excluded.
 
-Navigate to the group's [Vulnerability Report](#vulnerability-list) to view the vulnerabilities found.
+Navigate to the group's [vulnerability report](#vulnerability-report) to view the vulnerabilities found.
 
-## Instance Security Dashboard
+## Instance Security Center
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6953) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.8.
+> [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/3426) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.4.
 
-At the instance level, the Security Dashboard displays the vulnerabilities present in the default
-branches of all the projects you configure to display on the dashboard. It includes all the
-[group Security Dashboard's](#group-security-dashboard)
-features.
+The Security Center is where you manage vulnerabilities for your instance. It displays the
+vulnerabilities present in the default branches of all the projects you configure. It includes the
+following:
+
+- The [group security dashboard's](#group-security-dashboard) features.
+- A [vulnerability report](#vulnerability-report).
+- A dedicated settings area to configure which projects to display.
 
 ![Instance Security Dashboard with projects](img/instance_security_dashboard_v13_4.png)
 
-You can access the Instance Security Dashboard from the menu
+You can access the Instance Security Center from the menu
 bar at the top of the page. Under **More**, select **Security**.
 
-![Instance Security Dashboard navigation link](img/instance_security_dashboard_link_v12_4.png)
+![Instance Security Center navigation link](img/instance_security_dashboard_link_v12_4.png)
 
-The dashboard is empty before you add projects to it.
+The dashboard and vulnerability report are empty before you add projects.
 
-![Uninitialized Instance Security Dashboard](img/instance_security_dashboard_empty_v13_4.png)
+![Uninitialized Instance Security Center](img/instance_security_dashboard_empty_v13_4.png)
 
-### Adding projects to the dashboard
+### Adding projects to the Security Center
 
-To add projects to the dashboard:
+To add projects to the Security Center:
 
 1. Click **Settings** in the left navigation bar or click the **Add projects** button.
 1. Search for and add one or more projects using the **Search your projects** field.
 1. Click the **Add projects** button.
 
-After you add projects, the Security Dashboard displays the vulnerabilities found in those projects'
-default branches.
+![Adding projects to Instance Security Center](img/instance_security_center_settings_v13_4.png)
+
+After you add projects, the security dashboard and vulnerability report display the vulnerabilities
+found in those projects' default branches.
 
 ## Export vulnerabilities
 
@@ -191,14 +202,14 @@ When using [Auto DevOps](../../../topics/autodevops/index.md), use
 [special environment variables](../../../topics/autodevops/customize.md#environment-variables)
 to configure daily security scans.
 
-## Vulnerability list
+## Vulnerability report
 
-Each dashboard's vulnerability list contains vulnerabilities from the latest scans that were merged
+Each vulnerability report contains vulnerabilities from the latest scans that were merged
 into the default branch.
 
 ![Vulnerability Report](img/group_vulnerability_report_v13_4.png)
 
-You can filter which vulnerabilities the Security Dashboard displays by:
+You can filter which vulnerabilities the vulnerability report displays by:
 
 - Status
 - Severity

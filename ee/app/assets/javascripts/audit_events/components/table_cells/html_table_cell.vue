@@ -1,6 +1,6 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { sanitize } from 'dompurify';
+import { sanitize } from '~/lib/dompurify';
 
 const ALLOWED_TAGS = ['strong'];
 

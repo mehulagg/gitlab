@@ -1,5 +1,0 @@
----
-title: Return empty scanners list when pipeline has no reports
-merge_request: 41652
-author:
-type: performance

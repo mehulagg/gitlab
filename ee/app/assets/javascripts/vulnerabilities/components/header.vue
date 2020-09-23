@@ -13,7 +13,7 @@ import ResolutionAlert from './resolution_alert.vue';
 import VulnerabilityStateDropdown from './vulnerability_state_dropdown.vue';
 import StatusDescription from './status_description.vue';
 import { VULNERABILITY_STATE_OBJECTS, FEEDBACK_TYPES, HEADER_ACTION_BUTTONS } from '../constants';
-import dismissVulnerability from '../../security_dashboard/graphql/dismissVulnerability.graphql';
+import vulnerabilityDismiss from '../../security_dashboard/graphql/vulnerability_dismiss.mutation.graphql';
 
 export default {
   name: 'VulnerabilityHeader',
@@ -105,7 +105,7 @@ export default {
         this.isLoadingUser = true;
 
         UsersCache.retrieveById(id)
-          .then(userData => {
+          .then((userData) => {
             this.user = userData;
           })
           .catch(() => {
@@ -127,7 +127,7 @@ export default {
       const gqlId = `gid://gitlab/Vulnerability/${this.vulnerability.id}`;
       this.$apollo
         .mutate({
-          mutation: dismissVulnerability,
+          mutation: vulnerabilityDismiss,
           variables: { id: gqlId, comment: reason },
         })
         .then(() => {
@@ -229,7 +229,7 @@ export default {
         .then(({ data }) => {
           Object.assign(this.vulnerability, data);
         })
-        .catch(e => {
+        .catch((e) => {
           // Don't show an error message if the request was cancelled through the cancel token.
           if (!axios.isCancel(e)) {
             createFlash(

@@ -210,6 +210,41 @@ RSpec.describe Search::GlobalService do
     end
   end
 
+  describe '#elastic_projects' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:project) { create(:project, namespace: group) }
+    let_it_be(:another_project) { create(:project) }
+    let_it_be(:non_admin_user) { create_user_from_membership(project, :developer) }
+    let_it_be(:admin) { create(:admin) }
+
+    let(:service) { described_class.new(user, {}) }
+    let(:elastic_projects) { service.elastic_projects }
+
+    context 'when the user is an admin' do
+      let(:user) { admin }
+
+      it 'returns :any' do
+        expect(elastic_projects).to eq(:any)
+      end
+    end
+
+    context 'when the user is not an admin' do
+      let(:user) { non_admin_user }
+
+      it 'returns the projects the user has access to' do
+        expect(elastic_projects).to eq([project.id])
+      end
+    end
+
+    context 'when there is no user' do
+      let(:user) { nil }
+
+      it 'returns empty array' do
+        expect(elastic_projects).to eq([])
+      end
+    end
+  end
+
   context 'confidential notes' do
     let(:project) { create(:project, :public) }
 

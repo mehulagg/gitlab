@@ -8,7 +8,14 @@ import MergeRequestTable from 'ee/analytics/productivity_analytics/components/mr
 import { getStoreConfig } from 'ee/analytics/productivity_analytics/store';
 import { chartKeys } from 'ee/analytics/productivity_analytics/constants';
 import { TEST_HOST } from 'helpers/test_constants';
-import { GlEmptyState, GlLoadingIcon, GlDropdown, GlDropdownItem, GlButton } from '@gitlab/ui';
+import {
+  GlEmptyState,
+  GlLoadingIcon,
+  GlDropdown,
+  GlDropdownItem,
+  GlButton,
+  GlAlert,
+} from '@gitlab/ui';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import UrlSyncMixin from 'ee/analytics/shared/mixins/url_sync_mixin';
 import MetricChart from 'ee/analytics/productivity_analytics/components/metric_chart.vue';
@@ -427,7 +434,7 @@ describe('ProductivityApp component', () => {
                   it('doesn’t render a "no data" message', () => {
                     expect(
                       findMrTableSection()
-                        .find('.js-no-data')
+                        .find(GlAlert)
                         .exists(),
                     ).toBe(false);
                   });
@@ -478,7 +485,7 @@ describe('ProductivityApp component', () => {
                   it('renders a "no data" message', () => {
                     expect(
                       findMrTableSection()
-                        .find('.js-no-data')
+                        .find(GlAlert)
                         .exists(),
                     ).toBe(true);
                   });

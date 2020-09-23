@@ -1,5 +1,0 @@
----
-title: This change preserves the environment when editing network policies
-merge_request: 42148
-author:
-type: fixed

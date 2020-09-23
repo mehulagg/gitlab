@@ -11,15 +11,12 @@ module Gitlab
 
       # Limit search results by passed projects
       # It allows us to search only for projects user has access to
-      attr_reader :limit_projects
+      attr_reader :limit_project_ids
 
-      delegate :users, to: :generic_search_results
-      delegate :limited_users_count, to: :generic_search_results
-
-      def initialize(current_user, query, limit_projects = nil, public_and_internal_projects: true, filters: {})
+      def initialize(current_user, query, limit_project_ids = nil, public_and_internal_projects: true, filters: {})
         @current_user = current_user
         @query = query
-        @limit_projects = limit_projects
+        @limit_project_ids = limit_project_ids
         @public_and_internal_projects = public_and_internal_projects
         @filters = filters
       end
@@ -44,15 +41,9 @@ module Gitlab
           wiki_blobs(page: page, per_page: per_page)
         when 'commits'
           commits(page: page, per_page: per_page, preload_method: preload_method)
-        when 'users'
-          users.page(page).per(per_page)
         else
           Kaminari.paginate_array([])
         end
-      end
-
-      def generic_search_results
-        @generic_search_results ||= Gitlab::SearchResults.new(current_user, query, limit_projects)
       end
 
       def formatted_count(scope)
@@ -73,8 +64,6 @@ module Gitlab
           merge_requests_count.to_s
         when 'milestones'
           milestones_count.to_s
-        when 'users'
-          generic_search_results.formatted_count('users')
         end
       end
 
@@ -175,20 +164,6 @@ module Gitlab
       end
 
       private
-
-      # Convert the `limit_projects` to a list of ids for Elasticsearch
-      def limit_project_ids
-        strong_memoize(:limit_project_ids) do
-          case limit_projects
-          when :any then :any
-          when ActiveRecord::Relation
-            limit_projects.pluck_primary_key if limit_projects.model == Project
-          when Array
-            limit_projects.all? { |x| x.is_a?(Project) } ? limit_projects.map(&:id) : []
-          else []
-          end
-        end
-      end
 
       # Apply some eager loading to the `records` of an ES result object without
       # losing pagination information. Also, take advantage of preload method if

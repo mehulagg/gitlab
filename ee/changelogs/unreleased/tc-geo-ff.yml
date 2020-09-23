@@ -1,6 +1,0 @@
----
-title: Create a Geo cache invalidation event when toggling feature flags through the
-  API
-merge_request: 42070
-author:
-type: fixed

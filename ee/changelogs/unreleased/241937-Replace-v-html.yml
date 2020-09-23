@@ -1,5 +1,0 @@
----
-title: Replace v-html with v-safe-html in card_security_discover_app.vue
-merge_request: 41139
-author: Kev @KevSlashNull
-type: other

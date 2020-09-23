@@ -100,8 +100,9 @@ describe('Threat Monitoring mutations', () => {
       mutations[types.SET_CURRENT_ENVIRONMENT_ID](state, environmentId);
     });
 
-    it('sets currentEnvironmentId', () => {
+    it('sets currentEnvironmentId and allEnvironments', () => {
       expect(state.currentEnvironmentId).toBe(environmentId);
+      expect(state.allEnvironments).toBe(false);
     });
   });
 
@@ -114,6 +115,16 @@ describe('Threat Monitoring mutations', () => {
 
     it('sets currentTimeWindow', () => {
       expect(state.currentTimeWindow).toBe(timeWindow);
+    });
+  });
+
+  describe(types.SET_ALL_ENVIRONMENTS, () => {
+    beforeEach(() => {
+      mutations[types.SET_ALL_ENVIRONMENTS](state);
+    });
+
+    it('sets allEnvironments', () => {
+      expect(state.allEnvironments).toBe(true);
     });
   });
 });

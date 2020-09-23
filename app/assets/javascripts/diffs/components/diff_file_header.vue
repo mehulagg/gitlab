@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import { escape } from 'lodash';
 import { mapActions, mapGetters } from 'vuex';
 import {
@@ -68,6 +67,11 @@ export default {
       required: false,
       default: false,
     },
+  },
+  data() {
+    return {
+      hasDropdownOpen: false,
+    };
   },
   computed: {
     ...mapGetters('diffs', ['diffHasExpandedDiscussions', 'diffHasDiscussions']),
@@ -179,6 +183,9 @@ export default {
         }
       }
     },
+    setDropdownOpen(val) {
+      this.hasDropdownOpen = val;
+    },
   },
 };
 </script>
@@ -187,6 +194,7 @@ export default {
   <div
     ref="header"
     class="js-file-title file-title file-title-flex-parent"
+    :class="{ 'gl-z-dropdown-menu!': hasDropdownOpen }"
     @click.self="handleToggleFile"
   >
     <div class="file-header-content">
@@ -210,16 +218,16 @@ export default {
         <span v-if="isFileRenamed">
           <strong
             v-gl-tooltip
+            v-safe-html="diffFile.old_path_html"
             :title="diffFile.old_path"
             class="file-title-name"
-            v-html="diffFile.old_path_html"
           ></strong>
           →
           <strong
             v-gl-tooltip
+            v-safe-html="diffFile.new_path_html"
             :title="diffFile.new_path"
             class="file-title-name"
-            v-html="diffFile.new_path_html"
           ></strong>
         </span>
 
@@ -273,20 +281,23 @@ export default {
             v-if="!diffFile.deleted_file"
             :can-current-user-fork="canCurrentUserFork"
             :edit-path="diffFile.edit_path"
+            :ide-edit-path="diffFile.ide_edit_path"
             :can-modify-blob="diffFile.can_modify_blob"
             data-track-event="click_toggle_edit_button"
             data-track-label="diff_toggle_edit_button"
             data-track-property="diff_toggle_edit"
             @showForkMessage="showForkMessage"
+            @open="setDropdownOpen(true)"
+            @close="setDropdownOpen(false)"
           />
         </template>
 
         <a
           v-if="diffFile.replaced_view_path"
           ref="replacedFileButton"
+          v-safe-html="viewReplacedFileButtonText"
           :href="diffFile.replaced_view_path"
           class="btn view-file"
-          v-html="viewReplacedFileButtonText"
         >
         </a>
         <gl-deprecated-button

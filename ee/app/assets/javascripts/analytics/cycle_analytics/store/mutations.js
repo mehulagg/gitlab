@@ -6,10 +6,6 @@ export default {
   [types.SET_FEATURE_FLAGS](state, featureFlags) {
     state.featureFlags = featureFlags;
   },
-  [types.SET_SELECTED_GROUP](state, group) {
-    state.selectedGroup = convertObjectPropsToCamelCase(group, { deep: true });
-    state.selectedProjects = [];
-  },
   [types.SET_SELECTED_PROJECTS](state, projects) {
     state.selectedProjects = projects;
   },
@@ -91,14 +87,14 @@ export default {
   [types.INITIALIZE_CYCLE_ANALYTICS](
     state,
     {
-      group: selectedGroup = null,
+      group = null,
       createdAfter: startDate = null,
       createdBefore: endDate = null,
       selectedProjects = [],
     } = {},
   ) {
     state.isLoading = true;
-    state.selectedGroup = selectedGroup;
+    state.currentGroup = group;
     state.selectedProjects = selectedProjects;
     state.startDate = startDate;
     state.endDate = endDate;

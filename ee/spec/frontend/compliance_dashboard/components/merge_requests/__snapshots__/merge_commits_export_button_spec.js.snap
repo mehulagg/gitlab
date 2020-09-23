@@ -3,6 +3,7 @@
 exports[`MergeCommitsExportButton component Merge commit CSV export button matches the snapshot 1`] = `
 <div>
   <gl-button-stub
+    buttontextclasses=""
     category="primary"
     class="gl-align-self-center"
     href="/merge_commit_reports"

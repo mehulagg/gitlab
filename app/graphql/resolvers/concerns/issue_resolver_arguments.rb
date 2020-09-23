@@ -18,6 +18,9 @@ module IssueResolverArguments
     argument :milestone_title, GraphQL::STRING_TYPE.to_list_type,
               required: false,
               description: 'Milestone applied to this issue'
+    argument :author_username, GraphQL::STRING_TYPE,
+              required: false,
+              description: 'Username of the author of the issue'
     argument :assignee_username, GraphQL::STRING_TYPE,
               required: false,
               description: 'Username of a user assigned to the issue'

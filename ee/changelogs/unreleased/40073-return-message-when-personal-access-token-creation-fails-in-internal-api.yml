@@ -1,5 +1,0 @@
----
-title: Return message when personal access token creation fails in internal API
-merge_request: 40073
-author: Taylan Develioglu
-type: changed

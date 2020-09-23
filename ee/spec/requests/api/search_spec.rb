@@ -273,6 +273,18 @@ RSpec.describe API::Search do
       it_behaves_like 'pagination', scope: 'users', search: ''
     end
 
+    context 'for notes scope', :sidekiq_inline do
+      before do
+        create(:note_on_merge_request, project: project, note: 'awesome note')
+        mr = create(:merge_request, source_project: project, target_branch: 'another_branch')
+        create(:note, project: project, noteable: mr, note: 'another note')
+
+        ensure_elasticsearch_index!
+      end
+
+      it_behaves_like 'pagination', scope: 'notes'
+    end
+
     if level == :global
       context 'for snippet_titles scope', :sidekiq_inline do
         before do
@@ -282,20 +294,6 @@ RSpec.describe API::Search do
         end
 
         it_behaves_like 'pagination', scope: 'snippet_titles'
-      end
-    end
-
-    if level == :project
-      context 'for notes scope', :sidekiq_inline do
-        before do
-          create(:note_on_merge_request, project: project, note: 'awesome note')
-          mr = create(:merge_request, source_project: project, target_branch: 'another_branch')
-          create(:note, project: project, noteable: mr, note: 'another note')
-
-          ensure_elasticsearch_index!
-        end
-
-        it_behaves_like 'pagination', scope: 'notes'
       end
     end
   end

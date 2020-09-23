@@ -8,6 +8,7 @@ module Security
         @variables = variables(params)
         @existing_gitlab_ci_content = existing_gitlab_ci_content || {}
         @default_sast_values = default_sast_values(params)
+        @default_values_overwritten = false
       end
 
       def generate
@@ -15,7 +16,7 @@ module Security
 
         update_existing_content!
 
-        [{ action: action, file_path: '.gitlab-ci.yml', content: prepare_existing_content }]
+        [{ action: action, file_path: '.gitlab-ci.yml', content: prepare_existing_content, default_values_overwritten: @default_values_overwritten }]
       end
 
       private
@@ -77,6 +78,7 @@ module Security
         variables.each do |key|
           if @variables[key].present? && @variables[key].to_s != @default_sast_values[key].to_s
             hash_to_update['variables'][key] = @variables[key]
+            @default_values_overwritten = true
           else
             hash_to_update['variables'].delete(key)
           end

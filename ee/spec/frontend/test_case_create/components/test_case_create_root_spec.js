@@ -1,4 +1,4 @@
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 
 import TestCaseCreateRoot from 'ee/test_case_create/components/test_case_create_root.vue';
 import createTestCase from 'ee/test_case_create/queries/create_test_case.mutation.graphql';
@@ -6,6 +6,7 @@ import createTestCase from 'ee/test_case_create/queries/create_test_case.mutatio
 import createFlash from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
 import IssuableCreate from '~/issuable_create/components/issuable_create_root.vue';
+import IssuableForm from '~/issuable_create/components/issuable_form.vue';
 
 jest.mock('~/flash');
 jest.mock('~/lib/utils/url_utility');
@@ -20,12 +21,16 @@ const mockProvide = {
 };
 
 const createComponent = () =>
-  mount(TestCaseCreateRoot, {
+  shallowMount(TestCaseCreateRoot, {
     provide: mockProvide,
     mocks: {
       $apollo: {
         mutate: jest.fn(),
       },
+    },
+    stubs: {
+      IssuableCreate,
+      IssuableForm,
     },
   });
 

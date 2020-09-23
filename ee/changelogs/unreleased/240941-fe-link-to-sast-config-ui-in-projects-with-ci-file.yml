@@ -1,5 +1,0 @@
----
-title: Allow SAST Configuration UI to be used when there's an existing CI file
-merge_request: 40528
-author:
-type: changed

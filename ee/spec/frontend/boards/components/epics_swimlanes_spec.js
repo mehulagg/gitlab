@@ -17,12 +17,8 @@ describe('EpicsSwimlanes', () => {
 
   const createStore = () => {
     return new Vuex.Store({
-      actions: {
-        fetchIssuesForAllLists: jest.fn(),
-      },
       state: {
         epics: mockEpics,
-        isLoadingIssues: false,
         issuesByListId: mockIssuesByListId,
         issues,
       },
