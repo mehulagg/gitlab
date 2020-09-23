@@ -3,21 +3,18 @@
 require 'spec_helper'
 
 RSpec.describe 'projects/tracings/show' do
-  let(:project) { create(:project, :repository) }
-  let(:error_tracking_setting) { create(:project_error_tracking_setting, project: project) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:error_tracking_setting) { create(:project_error_tracking_setting, project: project) }
 
   before do
     assign(:project, project)
-    assign(:repository, project.repository)
-    allow(view).to receive(:current_ref).and_return('master')
-    allow(view).to receive(:error_tracking_setting).and_return(error_tracking_setting)
-    allow(view).to receive(:incident_management_available?) { false }
-    stub_licensed_features(tracing: true)
+    allow(view).to receive(:error_tracking_setting)
+      .and_return(error_tracking_setting)
   end
 
   context 'with project.tracing_external_url' do
-    let(:tracing_url) { 'https://tracing.url' }
-    let(:tracing_setting) { create(:project_tracing_setting, project: project, external_url: tracing_url) }
+    let_it_be(:tracing_url) { 'https://tracing.url' }
+    let_it_be(:tracing_setting) { create(:project_tracing_setting, project: project, external_url: tracing_url) }
 
     before do
       allow(view).to receive(:can?).and_return(true)

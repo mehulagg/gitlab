@@ -4,12 +4,15 @@ require 'spec_helper'
 
 RSpec.describe 'Tracings Content Security Policy' do
   let_it_be(:user) { create(:user) }
-  let(:project) { create(:project) }
+  let_it_be(:project) { create(:project) }
 
   subject { response_headers['Content-Security-Policy'] }
 
-  before do
+  before_all do
     project.add_maintainer(user)
+  end
+
+  before do
     sign_in(user)
   end
 

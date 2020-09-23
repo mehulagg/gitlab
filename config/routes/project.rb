@@ -310,6 +310,8 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         resources :incidents, only: [:index]
 
+        resource :tracing, only: [:show]
+
         namespace :error_tracking do
           resources :projects, only: :index
         end

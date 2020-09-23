@@ -127,8 +127,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
         end
       end
 
-      resource :tracing, only: [:show]
-
       post '/restore' => '/projects#restore', as: :restore
 
       resource :insights, only: [:show], trailing_slash: true do
