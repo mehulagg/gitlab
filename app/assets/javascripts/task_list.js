@@ -31,6 +31,14 @@ export default class TaskList {
   init() {
     this.disable(); // Prevent duplicate event bindings
 
+    const taskListField = document.querySelector(
+      `${this.taskListContainerSelector} .js-task-list-field`,
+    );
+
+    if (taskListField?.dataset.value) {
+      taskListField.value = taskListField.dataset.value;
+    }
+
     $(this.taskListContainerSelector).taskList('enable');
     $(document).on('tasklist:changed', this.taskListContainerSelector, this.updateHandler);
   }
