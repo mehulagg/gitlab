@@ -368,6 +368,16 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    - `401 Unauthorized` if user is not authenticated
    - `403 Forbidden` for invalid CSRF token provided
 
+1. Track events using JavaScript/Vue API helper which calls the API above
+
+   Example usage for an existing event already defined in known events:
+
+   ```javascript
+   import api from '~/api';
+
+   api.trackRedisHllEvent('my_already_defined_event_name'),
+   ```
+
 1. Track event using base module `Gitlab::UsageDataCounters::HLLRedisCounter.track_event(entity_id, event_name)`.
 
    Arguments:

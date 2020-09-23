@@ -1152,4 +1152,40 @@ describe('Api', () => {
       });
     });
   });
+
+  describe('trackRedisHllEvent', () => {
+    const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/usage_data/increment_unique_users`;
+
+    const event = 'dummy_event';
+    const postData = { event };
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    describe('when usage data increment unique users is called with feature flag disabled', () => {
+      beforeEach(() => {
+        gon.features = { ...gon.features, usageDataApi: false };
+      });
+
+      it('returns null', () => {
+        expect(Api.trackRedisHllEvent(event)).toEqual(null);
+      });
+    });
+
+    describe('when usage data increment unique users is called', () => {
+      beforeEach(() => {
+        gon.features = { ...gon.features, usageDataApi: true };
+      });
+
+      it('resolves the Promise', () => {
+        jest.spyOn(axios, 'post');
+        mock.onPost(expectedUrl, { event }).replyOnce(httpStatus.OK, true);
+
+        return Api.trackRedisHllEvent(event).then(({ data }) => {
+          expect(data).toEqual(true);
+          expect(axios.post).toHaveBeenCalledWith(expectedUrl, postData, { headers });
+        });
+      });
+    });
+  });
 });
