@@ -483,3 +483,9 @@ This error occurs when the Docker version that runs the Dependency Scanning job 
 Consider updating to Docker `19.03.1` or greater. Older versions are not
 affected. Read more in
 [this issue](https://gitlab.com/gitlab-org/gitlab/-/issues/13830#note_211354992 "Current SAST container fails").
+
+### Limitation when using `rules:exists`
+
+https://docs.gitlab.com/ee/ci/yaml#rulesexists
+
+If you use the [`rules:exists`](../../../ci/yaml/#rulesexists) syntax in your GitLab CI/CD pipeline configuration, this directive is limited to 10000 checks, and will always return `true` after this number has been reached. This means that if you use a glob pattern to only run a dependency scan if matching files exist, and there are more than 10000 checks, then the `rules:exist` directive will always return true and the dependency scan will be executed _even if the glob pattern doesn't actually match any files_.
