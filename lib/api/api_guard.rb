@@ -54,6 +54,11 @@ module API
         user = find_user_from_sources
         return unless user
 
+        if user.bot?
+          terms = Gitlab::CurrentSettings.current_application_settings.latest_terms
+          ::Users::RespondToTermsService.new(user, terms).execute(accepted: true)
+        end
+
         # Sessions are enforced to be unavailable for API calls, so ignore them for admin mode
         Gitlab::Auth::CurrentUserMode.bypass_session!(user.id) if Feature.enabled?(:user_mode_in_session)
 
