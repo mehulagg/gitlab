@@ -1,83 +1,107 @@
-import Vue from 'vue';
-import { mount } from '@vue/test-utils';
+import { mount, createLocalVue } from '@vue/test-utils';
 import SmartVirtualScrollList from '~/vue_shared/components/smart_virtual_list.vue';
 
-describe('Toggle Button', () => {
-  let vm;
+const localVue = createLocalVue();
 
-  const createComponent = ({ length, remain }) => {
-    const smartListProperties = {
-      rtag: 'section',
-      wtag: 'ul',
-      wclass: 'test-class',
-      // Size in pixels does not matter for our tests here
-      size: 35,
-      length,
-      remain,
-    };
+const ItemComponent = {
+  props: {
+    index: { type: Number, required: true },
+    source: { type: Object, required: false, default: () => ({}) },
+  },
+  template: `<li data-testid="smart-virtual-list-item">{{ index }} - {{ source.text }}</li>`,
+};
 
-    const Component = Vue.extend({
-      components: {
-        SmartVirtualScrollList,
+describe('Smart virtual scroll list component', () => {
+  let wrapper;
+
+  const findVirtualList = () => wrapper.find('[data-testid="smart-virtual-list"]');
+  const findVirtualListItems = () => wrapper.findAll('[data-testid="smart-virtual-list-item"]');
+
+  const findPlainList = () => wrapper.find('[data-testid="smart-virtual-list-plain"]');
+  const findPlainListWrapper = () =>
+    wrapper.find('[data-testid="smart-virtual-list-plain-wrapper"]');
+  const findPlainListItemByKey = key =>
+    wrapper.find(`[data-testid="smart-virtual-list-plain-item-${key}"]`);
+
+  const createComponent = props => {
+    wrapper = mount(SmartVirtualScrollList, {
+      localVue,
+      propsData: {
+        dataKey: 'id',
+        dataComponent: ItemComponent,
+        dataSources: [],
+        ...props,
       },
-      smartListProperties,
-      items: Array(length).fill(1),
-      template: `
-      <smart-virtual-scroll-list v-bind="$options.smartListProperties">
-        <li v-for="(val, key) in $options.items" :key="key">{{ key + 1 }}</li>
-      </smart-virtual-scroll-list>`,
+      stubs: {
+        ItemComponent,
+      },
     });
-
-    return mount(Component).vm;
   };
 
+  beforeEach(() => {
+    createComponent();
+  });
+
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
   });
 
   describe('if the list is shorter than the maximum shown elements', () => {
-    const listLength = 10;
+    const dataSources = [{ id: 1, text: 'one' }, { id: 2, text: 'two' }];
 
     beforeEach(() => {
-      vm = createComponent({ length: listLength, remain: 20 });
+      createComponent({
+        dataSources,
+        rootTag: 'section',
+        wrapTag: 'ul',
+        wrapClass: 'test-class',
+      });
     });
 
     it('renders without the vue-virtual-scroll-list component', () => {
-      expect(vm.$el.classList).not.toContain('js-virtual-list');
-      expect(vm.$el.classList).toContain('js-plain-element');
+      expect(findVirtualList().exists()).toBe(false);
+      expect(findPlainList().exists()).toBe(true);
     });
 
     it('renders list with provided tags and classes for the wrapper elements', () => {
-      expect(vm.$el.tagName).toEqual('SECTION');
-      expect(vm.$el.firstChild.tagName).toEqual('UL');
-      expect(vm.$el.firstChild.classList).toContain('test-class');
+      expect(findPlainList().element.tagName).toEqual('SECTION');
+      expect(findPlainListWrapper().element.tagName).toEqual('UL');
+      expect(findPlainListWrapper().classes()).toContain('test-class');
     });
 
-    it('renders all children list elements', () => {
-      expect(vm.$el.querySelectorAll('li').length).toEqual(listLength);
+    it.each(dataSources)('renders item component for %s', source => {
+      expect(findPlainListItemByKey(source.id).exists()).toBe(true);
     });
   });
 
   describe('if the list is longer than the maximum shown elements', () => {
-    const maxItemsShown = 20;
+    const dataSources = [
+      { id: 1, text: 'one' },
+      { id: 2, text: 'two' },
+      { id: 3, text: 'three' },
+      { id: 4, text: 'four' },
+      { id: 5, text: 'five' },
+      { id: 6, text: 'six' },
+    ];
+
+    const maxItemsShown = 1;
 
     beforeEach(() => {
-      vm = createComponent({ length: 1000, remain: maxItemsShown });
+      createComponent({
+        dataSources,
+        keeps: maxItemsShown,
+      });
     });
 
     it('uses the vue-virtual-scroll-list component', () => {
-      expect(vm.$el.classList).toContain('js-virtual-list');
-      expect(vm.$el.classList).not.toContain('js-plain-element');
-    });
-
-    it('renders list with provided tags and classes for the wrapper elements', () => {
-      expect(vm.$el.tagName).toEqual('SECTION');
-      expect(vm.$el.firstChild.tagName).toEqual('UL');
-      expect(vm.$el.firstChild.classList).toContain('test-class');
+      expect(findVirtualList().exists()).toBe(true);
+      expect(findPlainList().exists()).toBe(false);
     });
 
     it('renders at max twice the maximum shown elements', () => {
-      expect(vm.$el.querySelectorAll('li').length).toBeLessThanOrEqual(2 * maxItemsShown);
+      expect(findVirtualListItems().length).toBeGreaterThan(0);
+      expect(findVirtualListItems().length).toBeLessThanOrEqual(2 * maxItemsShown);
     });
   });
 });
