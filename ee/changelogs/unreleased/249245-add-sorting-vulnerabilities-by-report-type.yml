@@ -1,0 +1,5 @@
+---
+title: Add ability to sort vulnerabilities by report type
+merge_request: 42979
+author:
+type: added
