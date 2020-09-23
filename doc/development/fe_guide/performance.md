@@ -57,7 +57,7 @@ needed _everywhere_. These bundles include ubiquitous libraries like `vue`,
 Where possible we should aim to remove modules from these bundles to reduce our
 code footprint.
 
-### Page-specific JavaScriptw
+### Page-specific JavaScript
 
 Webpack has been configured to automatically generate entry point bundles based
 on the file structure within `app/assets/javascripts/pages/*`. The directories
