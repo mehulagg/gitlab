@@ -97,7 +97,7 @@ export default {
               'FeatureFlags|Feature flags allow you to configure your code into different flavors by dynamically toggling certain functionality.',
             )
           }}
-          <gl-link :href="featureFlagsHelpPagePath" target="_blank" rel="noopener noreferrer">
+          <gl-link :href="featureFlagsHelpPagePath" target="_blank">
             {{ s__('FeatureFlags|More information') }}
           </gl-link>
         </template>

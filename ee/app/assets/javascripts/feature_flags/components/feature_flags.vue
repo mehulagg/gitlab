@@ -317,7 +317,7 @@ export default {
               category="secondary"
               data-qa-selector="configure_feature_flags_button"
               data-testid="ff-configure-button"
-              class="mb-0 mr-3"
+              class="gl-mb-0 gl-mr-4"
             >
               {{ s__('FeatureFlags|Configure') }}
             </gl-button>
@@ -327,7 +327,7 @@ export default {
               :href="newUserListPath"
               variant="success"
               category="secondary"
-              class="mb-0 mr-3"
+              class="gl-mb-0 gl-mr-4"
               data-testid="ff-new-list-button"
             >
               {{ s__('FeatureFlags|New user list') }}
