@@ -74,6 +74,9 @@ export default {
     submitChanges(images) {
       this.isSavingChanges = true;
 
+      this.appData.hasSubmittedChanges = true;
+      this.$router.push(SUCCESS_ROUTE);
+
       this.$apollo
         .mutate({
           mutation: submitContentChangesMutation,
@@ -86,9 +89,6 @@ export default {
               images,
             },
           },
-        })
-        .then(() => {
-          this.$router.push(SUCCESS_ROUTE);
         })
         .catch(e => {
           this.submitChangesError = e.message;

@@ -23,6 +23,7 @@ const initStaticSiteEditor = el => {
     returnUrl,
     sourcePath,
     username,
+    hasSubmittedChanges: false,
   });
 
   return new Vue({
