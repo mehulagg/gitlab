@@ -6,22 +6,22 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 
 # GitLab Managed Apps
 
-GitLab provides **GitLab Managed Apps**, a one-click install for various applications which can
-be added directly to your configured cluster.These applications are needed for
-[Review Apps](../../ci/review_apps/index.md) and [deployments](../../ci/environments/index.md)
-when using [Auto DevOps](../../topics/autodevops/index.md). You can install them after you
-[create a cluster](../project/clusters/add_remove_clusters.md).
+GitLab provides **GitLab Managed Apps**, a one-click install for various
+applications which can be added directly to your configured cluster. These
+applications are needed for [Review Apps](../../ci/review_apps/index.md) and
+[deployments](../../ci/environments/index.md) when using [Auto DevOps](../../topics/autodevops/index.md).
+You can install them after you [create a cluster](../project/clusters/add_remove_clusters.md).
 
 ## Installing applications
 
-Applications managed by GitLab are installed onto the `gitlab-managed-apps` namespace.
-This namespace:
+Applications managed by GitLab are installed onto the `gitlab-managed-apps`
+namespace. This namespace:
 
 - Is different from the namespace used for project deployments.
 - Is created once.
 - Has a non-configurable name.
 
-To see a list of available applications to install for a:
+To view a list of available applications to install for a:
 
 - [Project-level cluster](../project/clusters/index.md), navigate to your project's
   **Operations > Kubernetes**.
@@ -56,8 +56,8 @@ you should be careful as GitLab cannot detect it. In this case, installing
 Helm via the applications will result in the cluster having it twice, which
 can lead to confusion during deployments.
 
-In GitLab versions 11.6 and greater, Helm is upgraded to the latest version supported
-by GitLab before installing any of the applications.
+In GitLab versions 11.6 and greater, Helm is upgraded to the latest version
+supported by GitLab before installing any of the applications.
 
 ### Helm
 
@@ -83,11 +83,10 @@ is available.
 
 > Introduced in GitLab 11.6 for project- and group-level clusters.
 
-[cert-manager](https://cert-manager.io/docs/) is a native
-Kubernetes certificate management controller that helps with issuing
-certificates. Installing cert-manager on your cluster issues a
-certificate by [Let's Encrypt](https://letsencrypt.org/) and ensures that
-certificates are valid and up-to-date.
+[cert-manager](https://cert-manager.io/docs/) is a native Kubernetes certificate
+management controller that helps with issuing certificates. Installing
+cert-manager on your cluster issues a certificate by [Let's Encrypt](https://letsencrypt.org/)
+and ensures that certificates are valid and up-to-date.
 
 The chart used to install this application depends on the version of GitLab used. In:
 
@@ -97,7 +96,7 @@ The chart used to install this application depends on the version of GitLab used
 - GitLab 12.2 and older, the [`stable/cert-manager`](https://gi2wthub.com/helm/charts/tree/master/stable/cert-manager)
   chart was used.
 
-If you have installed cert-manager prior to GitLab 12.3, Let's Encrypt
+If you installed cert-manager prior to GitLab 12.3, Let's Encrypt
 [blocks requests](https://community.letsencrypt.org/t/blocking-old-cert-manager-versions/98753)
 from older versions of `cert-manager`. To resolve this:
 
@@ -111,18 +110,18 @@ from older versions of `cert-manager`. To resolve this:
 > - Introduced in GitLab 11.10 for group-level clusters.
 
 [GitLab Runner](https://docs.gitlab.com/runner/) is the open source project that
-is used to run your jobs and send the results back to GitLab. It is used in conjunction
-with [GitLab CI/CD](../../ci/README.md), the open-source continuous integration
-service included with GitLab that coordinates the jobs.
+is used to run your jobs and send the results back to GitLab. It's used in
+conjunction with [GitLab CI/CD](../../ci/README.md), the open-source continuous
+integration service included with GitLab that coordinates the jobs.
 
 If the project is on GitLab.com, [shared runners](../gitlab_com/index.md#shared-runners)
-are available, and you do not have to deploy one if they are enough for your needs. If a
-project-specific runner is desired, or there are no shared runners, it is easy
-to deploy one.
+are available, and you do not have to deploy one if they are enough for your
+needs. If a project-specific runner is desired, or there are no shared runners,
+you can deploy one.
 
-The deployed runner is set as **privileged**. Root access to the underlying machine is
-required to build Docker images, so it is the default. Make sure you read the
-[security implications](../project/clusters/index.md#security-implications)
+The deployed runner is set as **privileged**. Root access to the underlying
+server is required to build Docker images, so it is the default. Be sure to read
+the [security implications](../project/clusters/index.md#security-implications)
 before deploying one.
 
 The [`runner/gitlab-runner`](https://gitlab.com/gitlab-org/charts/gitlab-runner)
