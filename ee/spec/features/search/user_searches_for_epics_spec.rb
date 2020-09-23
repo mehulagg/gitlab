@@ -3,8 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe 'User searches for epics', :js do
-  let(:user) { create(:user) }
-  let(:group) { create(:group) }
+  let!(:user) { create(:user) }
+  let!(:group) { create(:group) }
   let!(:epic1) { create(:epic, title: 'Foo', group: group) }
   let!(:epic2) { create(:epic, :closed, :confidential, title: 'Bar', group: group) }
 
@@ -17,7 +17,8 @@ RSpec.describe 'User searches for epics', :js do
   before do
     stub_feature_flags(epics_search: true)
     stub_licensed_features(epics: true)
-    group.add_maintainer(group)
+
+    group.add_maintainer(user)
     sign_in(user)
 
     visit(search_path(group_id: group.id))
@@ -60,7 +61,7 @@ RSpec.describe 'User searches for epics', :js do
   end
 
   it 'shows correct badge for closed epics' do
-    search_for_issue(epic2.title)
+    search_for_epic(epic2.title)
 
     page.within('.results') do
       expect(page).not_to have_css('.badge-success')
