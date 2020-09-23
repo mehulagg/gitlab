@@ -15,6 +15,24 @@ RSpec.describe Ci::CompareLicenseScanningReportsService do
   describe '#execute' do
     subject { service.execute(base_pipeline, head_pipeline) }
 
+    context "when loading data for multiple reports" do
+      it 'loads the data efficiently' do
+        base_pipeline = create(:ci_pipeline, :success, project: project)
+        head_pipeline = create(:ci_pipeline, :success, project: project, builds: [create(:ci_build, :success, job_artifacts: [create(:ee_ci_job_artifact, :license_scan)])])
+
+        control_count = ActiveRecord::QueryRecorder.new do
+          service.execute(base_pipeline.reload, head_pipeline.reload)
+        end.count
+
+        create_list(:ci_pipeline, 10, :success, project: project, builds: [create(:ee_ci_build, :license_scan_v2_1, :success)])
+        new_head_pipeline = create(:ci_pipeline, :success, project: project, builds: [create(:ee_ci_build, :license_scan_v2_1, :success)])
+
+        expect do
+          service.execute(base_pipeline.reload, new_head_pipeline.reload)
+        end.not_to exceed_query_limit(control_count)
+      end
+    end
+
     context 'when head pipeline has license scanning reports' do
       let!(:base_pipeline) { nil }
       let!(:head_pipeline) { create(:ee_ci_pipeline, :with_license_scanning_report, project: project) }
@@ -43,14 +61,6 @@ RSpec.describe Ci::CompareLicenseScanningReportsService do
       it 'reports new licenses' do
         expect(subject[:status]).to eq(:parsed)
         expect(subject[:data]['new_licenses'].count).to be > 1
-      end
-
-      it 'loads the data efficiently' do
-        control_count = ActiveRecord::QueryRecorder.new { service.execute(nil, head_pipeline) }.count
-
-        base_pipeline = create(:ee_ci_pipeline, :with_license_scanning_report, project: project, user: maintainer)
-
-        expect { service.execute(base_pipeline, head_pipeline) }.not_to exceed_query_limit(control_count)
       end
     end
 
