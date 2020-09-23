@@ -126,6 +126,10 @@ module QA
         run("git rev-parse --abbrev-ref HEAD").to_s
       end
 
+      def reset_2fa_codes
+        run("ssh git@192.168.100.9:3000 2fa_recovery_codes").to_s
+      end
+
       def push_changes(branch = 'master', push_options: nil)
         cmd = ['git push']
         cmd << push_options_hash_to_string(push_options)

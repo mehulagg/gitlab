@@ -2,6 +2,8 @@
 
 module QA
   context 'Manage', :requires_admin, :skip_live_env do
+    include Service::Shellout
+
     describe '2FA' do
       let!(:owner_user) do
         Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_2fa_owner_username_1, Runtime::Env.gitlab_qa_2fa_owner_password_1)
@@ -31,7 +33,7 @@ module QA
         QA::Resource::Group.fabricate_via_api! do |group|
           group.sandbox = sandbox_group
           group.api_client = owner_api_client
-          # group.require_two_factor_authentication = true
+          group.require_two_factor_authentication = true
         end
       end
 
@@ -40,14 +42,18 @@ module QA
           project.group = group
           project.name = 'ssh-recovery-test'
           project.api_client = owner_api_client
+          project.initialize_with_readme = true
         end
       end
 
+      # Might not be necessary
       let(:project_push) do
         Resource::Repository::ProjectPush.fabricate! do |push|
+          push.new_branch = true
+          push.branch_name = 'test-branch'
           push.project = project
           push.ssh_key = ssh_key
-          push.file_name = 'README.md'
+          push.file_name = 'text.md'
           push.file_content = '# Test Use SSH Key'
           push.commit_message = 'Add README.md'
         end
@@ -60,15 +66,16 @@ module QA
       it 'allows using 2FA recovery code once only', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/972' do
         project_push
 
+        recovery_code = enable_2fa_for_user_and_fetch_recovery_code(developer_user)
+
+        Git::Repository.perform do |repository|
+          repository.reset_2fa_codes
+        end
+
         require 'pry-byebug'
         binding.pry
 
-        recovery_code = enable_2fa_for_user_and_fetch_recovery_code(developer_user)
-
         Flow::Login.sign_in(as: developer_user, skip_page_validation: true)
-
-
-        binding.pry
 
         Page::Main::TwoFactorAuth.perform do |two_fa_auth|
           two_fa_auth.set_2fa_code(recovery_code)
