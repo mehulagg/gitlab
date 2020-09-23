@@ -58,7 +58,7 @@ The current detection logic limits the maximum search depth to two levels. For e
 
 The following languages and dependency managers are supported:
 
-| Package Manager(s) | Language  | Supported files | Scan tool(s) |
+| Package Managers | Languages  | Supported files | Scan tools |
 | ------------------- | --------- | --------------- | ------------ |
 | [Bundler](https://bundler.io/) | Ruby | `Gemfile.lock`, `gems.locked` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium), [bundler-audit](https://github.com/rubysec/bundler-audit) |
 | [Composer](https://getcomposer.org/) | PHP | `composer.lock` | [Gemnasium](https://gitlab.com/gitlab-org/security-products/gemnasium) |
