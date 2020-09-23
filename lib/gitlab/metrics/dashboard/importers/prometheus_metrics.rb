@@ -68,7 +68,7 @@ module Gitlab
 
           # rubocop: disable CodeReuse/ActiveRecord
           def delete_stale_alerts(stale_metrics)
-            stale_alerts = Projects::Prometheus::AlertsFinder.new(project: project, metric: stale_metrics).execute
+            stale_alerts = find_alerts(stale_metrics)
 
             return unless stale_alerts.present?
 
