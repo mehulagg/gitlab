@@ -18,13 +18,19 @@ export default {
       default: false,
     },
   },
+  computed: {
+    hasValidValueProp() {
+      // when in non-prod and non-json mode the value should be of type "String"
+      return process.env.NODE_ENV !== 'production' && !this.json ? isString(this.value) : true;
+    },
+  },
   watch: {
     value(newVal) {
       this.saveValue(this.serialize(newVal));
     },
   },
   mounted() {
-    if (!this.json && !isString(this.value)) {
+    if (!this.hasValidValueProp) {
       throw new Error(
         // eslint-disable-next-line @gitlab/require-i18n-strings
         'Invalid prop: type check failed for prop "value". Expected String. Hint: Use the "json" prop to use non-string values',

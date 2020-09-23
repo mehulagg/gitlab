@@ -170,6 +170,8 @@ describe('Local Storage Sync', () => {
           });
 
           wrapper.setProps({ value });
+
+          return wrapper.vm.$nextTick();
         });
 
         it('serializes the value correctly to localStorage', () => {
