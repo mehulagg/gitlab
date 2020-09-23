@@ -147,7 +147,8 @@ const bindEvents = () => {
     $selectedIcon.empty();
     const value = $(this).val();
 
-    const selectedTemplate = DEFAULT_PROJECT_TEMPLATES[value] || DEFAULT_SAMPLE_DATA_TEMPLATES[value];
+    const selectedTemplate =
+      DEFAULT_PROJECT_TEMPLATES[value] || DEFAULT_SAMPLE_DATA_TEMPLATES[value];
     $selectedTemplateText.text(selectedTemplate.text);
     $(selectedTemplate.icon)
       .clone()
