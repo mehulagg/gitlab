@@ -32,7 +32,7 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
   end
 
   let(:params_with_analyzer_info) do
-    params.merge!( { 'analyzers' =>
+    params.merge( { 'analyzers' =>
                     [
                       {
                         'name' =>  "bandit",
@@ -57,11 +57,11 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
                         ]
                       }
                     ] }
-                 )
+                )
   end
 
   let(:params_with_all_analyzers_enabled) do
-    params.merge!( { 'analyzers' =>
+    params.merge( { 'analyzers' =>
                     [
                       {
                         'name' =>  "brakeman",
@@ -72,7 +72,7 @@ RSpec.describe Security::CiConfiguration::SastBuildActions do
                         'enabled' =>  true
                       }
                     ] }
-                 )
+                )
   end
 
   context 'with existing .gitlab-ci.yml' do

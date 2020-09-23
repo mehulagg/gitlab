@@ -11,7 +11,6 @@ module Security
         @existing_gitlab_ci_content = existing_gitlab_ci_content || {}
         @default_sast_values = default_sast_values(params)
         @default_values_overwritten = false
-        process_analyzers(params)
       end
 
       def generate
@@ -23,26 +22,6 @@ module Security
       end
 
       private
-
-      def process_analyzers(params)
-        analyzer_variables = {}
-        default_values = {}
-        enabled_analyzers = []
-        params['analyzers']&.each do |analyzer|
-          enabled_analyzers << analyzer['name'] if analyzer['enabled']
-
-          if analyzer['variables'].present?
-            analyzer_variables.merge!( analyzer['variables']&.to_h { |k| [k['field'], k['value']] } )
-            default_values.merge!( analyzer['variables']&.to_h { |k| [k['field'], k['defaultValue']] } )
-          end
-        end
-
-        analyzer_variables['SAST_DEFAULT_ANALYZERS'] = enabled_analyzers.join(', ')
-        default_values['SAST_DEFAULT_ANALYZERS'] = SAST_DEFAULT_ANALYZERS
-
-        @variables.merge!(analyzer_variables)
-        @default_sast_values.merge!(default_values)
-      end
 
       def variables(params)
         # This early return is necessary for supporting REST API.
@@ -60,7 +39,28 @@ module Security
       def collect_values(config, key)
         global_variables = config['global']&.to_h { |k| [k['field'], k[key]] } || {}
         pipeline_variables = config['pipeline']&.to_h { |k| [k['field'], k[key]] } || {}
-        global_variables.merge!(pipeline_variables)
+
+        analyzer_variables = collect_analyzer_values(config, key)
+
+        global_variables.merge!(pipeline_variables).merge!(analyzer_variables)
+      end
+
+      def collect_analyzer_values(config, key)
+        analyzer_variables = config['analyzers']
+        &.select {|a| a['enabled'] && a['variables'] }
+        &.flat_map {|a| a['variables'] }
+        &.collect {|v| [v['field'], v[key]] }.to_h
+
+        analyzer_variables['SAST_DEFAULT_ANALYZERS'] = if key == 'value'
+                                                         config['analyzers']
+                                                         &.select {|a| a['enabled'] }
+                                                         &.collect {|a| a['name'] }
+                                                         &.join(', ')
+                                                       else
+                                                         SAST_DEFAULT_ANALYZERS
+                                                       end
+
+        analyzer_variables
       end
 
       def update_existing_content!
