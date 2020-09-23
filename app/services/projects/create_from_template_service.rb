@@ -8,7 +8,7 @@ module Projects
 
     def initialize(user, params)
       @current_user, @params = user, params.to_h.dup
-      @template_name = @params[:template_name]
+      @template_name = @params.delete(:template_name).presence
     end
 
     def execute
@@ -18,6 +18,7 @@ module Projects
 
       override_params = params.dup
       params[:file] = file
+      params[:sample_data] = true if sample_data_template
 
       GitlabProjectsImportService.new(current_user, params, override_params).execute
     ensure

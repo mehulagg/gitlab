@@ -108,7 +108,7 @@ module Gitlab
         end
 
         def sample_data_template?
-          @importable.import_data.data['template_name'] == 'sample_data_template'
+          @importable.import_data.data['sample_data'] == true
         end
 
         def update_project_references
