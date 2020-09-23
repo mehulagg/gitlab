@@ -536,6 +536,7 @@ production: &base
     # path: shared/registry
     # issuer: gitlab-issuer
     # notification_secret: '' # only set it when you use Geo replication feature without built-in Registry
+    # ca: nil # optional self-signed registry certificate, used by some external integrations (such as the GitLab-managed Kubernetes Runner)
 
     # Add notification settings if you plan to use Geo Replication for the registry
     # notifications:

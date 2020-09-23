@@ -36,7 +36,8 @@ module Clusters
           rbac: cluster.platform_kubernetes_rbac?,
           chart: chart,
           files: files,
-          repository: repository
+          repository: repository,
+          preinstall: pre_install_script
         )
       end
 
@@ -86,8 +87,48 @@ module Clusters
         {
           "gitlabUrl" => gitlab_url,
           "runnerToken" => ensure_runner.token,
-          "runners" => { "privileged" => privileged }
+          "runners" => { "privileged" => privileged },
+          "preEntrypointScript" => pre_entrypoint_script
         }
+      end
+
+      def pre_entrypoint_script
+        return unless registry_ca.present?
+
+        <<~BASH
+          #!/bin/bash
+          cat << EOF >> /home/gitlab-runner/.gitlab-runner/config.toml
+          [[runners.kubernetes.volumes.config_map]]
+            name = "gitlab-registry-ca"
+            mount_path = "/etc/docker/certs.d/#{Gitlab.config.registry.host_port}"
+            [runners.kubernetes.volumes.config_map.items]
+              "ca.crt" = "ca.crt"
+          EOF
+        BASH
+      end
+
+      def pre_install_script
+        return unless registry_ca.present?
+
+        configmap = <<~YAML
+          apiVersion: v1
+          kind: ConfigMap
+          metadata:
+            name: gitlab-registry-ca
+            namespace: gitlab-managed-apps
+          data:
+            ca.crt: |
+          #{registry_ca.indent(4)}
+        YAML
+
+        [
+          "echo #{configmap.shellescape} > /tmp/runner-ca-configmap.yaml",
+          "kubectl --namespace #{Gitlab::Kubernetes::Helm::NAMESPACE} apply -f /tmp/runner-ca-configmap.yaml"
+        ]
+      end
+
+      def registry_ca
+        @registry_ca ||= File.open(Gitlab.config.registry.ca, &:read)
       end
 
       def content_values
