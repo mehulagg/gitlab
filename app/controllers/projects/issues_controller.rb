@@ -113,6 +113,10 @@ class Projects::IssuesController < Projects::ApplicationController
       discussion_to_resolve: params[:discussion_to_resolve]
     )
 
+    if create_params[:issue_type] == 'incident'
+      return render_404 unless can?(current_user, :create_incident, project)
+    end
+
     service = ::Issues::CreateService.new(project, current_user, create_params)
     @issue = service.execute
 

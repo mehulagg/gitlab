@@ -320,6 +320,8 @@ class ProjectPolicy < BasePolicy
     enable :update_metrics_dashboard_annotation
     enable :read_alert_management_alert
     enable :update_alert_management_alert
+    enable :create_incident
+    enable :update_incident
     enable :create_design
     enable :move_design
     enable :destroy_design
