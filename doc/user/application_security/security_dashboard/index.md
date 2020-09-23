@@ -164,7 +164,6 @@ button located at top right of the **Security Dashboard**. When the report
 is ready, the CSV report downloads to your local machine. The report contains all
 vulnerabilities for the projects defined in the **Security Dashboard**,
 as filters don't apply to the export function.
-
 The fields in the export include:
 - Scanner Type
 - Scanner Name
