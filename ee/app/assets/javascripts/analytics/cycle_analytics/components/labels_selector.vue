@@ -4,6 +4,7 @@ import { debounce } from 'lodash';
 import {
   GlDropdown,
   GlDropdownItem,
+  GlDropdownSectionHeader,
   GlIcon,
   GlLoadingIcon,
   GlSearchBoxByType,
@@ -19,6 +20,7 @@ export default {
   components: {
     GlDropdown,
     GlDropdownItem,
+    GlDropdownSectionHeader,
     GlIcon,
     GlLoadingIcon,
     GlSearchBoxByType,
@@ -146,11 +148,11 @@ export default {
     </template>
     <template>
       <slot name="label-dropdown-list-header">
-        <gl-dropdown-item
+        <gl-dropdown-section-header
           :active="!selectedLabelId.length"
           @click.prevent="$emit('clearLabel')"
           >{{ __('Select a label') }}
-        </gl-dropdown-item>
+        </gl-dropdown-section-header>
       </slot>
       <div class="mb-3 px-3">
         <gl-search-box-by-type v-model.trim="searchTerm" class="mb-2" />
