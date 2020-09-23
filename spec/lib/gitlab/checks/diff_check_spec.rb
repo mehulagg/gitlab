@@ -51,14 +51,14 @@ RSpec.describe Gitlab::Checks::DiffCheck do
       before do
         allow(subject).to receive(:validations_for_diff).and_return([lambda { |diff| return }])
 
-        expect_any_instance_of(Commit).to receive(:raw_deltas).and_call_original
+        expect_any_instance_of(Commit).to receive(:diff_stats).and_call_original
 
         subject.validate!
       end
 
       context 'when request store is inactive' do
         it 'are run for every commit' do
-          expect_any_instance_of(Commit).to receive(:raw_deltas).and_call_original
+          expect_any_instance_of(Commit).to receive(:diff_stats).and_call_original
 
           subject.validate!
         end
@@ -66,7 +66,7 @@ RSpec.describe Gitlab::Checks::DiffCheck do
 
       context 'when request store is active', :request_store do
         it 'are cached for every commit' do
-          expect_any_instance_of(Commit).not_to receive(:raw_deltas)
+          expect_any_instance_of(Commit).not_to receive(:diff_stats)
 
           subject.validate!
         end
@@ -77,8 +77,8 @@ RSpec.describe Gitlab::Checks::DiffCheck do
           )
           change_access.instance_variable_set(:@commits, project.repository.new_commits)
 
-          expect(project.repository.new_commits.first).not_to receive(:raw_deltas).and_call_original
-          expect(project.repository.new_commits.last).to receive(:raw_deltas).and_call_original
+          expect(project.repository.new_commits.first).not_to receive(:diff_stats).and_call_original
+          expect(project.repository.new_commits.last).to receive(:diff_stats).and_call_original
 
           subject.validate!
         end

@@ -19,10 +19,10 @@ module Gitlab
 
         process_commits do |commit|
           validate_once(commit) do
-            commit.raw_deltas.each do |diff|
-              file_paths.concat([diff.new_path, diff.old_path].compact)
+            commit.diff_stats.each do |diff_stat|
+              file_paths.concat([diff_stat.path, diff_stat.old_path].compact)
 
-              validate_diff(diff)
+              validate_diff(diff_stat)
             end
           end
         end
