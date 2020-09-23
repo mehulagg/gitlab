@@ -231,6 +231,10 @@ module API
 
         authorize! :create_issue, user_project
 
+        if params[:issue_type] == 'incident'
+          authorize! :create_incident, user_project
+        end
+
         params.delete(:created_at) unless current_user.can?(:set_issue_created_at, user_project)
         params.delete(:iid) unless current_user.can?(:set_issue_iid, user_project)
 
@@ -278,6 +282,7 @@ module API
 
         issue = user_project.issues.find_by!(iid: params.delete(:issue_iid))
         authorize! :update_issue, issue
+        authorize!(:update_incident, user_project) if issue.issue_type == 'incident'
 
         # Setting updated_at is allowed only for admins and owners
         params.delete(:updated_at) unless current_user.can?(:set_issue_updated_at, user_project)
@@ -316,6 +321,7 @@ module API
         not_found!('Issue') unless issue
 
         authorize! :update_issue, issue
+        authorize!(:update_incident, user_project) if issue.issue_type == 'incident'
 
         if ::Issues::ReorderService.new(user_project, current_user, params).execute(issue)
           present issue, with: Entities::Issue, current_user: current_user, project: user_project

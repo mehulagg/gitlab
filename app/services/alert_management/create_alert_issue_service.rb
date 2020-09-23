@@ -33,7 +33,7 @@ module AlertManagement
     delegate :project, to: :alert
 
     def allowed?
-      user.can?(:create_issue, project)
+      user.can?(:create_incident, project)
     end
 
     def create_incident

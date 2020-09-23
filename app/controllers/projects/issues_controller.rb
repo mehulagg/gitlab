@@ -30,6 +30,7 @@ class Projects::IssuesController < Projects::ApplicationController
 
   # Allow modify issue
   before_action :authorize_update_issuable!, only: [:edit, :update, :move, :reorder]
+  before_action :authorize_update_incident!, only: [:edit, :update, :move, :reorder], if: ->(c) { @issue.issue_type == 'incident' }
 
   # Allow create a new branch and empty WIP merge request from current issue
   before_action :authorize_create_merge_request_from!, only: [:create_merge_request]
