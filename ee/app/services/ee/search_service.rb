@@ -21,10 +21,7 @@ module EE
     end
 
     def show_epics?
-      return false unless ::Feature.enabled?(:epics_search)
-      return false unless ::License.feature_available?(:epics)
-
-      true
+      search_service.allowed_scopes.include?('epics')
     end
   end
 end

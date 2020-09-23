@@ -37,9 +37,11 @@ module EE
       override :allowed_scopes
       def allowed_scopes
         super.tap do |scopes|
-          scopes << 'epics' if ::Feature.enabled?(:epics_search) && ::License.feature_available?(:epics)
-
-          scopes
+          if ::Feature.enabled?(:epics_search) && ::License.feature_available?(:epics)
+            scopes << 'epics'
+          else
+            scopes
+          end
         end
       end
     end
