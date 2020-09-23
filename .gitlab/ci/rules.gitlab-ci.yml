@@ -37,6 +37,7 @@
 .if-merge-request-title-as-if-foss: &if-merge-request-title-as-if-foss
   if: '$CI_MERGE_REQUEST_TITLE =~ /RUN AS-IF-FOSS/'
 
+# Test for updating cache in MR
 .if-merge-request-title-update-caches: &if-merge-request-title-update-caches
   if: '$CI_MERGE_REQUEST_TITLE =~ /UPDATE CACHE/'
 
