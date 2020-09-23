@@ -75,6 +75,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
         expect(@merge_request).to be_valid
         expect(@merge_request.title).to eq('New title')
         expect(@merge_request.assignees).to match_array([user])
+        expect(@merge_request.reviewers).to match_array([])
         expect(@merge_request).to be_closed
         expect(@merge_request.labels.count).to eq(1)
         expect(@merge_request.labels.first.title).to eq(label.name)
@@ -92,6 +93,7 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
               labels: [],
               mentioned_users: [user2],
               assignees: [user3],
+              reviewers: [],
               milestone: nil,
               total_time_spent: 0,
               description: "FYI #{user2.to_reference}"
@@ -399,6 +401,41 @@ RSpec.describe MergeRequests::UpdateService, :mailer do
           }
 
           expect(Todo.where(attributes).count).to eq 1
+        end
+      end
+
+      context 'when reviewers gets changed' do
+        it 'marks pending todo as done' do
+          update_merge_request({ reviewer_ids: [user2.id] })
+
+          expect(pending_todo.reload).to be_done
+        end
+
+        it 'creates a pending todo for new review request' do
+          update_merge_request({ reviewer_ids: [user2.id] })
+
+          attributes = {
+            project: project,
+            author: user,
+            user: user2,
+            target_id: merge_request.id,
+            target_type: merge_request.class.name,
+            action: Todo::REVIEW_REQUESTED,
+            state: :pending
+          }
+
+          expect(Todo.where(attributes).count).to eq 1
+        end
+
+        it 'sends email reviewer change notifications to old and new reviewers', :sidekiq_might_not_need_inline do
+          merge_request.reviewers = [user2]
+
+          perform_enqueued_jobs do
+            update_merge_request({ reviewer_ids: [user3.id] })
+          end
+
+          should_email(user2)
+          should_email(user3)
         end
       end
 

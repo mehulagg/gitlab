@@ -93,7 +93,6 @@ export default {
           @keyup.enter.exact="createEpic"
         />
         <gl-form-checkbox
-          v-if="glFeatures.confidentialEpics"
           v-model="epicConfidential"
           class="mt-3 mb-3 mr-0"
           data-qa-selector="confidential_epic_checkbox"

@@ -5,15 +5,10 @@ require 'spec_helper'
 RSpec.describe API::Unleash do
   include FeatureFlagHelpers
 
-  let_it_be(:project) { create(:project) }
+  let_it_be(:project, refind: true) { create(:project) }
   let(:project_id) { project.id }
-  let(:feature_enabled) { true }
   let(:params) { }
   let(:headers) { }
-
-  before do
-    stub_licensed_features(feature_flags: feature_enabled)
-  end
 
   shared_examples 'authenticated request' do
     context 'when using instance id' do
@@ -27,7 +22,13 @@ RSpec.describe API::Unleash do
       end
 
       context 'when feature is not available' do
-        let(:feature_enabled) { false }
+        before do
+          project.project_feature.update!(
+            repository_access_level: ::ProjectFeature::DISABLED,
+            merge_requests_access_level: ::ProjectFeature::DISABLED,
+            builds_access_level: ::ProjectFeature::DISABLED
+          )
+        end
 
         it 'responds with forbidden' do
           subject

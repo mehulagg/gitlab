@@ -39,17 +39,6 @@ RSpec.describe StatusPage::PublishDetailsService do
         allow(storage_client).to receive(:list_object_keys).and_return([])
       end
 
-      context 'when feature flag disabled' do
-        before do
-          stub_feature_flags(status_page_attachments: false)
-        end
-
-        it 'does not publish attachments and returns success' do
-          expect(StatusPage::PublishAttachmentsService).not_to receive(:new)
-          expect(subject.success?).to be true
-        end
-      end
-
       context 'when successful' do
         let(:success_response) { double(error?: false, success?: true) }
 

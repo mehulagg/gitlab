@@ -3,7 +3,6 @@
 require 'carrierwave/orm/activerecord'
 
 class Project < ApplicationRecord
-  extend ::Gitlab::Utils::Override
   include Gitlab::ConfigHelper
   include Gitlab::VisibilityLevel
   include AccessRequestable
@@ -147,6 +146,7 @@ class Project < ApplicationRecord
   has_one :discord_service
   has_one :drone_ci_service
   has_one :emails_on_push_service
+  has_one :ewm_service
   has_one :pipelines_email_service
   has_one :irker_service
   has_one :pivotaltracker_service
@@ -245,7 +245,6 @@ class Project < ApplicationRecord
   has_many :lfs_file_locks
   has_many :project_group_links
   has_many :invited_groups, through: :project_group_links, source: :group
-  has_many :pages_domains
   has_many :todos
   has_many :notification_settings, as: :source, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
 
@@ -327,8 +326,6 @@ class Project < ApplicationRecord
   has_many :sourced_pipelines, class_name: 'Ci::Sources::Pipeline', foreign_key: :source_project_id
   has_many :source_pipelines, class_name: 'Ci::Sources::Pipeline', foreign_key: :project_id
 
-  has_one :pages_metadatum, class_name: 'ProjectPagesMetadatum', inverse_of: :project
-
   has_many :import_failures, inverse_of: :project
   has_many :jira_imports, -> { order 'jira_imports.created_at' }, class_name: 'JiraImportState', inverse_of: :project
 
@@ -338,6 +335,11 @@ class Project < ApplicationRecord
 
   has_many :webide_pipelines, -> { webide_source }, class_name: 'Ci::Pipeline', inverse_of: :project
   has_many :reviews, inverse_of: :project
+
+  # GitLab Pages
+  has_many :pages_domains
+  has_one  :pages_metadatum, class_name: 'ProjectPagesMetadatum', inverse_of: :project
+  has_many :pages_deployments
 
   # Can be too many records. We need to implement delete_all in batches.
   # Issue https://gitlab.com/gitlab-org/gitlab/-/issues/228637
@@ -896,12 +898,12 @@ class Project < ApplicationRecord
   end
 
   def repository
-    @repository ||= Repository.new(full_path, self, shard: repository_storage, disk_path: disk_path)
+    @repository ||= Gitlab::GlRepository::PROJECT.repository_for(self)
   end
 
   def design_repository
     strong_memoize(:design_repository) do
-      DesignManagement::Repository.new(self)
+      Gitlab::GlRepository::DESIGN.repository_for(self)
     end
   end
 
@@ -1469,44 +1471,10 @@ class Project < ApplicationRecord
     forked_from_project || fork_network&.root_project
   end
 
-  # TODO: Remove this method once all LfsObjectsProject records are backfilled
-  # for forks.
-  #
-  # See https://gitlab.com/gitlab-org/gitlab/issues/122002 for more info.
-  def lfs_storage_project
-    @lfs_storage_project ||= begin
-      result = self
-
-      # TODO: Make this go to the fork_network root immediately
-      # dependant on the discussion in: https://gitlab.com/gitlab-org/gitlab-foss/issues/39769
-      result = result.fork_source while result&.forked?
-
-      result || self
-    end
-  end
-
-  # This will return all `lfs_objects` that are accessible to the project and
-  # the fork source. This is needed since older forks won't have access to some
-  # LFS objects directly and have to get it from the fork source.
-  #
-  # TODO: Remove this method once all LfsObjectsProject records are backfilled
-  # for forks. At that point, projects can look at their own `lfs_objects`.
-  #
-  # See https://gitlab.com/gitlab-org/gitlab/issues/122002 for more info.
-  def all_lfs_objects
+  def lfs_objects_for_repository_types(*types)
     LfsObject
-      .distinct
       .joins(:lfs_objects_projects)
-      .where(lfs_objects_projects: { project_id: [self, lfs_storage_project] })
-  end
-
-  # TODO: Remove this method once all LfsObjectsProject records are backfilled
-  # for forks. At that point, projects can look at their own `lfs_objects` so
-  # `lfs_objects_oids` can be used instead.
-  #
-  # See https://gitlab.com/gitlab-org/gitlab/issues/122002 for more info.
-  def all_lfs_objects_oids(oids: [])
-    oids(all_lfs_objects, oids: oids)
+      .where(lfs_objects_projects: { project: self, repository_type: types })
   end
 
   def lfs_objects_oids(oids: [])
@@ -2324,6 +2292,10 @@ class Project < ApplicationRecord
     []
   end
 
+  def mark_primary_write_location
+    # Overriden in EE
+  end
+
   def toggle_ci_cd_settings!(settings_attribute)
     ci_cd_settings.toggle!(settings_attribute)
   end
@@ -2470,11 +2442,6 @@ class Project < ApplicationRecord
     jira_imports.last
   end
 
-  override :after_wiki_activity
-  def after_wiki_activity
-    touch(:last_activity_at, :last_repository_updated_at)
-  end
-
   def metrics_setting
     super || build_metrics_setting
   end
@@ -2530,6 +2497,12 @@ class Project < ApplicationRecord
 
   def ci_config_path_or_default
     ci_config_path.presence || Ci::Pipeline::DEFAULT_CONFIG_PATH
+  end
+
+  def enabled_group_deploy_keys
+    return GroupDeployKey.none unless group
+
+    GroupDeployKey.for_groups(group.self_and_ancestors_ids)
   end
 
   private

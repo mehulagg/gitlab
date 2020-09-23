@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlNewDropdownItem } from '@gitlab/ui';
+import { GlDropdownItem } from '@gitlab/ui';
 import SortingField from 'ee/audit_events/components/sorting_field.vue';
 
 describe('SortingField component', () => {
@@ -8,15 +8,11 @@ describe('SortingField component', () => {
   const initComponent = (props = {}) => {
     wrapper = shallowMount(SortingField, {
       propsData: { ...props },
-      stubs: {
-        GlNewDropdown: true,
-        GlNewDropdownItem: true,
-      },
     });
   };
 
   const getCheckedOptions = () =>
-    wrapper.findAll(GlNewDropdownItem).filter(item => item.props().isChecked);
+    wrapper.findAll(GlDropdownItem).filter(item => item.props().isChecked);
 
   beforeEach(() => {
     initComponent();
@@ -29,7 +25,7 @@ describe('SortingField component', () => {
 
   describe('when initialized', () => {
     it('should have sorting options', () => {
-      expect(wrapper.findAll(GlNewDropdownItem)).toHaveLength(2);
+      expect(wrapper.findAll(GlDropdownItem)).toHaveLength(2);
     });
 
     it('should set the sorting option to `created_desc` by default', () => {
@@ -58,7 +54,7 @@ describe('SortingField component', () => {
     beforeEach(() => {
       initComponent();
       wrapper
-        .findAll(GlNewDropdownItem)
+        .findAll(GlDropdownItem)
         .at(1)
         .vm.$emit('click');
     });

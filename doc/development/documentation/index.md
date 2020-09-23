@@ -105,22 +105,22 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 ---
 ```
 
-### Page type metadata
+### Document type metadata
 
 Originally discussed in [this epic](https://gitlab.com/groups/gitlab-org/-/epics/1280),
-each page should have a `type` metadata. It can be one or more of the following:
+each page should have a metadata tag called `type`. It can be one or more of the
+following:
 
-- `index`: Index/overview pages. They serve as a list to other pages. Doesn't
-  necessarily mean the page should be named `index.md`. [Example page](../../install/README.md).
-- `concepts`: What you need to know before using product. Informational, not
-  instructional. For example, abstract ideas, explain meaning or benefit, support
-  understanding of tasks. They are read for background information, for example
-  "Why X is important". [Example page](../../topics/autodevops/index.md).
-- `howto`: Specific use case instructions. [Example page](../../ssh/README.md).
-- `tutorial`: Learn a process/concept by doing. [Example page](../../gitlab-basics/start-using-git.md).
-- `reference`: Covers what things are/do. Things like specific settings, facts
-  without too much explanation that are read for detailed information.
-  [Example page](../../ci/yaml/README.md).
+- `index`: It consists mostly of a list of links to other pages.
+  [Example page](../../README.md).
+- `concepts`: The background or context of a subject.
+  [Example page](../../topics/autodevops/index.md).
+- `howto`: Specific use case instructions.
+  [Example page](../../ssh/README.md).
+- `tutorial`: Learn a process/concept by doing.
+  [Example page](../../gitlab-basics/start-using-git.md).
+- `reference`: A collection of information used as a reference to use a feature
+  or a functionality. [Example page](../../ci/yaml/README.md).
 
 ### Redirection metadata
 
@@ -147,17 +147,10 @@ comments: false
 
 ### Additional page metadata
 
-Each page can have additional (optional) metadata (set in the
+Each page can have additional, optional metadata (set in the
 [default.html](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/fc3577921343173d589dfa43d837b4307e4e620f/layouts/default.html#L30-52)
-Nanoc layout), which will be shown to the top of the page if defined:
+Nanoc layout), which will be displayed at the top of the page if defined:
 
-- `author`: The name of the author of a page, usually a tutorial. It requires `author_gitlab` in order to be shown.
-- `author_gitlab`: The username of the author on GitLab.com. It requires `author` in order to be shown.
-- `date`: The date the page was created, usually for tutorials.
-- `article_type`: The type of article. Can be either `tutorial` or `user guide`.
-- `level`: The level of complexity of a how-to or tutorial. Can be either `beginner`,
-  `advanced`, or `intermediate`.
-- `last_updated`: The date in ISO format when the page was last updated. For example `2020-02-14`.
 - `reading_time`: If you want to add an indication of the approximate reading
   time of a page, you can set `reading_time` to `true`. This uses a simple
   [algorithm](https://gitlab.com/gitlab-org/gitlab-docs/-/blob/master/lib/helpers/reading_time.rb)
@@ -335,12 +328,12 @@ You can combine one or more of the following:
    = link_to 'Help page', help_page_path('user/permissions'), target: '_blank'
    ```
 
-1. **Linking to a circle icon.** Usually used in settings where a long
+1. **Using a question icon.** Usually used in settings where a long
    description cannot be used, like near checkboxes. You can basically use
-   any font awesome icon, but prefer the `question-circle`:
+   any GitLab SVG icon, but prefer the `question-o`:
 
    ```haml
-   = link_to icon('question-circle'), help_page_path('user/permissions')
+   = link_to sprite_icon('question-o'), help_page_path('user/permissions')
    ```
 
 1. **Using a button link.** Useful in places where text would be out of context
@@ -462,7 +455,7 @@ If you want to know the in-depth details, here's what's really happening:
    [skips the test jobs](https://gitlab.com/gitlab-org/gitlab-docs/blob/8d5d5c750c602a835614b02f9db42ead1c4b2f5e/.gitlab-ci.yml#L50-55)
    to lower the build time.
 1. Once the docs site is built, the HTML files are uploaded as artifacts.
-1. A specific Runner tied only to the docs project, runs the Review App job
+1. A specific runner tied only to the docs project, runs the Review App job
    that downloads the artifacts and uses `rsync` to transfer the files over
    to a location where NGINX serves them.
 
@@ -472,7 +465,7 @@ The following GitLab features are used among others:
 - [Multi project pipelines](../../ci/multi_project_pipeline_graphs.md)
 - [Review Apps](../../ci/review_apps/index.md)
 - [Artifacts](../../ci/yaml/README.md#artifacts)
-- [Specific Runner](../../ci/runners/README.md#prevent-a-specific-runner-from-being-enabled-for-other-projects)
+- [Specific runner](../../ci/runners/README.md#prevent-a-specific-runner-from-being-enabled-for-other-projects)
 - [Pipelines for merge requests](../../ci/merge_request_pipelines/index.md)
 
 ## Testing

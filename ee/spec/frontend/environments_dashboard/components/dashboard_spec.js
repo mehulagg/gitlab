@@ -1,6 +1,6 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { GlButton, GlEmptyState, GlModal, GlSprintf, GlLink } from '@gitlab/ui';
+import { GlButton, GlEmptyState, GlModal, GlSprintf, GlLink, GlPagination } from '@gitlab/ui';
 import createStore from 'ee/vue_shared/dashboards/store/index';
 import state from 'ee/vue_shared/dashboards/store/state';
 import component from 'ee/environments_dashboard/components/dashboard/dashboard.vue';
@@ -55,6 +55,8 @@ describe('dashboard', () => {
     store.replaceState(state());
   });
 
+  const findPagination = () => wrapper.find(GlPagination);
+
   it('should match the snapshot', () => {
     expect(wrapper.element).toMatchSnapshot();
   });
@@ -65,6 +67,10 @@ describe('dashboard', () => {
 
   it('should render the empty state component', () => {
     expect(wrapper.find(GlEmptyState).exists()).toBe(true);
+  });
+
+  it('should not render pagination in empty state', () => {
+    expect(findPagination().exists()).toBe(false);
   });
 
   describe('page limits information message', () => {
@@ -177,6 +183,22 @@ describe('dashboard', () => {
           expect(wrapper.find(ProjectSelector).props('totalResults')).toBe(100);
         });
       });
+    });
+
+    describe('pagination', () => {
+      const testPagination = async ({ totalPages }) => {
+        store.state.projectsPage.pageInfo.totalPages = totalPages;
+        const shouldRenderPagination = totalPages > 1;
+
+        await wrapper.vm.$nextTick();
+        expect(findPagination().exists()).toBe(shouldRenderPagination);
+      };
+
+      it('should not render the pagination component if there is only one page', () =>
+        testPagination({ totalPages: 1 }));
+
+      it('should render the pagination component if there are multiple pages', () =>
+        testPagination({ totalPages: 2 }));
     });
   });
 });

@@ -6,7 +6,6 @@ class License < ApplicationRecord
   STARTER_PLAN = 'starter'.freeze
   PREMIUM_PLAN = 'premium'.freeze
   ULTIMATE_PLAN = 'ultimate'.freeze
-  EARLY_ADOPTER_PLAN = 'early_adopter'.freeze
 
   EES_FEATURES = %i[
     audit_events
@@ -19,6 +18,7 @@ class License < ApplicationRecord
     group_activity_analytics
     group_bulk_edit
     group_webhooks
+    group_wikis
     issuable_default_templates
     issue_weights
     iterations
@@ -72,7 +72,7 @@ class License < ApplicationRecord
     epics
     extended_audit_events
     external_authorization_service_api_management
-    feature_flags
+    feature_flags_related_issues
     file_locks
     geo
     generic_alert_fingerprinting
@@ -83,7 +83,9 @@ class License < ApplicationRecord
     group_ip_restriction
     group_merge_request_analytics
     group_project_templates
+    group_repository_analytics
     group_saml
+    ide_schema_config
     issues_analytics
     jira_issues_integration
     ldap_group_sync_filter
@@ -106,8 +108,10 @@ class License < ApplicationRecord
     required_ci_templates
     scoped_labels
     smartcard_auth
+    swimlanes
     group_timelogs
     type_of_work_analytics
+    minimal_access_role
     unprotection_restrictions
     ci_project_subscriptions
   ]
@@ -132,9 +136,11 @@ class License < ApplicationRecord
     prometheus_alerts
     pseudonymizer
     release_evidence_test_artifacts
+    environment_alerts
     report_approver_rules
     requirements
     sast
+    sast_custom_rulesets
     secret_detection
     security_dashboard
     security_on_demand_scans
@@ -146,37 +152,10 @@ class License < ApplicationRecord
   ]
   EEU_FEATURES.freeze
 
-  # List all features available for early adopters,
-  # i.e. users that started using GitLab.com before
-  # the introduction of Bronze, Silver, Gold plans.
-  # Obs.: Do not extend from other feature constants.
-  # Early adopters should not earn new features as they're
-  # introduced.
-  EARLY_ADOPTER_FEATURES = %i[
-    audit_events
-    contribution_analytics
-    cross_project_pipelines
-    deploy_board
-    file_locks
-    group_webhooks
-    issuable_default_templates
-    issue_weights
-    jenkins_integration
-    merge_request_approvers
-    multiple_group_issue_boards
-    multiple_issue_assignees
-    protected_refs_for_users
-    push_rules
-    related_issues
-    repository_mirrors
-    scoped_issue_board
-  ].freeze
-
   FEATURES_BY_PLAN = {
     STARTER_PLAN       => EES_FEATURES,
     PREMIUM_PLAN       => EEP_FEATURES,
-    ULTIMATE_PLAN      => EEU_FEATURES,
-    EARLY_ADOPTER_PLAN => EARLY_ADOPTER_FEATURES
+    ULTIMATE_PLAN      => EEU_FEATURES
   }.freeze
 
   PLANS_BY_FEATURE = FEATURES_BY_PLAN.each_with_object({}) do |(plan, features), hash|
@@ -219,6 +198,14 @@ class License < ApplicationRecord
     required_ci_templates
     seat_link
     usage_quotas
+  ].freeze
+
+  ACTIVE_USER_COUNT_THRESHOLD_LEVELS = [
+    { range: (2..15), percentage: false, value: 1 },
+    { range: (16..25), percentage: false, value: 2 },
+    { range: (26..99), percentage: true, value: 10 },
+    { range: (100..999), percentage: true, value: 8 },
+    { range: (1000..nil), percentage: true, value: 5 }
   ].freeze
 
   validate :valid_license
@@ -378,7 +365,7 @@ class License < ApplicationRecord
     return false if trial? && expired?
 
     # This feature might not be behind a feature flag at all, so default to true
-    return false unless ::Feature.enabled?(feature, default_enabled: true)
+    return false unless ::Feature.enabled?(feature, type: :licensed, default_enabled: true)
 
     features.include?(feature)
   end
@@ -494,6 +481,28 @@ class License < ApplicationRecord
 
   def auto_renew
     false
+  end
+
+  def active_user_count_threshold
+    ACTIVE_USER_COUNT_THRESHOLD_LEVELS.find do |threshold|
+      threshold[:range].include?(restricted_user_count)
+    end
+  end
+
+  def active_user_count_threshold_reached?
+    return false if restricted_user_count.nil?
+    return false if current_active_users_count <= 1
+    return false if current_active_users_count > restricted_user_count
+
+    active_user_count_threshold[:value] >= if active_user_count_threshold[:percentage]
+                                             remaining_user_count.fdiv(current_active_users_count) * 100
+                                           else
+                                             remaining_user_count
+                                           end
+  end
+
+  def remaining_user_count
+    restricted_user_count - current_active_users_count
   end
 
   private

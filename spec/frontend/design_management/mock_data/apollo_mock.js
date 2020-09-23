@@ -4,6 +4,7 @@ export const designListQueryResponse = {
       id: '1',
       issue: {
         designCollection: {
+          copyState: 'READY',
           designs: {
             nodes: [
               {
@@ -13,6 +14,9 @@ export const designListQueryResponse = {
                 notesCount: 3,
                 image: 'image-1',
                 imageV432x230: 'image-1',
+                currentUserTodos: {
+                  nodes: [],
+                },
               },
               {
                 id: '2',
@@ -21,6 +25,9 @@ export const designListQueryResponse = {
                 notesCount: 2,
                 image: 'image-2',
                 imageV432x230: 'image-2',
+                currentUserTodos: {
+                  nodes: [],
+                },
               },
               {
                 id: '3',
@@ -29,6 +36,9 @@ export const designListQueryResponse = {
                 notesCount: 1,
                 image: 'image-3',
                 imageV432x230: 'image-3',
+                currentUserTodos: {
+                  nodes: [],
+                },
               },
             ],
           },
@@ -60,6 +70,9 @@ export const reorderedDesigns = [
     notesCount: 2,
     image: 'image-2',
     imageV432x230: 'image-2',
+    currentUserTodos: {
+      nodes: [],
+    },
   },
   {
     id: '1',
@@ -68,6 +81,9 @@ export const reorderedDesigns = [
     notesCount: 3,
     image: 'image-1',
     imageV432x230: 'image-1',
+    currentUserTodos: {
+      nodes: [],
+    },
   },
   {
     id: '3',
@@ -76,6 +92,9 @@ export const reorderedDesigns = [
     notesCount: 1,
     image: 'image-3',
     imageV432x230: 'image-3',
+    currentUserTodos: {
+      nodes: [],
+    },
   },
 ];
 

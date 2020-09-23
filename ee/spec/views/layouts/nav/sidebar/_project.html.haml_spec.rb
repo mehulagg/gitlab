@@ -28,8 +28,6 @@ RSpec.describe 'layouts/nav/sidebar/_project' do
     let(:user) { create(:user) }
 
     before do
-      stub_licensed_features(feature_flags: true)
-
       project.project_feature.update!(builds_access_level: feature)
 
       project.team.add_developer(user)

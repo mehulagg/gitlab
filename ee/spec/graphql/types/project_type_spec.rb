@@ -16,7 +16,7 @@ RSpec.describe GitlabSchema.types['Project'] do
   it 'includes the ee specific fields' do
     expected_fields = %w[
       vulnerabilities sast_ci_configuration vulnerability_scanners requirement_states_count
-      vulnerability_severities_count packages compliance_frameworks vulnerability_severities_count
+      vulnerability_severities_count packages compliance_frameworks vulnerabilities_count_by_day
       security_dashboard_path iterations cluster_agents
     ]
 
@@ -226,6 +226,46 @@ RSpec.describe GitlabSchema.types['Project'] do
       expect(agents.first['createdAt']).to be_present
       expect(agents.first['updatedAt']).to be_present
       expect(agents.first['project']['id']).to eq(project.to_global_id.to_s)
+    end
+  end
+
+  describe 'cluster_agent' do
+    let_it_be(:cluster_agent) { create(:cluster_agent, project: project, name: 'agent-name') }
+    let_it_be(:agent_token) { create(:cluster_agent_token, agent: cluster_agent) }
+    let_it_be(:query) do
+      %(
+        query {
+          project(fullPath: "#{project.full_path}") {
+            clusterAgent(name: "#{cluster_agent.name}") {
+              id
+
+              tokens {
+                nodes {
+                  id
+                }
+              }
+            }
+          }
+        }
+      )
+    end
+
+    subject { GitlabSchema.execute(query, context: { current_user: user }).as_json }
+
+    before do
+      stub_licensed_features(cluster_agents: true)
+
+      project.add_maintainer(user)
+    end
+
+    it 'returns associated cluster agents' do
+      agent = subject.dig('data', 'project', 'clusterAgent')
+      tokens = agent.dig('tokens', 'nodes')
+
+      expect(agent['id']).to eq(cluster_agent.to_global_id.to_s)
+
+      expect(tokens.count).to be(1)
+      expect(tokens.first['id']).to eq(agent_token.to_global_id.to_s)
     end
   end
 end

@@ -37,6 +37,10 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
       expect(subject[:create_sast_merge_request_path]).to eq(project_security_configuration_sast_path(project))
     end
 
+    it 'includes the path to gitlab_ci history' do
+      expect(subject[:gitlab_ci_history_path]).to eq(project_blame_path(project, 'master/.gitlab-ci.yml'))
+    end
+
     context "when the latest default branch pipeline's source is auto devops" do
       before do
         pipeline = create(
@@ -246,7 +250,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
   def configuration_path(type)
     if type === :dast_profiles
-      project_profiles_path(project)
+      project_security_configuration_dast_profiles_path(project)
     elsif type === :sast
       project_security_configuration_sast_path(project)
     else

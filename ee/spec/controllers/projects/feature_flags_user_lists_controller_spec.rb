@@ -12,10 +12,6 @@ RSpec.describe Projects::FeatureFlagsUserListsController do
     project.add_developer(developer)
   end
 
-  before do
-    stub_licensed_features(feature_flags: true)
-  end
-
   def request_params(extra_params = {})
     { namespace_id: project.namespace, project_id: project }.merge(extra_params)
   end
@@ -38,15 +34,6 @@ RSpec.describe Projects::FeatureFlagsUserListsController do
 
     it 'returns not found for a reporter' do
       sign_in(reporter)
-
-      get(:new, params: request_params)
-
-      expect(response).to have_gitlab_http_status(:not_found)
-    end
-
-    it 'returns not found when feature flags are not licensed' do
-      stub_licensed_features(feature_flags: false)
-      sign_in(developer)
 
       get(:new, params: request_params)
 

@@ -7,6 +7,7 @@ import { extractCurrentDiscussion, extractDesign, extractDesigns } from './desig
 import {
   ADD_IMAGE_DIFF_NOTE_ERROR,
   UPDATE_IMAGE_DIFF_NOTE_ERROR,
+  DELETE_DESIGN_TODO_ERROR,
   designDeletionError,
 } from './error_messages';
 
@@ -154,6 +155,7 @@ const addNewDesignToStore = (store, designManagementUpload, query) => {
 
     const updatedDesigns = {
       __typename: 'DesignCollection',
+      copyState: 'READY',
       designs: {
         __typename: 'DesignConnection',
         nodes: newDesigns,
@@ -186,6 +188,49 @@ const moveDesignInStore = (store, designManagementMove, query) => {
     ...query,
     data,
   });
+};
+
+export const addPendingTodoToStore = (store, pendingTodo, query, queryVariables) => {
+  const sourceData = store.readQuery({
+    query,
+    variables: queryVariables,
+  });
+
+  const data = produce(sourceData, draftData => {
+    const design = extractDesign(draftData);
+    const existingTodos = design.currentUserTodos?.nodes || [];
+    const newTodoNodes = [...existingTodos, { ...pendingTodo, __typename: 'Todo' }];
+
+    if (!design.currentUserTodos) {
+      design.currentUserTodos = {
+        __typename: 'TodoConnection',
+        nodes: newTodoNodes,
+      };
+    } else {
+      design.currentUserTodos.nodes = newTodoNodes;
+    }
+  });
+
+  store.writeQuery({ query, variables: queryVariables, data });
+};
+
+export const deletePendingTodoFromStore = (store, todoMarkDone, query, queryVariables) => {
+  const sourceData = store.readQuery({
+    query,
+    variables: queryVariables,
+  });
+
+  const {
+    todo: { id: todoId },
+  } = todoMarkDone;
+  const data = produce(sourceData, draftData => {
+    const design = extractDesign(draftData);
+    const existingTodos = design.currentUserTodos?.nodes || [];
+
+    design.currentUserTodos.nodes = existingTodos.filter(({ id }) => id !== todoId);
+  });
+
+  store.writeQuery({ query, variables: queryVariables, data });
 };
 
 const onError = (data, message) => {
@@ -241,5 +286,13 @@ export const updateDesignsOnStoreAfterReorder = (store, data, query) => {
     createFlash(data.errors[0]);
   } else {
     moveDesignInStore(store, data, query);
+  }
+};
+
+export const updateStoreAfterDeleteDesignTodo = (store, data, query, queryVariables) => {
+  if (hasErrors(data)) {
+    onError(data, DELETE_DESIGN_TODO_ERROR);
+  } else {
+    deletePendingTodoFromStore(store, data, query, queryVariables);
   }
 };

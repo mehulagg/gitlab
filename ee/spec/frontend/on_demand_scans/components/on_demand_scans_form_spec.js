@@ -9,17 +9,21 @@ import { redirectTo } from '~/lib/utils/url_utility';
 const helpPagePath = `${TEST_HOST}/application_security/dast/index#on-demand-scans`;
 const projectPath = 'group/project';
 const defaultBranch = 'master';
-const profilesLibraryPath = `${TEST_HOST}/${projectPath}/-/on_demand_scans/profiles`;
+const scannerProfilesLibraryPath = '/on_demand_scans/profiles#scanner-profiles';
+const siteProfilesLibraryPath = '/on_demand_scans/profiles#site-profiles';
+const newScannerProfilePath = '/on_demand_scans/profiles/dast_scanner_profile/new';
 const newSiteProfilePath = `${TEST_HOST}/${projectPath}/-/on_demand_scans/profiles`;
 
 const defaultProps = {
   helpPagePath,
   projectPath,
   defaultBranch,
-  profilesLibraryPath,
-  newSiteProfilePath,
 };
 
+const scannerProfiles = [
+  { id: 1, profileName: 'My first scanner profile', spiderTimeout: 5, targetTimeout: 10 },
+  { id: 2, profileName: 'My second scanner profile', spiderTimeout: 20, targetTimeout: 150 },
+];
 const siteProfiles = [
   { id: 1, profileName: 'My first site profile', targetUrl: 'https://example.com' },
   { id: 2, profileName: 'My second site profile', targetUrl: 'https://foo.bar' },
@@ -35,13 +39,15 @@ describe('OnDemandScansApp', () => {
   let wrapper;
 
   const findForm = () => wrapper.find(GlForm);
-  const findSiteProfilesDropdown = () => wrapper.find('[data-testid="site-profiles-dropdown"]');
-  const findManageSiteProfilesButton = () =>
-    wrapper.find('[data-testid="manage-site-profiles-button"]');
-  const findCreateNewSiteProfileLink = () =>
-    wrapper.find('[data-testid="create-site-profile-link"]');
-  const findAlert = () => wrapper.find('[data-testid="on-demand-scan-error"]');
-  const findCancelButton = () => wrapper.find('[data-testid="on-demand-scan-cancel-button"]');
+  const findByTestId = testId => wrapper.find(`[data-testid="${testId}"]`);
+  const findScannerProfilesDropdown = () => findByTestId('scanner-profiles-dropdown');
+  const findSiteProfilesDropdown = () => findByTestId('site-profiles-dropdown');
+  const findManageScannerProfilesButton = () => findByTestId('manage-scanner-profiles-button');
+  const findCreateNewScannerProfileLink = () => findByTestId('create-scanner-profile-link');
+  const findManageSiteProfilesButton = () => findByTestId('manage-site-profiles-button');
+  const findCreateNewSiteProfileLink = () => findByTestId('create-site-profile-link');
+  const findAlert = () => findByTestId('on-demand-scan-error');
+  const findCancelButton = () => findByTestId('on-demand-scan-cancel-button');
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
 
   const wrapperFactory = (mountFn = shallowMount) => (options = {}) => {
@@ -55,9 +61,17 @@ describe('OnDemandScansApp', () => {
             $apollo: {
               mutate: jest.fn(),
               queries: {
+                scannerProfiles: {},
                 siteProfiles: {},
               },
             },
+          },
+          provide: {
+            glFeatures: { securityOnDemandScansScannerProfiles: true },
+            scannerProfilesLibraryPath,
+            siteProfilesLibraryPath,
+            newScannerProfilePath,
+            newSiteProfilePath,
           },
         },
         options,
@@ -189,79 +203,138 @@ describe('OnDemandScansApp', () => {
     });
   });
 
-  describe('site profiles', () => {
-    describe('while site profiles are being fetched', () => {
-      beforeEach(() => {
-        createComponent({ mocks: { $apollo: { queries: { siteProfiles: { loading: true } } } } });
-      });
-
-      it('shows a skeleton loader', () => {
-        expect(wrapper.find(GlSkeletonLoader).exists()).toBe(true);
+  describe('scanner profiles with feature flag disabled', () => {
+    beforeEach(() => {
+      createComponent({
+        provide: {
+          glFeatures: { securityOnDemandScansScannerProfiles: false },
+        },
       });
     });
 
-    describe('when site profiles could not be fetched', () => {
-      beforeEach(() => {
-        createComponent();
-        return wrapper.vm.showErrors('ERROR_FETCH_SITE_PROFILES');
-      });
-
-      it('shows a non-dismissible alert and no field', () => {
-        const alert = findAlert();
-        expect(alert.exists()).toBe(true);
-        expect(alert.props('dismissible')).toBe(false);
-        expect(alert.text()).toContain(
-          'Could not fetch site profiles. Please refresh the page, or try again later.',
-        );
-      });
+    it('shows static scanner settings and no scanner profiles component', () => {
+      expect(findScannerProfilesDropdown().exists()).toBe(false);
+      expect(findManageScannerProfilesButton().exists()).toBe(false);
+      expect(findCreateNewScannerProfileLink().exists()).toBe(false);
+      expect(wrapper.text()).toContain('Passive');
+      expect(wrapper.text()).toContain('master');
     });
 
-    describe('when there are no site profiles yet', () => {
-      beforeEach(() => {
-        createFullComponent();
-      });
-
-      it('disables the link to manage site profiles', () => {
-        expect(findManageSiteProfilesButton().props('disabled')).toBe(true);
-      });
-
-      it('shows a link to create a new site profile', () => {
-        const link = findCreateNewSiteProfileLink();
-        expect(link.exists()).toBe(true);
-        expect(link.attributes('href')).toBe(newSiteProfilePath);
-      });
-    });
-
-    describe('when there are site profiles', () => {
-      beforeEach(() => {
-        createComponent({
-          data: {
-            siteProfiles,
-          },
-        });
-      });
-
-      it('shows a dropdown containing the site profiles', () => {
-        const dropdown = findSiteProfilesDropdown();
-        expect(dropdown.exists()).toBe(true);
-        expect(dropdown.element.children).toHaveLength(siteProfiles.length);
-      });
-
-      it('when a site profile is selected, its summary is displayed below the dropdown', async () => {
-        wrapper.vm.form.dastSiteProfileId.value = siteProfiles[0].id;
-        await wrapper.vm.$nextTick();
-        const summary = wrapper.find('[data-testid="site-profile-summary"]');
-
-        expect(summary.exists()).toBe(true);
-        expect(summary.text()).toContain(siteProfiles[0].targetUrl);
+    it('when submitting the form, GraphQL query does not include scanner data', async () => {
+      wrapper.vm.siteProfiles = siteProfiles;
+      await wrapper.vm.$nextTick();
+      jest
+        .spyOn(wrapper.vm.$apollo, 'mutate')
+        .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } } });
+      findSiteProfilesDropdown().vm.$emit('input', siteProfiles[0]);
+      submitForm();
+      expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+        mutation: dastOnDemandScanCreate,
+        variables: {
+          dastSiteProfileId: siteProfiles[0],
+          fullPath: projectPath,
+        },
       });
     });
   });
+
+  describe.each`
+    profileType  | manageProfilesButtonFinder         | manageProfilesPath            | createNewProfileButtonFinder       | newProfilePath           | dropdownFinder
+    ${'scanner'} | ${findManageScannerProfilesButton} | ${scannerProfilesLibraryPath} | ${findCreateNewScannerProfileLink} | ${newScannerProfilePath} | ${findScannerProfilesDropdown}
+    ${'site'}    | ${findManageSiteProfilesButton}    | ${siteProfilesLibraryPath}    | ${findCreateNewSiteProfileLink}    | ${newSiteProfilePath}    | ${findSiteProfilesDropdown}
+  `(
+    '$profileType profiles',
+    ({
+      profileType,
+      manageProfilesButtonFinder,
+      manageProfilesPath,
+      createNewProfileButtonFinder,
+      newProfilePath,
+      dropdownFinder,
+    }) => {
+      describe('while profiles are being fetched', () => {
+        beforeEach(() => {
+          createComponent({
+            mocks: { $apollo: { queries: { [`${profileType}Profiles`]: { loading: true } } } },
+          });
+        });
+
+        it('shows a skeleton loader', () => {
+          expect(wrapper.find(GlSkeletonLoader).exists()).toBe(true);
+        });
+      });
+
+      describe('when profiles could not be fetched', () => {
+        beforeEach(() => {
+          createComponent();
+          wrapper.vm.showErrors(`ERROR_FETCH_${profileType.toUpperCase()}_PROFILES`);
+        });
+
+        it('shows a non-dismissible alert and no field', () => {
+          const alert = findAlert();
+          expect(alert.exists()).toBe(true);
+          expect(alert.props('dismissible')).toBe(false);
+          expect(alert.text()).toContain(
+            `Could not fetch ${profileType} profiles. Please refresh the page, or try again later.`,
+          );
+        });
+      });
+
+      describe('when there are no profiles yet', () => {
+        beforeEach(() => {
+          createFullComponent();
+        });
+
+        it('disables the link to profiles library', () => {
+          expect(manageProfilesButtonFinder().props('disabled')).toBe(true);
+        });
+
+        it('shows a link to create a new profile', () => {
+          const link = createNewProfileButtonFinder();
+          expect(link.exists()).toBe(true);
+          expect(link.attributes('href')).toBe(newProfilePath);
+        });
+      });
+
+      describe('when there are profiles', () => {
+        beforeEach(() => {
+          createFullComponent({
+            data: {
+              scannerProfiles,
+              siteProfiles,
+              form: {
+                dastScannerProfileId: { value: scannerProfiles[0].id },
+                dastSiteProfileId: { value: siteProfiles[0].id },
+              },
+            },
+          });
+        });
+
+        it('enables link to profiles management', () => {
+          expect(manageProfilesButtonFinder().props('disabled')).toBe(false);
+          expect(manageProfilesButtonFinder().attributes('href')).toBe(manageProfilesPath);
+        });
+
+        it('shows a dropdown containing the profiles', () => {
+          const dropdown = dropdownFinder();
+          expect(dropdown.exists()).toBe(true);
+          expect(dropdown.element.children).toHaveLength(siteProfiles.length);
+        });
+
+        it('when a profile is selected, its summary is displayed below the dropdow', () => {
+          const summary = wrapper.find(`[data-testid="${profileType}-profile-summary"]`);
+
+          expect(summary.exists()).toBe(true);
+        });
+      });
+    },
+  );
 
   describe('submission', () => {
     beforeEach(() => {
       createComponent({
         data: {
+          scannerProfiles,
           siteProfiles,
         },
       });
@@ -272,6 +345,7 @@ describe('OnDemandScansApp', () => {
         jest
           .spyOn(wrapper.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl, errors: [] } } });
+        findScannerProfilesDropdown().vm.$emit('input', scannerProfiles[0].id);
         findSiteProfilesDropdown().vm.$emit('input', siteProfiles[0]);
         submitForm();
       });
@@ -284,8 +358,7 @@ describe('OnDemandScansApp', () => {
         expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
           mutation: dastOnDemandScanCreate,
           variables: {
-            scanType: 'PASSIVE',
-            branch: 'master',
+            dastScannerProfileId: scannerProfiles[0].id,
             dastSiteProfileId: siteProfiles[0],
             fullPath: projectPath,
           },
@@ -304,6 +377,7 @@ describe('OnDemandScansApp', () => {
     describe('on top-level error', () => {
       beforeEach(() => {
         jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue();
+        findScannerProfilesDropdown().vm.$emit('input', scannerProfiles[0].id);
         findSiteProfilesDropdown().vm.$emit('input', siteProfiles[0]);
         submitForm();
       });
@@ -326,6 +400,7 @@ describe('OnDemandScansApp', () => {
         jest
           .spyOn(wrapper.vm.$apollo, 'mutate')
           .mockResolvedValue({ data: { dastOnDemandScanCreate: { pipelineUrl: null, errors } } });
+        findScannerProfilesDropdown().vm.$emit('input', scannerProfiles[0].id);
         findSiteProfilesDropdown().vm.$emit('input', siteProfiles[0]);
         submitForm();
       });

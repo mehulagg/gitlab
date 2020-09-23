@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Feature do
+RSpec.describe Feature, stub_feature_flags: false do
   include EE::GeoHelpers
 
   describe '.enable' do

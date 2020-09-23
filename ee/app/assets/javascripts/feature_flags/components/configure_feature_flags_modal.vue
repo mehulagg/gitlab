@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import {
   GlFormGroup,
   GlFormInput,
@@ -10,7 +9,7 @@ import {
   GlLink,
   GlIcon,
 } from '@gitlab/ui';
-import { s__, __, sprintf } from '~/locale';
+import { s__, __ } from '~/locale';
 import ModalCopyButton from '~/vue_shared/components/modal_copy_button.vue';
 import Callout from '~/vue_shared/components/callout.vue';
 
@@ -111,20 +110,6 @@ export default {
           }
         : null;
     },
-    helpText() {
-      return sprintf(
-        s__(
-          'FeatureFlags|Install a %{docs_link_anchored_start}compatible client library%{docs_link_anchored_end} and specify the API URL, application name, and instance ID during the configuration setup. %{docs_link_start}More Information%{docs_link_end}',
-        ),
-        {
-          docs_link_anchored_start: `<a href="${this.helpClientLibrariesPath}" target="_blank">`,
-          docs_link_anchored_end: '</a>',
-          docs_link_start: `<a href="${this.helpPath}" target="_blank">`,
-          docs_link_end: '</a>',
-        },
-        false,
-      );
-    },
   },
 
   methods: {
@@ -150,7 +135,25 @@ export default {
     <template #modal-title>
       {{ $options.modalTitle }}
     </template>
-    <p v-html="helpText"></p>
+    <p>
+      <gl-sprintf
+        :message="
+          s__(
+            'FeatureFlags|Install a %{docsLinkAnchoredStart}compatible client library%{docsLinkAnchoredEnd} and specify the API URL, application name, and instance ID during the configuration setup. %{docsLinkStart}More Information%{docsLinkEnd}',
+          )
+        "
+      >
+        <template #docsLinkAnchored="{ content }">
+          <gl-link :href="helpClientLibrariesPath" target="_blank" data-testid="help-client-link">
+            {{ content }}
+          </gl-link>
+        </template>
+        <template #docsLink="{ content }">
+          <gl-link :href="helpPath" target="_blank" data-testid="help-link">{{ content }}</gl-link>
+        </template>
+      </gl-sprintf>
+    </p>
+
     <callout category="warning">
       <gl-sprintf
         :message="

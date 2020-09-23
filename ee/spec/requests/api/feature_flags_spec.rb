@@ -15,10 +15,6 @@ RSpec.describe API::FeatureFlags do
     project.add_reporter(reporter)
   end
 
-  before do
-    stub_licensed_features(feature_flags: true)
-  end
-
   shared_examples_for 'check user permission' do
     context 'when user is reporter' do
       let(:user) { reporter }

@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { GlIcon, GlSearchBoxByType, GlDeprecatedDropdown } from '@gitlab/ui';
+import { GlIcon, GlSearchBoxByType, GlDropdown } from '@gitlab/ui';
 import GeoNodeFormNamespaces from 'ee/geo_node_form/components/geo_node_form_namespaces.vue';
 import { MOCK_SYNC_NAMESPACES } from '../mock_data';
 
@@ -45,9 +45,9 @@ describe('GeoNodeFormNamespaces', () => {
     wrapper.destroy();
   });
 
-  const findGlDropdown = () => wrapper.find(GlDeprecatedDropdown);
+  const findGlDropdown = () => wrapper.find(GlDropdown);
   const findGlDropdownSearch = () => findGlDropdown().find(GlSearchBoxByType);
-  const findDropdownItems = () => findGlDropdown().findAll('li');
+  const findDropdownItems = () => findGlDropdown().findAll('button');
   const findDropdownItemsText = () => findDropdownItems().wrappers.map(w => w.text());
   const findGlIcons = () => wrapper.findAll(GlIcon);
 
@@ -98,7 +98,7 @@ describe('GeoNodeFormNamespaces', () => {
       });
 
       it('hides GlIcon if namespace not in selectedNamespaces', () => {
-        expect(findGlIcons().wrappers.every(w => w.classes('invisible'))).toBe(true);
+        expect(findGlIcons().wrappers.every(w => w.classes('gl-visibility-hidden'))).toBe(true);
       });
     });
   });

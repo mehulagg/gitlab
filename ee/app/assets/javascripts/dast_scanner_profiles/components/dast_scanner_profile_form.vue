@@ -17,6 +17,7 @@ import { __, s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import { serializeFormObject, isEmptyValue } from '~/lib/utils/forms';
 import dastScannerProfileCreateMutation from '../graphql/dast_scanner_profile_create.mutation.graphql';
+import dastScannerProfileUpdateMutation from '../graphql/dast_scanner_profile_update.mutation.graphql';
 
 const initField = (value, isRequired = false) => ({
   value,
@@ -55,12 +56,19 @@ export default {
       type: String,
       required: true,
     },
+    profile: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
   },
   data() {
+    const { name = '', spiderTimeout = '', targetTimeout = '' } = this.profile;
+
     const form = {
-      profileName: initField('', true),
-      spiderTimeout: initField('', true),
-      targetTimeout: initField('', true),
+      profileName: initField(name, true),
+      spiderTimeout: initField(spiderTimeout, true),
+      targetTimeout: initField(targetTimeout, true),
     };
 
     return {
@@ -79,6 +87,35 @@ export default {
     max: TARGET_TIMEOUT_MAX,
   },
   computed: {
+    isEdit() {
+      return Boolean(this.profile.id);
+    },
+    i18n() {
+      const { isEdit } = this;
+      return {
+        title: isEdit
+          ? s__('DastProfiles|Edit scanner profile')
+          : s__('DastProfiles|New scanner profile'),
+        errorMessage: isEdit
+          ? s__('DastProfiles|Could not update the scanner profile. Please try again.')
+          : s__('DastProfiles|Could not create the scanner profile. Please try again.'),
+        modal: {
+          title: isEdit
+            ? s__('DastProfiles|Do you want to discard your changes?')
+            : s__('DastProfiles|Do you want to discard this scanner profile?'),
+          okTitle: __('Discard'),
+          cancelTitle: __('Cancel'),
+        },
+        tooltips: {
+          spiderTimeout: s__(
+            'DastProfiles|The maximum number of minutes allowed for the spider to traverse the site.',
+          ),
+          targetTimeout: s__(
+            'DastProfiles|The maximum number of seconds allowed for the site under test to respond to a request.',
+          ),
+        },
+      };
+    },
     formTouched() {
       return !isEqual(serializeFormObject(this.form), this.initialFormValues);
     },
@@ -122,22 +159,33 @@ export default {
 
       const variables = {
         projectFullPath: this.projectFullPath,
+        ...(this.isEdit ? { id: this.profile.id } : {}),
         ...serializeFormObject(this.form),
       };
 
       this.$apollo
         .mutate({
-          mutation: dastScannerProfileCreateMutation,
+          mutation: this.isEdit
+            ? dastScannerProfileUpdateMutation
+            : dastScannerProfileCreateMutation,
           variables,
         })
-        .then(({ data: { dastScannerProfileCreate: { errors = [] } } }) => {
-          if (errors.length > 0) {
-            this.showErrors(errors);
-            this.loading = false;
-          } else {
-            redirectTo(this.profilesLibraryPath);
-          }
-        })
+        .then(
+          ({
+            data: {
+              [this.isEdit ? 'dastScannerProfileUpdate' : 'dastScannerProfileCreate']: {
+                errors = [],
+              },
+            },
+          }) => {
+            if (errors.length > 0) {
+              this.showErrors(errors);
+              this.loading = false;
+            } else {
+              redirectTo(this.profilesLibraryPath);
+            }
+          },
+        )
         .catch(e => {
           Sentry.captureException(e);
           this.showErrors();
@@ -164,24 +212,13 @@ export default {
     },
   },
   modalId: 'deleteDastProfileModal',
-  i18n: {
-    modalTitle: s__('DastProfiles|Do you want to discard this scanner profile?'),
-    modalOkTitle: __('Discard'),
-    modalCancelTitle: __('Cancel'),
-    spiderTimeoutTooltip: s__(
-      'DastProfiles|The maximum number of seconds allowed for the spider to traverse the site.',
-    ),
-    targetTimeoutTooltip: s__(
-      'DastProfiles|The maximum number of seconds allowed for the site under test to respond to a request.',
-    ),
-  },
 };
 </script>
 
 <template>
   <gl-form @submit.prevent="onSubmit">
     <h2 class="gl-mb-6">
-      {{ s__('DastProfiles|New scanner profile') }}
+      {{ i18n.title }}
     </h2>
 
     <gl-alert v-if="showAlert" variant="danger" class="gl-mb-5" @dismiss="hideErrors">
@@ -214,7 +251,7 @@ export default {
             v-gl-tooltip.hover
             name="information-o"
             class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="$options.i18n.spiderTimeoutTooltip"
+            :title="i18n.tooltips.spiderTimeout"
           />
         </template>
         <gl-form-input-group
@@ -246,7 +283,7 @@ export default {
             v-gl-tooltip.hover
             name="information-o"
             class="gl-vertical-align-text-bottom gl-text-gray-400 gl-ml-2"
-            :title="$options.i18n.targetTimeoutTooltip"
+            :title="i18n.tooltips.targetTimeout"
           />
         </template>
         <gl-form-input-group
@@ -291,9 +328,9 @@ export default {
     <gl-modal
       :ref="$options.modalId"
       :modal-id="$options.modalId"
-      :title="$options.i18n.modalTitle"
-      :ok-title="$options.i18n.modalOkTitle"
-      :cancel-title="$options.i18n.modalCancelTitle"
+      :title="i18n.modal.title"
+      :ok-title="i18n.modal.okTitle"
+      :cancel-title="i18n.modal.cancelTitle"
       ok-variant="danger"
       body-class="gl-display-none"
       data-testid="dast-scanner-profile-form-cancel-modal"

@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import PolicyRuleEntity from 'ee/threat_monitoring/components/policy_editor/policy_rule_entity.vue';
-import { GlNewDropdown as GlDropdown, GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { EntityTypes } from 'ee/threat_monitoring/components/policy_editor/constants';
 
 describe('PolicyRuleEntity component', () => {

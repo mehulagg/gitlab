@@ -74,12 +74,12 @@ describe('Board List Header Component', () => {
       store,
       localVue,
       propsData: {
-        boardId,
         disabled: false,
-        issueLinkBase: '/',
-        rootPath: '/',
         list,
         isSwimlanesHeader,
+      },
+      provide: {
+        boardId,
       },
     });
   };

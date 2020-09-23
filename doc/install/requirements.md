@@ -12,7 +12,7 @@ as the hardware requirements that are needed to install and use GitLab.
 ### Supported Linux distributions
 
 - Ubuntu (16.04/18.04/20.04)
-- Debian (8/9/10)
+- Debian (9/10)
 - CentOS (6/7/8)
 - openSUSE (Leap 15.1/Enterprise Server 12.2)
 - Red Hat Enterprise Linux (please use the CentOS packages and instructions)
@@ -140,7 +140,6 @@ We highly recommend users to use the minimum PostgreSQL versions specified below
 GitLab version | Minimum PostgreSQL version
 -|-
 10.0 | 9.6
-12.10 | 11
 13.0 | 11
 
 You must also ensure the `pg_trgm` and `btree_gist` extensions are [loaded into every
@@ -151,7 +150,7 @@ Support for [PostgreSQL 9.6 and 10 has been removed in GitLab 13.0](https://abou
 
 #### Additional requirements for GitLab Geo
 
-If you're using [GitLab Geo](../administration/geo/replication/index.md):
+If you're using [GitLab Geo](../administration/geo/index.md):
 
 - We strongly recommend running Omnibus-managed instances as they are actively
   developed and tested. We aim to be compatible with most external (not managed

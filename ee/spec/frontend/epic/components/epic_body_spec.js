@@ -29,6 +29,8 @@ describe('EpicBodyComponent', () => {
     vm = mountComponentWithStore(Component, {
       store,
     });
+
+    jest.advanceTimersByTime(5);
   });
 
   afterEach(() => {

@@ -8,24 +8,11 @@ module Gitlab
     class ProjectSearchResults < Gitlab::Elastic::SearchResults
       attr_reader :project, :repository_ref, :filters
 
-      delegate :users, to: :generic_search_results
-      delegate :limited_users_count, to: :generic_search_results
-
       def initialize(current_user, query, project:, repository_ref: nil, filters: {})
         @project = project
         @repository_ref = repository_ref.presence || project.default_branch
 
-        super(current_user, query, [project], public_and_internal_projects: false, filters: filters)
-      end
-
-      def generic_search_results
-        @generic_search_results ||= Gitlab::ProjectSearchResults.new(
-          current_user,
-          query,
-          project: project,
-          repository_ref: repository_ref,
-          filters: filters
-        )
+        super(current_user, query, [project.id], public_and_internal_projects: false, filters: filters)
       end
 
       private

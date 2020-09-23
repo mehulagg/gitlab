@@ -1,10 +1,14 @@
+import { get } from 'lodash';
+import initialState from 'ee/analytics/shared/store/modules/filters/state';
 import mutations from 'ee/analytics/shared/store/modules/filters/mutations';
 import * as types from 'ee/analytics/shared/store/modules/filters/mutation_types';
+import { mockBranches } from 'jest/vue_shared/components/filtered_search_bar/mock_data';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { filterMilestones, filterUsers, filterLabels } from './mock_data';
 
 let state = null;
 
+const branches = mockBranches.map(convertObjectPropsToCamelCase);
 const milestones = filterMilestones.map(convertObjectPropsToCamelCase);
 const users = filterUsers.map(convertObjectPropsToCamelCase);
 const labels = filterLabels.map(convertObjectPropsToCamelCase);
@@ -14,12 +18,7 @@ const filterValue = { value: 'foo' };
 describe('Filters mutations', () => {
   const errorCode = 500;
   beforeEach(() => {
-    state = {
-      authors: { selected: null, selectedList: [] },
-      milestones: { selected: null, selectedList: [] },
-      assignees: { selected: null, selectedList: [] },
-      labels: { selected: null, selectedList: [] },
-    };
+    state = initialState();
   });
 
   afterEach(() => {
@@ -38,34 +37,49 @@ describe('Filters mutations', () => {
   });
 
   it.each`
-    mutation                      | stateKey        | stateProp         | filterName                 | value
-    ${types.SET_SELECTED_FILTERS} | ${'authors'}    | ${'selected'}     | ${'selectedAuthor'}        | ${null}
-    ${types.SET_SELECTED_FILTERS} | ${'authors'}    | ${'selected'}     | ${'selectedAuthor'}        | ${filterValue}
-    ${types.SET_SELECTED_FILTERS} | ${'authors'}    | ${'selectedList'} | ${'selectedAuthorList'}    | ${[]}
-    ${types.SET_SELECTED_FILTERS} | ${'authors'}    | ${'selectedList'} | ${'selectedAuthorList'}    | ${[filterValue]}
-    ${types.SET_SELECTED_FILTERS} | ${'milestones'} | ${'selected'}     | ${'selectedMilestone'}     | ${null}
-    ${types.SET_SELECTED_FILTERS} | ${'milestones'} | ${'selected'}     | ${'selectedMilestone'}     | ${filterValue}
-    ${types.SET_SELECTED_FILTERS} | ${'milestones'} | ${'selectedList'} | ${'selectedMilestoneList'} | ${[]}
-    ${types.SET_SELECTED_FILTERS} | ${'milestones'} | ${'selectedList'} | ${'selectedMilestoneList'} | ${[filterValue]}
-    ${types.SET_SELECTED_FILTERS} | ${'assignees'}  | ${'selected'}     | ${'selectedAssignee'}      | ${null}
-    ${types.SET_SELECTED_FILTERS} | ${'assignees'}  | ${'selected'}     | ${'selectedAssignee'}      | ${filterValue}
-    ${types.SET_SELECTED_FILTERS} | ${'assignees'}  | ${'selectedList'} | ${'selectedAssigneeList'}  | ${[]}
-    ${types.SET_SELECTED_FILTERS} | ${'assignees'}  | ${'selectedList'} | ${'selectedAssigneeList'}  | ${[filterValue]}
-    ${types.SET_SELECTED_FILTERS} | ${'labels'}     | ${'selected'}     | ${'selectedLabel'}         | ${null}
-    ${types.SET_SELECTED_FILTERS} | ${'labels'}     | ${'selected'}     | ${'selectedLabel'}         | ${filterValue}
-    ${types.SET_SELECTED_FILTERS} | ${'labels'}     | ${'selectedList'} | ${'selectedLabelList'}     | ${[]}
-    ${types.SET_SELECTED_FILTERS} | ${'labels'}     | ${'selectedList'} | ${'selectedLabelList'}     | ${[filterValue]}
+    mutation                      | stateKey                          | filterName                    | value
+    ${types.SET_SELECTED_FILTERS} | ${'branches.source.selected'}     | ${'selectedSourceBranch'}     | ${null}
+    ${types.SET_SELECTED_FILTERS} | ${'branches.source.selected'}     | ${'selectedSourceBranch'}     | ${filterValue}
+    ${types.SET_SELECTED_FILTERS} | ${'branches.source.selectedList'} | ${'selectedSourceBranchList'} | ${[]}
+    ${types.SET_SELECTED_FILTERS} | ${'branches.source.selectedList'} | ${'selectedSourceBranchList'} | ${[filterValue]}
+    ${types.SET_SELECTED_FILTERS} | ${'branches.target.selected'}     | ${'selectedTargetBranch'}     | ${null}
+    ${types.SET_SELECTED_FILTERS} | ${'branches.target.selected'}     | ${'selectedTargetBranch'}     | ${filterValue}
+    ${types.SET_SELECTED_FILTERS} | ${'branches.target.selectedList'} | ${'selectedTargetBranchList'} | ${[]}
+    ${types.SET_SELECTED_FILTERS} | ${'branches.target.selectedList'} | ${'selectedTargetBranchList'} | ${[filterValue]}
+    ${types.SET_SELECTED_FILTERS} | ${'authors.selected'}             | ${'selectedAuthor'}           | ${null}
+    ${types.SET_SELECTED_FILTERS} | ${'authors.selected'}             | ${'selectedAuthor'}           | ${filterValue}
+    ${types.SET_SELECTED_FILTERS} | ${'authors.selectedList'}         | ${'selectedAuthorList'}       | ${[]}
+    ${types.SET_SELECTED_FILTERS} | ${'authors.selectedList'}         | ${'selectedAuthorList'}       | ${[filterValue]}
+    ${types.SET_SELECTED_FILTERS} | ${'milestones.selected'}          | ${'selectedMilestone'}        | ${null}
+    ${types.SET_SELECTED_FILTERS} | ${'milestones.selected'}          | ${'selectedMilestone'}        | ${filterValue}
+    ${types.SET_SELECTED_FILTERS} | ${'milestones.selectedList'}      | ${'selectedMilestoneList'}    | ${[]}
+    ${types.SET_SELECTED_FILTERS} | ${'milestones.selectedList'}      | ${'selectedMilestoneList'}    | ${[filterValue]}
+    ${types.SET_SELECTED_FILTERS} | ${'assignees.selected'}           | ${'selectedAssignee'}         | ${null}
+    ${types.SET_SELECTED_FILTERS} | ${'assignees.selected'}           | ${'selectedAssignee'}         | ${filterValue}
+    ${types.SET_SELECTED_FILTERS} | ${'assignees.selectedList'}       | ${'selectedAssigneeList'}     | ${[]}
+    ${types.SET_SELECTED_FILTERS} | ${'assignees.selectedList'}       | ${'selectedAssigneeList'}     | ${[filterValue]}
+    ${types.SET_SELECTED_FILTERS} | ${'labels.selected'}              | ${'selectedLabel'}            | ${null}
+    ${types.SET_SELECTED_FILTERS} | ${'labels.selected'}              | ${'selectedLabel'}            | ${filterValue}
+    ${types.SET_SELECTED_FILTERS} | ${'labels.selectedList'}          | ${'selectedLabelList'}        | ${[]}
+    ${types.SET_SELECTED_FILTERS} | ${'labels.selectedList'}          | ${'selectedLabelList'}        | ${[filterValue]}
   `(
     '$mutation will set $stateKey with a given value',
-    ({ mutation, stateKey, stateProp, filterName, value }) => {
+    ({ mutation, stateKey, filterName, value }) => {
       mutations[mutation](state, { [filterName]: value });
 
-      expect(state[stateKey][stateProp]).toEqual(value);
+      expect(get(state, stateKey)).toEqual(value);
     },
   );
 
   it.each`
     mutation                            | rootKey         | stateKey       | value
+    ${types.REQUEST_BRANCHES}           | ${'branches'}   | ${'isLoading'} | ${true}
+    ${types.RECEIVE_BRANCHES_SUCCESS}   | ${'branches'}   | ${'isLoading'} | ${false}
+    ${types.RECEIVE_BRANCHES_SUCCESS}   | ${'branches'}   | ${'data'}      | ${branches}
+    ${types.RECEIVE_BRANCHES_SUCCESS}   | ${'branches'}   | ${'errorCode'} | ${null}
+    ${types.RECEIVE_BRANCHES_ERROR}     | ${'branches'}   | ${'isLoading'} | ${false}
+    ${types.RECEIVE_BRANCHES_ERROR}     | ${'branches'}   | ${'data'}      | ${[]}
+    ${types.RECEIVE_BRANCHES_ERROR}     | ${'branches'}   | ${'errorCode'} | ${errorCode}
     ${types.REQUEST_MILESTONES}         | ${'milestones'} | ${'isLoading'} | ${true}
     ${types.RECEIVE_MILESTONES_SUCCESS} | ${'milestones'} | ${'isLoading'} | ${false}
     ${types.RECEIVE_MILESTONES_SUCCESS} | ${'milestones'} | ${'data'}      | ${milestones}

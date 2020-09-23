@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Knowledge
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+---
+
 # Design Management
 
 > - [Introduced](https://gitlab.com/groups/gitlab-org/-/epics/660) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.2.
@@ -179,9 +185,7 @@ viewed by browsing previous versions.
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/34382) in GitLab 13.3.
 
-You can change the order of designs by dragging them to a new position:
-
-![Reorder designs](img/designs_reordering_v13_3.gif)
+You can change the order of designs by dragging them to a new position.
 
 ## Starting discussions on designs
 
@@ -224,6 +228,40 @@ There are two ways to resolve/unresolve a Design thread:
 Note that your resolved comment pins will disappear from the Design to free up space for new discussions.
 However, if you need to revisit or find a resolved discussion, all of your resolved threads will be
 available in the **Resolved Comment** area at the bottom of the right sidebar.
+
+## Add To-Do for Designs
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/198439) in GitLab 13.4.
+> - It's [deployed behind a feature flag](../../feature_flags.md), enabled by default.
+> - It's enabled on GitLab.com.
+> - It's recommended for production use.
+> - For GitLab self-managed instances, GitLab administrators can opt to [disable it](#enable-or-disable-the-design-to-do-button). **(CORE ONLY)**
+
+CAUTION: **Warning:**
+This feature might not be available to you. Check the **version history** note above for details.
+
+Add a to-do for a design by clicking **Add a To-Do** on the design sidebar:
+
+![To-Do button](img/design_todo_button_v13_4.png)
+
+### Enable or disable the design To-Do button **(CORE ONLY)**
+
+The **Add a To-Do** button for Designs is under development but ready for production use. It is
+deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it.
+
+To enable it:
+
+```ruby
+Feature.enable(:design_management_todo_button)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:design_management_todo_button)
+```
 
 ## Referring to designs in Markdown
 

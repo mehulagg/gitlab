@@ -40,11 +40,15 @@ RSpec.describe Packages::Pypi::CreatePackageService do
     end
 
     context 'with an invalid metadata' do
-      let(:requires_python) { 'x' * 51 }
+      let(:requires_python) { 'x' * 256 }
 
       it 'raises an error' do
         expect { subject }.to raise_error(ActiveRecord::RecordInvalid)
       end
+    end
+
+    it_behaves_like 'assigns the package creator' do
+      let(:package) { created_package }
     end
 
     context 'with an existing package' do

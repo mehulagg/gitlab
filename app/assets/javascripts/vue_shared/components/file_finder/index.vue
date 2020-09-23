@@ -2,6 +2,7 @@
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
 import Mousetrap from 'mousetrap';
 import VirtualList from 'vue-virtual-scroll-list';
+import { GlIcon } from '@gitlab/ui';
 import Item from './item.vue';
 import { UP_KEY_CODE, DOWN_KEY_CODE, ENTER_KEY_CODE, ESC_KEY_CODE } from '~/lib/utils/keycodes';
 
@@ -13,6 +14,7 @@ const originalStopCallback = Mousetrap.prototype.stopCallback;
 
 export default {
   components: {
+    GlIcon,
     Item,
     VirtualList,
   },
@@ -126,7 +128,7 @@ export default {
       this.focusedIndex = 0;
     }
 
-    Mousetrap.bind(['t', 'command+p', 'ctrl+p'], e => {
+    Mousetrap.bind(['t', 'mod+p'], e => {
       if (e.preventDefault) {
         e.preventDefault();
       }
@@ -140,7 +142,7 @@ export default {
         el.classList.contains('inputarea')
       ) {
         return true;
-      } else if (combo === 'command+p' || combo === 'ctrl+p') {
+      } else if (combo === 'mod+p') {
         return false;
       }
 
@@ -235,12 +237,13 @@ export default {
           aria-hidden="true"
           class="fa fa-search dropdown-input-search"
         ></i>
-        <i
-          :aria-label="__('Clear search input')"
+        <gl-icon
+          name="close"
+          class="dropdown-input-clear"
           role="button"
-          class="fa fa-times dropdown-input-clear"
+          :aria-label="__('Clear search input')"
           @click="clearSearchInput"
-        ></i>
+        />
       </div>
       <div>
         <virtual-list ref="virtualScrollList" :size="listHeight" :remain="listShowCount" wtag="ul">

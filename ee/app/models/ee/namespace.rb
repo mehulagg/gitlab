@@ -13,8 +13,7 @@ module EE
     NAMESPACE_PLANS_TO_LICENSE_PLANS = {
       ::Plan::BRONZE        => License::STARTER_PLAN,
       ::Plan::SILVER        => License::PREMIUM_PLAN,
-      ::Plan::GOLD          => License::ULTIMATE_PLAN,
-      ::Plan::EARLY_ADOPTER => License::EARLY_ADOPTER_PLAN
+      ::Plan::GOLD          => License::ULTIMATE_PLAN
     }.freeze
 
     LICENSE_PLANS_TO_NAMESPACE_PLANS = NAMESPACE_PLANS_TO_LICENSE_PLANS.invert.freeze
@@ -126,7 +125,7 @@ module EE
     #   it. This is the case when we're ready to enable a feature for anyone
     #   with the correct license.
     def beta_feature_available?(feature)
-      ::Feature.enabled?(feature) ? feature_available?(feature) : ::Feature.enabled?(feature, self)
+      ::Feature.enabled?(feature, type: :licensed) ? feature_available?(feature) : ::Feature.enabled?(feature, self, type: :licensed)
     end
     alias_method :alpha_feature_available?, :beta_feature_available?
 
@@ -136,7 +135,7 @@ module EE
     override :feature_available?
     def feature_available?(feature)
       # This feature might not be behind a feature flag at all, so default to true
-      return false unless ::Feature.enabled?(feature, default_enabled: true)
+      return false unless ::Feature.enabled?(feature, type: :licensed, default_enabled: true)
 
       available_features = strong_memoize(:feature_available) do
         Hash.new do |h, f|
@@ -320,10 +319,6 @@ module EE
 
     def free_plan?
       actual_plan_name == ::Plan::FREE
-    end
-
-    def early_adopter_plan?
-      actual_plan_name == ::Plan::EARLY_ADOPTER
     end
 
     def bronze_plan?

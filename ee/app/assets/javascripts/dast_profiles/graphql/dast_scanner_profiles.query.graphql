@@ -24,6 +24,7 @@ query DastScannerProfiles(
           profileName
           spiderTimeout
           targetTimeout
+          editPath
         }
       }
     }

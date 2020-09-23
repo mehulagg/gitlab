@@ -1,5 +1,0 @@
----
-title: Do not write SAST defaults via SAST Config UI
-merge_request: 40030
-author:
-type: changed

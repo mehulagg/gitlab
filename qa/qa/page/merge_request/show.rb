@@ -44,17 +44,9 @@ module QA
           element :squash_checkbox
         end
 
-        view 'app/assets/javascripts/vue_shared/components/notes/skeleton_note.vue' do
-          element :skeleton_note
-        end
-
         view 'app/views/projects/merge_requests/show.html.haml' do
           element :notes_tab
           element :diffs_tab
-        end
-
-        view 'app/assets/javascripts/diffs/components/diff_table_cell.vue' do
-          element :diff_comment
         end
 
         view 'app/assets/javascripts/diffs/components/inline_diff_table_row.vue' do
@@ -78,8 +70,8 @@ module QA
         view 'app/assets/javascripts/notes/components/note_form.vue' do
           element :unresolve_review_discussion_checkbox
           element :resolve_review_discussion_checkbox
-          element :start_review
-          element :comment_now
+          element :start_review_button
+          element :comment_now_button
         end
 
         view 'app/assets/javascripts/batch_comments/components/preview_dropdown.vue' do
@@ -87,19 +79,19 @@ module QA
         end
 
         def start_review
-          click_element :start_review
+          click_element :start_review_button
 
           # After clicking the button, wait for it to disappear
           # before moving on to the next part of the test
-          has_no_element? :start_review
+          has_no_element? :start_review_button
         end
 
         def comment_now
-          click_element :comment_now
+          click_element :comment_now_button
 
           # After clicking the button, wait for it to disappear
           # before moving on to the next part of the test
-          has_no_element? :comment_now
+          has_no_element? :comment_now_button
         end
 
         def submit_pending_reviews
@@ -121,7 +113,7 @@ module QA
         end
 
         def resolve_review_discussion
-          scroll_to_element :start_review
+          scroll_to_element :start_review_button
           check_element :resolve_review_discussion_checkbox
         end
 
@@ -135,7 +127,7 @@ module QA
           end
           all_elements(:new_diff_line, minimum: 1).first.hover
           click_element(:diff_comment)
-          fill_element(:reply_input, text)
+          fill_element(:reply_field, text)
         end
 
         def click_discussions_tab
@@ -270,12 +262,9 @@ module QA
           end
         end
 
-        def wait_for_loading
-          has_no_element?(:skeleton_note)
-        end
-
         def click_open_in_web_ide
-          click_element :open_in_web_ide_button
+          click_element(:open_in_web_ide_button)
+          wait_for_requests
         end
       end
     end

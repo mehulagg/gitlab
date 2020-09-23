@@ -312,20 +312,6 @@ RSpec.describe Groups::EpicsController do
           expect(response).to match_response_schema('entities/epic', dir: 'ee')
         end
 
-        context 'when confidential_epics flag is disabled' do
-          before do
-            stub_feature_flags(confidential_epics: false)
-          end
-
-          it 'does not include confidential attribute' do
-            group.add_developer(user)
-            show_epic(:json)
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response).not_to include("confidential")
-          end
-        end
-
         context 'with unauthorized user' do
           it 'returns a not found 404 response' do
             show_epic(:json)

@@ -3,6 +3,8 @@
 module Elastic
   module Latest
     class MergeRequestClassProxy < ApplicationClassProxy
+      include StateFilter
+
       def elastic_search(query, options: {})
         query_hash =
           if query =~ /\!(\d+)\z/
@@ -20,6 +22,7 @@ module Elastic
 
         options[:features] = 'merge_requests'
         query_hash = project_ids_filter(query_hash, options)
+        query_hash = state_filter(query_hash, options)
 
         search(query_hash, options)
       end

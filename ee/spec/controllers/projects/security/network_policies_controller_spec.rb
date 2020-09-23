@@ -42,7 +42,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
         subject
 
         expect(response).to have_gitlab_http_status(:bad_request)
-        expect(response.body).to eq('{"error":"error"}')
+        expect(response.body).to eq('{"payload":{},"error":"error"}')
       end
     end
   end
@@ -175,7 +175,7 @@ RSpec.describe Projects::Security::NetworkPoliciesController do
 
       before do
         group.add_developer(user)
-        allow(NetworkPolicies::ResourcesService).to receive(:new).with(environment: environment) { service }
+        allow(NetworkPolicies::ResourcesService).to receive(:new).with(environment_id: environment.id.to_s, project: project) { service }
       end
 
       it 'responds with policies' do

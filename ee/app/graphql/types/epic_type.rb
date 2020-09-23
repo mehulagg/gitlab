@@ -5,7 +5,7 @@ module Types
     include ::Gitlab::Graphql::Aggregations::Epics::Constants
 
     graphql_name 'Epic'
-    description 'Represents an epic.'
+    description 'Represents an epic'
 
     authorize :read_epic
 
@@ -14,6 +14,7 @@ module Types
     present_using EpicPresenter
 
     implements(Types::Notes::NoteableType)
+    implements(Types::CurrentUserTodos)
 
     field :id, GraphQL::ID_TYPE, null: false,
           description: 'ID of the epic'

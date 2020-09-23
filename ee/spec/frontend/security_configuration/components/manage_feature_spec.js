@@ -101,21 +101,4 @@ describe('ManageFeature component', () => {
       expect(button.attributes('href')).toBe(feature.configuration_path);
     });
   });
-
-  describe('given a feature type that is not "sast"', () => {
-    beforeEach(() => {
-      [feature] = generateFeatures(1, { type: 'something_that_is_not_sast' });
-
-      createComponent({
-        propsData: { feature },
-      });
-    });
-
-    it('shows docs link for feature', () => {
-      const link = findTestId('docsLink');
-      expect(link.exists()).toBe(true);
-      expect(link.attributes('aria-label')).toContain(feature.name);
-      expect(link.attributes('href')).toBe(feature.link);
-    });
-  });
 });

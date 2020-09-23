@@ -18,7 +18,8 @@ module Types
             description: 'Title of the requirement'
       field :state, RequirementsManagement::RequirementStateEnum, null: false,
             description: 'State of the requirement'
-
+      field :last_test_report_state, RequirementsManagement::TestReportStateEnum, null: true, complexity: 5,
+            description: 'Latest requirement test report state'
       field :project, ProjectType, null: false,
             description: 'Project to which the requirement belongs',
             resolve: -> (obj, _args, _ctx) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, obj.project_id).find }

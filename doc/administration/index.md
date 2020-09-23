@@ -36,7 +36,7 @@ Learn how to install, configure, update, and maintain your GitLab instance.
   - [Omnibus support for log forwarding](https://docs.gitlab.com/omnibus/settings/logs.html#udp-log-shipping-gitlab-enterprise-edition-only) **(STARTER ONLY)**
 - [Reference architectures](reference_architectures/index.md): Add additional resources to support more users.
   - [Installing GitLab on Amazon Web Services (AWS)](../install/aws/index.md): Set up GitLab on Amazon AWS.
-- [Geo](geo/replication/index.md): Replicate your GitLab instance to other geographic locations as a read-only fully operational version. **(PREMIUM ONLY)**
+- [Geo](geo/index.md): Replicate your GitLab instance to other geographic locations as a read-only fully operational version. **(PREMIUM ONLY)**
 - [Disaster Recovery](geo/disaster_recovery/index.md): Quickly fail-over to a different site with minimal effort in a disaster situation. **(PREMIUM ONLY)**
 - [Pivotal Tile](../install/pivotal/index.md): Deploy GitLab as a preconfigured appliance using Ops Manager (BOSH) for Pivotal Cloud Foundry. **(PREMIUM ONLY)**
 - [Add License](../user/admin_area/license.md): Upload a license at install time to unlock features that are in paid tiers of GitLab. **(STARTER ONLY)**
@@ -157,8 +157,8 @@ Learn how to install, configure, update, and maintain your GitLab instance.
 - [External Pipeline Validation](external_pipeline_validation.md): Enable, disable and configure external pipeline validation.
 - [Job artifacts](job_artifacts.md): Enable, disable, and configure job artifacts (a set of files and directories which are outputted by a job when it completes successfully).
 - [Job logs](job_logs.md): Information about the job logs.
-- [Register Runners](../ci/runners/README.md#types-of-runners): Learn how to register and configure Runners.
-- [Shared Runners pipelines quota](../user/admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota): Limit the usage of pipeline minutes for Shared Runners. **(STARTER ONLY)**
+- [Register runners](../ci/runners/README.md#types-of-runners): Learn how to register and configure runners.
+- [Shared runners pipelines quota](../user/admin_area/settings/continuous_integration.md#shared-runners-pipeline-minutes-quota): Limit the usage of pipeline minutes for shared runners. **(STARTER ONLY)**
 - [Enable/disable Auto DevOps](../topics/autodevops/index.md#enablingdisabling-auto-devops): Enable or disable Auto DevOps for your instance.
 
 ## Snippet settings

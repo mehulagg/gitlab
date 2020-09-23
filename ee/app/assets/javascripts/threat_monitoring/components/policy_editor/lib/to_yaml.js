@@ -33,7 +33,11 @@ function spec({ rules, isEnabled, endpointMatchMode, endpointLabels }) {
  Return yaml representation of a policy.
 */
 export default function toYaml(policy) {
-  const { name, description } = policy;
+  const { name, resourceVersion, description } = policy;
+  const metadata = { name };
+  if (resourceVersion) {
+    metadata.resourceVersion = resourceVersion;
+  }
 
   const policySpec = {
     apiVersion: 'cilium.io/v2',
@@ -46,7 +50,7 @@ export default function toYaml(policy) {
 
   // We want description at a specific position to have yaml in a common form.
   Object.assign(policySpec, {
-    metadata: { name },
+    metadata,
     spec: spec(policy),
   });
 

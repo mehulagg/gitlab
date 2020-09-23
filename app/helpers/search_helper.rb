@@ -7,6 +7,7 @@ module SearchHelper
     return unless current_user
 
     resources_results = [
+      recent_merge_requests_autocomplete(term),
       recent_issues_autocomplete(term),
       groups_autocomplete(term),
       projects_autocomplete(term)
@@ -180,6 +181,20 @@ module SearchHelper
     end
   end
 
+  def recent_merge_requests_autocomplete(term, limit = 5)
+    return [] unless current_user
+
+    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).search(term).limit(limit).map do |mr|
+      {
+        category: "Recent merge requests",
+        id: mr.id,
+        label: search_result_sanitize(mr.title),
+        url: merge_request_path(mr),
+        avatar_url: mr.project.avatar_url || ''
+      }
+    end
+  end
+
   def recent_issues_autocomplete(term, limit = 5)
     return [] unless current_user
 
@@ -277,6 +292,11 @@ module SearchHelper
 
     # Truncato's filtered_tags and filtered_attributes are not quite the same
     sanitize(html, tags: %w(a p ol ul li pre code))
+  end
+
+  # _search_highlight is used in EE override
+  def highlight_and_truncate_issue(issue, search_term, _search_highlight)
+    simple_search_highlight_and_truncate(issue.description, search_term, highlighter: '<span class="gl-text-black-normal gl-font-weight-bold">\1</span>')
   end
 
   def show_user_search_tab?

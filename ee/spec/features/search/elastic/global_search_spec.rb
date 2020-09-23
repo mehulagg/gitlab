@@ -266,7 +266,19 @@ RSpec.describe 'Global elastic search', :elastic, :sidekiq_inline do
 end
 
 RSpec.describe 'Global elastic search redactions', :elastic do
-  it_behaves_like 'a redacted search results page' do
-    let(:search_path) { explore_root_path }
+  context 'when block_anonymous_global_searches is disabled' do
+    before do
+      stub_feature_flags(block_anonymous_global_searches: false)
+    end
+
+    it_behaves_like 'a redacted search results page' do
+      let(:search_path) { explore_root_path }
+    end
+  end
+
+  context 'when block_anonymous_global_searches is enabled' do
+    it_behaves_like 'a redacted search results page', include_anonymous: false do
+      let(:search_path) { explore_root_path }
+    end
   end
 end

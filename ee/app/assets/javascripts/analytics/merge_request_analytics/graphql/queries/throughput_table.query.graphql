@@ -1,10 +1,27 @@
-query($fullPath: ID!, $startDate: Time!, $endDate: Time!, $limit: Int!) {
+query(
+  $fullPath: ID!
+  $startDate: Time!
+  $endDate: Time!
+  $limit: Int!
+  $labels: [String!]
+  $authorUsername: String
+  $assigneeUsername: String
+  $milestoneTitle: String
+  $sourceBranches: [String!]
+  $targetBranches: [String!]
+) {
   project(fullPath: $fullPath) {
     mergeRequests(
       first: $limit
       mergedAfter: $startDate
       mergedBefore: $endDate
       sort: MERGED_AT_DESC
+      labels: $labels
+      authorUsername: $authorUsername
+      assigneeUsername: $assigneeUsername
+      milestoneTitle: $milestoneTitle
+      sourceBranches: $sourceBranches
+      targetBranches: $targetBranches
     ) {
       nodes {
         iid

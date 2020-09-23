@@ -116,9 +116,13 @@ module EE
 
           # handle license rename https://gitlab.com/gitlab-org/gitlab/issues/8911
           license_scan_count = results.delete(:license_scanning_jobs)
-          results[:license_management_jobs] += license_scan_count > 0 ? license_scan_count : 0
+          results[:license_management_jobs] += license_scan_count > 0 ? license_scan_count : 0 if license_scan_count.is_a?(Integer)
 
           results
+        end
+
+        def on_demand_pipelines_usage
+          { dast_on_demand_pipelines: count(::Ci::Pipeline.ondemand_dast_scan) }
         end
 
         # Note: when adding a preference, check if it's mapped to an attribute of a User model. If so, name
@@ -181,6 +185,7 @@ module EE
               },
               requirements_counts,
               security_products_usage,
+              on_demand_pipelines_usage,
               epics_deepest_relationship_level,
               operations_dashboard_usage)
           end
@@ -235,7 +240,11 @@ module EE
             suggestions: distinct_count(::Note.with_suggestions.where(time_period),
                                         :author_id,
                                         start: user_minimum_id,
-                                        finish: user_maximum_id)
+                                        finish: user_maximum_id),
+            users_using_path_locks: distinct_count(PathLock.where(time_period), :user_id),
+            users_using_lfs_locks: distinct_count(LfsFileLock.where(time_period), :user_id),
+            total_number_of_path_locks: count(::PathLock.where(time_period)),
+            total_number_of_locked_files: count(::LfsFileLock.where(time_period))
           }, approval_rules_counts)
         end
 
@@ -319,7 +328,7 @@ module EE
           # handle license rename https://gitlab.com/gitlab-org/gitlab/issues/8911
           combined_license_key = "#{prefix}license_management_jobs".to_sym
           license_scan_count = results.delete("#{prefix}license_scanning_jobs".to_sym)
-          results[combined_license_key] += license_scan_count > 0 ? license_scan_count : 0
+          results[combined_license_key] += license_scan_count > 0 ? license_scan_count : 0 if license_scan_count.is_a?(Integer)
 
           super.merge(results)
         end
@@ -329,7 +338,6 @@ module EE
 
         # rubocop:disable CodeReuse/ActiveRecord
         # rubocop: disable UsageData/LargeTable
-        # rubocop: disable UsageData/DistinctCountByLargeForeignKey
         def count_secure_jobs(time_period)
           start = ::Security::Scan.minimum(:build_id)
           finish = ::Security::Scan.maximum(:build_id)
@@ -356,13 +364,12 @@ module EE
                                 .where(status: 'success', retried: [nil, false])
                                 .where('security_scans.scan_type = ?', scan_type)
                                 .where(time_period)
-            pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish)
+            pipelines_with_secure_jobs["#{name}_pipeline".to_sym] = distinct_count(relation, :commit_id, start: start, finish: finish, batch: false)
           end
 
           pipelines_with_secure_jobs
         end
         # rubocop: enable UsageData/LargeTable
-        # rubocop: enable UsageData/DistinctCountByLargeForeignKey
 
         def approval_merge_request_rule_minimum_id
           strong_memoize(:approval_merge_request_rule_minimum_id) do

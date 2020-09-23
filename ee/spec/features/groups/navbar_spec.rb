@@ -5,6 +5,7 @@ require 'spec_helper'
 RSpec.describe 'Group navbar' do
   include NavbarStructureHelper
   include WaitForRequests
+  include WikiHelpers
 
   include_context 'group navbar structure'
 
@@ -14,7 +15,7 @@ RSpec.describe 'Group navbar' do
   before do
     group.add_maintainer(user)
     stub_feature_flags(group_iterations: false)
-    stub_feature_flags(group_wiki: false)
+    stub_group_wikis(false)
     sign_in(user)
 
     insert_package_nav(_('Kubernetes'))
@@ -43,7 +44,7 @@ RSpec.describe 'Group navbar' do
       insert_after_sub_nav_item(
         _('Contribution'),
         within: _('Analytics'),
-        new_sub_nav_item_name: _('Merge Requests')
+        new_sub_nav_item_name: _('Merge Request')
       )
 
       visit group_path(group)
@@ -216,7 +217,7 @@ RSpec.describe 'Group navbar' do
 
   context 'when group wiki is available' do
     before do
-      stub_feature_flags(group_wiki: true)
+      stub_group_wikis(true)
 
       insert_after_nav_item(
         _('Analytics'),

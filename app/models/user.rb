@@ -71,8 +71,6 @@ class User < ApplicationRecord
 
   MINIMUM_INACTIVE_DAYS = 180
 
-  ignore_column :bio, remove_with: '13.4', remove_after: '2020-09-22'
-
   # Override Devise::Models::Trackable#update_tracked_fields!
   # to limit database writes to at most once every hour
   # rubocop: disable CodeReuse/ServiceClass
@@ -120,7 +118,7 @@ class User < ApplicationRecord
 
   # Groups
   has_many :members
-  has_many :group_members, -> { where(requested_at: nil) }, source: 'GroupMember'
+  has_many :group_members, -> { where(requested_at: nil).where("access_level >= ?", Gitlab::Access::GUEST) }, source: 'GroupMember'
   has_many :groups, through: :group_members
   has_many :owned_groups, -> { where(members: { access_level: Gitlab::Access::OWNER }) }, through: :group_members, source: :group
   has_many :maintainers_groups, -> { where(members: { access_level: Gitlab::Access::MAINTAINER }) }, through: :group_members, source: :group
@@ -279,6 +277,7 @@ class User < ApplicationRecord
             :view_diffs_file_by_file, :view_diffs_file_by_file=,
             :tab_width, :tab_width=,
             :sourcegraph_enabled, :sourcegraph_enabled=,
+            :gitpod_enabled, :gitpod_enabled=,
             :setup_for_company, :setup_for_company=,
             :render_whitespace_in_code, :render_whitespace_in_code=,
             :experience_level, :experience_level=,
@@ -1715,9 +1714,6 @@ class User < ApplicationRecord
     [last_activity, last_sign_in].compact.max
   end
 
-  # Below is used for the signup_flow experiment. Should be removed
-  # when experiment finishes.
-  # See https://gitlab.com/gitlab-org/growth/engineering/issues/64
   REQUIRES_ROLE_VALUE = 99
 
   def role_required?
@@ -1727,7 +1723,6 @@ class User < ApplicationRecord
   def set_role_required!
     update_column(:role, REQUIRES_ROLE_VALUE)
   end
-  # End of signup_flow experiment methods
 
   def dismissed_callout?(feature_name:, ignore_dismissal_earlier_than: nil)
     callouts = self.callouts.with_feature_name(feature_name)

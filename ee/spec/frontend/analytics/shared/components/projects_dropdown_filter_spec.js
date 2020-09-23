@@ -1,6 +1,6 @@
 import { mount } from '@vue/test-utils';
 import ProjectsDropdownFilter from 'ee/analytics/shared/components/projects_dropdown_filter.vue';
-import { GlNewDropdown as GlDropdown, GlNewDropdownItem as GlDropdownItem } from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
 import { LAST_ACTIVITY_AT } from 'ee/analytics/shared/constants';
 import { TEST_HOST } from 'helpers/test_constants';
 import Api from '~/api';

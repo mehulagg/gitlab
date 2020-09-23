@@ -37,19 +37,31 @@ RSpec.describe 'Snippet elastic search', :js, :elastic, :aggregate_failures, :si
     context 'as anonymous user' do
       let(:current_user) { nil }
 
-      it 'finds only public snippets' do
-        within('.results') do
-          expect(page).to have_content('public personal snippet')
-          expect(page).not_to have_content('public project snippet')
+      context 'when block_anonymous_global_searches is enabled' do
+        it 'redirects to login page' do
+          expect(page).to have_content('You must be logged in to search across all of GitLab')
+        end
+      end
 
-          expect(page).not_to have_content('internal personal snippet')
-          expect(page).not_to have_content('internal project snippet')
+      context 'when block_anonymous_global_searches is disabled' do
+        before(:context) do
+          stub_feature_flags(block_anonymous_global_searches: false)
+        end
 
-          expect(page).not_to have_content('authorized personal snippet')
-          expect(page).not_to have_content('authorized project snippet')
+        it 'finds only public snippets' do
+          within('.results') do
+            expect(page).to have_content('public personal snippet')
+            expect(page).not_to have_content('public project snippet')
 
-          expect(page).not_to have_content('private personal snippet')
-          expect(page).not_to have_content('private project snippet')
+            expect(page).not_to have_content('internal personal snippet')
+            expect(page).not_to have_content('internal project snippet')
+
+            expect(page).not_to have_content('authorized personal snippet')
+            expect(page).not_to have_content('authorized project snippet')
+
+            expect(page).not_to have_content('private personal snippet')
+            expect(page).not_to have_content('private project snippet')
+          end
         end
       end
     end

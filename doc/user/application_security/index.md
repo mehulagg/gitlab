@@ -22,10 +22,10 @@ Testing (SAST), and Secret Detection by adding the following to your `.gitlab-ci
 
 ```yaml
 include:
-  - template: Dependency-Scanning.gitlab-ci.yml
-  - template: License-Scanning.gitlab-ci.yml
-  - template: SAST.gitlab-ci.yml
-  - template: Secret-Detection.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
 ```
 
 To add Dynamic Application Security Testing (DAST) scanning, add the following to your
@@ -33,7 +33,7 @@ To add Dynamic Application Security Testing (DAST) scanning, add the following t
 
 ```yaml
 include:
-  - template: DAST.gitlab-ci.yml
+  - template: Security/DAST.gitlab-ci.yml
 
 variables:
   DAST_WEBSITE: https://staging.example.com
@@ -166,7 +166,8 @@ reports. You can specify the list of all headers to be masked. For details, see
 
 ### Dismissing a vulnerability
 
-To dismiss a vulnerability, you must set its status to Dismissed. Follow these steps to do so:
+To dismiss a vulnerability, you must set its status to Dismissed. This dismisses the vulnerability
+for the entire project. Follow these steps to do so:
 
 1. Select the vulnerability in the Security Dashboard.
 1. Select **Dismissed** from the **Status** selector menu at the top-right.
@@ -246,7 +247,9 @@ You can create an issue for a vulnerability by visiting the vulnerability's page
 This creates a [confidential issue](../project/issues/confidential_issues.md) in the project the
 vulnerability came from, and pre-populates it with some useful information taken from the vulnerability
 report. Once the issue is created, you are redirected to it so you can edit, assign, or comment on
-it.
+it. CVE identifiers can be requested from GitLab by clicking the
+[_CVE ID Request_ button](cve_id_request.md) that is enabled for maintainers of
+public projects on GitLab.com
 
 Upon returning to the group security dashboard, the vulnerability now has an associated issue next
 to the name.
@@ -446,7 +449,7 @@ To fix this issue, you can either:
 
   ```yaml
   include:
-    template: SAST.gitlab-ci.yml
+    template: Security/SAST.gitlab-ci.yml
 
   spotbugs-sast:
     stage: unit-tests
@@ -487,7 +490,7 @@ would look similar to:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 # Ensure that the scanning is only executed on master or merge requests
 spotbugs-sast:
@@ -502,7 +505,7 @@ would be written as follows:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 # Ensure that the scanning is only executed on master or merge requests
 spotbugs-sast:
@@ -516,7 +519,7 @@ it would look similar to:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 # Ensure that the scanning is not executed on tags
 spotbugs-sast:
@@ -528,7 +531,7 @@ To transition to the new `rules` syntax, the override would be rewritten as:
 
 ```yaml
 include:
-  - template: SAST.gitlab-ci.yml
+  - template: Security/SAST.gitlab-ci.yml
 
 # Ensure that the scanning is not executed on tags
 spotbugs-sast:

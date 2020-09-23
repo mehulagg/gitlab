@@ -1,12 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import {
-  GlNewDropdown,
-  GlNewDropdownItem,
-  GlEmptyState,
-  GlLoadingIcon,
-  GlTab,
-  GlTabs,
-} from '@gitlab/ui';
+import { GlDropdown, GlDropdownItem, GlEmptyState, GlLoadingIcon, GlTab, GlTabs } from '@gitlab/ui';
 import IterationReport from 'ee/iterations/components/iteration_report.vue';
 import IterationForm from 'ee/iterations/components/iteration_form.vue';
 import IterationReportSummary from 'ee/iterations/components/iteration_report_summary.vue';
@@ -26,7 +19,7 @@ describe('Iterations report', () => {
   const findActionsDropdown = () => wrapper.find('[data-testid="actions-dropdown"]');
   const clickEditButton = () => {
     findActionsDropdown().vm.$emit('click');
-    wrapper.find(GlNewDropdownItem).vm.$emit('click');
+    wrapper.find(GlDropdownItem).vm.$emit('click');
   };
 
   const mountComponent = ({ props = defaultProps, loading = false } = {}) => {
@@ -229,7 +222,7 @@ describe('Iterations report', () => {
           });
 
           it(`${canEditIteration ? 'is shown' : 'is hidden'}`, () => {
-            expect(wrapper.find(GlNewDropdown).exists()).toBe(canEditIteration);
+            expect(wrapper.find(GlDropdown).exists()).toBe(canEditIteration);
           });
         },
       );

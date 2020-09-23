@@ -1,5 +1,6 @@
 <script>
 /* eslint-disable @gitlab/vue-require-i18n-strings, vue/no-v-html */
+import { GlButton } from '@gitlab/ui';
 import { __ } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 import { redirectTo } from '~/lib/utils/url_utility';
@@ -8,6 +9,10 @@ import { spriteIcon } from '~/lib/utils/common_utils';
 import GitlabSlackService from '../services/gitlab_slack_service';
 
 export default {
+  components: {
+    GlButton,
+  },
+
   props: {
     projects: {
       type: Array,
@@ -100,9 +105,14 @@ export default {
       <img :src="slackLogoPath" class="gitlab-slack-logo" />
     </div>
 
-    <button type="button" class="btn btn-red mx-auto js-popup-button gl-mt-3" @click="togglePopup">
+    <gl-button
+      category="primary"
+      variant="success"
+      class="js-popup-button gl-mt-3"
+      @click="togglePopup"
+    >
       {{ __('Add GitLab to Slack') }}
-    </button>
+    </gl-button>
 
     <div
       v-if="popupOpen"
@@ -117,9 +127,14 @@ export default {
           </option>
         </select>
 
-        <button type="button" class="btn btn-red float-right js-add-button" @click="addToSlack">
+        <gl-button
+          category="primary"
+          variant="success"
+          class="float-right js-add-button"
+          @click="addToSlack"
+        >
           {{ __('Add to Slack') }}
-        </button>
+        </gl-button>
       </div>
 
       <span v-else-if="isSignedIn && !hasProjects" class="js-no-projects">{{

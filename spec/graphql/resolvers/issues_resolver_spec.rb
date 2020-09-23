@@ -58,6 +58,10 @@ RSpec.describe Resolvers::IssuesResolver do
         expect(resolve_issues(assignee_id: IssuableFinder::Params::FILTER_NONE)).to contain_exactly(issue1)
       end
 
+      it 'filters by author' do
+        expect(resolve_issues(author_username: issue1.author.username)).to contain_exactly(issue1, issue2)
+      end
+
       it 'filters by labels' do
         expect(resolve_issues(label_name: [label1.title])).to contain_exactly(issue1, issue2)
         expect(resolve_issues(label_name: [label1.title, label2.title])).to contain_exactly(issue2)

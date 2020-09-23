@@ -7,6 +7,17 @@ describe('Configure Feature Flags Modal', () => {
   const mockEvent = { preventDefault: jest.fn() };
   const projectName = 'fakeProjectName';
 
+  const propsData = {
+    helpPath: '/help/path',
+    helpClientLibrariesPath: '/help/path/#flags',
+    helpClientExamplePath: '/feature-flags#clientexample',
+    apiUrl: '/api/url',
+    instanceId: 'instance-id-token',
+    isRotating: false,
+    hasRotateError: false,
+    canUserRotateToken: true,
+  };
+
   let wrapper;
   const factory = (props = {}, { mountFn = shallowMount, ...options } = {}) => {
     wrapper = mountFn(Component, {
@@ -15,14 +26,7 @@ describe('Configure Feature Flags Modal', () => {
       },
       stubs: { GlSprintf },
       propsData: {
-        helpPath: '/help/path',
-        helpClientLibrariesPath: '/help/path/#flags',
-        helpClientExamplePath: '/feature-flags#clientexample',
-        apiUrl: '/api/url',
-        instanceId: 'instance-id-token',
-        isRotating: false,
-        hasRotateError: false,
-        canUserRotateToken: true,
+        ...propsData,
         ...props,
       },
       ...options,
@@ -74,11 +78,10 @@ describe('Configure Feature Flags Modal', () => {
     });
 
     it('should have links to the documentation', () => {
-      const help = wrapper.find('p');
-      const link = help.find('a[href="/help/path"]');
-      expect(link.exists()).toBe(true);
-      const anchoredLink = help.find('a[href="/help/path/#flags"]');
-      expect(anchoredLink.exists()).toBe(true);
+      expect(wrapper.find('[data-testid="help-link"]').attributes('href')).toBe(propsData.helpPath);
+      expect(wrapper.find('[data-testid="help-client-link"]').attributes('href')).toBe(
+        propsData.helpClientLibrariesPath,
+      );
     });
 
     it('should display one and only one danger callout', () => {

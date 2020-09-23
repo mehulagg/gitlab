@@ -3,8 +3,8 @@ import {
   GlFilteredSearch,
   GlButtonGroup,
   GlButton,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
   GlTooltipDirective,
 } from '@gitlab/ui';
 

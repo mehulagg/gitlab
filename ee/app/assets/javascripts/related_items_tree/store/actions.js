@@ -389,6 +389,7 @@ export const createItem = ({ state, dispatch }, { itemTitle }) => {
   dispatch('requestCreateItem');
 
   Api.createChildEpic({
+    confidential: state.parentItem.confidential,
     groupId: state.parentItem.fullPath,
     parentEpicIid: state.parentItem.iid,
     title: itemTitle,

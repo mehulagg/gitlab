@@ -36,7 +36,7 @@ RSpec.describe SnippetStatistics do
     subject { statistics.update_file_count }
 
     it 'updates the count of files' do
-      file_count = snippet_with_repo.repository.ls_files(nil).count
+      file_count = snippet_with_repo.repository.ls_files(snippet_with_repo.default_branch).count
 
       subject
 
@@ -75,15 +75,28 @@ RSpec.describe SnippetStatistics do
   end
 
   describe '#refresh!' do
-    subject { statistics.refresh! }
-
     it 'retrieves and saves statistic data from repository' do
       expect(statistics).to receive(:update_commit_count)
       expect(statistics).to receive(:update_file_count)
       expect(statistics).to receive(:update_repository_size)
       expect(statistics).to receive(:save!)
 
-      subject
+      statistics.refresh!
+    end
+
+    context 'when the database is read-only' do
+      it 'does nothing' do
+        allow(Gitlab::Database).to receive(:read_only?) { true }
+
+        expect(statistics).not_to receive(:update_commit_count)
+        expect(statistics).not_to receive(:update_file_count)
+        expect(statistics).not_to receive(:update_repository_size)
+        expect(statistics).not_to receive(:save!)
+        expect(Namespaces::ScheduleAggregationWorker)
+          .not_to receive(:perform_async)
+
+        statistics.refresh!
+      end
     end
   end
 

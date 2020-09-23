@@ -65,8 +65,7 @@ module QA
         end
       end
 
-      # Skipping on staging due to: https://gitlab.com/gitlab-org/gitlab/-/issues/228624
-      context 'instance level', :requires_admin, :skip_live_env do
+      context 'instance level', :requires_admin, quarantine: { only: { subdomain: :staging }, issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/228624' } do
         before do
           Flow::Login.sign_in_as_admin
 

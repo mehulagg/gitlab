@@ -4,7 +4,7 @@ require 'spec_helper'
 
 RSpec.describe FetchSubscriptionPlansService do
   describe '#execute' do
-    let(:endpoint_url) { 'https://customers.gitlab.com/gitlab_plans' }
+    let(:endpoint_url) { "#{EE::SUBSCRIPTIONS_URL}/gitlab_plans" }
 
     subject { described_class.new(plan: 'bronze').execute }
 

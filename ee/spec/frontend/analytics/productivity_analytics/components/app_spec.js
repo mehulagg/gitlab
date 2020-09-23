@@ -11,9 +11,10 @@ import { TEST_HOST } from 'helpers/test_constants';
 import {
   GlEmptyState,
   GlLoadingIcon,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlDeprecatedButton,
+  GlDropdown,
+  GlDropdownItem,
+  GlButton,
+  GlAlert,
 } from '@gitlab/ui';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import UrlSyncMixin from 'ee/analytics/shared/mixins/url_sync_mixin';
@@ -107,8 +108,8 @@ describe('ProductivityApp component', () => {
   const findCommitBasedMetricChart = () => wrapper.find({ ref: 'commitBasedChart' });
   const findScatterplotMetricChart = () => wrapper.find({ ref: 'scatterplot' });
   const findMrTableSortSection = () => wrapper.find('.js-mr-table-sort');
-  const findSortFieldDropdown = () => findMrTableSortSection().find(GlDeprecatedDropdown);
-  const findSortOrderToggle = () => findMrTableSortSection().find(GlDeprecatedButton);
+  const findSortFieldDropdown = () => findMrTableSortSection().find(GlDropdown);
+  const findSortOrderToggle = () => findMrTableSortSection().find(GlButton);
   const findMrTableSection = () => wrapper.find('.js-mr-table');
   const findMrTable = () => findMrTableSection().find(MergeRequestTable);
 
@@ -433,7 +434,7 @@ describe('ProductivityApp component', () => {
                   it('doesn’t render a "no data" message', () => {
                     expect(
                       findMrTableSection()
-                        .find('.js-no-data')
+                        .find(GlAlert)
                         .exists(),
                     ).toBe(false);
                   });
@@ -459,7 +460,7 @@ describe('ProductivityApp component', () => {
 
                     it('should change the sort field', () => {
                       findSortFieldDropdown()
-                        .findAll(GlDeprecatedDropdownItem)
+                        .findAll(GlDropdownItem)
                         .at(0)
                         .vm.$emit('click');
 
@@ -484,7 +485,7 @@ describe('ProductivityApp component', () => {
                   it('renders a "no data" message', () => {
                     expect(
                       findMrTableSection()
-                        .find('.js-no-data')
+                        .find(GlAlert)
                         .exists(),
                     ).toBe(true);
                   });

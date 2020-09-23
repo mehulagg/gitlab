@@ -55,7 +55,7 @@ RSpec.shared_examples 'issue with epic_id parameter' do
       it 'calls EpicIssues::CreateService' do
         link_sevice = double
         expect(EpicIssues::CreateService).to receive(:new).and_return(link_sevice)
-        expect(link_sevice).to receive(:execute)
+        expect(link_sevice).to receive(:execute).and_return({ status: :success })
 
         execute
       end

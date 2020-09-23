@@ -121,7 +121,7 @@ describe('EE - DastProfilesList', () => {
         id: 3,
         profileName: 'Profile 2',
         targetUrl: 'http://example-2.com',
-        editPath: '',
+        editPath: '/3/edit',
         validationStatus: 'Pending',
       },
     ];
@@ -155,19 +155,9 @@ describe('EE - DastProfilesList', () => {
         expect(validationStatusCell.innerText).toContain(profile.validationStatus);
         expect(within(actionsCell).getByRole('button', { name: /delete/i })).not.toBe(null);
 
-        if (profile.editPath) {
-          const editLink = within(actionsCell).getByRole('link', { name: /edit/i });
-          expect(editLink).not.toBe(null);
-          expect(editLink.getAttribute('href')).toBe(profile.editPath);
-        } else {
-          const editButton = within(actionsCell).getByRole('button', { name: /edit/i });
-          const helpText = within(actionsCell).getByTitle(
-            /edit feature will come soon. please create a new profile if changes needed/i,
-          );
-          expect(helpText).not.toBe(null);
-          expect(editButton).not.toBe(null);
-          expect(editButton.getAttribute('disabled')).not.toBe(null);
-        }
+        const editLink = within(actionsCell).getByRole('link', { name: /edit/i });
+        expect(editLink).not.toBe(null);
+        expect(editLink.getAttribute('href')).toBe(profile.editPath);
       });
     });
 

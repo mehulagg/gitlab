@@ -136,7 +136,7 @@ module EE
       end
 
       def ci_secrets_management_available?
-        project.beta_feature_available?(:ci_secrets_management)
+        project.feature_available?(:ci_secrets_management)
       end
 
       override :runner_required_feature_names

@@ -361,7 +361,7 @@ export default {
         </template>
       </gl-sprintf>
     </div>
-    <div v-once class="timeline-icon">
+    <div class="timeline-icon">
       <user-avatar-link
         :link-href="author.path"
         :img-src="author.avatar_url"
@@ -374,7 +374,6 @@ export default {
     <div class="timeline-content">
       <div class="note-header">
         <note-header
-          v-once
           :author="author"
           :created-at="note.created_at"
           :note-id="note.id"
@@ -390,6 +389,10 @@ export default {
           :note-id="note.id"
           :note-url="note.noteable_note_url"
           :access-level="note.human_access"
+          :is-contributor="note.is_contributor"
+          :is-author="note.is_noteable_author"
+          :project-name="note.project_name"
+          :noteable-type="note.noteable_type"
           :show-reply="showReplyButton"
           :can-edit="note.current_user.can_edit"
           :can-award-emoji="note.current_user.can_award_emoji"

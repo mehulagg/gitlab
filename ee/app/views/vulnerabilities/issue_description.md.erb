@@ -8,7 +8,7 @@
 <% if vulnerability.confidence.present? %>
 * <%= _("Confidence") %>: <%= vulnerability.confidence %>
 <% end %>
-<% if defined?(vulnerability.file) && vulnerability.file.present? %>
+<% if vulnerability.try(:file) %>
 * <%= _("Location") %>: [<%= vulnerability.location_text %>](<%= vulnerability.location_link %>)
 <% end %>
 
@@ -42,7 +42,7 @@
 <% end %>
 <% end %>
 
-<% if vulnerability.remediations.present? %>
+<% if vulnerability.remediations.present? && vulnerability.remediations.any? %>
 ### <%= _("Remediations") %>:
 
 <% vulnerability.remediations.each do |remediation| %>

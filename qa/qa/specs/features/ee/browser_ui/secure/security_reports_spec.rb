@@ -3,7 +3,7 @@
 require 'pathname'
 
 module QA
-  RSpec.describe 'Secure', :docker, :runner do
+  RSpec.describe 'Secure', :runner do
     let(:number_of_dependencies_in_fixture) { 9 }
     let(:dependency_scan_example_vuln) { 'Prototype pollution attack in mixin-deep' }
     let(:container_scan_example_vuln) { 'CVE-2017-18269 in glibc' }

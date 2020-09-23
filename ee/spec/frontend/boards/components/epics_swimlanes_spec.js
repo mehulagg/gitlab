@@ -17,12 +17,8 @@ describe('EpicsSwimlanes', () => {
 
   const createStore = () => {
     return new Vuex.Store({
-      actions: {
-        fetchIssuesForAllLists: jest.fn(),
-      },
       state: {
         epics: mockEpics,
-        isLoadingIssues: false,
         issuesByListId: mockIssuesByListId,
         issues,
       },
@@ -34,9 +30,7 @@ describe('EpicsSwimlanes', () => {
     const store = createStore();
     const defaultProps = {
       lists: mockListsWithModel,
-      boardId: '1',
       disabled: false,
-      rootPath: '/',
     };
 
     wrapper = shallowMount(EpicsSwimlanes, {

@@ -58,5 +58,13 @@ module RequirementsManagement
     def resource_parent
       project
     end
+
+    def last_test_report_state
+      test_reports.last&.state
+    end
+
+    def last_test_report_manually_created?
+      test_reports.last&.build.nil?
+    end
   end
 end

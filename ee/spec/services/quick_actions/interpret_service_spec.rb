@@ -232,6 +232,19 @@ RSpec.describe QuickActions::InterpretService do
               expect(updates).to eq(iteration: iteration)
               expect(message).to eq("Set the iteration to #{iteration.to_reference}.")
             end
+
+            context 'when iteration is started' do
+              before do
+                iteration.start!
+              end
+
+              it 'assigns an iteration to an issue' do
+                _, updates, message = service.execute(content, issue)
+
+                expect(updates).to eq(iteration: iteration)
+                expect(message).to eq("Set the iteration to #{iteration.to_reference}.")
+              end
+            end
           end
 
           context 'when the user does not have enough permissions' do
@@ -268,6 +281,16 @@ RSpec.describe QuickActions::InterpretService do
 
         it 'does not recognize /iteration' do
           _, updates = service.execute(content, issue)
+
+          expect(updates).to be_empty
+        end
+      end
+
+      context 'when issuable does not support iterations' do
+        it 'does not assign an iteration to an incident' do
+          incident = create(:incident, project: project)
+
+          _, updates = service.execute(content, incident)
 
           expect(updates).to be_empty
         end
@@ -314,6 +337,16 @@ RSpec.describe QuickActions::InterpretService do
 
         it 'does not recognize /remove_iteration' do
           _, updates = service.execute(content, issue)
+
+          expect(updates).to be_empty
+        end
+      end
+
+      context 'when issuable does not support iterations' do
+        it 'does not assign an iteration to an incident' do
+          incident = create(:incident, project: project)
+
+          _, updates = service.execute(content, incident)
 
           expect(updates).to be_empty
         end
@@ -862,6 +895,26 @@ RSpec.describe QuickActions::InterpretService do
 
       it 'does not recognise /clear_weight' do
         _, updates = service.execute('/clear_weight', issue)
+
+        expect(updates).to be_empty
+      end
+    end
+
+    context 'issuable weights not supported by type' do
+      let_it_be(:incident) { create(:incident, project: project) }
+
+      before do
+        stub_licensed_features(issue_weights: true)
+      end
+
+      it 'does not recognise /weight X' do
+        _, updates = service.execute('/weight 5', incident)
+
+        expect(updates).to be_empty
+      end
+
+      it 'does not recognise /clear_weight' do
+        _, updates = service.execute('/clear_weight', incident)
 
         expect(updates).to be_empty
       end

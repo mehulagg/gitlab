@@ -76,6 +76,30 @@ RSpec.describe Gitlab::Danger::Helper do
     end
   end
 
+  describe '#changed_lines' do
+    subject { helper.changed_lines('changed_file.rb') }
+
+    before do
+      allow(fake_git).to receive(:diff_for_file).with('changed_file.rb').and_return(diff)
+    end
+
+    context 'when file has diff' do
+      let(:diff) { double(:diff, patch: "+ # New change here\n+ # New change there") }
+
+      it 'returns file changes' do
+        is_expected.to eq(['+ # New change here', '+ # New change there'])
+      end
+    end
+
+    context 'when file has no diff (renamed without changes)' do
+      let(:diff) { nil }
+
+      it 'returns a blank array' do
+        is_expected.to eq([])
+      end
+    end
+  end
+
   describe "changed_files" do
     it 'returns list of changed files matching given regex' do
       expect(helper).to receive(:all_changed_files).and_return(%w[migration.rb usage_data.rb])
@@ -408,6 +432,28 @@ RSpec.describe Gitlab::Danger::Helper do
         .and_return('web_url' => 'https://gitlab.com/gitlab-org/security/gitlab/-/merge_requests/1')
 
       expect(helper).to be_security_mr
+    end
+  end
+
+  describe '#draft_mr?' do
+    it 'returns false when `gitlab_helper` is unavailable' do
+      expect(helper).to receive(:gitlab_helper).and_return(nil)
+
+      expect(helper).not_to be_draft_mr
+    end
+
+    it 'returns true for a draft MR' do
+      expect(fake_gitlab).to receive(:mr_json)
+        .and_return('title' => 'Draft: My MR title')
+
+      expect(helper).to be_draft_mr
+    end
+
+    it 'returns false for non draft MR' do
+      expect(fake_gitlab).to receive(:mr_json)
+        .and_return('title' => 'My MR title')
+
+      expect(helper).not_to be_draft_mr
     end
   end
 

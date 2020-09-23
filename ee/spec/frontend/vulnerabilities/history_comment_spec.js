@@ -64,7 +64,7 @@ describe('History Comment', () => {
   // whichever one exists and click it to show the editor.
   const showEditView = () => {
     if (addCommentButton().exists()) {
-      addCommentButton().vm.$emit('click');
+      addCommentButton().trigger('click');
     } else {
       editButton().vm.$emit('click');
     }

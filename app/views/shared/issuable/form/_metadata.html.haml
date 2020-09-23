@@ -12,6 +12,10 @@
     .form-group.row.merge-request-assignee
       = render "shared/issuable/form/metadata_issuable_assignee", issuable: issuable, form: form, has_due_date: has_due_date
 
+    - if issuable.allows_reviewers?
+      .form-group.row.merge-request-reviewer
+        = render "shared/issuable/form/metadata_issuable_reviewer", issuable: issuable, form: form, has_due_date: has_due_date
+
     = render_if_exists "shared/issuable/form/epic", issuable: issuable, form: form, project: project
 
     - if issuable.supports_milestone?
@@ -32,8 +36,7 @@
 
   - if has_due_date
     .col-lg-6
-      - if @issue[:issue_type] != 'incident'
-        = render_if_exists "shared/issuable/form/weight", issuable: issuable, form: form
+      = render_if_exists "shared/issuable/form/weight", issuable: issuable, form: form
       .form-group.row
         = form.label :due_date, "Due date", class: "col-form-label col-md-2 col-lg-4"
         .col-8

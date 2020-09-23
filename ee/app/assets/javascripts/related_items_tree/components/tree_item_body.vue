@@ -293,7 +293,8 @@ export default {
           :aria-label="__('Remove')"
           :disabled="itemActionInProgress"
           icon="close"
-          class="js-issue-item-remove-button qa-remove-issue-button gl-align-self-start"
+          class="js-issue-item-remove-button gl-align-self-start"
+          data-qa-selector="remove_issue_button"
           @click="handleRemoveClick"
         />
         <span v-if="showEmptySpacer" class="gl-p-3"></span>

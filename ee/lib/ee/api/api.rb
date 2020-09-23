@@ -50,6 +50,7 @@ module EE
         mount ::API::Analytics::GroupActivityAnalytics
         mount ::API::ProtectedEnvironments
         mount ::API::ResourceWeightEvents
+        mount ::API::ResourceIterationEvents
       end
     end
   end

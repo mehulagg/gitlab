@@ -58,7 +58,7 @@ RSpec.describe VulnerabilitiesHelper do
     it 'has expected vulnerability properties' do
       expect(subject).to include(
         timestamp: Time.now.to_i,
-        create_issue_url: "/#{project.full_path}/-/vulnerability_feedback",
+        create_issue_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/create_issue",
         has_mr: anything,
         create_mr_url: "/#{project.full_path}/-/vulnerability_feedback",
         discussions_url: "/#{project.full_path}/-/security/vulnerabilities/#{vulnerability.id}/discussions",
@@ -68,6 +68,16 @@ RSpec.describe VulnerabilitiesHelper do
         pipeline: anything,
         can_modify_related_issues: false
       )
+    end
+
+    context 'when the issues are disabled for the project' do
+      before do
+        allow(project).to receive(:issues_enabled?).and_return(false)
+      end
+
+      it 'has `create_issue_url` set as nil' do
+        expect(subject).to include(create_issue_url: nil)
+      end
     end
   end
 

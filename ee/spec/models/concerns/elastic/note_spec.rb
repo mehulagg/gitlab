@@ -154,7 +154,7 @@ RSpec.describe Note, :elastic do
 
     shared_examples 'notes finder' do |user_type, no_of_notes|
       it "finds #{no_of_notes} notes for #{user_type}", :sidekiq_might_not_need_inline do
-        superuser = create(user_type)
+        superuser = create(user_type) # rubocop:disable Rails/SaveBang
         issue = create(:issue, :confidential, author: create(:user))
 
         Sidekiq::Testing.inline! do

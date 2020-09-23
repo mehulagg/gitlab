@@ -31,7 +31,7 @@ module Projects
           license_scanning: _('Search your project dependencies for their licenses and apply policies.'),
           sast: _('Analyze your source code for known vulnerabilities.'),
           secret_detection: _('Analyze your source code and git history for secrets.'),
-          coverage_fuzzing: _('Find bugs in your code with coverage-guided fuzzing')
+          coverage_fuzzing: _('Find bugs in your code with coverage-guided fuzzing.')
         }.freeze
       end
 
@@ -62,6 +62,7 @@ module Projects
           auto_fix_enabled: autofix_enabled,
           can_toggle_auto_fix_settings: auto_fix_permission,
           gitlab_ci_present: gitlab_ci_present?,
+          gitlab_ci_history_path: gitlab_ci_history_path,
           auto_fix_user_path: '/' # TODO: real link will be updated with https://gitlab.com/gitlab-org/gitlab/-/issues/215669
         }
       end
@@ -91,6 +92,11 @@ module Projects
 
       def gitlab_ci_present?
         latest_pipeline.try(:config_path) == Gitlab::FileDetector::PATTERNS[:gitlab_ci]
+      end
+
+      def gitlab_ci_history_path
+        gitlab_ci = Gitlab::FileDetector::PATTERNS[:gitlab_ci]
+        Gitlab::Routing.url_helpers.project_blame_path(project, File.join(project.default_branch, gitlab_ci))
       end
 
       def features
@@ -172,7 +178,7 @@ module Projects
       def configuration_path(type)
         {
           sast: project_security_configuration_sast_path(project),
-          dast_profiles: project_profiles_path(project)
+          dast_profiles: project_security_configuration_dast_profiles_path(project)
         }[type]
       end
     end

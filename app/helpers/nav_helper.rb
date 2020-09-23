@@ -47,7 +47,7 @@ module NavHelper
   end
 
   def has_extra_nav_icons?
-    Gitlab::Sherlock.enabled? || can?(current_user, :read_instance_statistics) || current_user.admin?
+    Gitlab::Sherlock.enabled? || current_user.admin?
   end
 
   def page_has_markdown?
@@ -63,7 +63,7 @@ module NavHelper
   end
 
   def admin_analytics_nav_links
-    %w(dev_ops_score cohorts)
+    %w(dev_ops_report cohorts)
   end
 
   def group_issues_sub_menu_items

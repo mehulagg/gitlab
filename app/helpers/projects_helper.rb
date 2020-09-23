@@ -7,7 +7,7 @@ module ProjectsHelper
   end
 
   def link_to_project(project)
-    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name) do
+    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name), class: 'gl-link' do
       title = content_tag(:span, project.name, class: 'project-name')
 
       if project.namespace
@@ -109,7 +109,7 @@ module ProjectsHelper
   end
 
   def transfer_project_message(project)
-    _("You are going to transfer %{project_full_name} to another owner. Are you ABSOLUTELY sure?") %
+    _("You are going to transfer %{project_full_name} to another namespace. Are you ABSOLUTELY sure?") %
       { project_full_name: project.full_name }
   end
 

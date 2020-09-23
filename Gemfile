@@ -45,6 +45,7 @@ gem 'omniauth_crowd', '~> 2.4.0'
 gem 'omniauth-authentiq', '~> 0.3.3'
 gem 'omniauth_openid_connect', '~> 0.3.5'
 gem 'omniauth-salesforce', '~> 1.0.5'
+gem 'omniauth-atlassian-oauth2', '~> 0.2.0'
 gem 'rack-oauth2', '~> 1.9.3'
 gem 'jwt', '~> 2.1.0'
 
@@ -88,7 +89,7 @@ gem 'grape-entity', '~> 0.7.1'
 gem 'rack-cors', '~> 1.0.6', require: 'rack/cors'
 
 # GraphQL API
-gem 'graphql', '~> 1.10.5'
+gem 'graphql', '~> 1.11.4'
 # NOTE: graphiql-rails v1.5+ doesn't work: https://gitlab.com/gitlab-org/gitlab/issues/31771
 # TODO: remove app/views/graphiql/rails/editors/show.html.erb when https://github.com/rmosolgo/graphiql-rails/pull/71 is released:
 # https://gitlab.com/gitlab-org/gitlab/issues/31747
@@ -341,7 +342,6 @@ group :development do
 
   # Better errors handler
   gem 'better_errors', '~> 2.7.1'
-  gem 'binding_of_caller', '~> 0.8.0'
 
   # thin instead webrick
   gem 'thin', '~> 1.7.0'
@@ -375,8 +375,6 @@ group :development, :test do
 
   gem 'scss_lint', '~> 0.56.0', require: false
   gem 'haml_lint', '~> 0.34.0', require: false
-  gem 'simplecov', '~> 0.18.5', require: false
-  gem 'simplecov-cobertura', '~> 1.3.1', require: false
   gem 'bundler-audit', '~> 0.6.1', require: false
 
   gem 'benchmark-ips', '~> 2.3.0', require: false
@@ -392,6 +390,11 @@ group :development, :test do
   gem 'parallel', '~> 1.19', require: false
 
   gem 'rblineprof', '~> 0.3.6', platform: :mri, require: false
+end
+
+group :development, :test, :coverage do
+  gem 'simplecov', '~> 0.18.5', require: false
+  gem 'simplecov-cobertura', '~> 1.3.1', require: false
 end
 
 # Gems required in omnibus-gitlab pipeline

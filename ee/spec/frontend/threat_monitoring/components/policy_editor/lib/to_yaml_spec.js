@@ -40,6 +40,25 @@ spec:
     });
   });
 
+  describe('when resourceVersion is not empty', () => {
+    beforeEach(() => {
+      policy.resourceVersion = '1234';
+    });
+
+    it('returns yaml representation', () => {
+      expect(toYaml(policy)).toEqual(`apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: test-policy
+  resourceVersion: '1234'
+spec:
+  endpointSelector:
+    matchLabels:
+      network-policy.gitlab.com/disabled_by: gitlab
+`);
+    });
+  });
+
   describe('when policy is enabled', () => {
     beforeEach(() => {
       policy.isEnabled = true;

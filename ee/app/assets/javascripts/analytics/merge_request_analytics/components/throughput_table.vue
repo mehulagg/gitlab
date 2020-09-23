@@ -1,4 +1,5 @@
 <script>
+import { mapState } from 'vuex';
 import dateFormat from 'dateformat';
 import {
   GlTable,
@@ -13,6 +14,7 @@ import {
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import { approximateDuration, differenceInSeconds } from '~/lib/utils/datetime_utility';
+import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
 import throughputTableQuery from '../graphql/queries/throughput_table.query.graphql';
 import {
@@ -114,11 +116,21 @@ export default {
     throughputTableData: {
       query: throughputTableQuery,
       variables() {
+        const options = filterToQueryObject({
+          sourceBranches: this.selectedSourceBranch,
+          targetBranches: this.selectedTargetBranch,
+          milestoneTitle: this.selectedMilestone,
+          authorUsername: this.selectedAuthor,
+          assigneeUsername: this.selectedAssignee,
+          labels: this.selectedLabelList,
+        });
+
         return {
           fullPath: this.fullPath,
           limit: MAX_RECORDS,
           startDate: dateFormat(this.startDate, dateFormats.isoDate),
           endDate: dateFormat(this.endDate, dateFormats.isoDate),
+          ...options,
         };
       },
       update: data => data.project.mergeRequests.nodes,
@@ -131,6 +143,14 @@ export default {
     },
   },
   computed: {
+    ...mapState('filters', {
+      selectedSourceBranch: state => state.branches.source.selected,
+      selectedTargetBranch: state => state.branches.target.selected,
+      selectedMilestone: state => state.milestones.selected,
+      selectedAuthor: state => state.authors.selected,
+      selectedAssignee: state => state.assignees.selected,
+      selectedLabelList: state => state.labels.selectedList,
+    }),
     tableDataAvailable() {
       return this.throughputTableData.length;
     },

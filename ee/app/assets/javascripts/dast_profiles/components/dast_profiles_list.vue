@@ -154,21 +154,6 @@ export default {
               @click="prepareProfileDeletion(item.id)"
             />
             <gl-button v-if="item.editPath" :href="item.editPath">{{ __('Edit') }}</gl-button>
-            <!--
-            NOTE: The tooltip and `disable` on the button is temporary until the edit feature has been implemented
-            further details: https://gitlab.com/groups/gitlab-org/-/epics/3786 (iteration outline)
-           -->
-            <span
-              v-else
-              v-gl-tooltip.hover
-              :title="
-                s__(
-                  'DastProfiles|Edit feature will come soon. Please create a new profile if changes needed',
-                )
-              "
-            >
-              <gl-button disabled>{{ __('Edit') }}</gl-button>
-            </span>
           </div>
         </template>
 

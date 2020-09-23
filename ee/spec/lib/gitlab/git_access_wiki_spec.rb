@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::GitAccessWiki do
+  include WikiHelpers
+
   let(:user) { create(:user) }
   let(:project) { create(:project, :wiki_repo) }
   let(:changes) { ['6f6d7e7ed 570e7b2ab refs/heads/master'] }
@@ -76,7 +78,7 @@ RSpec.describe Gitlab::GitAccessWiki do
 
         context 'when wiki feature is disabled' do
           before do
-            stub_feature_flags(group_wiki: false)
+            stub_group_wikis(false)
           end
 
           it_behaves_like 'forbidden git access' do
@@ -100,7 +102,7 @@ RSpec.describe Gitlab::GitAccessWiki do
 
         context 'when wiki feature is disabled' do
           before do
-            stub_feature_flags(group_wiki: false)
+            stub_group_wikis(false)
           end
 
           it_behaves_like 'forbidden git access' do

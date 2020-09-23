@@ -1,12 +1,12 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlSprintf, GlLink } from '@gitlab/ui';
+import { GlSprintf } from '@gitlab/ui';
 import Component from '~/registry/explorer/components/list_page/registry_header.vue';
+import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import {
   CONTAINER_REGISTRY_TITLE,
   LIST_INTRO_TEXT,
   EXPIRATION_POLICY_DISABLED_MESSAGE,
   EXPIRATION_POLICY_DISABLED_TEXT,
-  EXPIRATION_POLICY_WILL_RUN_IN,
 } from '~/registry/explorer/constants';
 
 jest.mock('~/lib/utils/datetime_utility', () => ({
@@ -17,25 +17,21 @@ jest.mock('~/lib/utils/datetime_utility', () => ({
 describe('registry_header', () => {
   let wrapper;
 
-  const findHeader = () => wrapper.find('[data-testid="header"]');
-  const findTitle = () => wrapper.find('[data-testid="title"]');
+  const findTitleArea = () => wrapper.find(TitleArea);
   const findCommandsSlot = () => wrapper.find('[data-testid="commands-slot"]');
-  const findInfoArea = () => wrapper.find('[data-testid="info-area"]');
-  const findIntroText = () => wrapper.find('[data-testid="default-intro"]');
-  const findSubHeader = () => wrapper.find('[data-testid="subheader"]');
   const findImagesCountSubHeader = () => wrapper.find('[data-testid="images-count"]');
   const findExpirationPolicySubHeader = () => wrapper.find('[data-testid="expiration-policy"]');
-  const findDisabledExpirationPolicyMessage = () =>
-    wrapper.find('[data-testid="expiration-disabled-message"]');
 
   const mountComponent = (propsData, slots) => {
     wrapper = shallowMount(Component, {
       stubs: {
         GlSprintf,
+        TitleArea,
       },
       propsData,
       slots,
     });
+    return wrapper.vm.$nextTick();
   };
 
   afterEach(() => {
@@ -44,175 +40,127 @@ describe('registry_header', () => {
   });
 
   describe('header', () => {
-    it('exists', () => {
+    it('has a title', () => {
       mountComponent();
-      expect(findHeader().exists()).toBe(true);
-    });
 
-    it('contains the title of the page', () => {
-      mountComponent();
-      const title = findTitle();
-      expect(title.exists()).toBe(true);
-      expect(title.text()).toBe(CONTAINER_REGISTRY_TITLE);
+      expect(findTitleArea().props('title')).toBe(CONTAINER_REGISTRY_TITLE);
     });
 
     it('has a commands slot', () => {
-      mountComponent(null, { commands: 'baz' });
+      mountComponent(null, { commands: '<div data-testid="commands-slot">baz</div>' });
+
       expect(findCommandsSlot().text()).toBe('baz');
     });
-  });
 
-  describe('subheader', () => {
-    describe('when there are no images', () => {
-      it('is hidden ', () => {
-        mountComponent();
-        expect(findSubHeader().exists()).toBe(false);
-      });
-    });
+    describe('sub header parts', () => {
+      describe('images count', () => {
+        it('exists', async () => {
+          await mountComponent({ imagesCount: 1 });
 
-    describe('when there are images', () => {
-      it('is visible', () => {
-        mountComponent({ imagesCount: 1 });
-        expect(findSubHeader().exists()).toBe(true);
-      });
+          expect(findImagesCountSubHeader().exists()).toBe(true);
+        });
 
-      describe('sub header parts', () => {
-        describe('images count', () => {
-          it('exists', () => {
-            mountComponent({ imagesCount: 1 });
-            expect(findImagesCountSubHeader().exists()).toBe(true);
-          });
+        it('when there is one image', async () => {
+          await mountComponent({ imagesCount: 1 });
 
-          it('when there is one image', () => {
-            mountComponent({ imagesCount: 1 });
-            expect(findImagesCountSubHeader().text()).toMatchInterpolatedText('1 Image repository');
-          });
-
-          it('when there is more than one image', () => {
-            mountComponent({ imagesCount: 3 });
-            expect(findImagesCountSubHeader().text()).toMatchInterpolatedText(
-              '3 Image repositories',
-            );
+          expect(findImagesCountSubHeader().props()).toMatchObject({
+            text: '1 Image repository',
+            icon: 'container-image',
           });
         });
 
-        describe('expiration policy', () => {
-          it('when is disabled', () => {
-            mountComponent({
-              expirationPolicy: { enabled: false },
-              expirationPolicyHelpPagePath: 'foo',
-              imagesCount: 1,
-            });
-            const text = findExpirationPolicySubHeader();
-            expect(text.exists()).toBe(true);
-            expect(text.text()).toMatchInterpolatedText(EXPIRATION_POLICY_DISABLED_TEXT);
+        it('when there is more than one image', async () => {
+          await mountComponent({ imagesCount: 3 });
+
+          expect(findImagesCountSubHeader().props('text')).toBe('3 Image repositories');
+        });
+      });
+
+      describe('expiration policy', () => {
+        it('when is disabled', async () => {
+          await mountComponent({
+            expirationPolicy: { enabled: false },
+            expirationPolicyHelpPagePath: 'foo',
+            imagesCount: 1,
           });
 
-          it('when is enabled', () => {
-            mountComponent({
-              expirationPolicy: { enabled: true },
-              expirationPolicyHelpPagePath: 'foo',
-              imagesCount: 1,
-            });
-            const text = findExpirationPolicySubHeader();
-            expect(text.exists()).toBe(true);
-            expect(text.text()).toMatchInterpolatedText(EXPIRATION_POLICY_WILL_RUN_IN);
+          const text = findExpirationPolicySubHeader();
+          expect(text.exists()).toBe(true);
+          expect(text.props()).toMatchObject({
+            text: EXPIRATION_POLICY_DISABLED_TEXT,
+            icon: 'expire',
+            size: 'xl',
           });
-          it('when the expiration policy is completely disabled', () => {
-            mountComponent({
-              expirationPolicy: { enabled: true },
-              expirationPolicyHelpPagePath: 'foo',
-              imagesCount: 1,
-              hideExpirationPolicyData: true,
-            });
-            const text = findExpirationPolicySubHeader();
-            expect(text.exists()).toBe(false);
+        });
+
+        it('when is enabled', async () => {
+          await mountComponent({
+            expirationPolicy: { enabled: true },
+            expirationPolicyHelpPagePath: 'foo',
+            imagesCount: 1,
           });
+
+          const text = findExpirationPolicySubHeader();
+          expect(text.exists()).toBe(true);
+          expect(text.props('text')).toBe('Expiration policy will run in ');
+        });
+        it('when the expiration policy is completely disabled', async () => {
+          await mountComponent({
+            expirationPolicy: { enabled: true },
+            expirationPolicyHelpPagePath: 'foo',
+            imagesCount: 1,
+            hideExpirationPolicyData: true,
+          });
+
+          const text = findExpirationPolicySubHeader();
+          expect(text.exists()).toBe(false);
         });
       });
     });
   });
 
-  describe('info area', () => {
-    it('exists', () => {
-      mountComponent();
-      expect(findInfoArea().exists()).toBe(true);
-    });
-
+  describe('info messages', () => {
     describe('default message', () => {
-      beforeEach(() => {
-        mountComponent({ helpPagePath: 'bar' });
-      });
+      it('is correctly bound to title_area props', () => {
+        mountComponent({ helpPagePath: 'foo' });
 
-      it('exists', () => {
-        expect(findIntroText().exists()).toBe(true);
-      });
-
-      it('has the correct copy', () => {
-        expect(findIntroText().text()).toMatchInterpolatedText(LIST_INTRO_TEXT);
-      });
-
-      it('has the correct link', () => {
-        expect(
-          findIntroText()
-            .find(GlLink)
-            .attributes('href'),
-        ).toBe('bar');
+        expect(findTitleArea().props('infoMessages')).toEqual([
+          { text: LIST_INTRO_TEXT, link: 'foo' },
+        ]);
       });
     });
 
     describe('expiration policy info message', () => {
-      describe('when there are no images', () => {
-        it('is hidden', () => {
-          mountComponent();
-          expect(findDisabledExpirationPolicyMessage().exists()).toBe(false);
-        });
-      });
-
       describe('when there are images', () => {
         describe('when expiration policy is disabled', () => {
           beforeEach(() => {
-            mountComponent({
+            return mountComponent({
               expirationPolicy: { enabled: false },
               expirationPolicyHelpPagePath: 'foo',
               imagesCount: 1,
             });
           });
-          it('message exist', () => {
-            expect(findDisabledExpirationPolicyMessage().exists()).toBe(true);
-          });
-          it('has the correct copy', () => {
-            expect(findDisabledExpirationPolicyMessage().text()).toMatchInterpolatedText(
-              EXPIRATION_POLICY_DISABLED_MESSAGE,
-            );
-          });
 
-          it('has the correct link', () => {
-            expect(
-              findDisabledExpirationPolicyMessage()
-                .find(GlLink)
-                .attributes('href'),
-            ).toBe('foo');
+          it('the prop is correctly bound', () => {
+            expect(findTitleArea().props('infoMessages')).toEqual([
+              { text: LIST_INTRO_TEXT, link: '' },
+              { text: EXPIRATION_POLICY_DISABLED_MESSAGE, link: 'foo' },
+            ]);
           });
         });
 
-        describe('when expiration policy is enabled', () => {
+        describe.each`
+          desc                                                   | props
+          ${'when there are no images'}                          | ${{ expirationPolicy: { enabled: false }, imagesCount: 0 }}
+          ${'when expiration policy is enabled'}                 | ${{ expirationPolicy: { enabled: true }, imagesCount: 1 }}
+          ${'when the expiration policy is completely disabled'} | ${{ expirationPolicy: { enabled: false }, imagesCount: 1, hideExpirationPolicyData: true }}
+        `('$desc', ({ props }) => {
           it('message does not exist', () => {
-            mountComponent({
-              expirationPolicy: { enabled: true },
-              imagesCount: 1,
-            });
-            expect(findDisabledExpirationPolicyMessage().exists()).toBe(false);
-          });
-        });
-        describe('when the expiration policy is completely disabled', () => {
-          it('message does not exist', () => {
-            mountComponent({
-              expirationPolicy: { enabled: true },
-              imagesCount: 1,
-              hideExpirationPolicyData: true,
-            });
-            expect(findDisabledExpirationPolicyMessage().exists()).toBe(false);
+            mountComponent(props);
+
+            expect(findTitleArea().props('infoMessages')).toEqual([
+              { text: LIST_INTRO_TEXT, link: '' },
+            ]);
           });
         });
       });

@@ -1,4 +1,5 @@
 <script>
+import * as Sentry from '@sentry/browser';
 import {
   GlAlert,
   GlButton,
@@ -12,7 +13,13 @@ import {
   GlLoadingIcon,
 } from '@gitlab/ui';
 import download from '~/lib/utils/downloader';
-import { DAST_SITE_VALIDATION_METHOD_TEXT_FILE, DAST_SITE_VALIDATION_METHODS } from '../constants';
+import {
+  DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
+  DAST_SITE_VALIDATION_METHODS,
+  DAST_SITE_VALIDATION_STATUS,
+} from '../constants';
+import dastSiteValidationCreateMutation from '../graphql/dast_site_validation_create.mutation.graphql';
+import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graphql';
 
 export default {
   name: 'DastSiteValidation',
@@ -28,18 +35,59 @@ export default {
     GlInputGroupText,
     GlLoadingIcon,
   },
+  apollo: {
+    dastSiteValidation: {
+      query: dastSiteValidationQuery,
+      variables() {
+        return {
+          fullPath: this.fullPath,
+          targetUrl: this.targetUrl,
+        };
+      },
+      manual: true,
+      result({
+        data: {
+          project: {
+            dastSiteValidation: { status },
+          },
+        },
+      }) {
+        if (status === DAST_SITE_VALIDATION_STATUS.VALID) {
+          this.onSuccess();
+        }
+      },
+      skip() {
+        return !(this.isCreatingValidation || this.isValidating);
+      },
+      pollInterval: 1000,
+      error(e) {
+        this.onError(e);
+      },
+    },
+  },
   props: {
+    fullPath: {
+      type: String,
+      required: true,
+    },
     targetUrl: {
       type: String,
       required: true,
     },
+    tokenId: {
+      type: String,
+      required: false,
+      default: null,
+    },
     token: {
       type: String,
-      required: true,
+      required: false,
+      default: null,
     },
   },
   data() {
     return {
+      isCreatingValidation: false,
       isValidating: false,
       hasValidationError: false,
       validationMethod: DAST_SITE_VALIDATION_METHOD_TEXT_FILE,
@@ -66,20 +114,45 @@ export default {
       download({ fileName: this.textFileName, fileData: btoa(this.token) });
     },
     async validate() {
-      // TODO: Trigger the dastSiteValidationCreate GraphQL mutation.
-      // See https://gitlab.com/gitlab-org/gitlab/-/issues/238578
       this.hasValidationError = false;
+      this.isCreatingValidation = true;
       this.isValidating = true;
       try {
-        await new Promise(resolve => {
-          setTimeout(resolve, 1000);
+        const {
+          data: {
+            dastSiteValidationCreate: { status, errors },
+          },
+        } = await this.$apollo.mutate({
+          mutation: dastSiteValidationCreateMutation,
+          variables: {
+            projectFullPath: this.fullPath,
+            dastSiteTokenId: this.tokenId,
+            strategy: this.validationMethod,
+          },
         });
-        this.isValidating = false;
-        this.$emit('success');
-      } catch (_) {
-        this.hasValidationError = true;
-        this.isValidating = false;
+        if (errors?.length) {
+          this.onError();
+        } else if (status === DAST_SITE_VALIDATION_STATUS.VALID) {
+          this.onSuccess();
+        } else {
+          this.isCreatingValidation = false;
+        }
+      } catch (exception) {
+        this.onError(exception);
       }
+    },
+    onSuccess() {
+      this.isCreatingValidation = false;
+      this.isValidating = false;
+      this.$emit('success');
+    },
+    onError(exception = null) {
+      if (exception !== null) {
+        Sentry.captureException(exception);
+      }
+      this.isCreatingValidation = false;
+      this.isValidating = false;
+      this.hasValidationError = true;
     },
   },
   validationMethodOptions: Object.values(DAST_SITE_VALIDATION_METHODS),

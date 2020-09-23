@@ -3,7 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe GitlabSchema.types['SastCiConfigurationAnalyzersEntity'] do
-  let(:fields) { %i[name label enabled description] }
+  let(:fields) { %i[name label enabled description variables] }
 
   it { expect(described_class.graphql_name).to eq('SastCiConfigurationAnalyzersEntity') }
 

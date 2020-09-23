@@ -44,7 +44,10 @@ module Gitlab
       #   "+      # Test change",
       #   "-      # Old change" ]
       def changed_lines(changed_file)
-        git.diff_for_file(changed_file).patch.split("\n").select { |line| %r{^[+-]}.match?(line) }
+        diff = git.diff_for_file(changed_file)
+        return [] unless diff
+
+        diff.patch.split("\n").select { |line| %r{^[+-]}.match?(line) }
       end
 
       def all_ee_changes
@@ -209,6 +212,12 @@ module Gitlab
 
       def sanitize_mr_title(title)
         title.gsub(DRAFT_REGEX, '').gsub(/`/, '\\\`')
+      end
+
+      def draft_mr?
+        return false unless gitlab_helper
+
+        DRAFT_REGEX.match?(gitlab_helper.mr_json['title'])
       end
 
       def security_mr?

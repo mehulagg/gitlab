@@ -1,8 +1,19 @@
 #import "~/graphql_shared/fragments/pageInfo.fragment.graphql"
 #import "ee/security_dashboard/graphql/project.fragment.graphql"
 
-query getProjects($search: String!, $after: String = "", $first: Int!) {
-  projects(search: $search, after: $after, first: $first, membership: true) {
+query getProjects(
+  $search: String!
+  $after: String = ""
+  $first: Int!
+  $searchNamespaces: Boolean = false
+) {
+  projects(
+    search: $search
+    after: $after
+    first: $first
+    membership: true
+    searchNamespaces: $searchNamespaces
+  ) {
     nodes {
       ...Project
     }

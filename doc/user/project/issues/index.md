@@ -156,11 +156,14 @@ collaborate with your team.
 efficiently and with less effort by tracking groups of issues that share a theme, across
 projects and milestones.
 
-### Related issues **(STARTER)**
+### Related issues
 
 You can mark two issues as related, so that when viewing one, the other is always
 listed in its [Related Issues](related_issues.md) section. This can help display important
 context, such as past work, dependencies, or duplicates.
+
+Users on [GitLab Starter, GitLab Bronze, and higher tiers](https://about.gitlab.com/pricing/), can
+also mark issues as blocking or blocked by another issue.
 
 ### Crosslinking issues
 
@@ -221,4 +224,4 @@ Feature.disable(:save_issuable_health_status)
 - [Export issues](csv_export.md)
 - [Issues API](../../../api/issues.md)
 - Configure an [external issue tracker](../../../integration/external-issue-tracker.md)
-  such as Jira, Redmine, or Bugzilla.
+  such as Jira, Redmine, Bugzilla, or EWM.

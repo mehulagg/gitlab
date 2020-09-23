@@ -11,6 +11,7 @@ import './behaviors';
 // lib/utils
 import applyGitLabUIConfig from '@gitlab/ui/dist/config';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
+import { initRails } from '~/lib/utils/rails_ujs';
 import {
   handleLocationHash,
   addSelectOnFocusBehaviour,
@@ -31,8 +32,6 @@ import initLogoAnimation from './logo';
 import initFrequentItemDropdowns from './frequent_items';
 import initBreadcrumbs from './breadcrumb';
 import initUsagePingConsent from './usage_ping_consent';
-import initPerformanceBar from './performance_bar';
-import initSearchAutocomplete from './search_autocomplete';
 import GlFieldErrors from './gl_field_errors';
 import initUserPopovers from './user_popovers';
 import initBroadcastNotifications from './broadcast_notification';
@@ -113,7 +112,21 @@ function deferredInitialisation() {
   initPersistentUserCallouts();
   initDefaultTrackers();
 
-  if (document.querySelector('.search')) initSearchAutocomplete();
+  const search = document.querySelector('#search');
+  if (search) {
+    search.addEventListener(
+      'focus',
+      () => {
+        import(/* webpackChunkName: 'globalSearch' */ './search_autocomplete')
+          .then(({ default: initSearchAutocomplete }) => {
+            const searchDropdown = initSearchAutocomplete();
+            searchDropdown.onSearchInputFocus();
+          })
+          .catch(() => {});
+      },
+      { once: true },
+    );
+  }
 
   addSelectOnFocusBehaviour('.js-select-on-focus');
 
@@ -157,14 +170,14 @@ function deferredInitialisation() {
 
   // Adding a helper class to activate animations only after all is rendered
   setTimeout(() => $body.addClass('page-initialised'), 1000);
+
+  initRails();
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   const $body = $('body');
   const $document = $(document);
   const bootstrapBreakpoint = bp.getBreakpointSize();
-
-  if (document.querySelector('#js-peek')) initPerformanceBar({ container: '#js-peek' });
 
   initUserTracking();
   initLayoutNav();

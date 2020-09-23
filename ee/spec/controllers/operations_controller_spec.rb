@@ -660,7 +660,7 @@ RSpec.describe OperationsController do
         project_b.add_developer(user)
       end
 
-      it 'adds projects to the dasboard' do
+      it 'adds projects to the dashboard' do
         post :create, params: { project_ids: [project_a.id, project_b.id.to_s] }
 
         expect(response).to have_gitlab_http_status(:ok)

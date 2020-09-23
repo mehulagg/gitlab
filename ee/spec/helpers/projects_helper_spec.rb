@@ -178,10 +178,12 @@ RSpec.describe ProjectsHelper do
         projects/dast_site_profiles#new
         projects/dast_site_profiles#edit
         projects/dast_scanner_profiles#new
+        projects/dast_scanner_profiles#edit
         projects/dependencies#index
         projects/licenses#index
         projects/threat_monitoring#show
         projects/threat_monitoring#new
+        projects/threat_monitoring#edit
       ]
     end
 
@@ -198,6 +200,7 @@ RSpec.describe ProjectsHelper do
         projects/dast_site_profiles#new
         projects/dast_site_profiles#edit
         projects/dast_scanner_profiles#new
+        projects/dast_scanner_profiles#edit
       ]
     end
 

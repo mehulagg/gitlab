@@ -74,12 +74,14 @@ module API
       end
       params do
         requires :title, type: String, desc: 'The title of a child epic'
+        optional :confidential, type: Boolean, desc: 'Indicates if the epic is confidential. Will be ignored if `confidential_epics` feature flag is disabled'
       end
       post ':id/(-/)epics/:epic_iid/epics' do
         authorize_subepics_feature!
         authorize_can_admin_epic_link!
 
-        create_params = { parent_id: epic.id, title: params[:title] }
+        confidential = params[:confidential].nil? ? epic.confidential : params[:confidential]
+        create_params = { parent_id: epic.id, title: params[:title], confidential: confidential }
 
         child_epic = ::Epics::CreateService.new(user_group, current_user, create_params).execute
 

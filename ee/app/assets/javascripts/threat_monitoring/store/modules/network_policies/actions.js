@@ -16,14 +16,20 @@ const commitReceivePoliciesError = (commit, payload) => {
 };
 
 export const fetchPolicies = ({ state, commit }, environmentId) => {
-  if (!state.policiesEndpoint || !environmentId) return commitReceivePoliciesError(commit);
+  if (!state.policiesEndpoint) return commitReceivePoliciesError(commit);
 
   commit(types.REQUEST_POLICIES);
 
+  const params = environmentId ? { params: { environment_id: environmentId } } : {};
+
   return axios
-    .get(state.policiesEndpoint, { params: { environment_id: environmentId } })
+    .get(state.policiesEndpoint, params)
     .then(({ data }) => commit(types.RECEIVE_POLICIES_SUCCESS, data))
-    .catch(error => commitReceivePoliciesError(commit, error?.response?.data));
+    .catch(({ response: { data } }) => {
+      const payload = data?.payload?.length ? data.payload : [];
+      commit(types.RECEIVE_POLICIES_SUCCESS, payload);
+      commitReceivePoliciesError(commit, data);
+    });
 };
 
 const commitPolicyError = (commit, type, payload) => {
@@ -86,5 +92,29 @@ export const updatePolicy = ({ state, commit }, { environmentId, policy }) => {
     })
     .catch(error =>
       commitPolicyError(commit, types.RECEIVE_UPDATE_POLICY_ERROR, error?.response?.data),
+    );
+};
+
+export const deletePolicy = ({ state, commit }, { environmentId, policy }) => {
+  if (!state.policiesEndpoint || !environmentId || !policy) {
+    return commitPolicyError(commit, types.RECEIVE_DELETE_POLICY_ERROR);
+  }
+
+  commit(types.REQUEST_DELETE_POLICY);
+
+  return axios
+    .delete(joinPaths(state.policiesEndpoint, policy.name), {
+      params: {
+        environment_id: environmentId,
+        manifest: policy.manifest,
+      },
+    })
+    .then(() => {
+      commit(types.RECEIVE_DELETE_POLICY_SUCCESS, {
+        policy,
+      });
+    })
+    .catch(error =>
+      commitPolicyError(commit, types.RECEIVE_DELETE_POLICY_ERROR, error?.response?.data),
     );
 };

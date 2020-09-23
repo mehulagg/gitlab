@@ -67,12 +67,13 @@ export default {
       });
   },
 
-  createChildEpic({ groupId, parentEpicIid, title }) {
+  createChildEpic({ confidential, groupId, parentEpicIid, title }) {
     const url = Api.buildUrl(this.childEpicPath)
       .replace(':id', encodeURIComponent(groupId))
       .replace(':epic_iid', parentEpicIid);
 
     return axios.post(url, {
+      confidential,
       title,
     });
   },
@@ -163,7 +164,7 @@ export default {
       .replace(':value_stream_id', valueStreamId)
       .replace(':stage_id', stageId);
 
-    return axios.get(url, { params: { ...params } });
+    return axios.get(url, { params });
   },
 
   cycleAnalyticsCreateStage({ groupId, valueStreamId, data }) {

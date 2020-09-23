@@ -1,9 +1,7 @@
 <script>
 import { GlEmptyState } from '@gitlab/ui';
 import { mapActions, mapState, mapGetters } from 'vuex';
-import { featureAccessLevel } from '~/pages/projects/shared/permissions/constants';
 import { PROJECTS_PER_PAGE } from '../constants';
-import GroupsDropdownFilter from '../../shared/components/groups_dropdown_filter.vue';
 import ProjectsDropdownFilter from '../../shared/components/projects_dropdown_filter.vue';
 import { SIMILARITY_ORDER, LAST_ACTIVITY_AT, DATE_RANGE_LIMIT } from '../../shared/constants';
 import DateRange from '../../shared/components/daterange.vue';
@@ -25,7 +23,6 @@ export default {
     DateRange,
     DurationChart,
     GlEmptyState,
-    GroupsDropdownFilter,
     ProjectsDropdownFilter,
     StageTable,
     TypeOfWorkCharts,
@@ -50,10 +47,6 @@ export default {
       type: String,
       required: true,
     },
-    hideGroupDropDown: {
-      type: Boolean,
-      required: true,
-    },
   },
   computed: {
     ...mapState([
@@ -61,7 +54,7 @@ export default {
       'isLoading',
       'isLoadingStage',
       'isEmptyStage',
-      'selectedGroup',
+      'currentGroup',
       'selectedProjects',
       'selectedStage',
       'stages',
@@ -71,6 +64,7 @@ export default {
       'endDate',
       'medians',
       'isLoadingValueStreams',
+      'selectedStageError',
     ]),
     // NOTE: formEvents are fetched in the same request as the list of stages (fetchGroupStagesAndEvents)
     // so i think its ok to bind formEvents here even though its only used as a prop to the custom-stage-form
@@ -86,10 +80,10 @@ export default {
     ]),
     ...mapGetters('customStages', ['customStageFormActive']),
     shouldRenderEmptyState() {
-      return !this.selectedGroup && !this.isLoading;
+      return !this.currentGroup && !this.isLoading;
     },
     shouldDisplayFilters() {
-      return this.selectedGroup && !this.errorCode;
+      return !this.errorCode;
     },
     shouldDisplayDurationChart() {
       return this.featureFlags.hasDurationChart && !this.hasNoAccessError;
@@ -99,11 +93,6 @@ export default {
     },
     shouldDisplayPathNavigation() {
       return this.featureFlags.hasPathNavigation && !this.hasNoAccessError && this.selectedStage;
-    },
-    shouldDisplayFilterBar() {
-      // TODO: After we remove instance VSA currentGroupPath will be always set
-      // https://gitlab.com/gitlab-org/gitlab/-/issues/223735
-      return this.currentGroupPath;
     },
     shouldDisplayCreateMultipleValueStreams() {
       return Boolean(
@@ -117,7 +106,6 @@ export default {
       const selectedProjectIds = this.selectedProjectIds?.length ? this.selectedProjectIds : null;
 
       return {
-        group_id: !this.hideGroupDropDown ? this.currentGroupPath : null,
         project_ids: selectedProjectIds,
         created_after: toYmd(this.startDate),
         created_before: toYmd(this.endDate),
@@ -142,26 +130,14 @@ export default {
     ...mapActions([
       'fetchCycleAnalyticsData',
       'fetchStageData',
-      'setSelectedGroup',
       'setSelectedProjects',
       'setSelectedStage',
       'setDateRange',
-      'updateStage',
       'removeStage',
       'updateStage',
       'reorderStage',
     ]),
-    ...mapActions('customStages', [
-      'hideForm',
-      'showCreateForm',
-      'showEditForm',
-      'createStage',
-      'clearFormErrors',
-    ]),
-    onGroupSelect(group) {
-      this.setSelectedGroup(group);
-      this.fetchCycleAnalyticsData();
-    },
+    ...mapActions('customStages', ['hideForm', 'showCreateForm', 'showEditForm', 'createStage']),
     onProjectsSelect(projects) {
       this.setSelectedProjects(projects);
       this.fetchCycleAnalyticsData();
@@ -193,9 +169,6 @@ export default {
   },
   multiProjectSelect: true,
   dateOptions: [7, 30, 90],
-  groupsQueryParams: {
-    min_access_level: featureAccessLevel.EVERYONE,
-  },
   maxDateRange: DATE_RANGE_LIMIT,
 };
 </script>
@@ -210,7 +183,15 @@ export default {
         class="gl-align-self-start gl-sm-align-self-start gl-mt-0 gl-sm-mt-5"
       />
     </div>
-    <div class="gl-max-w-full">
+    <gl-empty-state
+      v-if="shouldRenderEmptyState"
+      :title="__('Value Stream Analytics can help you determine your team’s velocity')"
+      :description="
+        __('Filter parameters are not valid. Make sure that the end date is after the start date.')
+      "
+      :svg-path="emptyStateSvgPath"
+    />
+    <div v-if="!shouldRenderEmptyState" class="gl-max-w-full">
       <div class="gl-mt-3 gl-py-2 gl-px-3 bg-gray-light border-top border-bottom">
         <div v-if="shouldDisplayPathNavigation" class="gl-w-full gl-pb-2">
           <path-navigation
@@ -222,57 +203,35 @@ export default {
           />
         </div>
         <div
+          v-if="shouldDisplayFilters"
           class="gl-display-flex gl-flex-direction-column gl-lg-flex-direction-row gl-justify-content-space-between"
         >
-          <div class="dropdown-container d-flex flex-column flex-lg-row">
-            <groups-dropdown-filter
-              v-if="!hideGroupDropDown"
-              class="js-groups-dropdown-filter"
-              :class="{ 'mr-lg-3': shouldDisplayFilters }"
-              :query-params="$options.groupsQueryParams"
-              :default-group="selectedGroup"
-              @selected="onGroupSelect"
-            />
-            <projects-dropdown-filter
-              v-if="shouldDisplayFilters"
-              :key="selectedGroup.id"
-              class="js-projects-dropdown-filter project-select"
-              :group-id="selectedGroup.id"
-              :query-params="projectsQueryParams"
-              :multi-select="$options.multiProjectSelect"
-              :default-projects="selectedProjects"
-              @selected="onProjectsSelect"
-            />
-          </div>
-          <div v-if="shouldDisplayFilters" class="gl-justify-content-end gl-white-space-nowrap">
-            <date-range
-              :start-date="startDate"
-              :end-date="endDate"
-              :max-date-range="$options.maxDateRange"
-              :include-selected-date="true"
-              class="js-daterange-picker"
-              @change="setDateRange"
-            />
-          </div>
+          <projects-dropdown-filter
+            :key="currentGroup.id"
+            class="js-projects-dropdown-filter project-select"
+            :group-id="currentGroup.id"
+            :query-params="projectsQueryParams"
+            :multi-select="$options.multiProjectSelect"
+            :default-projects="selectedProjects"
+            @selected="onProjectsSelect"
+          />
+          <date-range
+            :start-date="startDate"
+            :end-date="endDate"
+            :max-date-range="$options.maxDateRange"
+            :include-selected-date="true"
+            class="js-daterange-picker"
+            @change="setDateRange"
+          />
         </div>
         <filter-bar
-          v-if="shouldDisplayFilterBar"
+          v-if="shouldDisplayFilters"
           class="js-filter-bar filtered-search-box gl-display-flex gl-mt-3 gl-mr-3 gl-border-none"
           :group-path="currentGroupPath"
         />
       </div>
     </div>
-    <gl-empty-state
-      v-if="shouldRenderEmptyState"
-      :title="__('Value Stream Analytics can help you determine your team’s velocity')"
-      :description="
-        __(
-          'Start by choosing a group to see how your team is spending time. You can then drill down to the project level.',
-        )
-      "
-      :svg-path="emptyStateSvgPath"
-    />
-    <div v-else class="cycle-analytics mt-0">
+    <div v-if="!shouldRenderEmptyState" class="cycle-analytics gl-mt-0">
       <gl-empty-state
         v-if="hasNoAccessError"
         class="js-empty-state"
@@ -296,6 +255,7 @@ export default {
           :custom-stage-form-active="customStageFormActive"
           :current-stage-events="currentStageEvents"
           :no-data-svg-path="noDataSvgPath"
+          :empty-state-message="selectedStageError"
         >
           <template #nav>
             <stage-table-nav

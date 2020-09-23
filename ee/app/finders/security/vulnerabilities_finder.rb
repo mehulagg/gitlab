@@ -12,6 +12,8 @@
 #     report_types: only return vulnerabilities from these report types
 #     severities: only return vulnerabilities with these severities
 #     states: only return vulnerabilities in these states
+#     has_resolution: only return vulnerabilities thah have resolution
+#     has_issues: only return vulnerabilities that have issues linked
 #     sort: return vulnerabilities ordered by severity_asc or severity_desc
 
 module Security
@@ -29,6 +31,8 @@ module Security
       filter_by_severities
       filter_by_states
       filter_by_scanners
+      filter_by_resolution
+      filter_by_issues
 
       sort(vulnerabilities)
     end
@@ -64,6 +68,18 @@ module Security
     def filter_by_scanners
       if params[:scanner].present?
         @vulnerabilities = vulnerabilities.with_scanners(params[:scanner])
+      end
+    end
+
+    def filter_by_resolution
+      if params[:has_resolution].in?([true, false])
+        @vulnerabilities = vulnerabilities.with_resolution(params[:has_resolution])
+      end
+    end
+
+    def filter_by_issues
+      if params[:has_issues].in?([true, false])
+        @vulnerabilities = vulnerabilities.with_issues(params[:has_issues])
       end
     end
 

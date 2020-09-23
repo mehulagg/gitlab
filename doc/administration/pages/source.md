@@ -61,7 +61,7 @@ Before proceeding with the Pages configuration, make sure that:
    Pages artifacts.
 1. (Optional) You have a **wildcard certificate** for the Pages domain if you
    decide to serve Pages (`*.example.io`) under HTTPS.
-1. (Optional but recommended) You have configured and enabled the [Shared Runners](../../ci/runners/README.md)
+1. (Optional but recommended) You have configured and enabled the [shared runners](../../ci/runners/README.md)
    so that your users don't have to bring their own.
 
 ### DNS configuration
@@ -346,6 +346,10 @@ world. Custom domains and TLS are supported.
    listens to.
 1. Restart NGINX
 1. [Restart GitLab](../restart_gitlab.md#installations-from-source)
+
+## Enable redirects
+
+In GitLab Pages, you can [enable the redirects feature](../../user/project/pages/redirects.md#enable-or-disable-redirects) to configure rules to forward one URL to another using HTTP redirects.
 
 ## NGINX caveats
 

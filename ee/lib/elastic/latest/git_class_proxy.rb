@@ -115,6 +115,7 @@ module Elastic
           filter :filename, field: :file_name
           filter :path, parser: ->(input) { "*#{input.downcase}*" }
           filter :extension, field: :path, parser: ->(input) { '*.' + input.downcase }
+          filter :blob, field: :oid
         end
 
         bool_expr = Gitlab::Elastic::BoolExpr.new

@@ -1,11 +1,11 @@
 <script>
-/* eslint-disable vue/no-v-html */
 import $ from 'jquery';
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import Tracking from '~/tracking';
 import eventHub from '~/sidebar/event_hub';
 import tooltip from '~/vue_shared/directives/tooltip';
+import { MAX_DISPLAY_WEIGHT } from '../../constants';
 
 export default {
   components: {
@@ -66,31 +66,15 @@ export default {
       return this.checkIfNoValue(this.weight);
     },
     collapsedWeightLabel() {
-      let label = this.weight;
-      if (this.checkIfNoValue(this.weight)) {
-        label = this.noValueLabel;
-      }
-
-      // Truncate with ellipsis after five digits
-      if (this.weight > 99999) {
-        label = `${this.weight.toString().substr(0, 5)}&hellip;`;
-      }
-
-      return label;
+      return this.checkIfNoValue(this.weight)
+        ? this.noValueLabel
+        : this.weight.toString().substr(0, 5);
     },
     noValueLabel() {
       return s__('Sidebar|None');
     },
-    changeWeightLabel() {
-      return s__('Sidebar|Change weight');
-    },
     dropdownToggleLabel() {
-      let label = this.weight;
-      if (this.checkIfNoValue(this.weight)) {
-        label = s__('Sidebar|Weight');
-      }
-
-      return label;
+      return this.checkIfNoValue(this.weight) ? s__('Sidebar|Weight') : this.weight;
     },
     shouldShowWeight() {
       return !this.fetching && !this.shouldShowEditField;
@@ -150,6 +134,7 @@ export default {
       eventHub.$emit('updateWeight', '', this.id);
     },
   },
+  maxDisplayWeight: MAX_DISPLAY_WEIGHT,
 };
 </script>
 
@@ -166,7 +151,12 @@ export default {
     >
       <gl-icon :size="16" name="weight" />
       <gl-loading-icon v-if="fetching" class="js-weight-collapsed-loading-icon" />
-      <span v-else class="js-weight-collapsed-weight-label" v-html="collapsedWeightLabel"></span>
+      <span v-else class="js-weight-collapsed-weight-label">
+        {{ collapsedWeightLabel
+        }}<template v-if="weight > $options.maxDisplayWeight"
+          >&hellip;</template
+        >
+      </span>
     </div>
     <div class="title hide-collapsed">
       {{ s__('Sidebar|Weight') }}

@@ -211,9 +211,10 @@ RSpec.describe Issues::UpdateService do
 
           it 'calls EpicIssues::CreateService' do
             link_sevice = double
-            expect(EpicIssues::CreateService).to receive(:new).with(epic, user, { target_issuable: issue })
+            expect(EpicIssues::CreateService).to receive(:new)
+              .with(epic, user, { target_issuable: issue, skip_epic_dates_update: true })
               .and_return(link_sevice)
-            expect(link_sevice).to receive(:execute)
+            expect(link_sevice).to receive(:execute).and_return({ status: :success })
 
             subject
           end
@@ -232,9 +233,10 @@ RSpec.describe Issues::UpdateService do
 
           it 'calls EpicIssues::CreateService' do
             link_sevice = double
-            expect(EpicIssues::CreateService).to receive(:new).with(epic, user, { target_issuable: issue })
+            expect(EpicIssues::CreateService).to receive(:new)
+              .with(epic, user, { target_issuable: issue, skip_epic_dates_update: true })
               .and_return(link_sevice)
-            expect(link_sevice).to receive(:execute)
+            expect(link_sevice).to receive(:execute).and_return({ status: :success })
 
             subject
           end
@@ -273,7 +275,7 @@ RSpec.describe Issues::UpdateService do
             link_sevice = double
             expect(EpicIssues::DestroyService).to receive(:new).with(EpicIssue.last, user)
               .and_return(link_sevice)
-            expect(link_sevice).to receive(:execute)
+            expect(link_sevice).to receive(:execute).and_return({ status: :success })
 
             subject
           end
@@ -311,7 +313,7 @@ RSpec.describe Issues::UpdateService do
         link_sevice = double
         expect(EpicIssues::DestroyService).to receive(:new).with(epic_issue, user)
           .and_return(link_sevice)
-        expect(link_sevice).to receive(:execute)
+        expect(link_sevice).to receive(:execute).and_return({ status: :success })
 
         subject
       end

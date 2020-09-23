@@ -1,5 +1,8 @@
 import Vue from 'vue';
+import { GlToast } from '@gitlab/ui';
 import ResetButton from './reset_button.vue';
+
+Vue.use(GlToast);
 
 export function pipelineMinutes() {
   const el = document.getElementById('pipeline-minutes-vue');

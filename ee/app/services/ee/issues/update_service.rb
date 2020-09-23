@@ -6,9 +6,15 @@ module EE
       extend ::Gitlab::Utils::Override
       include ::Gitlab::Utils::StrongMemoize
 
+      override :filter_params
+      def filter_params(issue)
+        handle_epic(issue)
+
+        super
+      end
+
       override :execute
       def execute(issue)
-        handle_epic(issue)
         handle_promotion(issue)
 
         result = super

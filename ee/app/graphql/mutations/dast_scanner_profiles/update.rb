@@ -25,7 +25,7 @@ module Mutations
 
       argument :spider_timeout, GraphQL::INT_TYPE,
                 required: true,
-                description: 'The maximum number of seconds allowed for the spider to traverse the site.'
+                description: 'The maximum number of minutes allowed for the spider to traverse the site.'
 
       argument :target_timeout, GraphQL::INT_TYPE,
                 required: true,

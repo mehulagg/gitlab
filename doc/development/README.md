@@ -43,6 +43,7 @@ For information on how to install, configure, update, and upgrade your own GitLa
 
 **Must-reads:**
 
+- [Guide on adapting existing and introducing new components](architecture.md#adapting-existing-and-introducing-new-components)
 - [Code review guidelines](code_review.md) for reviewing code and having code reviewed
 - [Database review guidelines](database_review.md) for reviewing database-related changes and complex SQL queries, and having them reviewed
 - [Secure coding guidelines](secure_coding_guidelines.md)
@@ -57,6 +58,7 @@ Complementary reads:
 - [Generate a changelog entry with `bin/changelog`](changelog.md)
 - [Requesting access to Chatops on GitLab.com](chatops_on_gitlabcom.md#requesting-access) (for GitLab team members)
 - [Patch release process for developers](https://gitlab.com/gitlab-org/release/docs/blob/master/general/patch/process.md#process-for-developers)
+- [Adding a new service component to GitLab](adding_service_component.md)
 
 ## UX and Frontend guides
 
@@ -197,6 +199,7 @@ See [database guidelines](database/index.md).
 - [Defining relations between files using projections](projections.md)
 - [Reference processing](./reference_processing.md)
 - [Compatibility with multiple versions of the application running at the same time](multi_version_compatibility.md)
+- [Features inside `.gitlab/`](./features_inside_dot_gitlab.md)
 
 ## Other GitLab Development Kit (GDK) guides
 

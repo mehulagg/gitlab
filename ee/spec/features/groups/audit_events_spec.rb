@@ -8,6 +8,8 @@ RSpec.describe 'Groups > Audit Events', :js do
   let(:group) { create(:group) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     group.add_owner(user)
     group.add_developer(alex)
     sign_in(user)

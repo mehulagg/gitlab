@@ -32,7 +32,7 @@ RSpec.shared_examples 'package details link' do |property|
 
     expect(page).to have_current_path(project_package_path(package.project, package))
 
-    page.within('.detail-page-header') do
+    page.within('[data-qa-selector="package_title"]') do
       expect(page).to have_content(package.name)
     end
 
@@ -84,11 +84,11 @@ RSpec.shared_examples 'shared package sorting' do
     let(:packages) { [package_two, package_one] }
   end
 
-  it_behaves_like 'correctly sorted packages list', 'Created' do
+  it_behaves_like 'correctly sorted packages list', 'Published' do
     let(:packages) { [package_two, package_one] }
   end
 
-  it_behaves_like 'correctly sorted packages list', 'Created', ascending: true do
+  it_behaves_like 'correctly sorted packages list', 'Published', ascending: true do
     let(:packages) { [package_one, package_two] }
   end
 end

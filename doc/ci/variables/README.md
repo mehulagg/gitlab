@@ -131,10 +131,10 @@ After you set a variable, call it from the `.gitlab-ci.yml` file:
 test_variable:
   stage: test
   script:
-    - echo $CI_JOB_STAGE # calls a predefined variable
-    - echo $TEST # calls a custom variable of type `env_var`
-    - echo $GREETING # calls a custom variable of type `file` that contains the path to the temp file
-    - cat $GREETING # the temp file itself contains the variable value
+    - echo $CI_JOB_STAGE  # calls a predefined variable
+    - echo $TEST          # calls a custom variable of type `env_var`
+    - echo $GREETING      # calls a custom variable of type `file` that contains the path to the temp file
+    - cat $GREETING       # the temp file itself contains the variable value
 ```
 
 The output is:
@@ -431,7 +431,7 @@ script:
 You can define per-project or per-group variables
 that are set in the pipeline environment. Group-level variables are stored out of
 the repository (not in `.gitlab-ci.yml`) and are securely passed to GitLab Runner,
-which makes them available during a pipeline run. For Premium users who do **not** use an external key store or who use GitLab's [integration with HashiCorp Vault](../examples/authenticating-with-hashicorp-vault/index.md), we recommend using group environment variables to store secrets like passwords, SSH keys, and credentials.
+which makes them available during a pipeline run. For Premium users who do **not** use an external key store or who use GitLab's [integration with HashiCorp Vault](../secrets/index.md), we recommend using group environment variables to store secrets like passwords, SSH keys, and credentials.
 
 Group-level variables can be added by:
 
@@ -511,7 +511,7 @@ build:
 deploy:
   stage: deploy
   script:
-    - echo $BUILD_VERSION # => hello
+    - echo $BUILD_VERSION  # => hello
   dependencies:
     - build
 ```
@@ -530,7 +530,7 @@ build:
 deploy:
   stage: deploy
   script:
-    - echo $BUILD_VERSION # => hello
+    - echo $BUILD_VERSION  # => hello
   needs:
     - job: build
       artifacts: true
@@ -547,6 +547,7 @@ The order of precedence for variables is (from highest to lowest):
    and [manual pipeline run variables](#override-a-variable-by-manually-running-a-pipeline).
 1. Project-level [variables](#custom-environment-variables) or [protected variables](#protect-a-custom-variable).
 1. Group-level [variables](#group-level-environment-variables) or [protected variables](#protect-a-custom-variable).
+1. Instance-level [variables](#instance-level-cicd-environment-variables) or [protected variables](#protect-a-custom-variable).
 1. [Inherited environment variables](#inherit-environment-variables).
 1. YAML-defined [job-level variables](../yaml/README.md#variables).
 1. YAML-defined [global variables](../yaml/README.md#variables).
@@ -570,7 +571,7 @@ in which you wish to use it.
 
 ## Where variables can be used
 
-Click [here](where_variables_can_be_used.md) for a section that describes where and how the different types of variables can be used.
+[This section](where_variables_can_be_used.md) describes where and how the different types of variables can be used.
 
 ## Advanced use
 

@@ -28,27 +28,27 @@ module EE
       end
 
       def license_scanning_reports
-        reports_response(merge_request.compare_license_scanning_reports(current_user))
+        reports_response(merge_request.compare_license_scanning_reports(current_user), head_pipeline)
       end
 
       def container_scanning_reports
-        reports_response(merge_request.compare_container_scanning_reports(current_user))
+        reports_response(merge_request.compare_container_scanning_reports(current_user), head_pipeline)
       end
 
       def dependency_scanning_reports
-        reports_response(merge_request.compare_dependency_scanning_reports(current_user))
+        reports_response(merge_request.compare_dependency_scanning_reports(current_user), head_pipeline)
       end
 
       def sast_reports
-        reports_response(merge_request.compare_sast_reports(current_user))
+        reports_response(merge_request.compare_sast_reports(current_user), head_pipeline)
       end
 
       def secret_detection_reports
-        reports_response(merge_request.compare_secret_detection_reports(current_user))
+        reports_response(merge_request.compare_secret_detection_reports(current_user), head_pipeline)
       end
 
       def dast_reports
-        reports_response(merge_request.compare_dast_reports(current_user))
+        reports_response(merge_request.compare_dast_reports(current_user), head_pipeline)
       end
 
       def metrics_reports
@@ -56,7 +56,7 @@ module EE
       end
 
       def coverage_fuzzing_reports
-        reports_response(merge_request.compare_coverage_fuzzing_reports(current_user))
+        reports_response(merge_request.compare_coverage_fuzzing_reports(current_user), head_pipeline)
       end
 
       private

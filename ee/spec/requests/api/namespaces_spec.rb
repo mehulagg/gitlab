@@ -285,7 +285,7 @@ RSpec.describe API::Namespaces do
     end
 
     context 'when authenticated as a regular user' do
-      it 'returns an unauthroized error' do
+      it 'returns an unauthorized error' do
         do_post(user, params)
 
         expect(response).to have_gitlab_http_status(:forbidden)
@@ -347,7 +347,7 @@ RSpec.describe API::Namespaces do
     end
 
     context 'with a regular user' do
-      it 'returns an unauthroized error' do
+      it 'returns an unauthorized error' do
         do_get(developer)
 
         expect(response).to have_gitlab_http_status(:forbidden)
@@ -401,7 +401,7 @@ RSpec.describe API::Namespaces do
     end
 
     context 'when authenticated as a regular user' do
-      it 'returns an unauthroized error' do
+      it 'returns an unauthorized error' do
         do_put(namespace.id, user, { seats: 150 })
 
         expect(response).to have_gitlab_http_status(:forbidden)

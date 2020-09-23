@@ -137,6 +137,10 @@ module EE
       !incident?
     end
 
+    def supports_iterations?
+      !incident?
+    end
+
     def can_assign_epic?(user)
       user&.can?(:admin_epic, project.group)
     end

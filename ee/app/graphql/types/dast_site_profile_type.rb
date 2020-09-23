@@ -3,7 +3,7 @@
 module Types
   class DastSiteProfileType < BaseObject
     graphql_name 'DastSiteProfile'
-    description 'Represents a DAST Site Profile.'
+    description 'Represents a DAST Site Profile'
 
     authorize :create_on_demand_dast_scan
 
@@ -23,7 +23,7 @@ module Types
     field :edit_path, GraphQL::STRING_TYPE, null: true,
           description: 'Relative web path to the edit page of a site profile',
           resolve: -> (obj, _args, _ctx) do
-            Rails.application.routes.url_helpers.edit_project_dast_site_profile_path(obj.project, obj)
+            Rails.application.routes.url_helpers.edit_project_security_configuration_dast_profiles_dast_site_profile_path(obj.project, obj)
           end
 
     field :validation_status, Types::DastSiteProfileValidationStatusEnum, null: true,

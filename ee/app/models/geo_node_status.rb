@@ -42,7 +42,7 @@ class GeoNodeStatus < ApplicationRecord
     }
   end
 
-  # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959/diffs#note_402656534
+  # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959#note_402656534
   def self.replicator_class_status_fields
     Gitlab::Geo::REPLICATOR_CLASSES.map do |replicable_class|
       status_fields_for(replicable_class).keys
@@ -95,7 +95,7 @@ class GeoNodeStatus < ApplicationRecord
     design_repositories_failed_count
   ) + replicator_class_status_fields).freeze
 
-  # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959/diffs#note_402656534
+  # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959#note_402656534
   def self.replicator_class_prometheus_metrics
     Gitlab::Geo::REPLICATOR_CLASSES.map do |replicable_class|
       status_fields_for(replicable_class)

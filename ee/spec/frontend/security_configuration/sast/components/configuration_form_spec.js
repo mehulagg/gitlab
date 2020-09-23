@@ -1,97 +1,228 @@
+import { merge } from 'lodash';
 import * as Sentry from '@sentry/browser';
-import AxiosMockAdapter from 'axios-mock-adapter';
-import { GlAlert } from '@gitlab/ui';
-import waitForPromises from 'helpers/wait_for_promises';
+import { GlAlert, GlLink } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
+import AnalyzerConfiguration from 'ee/security_configuration/sast/components/analyzer_configuration.vue';
 import ConfigurationForm from 'ee/security_configuration/sast/components/configuration_form.vue';
 import DynamicFields from 'ee/security_configuration/sast/components/dynamic_fields.vue';
+import ExpandableSection from 'ee/security_configuration/sast/components/expandable_section.vue';
+import configureSastMutation from 'ee/security_configuration/sast/graphql/configure_sast.mutation.graphql';
 import { redirectTo } from '~/lib/utils/url_utility';
-import axios from '~/lib/utils/axios_utils';
-import { makeEntities } from './helpers';
+import { makeEntities, makeSastCiConfiguration } from './helpers';
 
 jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
 }));
 
-const createSastMergeRequestPath = '/merge_request/create';
+const projectPath = 'group/project';
+const sastAnalyzersDocumentationPath = '/help/sast/analyzers';
 const securityConfigurationPath = '/security/configuration';
 const newMergeRequestPath = '/merge_request/new';
 
 describe('ConfigurationForm component', () => {
   let wrapper;
-  let entities;
-  let axiosMock;
+  let sastCiConfiguration;
 
-  const createComponent = ({ props = {} } = {}) => {
-    entities = makeEntities(3, { value: 'foo' });
+  let pendingPromiseResolvers;
+  const fulfillPendingPromises = () => {
+    pendingPromiseResolvers.forEach(resolve => resolve());
+  };
 
-    wrapper = shallowMount(ConfigurationForm, {
-      provide: {
-        createSastMergeRequestPath,
-        securityConfigurationPath,
-      },
-      propsData: {
-        entities,
-        ...props,
-      },
-    });
+  const createComponent = ({ mutationResult, ...options } = {}) => {
+    sastCiConfiguration = makeSastCiConfiguration();
+
+    wrapper = shallowMount(
+      ConfigurationForm,
+      merge(
+        {
+          provide: {
+            projectPath,
+            securityConfigurationPath,
+            sastAnalyzersDocumentationPath,
+          },
+          propsData: {
+            sastCiConfiguration,
+          },
+          mocks: {
+            $apollo: {
+              mutate: jest.fn(
+                () =>
+                  new Promise(resolve => {
+                    pendingPromiseResolvers.push(() =>
+                      resolve({
+                        data: { configureSast: mutationResult },
+                      }),
+                    );
+                  }),
+              ),
+            },
+          },
+        },
+        options,
+      ),
+    );
   };
 
   const findForm = () => wrapper.find('form');
   const findSubmitButton = () => wrapper.find({ ref: 'submitButton' });
   const findErrorAlert = () => wrapper.find(GlAlert);
   const findCancelButton = () => wrapper.find({ ref: 'cancelButton' });
-  const findDynamicFieldsComponent = () => wrapper.find(DynamicFields);
+  const findDynamicFieldsComponents = () => wrapper.findAll(DynamicFields);
+  const findAnalyzerConfigurations = () => wrapper.findAll(AnalyzerConfiguration);
+  const findAnalyzersSection = () => wrapper.find('[data-testid="analyzers-section"]');
 
-  const expectPayloadForEntities = () => {
-    const { post } = axiosMock.history;
+  const expectPayloadForEntities = ({ withAnalyzers = false } = {}) => {
+    const expectedPayload = {
+      mutation: configureSastMutation,
+      variables: {
+        input: {
+          projectPath,
+          configuration: {
+            global: [
+              {
+                field: 'field0',
+                defaultValue: 'defaultValue0',
+                value: 'value0',
+              },
+            ],
+            pipeline: [
+              {
+                field: 'field1',
+                defaultValue: 'defaultValue1',
+                value: 'value1',
+              },
+            ],
+          },
+        },
+      },
+    };
 
-    expect(post).toHaveLength(1);
+    if (withAnalyzers) {
+      expectedPayload.variables.input.configuration.analyzers = [
+        {
+          name: 'nameValue0',
+          enabled: true,
+          variables: [
+            {
+              field: 'field2',
+              defaultValue: 'defaultValue2',
+              value: 'value2',
+            },
+          ],
+        },
+      ];
+    }
 
-    const postedData = JSON.parse(post[0].data);
-    entities.forEach(entity => {
-      expect(postedData[entity.field]).toBe(entity.value);
-    });
+    expect(wrapper.vm.$apollo.mutate.mock.calls).toEqual([[expectedPayload]]);
   };
 
   beforeEach(() => {
-    axiosMock = new AxiosMockAdapter(axios);
+    pendingPromiseResolvers = [];
   });
 
   afterEach(() => {
     wrapper.destroy();
-    wrapper = null;
-    axiosMock.restore();
   });
 
-  describe('the DynamicFields component', () => {
+  describe.each`
+    type          | expectedPosition
+    ${'global'}   | ${0}
+    ${'pipeline'} | ${1}
+  `('the $type DynamicFields component', ({ type, expectedPosition }) => {
+    let dynamicFields;
+
     beforeEach(() => {
       createComponent();
+      dynamicFields = findDynamicFieldsComponents().at(expectedPosition);
     });
 
     it('renders', () => {
-      expect(findDynamicFieldsComponent().exists()).toBe(true);
+      expect(dynamicFields.exists()).toBe(true);
     });
 
-    it('recieves a copy of the entities prop', () => {
-      const entitiesProp = findDynamicFieldsComponent().props('entities');
+    it(`receives a copy of the ${type} entities`, () => {
+      const entitiesProp = dynamicFields.props('entities');
 
-      expect(entitiesProp).not.toBe(entities);
-      expect(entitiesProp).toEqual(entities);
+      expect(entitiesProp).not.toBe(sastCiConfiguration[type].nodes);
+      expect(entitiesProp).toEqual(sastCiConfiguration[type].nodes);
     });
 
-    describe('when the dynamic fields component emits an input event', () => {
-      let dynamicFields;
+    describe('when it emits an input event', () => {
       let newEntities;
 
       beforeEach(() => {
-        dynamicFields = findDynamicFieldsComponent();
-        newEntities = makeEntities(3, { value: 'foo' });
+        newEntities = makeEntities(1);
         dynamicFields.vm.$emit(DynamicFields.model.event, newEntities);
       });
 
       it('updates the entities binding', () => {
         expect(dynamicFields.props('entities')).toBe(newEntities);
+      });
+    });
+  });
+
+  describe('the analyzers section', () => {
+    describe('given the sastConfigurationUiAnalyzers feature flag is disabled', () => {
+      beforeEach(() => {
+        createComponent();
+      });
+
+      it('does not render', () => {
+        expect(findAnalyzersSection().exists()).toBe(false);
+      });
+    });
+
+    describe('given the sastConfigurationUiAnalyzers feature flag is enabled', () => {
+      beforeEach(() => {
+        createComponent({
+          provide: {
+            glFeatures: {
+              sastConfigurationUiAnalyzers: true,
+            },
+          },
+          stubs: {
+            ExpandableSection,
+          },
+        });
+      });
+
+      it('renders', () => {
+        const analyzersSection = findAnalyzersSection();
+        expect(analyzersSection.exists()).toBe(true);
+        expect(analyzersSection.text()).toContain(ConfigurationForm.i18n.analyzersHeading);
+        expect(analyzersSection.text()).toContain(ConfigurationForm.i18n.analyzersSubHeading);
+      });
+
+      it('has a link to the documentation', () => {
+        const link = findAnalyzersSection().find(GlLink);
+        expect(link.exists()).toBe(true);
+        expect(link.attributes('href')).toBe(sastAnalyzersDocumentationPath);
+      });
+
+      it('renders each analyzer', () => {
+        const analyzerEntities = sastCiConfiguration.analyzers.nodes;
+        const analyzerComponents = findAnalyzerConfigurations();
+        analyzerEntities.forEach((entity, i) => {
+          expect(analyzerComponents.at(i).props()).toEqual({ entity });
+        });
+      });
+
+      describe('when an AnalyzerConfiguration emits an input event', () => {
+        let analyzer;
+        let updatedEntity;
+
+        beforeEach(() => {
+          analyzer = findAnalyzerConfigurations().at(0);
+          updatedEntity = {
+            ...sastCiConfiguration.analyzers.nodes[0],
+            value: 'new value',
+          };
+          analyzer.vm.$emit('input', updatedEntity);
+        });
+
+        it('updates the entity binding', () => {
+          expect(analyzer.props('entity')).toBe(updatedEntity);
+        });
       });
     });
   });
@@ -102,27 +233,38 @@ describe('ConfigurationForm component', () => {
     });
 
     describe.each`
-      context                    | filePath               | statusCode | partialErrorMessage
-      ${'a response error code'} | ${newMergeRequestPath} | ${500}     | ${'500'}
-      ${'no filePath'}           | ${''}                  | ${200}     | ${/merge request.*fail/}
+      context             | successPath | errors          | sastConfigurationUiAnalyzers
+      ${'no successPath'} | ${''}       | ${[]}           | ${false}
+      ${'any errors'}     | ${''}       | ${['an error']} | ${false}
+      ${'no successPath'} | ${''}       | ${[]}           | ${true}
+      ${'any errors'}     | ${''}       | ${['an error']} | ${true}
     `(
       'given an unsuccessful endpoint response due to $context',
-      ({ filePath, statusCode, partialErrorMessage }) => {
+      ({ successPath, errors, sastConfigurationUiAnalyzers }) => {
         beforeEach(() => {
-          axiosMock.onPost(createSastMergeRequestPath).replyOnce(statusCode, { filePath });
-          createComponent();
+          createComponent({
+            mutationResult: {
+              successPath,
+              errors,
+            },
+            provide: {
+              glFeatures: { sastConfigurationUiAnalyzers },
+            },
+          });
 
           findForm().trigger('submit');
         });
 
-        it('includes the value of each entity in the payload', expectPayloadForEntities);
+        it('includes the value of each entity in the payload', () => {
+          expectPayloadForEntities({ withAnalyzers: sastConfigurationUiAnalyzers });
+        });
 
         it(`sets the submit button's loading prop to true`, () => {
           expect(findSubmitButton().props('loading')).toBe(true);
         });
 
         describe('after async tasks', () => {
-          beforeEach(() => waitForPromises());
+          beforeEach(fulfillPendingPromises);
 
           it('does not call redirectTo', () => {
             expect(redirectTo).not.toHaveBeenCalled();
@@ -134,7 +276,7 @@ describe('ConfigurationForm component', () => {
 
           it('sends the error to Sentry', () => {
             expect(Sentry.captureException.mock.calls).toMatchObject([
-              [{ message: expect.stringMatching(partialErrorMessage) }],
+              [{ message: expect.stringMatching(/merge request.*fail/) }],
             ]);
           });
 
@@ -155,47 +297,62 @@ describe('ConfigurationForm component', () => {
       },
     );
 
-    describe('given a successful endpoint response', () => {
-      beforeEach(() => {
-        axiosMock
-          .onPost(createSastMergeRequestPath)
-          .replyOnce(200, { filePath: newMergeRequestPath });
-        createComponent();
+    describe.each([true, false])(
+      'given a successful endpoint response with sastConfigurationUiAnalyzers = %p',
+      sastConfigurationUiAnalyzers => {
+        beforeEach(() => {
+          createComponent({
+            mutationResult: {
+              successPath: newMergeRequestPath,
+              errors: [],
+            },
+            provide: {
+              glFeatures: { sastConfigurationUiAnalyzers },
+            },
+          });
 
-        findForm().trigger('submit');
-      });
-
-      it('includes the value of each entity in the payload', expectPayloadForEntities);
-
-      it(`sets the submit button's loading prop to true`, () => {
-        expect(findSubmitButton().props().loading).toBe(true);
-      });
-
-      describe('after async tasks', () => {
-        beforeEach(() => waitForPromises());
-
-        it('calls redirectTo', () => {
-          expect(redirectTo).toHaveBeenCalledWith(newMergeRequestPath);
+          findForm().trigger('submit');
         });
 
-        it('does not display an alert message', () => {
-          expect(findErrorAlert().exists()).toBe(false);
+        // See https://github.com/jest-community/eslint-plugin-jest/issues/229
+        // for a similar reason for disabling the rule on the next line
+        // eslint-disable-next-line jest/no-identical-title
+        it('includes the value of each entity in the payload', () => {
+          expectPayloadForEntities({ withAnalyzers: sastConfigurationUiAnalyzers });
         });
 
-        it('does not call Sentry.captureException', () => {
-          expect(Sentry.captureException).not.toHaveBeenCalled();
-        });
-
-        it('keeps the loading prop set to true', () => {
-          // This is done for UX reasons. If the loading prop is set to false
-          // on success, then there's a period where the button is clickable
-          // again. Instead, we want the button to display a loading indicator
-          // for the remainder of the lifetime of the page (i.e., until the
-          // browser can start painting the new page it's been redirected to).
+        // eslint-disable-next-line jest/no-identical-title
+        it(`sets the submit button's loading prop to true`, () => {
           expect(findSubmitButton().props().loading).toBe(true);
         });
-      });
-    });
+
+        // eslint-disable-next-line jest/no-identical-title
+        describe('after async tasks', () => {
+          beforeEach(fulfillPendingPromises);
+
+          it('calls redirectTo', () => {
+            expect(redirectTo).toHaveBeenCalledWith(newMergeRequestPath);
+          });
+
+          it('does not display an alert message', () => {
+            expect(findErrorAlert().exists()).toBe(false);
+          });
+
+          it('does not call Sentry.captureException', () => {
+            expect(Sentry.captureException).not.toHaveBeenCalled();
+          });
+
+          it('keeps the loading prop set to true', () => {
+            // This is done for UX reasons. If the loading prop is set to false
+            // on success, then there's a period where the button is clickable
+            // again. Instead, we want the button to display a loading indicator
+            // for the remainder of the lifetime of the page (i.e., until the
+            // browser can start painting the new page it's been redirected to).
+            expect(findSubmitButton().props().loading).toBe(true);
+          });
+        });
+      },
+    );
   });
 
   describe('the cancel button', () => {

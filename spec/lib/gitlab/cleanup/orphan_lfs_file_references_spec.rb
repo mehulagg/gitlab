@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Gitlab::Cleanup::OrphanLfsFileReferences do
+  include ProjectForksHelper
+
   let(:null_logger) { Logger.new('/dev/null') }
   let(:project) { create(:project, :repository, lfs_enabled: true) }
   let(:lfs_object) { create(:lfs_object) }

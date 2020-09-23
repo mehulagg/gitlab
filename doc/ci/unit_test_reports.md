@@ -81,6 +81,8 @@ merge request widget.
 
 To make the Unit test report output files browsable, include them with the
 [`artifacts:paths`](yaml/README.md#artifactspaths) keyword as well, as shown in the [Ruby example](#ruby-example).
+To upload the report even if the job fails (for example if the tests do not pass), use the [`artifacts:when:always`](yaml/README.md#artifactswhen)
+keyword.
 
 NOTE: **Note:**
 You cannot have multiple tests with the same name and class in your JUnit report format XML file.
@@ -97,6 +99,7 @@ ruby:
     - bundle install
     - bundle exec rspec --format progress --format RspecJunitFormatter --out rspec.xml
   artifacts:
+    when: always
     paths:
       - rspec.xml
     reports:
@@ -116,6 +119,7 @@ golang:
     - go get -u github.com/jstemmer/go-junit-report
     - go test -v 2>&1 | go-junit-report -set-exit-code > report.xml
   artifacts:
+    when: always
     reports:
       junit: report.xml
 ```
@@ -137,6 +141,7 @@ java:
   script:
     - gradle test
   artifacts:
+    when: always
     reports:
       junit: build/test-results/test/**/TEST-*.xml
 ```
@@ -156,6 +161,7 @@ java:
   script:
     - mvn verify
   artifacts:
+    when: always
     reports:
       junit:
         - target/surefire-reports/TEST-*.xml
@@ -173,6 +179,7 @@ pytest:
   script:
     - pytest --junitxml=report.xml
   artifacts:
+    when: always
     reports:
       junit: report.xml
 ```
@@ -194,6 +201,7 @@ cpp:
   script:
     - gtest.exe --gtest_output="xml:report.xml"
   artifacts:
+    when: always
     reports:
       junit: report.xml
 ```
@@ -208,6 +216,7 @@ cunit:
   script:
     - ./my-cunit-test
   artifacts:
+    when: always
     reports:
       junit: ./my-cunit-test.xml
 ```

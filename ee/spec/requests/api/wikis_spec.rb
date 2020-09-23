@@ -13,6 +13,7 @@ require 'spec_helper'
 # because they are 3 edge cases of using wiki pages.
 
 RSpec.describe API::Wikis do
+  include WikiHelpers
   include WorkhorseHelpers
 
   let_it_be(:user) { create(:user) }
@@ -31,7 +32,7 @@ RSpec.describe API::Wikis do
 
     context 'when group wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do
@@ -125,7 +126,7 @@ RSpec.describe API::Wikis do
 
     context 'when wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do
@@ -250,7 +251,7 @@ RSpec.describe API::Wikis do
 
     context 'when wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do
@@ -342,7 +343,7 @@ RSpec.describe API::Wikis do
 
     context 'when wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do
@@ -482,7 +483,7 @@ RSpec.describe API::Wikis do
 
     context 'when wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do
@@ -613,7 +614,7 @@ RSpec.describe API::Wikis do
 
     context 'when wiki is disabled' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_group_wikis(false)
       end
 
       context 'when user is guest' do

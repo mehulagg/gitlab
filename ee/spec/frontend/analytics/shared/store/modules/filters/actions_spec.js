@@ -4,13 +4,16 @@ import testAction from 'helpers/vuex_action_helper';
 import * as actions from 'ee/analytics/shared/store/modules/filters/actions';
 import * as types from 'ee/analytics/shared/store/modules/filters/mutation_types';
 import initialState from 'ee/analytics/shared/store/modules/filters/state';
+import { mockBranches } from 'jest/vue_shared/components/filtered_search_bar/mock_data';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
+import Api from '~/api';
 import { filterMilestones, filterUsers, filterLabels } from './mock_data';
 
 const milestonesEndpoint = 'fake_milestones_endpoint';
 const labelsEndpoint = 'fake_labels_endpoint';
 const groupEndpoint = 'fake_group_endpoint';
+const projectEndpoint = 'fake_project_endpoint';
 
 jest.mock('~/flash');
 
@@ -37,6 +40,7 @@ describe('Filters actions', () => {
       milestonesEndpoint,
       labelsEndpoint,
       groupEndpoint,
+      projectEndpoint,
       selectedAuthor: 'Mr cool',
       selectedMilestone: 'NEXT',
     };
@@ -98,35 +102,112 @@ describe('Filters actions', () => {
     it('sets the api paths', () => {
       return testAction(
         actions.setEndpoints,
-        { milestonesEndpoint, labelsEndpoint, groupEndpoint },
+        { milestonesEndpoint, labelsEndpoint, groupEndpoint, projectEndpoint },
         state,
         [
           { payload: 'fake_milestones_endpoint', type: types.SET_MILESTONES_ENDPOINT },
           { payload: 'fake_labels_endpoint', type: types.SET_LABELS_ENDPOINT },
           { payload: 'fake_group_endpoint', type: types.SET_GROUP_ENDPOINT },
+          { payload: 'fake_project_endpoint', type: types.SET_PROJECT_ENDPOINT },
         ],
         [],
       );
     });
   });
 
+  describe('fetchBranches', () => {
+    describe('success', () => {
+      beforeEach(() => {
+        const url = Api.buildUrl(Api.createBranchPath).replace(
+          ':id',
+          encodeURIComponent(projectEndpoint),
+        );
+        mock.onGet(url).replyOnce(httpStatusCodes.OK, mockBranches);
+      });
+
+      it('dispatches RECEIVE_BRANCHES_SUCCESS with received data', () => {
+        return testAction(
+          actions.fetchBranches,
+          null,
+          { ...state, projectEndpoint },
+          [
+            { type: types.REQUEST_BRANCHES },
+            { type: types.RECEIVE_BRANCHES_SUCCESS, payload: mockBranches },
+          ],
+          [],
+        ).then(({ data }) => {
+          expect(data).toBe(mockBranches);
+        });
+      });
+    });
+
+    describe('error', () => {
+      beforeEach(() => {
+        mock.onAny().replyOnce(httpStatusCodes.SERVICE_UNAVAILABLE);
+      });
+
+      it('dispatches RECEIVE_BRANCHES_ERROR', () => {
+        return testAction(
+          actions.fetchBranches,
+          null,
+          state,
+          [
+            { type: types.REQUEST_BRANCHES },
+            {
+              type: types.RECEIVE_BRANCHES_ERROR,
+              payload: httpStatusCodes.SERVICE_UNAVAILABLE,
+            },
+          ],
+          [],
+        ).then(() => expect(createFlash).toHaveBeenCalled());
+      });
+    });
+  });
+
   describe('fetchAuthors', () => {
+    let restoreVersion;
+    beforeEach(() => {
+      restoreVersion = gon.api_version;
+      gon.api_version = 'v1';
+    });
+
+    afterEach(() => {
+      gon.api_version = restoreVersion;
+    });
+
     describe('success', () => {
       beforeEach(() => {
         mock.onAny().replyOnce(httpStatusCodes.OK, filterUsers);
       });
 
-      it('dispatches RECEIVE_AUTHORS_SUCCESS with received data', () => {
+      it('dispatches RECEIVE_AUTHORS_SUCCESS with received data and groupEndpoint set', () => {
         return testAction(
           actions.fetchAuthors,
           null,
-          state,
+          { ...state, groupEndpoint },
           [
             { type: types.REQUEST_AUTHORS },
             { type: types.RECEIVE_AUTHORS_SUCCESS, payload: filterUsers },
           ],
           [],
         ).then(({ data }) => {
+          expect(mock.history.get[0].url).toBe('/api/v1/groups/fake_group_endpoint/members');
+          expect(data).toBe(filterUsers);
+        });
+      });
+
+      it('dispatches RECEIVE_AUTHORS_SUCCESS with received data and projectEndpoint set', () => {
+        return testAction(
+          actions.fetchAuthors,
+          null,
+          { ...state, projectEndpoint },
+          [
+            { type: types.REQUEST_AUTHORS },
+            { type: types.RECEIVE_AUTHORS_SUCCESS, payload: filterUsers },
+          ],
+          [],
+        ).then(({ data }) => {
+          expect(mock.history.get[0].url).toBe('/api/v1/projects/fake_project_endpoint/users');
           expect(data).toBe(filterUsers);
         });
       });
@@ -137,11 +218,11 @@ describe('Filters actions', () => {
         mock.onAny().replyOnce(httpStatusCodes.SERVICE_UNAVAILABLE);
       });
 
-      it('dispatches RECEIVE_AUTHORS_ERROR', () => {
+      it('dispatches RECEIVE_AUTHORS_ERROR and groupEndpoint set', () => {
         return testAction(
           actions.fetchAuthors,
           null,
-          state,
+          { ...state, groupEndpoint },
           [
             { type: types.REQUEST_AUTHORS },
             {
@@ -150,7 +231,29 @@ describe('Filters actions', () => {
             },
           ],
           [],
-        ).then(() => expect(createFlash).toHaveBeenCalled());
+        ).then(() => {
+          expect(mock.history.get[0].url).toBe('/api/v1/groups/fake_group_endpoint/members');
+          expect(createFlash).toHaveBeenCalled();
+        });
+      });
+
+      it('dispatches RECEIVE_AUTHORS_ERROR and projectEndpoint set', () => {
+        return testAction(
+          actions.fetchAuthors,
+          null,
+          { ...state, projectEndpoint },
+          [
+            { type: types.REQUEST_AUTHORS },
+            {
+              type: types.RECEIVE_AUTHORS_ERROR,
+              payload: httpStatusCodes.SERVICE_UNAVAILABLE,
+            },
+          ],
+          [],
+        ).then(() => {
+          expect(mock.history.get[0].url).toBe('/api/v1/projects/fake_project_endpoint/users');
+          expect(createFlash).toHaveBeenCalled();
+        });
       });
     });
   });
@@ -202,36 +305,67 @@ describe('Filters actions', () => {
 
   describe('fetchAssignees', () => {
     describe('success', () => {
+      let restoreVersion;
       beforeEach(() => {
         mock.onAny().replyOnce(httpStatusCodes.OK, filterUsers);
+        restoreVersion = gon.api_version;
+        gon.api_version = 'v1';
       });
 
-      it('dispatches RECEIVE_ASSIGNEES_SUCCESS with received data', () => {
+      afterEach(() => {
+        gon.api_version = restoreVersion;
+      });
+
+      it('dispatches RECEIVE_ASSIGNEES_SUCCESS with received data and groupEndpoint set', () => {
         return testAction(
           actions.fetchAssignees,
           null,
-          { ...state, milestonesEndpoint },
+          { ...state, milestonesEndpoint, groupEndpoint },
           [
             { type: types.REQUEST_ASSIGNEES },
             { type: types.RECEIVE_ASSIGNEES_SUCCESS, payload: filterUsers },
           ],
           [],
         ).then(({ data }) => {
+          expect(mock.history.get[0].url).toBe('/api/v1/groups/fake_group_endpoint/members');
+          expect(data).toBe(filterUsers);
+        });
+      });
+
+      it('dispatches RECEIVE_ASSIGNEES_SUCCESS with received data and projectEndpoint set', () => {
+        return testAction(
+          actions.fetchAssignees,
+          null,
+          { ...state, milestonesEndpoint, projectEndpoint },
+          [
+            { type: types.REQUEST_ASSIGNEES },
+            { type: types.RECEIVE_ASSIGNEES_SUCCESS, payload: filterUsers },
+          ],
+          [],
+        ).then(({ data }) => {
+          expect(mock.history.get[0].url).toBe('/api/v1/projects/fake_project_endpoint/users');
           expect(data).toBe(filterUsers);
         });
       });
     });
 
     describe('error', () => {
+      let restoreVersion;
       beforeEach(() => {
         mock.onAny().replyOnce(httpStatusCodes.SERVICE_UNAVAILABLE);
+        restoreVersion = gon.api_version;
+        gon.api_version = 'v1';
       });
 
-      it('dispatches RECEIVE_ASSIGNEES_ERROR', () => {
+      afterEach(() => {
+        gon.api_version = restoreVersion;
+      });
+
+      it('dispatches RECEIVE_ASSIGNEES_ERROR and groupEndpoint set', () => {
         return testAction(
           actions.fetchAssignees,
           null,
-          state,
+          { ...state, groupEndpoint },
           [
             { type: types.REQUEST_ASSIGNEES },
             {
@@ -240,7 +374,29 @@ describe('Filters actions', () => {
             },
           ],
           [],
-        ).then(() => expect(createFlash).toHaveBeenCalled());
+        ).then(() => {
+          expect(mock.history.get[0].url).toBe('/api/v1/groups/fake_group_endpoint/members');
+          expect(createFlash).toHaveBeenCalled();
+        });
+      });
+
+      it('dispatches RECEIVE_ASSIGNEES_ERROR and projectEndpoint set', () => {
+        return testAction(
+          actions.fetchAssignees,
+          null,
+          { ...state, projectEndpoint },
+          [
+            { type: types.REQUEST_ASSIGNEES },
+            {
+              type: types.RECEIVE_ASSIGNEES_ERROR,
+              payload: httpStatusCodes.SERVICE_UNAVAILABLE,
+            },
+          ],
+          [],
+        ).then(() => {
+          expect(mock.history.get[0].url).toBe('/api/v1/projects/fake_project_endpoint/users');
+          expect(createFlash).toHaveBeenCalled();
+        });
       });
     });
   });

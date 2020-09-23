@@ -6,7 +6,12 @@ RSpec.describe Geo::DesignRegistry, :geo do
   include ::EE::GeoHelpers
 
   it_behaves_like 'a BulkInsertSafe model', Geo::DesignRegistry do
-    let(:valid_items_for_bulk_insertion) { build_list(:geo_design_registry, 10, created_at: Time.zone.now) }
+    let(:valid_items_for_bulk_insertion) do
+      build_list(:geo_design_registry, 10, created_at: Time.zone.now) do |registry|
+        registry.project = create(:project)
+      end
+    end
+
     let(:invalid_items_for_bulk_insertion) { [] } # class does not have any validations defined
   end
 

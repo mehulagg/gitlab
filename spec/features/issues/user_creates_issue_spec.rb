@@ -61,6 +61,10 @@ RSpec.describe "User creates issue" do
         .and have_content(project.name)
       expect(page).to have_selector('strong', text: 'Description')
     end
+
+    it 'does not render the issue type dropdown' do
+      expect(page).not_to have_selector('.s-issuable-type-filter-dropdown-wrap')
+    end
   end
 
   context "when signed in as developer", :js do
@@ -196,7 +200,7 @@ RSpec.describe "User creates issue" do
       end
 
       it 'pre-fills the issue type dropdown with issue type' do
-        expect(find('.js-issuable-type-filter-dropdown-wrap .dropdown-label')).to have_content('Issue')
+        expect(find('.js-issuable-type-filter-dropdown-wrap .dropdown-toggle-text')).to have_content('Issue')
       end
 
       it 'does not hide the milestone select' do
@@ -208,11 +212,11 @@ RSpec.describe "User creates issue" do
       let(:project) { create(:project) }
 
       before do
-        visit new_project_issue_path(project, { 'issue[issue_type]': 'incident', issuable_template: 'incident' })
+        visit new_project_issue_path(project, { issuable_template: 'incident', issue: { issue_type: 'incident' } })
       end
 
       it 'pre-fills the issue type dropdown with incident type' do
-        expect(find('.js-issuable-type-filter-dropdown-wrap .dropdown-label')).to have_content('Incident')
+        expect(find('.js-issuable-type-filter-dropdown-wrap .dropdown-toggle-text')).to have_content('Incident')
       end
 
       it 'hides the epic select' do
@@ -225,6 +229,10 @@ RSpec.describe "User creates issue" do
 
       it 'hides the weight input' do
         expect(page).not_to have_selector('.qa-issuable-weight-input')
+      end
+
+      it 'shows the incident help text' do
+        expect(page).to have_text('A modified issue to guide the resolution of incidents.')
       end
     end
 

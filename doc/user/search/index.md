@@ -170,6 +170,8 @@ You can also type in this search bar to see autocomplete suggestions for:
 - Various help pages (try and type **API help**)
 - Project feature pages (try and type **milestones**)
 - Various settings pages (try and type **user settings**)
+- Recently viewed issues (try and type some word from the title of a recently viewed issue)
+- Recently viewed merge requests (try and type some word from the title of a recently merge request)
 
 ## To-Do List
 

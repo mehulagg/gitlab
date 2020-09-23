@@ -10,7 +10,7 @@ module VulnerabilitiesHelper
 
     result = {
       timestamp: Time.now.to_i,
-      create_issue_url: create_vulnerability_feedback_issue_path(vulnerability.finding.project),
+      create_issue_url: create_issue_url_for(vulnerability),
       has_mr: !!vulnerability.finding.merge_request_feedback.try(:merge_request_iid),
       create_mr_url: create_vulnerability_feedback_merge_request_path(vulnerability.finding.project),
       discussions_url: discussions_project_security_vulnerability_path(vulnerability.project, vulnerability),
@@ -24,6 +24,12 @@ module VulnerabilitiesHelper
     }
 
     result.merge(vulnerability_data(vulnerability), vulnerability_finding_data(vulnerability))
+  end
+
+  def create_issue_url_for(vulnerability)
+    return unless vulnerability.project.issues_enabled?
+
+    create_issue_project_security_vulnerability_path(vulnerability.project, vulnerability)
   end
 
   def vulnerability_pipeline_data(pipeline)

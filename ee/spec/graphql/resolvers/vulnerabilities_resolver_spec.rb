@@ -12,11 +12,11 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
     let_it_be(:user) { create(:user, security_dashboard_projects: [project]) }
 
     let_it_be(:low_vulnerability) do
-      create(:vulnerability, :with_findings, :detected, :low, :dast, project: project)
+      create(:vulnerability, :with_findings, :detected, :low, :dast, :with_issue_links, project: project)
     end
 
     let_it_be(:critical_vulnerability) do
-      create(:vulnerability, :with_findings, :detected, :critical, :sast, project: project)
+      create(:vulnerability, :with_findings, :detected, :critical, :sast, resolved_on_default_branch: true, project: project)
     end
 
     let_it_be(:high_vulnerability) do
@@ -82,6 +82,46 @@ RSpec.describe Resolvers::VulnerabilitiesResolver do
 
       it 'only returns vulnerabilities of the given report types' do
         is_expected.to contain_exactly(critical_vulnerability, low_vulnerability)
+      end
+    end
+
+    context 'when given value for hasIssues argument' do
+      let(:params) { { has_issues: has_issues } }
+
+      context 'when has_issues is set to true' do
+        let(:has_issues) { true }
+
+        it 'only returns vulnerabilities that have issues' do
+          is_expected.to contain_exactly(low_vulnerability)
+        end
+      end
+
+      context 'when has_issues is set to false' do
+        let(:has_issues) { false }
+
+        it 'only returns vulnerabilities that does not have issues' do
+          is_expected.to contain_exactly(critical_vulnerability, high_vulnerability)
+        end
+      end
+    end
+
+    context 'when given value for has_resolution argument' do
+      let(:params) { { has_resolution: has_resolution } }
+
+      context 'when has_resolution is set to true' do
+        let(:has_resolution) { true }
+
+        it 'only returns resolution that have resolution' do
+          is_expected.to contain_exactly(critical_vulnerability)
+        end
+      end
+
+      context 'when has_resolution is set to false' do
+        let(:has_resolution) { false }
+
+        it 'only returns resolution that does not have resolution' do
+          is_expected.to contain_exactly(low_vulnerability, high_vulnerability)
+        end
       end
     end
 

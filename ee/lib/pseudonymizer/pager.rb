@@ -31,7 +31,7 @@ module Pseudonymizer
           ORDER BY id
           LIMIT #{PAGE_SIZE}
         SQL
-        Rails.logger.debug("#{self.class.name} fetch ids [#{id_offset}..+#{PAGE_SIZE}]") # rubocop:disable Gitlab/RailsLogger
+        Gitlab::AppLogger.debug("#{self.class.name} fetch ids [#{id_offset}..+#{PAGE_SIZE}]")
         break if results.empty?
 
         id_offset = results.last["id"].to_i
@@ -52,7 +52,7 @@ module Pseudonymizer
           ORDER BY #{@columns.join(",")}
           LIMIT #{PAGE_SIZE} OFFSET #{offset}
         SQL
-        Rails.logger.debug("#{self.class.name} fetching offset [#{offset}..#{offset + PAGE_SIZE}]") # rubocop:disable Gitlab/RailsLogger
+        Gitlab::AppLogger.debug("#{self.class.name} fetching offset [#{offset}..#{offset + PAGE_SIZE}]")
         break if results.empty?
 
         offset += PAGE_SIZE

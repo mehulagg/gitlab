@@ -1,0 +1,20 @@
+mutation dastScannerProfileUpdate(
+  $id: DastScannerProfileID!
+  $projectFullPath: ID!
+  $profileName: String!
+  $spiderTimeout: Int!
+  $targetTimeout: Int!
+) {
+  dastScannerProfileUpdate(
+    input: {
+      id: $id
+      fullPath: $projectFullPath
+      profileName: $profileName
+      spiderTimeout: $spiderTimeout
+      targetTimeout: $targetTimeout
+    }
+  ) {
+    id
+    errors
+  }
+}

@@ -118,7 +118,7 @@ See the section on [ETag mismatch errors](#etag-mismatch) for more details.
    AWS access key and secret access key/value pairs. For example:
 
    ```ruby
-   gitlab_rails['object_store_connection'] = {
+   gitlab_rails['object_store']['connection'] = {
      'provider' => 'AWS',
      'region' => '<eu-central-1>',
      'use_iam_profile' => true
@@ -369,7 +369,7 @@ Here are the valid connection parameters for Rackspace Cloud, provided by
 | `rackspace_username` | The username of the Rackspace account with access to the container | `joe.smith` |
 | `rackspace_api_key` | The API key of the Rackspace account with access to the container | `ABC123DEF456ABC123DEF456ABC123DE` |
 | `rackspace_region` | The Rackspace storage region to use, a three letter code from the [list of service access endpoints](https://developer.rackspace.com/docs/cloud-files/v1/general-api-info/service-access/) | `iad` |
-| `rackspace_temp_url_key` | The private key you have set in the Rackspace API for temporary URLs. Read more [here](https://developer.rackspace.com/docs/cloud-files/v1/use-cases/public-access-to-your-cloud-files-account/#tempurl) | `ABC123DEF456ABC123DEF456ABC123DE` |
+| `rackspace_temp_url_key` | The private key you have set in the Rackspace API for [temporary URLs](https://developer.rackspace.com/docs/cloud-files/v1/use-cases/public-access-to-your-cloud-files-account/#tempurl). | `ABC123DEF456ABC123DEF456ABC123DE` |
 
 NOTE: **Note:**
 Regardless of whether the container has public access enabled or disabled, Fog will
@@ -512,7 +512,7 @@ supported by consolidated configuration form, refer to the following guides:
 | [Packages](packages/index.md#using-object-storage) (optional feature) **(PREMIUM ONLY)** | Yes |
 | [Dependency Proxy](packages/dependency_proxy.md#using-object-storage) (optional feature) **(PREMIUM ONLY)** | Yes |
 | [Pseudonymizer](pseudonymizer.md#configuration) (optional feature) **(ULTIMATE ONLY)** | No |
-| [Autoscale Runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
+| [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
 | [Terraform state files](terraform_state.md#using-object-storage) | Yes |
 
 ### Other alternatives to filesystem storage

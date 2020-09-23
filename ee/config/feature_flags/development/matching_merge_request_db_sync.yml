@@ -1,0 +1,7 @@
+---
+name: matching_merge_request_db_sync
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/42435
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/254488
+group: group::create
+type: development
+default_enabled: false

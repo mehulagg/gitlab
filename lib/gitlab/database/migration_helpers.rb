@@ -176,7 +176,7 @@ module Gitlab
           name: name.presence || concurrent_foreign_key_name(source, column)
         }
 
-        if foreign_key_exists?(source, target, options)
+        if foreign_key_exists?(source, target, **options)
           warning_message = "Foreign key not created because it exists already " \
             "(this may be due to an aborted migration or similar): " \
             "source: #{source}, target: #{target}, column: #{options[:column]}, "\
@@ -330,13 +330,13 @@ module Gitlab
       # * +timing_configuration+ - [[ActiveSupport::Duration, ActiveSupport::Duration], ...] lock timeout for the block, sleep time before the next iteration, defaults to `Gitlab::Database::WithLockRetries::DEFAULT_TIMING_CONFIGURATION`
       # * +logger+ - [Gitlab::JsonLogger]
       # * +env+ - [Hash] custom environment hash, see the example with `DISABLE_LOCK_RETRIES`
-      def with_lock_retries(**args, &block)
+      def with_lock_retries(*args, **kwargs, &block)
         merged_args = {
           klass: self.class,
           logger: Gitlab::BackgroundMigration::Logger
-        }.merge(args)
+        }.merge(kwargs)
 
-        Gitlab::Database::WithLockRetries.new(merged_args).run(&block)
+        Gitlab::Database::WithLockRetries.new(**merged_args).run(&block)
       end
 
       def true_value
@@ -538,10 +538,10 @@ module Gitlab
       # table - The table containing the column.
       # column - The name of the column to change.
       # new_type - The new column type.
-      def change_column_type_concurrently(table, column, new_type, type_cast_function: nil)
+      def change_column_type_concurrently(table, column, new_type, type_cast_function: nil, batch_column_name: :id)
         temp_column = "#{column}_for_type_change"
 
-        rename_column_concurrently(table, column, temp_column, type: new_type, type_cast_function: type_cast_function)
+        rename_column_concurrently(table, column, temp_column, type: new_type, type_cast_function: type_cast_function, batch_column_name: batch_column_name)
       end
 
       # Performs cleanup of a concurrent type change.

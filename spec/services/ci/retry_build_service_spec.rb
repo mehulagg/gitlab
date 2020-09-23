@@ -50,7 +50,7 @@ RSpec.describe Ci::RetryBuildService do
        metadata runner_session trace_chunks upstream_pipeline_id
        artifacts_file artifacts_metadata artifacts_size commands
        resource resource_group_id processed security_scans author
-       pipeline_id report_results].freeze
+       pipeline_id report_results pending_state pages_deployments].freeze
 
   shared_examples 'build duplication' do
     let(:another_pipeline) { create(:ci_empty_pipeline, project: project) }
@@ -230,6 +230,19 @@ RSpec.describe Ci::RetryBuildService do
 
             expect(new_build.scheduling_type).to eq('stage')
           end
+        end
+      end
+
+      context 'when the pipeline is a child pipeline and the bridge is depended' do
+        let!(:parent_pipeline) { create(:ci_pipeline, project: project) }
+        let!(:pipeline) { create(:ci_pipeline, project: project) }
+        let!(:bridge) { create(:ci_bridge, :strategy_depend, pipeline: parent_pipeline, status: 'success') }
+        let!(:source_pipeline) { create(:ci_sources_pipeline, pipeline: pipeline, source_job: bridge) }
+
+        it 'marks source bridge as pending' do
+          service.execute(build)
+
+          expect(bridge.reload).to be_pending
         end
       end
     end

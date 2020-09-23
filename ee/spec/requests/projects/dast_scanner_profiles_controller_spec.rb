@@ -80,4 +80,20 @@ RSpec.describe Projects::DastScannerProfilesController, type: :request do
       let(:path) { new_project_dast_scanner_profile_path(project) }
     end
   end
+
+  describe 'GET #edit' do
+    include_context 'user authorized'
+    include_context 'on-demand scans feature available'
+
+    let(:edit_path) { edit_project_dast_scanner_profile_path(project, dast_scanner_profile) }
+
+    it_behaves_like 'a GET request' do
+      let(:path) { edit_path }
+    end
+
+    it 'sets scanner_profile' do
+      get edit_path
+      expect(assigns(:scanner_profile)).to eq(dast_scanner_profile)
+    end
+  end
 end

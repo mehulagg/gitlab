@@ -668,6 +668,9 @@ To enable delayed deletion of projects:
 1. Expand the **Permissions, LFS, 2FA** section, and check **Enable delayed project removal**.
 1. Click **Save changes**.
 
+NOTE: **Note:**
+The group setting for delayed deletion is not inherited by sub-groups and has to be individually defined for each group.
+
 #### Prevent project forking outside group **(PREMIUM)**
 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216987) in GitLab 13.3.
@@ -739,6 +742,12 @@ and issues) performed by your group members.
 ## Issue analytics **(PREMIUM)**
 
 With [GitLab Issue Analytics](issues_analytics/index.md), you can see a bar chart of the number of issues created each month in your groups.
+
+## Repositories analytics **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/215104) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.4.
+
+With [GitLab Repositories Analytics](repositories_analytics/index.md), you can download a CSV of the latest coverage data for all the projects in your group.
 
 ## Dependency Proxy **(PREMIUM)**
 

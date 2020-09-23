@@ -1,4 +1,8 @@
-- if Gitlab.com?
+- return unless Gitlab.dev_env_or_com?
+
+- if skip_setup_for_company?
+  = f.hidden_field :setup_for_company, value: true
+- else
   .row
     .form-group.col-sm-12
       = f.label :setup_for_company, setup_for_company_label_text, class: 'label-bold'

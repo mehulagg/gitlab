@@ -66,7 +66,7 @@ module API
       end
 
       def authorize_feature_flags_feature!
-        forbidden! unless project.feature_available?(:feature_flags)
+        forbidden! unless project.feature_available?(:repository)
       end
 
       def feature_flags

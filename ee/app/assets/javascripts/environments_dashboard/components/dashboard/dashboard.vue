@@ -8,6 +8,7 @@ import {
   GlLink,
   GlModal,
   GlModalDirective,
+  GlPagination,
   GlSprintf,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
@@ -38,6 +39,7 @@ export default {
     GlEmptyState,
     GlLink,
     GlModal,
+    GlPagination,
     GlSprintf,
     ProjectHeader,
     ProjectSelector,
@@ -79,12 +81,35 @@ export default {
       'searchQuery',
       'messages',
       'pageInfo',
+      'projectsPage',
     ]),
+    currentPage: {
+      get() {
+        return this.projectsPage.pageInfo.page;
+      },
+      set(newPage) {
+        this.paginateDashboard(newPage);
+      },
+    },
+    projectsPerPage() {
+      return this.projectsPage.pageInfo.perPage;
+    },
+    totalProjects() {
+      return this.projectsPage.pageInfo.total;
+    },
+    shouldPaginate() {
+      return this.projectsPage.pageInfo.totalPages > 1;
+    },
     isSearchingProjects() {
       return this.searchCount > 0;
     },
     okDisabled() {
       return isEmpty(this.selectedProjects);
+    },
+  },
+  watch: {
+    currentPage: () => {
+      window.scrollTo(0, 0);
     },
   },
   created() {
@@ -105,6 +130,9 @@ export default {
       'toggleSelectedProject',
       'setSearchQuery',
       'removeProject',
+      'clearProjectsEtagPoll',
+      'stopProjectsPolling',
+      'paginateDashboard',
     ]),
     addProjects() {
       this.addProjectsToDashboard();
@@ -187,6 +215,15 @@ export default {
             />
           </div>
         </div>
+
+        <gl-pagination
+          v-if="shouldPaginate"
+          v-model="currentPage"
+          :per-page="projectsPerPage"
+          :total-items="totalProjects"
+          align="center"
+          class="gl-w-full gl-mt-3"
+        />
       </div>
 
       <gl-dashboard-skeleton v-else-if="isLoadingProjects" />

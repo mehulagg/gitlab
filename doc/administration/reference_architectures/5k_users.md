@@ -55,30 +55,33 @@ applicable (n/a) in the previous table.
 To set up GitLab and its components to accommodate up to 5,000 users:
 
 1. [Configure the external load balancing node](#configure-the-external-load-balancer)
-   that will handle the load balancing of the two GitLab application services nodes.
+   to handle the load balancing of the GitLab application services nodes.
 1. [Configure Redis](#configure-redis).
 1. [Configure Consul and Sentinel](#configure-consul-and-sentinel).
 1. [Configure PostgreSQL](#configure-postgresql), the database for GitLab.
 1. [Configure PgBouncer](#configure-pgbouncer).
-1. [Configure the internal load balancing node](#configure-the-internal-load-balancer)
+1. [Configure the internal load balancing node](#configure-the-internal-load-balancer).
 1. [Configure Gitaly](#configure-gitaly),
    which provides access to the Git repositories.
 1. [Configure Sidekiq](#configure-sidekiq).
 1. [Configure the main GitLab Rails application](#configure-gitlab-rails)
-   to run Puma/Unicorn, Workhorse, GitLab Shell, and to serve all frontend requests (UI, API, Git
-   over HTTP/SSH).
-1. [Configure Prometheus](#configure-prometheus) to monitor your GitLab environment.
-1. [Configure the Object Storage](#configure-the-object-storage)
+   to run Puma/Unicorn, Workhorse, GitLab Shell, and to serve all frontend
+   requests (which include UI, API, and Git over HTTP/SSH).
+1. [Configure Prometheus](#configure-prometheus) to monitor your GitLab
+   environment.
+1. [Configure the object storage](#configure-the-object-storage)
    used for shared data objects.
-1. [Configure NFS (Optional)](#configure-nfs-optional)
-   to have shared disk storage service as an alternative to Gitaly and/or Object Storage (although
-   not recommended). NFS is required for GitLab Pages, you can skip this step if you're not using
-   that feature.
+1. [Configure Advanced Search](#configure-advanced-search) (optional) for faster,
+   more advanced code search across your entire GitLab instance.
+1. [Configure NFS](#configure-nfs-optional) (optional, and not recommended)
+   to have shared disk storage service as an alternative to Gitaly or object
+   storage. You can skip this step if you're not using GitLab Pages (which
+   requires NFS).
 
-We start with all servers on the same 10.6.0.0/16 private network range, they
-can connect to each other freely on those addresses.
+The servers start on the same 10.6.0.0/24 private network range, and can
+connect to each other freely on these addresses.
 
-Here is a list and description of each machine and the assigned IP:
+The following list includes descriptions of each server and its assigned IP:
 
 - `10.6.0.10`: External Load Balancer
 - `10.6.0.61`: Redis Primary
@@ -161,6 +164,14 @@ connection will be secure all the way. However, configuration will need to be
 added to GitLab to configure SSL certificates. See
 [NGINX HTTPS documentation](https://docs.gitlab.com/omnibus/settings/nginx.html#enable-https)
 for details on managing SSL certificates and configuring NGINX.
+
+### Readiness checks
+
+Ensure the external load balancer only routes to working services with built
+in monitoring endpoints. The [readiness checks](../../user/admin_area/monitoring/health_check.md)
+all require [additional configuration](../monitoring/ip_whitelist.md)
+on the nodes being checked, otherwise, the external load balancer will not be able to
+connect.
 
 ### Ports
 
@@ -1573,6 +1584,11 @@ On each node perform the following:
    sudo gitlab-ctl tail gitaly
    ```
 
+1. Save the `/etc/gitlab/gitlab-secrets.json` file from one of the two
+   application nodes and install it on the other application node and the
+   [Gitaly node](#configure-gitaly) and
+   [reconfigure GitLab](../restart_gitlab.md#omnibus-gitlab-reconfigure).
+
 1. Verify the GitLab services are running:
 
    ```shell
@@ -1743,6 +1759,25 @@ One risk of using a single bucket would be if your organization decided to
 migrate GitLab to the Helm deployment in the future. GitLab would run, but the situation with
 backups might not be realized until the organization had a critical requirement for the backups to
 work.
+
+<div align="right">
+  <a type="button" class="btn btn-default" href="#setup-components">
+    Back to setup components <i class="fa fa-angle-double-up" aria-hidden="true"></i>
+  </a>
+</div>
+
+## Configure Advanced Search **(STARTER ONLY)**
+
+NOTE: **Note:**
+Elasticsearch cluster design and requirements are dependent on your specific data.
+For recommended best practices on how to set up your Elasticsearch cluster
+alongside your instance, read how to
+[choose the optimal cluster configuration](../../integration/elasticsearch.md#guidance-on-choosing-optimal-cluster-configuration).
+
+You can leverage Elasticsearch and enable Advanced Search for faster, more
+advanced code search across your entire GitLab instance.
+
+[Learn how to set it up.](../../integration/elasticsearch.md)
 
 <div align="right">
   <a type="button" class="btn btn-default" href="#setup-components">

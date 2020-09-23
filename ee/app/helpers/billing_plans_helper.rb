@@ -22,8 +22,7 @@ module BillingPlansHelper
 
   def use_new_purchase_flow?(namespace)
     namespace.group? &&
-      namespace.actual_plan_name == Plan::FREE &&
-      Feature.enabled?(:free_group_new_purchase_flow, current_user)
+      namespace.actual_plan_name == Plan::FREE
   end
 
   def show_contact_sales_button?(purchase_link_action)

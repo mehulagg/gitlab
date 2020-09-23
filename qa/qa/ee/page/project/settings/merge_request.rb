@@ -23,6 +23,11 @@ module QA
             def click_pipelines_for_merged_results_checkbox
               check_element :merged_results_pipeline_checkbox
             end
+
+            def enable_merge_train
+              click_pipelines_for_merged_results_checkbox
+              click_save_changes
+            end
           end
         end
       end

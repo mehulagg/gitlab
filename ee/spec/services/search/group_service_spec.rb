@@ -20,13 +20,13 @@ RSpec.describe Search::GroupService, :elastic do
   end
 
   describe 'group search' do
-    let(:term) { "Project Name" }
+    let(:term) { "RandomName" }
     let(:nested_group) { create(:group, :nested) }
 
     # These projects shouldn't be found
     let(:outside_project) { create(:project, :public, name: "Outside #{term}") }
     let(:private_project) { create(:project, :private, namespace: nested_group, name: "Private #{term}" )}
-    let(:other_project)   { create(:project, :public, namespace: nested_group, name: term.reverse) }
+    let(:other_project)   { create(:project, :public, namespace: nested_group, name: 'OtherProject') }
 
     # These projects should be found
     let(:project1) { create(:project, :internal, namespace: nested_group, name: "Inner #{term} 1") }

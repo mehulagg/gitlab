@@ -145,7 +145,6 @@ describe('Feature flag table', () => {
       toggle.trigger('click');
 
       expect(spy).toHaveBeenCalledWith('_category_', 'click_button', {
-        context: 'feature_flag_activity',
         label: 'feature_flag_toggle',
       });
     });

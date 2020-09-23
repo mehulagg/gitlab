@@ -12,7 +12,7 @@ RSpec.describe Gitlab::GlRepository::RepoType do
         let(:expected_identifier) { "group-#{expected_id}-wiki" }
         let(:expected_suffix) { '.wiki' }
         let(:expected_container) { group }
-        let(:expected_repository) { expected_container.wiki.repository }
+        let(:expected_repository) { ::Repository.new(group.wiki.full_path, group, shard: group.wiki.repository_storage, disk_path: group.wiki.disk_path, repo_type: Gitlab::GlRepository::WIKI) }
       end
     end
   end

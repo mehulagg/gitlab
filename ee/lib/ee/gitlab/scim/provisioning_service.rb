@@ -128,7 +128,6 @@ module EE
             hash[:saml_provider_id] = @group.saml_provider.id
             hash[:group_id] = @group.id
             hash[:provider] = identity_provider
-            hash[:email_confirmation] = hash[:email]
             hash[:username] = valid_username
             hash[:password] = hash[:password_confirmation] = random_password
             hash[:password_automatically_set] = PASSWORD_AUTOMATICALLY_SET

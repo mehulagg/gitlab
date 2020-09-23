@@ -12,14 +12,14 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
   describe '.uncached_data' do
     describe '.usage_activity_by_stage' do
-      it 'includes usage_activity_by_stage data' do
-        uncached_data = described_class.uncached_data
+      subject { described_class.uncached_data }
 
-        expect(uncached_data).to include(:usage_activity_by_stage)
-        expect(uncached_data).to include(:usage_activity_by_stage_monthly)
-        expect(uncached_data[:usage_activity_by_stage])
+      it 'includes usage_activity_by_stage data' do
+        is_expected.to include(:usage_activity_by_stage)
+        is_expected.to include(:usage_activity_by_stage_monthly)
+        expect(subject[:usage_activity_by_stage])
           .to include(:configure, :create, :manage, :monitor, :plan, :release, :verify)
-        expect(uncached_data[:usage_activity_by_stage_monthly])
+        expect(subject[:usage_activity_by_stage_monthly])
           .to include(:configure, :create, :manage, :monitor, :plan, :release, :verify)
       end
 
@@ -29,20 +29,19 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
                     user_minimum_id user_maximum_id unique_visit_service
                     deployment_minimum_id deployment_maximum_id
                     approval_merge_request_rule_minimum_id
-                    approval_merge_request_rule_maximum_id)
+                    approval_merge_request_rule_maximum_id
+                    auth_providers)
         values.each do |key|
           expect(described_class).to receive(:clear_memoization).with(key)
         end
 
-        described_class.uncached_data
+        subject
       end
 
       it 'merge_requests_users is included only in montly counters' do
-        uncached_data = described_class.uncached_data
-
-        expect(uncached_data[:usage_activity_by_stage][:create])
+        expect(subject[:usage_activity_by_stage][:create])
           .not_to include(:merge_requests_users)
-        expect(uncached_data[:usage_activity_by_stage_monthly][:create])
+        expect(subject[:usage_activity_by_stage_monthly][:create])
           .to include(:merge_requests_users)
       end
     end
@@ -169,6 +168,8 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
   describe 'usage_activity_by_stage_manage' do
     it 'includes accurate usage_activity_by_stage data' do
+      described_class.clear_memoization(:auth_providers)
+
       stub_config(
         omniauth:
           { providers: omniauth_providers }
@@ -176,21 +177,29 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       for_defined_days_back do
         user = create(:user)
+        user2 = create(:user)
         create(:event, author: user)
         create(:group_member, user: user)
+        create(:authentication_event, user: user, provider: :ldapmain, result: :success)
+        create(:authentication_event, user: user2, provider: :ldapsecondary, result: :success)
+        create(:authentication_event, user: user2, provider: :group_saml, result: :success)
+        create(:authentication_event, user: user2, provider: :group_saml, result: :success)
+        create(:authentication_event, user: user, provider: :group_saml, result: :failed)
       end
 
       expect(described_class.usage_activity_by_stage_manage({})).to include(
         events: 2,
         groups: 2,
-        users_created: 4,
-        omniauth_providers: ['google_oauth2']
+        users_created: 6,
+        omniauth_providers: ['google_oauth2'],
+        user_auth_by_provider: { 'group_saml' => 2, 'ldap' => 4 }
       )
       expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period)).to include(
         events: 1,
         groups: 1,
-        users_created: 2,
-        omniauth_providers: ['google_oauth2']
+        users_created: 3,
+        omniauth_providers: ['google_oauth2'],
+        user_auth_by_provider: { 'group_saml' => 1, 'ldap' => 2 }
       )
     end
 
@@ -244,6 +253,20 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           }
         }
       )
+    end
+
+    it 'includes group imports usage data' do
+      for_defined_days_back do
+        user = create(:user)
+        group = create(:group)
+        group.add_owner(user)
+        create(:group_import_state, group: group, user: user)
+      end
+
+      expect(described_class.usage_activity_by_stage_manage({}))
+        .to include(groups_imported: 2)
+      expect(described_class.usage_activity_by_stage_manage(described_class.last_28_days_time_period))
+        .to include(groups_imported: 1)
     end
 
     def omniauth_providers
@@ -401,10 +424,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(UsageDataHelpers::COUNTS_KEYS - count_data.keys).to be_empty
     end
 
-    it 'gathers usage counts monthly hash' do
-      expect(subject[:counts_monthly]).to be_an(Hash)
-    end
-
     it 'gathers usage counts correctly' do
       count_data = subject[:counts]
 
@@ -480,6 +499,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       expect(count_data[:projects_with_packages]).to eq(2)
       expect(count_data[:packages]).to eq(4)
+      expect(count_data[:user_preferences_user_gitpod_enabled]).to eq(1)
     end
 
     it 'gathers object store usage correctly' do
@@ -490,10 +510,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
          uploads: { enabled: nil, object_store: { enabled: false, direct_upload: true, background_upload: false, provider: "AWS" } },
          packages: { enabled: true, object_store: { enabled: false, direct_upload: false, background_upload: true, provider: "AWS" } } }
       )
-    end
-
-    it 'gathers topology data' do
-      expect(subject.keys).to include(:topology)
     end
 
     context 'with existing container expiration policies' do
@@ -638,6 +654,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
         expect(subject[:gitlab_shared_runners_enabled]).to eq(Gitlab.config.gitlab_ci.shared_runners_enabled)
         expect(subject[:web_ide_clientside_preview_enabled]).to eq(Gitlab::CurrentSettings.web_ide_clientside_preview_enabled?)
         expect(subject[:grafana_link_enabled]).to eq(Gitlab::CurrentSettings.grafana_enabled?)
+        expect(subject[:gitpod_enabled]).to eq(Gitlab::CurrentSettings.gitpod_enabled?)
       end
 
       context 'with embedded Prometheus' do
@@ -665,6 +682,20 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           stub_application_setting(grafana_enabled: false)
 
           expect(subject[:grafana_link_enabled]).to eq(false)
+        end
+      end
+
+      context 'with Gitpod' do
+        it 'returns true when is enabled' do
+          stub_application_setting(gitpod_enabled: true)
+
+          expect(subject[:gitpod_enabled]).to eq(true)
+        end
+
+        it 'returns false when is disabled' do
+          stub_application_setting(gitpod_enabled: false)
+
+          expect(subject[:gitpod_enabled]).to eq(false)
         end
       end
     end
@@ -974,14 +1005,14 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     before do
       counter = Gitlab::UsageDataCounters::TrackUniqueEvents
       merge_request = Event::TARGET_TYPES[:merge_request]
-      project = Event::TARGET_TYPES[:project]
+      design = Event::TARGET_TYPES[:design]
 
       counter.track_event(event_action: :commented, event_target: merge_request, author_id: 1, time: time)
       counter.track_event(event_action: :opened, event_target: merge_request, author_id: 1, time: time)
       counter.track_event(event_action: :merged, event_target: merge_request, author_id: 2, time: time)
       counter.track_event(event_action: :closed, event_target: merge_request, author_id: 3, time: time)
       counter.track_event(event_action: :opened, event_target: merge_request, author_id: 4, time: time - 3.days)
-      counter.track_event(event_action: :created, event_target: project, author_id: 5, time: time)
+      counter.track_event(event_action: :created, event_target: design, author_id: 5, time: time)
     end
 
     it 'returns the distinct count of users using merge requests (via events table) within the specified time period' do
@@ -1015,7 +1046,6 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       counter.track_event(event_action: :pushed, event_target: project, author_id: 2)
       counter.track_event(event_action: :pushed, event_target: project, author_id: 3)
       counter.track_event(event_action: :pushed, event_target: project, author_id: 4, time: time - 3.days)
-      counter.track_event(event_action: :created, event_target: project, author_id: 5, time: time - 3.days)
       counter.track_event(event_action: :created, event_target: wiki, author_id: 3)
       counter.track_event(event_action: :created, event_target: design, author_id: 3)
 
@@ -1075,6 +1105,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           'p_analytics_repo' => 123,
           'i_analytics_cohorts' => 123,
           'i_analytics_dev_ops_score' => 123,
+          'i_analytics_instance_statistics' => 123,
           'p_analytics_merge_request' => 123,
           'g_analytics_merge_request' => 123,
           'analytics_unique_visits_for_any_target' => 543,
@@ -1108,6 +1139,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
           'g_compliance_audit_events' => 123,
           'i_compliance_credential_inventory' => 123,
           'i_compliance_audit_events' => 123,
+          'a_compliance_audit_events_api' => 123,
           'compliance_unique_visits_for_any_target' => 543,
           'compliance_unique_visits_for_any_target_monthly' => 987
         }
@@ -1145,6 +1177,7 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
     subject { described_class.redis_hll_counters }
 
     let(:categories) { ::Gitlab::UsageDataCounters::HLLRedisCounter.categories }
+    let(:ineligible_total_categories) { ['source_code'] }
 
     it 'has all know_events' do
       expect(subject).to have_key(:redis_hll_counters)
@@ -1152,9 +1185,15 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
       expect(subject[:redis_hll_counters].keys).to match_array(categories)
 
       categories.each do |category|
-        keys = ::Gitlab::UsageDataCounters::HLLRedisCounter.events_for_category(category) + ["#{category}_total_unique_counts_weekly", "#{category}_total_unique_counts_monthly"]
+        keys = ::Gitlab::UsageDataCounters::HLLRedisCounter.events_for_category(category)
 
-        expect(subject[:redis_hll_counters][category].keys).to match_array(keys)
+        metrics = keys.map { |key| "#{key}_weekly" } + keys.map { |key| "#{key}_monthly" }
+
+        if ineligible_total_categories.exclude?(category)
+          metrics.append("#{category}_total_unique_counts_weekly", "#{category}_total_unique_counts_monthly")
+        end
+
+        expect(subject[:redis_hll_counters][category].keys).to match_array(metrics)
       end
     end
   end
@@ -1169,6 +1208,48 @@ RSpec.describe Gitlab::UsageData, :aggregate_failures do
 
       expect(subject).to eq(service_desk_enabled_projects: 1,
                             service_desk_issues: 2)
+    end
+  end
+
+  describe '.snowplow_event_counts' do
+    context 'when self-monitoring project exists' do
+      let_it_be(:project) { create(:project) }
+
+      before do
+        stub_application_setting(self_monitoring_project: project)
+      end
+
+      context 'and product_analytics FF is enabled for it' do
+        before do
+          stub_feature_flags(product_analytics: project)
+
+          create(:product_analytics_event, project: project, se_category: 'epics', se_action: 'promote')
+          create(:product_analytics_event, project: project, se_category: 'epics', se_action: 'promote', collector_tstamp: 28.days.ago)
+        end
+
+        it 'returns promoted_issues for the time period' do
+          expect(described_class.snowplow_event_counts[:promoted_issues]).to eq(2)
+          expect(described_class.snowplow_event_counts(
+            time_period: described_class.last_28_days_time_period(column: :collector_tstamp)
+          )[:promoted_issues]).to eq(1)
+        end
+      end
+
+      context 'and product_analytics FF is disabled' do
+        before do
+          stub_feature_flags(product_analytics: false)
+        end
+
+        it 'returns an empty hash' do
+          expect(described_class.snowplow_event_counts).to eq({})
+        end
+      end
+    end
+
+    context 'when self-monitoring project does not exist' do
+      it 'returns an empty hash' do
+        expect(described_class.snowplow_event_counts).to eq({})
+      end
     end
   end
 end

@@ -21,7 +21,7 @@ RSpec.describe Projects::JobsController do
       end
 
       context 'with shared runner that has quota' do
-        let(:project) { create(:project, :private, shared_runners_enabled: true) }
+        let(:project) { create(:project, :repository, :private, shared_runners_enabled: true) }
 
         before do
           stub_application_setting(shared_runners_minutes: 2)
@@ -54,7 +54,7 @@ RSpec.describe Projects::JobsController do
       end
 
       context 'when shared runner has no quota' do
-        let(:project) { create(:project, :private, shared_runners_enabled: true) }
+        let(:project) { create(:project, :repository, :private, shared_runners_enabled: true) }
 
         before do
           stub_application_setting(shared_runners_minutes: 0)
@@ -70,7 +70,7 @@ RSpec.describe Projects::JobsController do
       end
 
       context 'when project is public' do
-        let(:project) { create(:project, :public, shared_runners_enabled: true) }
+        let(:project) { create(:project, :repository, :public, shared_runners_enabled: true) }
 
         before do
           stub_application_setting(shared_runners_minutes: 2)

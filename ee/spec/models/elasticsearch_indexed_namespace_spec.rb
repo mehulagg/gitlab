@@ -18,8 +18,13 @@ RSpec.describe ElasticsearchIndexedNamespace do
   end
 
   it_behaves_like 'an elasticsearch indexed container' do
+    let_it_be(:namespace) { create(:namespace) }
+
     let(:container) { :elasticsearch_indexed_namespace }
-    let(:attribute) { :namespace_id }
+    let(:container_attributes) { { namespace: namespace } }
+
+    let(:required_attribute) { :namespace_id }
+
     let(:index_action) do
       expect(ElasticNamespaceIndexerWorker).to receive(:perform_async).with(subject.namespace_id, :index)
     end
@@ -36,9 +41,9 @@ RSpec.describe ElasticsearchIndexedNamespace do
     end
 
     let_it_be(:namespaces) { create_list(:namespace, 3) }
-    let_it_be(:subscription1) { create(:gitlab_subscription, :without_index_namespace_callback, namespace: namespaces[2]) }
-    let_it_be(:subscription2) { create(:gitlab_subscription, :without_index_namespace_callback, namespace: namespaces[0]) }
-    let_it_be(:subscription3) { create(:gitlab_subscription, :silver, :without_index_namespace_callback, namespace: namespaces[1]) }
+    let_it_be(:subscription1) { create(:gitlab_subscription, namespace: namespaces[2]) }
+    let_it_be(:subscription2) { create(:gitlab_subscription, namespace: namespaces[0]) }
+    let_it_be(:subscription3) { create(:gitlab_subscription, :silver, namespace: namespaces[1]) }
 
     before do
       stub_ee_application_setting(elasticsearch_indexing: false)

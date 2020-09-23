@@ -2,12 +2,14 @@
 import Vue from 'vue';
 import { isNumber } from 'lodash';
 import {
+  GlButton,
   GlFormSelect,
   GlFormInput,
   GlFormTextarea,
   GlFormGroup,
+  GlIcon,
+  GlLink,
   GlToken,
-  GlButton,
 } from '@gitlab/ui';
 import { s__, __ } from '~/locale';
 import {
@@ -22,17 +24,27 @@ import NewEnvironmentsDropdown from './new_environments_dropdown.vue';
 
 export default {
   components: {
+    GlButton,
     GlFormGroup,
     GlFormInput,
     GlFormTextarea,
     GlFormSelect,
+    GlIcon,
+    GlLink,
     GlToken,
-    GlButton,
     NewEnvironmentsDropdown,
   },
   model: {
     prop: 'strategy',
     event: 'change',
+  },
+  inject: {
+    strategyTypeDocsPagePath: {
+      type: String,
+    },
+    environmentsScopeDocsPath: {
+      type: String,
+    },
   },
   props: {
     strategy: {
@@ -59,9 +71,10 @@ export default {
   ROLLOUT_STRATEGY_USER_ID,
   ROLLOUT_STRATEGY_GITLAB_USER_LIST,
 
-  translations: {
+  i18n: {
     allEnvironments: __('All environments'),
     environmentsLabel: __('Environments'),
+    environmentsSelectDescription: __('Select the environment scope for this feature flag.'),
     rolloutPercentageDescription: __('Enter a whole number between 0 and 100'),
     rolloutPercentageInvalid: s__(
       'FeatureFlags|Percent rollout must be a whole number between 0 and 100',
@@ -72,7 +85,7 @@ export default {
     rolloutUserListLabel: s__('FeatureFlag|List'),
     rolloutUserListDescription: s__('FeatureFlag|Select a user list'),
     rolloutUserListNoListError: s__('FeatureFlag|There are no configured user lists'),
-    strategyTypeDescription: __('Select strategy activation method'),
+    strategyTypeDescription: __('Select strategy activation method.'),
     strategyTypeLabel: s__('FeatureFlag|Type'),
   },
 
@@ -135,9 +148,8 @@ export default {
     },
     appliesToAllEnvironments() {
       return (
-        this.filteredEnvironments.length === 0 ||
-        (this.filteredEnvironments.length === 1 &&
-          this.filteredEnvironments[0].environmentScope === '*')
+        this.filteredEnvironments.length === 1 &&
+        this.filteredEnvironments[0].environmentScope === '*'
       );
     },
     filteredEnvironments() {
@@ -190,6 +202,9 @@ export default {
       } else {
         this.environments = this.environments.filter(e => e !== environment);
       }
+      if (this.filteredEnvironments.length === 0) {
+        this.environments.push({ environmentScope: '*' });
+      }
       this.onStrategyChange();
     },
     isStrategyType(type) {
@@ -199,14 +214,14 @@ export default {
 };
 </script>
 <template>
-  <div class="border-top py-4">
-    <div class="flex flex-column flex-md-row flex-md-wrap">
+  <div class="gl-border-t-solid gl-border-t-1 gl-border-t-gray-100 gl-py-6">
+    <div class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row flex-md-wrap">
       <div class="mr-5">
-        <gl-form-group
-          :label="$options.translations.strategyTypeLabel"
-          :description="$options.translations.strategyTypeDescription"
-          :label-for="strategyTypeId"
-        >
+        <gl-form-group :label="$options.i18n.strategyTypeLabel" :label-for="strategyTypeId">
+          <p class="gl-display-inline-block ">{{ $options.i18n.strategyTypeDescription }}</p>
+          <gl-link :href="strategyTypeDocsPagePath" target="_blank">
+            <gl-icon name="question" />
+          </gl-link>
           <gl-form-select
             :id="strategyTypeId"
             v-model="formStrategy.name"
@@ -219,27 +234,27 @@ export default {
       <div data-testid="strategy">
         <gl-form-group
           v-if="isPercentRollout"
-          :label="$options.translations.rolloutPercentageLabel"
-          :description="$options.translations.rolloutPercentageDescription"
+          :label="$options.i18n.rolloutPercentageLabel"
+          :description="$options.i18n.rolloutPercentageDescription"
           :label-for="strategyPercentageId"
-          :invalid-feedback="$options.translations.rolloutPercentageInvalid"
+          :invalid-feedback="$options.i18n.rolloutPercentageInvalid"
         >
-          <div class="flex align-items-center">
+          <div class="gl-display-flex gl-align-items-center">
             <gl-form-input
               :id="strategyPercentageId"
               v-model="formPercentage"
-              class="rollout-percentage text-right w-3rem"
+              class="rollout-percentage gl-text-right gl-w-9"
               type="number"
               @input="onStrategyChange"
             />
-            <span class="ml-1">%</span>
+            <span class="gl-ml-2">%</span>
           </div>
         </gl-form-group>
 
         <gl-form-group
           v-if="isUserWithId"
-          :label="$options.translations.rolloutUserIdsLabel"
-          :description="$options.translations.rolloutUserIdsDescription"
+          :label="$options.i18n.rolloutUserIdsLabel"
+          :description="$options.i18n.rolloutUserIdsDescription"
           :label-for="strategyUserIdsId"
         >
           <gl-form-textarea
@@ -251,9 +266,9 @@ export default {
         <gl-form-group
           v-if="isUserList"
           :state="hasUserLists"
-          :invalid-feedback="$options.translations.rolloutUserListNoListError"
-          :label="$options.translations.rolloutUserListLabel"
-          :description="$options.translations.rolloutUserListDescription"
+          :invalid-feedback="$options.i18n.rolloutUserListNoListError"
+          :label="$options.i18n.rolloutUserListLabel"
+          :description="$options.i18n.rolloutUserListDescription"
           :label-for="strategyUserListId"
         >
           <gl-form-select
@@ -265,7 +280,9 @@ export default {
         </gl-form-group>
       </div>
 
-      <div class="align-self-end align-self-md-stretch order-first offset-md-0 order-md-0 ml-auto">
+      <div
+        class="align-self-end align-self-md-stretch order-first offset-md-0 order-md-0 gl-ml-auto"
+      >
         <gl-button
           data-testid="delete-strategy-button"
           variant="danger"
@@ -274,23 +291,31 @@ export default {
         />
       </div>
     </div>
-    <div class="flex flex-column">
-      <label :for="environmentsDropdownId">{{ $options.translations.environmentsLabel }}</label>
-      <div class="flex flex-column flex-md-row align-items-start align-items-md-center">
+    <label class="gl-display-block" :for="environmentsDropdownId">{{
+      $options.i18n.environmentsLabel
+    }}</label>
+    <p class="gl-display-inline-block">{{ $options.i18n.environmentsSelectDescription }}</p>
+    <gl-link :href="environmentsScopeDocsPath" target="_blank">
+      <gl-icon name="question" />
+    </gl-link>
+    <div class="gl-display-flex gl-flex-direction-column">
+      <div
+        class="gl-display-flex gl-flex-direction-column gl-md-flex-direction-row align-items-start gl-md-align-items-center"
+      >
         <new-environments-dropdown
           :id="environmentsDropdownId"
           :endpoint="endpoint"
-          class="mr-2"
+          class="gl-mr-3"
           @add="addEnvironment"
         />
-        <span v-if="appliesToAllEnvironments" class="text-secondary mt-2 mt-md-0 ml-md-3">
-          {{ $options.translations.allEnvironments }}
+        <span v-if="appliesToAllEnvironments" class="text-secondary gl-mt-3 mt-md-0 ml-md-3">
+          {{ $options.i18n.allEnvironments }}
         </span>
-        <div v-else class="flex align-items-center">
+        <div v-else class="gl-display-flex gl-align-items-center">
           <gl-token
             v-for="environment in filteredEnvironments"
             :key="environment.id"
-            class="mt-2 mr-2 mt-md-0 mr-md-0 ml-md-2 rounded-pill"
+            class="gl-mt-3 gl-mr-3 mt-md-0 mr-md-0 ml-md-2 rounded-pill"
             @close="removeScope(environment)"
           >
             {{ environment.environmentScope }}

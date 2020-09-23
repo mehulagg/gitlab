@@ -86,6 +86,7 @@ describe('Project Manager component', () => {
           search: 'test',
           first: wrapper.vm.$options.PROJECTS_PER_PAGE,
           after: '',
+          searchNamespaces: true,
         },
       });
     });

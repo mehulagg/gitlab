@@ -1,7 +1,6 @@
 import getters from 'ee/boards/stores/getters';
 import {
   mockIssue,
-  mockIssue2,
   mockIssue3,
   mockIssue4,
   mockIssues,
@@ -15,16 +14,6 @@ describe('EE Boards Store Getters', () => {
     issues,
   };
 
-  describe('getIssues', () => {
-    it('returns issues for a given listId', () => {
-      const getIssueById = issueId => [mockIssue, mockIssue2].find(({ id }) => id === issueId);
-
-      expect(getters.getIssues(boardsState, { getIssueById })('gid://gitlab/List/2')).toEqual(
-        mockIssues,
-      );
-    });
-  });
-
   describe('getIssuesByEpic', () => {
     it('returns issues for a given listId and epicId', () => {
       const getIssues = () => mockIssues;
@@ -37,13 +26,12 @@ describe('EE Boards Store Getters', () => {
     });
   });
 
-  describe('unassignedIssues', () => {
-    it('returns issues for a given listId and epicId', () => {
+  describe('getUnassignedIssues', () => {
+    it('returns issues not assigned to an epic for a given listId', () => {
       const getIssues = () => [mockIssue, mockIssue3, mockIssue4];
-      expect(getters.unassignedIssues(boardsState, { getIssues })('gid://gitlab/List/1')).toEqual([
-        mockIssue3,
-        mockIssue4,
-      ]);
+      expect(
+        getters.getUnassignedIssues(boardsState, { getIssues })('gid://gitlab/List/1'),
+      ).toEqual([mockIssue3, mockIssue4]);
     });
   });
 });

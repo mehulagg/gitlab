@@ -51,7 +51,15 @@ module EE
       has_many :approvers, as: :target, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
       has_many :approver_users, through: :approvers, source: :user
       has_many :approver_groups, as: :target, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
-      has_many :approval_rules, class_name: 'ApprovalProjectRule'
+      has_many :approval_rules, class_name: 'ApprovalProjectRule' do
+        def applicable_to_branch(branch)
+          includes(:protected_branches).select { |rule| rule.applies_to_branch?(branch) }
+        end
+
+        def inapplicable_to_branch(branch)
+          includes(:protected_branches).reject { |rule| rule.applies_to_branch?(branch) }
+        end
+      end
       has_many :approval_merge_request_rules, through: :merge_requests, source: :approval_rules
       has_many :audit_events, as: :entity
       has_many :path_locks
@@ -73,6 +81,7 @@ module EE
       has_many :vulnerability_exports, class_name: 'Vulnerabilities::Export'
 
       has_many :dast_site_profiles
+      has_many :dast_site_tokens
       has_many :dast_sites
 
       has_many :protected_environments
@@ -109,6 +118,7 @@ module EE
           .limit(limit)
       end
 
+      scope :including_project, ->(project) { where(id: project) }
       scope :with_wiki_enabled, -> { with_feature_enabled(:wiki) }
       scope :within_shards, -> (shard_names) { where(repository_storage: Array(shard_names)) }
       scope :verification_failed_repos, -> { joins(:repository_state).merge(ProjectRepositoryState.verification_failed_repos) }
@@ -305,7 +315,7 @@ module EE
     #   it. This is the case when we're ready to enable a feature for anyone
     #   with the correct license.
     def beta_feature_available?(feature)
-      ::Feature.enabled?(feature) ? feature_available?(feature) : ::Feature.enabled?(feature, self)
+      ::Feature.enabled?(feature, type: :licensed) ? feature_available?(feature) : ::Feature.enabled?(feature, self, type: :licensed)
     end
     alias_method :alpha_feature_available?, :beta_feature_available?
 
@@ -338,6 +348,11 @@ module EE
       mirror? &&
         feature_available?(:ci_cd_projects) &&
         feature_available?(:github_project_service_integration)
+    end
+
+    override :mark_primary_write_location
+    def mark_primary_write_location
+      ::Gitlab::Database::LoadBalancing::Sticking.mark_primary_write_location(:project, self.id)
     end
 
     override :add_import_job
@@ -647,26 +662,32 @@ module EE
     end
 
     def disable_overriding_approvers_per_merge_request
-      return super unless License.feature_available?(:admin_merge_request_approvers_rules)
-      return super unless has_regulated_settings?
+      strong_memoize(:disable_overriding_approvers_per_merge_request) do
+        next super unless License.feature_available?(:admin_merge_request_approvers_rules)
+        next super unless has_regulated_settings?
 
-      ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request?
+        ::Gitlab::CurrentSettings.disable_overriding_approvers_per_merge_request?
+      end
     end
     alias_method :disable_overriding_approvers_per_merge_request?, :disable_overriding_approvers_per_merge_request
 
     def merge_requests_author_approval
-      return super unless License.feature_available?(:admin_merge_request_approvers_rules)
-      return super unless has_regulated_settings?
+      strong_memoize(:merge_requests_author_approval) do
+        next super unless License.feature_available?(:admin_merge_request_approvers_rules)
+        next super unless has_regulated_settings?
 
-      !::Gitlab::CurrentSettings.prevent_merge_requests_author_approval?
+        !::Gitlab::CurrentSettings.prevent_merge_requests_author_approval?
+      end
     end
     alias_method :merge_requests_author_approval?, :merge_requests_author_approval
 
     def merge_requests_disable_committers_approval
-      return super unless License.feature_available?(:admin_merge_request_approvers_rules)
-      return super unless has_regulated_settings?
+      strong_memoize(:merge_requests_disable_committers_approval) do
+        next super unless License.feature_available?(:admin_merge_request_approvers_rules)
+        next super unless has_regulated_settings?
 
-      ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval?
+        ::Gitlab::CurrentSettings.prevent_merge_requests_committers_approval?
+      end
     end
     alias_method :merge_requests_disable_committers_approval?, :merge_requests_disable_committers_approval
 
@@ -703,7 +724,7 @@ module EE
 
     def licensed_feature_available?(feature, user = nil)
       # This feature might not be behind a feature flag at all, so default to true
-      return false unless ::Feature.enabled?(feature, user, default_enabled: true)
+      return false unless ::Feature.enabled?(feature, user, type: :licensed, default_enabled: true)
 
       available_features = strong_memoize(:licensed_feature_available) do
         Hash.new do |h, f|
@@ -736,7 +757,8 @@ module EE
 
     def user_defined_rules
       strong_memoize(:user_defined_rules) do
-        approval_rules.regular_or_any_approver.order(rule_type: :desc, id: :asc)
+        # Loading the relation in order to memoize it loaded
+        approval_rules.regular_or_any_approver.order(rule_type: :desc, id: :asc).load
       end
     end
 

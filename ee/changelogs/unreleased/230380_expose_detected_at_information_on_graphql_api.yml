@@ -1,5 +1,0 @@
----
-title: Introduce `detectedAt` field for VulnerabilityType on GraphQL API
-merge_request: 41000
-author:
-type: added

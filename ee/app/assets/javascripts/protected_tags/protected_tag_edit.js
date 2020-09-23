@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import 'vendor/jquery.scrollTo';
 import { find } from 'lodash';
 import AccessDropdown from '~/projects/settings/access_dropdown';
 import axios from '~/lib/utils/axios_utils';

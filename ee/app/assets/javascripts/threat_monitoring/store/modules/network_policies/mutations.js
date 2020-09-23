@@ -46,4 +46,17 @@ export default {
     state.isUpdatingPolicy = false;
     state.errorUpdatingPolicy = true;
   },
+  [types.REQUEST_DELETE_POLICY](state) {
+    state.isRemovingPolicy = true;
+    state.errorRemovingPolicy = false;
+  },
+  [types.RECEIVE_DELETE_POLICY_SUCCESS](state, { policy }) {
+    state.policies = state.policies.filter(({ name }) => name !== policy.name);
+    state.isRemovingPolicy = false;
+    state.errorRemovingPolicy = false;
+  },
+  [types.RECEIVE_DELETE_POLICY_ERROR](state) {
+    state.isRemovingPolicy = false;
+    state.errorRemovingPolicy = true;
+  },
 };

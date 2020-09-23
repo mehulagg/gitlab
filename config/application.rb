@@ -49,7 +49,8 @@ module Gitlab
                                      #{config.root}/app/models/members
                                      #{config.root}/app/models/project_services
                                      #{config.root}/app/graphql/resolvers/concerns
-                                     #{config.root}/app/graphql/mutations/concerns])
+                                     #{config.root}/app/graphql/mutations/concerns
+                                     #{config.root}/app/graphql/types/concerns])
 
     config.generators.templates.push("#{config.root}/generator_templates")
 
@@ -208,6 +209,13 @@ module Gitlab
     # Import css for xterm
     config.assets.paths << "#{config.root}/node_modules/xterm/src/"
     config.assets.precompile << "xterm.css"
+
+    # Add EE assets
+    if Gitlab.ee?
+      %w[images javascripts stylesheets].each do |path|
+        config.assets.paths << "#{config.root}/ee/app/assets/#{path}"
+      end
+    end
 
     # Import path for EE specific SCSS entry point
     # In CE it will import a noop file, in EE a functioning file

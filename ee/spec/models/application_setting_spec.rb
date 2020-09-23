@@ -65,6 +65,12 @@ RSpec.describe ApplicationSetting do
     it { is_expected.not_to allow_value(1.1).for(:elasticsearch_max_bulk_concurrency) }
     it { is_expected.not_to allow_value(-1).for(:elasticsearch_max_bulk_concurrency) }
 
+    it { is_expected.to allow_value(30).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.to allow_value(0).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.not_to allow_value(nil).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.not_to allow_value(1.1).for(:elasticsearch_client_request_timeout) }
+    it { is_expected.not_to allow_value(-1).for(:elasticsearch_client_request_timeout) }
+
     it { is_expected.to allow_value(nil).for(:required_instance_ci_template) }
     it { is_expected.not_to allow_value("").for(:required_instance_ci_template) }
     it { is_expected.not_to allow_value("  ").for(:required_instance_ci_template) }
@@ -288,7 +294,8 @@ RSpec.describe ApplicationSetting do
         elasticsearch_aws_access_key: 'test-access-key',
         elasticsearch_aws_secret_access_key: 'test-secret-access-key',
         elasticsearch_max_bulk_size_mb: 67,
-        elasticsearch_max_bulk_concurrency: 8
+        elasticsearch_max_bulk_concurrency: 8,
+        elasticsearch_client_request_timeout: 30
       )
 
       expect(setting.elasticsearch_config).to eq(
@@ -298,8 +305,15 @@ RSpec.describe ApplicationSetting do
         aws_access_key: 'test-access-key',
         aws_secret_access_key: 'test-secret-access-key',
         max_bulk_size_bytes: 67.megabytes,
-        max_bulk_concurrency: 8
+        max_bulk_concurrency: 8,
+        client_request_timeout: 30
       )
+
+      setting.update!(
+        elasticsearch_client_request_timeout: 0
+      )
+
+      expect(setting.elasticsearch_config).not_to include(:client_request_timeout)
     end
 
     context 'limiting namespaces and projects' do
@@ -407,8 +421,8 @@ RSpec.describe ApplicationSetting do
   end
 
   describe '#search_using_elasticsearch?' do
-    # Constructs a truth table with 16 entries to run the specs against
-    where(indexing: [true, false], searching: [true, false], limiting: [true, false])
+    # Constructs a truth table to run the specs against
+    where(indexing: [true, false], searching: [true, false], limiting: [true, false], advanced_global_search_for_limited_indexing: [true, false])
 
     with_them do
       let_it_be(:included_project_container) { create(:elasticsearch_indexed_project) }
@@ -430,12 +444,14 @@ RSpec.describe ApplicationSetting do
           elasticsearch_search: searching,
           elasticsearch_limit_indexing: limiting
         )
+
+        stub_feature_flags(advanced_global_search_for_limited_indexing: advanced_global_search_for_limited_indexing)
       end
 
       context 'global scope' do
         let(:scope) { nil }
 
-        it { is_expected.to eq(only_when_enabled_globally) }
+        it { is_expected.to eq(indexing && searching && (!limiting || advanced_global_search_for_limited_indexing)) }
       end
 
       context 'namespace (in scope)' do

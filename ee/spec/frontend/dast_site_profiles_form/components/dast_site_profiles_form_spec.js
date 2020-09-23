@@ -1,12 +1,18 @@
 import merge from 'lodash/merge';
+import VueApollo from 'vue-apollo';
 import { within } from '@testing-library/dom';
-import { mount, shallowMount } from '@vue/test-utils';
-import { GlAlert, GlForm, GlModal } from '@gitlab/ui';
+import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
+import { createMockClient } from 'mock-apollo-client';
+import { GlForm, GlModal } from '@gitlab/ui';
+import waitForPromises from 'jest/helpers/wait_for_promises';
 import { TEST_HOST } from 'helpers/test_constants';
 import DastSiteProfileForm from 'ee/dast_site_profiles_form/components/dast_site_profile_form.vue';
 import DastSiteValidation from 'ee/dast_site_profiles_form/components/dast_site_validation.vue';
+import dastSiteValidationQuery from 'ee/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
 import dastSiteProfileCreateMutation from 'ee/dast_site_profiles_form/graphql/dast_site_profile_create.mutation.graphql';
 import dastSiteProfileUpdateMutation from 'ee/dast_site_profiles_form/graphql/dast_site_profile_update.mutation.graphql';
+import dastSiteTokenCreateMutation from 'ee/dast_site_profiles_form/graphql/dast_site_token_create.mutation.graphql';
+import * as responses from 'ee_jest/dast_site_profiles_form/mock_data/apollo_mock';
 import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -14,18 +20,34 @@ jest.mock('~/lib/utils/url_utility', () => ({
   redirectTo: jest.fn(),
 }));
 
+const localVue = createLocalVue();
+localVue.use(VueApollo);
+
 const fullPath = 'group/project';
 const profilesLibraryPath = `${TEST_HOST}/${fullPath}/-/on_demand_scans/profiles`;
 const profileName = 'My DAST site profile';
 const targetUrl = 'http://example.com';
+const tokenId = '3455';
+const token = '33988';
 
 const defaultProps = {
   profilesLibraryPath,
   fullPath,
 };
 
+const defaultRequestHandlers = {
+  dastSiteProfileCreate: jest.fn().mockResolvedValue(responses.dastSiteProfileCreate()),
+  dastSiteProfileUpdate: jest.fn().mockResolvedValue(responses.dastSiteProfileUpdate()),
+  dastSiteTokenCreate: jest
+    .fn()
+    .mockResolvedValue(responses.dastSiteTokenCreate({ id: tokenId, token })),
+  dastSiteValidation: jest.fn().mockResolvedValue(responses.dastSiteValidation()),
+};
+
 describe('DastSiteProfileForm', () => {
   let wrapper;
+  let apolloProvider;
+  let requestHandlers;
 
   const withinComponent = () => within(wrapper.element);
 
@@ -39,27 +61,58 @@ describe('DastSiteProfileForm', () => {
     wrapper.find('[data-testid="dast-site-profile-form-cancel-button"]');
   const findCancelModal = () => wrapper.find(GlModal);
   const submitForm = () => findForm().vm.$emit('submit', { preventDefault: () => {} });
-  const findAlert = () => wrapper.find(GlAlert);
+  const findAlert = () => wrapper.find('[data-testid="dast-site-profile-form-alert"]');
   const findSiteValidationToggle = () =>
     wrapper.find('[data-testid="dast-site-validation-toggle"]');
   const findDastSiteValidation = () => wrapper.find(DastSiteValidation);
 
-  const componentFactory = (mountFn = shallowMount) => options => {
-    wrapper = mountFn(
-      DastSiteProfileForm,
-      merge(
-        {},
-        {
-          propsData: defaultProps,
-          mocks: {
-            $apollo: {
-              mutate: jest.fn(),
-            },
-          },
-        },
-        options,
-      ),
+  const mockClientFactory = handlers => {
+    const mockClient = createMockClient();
+
+    requestHandlers = {
+      ...defaultRequestHandlers,
+      ...handlers,
+    };
+
+    mockClient.setRequestHandler(
+      dastSiteProfileCreateMutation,
+      requestHandlers.dastSiteProfileCreate,
     );
+
+    mockClient.setRequestHandler(
+      dastSiteProfileUpdateMutation,
+      requestHandlers.dastSiteProfileUpdate,
+    );
+
+    mockClient.setRequestHandler(dastSiteTokenCreateMutation, requestHandlers.dastSiteTokenCreate);
+
+    mockClient.setRequestHandler(dastSiteValidationQuery, requestHandlers.dastSiteValidation);
+
+    return mockClient;
+  };
+
+  const respondWith = handlers => {
+    apolloProvider.defaultClient = mockClientFactory(handlers);
+  };
+
+  const componentFactory = (mountFn = shallowMount) => options => {
+    apolloProvider = new VueApollo({
+      defaultClient: mockClientFactory(),
+    });
+
+    const mountOpts = merge(
+      {},
+      {
+        propsData: defaultProps,
+      },
+      options,
+      {
+        localVue,
+        apolloProvider,
+      },
+    );
+
+    wrapper = mountFn(DastSiteProfileForm, mountOpts);
   };
   const createComponent = componentFactory();
   const createFullComponent = componentFactory(mount);
@@ -67,6 +120,7 @@ describe('DastSiteProfileForm', () => {
   afterEach(() => {
     wrapper.destroy();
     wrapper = null;
+    apolloProvider = null;
   });
 
   it('renders properly', () => {
@@ -125,11 +179,23 @@ describe('DastSiteProfileForm', () => {
   });
 
   describe('validation', () => {
-    describe('with feature flag disabled', () => {
+    const enableValidationToggle = async () => {
+      await findTargetUrlInput().vm.$emit('input', targetUrl);
+      await findSiteValidationToggle().vm.$emit('change', true);
+    };
+
+    describe.each`
+      title                  | siteProfile
+      ${'New site profile'}  | ${null}
+      ${'Edit site profile'} | ${{ id: 1, name: 'foo', targetUrl: 'bar' }}
+    `('$title with feature flag disabled', ({ siteProfile }) => {
       beforeEach(() => {
         createComponent({
           provide: {
             glFeatures: { securityOnDemandScansSiteValidation: false },
+          },
+          propsData: {
+            siteProfile,
           },
         });
       });
@@ -137,6 +203,10 @@ describe('DastSiteProfileForm', () => {
       it('does not render validation components', () => {
         expect(findSiteValidationToggle().exists()).toBe(false);
         expect(findDastSiteValidation().exists()).toBe(false);
+      });
+
+      it('does not check the target URLs validation status', () => {
+        expect(requestHandlers.dastSiteValidation).not.toHaveBeenCalled();
       });
     });
 
@@ -165,12 +235,12 @@ describe('DastSiteProfileForm', () => {
       it('disables target URL input when validation is enabled', async () => {
         const targetUrlInputGroup = findTargetUrlInputGroup();
         const targetUrlInput = findTargetUrlInput();
-        await targetUrlInput.vm.$emit('input', targetUrl);
 
         expect(targetUrlInputGroup.attributes('description')).toBeUndefined();
         expect(targetUrlInput.attributes('disabled')).toBeUndefined();
 
-        await findSiteValidationToggle().vm.$emit('change', true);
+        await enableValidationToggle();
+        await waitForPromises();
 
         expect(targetUrlInputGroup.attributes('description')).toBe(
           'Validation must be turned off to change the target URL',
@@ -178,16 +248,59 @@ describe('DastSiteProfileForm', () => {
         expect(targetUrlInput.attributes('disabled')).toBe('true');
       });
 
-      // TODO: refactor this test case when actual GraphQL mutations are implemented
-      // See https://gitlab.com/gitlab-org/gitlab/-/issues/238578
+      it('checks the target URLs validation status when validation is enabled', async () => {
+        expect(requestHandlers.dastSiteValidation).not.toHaveBeenCalled();
+
+        await enableValidationToggle();
+
+        expect(requestHandlers.dastSiteValidation).toHaveBeenCalledWith({
+          fullPath,
+          targetUrl,
+        });
+      });
+
+      it('creates a site token if the target URL has not been validated', async () => {
+        expect(requestHandlers.dastSiteTokenCreate).not.toHaveBeenCalled();
+
+        await enableValidationToggle();
+        await waitForPromises();
+
+        expect(requestHandlers.dastSiteTokenCreate).toHaveBeenCalledWith({
+          projectFullPath: fullPath,
+          targetUrl,
+        });
+
+        expect(findDastSiteValidation().props()).toMatchObject({
+          tokenId,
+          token,
+        });
+      });
+
+      it.each`
+        description                                             | failingResponse          | errorMessageStart
+        ${'target URLs validation status can not be retrieved'} | ${'dastSiteValidation'}  | ${'Could not retrieve site validation status'}
+        ${'validation token can not be created'}                | ${'dastSiteTokenCreate'} | ${'Could not create site validation token'}
+      `('shows an error if $description', async ({ failingResponse, errorMessageStart }) => {
+        respondWith({
+          [failingResponse]: jest.fn().mockRejectedValue(),
+        });
+
+        expect(findAlert().exists()).toBe(false);
+
+        await enableValidationToggle();
+        await waitForPromises();
+
+        expect(findAlert().exists()).toBe(true);
+        expect(findAlert().text()).toBe(
+          `${errorMessageStart}. Please refresh the page, or try again later.`,
+        );
+      });
+
       it('when validation section is opened and validation succeeds, section is collapsed', async () => {
-        jest.useFakeTimers();
         expect(wrapper.vm.showValidationSection).toBe(false);
 
-        findTargetUrlInput().vm.$emit('input', targetUrl);
-        await findSiteValidationToggle().vm.$emit('change', true);
-        jest.runAllTimers();
-        await wrapper.vm.$nextTick();
+        await enableValidationToggle();
+        await waitForPromises();
 
         expect(wrapper.vm.showValidationSection).toBe(true);
 
@@ -199,10 +312,10 @@ describe('DastSiteProfileForm', () => {
   });
 
   describe.each`
-    title                  | siteProfile                                 | mutation                         | mutationVars | mutationKind
-    ${'New site profile'}  | ${null}                                     | ${dastSiteProfileCreateMutation} | ${{}}        | ${'dastSiteProfileCreate'}
-    ${'Edit site profile'} | ${{ id: 1, name: 'foo', targetUrl: 'bar' }} | ${dastSiteProfileUpdateMutation} | ${{ id: 1 }} | ${'dastSiteProfileUpdate'}
-  `('$title', ({ siteProfile, title, mutation, mutationVars, mutationKind }) => {
+    title                  | siteProfile                                 | mutationVars | mutationKind
+    ${'New site profile'}  | ${null}                                     | ${{}}        | ${'dastSiteProfileCreate'}
+    ${'Edit site profile'} | ${{ id: 1, name: 'foo', targetUrl: 'bar' }} | ${{ id: 1 }} | ${'dastSiteProfileUpdate'}
+  `('$title', ({ siteProfile, title, mutationVars, mutationKind }) => {
     beforeEach(() => {
       createFullComponent({
         propsData: {
@@ -220,13 +333,8 @@ describe('DastSiteProfileForm', () => {
     });
 
     describe('submission', () => {
-      const createdProfileId = 30203;
-
       describe('on success', () => {
         beforeEach(() => {
-          jest
-            .spyOn(wrapper.vm.$apollo, 'mutate')
-            .mockResolvedValue({ data: { [mutationKind]: { id: createdProfileId } } });
           findProfileNameInput().vm.$emit('input', profileName);
           findTargetUrlInput().vm.$emit('input', targetUrl);
           submitForm();
@@ -237,14 +345,11 @@ describe('DastSiteProfileForm', () => {
         });
 
         it('triggers GraphQL mutation', () => {
-          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-            mutation,
-            variables: {
-              profileName,
-              targetUrl,
-              fullPath,
-              ...mutationVars,
-            },
+          expect(requestHandlers[mutationKind]).toHaveBeenCalledWith({
+            profileName,
+            targetUrl,
+            fullPath,
+            ...mutationVars,
           });
         });
 
@@ -259,10 +364,15 @@ describe('DastSiteProfileForm', () => {
 
       describe('on top-level error', () => {
         beforeEach(() => {
-          jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue();
+          respondWith({
+            [mutationKind]: jest.fn().mockRejectedValue(new Error('GraphQL Network Error')),
+          });
+
           const input = findTargetUrlInput();
           input.vm.$emit('input', targetUrl);
           submitForm();
+
+          return waitForPromises();
         });
 
         it('resets loading state', () => {
@@ -278,12 +388,15 @@ describe('DastSiteProfileForm', () => {
         const errors = ['error#1', 'error#2', 'error#3'];
 
         beforeEach(() => {
-          jest
-            .spyOn(wrapper.vm.$apollo, 'mutate')
-            .mockResolvedValue({ data: { [mutationKind]: { errors } } });
+          respondWith({
+            [mutationKind]: jest.fn().mockResolvedValue(responses[mutationKind](errors)),
+          });
+
           const input = findTargetUrlInput();
           input.vm.$emit('input', targetUrl);
           submitForm();
+
+          return waitForPromises();
         });
 
         it('resets loading state', () => {

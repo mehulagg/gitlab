@@ -389,7 +389,7 @@ RSpec.describe Ci::Pipeline do
 
         context 'when feature is available' do
           before do
-            stub_feature_flags(ci_project_subscriptions: true)
+            stub_licensed_features(ci_project_subscriptions: true)
           end
 
           it 'schedules the trigger downstream subscriptions worker' do

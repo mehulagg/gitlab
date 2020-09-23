@@ -60,16 +60,6 @@ RSpec.describe SearchHelper do
     end
 
     context 'with a licensed user' do
-      it "does not include feature flags" do
-        expect(project_autocomplete.find { |i| i[:label] == 'Feature Flags'} ).to be_nil
-      end
-    end
-
-    context 'with a licensed user' do
-      before do
-        stub_licensed_features(feature_flags: true)
-      end
-
       it "does include feature flags" do
         expect(project_autocomplete.find { |i| i[:label] == 'Feature Flags' }).to be_present
       end

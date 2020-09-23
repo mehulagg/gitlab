@@ -52,6 +52,18 @@ describe('fromYaml', () => {
     });
   });
 
+  describe('when resourceVersion is not empty', () => {
+    beforeEach(() => {
+      policy.resourceVersion = '1234';
+    });
+
+    it('returns policy object', () => {
+      expect(fromYaml(toYaml(policy))).toMatchObject({
+        resourceVersion: '1234',
+      });
+    });
+  });
+
   describe('when policy is disabled', () => {
     beforeEach(() => {
       policy.isEnabled = false;

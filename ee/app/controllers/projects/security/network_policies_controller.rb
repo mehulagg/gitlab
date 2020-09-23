@@ -34,7 +34,7 @@ module Projects
       end
 
       def index
-        response = NetworkPolicies::ResourcesService.new(environment: environment).execute
+        response = NetworkPolicies::ResourcesService.new(project: project, environment_id: params[:environment_id]).execute
         respond_with_service_response(response)
       end
 
@@ -89,7 +89,7 @@ module Projects
       end
 
       def respond_with_service_response(response)
-        payload = response.success? ? response.payload : { error: response.message }
+        payload = response.success? ? response.payload : { payload: response.payload, error: response.message }
         respond_to do |format|
           format.json do
             render status: response.http_status, json: payload

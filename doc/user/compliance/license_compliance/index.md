@@ -268,8 +268,7 @@ You can supply a custom root certificate to complete TLS verification by using t
 #### Using private Python repos
 
 If you have a private Python repository you can use the `PIP_INDEX_URL` [environment variable](#available-variables)
-to specify its location. It's also possible to provide a custom `pip.conf` for
-[additional configuration](#custom-root-certificates-for-python).
+to specify its location.
 
 ### Configuring NPM projects
 
@@ -617,8 +616,8 @@ To use License Compliance in an offline environment, you need:
 
 NOTE: **Note:**
 GitLab Runner has a [default `pull policy` of `always`](https://docs.gitlab.com/runner/executors/docker.html#using-the-always-pull-policy),
-meaning the Runner tries to pull Docker images from the GitLab container registry even if a local
-copy is available. GitLab Runner's [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
+meaning the runner tries to pull Docker images from the GitLab container registry even if a local
+copy is available. The GitLab Runner [`pull_policy` can be set to `if-not-present`](https://docs.gitlab.com/runner/executors/docker.html#using-the-if-not-present-pull-policy)
 in an offline environment if you prefer using only locally available Docker images. However, we
 recommend keeping the pull policy setting to `always` if not in an offline environment, as this
 enables the use of updated scanners in your CI/CD pipelines.

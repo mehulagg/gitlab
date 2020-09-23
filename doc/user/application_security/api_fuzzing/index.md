@@ -107,7 +107,15 @@ Follow these steps to configure API fuzzing in GitLab with an OpenAPI specificat
    ```
 
 1. The target API instance's base URL is also required. Provide it by using the `FUZZAPI_TARGET_URL`
-   variable:
+   variable or an `environment_url.txt` file.
+
+   Adding the URL in an `environment_url.txt` file at your project's root is great for testing in
+   dynamic environments. To run API fuzzing against an app dynamically created during a GitLab CI/CD
+   pipeline, have the app persist its domain in an `environment_url.txt` file. API fuzzing
+   automatically parses that file to find its scan target. You can see an
+   [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
+
+   Here's an example of using `FUZZAPI_TARGET_URL`:
 
    ```yaml
    include:
@@ -186,10 +194,19 @@ target API to test:
 
    variables:
      FUZZAPI_PROFILE: Quick-10
-     FUZZAPI_HAR: test-api-specification.json
+     FUZZAPI_HAR: test-api-recording.har
    ```
 
-1. Add the `FUZZAPI_TARGET_URL` variable and set it to the target API instance's base URL:
+1. The target API instance's base URL is also required. Provide it by using the `FUZZAPI_TARGET_URL`
+   variable or an `environment_url.txt` file.
+
+   Adding the URL in an `environment_url.txt` file at your project's root is great for testing in
+   dynamic environments. To run API fuzzing against an app dynamically created during a GitLab CI/CD
+   pipeline, have the app persist its domain in an `environment_url.txt` file. API fuzzing
+   automatically parses that file to find its scan target. You can see an
+   [example of this in our Auto DevOps CI YAML](https://gitlab.com/gitlab-org/gitlab/blob/master/lib/gitlab/ci/templates/Jobs/Deploy.gitlab-ci.yml).
+
+   Here's an example of using `FUZZAPI_TARGET_URL`:
 
    ```yaml
    include:
@@ -197,7 +214,7 @@ target API to test:
 
    variables:
      FUZZAPI_PROFILE: Quick-10
-     FUZZAPI_HAR: test-api-specification.json
+     FUZZAPI_HAR: test-api-recording.har
      FUZZAPI_TARGET_URL: http://test-deployment/
    ```
 
@@ -220,47 +237,28 @@ provide a script that performs an authentication flow or calculates the token.
 #### HTTP Basic Authentication
 
 [HTTP basic authentication](https://en.wikipedia.org/wiki/Basic_access_authentication)
-works by setting the `Authorization` header with the Base64-encoded username and password. The
-resulting header looks like this:
+is an authentication method built into the HTTP protocol and used in-conjunction with
+[transport layer security (TLS)](https://en.wikipedia.org/wiki/Transport_Layer_Security).
+To use HTTP basic authentication, two variables are added to your `.gitlab-ci.yml` file:
 
-```http
-Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=
-```
+- `FUZZAPI_HTTP_USERNAME`: The username for authentication.
+- `FUZZAPI_HTTP_PASSWORD`: The password for authentication.
 
-To have API fuzzing include this header during a scan, set an overrides environment variable.
-Base64-encode your username and password, separated with a `:` (for example, `username:password`).
-
-On Linux, create a text file with the username and password separated by `:`. Make sure the file has
-a single line with no return at the end. Then use the command line tool `base64` to encode it.
-
-```shell
-$ base64 ~/test.txt
-dXNlcm5hbWU6cGFzc3dvcmQ=
-```
-
-The output `dXNlcm5hbWU6cGFzc3dvcmQ=` is the Base64-encoded credentials. 
-
-DANGER: **Warning:**
-Base64 is **not** encryption. This string can be easily decoded and should not be considered a safe
-way to protect or store credentials.
-
-[Next create a CI/CD variable](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui),
-for example `TEST_API_BASICAUTH`, with the value
-`{"headers":{"Authorization":"Basic dXNlcm5hbWU6cGFzc3dvcmQ="}}` (substitute your Base64-encoded
-credential string). You can create CI/CD variables from the GitLab projects page at
-**Settings > CI/CD** in the **Variables** section.
-
-Set `FUZZAPI_OVERRIDES_ENV` in your `.gitlab-ci.yml` file:
+For the password, we recommended that you [create a CI/CD variable](../../../ci/variables/README.md#create-a-custom-variable-in-the-ui)
+(for example, `TEST_API_PASSWORD`) set to the password. You can create CI/CD variables from the
+GitLab projects page at **Settings > CI/CD**, in the **Variables** section.
 
 ```yaml
 include:
   - template: API-Fuzzing.gitlab-ci.yml
 
 variables:
-  FUZZAPI_PROFILE: Quick
-  FUZZAPI_OPENAPI: test-api-specification.json
+  FUZZAPI_PROFILE: Quick-10
+  FUZZAPI_HAR: test-api-recording.har
   FUZZAPI_TARGET_URL: http://test-deployment/
-  FUZZAPI_OVERRIDES_ENV: $TEST_API_BASICAUTH
+  FUZZAPI_HTTP_USERNAME: testuser
+  FUZZAPI_HTTP_PASSWORD: $TEST_API_PASSWORD
+
 ```
 
 #### Bearer Tokens
@@ -404,6 +402,8 @@ increases as the numbers go up. To use a configuration file, add it to your repo
 |[`FUZZAPI_OVERRIDES_ENV`](#overrides)      |JSON string containing headers to override. |
 |[`FUZZAPI_OVERRIDES_CMD`](#overrides)      |Overrides command. |
 |[`FUZZAPI_OVERRIDES_INTERVAL`](#overrides) |How often to run overrides command in seconds. Defaults to `0` (once). |
+|[`FUZZAPI_HTTP_USERNAME`](#http-basic-authentication) |Username for HTTP authentication. |
+|[`FUZZAPI_HTTP_PASSWORD`](#http-basic-authentication) |Password for HTTP authentication. |
 
 <!--|[`FUZZAPI_D_TARGET_IMAGE`](#target-container) |API target docker image |
 |[`FUZZAPI_D_TARGET_ENV`](#target-container)   |Docker environment options |
@@ -606,36 +606,36 @@ Example profile definition:
 
 ```yaml
 Profiles:
-- Name: Quick-10
-  DefaultProfile: Quick
-  Routes:
-  - Route: *Route0
-    Checks:
-    - Name: FormBodyFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
-    - Name: GeneralFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
-    - Name: JsonFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
-    - Name: XmlFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
+  - Name: Quick-10
+    DefaultProfile: Quick
+    Routes:
+      - Route: *Route0
+        Checks:
+          - Name: FormBodyFuzzingCheck
+            Configuration:
+              FuzzingCount: 10
+              UnicodeFuzzing: true
+          - Name: GeneralFuzzingCheck
+            Configuration:
+              FuzzingCount: 10
+              UnicodeFuzzing: true
+          - Name: JsonFuzzingCheck
+            Configuration:
+              FuzzingCount: 10
+              UnicodeFuzzing: true
+          - Name: XmlFuzzingCheck
+            Configuration:
+              FuzzingCount: 10
+              UnicodeFuzzing: true
 ```
 
 To turn off the General Fuzzing Check you can remove these lines:
 
 ```yaml
-    - Name: GeneralFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
+- Name: GeneralFuzzingCheck
+  Configuration:
+    FuzzingCount: 10
+    UnicodeFuzzing: true
 ```
 
 This results in the following YAML:
@@ -644,20 +644,20 @@ This results in the following YAML:
 - Name: Quick-10
   DefaultProfile: Quick
   Routes:
-  - Route: *Route0
-    Checks:
-    - Name: FormBodyFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
-    - Name: JsonFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
-    - Name: XmlFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
+    - Route: *Route0
+      Checks:
+        - Name: FormBodyFuzzingCheck
+          Configuration:
+            FuzzingCount: 10
+            UnicodeFuzzing: true
+        - Name: JsonFuzzingCheck
+          Configuration:
+            FuzzingCount: 10
+            UnicodeFuzzing: true
+        - Name: XmlFuzzingCheck
+          Configuration:
+            FuzzingCount: 10
+            UnicodeFuzzing: true
 ```
 
 ### Turn off an Assertion for a Check
@@ -671,14 +671,14 @@ This example shows the FormBody Fuzzing Check:
 
 ```yaml
 Checks:
-- Name: FormBodyFuzzingCheck
-  Configuration:
-    FuzzingCount: 30
-    UnicodeFuzzing: true
-  Assertions:
-  - Name: LogAnalysisAssertion
-  - Name: ResponseAnalysisAssertion
-  - Name: StatusCodeAssertion
+  - Name: FormBodyFuzzingCheck
+    Configuration:
+      FuzzingCount: 30
+      UnicodeFuzzing: true
+    Assertions:
+      - Name: LogAnalysisAssertion
+      - Name: ResponseAnalysisAssertion
+      - Name: StatusCodeAssertion
 ```
 
 Here you can see three Assertions are on by default. A common source of false positives is
@@ -688,30 +688,30 @@ example provides only the other two Assertions (`LogAnalysisAssertion`,
 
 ```yaml
 Profiles:
-- Name: Quick-10
-  DefaultProfile: Quick
-  Routes:
-  - Route: *Route0
-    Checks:
-    - Name: FormBodyFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
-      Assertions:
-      - Name: LogAnalysisAssertion
-      - Name: ResponseAnalysisAssertion
-    - Name: GeneralFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
-    - Name: JsonFuzzingCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
-    - Name: XmlInjectionCheck
-      Configuration:
-        FuzzingCount: 10
-        UnicodeFuzzing: true
+  - Name: Quick-10
+    DefaultProfile: Quick
+    Routes:
+      - Route: *Route0
+        Checks:
+          - Name: FormBodyFuzzingCheck
+            Configuration:
+              FuzzingCount: 10
+              UnicodeFuzzing: true
+            Assertions:
+              - Name: LogAnalysisAssertion
+              - Name: ResponseAnalysisAssertion
+          - Name: GeneralFuzzingCheck
+            Configuration:
+              FuzzingCount: 10
+              UnicodeFuzzing: true
+          - Name: JsonFuzzingCheck
+            Configuration:
+              FuzzingCount: 10
+              UnicodeFuzzing: true
+          - Name: XmlInjectionCheck
+            Configuration:
+              FuzzingCount: 10
+              UnicodeFuzzing: true
 ```
 
 <!--

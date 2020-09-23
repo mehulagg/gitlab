@@ -6,7 +6,6 @@ RSpec.describe "Admin uploads license", :js do
   let_it_be(:admin) { create(:admin) }
 
   before do
-    stub_feature_flags(licenses_app: false)
     sign_in(admin)
   end
 

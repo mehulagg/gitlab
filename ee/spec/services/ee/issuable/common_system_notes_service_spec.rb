@@ -115,38 +115,12 @@ RSpec.describe Issuable::CommonSystemNotesService do
       issuable.update(weight: 5, health_status: 'at_risk')
     end
 
-    it 'does not create common system notes' do
-      expect { subject }.not_to change { issuable.notes.count }
+    it 'creates a resource weight event' do
+      expect { subject }.to change { ResourceWeightEvent.count }
     end
 
-    context 'when resource weight event tracking is enabled' do
-      before do
-        stub_feature_flags(track_issue_weight_change_events: true)
-      end
-
-      it 'does not create a resource weight event' do
-        expect { subject }.not_to change { ResourceWeightEvent.count }
-      end
-
-      it 'does not create a system note' do
-        expect { subject }.not_to change { Note.count }
-      end
-    end
-
-    context 'when resource weight event tracking is disabled' do
-      before do
-        stub_feature_flags(track_issue_weight_change_events: false)
-      end
-
-      it 'does not created a resource weight event' do
-        expect { subject }.not_to change { ResourceWeightEvent.count }
-      end
-
-      it 'does create a system note' do
-        expect { subject }.to change { Note.count }.from(0).to(1)
-
-        expect(Note.first.note).to eq('changed weight to **5**')
-      end
+    it 'does not create a system note' do
+      expect { subject }.not_to change { Note.count }
     end
 
     it_behaves_like 'issuable iteration changed'

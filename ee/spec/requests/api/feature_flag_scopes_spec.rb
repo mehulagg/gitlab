@@ -10,8 +10,6 @@ RSpec.describe API::FeatureFlagScopes do
   let(:user) { developer }
 
   before do
-    stub_licensed_features(feature_flags: true)
-
     project.add_developer(developer)
     project.add_reporter(reporter)
   end
@@ -19,18 +17,6 @@ RSpec.describe API::FeatureFlagScopes do
   shared_examples_for 'check user permission' do
     context 'when user is reporter' do
       let(:user) { reporter }
-
-      it 'forbids the request' do
-        subject
-
-        expect(response).to have_gitlab_http_status(:forbidden)
-      end
-    end
-
-    context 'when license is not sufficient' do
-      before do
-        stub_licensed_features(feature_flags: false)
-      end
 
       it 'forbids the request' do
         subject

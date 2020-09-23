@@ -251,7 +251,7 @@ sudo gitlab-rake gitlab:geo:check
 
    When performing a PostgreSQL major version (9 > 10) update this is expected. Follow:
 
-   - [initiate-the-replication-process](database.md#step-3-initiate-the-replication-process)
+   - [initiate-the-replication-process](../setup/database.md#step-3-initiate-the-replication-process)
 
 ## Fixing replication errors
 
@@ -268,7 +268,7 @@ default to 1. You may need to increase this value if you have more
 
 Be sure to restart PostgreSQL for this to take
 effect. See the [PostgreSQL replication
-setup](database.md#postgresql-replication) guide for more details.
+setup](../setup/database.md#postgresql-replication) guide for more details.
 
 ### Message: `FATAL:  could not start WAL streaming: ERROR:  replication slot "geo_secondary_my_domain_com" does not exist`?
 
@@ -276,11 +276,11 @@ This occurs when PostgreSQL does not have a replication slot for the
 **secondary** node by that name.
 
 You may want to rerun the [replication
-process](database.md) on the **secondary** node .
+process](../setup/database.md) on the **secondary** node .
 
 ### Message: "Command exceeded allowed execution time" when setting up replication?
 
-This may happen while [initiating the replication process](database.md#step-3-initiate-the-replication-process) on the **secondary** node,
+This may happen while [initiating the replication process](../setup/database.md#step-3-initiate-the-replication-process) on the **secondary** node,
 and indicates that your initial dataset is too large to be replicated in the default timeout (30 minutes).
 
 Re-run `gitlab-ctl replicate-geo-database`, but include a larger value for
@@ -385,6 +385,15 @@ This happens when you have added IP addresses without a subnet mask in `postgres
 
 To fix this, add the subnet mask in `/etc/gitlab/gitlab.rb` under `postgresql['md5_auth_cidr_addresses']`
 to respect the CIDR format (i.e. `1.2.3.4/32`).
+
+### Message: `Found data in the gitlabhq_production database!` when running `gitlab-ctl replicate-geo-database`
+
+This happens if data is detected in the `projects` table. When one or more projects are detected, the operation
+is aborted to prevent accidental data loss. To bypass this message, pass the `--force` option to the command.
+
+In GitLab 13.4, a seed project is added when GitLab is first installed. This makes it necessary to pass `--force` even
+on a new Geo secondary node. There is an [issue to account for seed projects](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5618)
+when checking the database.
 
 ### Very large repositories never successfully synchronize on the **secondary** node
 
@@ -632,6 +641,23 @@ To double check this, you can do the following:
   UPDATE geo_nodes SET enabled = 't' WHERE id = ID_FROM_ABOVE;
   ```
 
+### While Promoting the secondary, I got an error `ActiveRecord::RecordInvalid`
+
+If you disabled a secondary node, either with the [replication pause task](../index.md#pausing-and-resuming-replication)
+(13.2) or via the UI (13.1 and earlier), you must first re-enable the
+node before you can continue. This is fixed in 13.4.
+
+From `gitlab-psql`, execute the following, replacing  `<your secondary url>`
+with the URL for your secondary server starting with `http` or `https` and ending with a `/`.
+
+```shell
+SECONDARY_URL="https://<secondary url>/"
+DATABASE_NAME="gitlabhq_production"
+sudo gitlab-psql -d "$DATABASE_NAME" -c "UPDATE geo_nodes SET enabled = true WHERE url = '$SECONDARY_URL';"
+```
+
+This should update 1 row.
+
 ### Message: ``NoMethodError: undefined method `secondary?' for nil:NilClass``
 
 When [promoting a **secondary** node](../disaster_recovery/index.md#step-3-promoting-a-secondary-node),
@@ -673,6 +699,20 @@ sudo /opt/gitlab/embedded/bin/gitlab-pg-ctl promote
 ```
 
 GitLab 12.9 and later are [unaffected by this error](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/5147).
+
+### Two-factor authentication is broken after a failover
+
+The setup instructions for Geo prior to 10.5 failed to replicate the
+`otp_key_base` secret, which is used to encrypt the two-factor authentication
+secrets stored in the database. If it differs between **primary** and **secondary**
+nodes, users with two-factor authentication enabled won't be able to log in
+after a failover.
+
+If you still have access to the old **primary** node, you can follow the
+instructions in the
+[Upgrading to GitLab 10.5](../replication/version_specific_updates.md#updating-to-gitlab-105)
+section to resolve the error. Otherwise, the secret is lost and you'll need to
+[reset two-factor authentication for all users](../../../security/two_factor_authentication.md#disabling-2fa-for-everyone).
 
 ## Expired artifacts
 
@@ -723,7 +763,7 @@ This error refers to a problem with the database replica on a **secondary** node
 which Geo expects to have access to. It usually means, either:
 
 - An unsupported replication method was used (for example, logical replication).
-- The instructions to setup a [Geo database replication](database.md) were not followed correctly.
+- The instructions to setup a [Geo database replication](../setup/database.md) were not followed correctly.
 - Your database connection details are incorrect, that is you have specified the wrong
   user in your `/etc/gitlab/gitlab.rb` file.
 
@@ -743,7 +783,7 @@ The most common problems that prevent the database from replicating correctly ar
 - Database replication slot is misconfigured.
 - Database is not using a replication slot or another alternative and cannot catch-up because WAL files were purged.
 
-Make sure you follow the [Geo database replication](database.md) instructions for supported configuration.
+Make sure you follow the [Geo database replication](../setup/database.md) instructions for supported configuration.
 
 ### Geo database version (...) does not match latest migration (...)
 

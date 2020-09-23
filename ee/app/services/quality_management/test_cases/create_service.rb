@@ -5,7 +5,7 @@ module QualityManagement
     class CreateService < BaseService
       ISSUE_TYPE = 'test_case'
 
-      def initialize(project, current_user, title:, description:, label_ids: [])
+      def initialize(project, current_user, title:, description: nil, label_ids: [])
         super(project, current_user)
 
         @title = title

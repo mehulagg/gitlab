@@ -30,5 +30,23 @@ RSpec.describe Clusters::AgentsFinder do
 
       it { is_expected.to be_empty }
     end
+
+    context 'filtering by name' do
+      let(:params) { Hash(name: name_param) }
+
+      subject { described_class.new(project, user, params: params).execute }
+
+      context 'name does not match' do
+        let(:name_param) { 'other-name' }
+
+        it { is_expected.to be_empty }
+      end
+
+      context 'name does match' do
+        let(:name_param) { matching_agent.name }
+
+        it { is_expected.to contain_exactly(matching_agent) }
+      end
+    end
   end
 end

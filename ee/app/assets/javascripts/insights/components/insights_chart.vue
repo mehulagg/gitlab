@@ -127,11 +127,11 @@ export default {
       :error="error"
     />
   </div>
-  <resizable-chart-container v-else-if="loaded" class="insights-chart">
+  <resizable-chart-container v-else class="insights-chart">
     <h5 class="text-center">{{ title }}</h5>
     <p v-if="description" class="text-center">{{ description }}</p>
     <gl-column-chart
-      v-if="isColumnChart"
+      v-if="loaded && isColumnChart"
       v-bind="$attrs"
       :height="$options.height"
       :data="data.datasets"
@@ -142,7 +142,7 @@ export default {
       @created="onChartCreated"
     />
     <gl-stacked-column-chart
-      v-else-if="isStackedColumnChart"
+      v-else-if="loaded && isStackedColumnChart"
       v-bind="$attrs"
       :height="$options.height"
       :data="data.datasets"
@@ -155,13 +155,13 @@ export default {
       @created="onChartCreated"
     />
     <gl-line-chart
-      v-else-if="isLineChart"
+      v-else-if="loaded && isLineChart"
       v-bind="$attrs"
       :height="$options.height"
       :data="data.datasets"
       :option="chartOptions"
       @created="onChartCreated"
     />
+    <chart-skeleton-loader v-else />
   </resizable-chart-container>
-  <chart-skeleton-loader v-else />
 </template>

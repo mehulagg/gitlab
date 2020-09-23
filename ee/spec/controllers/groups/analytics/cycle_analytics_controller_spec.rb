@@ -21,6 +21,30 @@ RSpec.describe Groups::Analytics::CycleAnalyticsController do
 
       expect(response).to be_successful
     end
+
+    it 'increments usage counter' do
+      expect(Gitlab::UsageDataCounters::CycleAnalyticsCounter).to receive(:count).with(:views)
+
+      get(:show, params: { group_id: group })
+
+      expect(response).to be_successful
+    end
+
+    it 'renders `show` template when feature flag is enabled' do
+      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => true)
+
+      get(:show, params: { group_id: group })
+
+      expect(response).to render_template :show
+    end
+
+    it 'renders `404` when feature flag is disabled' do
+      stub_feature_flags(Gitlab::Analytics::CYCLE_ANALYTICS_FEATURE_FLAG => false)
+
+      get(:show, params: { group_id: group })
+
+      expect(response).to have_gitlab_http_status(:not_found)
+    end
   end
 
   context 'when the license is missing' do

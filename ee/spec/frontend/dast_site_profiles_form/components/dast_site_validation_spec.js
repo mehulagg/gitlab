@@ -1,27 +1,68 @@
 import merge from 'lodash/merge';
+import VueApollo from 'vue-apollo';
 import { within } from '@testing-library/dom';
-import { mount, shallowMount } from '@vue/test-utils';
+import { createLocalVue, mount, shallowMount } from '@vue/test-utils';
+import { createMockClient } from 'mock-apollo-client';
 import { GlLoadingIcon } from '@gitlab/ui';
+import waitForPromises from 'jest/helpers/wait_for_promises';
 import DastSiteValidation from 'ee/dast_site_profiles_form/components/dast_site_validation.vue';
+import dastSiteValidationCreateMutation from 'ee/dast_site_profiles_form/graphql/dast_site_validation_create.mutation.graphql';
+import dastSiteValidationQuery from 'ee/dast_site_profiles_form/graphql/dast_site_validation.query.graphql';
+import * as responses from 'ee_jest/dast_site_profiles_form/mock_data/apollo_mock';
 import download from '~/lib/utils/downloader';
 
 jest.mock('~/lib/utils/downloader');
 
-// TODO: stop using fake timers once GraphQL mutations are implemented.
-// See https://gitlab.com/gitlab-org/gitlab/-/issues/238578
-jest.useFakeTimers();
+const localVue = createLocalVue();
+localVue.use(VueApollo);
 
+const fullPath = 'group/project';
 const targetUrl = 'https://example.com/';
 const token = 'validation-token-123';
+
 const defaultProps = {
+  fullPath,
   targetUrl,
   token,
 };
 
+const defaultRequestHandlers = {
+  dastSiteValidation: jest.fn().mockResolvedValue(responses.dastSiteValidation()),
+  dastSiteValidationCreate: jest.fn().mockResolvedValue(responses.dastSiteValidationCreate()),
+};
+
 describe('DastSiteValidation', () => {
   let wrapper;
+  let apolloProvider;
+  let requestHandlers;
+
+  const mockClientFactory = handlers => {
+    const mockClient = createMockClient();
+
+    requestHandlers = {
+      ...defaultRequestHandlers,
+      ...handlers,
+    };
+
+    mockClient.setRequestHandler(dastSiteValidationQuery, requestHandlers.dastSiteValidation);
+
+    mockClient.setRequestHandler(
+      dastSiteValidationCreateMutation,
+      requestHandlers.dastSiteValidationCreate,
+    );
+
+    return mockClient;
+  };
+
+  const respondWith = handlers => {
+    apolloProvider.defaultClient = mockClientFactory(handlers);
+  };
 
   const componentFactory = (mountFn = shallowMount) => options => {
+    apolloProvider = new VueApollo({
+      defaultClient: mockClientFactory(),
+    });
+
     wrapper = mountFn(
       DastSiteValidation,
       merge(
@@ -30,6 +71,10 @@ describe('DastSiteValidation', () => {
           propsData: defaultProps,
         },
         options,
+        {
+          localVue,
+          apolloProvider,
+        },
       ),
     );
   };
@@ -41,6 +86,10 @@ describe('DastSiteValidation', () => {
     wrapper.find('[data-testid="download-dast-text-file-validation-button"]');
   const findValidateButton = () => wrapper.find('[data-testid="validate-dast-site-button"]');
   const findLoadingIcon = () => wrapper.find(GlLoadingIcon);
+  const findErrorMessage = () =>
+    withinComponent().queryByText(
+      /validation failed, please make sure that you follow the steps above with the choosen method./i,
+    );
 
   afterEach(() => {
     wrapper.destroy();
@@ -88,24 +137,45 @@ describe('DastSiteValidation', () => {
   describe('validation', () => {
     beforeEach(() => {
       createComponent();
-      findValidateButton().vm.$emit('click');
     });
 
-    it('while validating, shows a loading state', () => {
-      expect(findLoadingIcon().exists()).toBe(true);
-      expect(wrapper.text()).toContain('Validating...');
+    describe('success', () => {
+      beforeEach(() => {
+        findValidateButton().vm.$emit('click');
+      });
+
+      it('while validating, shows a loading state', () => {
+        expect(findLoadingIcon().exists()).toBe(true);
+        expect(wrapper.text()).toContain('Validating...');
+      });
+
+      it('on success, emits success event', async () => {
+        await waitForPromises();
+
+        expect(wrapper.emitted('success')).toHaveLength(1);
+      });
     });
 
-    it('on success, emits success event', async () => {
-      jest.spyOn(wrapper.vm, '$emit');
-      jest.runAllTimers();
-      await wrapper.vm.$nextTick();
+    describe.each`
+      errorKind            | errorResponse
+      ${'top level error'} | ${() => Promise.reject(new Error('GraphQL Network Error'))}
+      ${'errors as data'}  | ${() => Promise.resolve(responses.dastSiteValidationCreate(['error#1', 'error#2']))}
+    `('$errorKind', ({ errorResponse }) => {
+      beforeEach(() => {
+        respondWith({
+          dastSiteValidationCreate: errorResponse,
+        });
+      });
 
-      expect(wrapper.vm.$emit).toHaveBeenCalledWith('success');
+      it('on error, shows error state', async () => {
+        expect(findErrorMessage()).toBe(null);
+
+        findValidateButton().vm.$emit('click');
+
+        await waitForPromises();
+
+        expect(findErrorMessage()).not.toBe(null);
+      });
     });
-
-    // TODO: test error handling once GraphQL mutations are implemented.
-    // See https://gitlab.com/gitlab-org/gitlab/-/issues/238578
-    it.todo('on error, shows error state');
   });
 });

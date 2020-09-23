@@ -3,6 +3,8 @@
 module Elastic
   module Latest
     class IssueClassProxy < ApplicationClassProxy
+      include StateFilter
+
       def elastic_search(query, options: {})
         query_hash =
           if query =~ /#(\d+)\z/
@@ -27,18 +29,6 @@ module Elastic
       end
 
       private
-
-      def state_filter(query_hash, options)
-        state = options[:state]
-
-        return query_hash if state.blank? || state == 'all'
-        return query_hash unless %w(all opened closed).include?(state)
-
-        filter = { match: { state: state } }
-
-        query_hash[:query][:bool][:filter] << filter
-        query_hash
-      end
 
       def confidentiality_filter(query_hash, options)
         current_user = options[:current_user]

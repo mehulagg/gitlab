@@ -96,13 +96,14 @@ module EE
           params '*iteration:"iteration name"'
           types Issue
           condition do
-            current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project) &&
+            quick_action_target.supports_iterations? &&
+              current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project) &&
               quick_action_target.project.group&.feature_available?(:iterations) &&
-              find_iterations(project, state: 'active').any?
+              find_iterations(project, state: 'opened').any?
           end
           parse_params do |iteration_param|
             extract_references(iteration_param, :iteration).first ||
-              find_iterations(project, title: iteration_param.strip).first
+              find_iterations(project, title: iteration_param.strip, state: 'opened').first
           end
           command :iteration do |iteration|
             @updates[:iteration] = iteration if iteration
@@ -117,7 +118,8 @@ module EE
           end
           types Issue
           condition do
-            quick_action_target.persisted? &&
+            quick_action_target.supports_iterations? &&
+              quick_action_target.persisted? &&
               quick_action_target.sprint_id? &&
               quick_action_target.project.group&.feature_available?(:iterations) &&
               current_user.can?(:"admin_#{quick_action_target.to_ability_name}", project)

@@ -1,9 +1,11 @@
 import merge from 'lodash/merge';
+import { within } from '@testing-library/dom';
 import { mount, shallowMount } from '@vue/test-utils';
 import { GlAlert, GlForm, GlModal } from '@gitlab/ui';
 import { TEST_HOST } from 'helpers/test_constants';
 import DastScannerProfileForm from 'ee/dast_scanner_profiles/components/dast_scanner_profile_form.vue';
 import dastScannerProfileCreateMutation from 'ee/dast_scanner_profiles/graphql/dast_scanner_profile_create.mutation.graphql';
+import dastScannerProfileUpdateMutation from 'ee/dast_scanner_profiles/graphql/dast_scanner_profile_update.mutation.graphql';
 import { redirectTo } from '~/lib/utils/url_utility';
 
 jest.mock('~/lib/utils/url_utility', () => ({
@@ -23,6 +25,8 @@ const defaultProps = {
 
 describe('DAST Scanner Profile', () => {
   let wrapper;
+
+  const withinComponent = () => within(wrapper.element);
 
   const findForm = () => wrapper.find(GlForm);
   const findProfileNameInput = () => wrapper.find('[data-testid="profile-name-input"]');
@@ -131,118 +135,139 @@ describe('DAST Scanner Profile', () => {
     });
   });
 
-  describe('submission', () => {
-    const createdProfileId = 30203;
-
-    describe('on success', () => {
-      beforeEach(() => {
-        createComponent();
-        jest
-          .spyOn(wrapper.vm.$apollo, 'mutate')
-          .mockResolvedValue({ data: { dastScannerProfileCreate: { id: createdProfileId } } });
-        findProfileNameInput().vm.$emit('input', profileName);
-        findSpiderTimeoutInput().vm.$emit('input', spiderTimeout);
-        findTargetTimeoutInput().vm.$emit('input', targetTimeout);
-        submitForm();
-      });
-
-      it('sets loading state', () => {
-        expect(findSubmitButton().props('loading')).toBe(true);
-      });
-
-      it('triggers GraphQL mutation', () => {
-        expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
-          mutation: dastScannerProfileCreateMutation,
-          variables: {
-            profileName,
-            spiderTimeout,
-            targetTimeout,
-            projectFullPath,
-          },
-        });
-      });
-
-      it('redirects to the profiles library', () => {
-        expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
-      });
-
-      it('does not show an alert', () => {
-        expect(findAlert().exists()).toBe(false);
-      });
-    });
-
-    describe('on top-level error', () => {
-      beforeEach(() => {
-        createComponent();
-        jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue();
-        const input = findTargetTimeoutInput();
-        input.vm.$emit('input', targetTimeout);
-        submitForm();
-      });
-
-      it('resets loading state', () => {
-        expect(findSubmitButton().props('loading')).toBe(false);
-      });
-
-      it('shows an error alert', () => {
-        expect(findAlert().exists()).toBe(true);
-      });
-    });
-
-    describe('on errors as data', () => {
-      const errors = ['Name is already taken', 'Value should be Int', 'error#3'];
-
-      beforeEach(() => {
-        createComponent();
-        jest
-          .spyOn(wrapper.vm.$apollo, 'mutate')
-          .mockResolvedValue({ data: { dastScannerProfileCreate: { pipelineUrl: null, errors } } });
-        const input = findSpiderTimeoutInput();
-        input.vm.$emit('input', spiderTimeout);
-        submitForm();
-      });
-
-      it('resets loading state', () => {
-        expect(findSubmitButton().props('loading')).toBe(false);
-      });
-
-      it('shows an alert with the returned errors', () => {
-        const alert = findAlert();
-
-        expect(alert.exists()).toBe(true);
-        errors.forEach(error => {
-          expect(alert.text()).toContain(error);
-        });
-      });
-    });
-  });
-
-  describe('cancellation', () => {
+  describe.each`
+    title                     | profile                                                        | mutation                            | mutationVars | mutationKind
+    ${'New scanner profile'}  | ${{}}                                                          | ${dastScannerProfileCreateMutation} | ${{}}        | ${'dastScannerProfileCreate'}
+    ${'Edit scanner profile'} | ${{ id: 1, name: 'foo', spiderTimeout: 2, targetTimeout: 12 }} | ${dastScannerProfileUpdateMutation} | ${{ id: 1 }} | ${'dastScannerProfileUpdate'}
+  `('$title', ({ profile, title, mutation, mutationVars, mutationKind }) => {
     beforeEach(() => {
-      createFullComponent();
-    });
-
-    describe('form empty', () => {
-      it('redirects to the profiles library', () => {
-        findCancelButton().vm.$emit('click');
-        expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+      createFullComponent({
+        propsData: {
+          profile,
+        },
       });
     });
 
-    describe('form not empty', () => {
+    it('sets the correct title', () => {
+      expect(withinComponent().getByRole('heading', { name: title })).not.toBeNull();
+    });
+
+    it('populates the fields with the data passed in via the profile prop', () => {
+      expect(findProfileNameInput().element.value).toBe(profile?.name ?? '');
+    });
+
+    describe('submission', () => {
+      const createdProfileId = 30203;
+
+      describe('on success', () => {
+        beforeEach(() => {
+          jest
+            .spyOn(wrapper.vm.$apollo, 'mutate')
+            .mockResolvedValue({ data: { [mutationKind]: { id: createdProfileId } } });
+          findProfileNameInput().vm.$emit('input', profileName);
+          findSpiderTimeoutInput().vm.$emit('input', spiderTimeout);
+          findTargetTimeoutInput().vm.$emit('input', targetTimeout);
+          submitForm();
+        });
+
+        it('sets loading state', () => {
+          expect(findSubmitButton().props('loading')).toBe(true);
+        });
+
+        it('triggers GraphQL mutation', () => {
+          expect(wrapper.vm.$apollo.mutate).toHaveBeenCalledWith({
+            mutation,
+            variables: {
+              profileName,
+              spiderTimeout,
+              targetTimeout,
+              projectFullPath,
+              ...mutationVars,
+            },
+          });
+        });
+
+        it('redirects to the profiles library', () => {
+          expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+        });
+
+        it('does not show an alert', () => {
+          expect(findAlert().exists()).toBe(false);
+        });
+      });
+
+      describe('on top-level error', () => {
+        beforeEach(() => {
+          createComponent();
+          jest.spyOn(wrapper.vm.$apollo, 'mutate').mockRejectedValue();
+          const input = findTargetTimeoutInput();
+          input.vm.$emit('input', targetTimeout);
+          submitForm();
+        });
+
+        it('resets loading state', () => {
+          expect(findSubmitButton().props('loading')).toBe(false);
+        });
+
+        it('shows an error alert', () => {
+          expect(findAlert().exists()).toBe(true);
+        });
+      });
+
+      describe('on errors as data', () => {
+        const errors = ['Name is already taken', 'Value should be Int', 'error#3'];
+
+        beforeEach(() => {
+          jest
+            .spyOn(wrapper.vm.$apollo, 'mutate')
+            .mockResolvedValue({ data: { [mutationKind]: { errors } } });
+          const input = findSpiderTimeoutInput();
+          input.vm.$emit('input', spiderTimeout);
+          submitForm();
+        });
+
+        it('resets loading state', () => {
+          expect(findSubmitButton().props('loading')).toBe(false);
+        });
+
+        it('shows an alert with the returned errors', () => {
+          const alert = findAlert();
+
+          expect(alert.exists()).toBe(true);
+          errors.forEach(error => {
+            expect(alert.text()).toContain(error);
+          });
+        });
+      });
+    });
+
+    describe('cancellation', () => {
       beforeEach(() => {
-        findProfileNameInput().setValue(profileName);
+        createFullComponent();
       });
 
-      it('asks the user to confirm the action', () => {
-        jest.spyOn(findCancelModal().vm, 'show').mockReturnValue();
-        findCancelButton().trigger('click');
-        expect(findCancelModal().vm.show).toHaveBeenCalled();
+      describe('form empty', () => {
+        it('redirects to the profiles library', () => {
+          findCancelButton().vm.$emit('click');
+          expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+        });
       });
 
-      it('redirects to the profiles library if confirmed', () => {
-        findCancelModal().vm.$emit('ok');
-        expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+      describe('form not empty', () => {
+        beforeEach(() => {
+          findProfileNameInput().setValue(profileName);
+        });
+
+        it('asks the user to confirm the action', () => {
+          jest.spyOn(findCancelModal().vm, 'show').mockReturnValue();
+          findCancelButton().trigger('click');
+          expect(findCancelModal().vm.show).toHaveBeenCalled();
+        });
+
+        it('redirects to the profiles library if confirmed', () => {
+          findCancelModal().vm.$emit('ok');
+          expect(redirectTo).toHaveBeenCalledWith(profilesLibraryPath);
+        });
       });
     });
   });

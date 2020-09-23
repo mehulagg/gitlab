@@ -1,5 +1,5 @@
 .issuable-warning-icon {
-  background-color: $orange-100;
+  background-color: $orange-50;
   border-radius: $border-radius-default;
   width: $issuable-warning-size;
   height: $issuable-warning-size;
@@ -119,11 +119,11 @@
 
 .assignee {
   .merge-icon {
-    color: $orange-500;
+    color: $orange-400;
     position: absolute;
     bottom: 0;
     right: 0;
-    text-shadow: -1px -1px 0 $white, 1px -1px 0 $white, -1px 1px 0 $white, 1px 1px 0 $white;
+    text-shadow: -1px -1px 2px $white, 1px -1px 2px $white, -1px 1px 2px $white, 1px 1px 2px $white;
   }
 }
 
@@ -359,13 +359,6 @@
 
     .assignee .user-list .avatar {
       margin: 0;
-    }
-
-    .username {
-      display: block;
-      margin-top: 4px;
-      font-size: 13px;
-      font-weight: $gl-font-weight-normal;
     }
 
     .hide-expanded {
@@ -738,7 +731,6 @@
     .issuable-info-container {
       flex: 1;
       display: flex;
-      padding-right: $gl-padding;
 
       .issuable-main-info {
         flex: 1 auto;
@@ -979,7 +971,7 @@
 }
 
 .suggestion-confidential {
-  color: $orange-600;
+  color: $orange-500;
 }
 
 .suggestion-state-open {
@@ -1001,5 +993,17 @@
   .avatar {
     margin-top: -3px;
     border: 0;
+  }
+}
+
+@include media-breakpoint-down(sm) {
+  // Overriding the following rule with the negative margin
+  // https://gitlab.com/gitlab-org/gitlab/-/blob/146c43c931c3743a140529307aea616e4aa9ff21/app/assets/stylesheets/framework/sidebar.scss#L1-5
+  .container-fluid {
+    .issuable-list,
+    .issues-filters,
+    .epics-filters {
+      margin: 0 (-$gl-padding);
+    }
   }
 }

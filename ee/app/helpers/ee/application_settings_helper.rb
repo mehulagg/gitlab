@@ -38,6 +38,7 @@ module EE
         :elasticsearch_limit_indexing,
         :elasticsearch_namespace_ids,
         :elasticsearch_project_ids,
+        :elasticsearch_client_request_timeout,
         :enforce_namespace_storage_limit,
         :geo_status_timeout,
         :geo_node_allowed_ips,

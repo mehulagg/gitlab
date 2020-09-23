@@ -73,11 +73,14 @@ export default {
   },
   methods: {
     medianValue(id) {
-      return this.medians[id] ? this.medians[id] : null;
+      return this.medians[id]?.value || null;
     },
     isActiveStage(stageId) {
       const { currentStage, isCreatingCustomStage } = this;
       return Boolean(!isCreatingCustomStage && currentStage && stageId === currentStage.id);
+    },
+    medianError(id) {
+      return this.medians[id]?.error || '';
     },
   },
   STAGE_ACTIONS,
@@ -94,6 +97,7 @@ export default {
       :value="medianValue(stage.id)"
       :is-active="isActiveStage(stage.id)"
       :is-default-stage="!stage.custom"
+      :error-message="medianError(stage.id)"
       @remove="$emit($options.STAGE_ACTIONS.REMOVE, stage.id)"
       @hide="$emit($options.STAGE_ACTIONS.HIDE, { id: stage.id, hidden: true })"
       @select="$emit($options.STAGE_ACTIONS.SELECT, stage)"

@@ -1,6 +1,6 @@
 <script>
-import { GlButton, GlIcon, GlLink, GlPopover, GlTooltipDirective } from '@gitlab/ui';
-import { mapGetters } from 'vuex';
+import { GlButton, GlIcon, GlLink, GlLoadingIcon, GlPopover, GlTooltipDirective } from '@gitlab/ui';
+import { mapActions, mapGetters, mapState } from 'vuex';
 import { __, n__, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import { formatDate } from '~/lib/utils/datetime_utility';
@@ -12,6 +12,7 @@ export default {
     GlButton,
     GlIcon,
     GlLink,
+    GlLoadingIcon,
     GlPopover,
     IssuesLaneList,
   },
@@ -28,18 +29,14 @@ export default {
       type: Array,
       required: true,
     },
-    isLoadingIssues: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
     disabled: {
       type: Boolean,
       required: true,
     },
-    rootPath: {
-      type: String,
-      required: true,
+    canAdminList: {
+      type: Boolean,
+      required: false,
+      default: false,
     },
   },
   data() {
@@ -48,6 +45,7 @@ export default {
     };
   },
   computed: {
+    ...mapState(['epicsFlags', 'filterParams']),
     ...mapGetters(['getIssuesByEpic']),
     isOpen() {
       return this.epic.state === statusType.open;
@@ -88,8 +86,25 @@ export default {
     epicDateString() {
       return formatDate(this.epic.createdAt);
     },
+    isLoading() {
+      return Boolean(this.epicsFlags[this.epic.id]?.isLoading);
+    },
+  },
+  watch: {
+    filterParams: {
+      handler() {
+        if (!this.filterParams.epicId || this.filterParams.epicId === this.epic.id) {
+          this.fetchIssuesForEpic(this.epic.id);
+        }
+      },
+      deep: true,
+    },
+  },
+  mounted() {
+    this.fetchIssuesForEpic(this.epic.id);
   },
   methods: {
+    ...mapActions(['fetchIssuesForEpic']),
     toggleExpanded() {
       this.isExpanded = !this.isExpanded;
     },
@@ -132,6 +147,7 @@ export default {
           <gl-link :href="epic.webUrl" class="gl-font-sm">{{ __('Go to epic') }}</gl-link>
         </gl-popover>
         <span
+          v-if="!isLoading"
           v-gl-tooltip.hover
           :title="issuesCountTooltipText"
           class="gl-display-flex gl-align-items-center gl-text-gray-500"
@@ -142,6 +158,7 @@ export default {
           <gl-icon class="gl-mr-2 gl-flex-shrink-0" name="issues" aria-hidden="true" />
           <span aria-hidden="true">{{ issuesCount }}</span>
         </span>
+        <gl-loading-icon v-if="isLoading" class="gl-p-2" />
       </div>
     </div>
     <div v-if="isExpanded" class="gl-display-flex">
@@ -150,11 +167,10 @@ export default {
         :key="`${list.id}-issues`"
         :list="list"
         :issues="getIssuesByEpic(list.id, epic.id)"
-        :is-loading="isLoadingIssues"
         :disabled="disabled"
-        :root-path="rootPath"
         :epic-id="epic.id"
         :epic-is-confidential="epic.confidential"
+        :can-admin-list="canAdminList"
       />
     </div>
   </div>

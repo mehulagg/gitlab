@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { GlIcon, GlDeprecatedDropdown } from '@gitlab/ui';
+import { GlIcon, GlDropdown } from '@gitlab/ui';
 import GeoNodeFormShards from 'ee/geo_node_form/components/geo_node_form_shards.vue';
 import { MOCK_SYNC_SHARDS } from '../mock_data';
 
@@ -24,7 +24,7 @@ describe('GeoNodeFormShards', () => {
     wrapper.destroy();
   });
 
-  const findGlDropdown = () => wrapper.find(GlDeprecatedDropdown);
+  const findGlDropdown = () => wrapper.find(GlDropdown);
   const findDropdownItems = () => findGlDropdown().findAll('li');
 
   describe('template', () => {

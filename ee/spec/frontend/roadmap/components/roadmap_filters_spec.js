@@ -1,11 +1,7 @@
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 
-import {
-  GlSegmentedControl,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
-} from '@gitlab/ui';
+import { GlSegmentedControl, GlDropdown, GlDropdownItem } from '@gitlab/ui';
 
 import RoadmapFilters from 'ee/roadmap/components/roadmap_filters.vue';
 import createStore from 'ee/roadmap/store';
