@@ -37,6 +37,8 @@ RSpec.configure do |c|
 end
 
 describe QA::Specs::Helpers::Quarantine do
+  include Helpers::StubENV
+
   describe '.skip_or_run_quarantined_contexts' do
     context 'with no tag focused' do
       before do
@@ -404,7 +406,9 @@ describe QA::Specs::Helpers::Quarantine do
 
   describe 'with pipeline constraints' do
     before do
-      QA::Runtime::Scenario.define(:ci_project_name, 'nightly')
+      # QA::Runtime::Scenario.define(:ci_project_name, 'nightly')
+      stub_env('CI_PROJECT_NAME', 'nightly')
+      described_class.configure_rspec
     end
 
     it 'runs on nightly pipeline' do
