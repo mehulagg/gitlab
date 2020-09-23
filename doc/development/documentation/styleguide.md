@@ -439,7 +439,7 @@ Avoid the use of gender-specific pronouns, unless referring to a specific person
 | GitLab Team Members               | Manpower                        |
 | You can install; They can install | He can install; She can install |
 
-If you need to set up [Fake user information](restful-api-styleguide.md#fake-user-information), use
+If you need to set up [Fake user information](#fake-user-information), use
 diverse or non-gendered names with common surnames.
 
 #### Avoid ableist language
