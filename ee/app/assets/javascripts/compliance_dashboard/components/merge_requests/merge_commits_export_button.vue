@@ -12,11 +12,16 @@ export default {
       required: true,
       type: String,
     },
+    downloadExportCsvPath: {
+      required: true,
+      type: String,
+    },
   },
   strings: {
     listMergeCommitsButtonText: __('List of all merge commits'),
     exportAsCsv: __('Export as CSV'),
     csvSizeLimit: __('(max size 15 MB)'),
+    downloadCsvButtonText: __('Download CSV'),
   },
   data() {
     return {
@@ -43,5 +48,14 @@ export default {
       <p class="gl-my-0">{{ $options.strings.exportAsCsv }}</p>
       <p class="gl-my-0">{{ $options.strings.csvSizeLimit }}</p>
     </gl-tooltip>
+
+    <gl-button
+      ref="button"
+      :href="downloadExportCsvPath"
+      icon="export"
+      class="gl-align-self-center"
+    >
+      {{ $options.strings.downloadCsvButtonText }}
+    </gl-button>
   </div>
 </template>

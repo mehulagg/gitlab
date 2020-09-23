@@ -35,6 +35,11 @@ export default {
       required: false,
       default: '',
     },
+    downloadExportCsvPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     hasMergeRequests() {
@@ -65,6 +70,7 @@ export default {
         <merge-commits-export-button
           v-if="hasMergeCommitsCsvExportPath"
           :merge-commits-csv-export-path="mergeCommitsCsvExportPath"
+          :download-export-csv-path="downloadExportCsvPath"
         />
       </div>
       <p>{{ $options.strings.subheading }}</p>
