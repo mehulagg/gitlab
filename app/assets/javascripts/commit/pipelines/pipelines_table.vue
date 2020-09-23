@@ -193,7 +193,7 @@ export default {
       "
     />
 
-    <div v-else-if="shouldRenderTable" class="table-holder">
+    <div v-else-if="shouldRenderTable">
       <gl-button
         v-if="canRenderPipelineButton"
         class="gl-mt-3 gl-mb-0 gl-display-md-none"
