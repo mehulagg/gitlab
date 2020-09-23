@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Autocomplete
-  class VulnerabilitiesFinder
+  class VulnerabilitiesAutocompleteFinder
     attr_reader :current_user, :vulnerable, :params
 
     # current_user - the User object of the user that wants to view the list of Vulnerabilities
