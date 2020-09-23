@@ -197,7 +197,7 @@ export default {
     :class="{ 'gl-z-dropdown-menu!': hasDropdownOpen }"
     @click.self="handleToggleFile"
   >
-    <div class="file-header-content gl-display-flex gl-align-items-center">
+    <div class="file-header-content gl-display-flex gl-align-items-center gl-pr-0!">
       <gl-icon
         v-if="collapsible"
         ref="collapseIcon"
