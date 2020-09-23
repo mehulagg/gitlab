@@ -194,12 +194,12 @@ Getting feedback about changes back to a developer in a context that is not lost
 
 ### Using Visual Reviews
 
-After Visual Reviews has been [enabled](#configuring-visual-reviews) for the
+After Visual Reviews has been [configured](#configure-review-app-for-visual-reviews) for the
 Review App, the Visual Reviews feedback form is overlaid on the right side of every page.
 
 ![Visual review feedback form](img/toolbar_feedback_form.png)
 
-To use the feedback form:
+To use the feedback form to make a comment in the merge request:
 
 1. Click the **Review** tab on the right side of a page.
 1. Make a comment on the visual review. You can make use of all the
@@ -215,7 +215,7 @@ To use the feedback form:
 <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
 To see Visual reviews in action, see the [Visual Reviews Walk through](https://youtu.be/1_tvWTlPfM4).
 
-### Configuring Visual Reviews
+### Configure Review Apps for Visual Reviews
 
 The feedback form is served through a script you add to pages in your Review App.
 If you have [Developer permissions](../../user/permissions.md) to the project,
@@ -287,12 +287,22 @@ can supply the ID by either:​​
 - Dynamically adding the `data-merge-request-id` value during the build of the app.
 - Supplying it manually through the visual review form in the app.
 
-### Disabling Visual Reviews
+### Enable or disable Visual Reviews **(CORE ONLY)**
 
-GitLab comes with Visual Reviews enabled by default for self-managed customers. Administrators can disable Visual Reviews with a Rails console as follows:
+Visual Reviews is deployed behind a feature flag that is **enabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../administration/feature_flags.md)
+can opt to disable it.
+
+To disable it:
 
 ```ruby
 Feature.disable(:anonymous_visual_review_feedback)
+```
+
+To enable it:
+
+```ruby
+Feature.enable(:anonymous_visual_review_feedback)
 ```
 
 ### Authentication for Visual Reviews
