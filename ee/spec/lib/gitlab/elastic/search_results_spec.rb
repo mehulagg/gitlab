@@ -181,6 +181,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
 
         ensure_elasticsearch_index!
       end
+
       include_examples 'search results filtered by state'
       include_examples 'search results filtered by confidential'
     end
