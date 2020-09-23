@@ -19,6 +19,7 @@ class Issue < ApplicationRecord
   include WhereComposite
   include StateEventable
   include IdInOrdered
+  include AvailableFeatures
 
   DueDateStruct                   = Struct.new(:title, :name).freeze
   NoDueDate                       = DueDateStruct.new('No Due Date', '0').freeze

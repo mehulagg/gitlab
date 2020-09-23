@@ -1213,4 +1213,16 @@ RSpec.describe Issue do
       expect(issue.allows_reviewers?).to be(false)
     end
   end
+
+  describe '#type_supports?' do
+    let_it_be(:issue) { create(:issue) }
+    let_it_be(:test_case) { create(:quality_test_case) }
+    let_it_be(:incident) { create(:incident) }
+
+    it do
+      expect(issue.type_supports?(:promotion)).to be(true)
+      expect(test_case.type_supports?(:promotion)).to be(false)
+      expect(incident.type_supports?(:promotion)).to be(false)
+    end
+  end
 end
