@@ -669,13 +669,44 @@ RSpec.describe Vulnerabilities::Finding do
     it { is_expected.to eql(expected_message) }
   end
 
-  describe '#cve' do
+  describe '#cve_value' do
     let(:finding) { build(:vulnerabilities_finding) }
-    let(:expected_cve) { finding.metadata['cve'] }
+    let(:expected_cve) { 'CVE-2020-0000' }
 
-    subject { finding.cve }
+    subject { finding.cve_value }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'cve', external_id: expected_cve)
+    end
 
     it { is_expected.to eql(expected_cve) }
+  end
+
+  describe '#cwe_value' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_cwe) { 'CWE-0000' }
+
+    subject { finding.cwe_value }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'cwe', external_id: expected_cwe)
+    end
+
+    it { is_expected.to eql(expected_cwe) }
+  end
+
+  describe '#other_identifier_values' do
+    let(:finding) { build(:vulnerabilities_finding) }
+    let(:expected_values) { ['ID 1', 'ID 2'] }
+
+    subject { finding.other_identifier_values }
+
+    before do
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'foo', external_id: expected_values.first)
+      finding.identifiers << build(:vulnerabilities_identifier, external_type: 'bar', external_id: expected_values.second)
+    end
+
+    it { is_expected.to match_array(expected_values) }
   end
 
   describe "#metadata" do
