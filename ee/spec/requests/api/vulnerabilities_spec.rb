@@ -463,5 +463,4 @@ RSpec.describe API::Vulnerabilities do
       it { expect { revert_vulnerability_to_detected }.to be_denied_for(:anonymous) }
     end
   end
-
 end
