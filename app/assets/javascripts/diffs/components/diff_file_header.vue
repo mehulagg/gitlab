@@ -288,7 +288,6 @@ export default {
         <gl-dropdown
           v-gl-tooltip.hover.focus="__('More actions')"
           right
-          lazy
           toggle-class="btn-icon js-diff-more-actions"
           @show="setMoreActionsShown(true)"
           @hidden="setMoreActionsShown(false)"
