@@ -32,7 +32,7 @@ module Ci
     end
 
     def status
-      @status ||= statuses.latest.composite_status
+      @status ||= latest_statuses.composite_status
     end
 
     def detailed_status(current_user)
@@ -60,7 +60,7 @@ module Ci
     def has_warnings?
       # lazilly calculate the warnings
       if @has_warnings.nil?
-        @has_warnings = statuses.latest.failed_but_allowed.any?
+        @has_warnings = latest_statuses.failed_but_allowed.any?
       end
 
       @has_warnings

@@ -369,7 +369,7 @@ RSpec.describe Ci::RetryPipelineService, '#execute' do
   end
 
   def build(name)
-    statuses.latest.find_by(name: name)
+    latest_statuses.find_by(name: name)
   end
 
   def create_build(name, status, stage_num, **opts)
