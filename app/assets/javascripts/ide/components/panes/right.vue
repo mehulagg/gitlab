@@ -1,134 +1,69 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
-import _ from 'underscore';
+import { mapGetters, mapState } from 'vuex';
 import { __ } from '~/locale';
-import tooltip from '../../../vue_shared/directives/tooltip';
-import Icon from '../../../vue_shared/components/icon.vue';
-import { rightSidebarViews } from '../../constants';
+import CollapsibleSidebar from './collapsible_sidebar.vue';
+import ResizablePanel from '../resizable_panel.vue';
+import { rightSidebarViews, SIDEBAR_INIT_WIDTH, SIDEBAR_NAV_WIDTH } from '../../constants';
 import PipelinesList from '../pipelines/list.vue';
 import JobsDetail from '../jobs/detail.vue';
-import MergeRequestInfo from '../merge_requests/info.vue';
-import ResizablePanel from '../resizable_panel.vue';
 import Clientside from '../preview/clientside.vue';
+import TerminalView from '../terminal/view.vue';
+
+// Need to add the width of the nav buttons since the resizable container contains those as well
+const WIDTH = SIDEBAR_INIT_WIDTH + SIDEBAR_NAV_WIDTH;
 
 export default {
-  directives: {
-    tooltip,
-  },
+  name: 'RightPane',
   components: {
-    Icon,
-    PipelinesList,
-    JobsDetail,
+    CollapsibleSidebar,
     ResizablePanel,
-    MergeRequestInfo,
-    Clientside,
-  },
-  props: {
-    extensionTabs: {
-      type: Array,
-      required: false,
-      default: () => [],
-    },
   },
   computed: {
+    ...mapState('terminal', { isTerminalVisible: 'isVisible' }),
     ...mapState(['currentMergeRequestId', 'clientsidePreviewEnabled']),
-    ...mapState('rightPane', ['isOpen', 'currentView']),
     ...mapGetters(['packageJson']),
-    ...mapGetters('rightPane', ['isActiveView', 'isAliveView']),
+    ...mapState('rightPane', ['isOpen']),
     showLivePreview() {
       return this.packageJson && this.clientsidePreviewEnabled;
     },
-    defaultTabs() {
+    rightExtensionTabs() {
       return [
-        {
-          show: this.currentMergeRequestId,
-          title: __('Merge Request'),
-          views: [rightSidebarViews.mergeRequestInfo],
-          icon: 'text-description',
-        },
         {
           show: true,
           title: __('Pipelines'),
-          views: [rightSidebarViews.pipelines, rightSidebarViews.jobsDetail],
+          views: [
+            { component: PipelinesList, ...rightSidebarViews.pipelines },
+            { component: JobsDetail, ...rightSidebarViews.jobsDetail },
+          ],
           icon: 'rocket',
         },
         {
           show: this.showLivePreview,
           title: __('Live preview'),
-          views: [rightSidebarViews.clientSidePreview],
+          views: [{ component: Clientside, ...rightSidebarViews.clientSidePreview }],
           icon: 'live-preview',
+        },
+        {
+          show: this.isTerminalVisible,
+          title: __('Terminal'),
+          views: [{ component: TerminalView, ...rightSidebarViews.terminal }],
+          icon: 'terminal',
         },
       ];
     },
-    tabs() {
-      return this.defaultTabs.concat(this.extensionTabs).filter(tab => tab.show);
-    },
-    tabViews() {
-      return _.flatten(this.tabs.map(tab => tab.views));
-    },
-    aliveTabViews() {
-      return this.tabViews.filter(view => this.isAliveView(view.name));
-    },
   },
-  methods: {
-    ...mapActions('rightPane', ['toggleOpen', 'open']),
-    clickTab(e, tab) {
-      e.target.blur();
-
-      if (this.isActiveTab(tab)) {
-        this.toggleOpen();
-      } else {
-        this.open(tab.views[0]);
-      }
-    },
-    isActiveTab(tab) {
-      return tab.views.some(view => this.isActiveView(view.name));
-    },
-  },
+  WIDTH,
 };
 </script>
 
 <template>
-  <div class="multi-file-commit-panel ide-right-sidebar" data-qa-selector="ide_right_sidebar">
-    <resizable-panel
-      v-show="isOpen"
-      :collapsible="false"
-      :initial-width="350"
-      :min-size="350"
-      :class="`ide-right-sidebar-${currentView}`"
-      side="right"
-      class="multi-file-commit-panel-inner"
-    >
-      <div
-        v-for="tabView in aliveTabViews"
-        v-show="isActiveView(tabView.name)"
-        :key="tabView.name"
-        class="h-100"
-      >
-        <component :is="tabView.component || tabView.name" />
-      </div>
-    </resizable-panel>
-    <nav class="ide-activity-bar">
-      <ul class="list-unstyled">
-        <li v-for="tab of tabs" :key="tab.title">
-          <button
-            v-tooltip
-            :title="tab.title"
-            :aria-label="tab.title"
-            :class="{
-              active: isActiveTab(tab) && isOpen,
-            }"
-            data-container="body"
-            data-placement="left"
-            :data-qa-selector="`${tab.title.toLowerCase()}_tab_button`"
-            class="ide-sidebar-link is-right"
-            type="button"
-            @click="clickTab($event, tab)"
-          >
-            <icon :size="16" :name="tab.icon" />
-          </button>
-        </li>
-      </ul>
-    </nav>
-  </div>
+  <resizable-panel
+    class="gl-display-flex gl-overflow-hidden"
+    side="right"
+    :initial-width="$options.WIDTH"
+    :min-size="$options.WIDTH"
+    :resizable="isOpen"
+  >
+    <collapsible-sidebar class="gl-w-full" :extension-tabs="rightExtensionTabs" side="right" />
+  </resizable-panel>
 </template>

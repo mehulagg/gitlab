@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Epics::UpdateDatesService do
+RSpec.describe Epics::UpdateDatesService do
   let(:group) { create(:group, :internal) }
   let(:user) { create(:user) }
   let(:project) { create(:project, group: group) }
@@ -32,6 +32,7 @@ describe Epics::UpdateDatesService do
           group: group
         )
       end
+
       let(:milestone2) do
         create(
           :milestone,
@@ -69,6 +70,7 @@ describe Epics::UpdateDatesService do
               group: group
             )
           end
+
           let(:milestone2) do
             create(
               :milestone,
@@ -96,6 +98,7 @@ describe Epics::UpdateDatesService do
               group: group
             )
           end
+
           let(:milestone2) do
             create(
               :milestone,

@@ -1,25 +1,35 @@
-/* eslint-disable no-shadow */
+/* eslint-disable no-shadow, no-param-reassign,consistent-return */
 /* global List */
-
+/* global ListIssue */
 import $ from 'jquery';
-import _ from 'underscore';
+import { sortBy } from 'lodash';
 import Vue from 'vue';
 import Cookies from 'js-cookie';
 import BoardsStoreEE from 'ee_else_ce/boards/stores/boards_store_ee';
-import { getUrlParamsArray, parseBoolean } from '~/lib/utils/common_utils';
+import {
+  urlParamsToObject,
+  getUrlParamsArray,
+  parseBoolean,
+  convertObjectPropsToCamelCase,
+} from '~/lib/utils/common_utils';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
+import { getIdFromGraphQLId } from '~/graphql_shared/utils';
 import eventHub from '../eventhub';
 import { ListType } from '../constants';
+import IssueProject from '../models/project';
+import ListLabel from '../models/label';
+import ListAssignee from '../models/assignee';
+import ListMilestone from '../models/milestone';
 
+const PER_PAGE = 20;
 const boardsStore = {
   disabled: false,
   timeTracking: {
     limitToHours: false,
   },
   scopedLabels: {
-    helpLink: '',
     enabled: false,
   },
   filter: {
@@ -30,11 +40,11 @@ const boardsStore = {
       labels: [],
     },
     currentPage: '',
-    reload: false,
     endpoints: {},
   },
   detail: {
     issue: {},
+    list: {},
   },
   moving: {
     issue: {},
@@ -42,7 +52,14 @@ const boardsStore = {
   },
   multiSelect: { list: [] },
 
-  setEndpoints({ boardsEndpoint, listsEndpoint, bulkUpdatePath, boardId, recentBoardsEndpoint }) {
+  setEndpoints({
+    boardsEndpoint,
+    listsEndpoint,
+    bulkUpdatePath,
+    boardId,
+    recentBoardsEndpoint,
+    fullPath,
+  }) {
     const listsEndpointGenerate = `${listsEndpoint}/generate.json`;
     this.state.endpoints = {
       boardsEndpoint,
@@ -50,6 +67,7 @@ const boardsStore = {
       listsEndpoint,
       listsEndpointGenerate,
       bulkUpdatePath,
+      fullPath,
       recentBoardsEndpoint: `${recentBoardsEndpoint}.json`,
     };
   },
@@ -58,16 +76,27 @@ const boardsStore = {
     this.filter.path = getUrlParamsArray().join('&');
     this.detail = {
       issue: {},
+      list: {},
     };
   },
   showPage(page) {
-    this.state.reload = false;
     this.state.currentPage = page;
   },
-  addList(listObj, defaultAvatar) {
-    const list = new List(listObj, defaultAvatar);
-    this.state.lists = _.sortBy([...this.state.lists, list], 'position');
+  updateListPosition(listObj) {
+    const listType = listObj.listType || listObj.list_type;
+    let { position } = listObj;
+    if (listType === ListType.closed) {
+      position = Infinity;
+    } else if (listType === ListType.backlog) {
+      position = -1;
+    }
 
+    const list = new List({ ...listObj, position });
+    return list;
+  },
+  addList(listObj) {
+    const list = this.updateListPosition(listObj);
+    this.state.lists = sortBy([...this.state.lists, list], 'position');
     return list;
   },
   new(listObj) {
@@ -80,7 +109,7 @@ const boardsStore = {
         // Remove any new issues from the backlog
         // as they will be visible in the new list
         list.issues.forEach(backlogList.removeIssue.bind(backlogList));
-        this.state.lists = _.sortBy(this.state.lists, 'position');
+        this.state.lists = sortBy(this.state.lists, 'position');
       })
       .catch(() => {
         // https://gitlab.com/gitlab-org/gitlab-foss/issues/30821
@@ -112,6 +141,69 @@ const boardsStore = {
       path: '',
     });
   },
+
+  findIssueLabel(issue, findLabel) {
+    return issue.labels.find(label => label.id === findLabel.id);
+  },
+
+  goToNextPage(list) {
+    if (list.issuesSize > list.issues.length) {
+      if (list.issues.length / PER_PAGE >= 1) {
+        list.page += 1;
+      }
+
+      return list.getIssues(false);
+    }
+  },
+
+  addListIssue(list, issue, listFrom, newIndex) {
+    let moveBeforeId = null;
+    let moveAfterId = null;
+
+    if (!list.findIssue(issue.id)) {
+      if (newIndex !== undefined) {
+        list.issues.splice(newIndex, 0, issue);
+
+        if (list.issues[newIndex - 1]) {
+          moveBeforeId = list.issues[newIndex - 1].id;
+        }
+
+        if (list.issues[newIndex + 1]) {
+          moveAfterId = list.issues[newIndex + 1].id;
+        }
+      } else {
+        list.issues.push(issue);
+      }
+
+      if (list.label) {
+        issue.addLabel(list.label);
+      }
+
+      if (list.assignee) {
+        if (listFrom && listFrom.type === 'assignee') {
+          issue.removeAssignee(listFrom.assignee);
+        }
+        issue.addAssignee(list.assignee);
+      }
+
+      if (IS_EE && list.milestone) {
+        if (listFrom && listFrom.type === 'milestone') {
+          issue.removeMilestone(listFrom.milestone);
+        }
+        issue.addMilestone(list.milestone);
+      }
+
+      if (listFrom) {
+        list.issuesSize += 1;
+
+        list.updateIssueLabel(issue, listFrom, moveBeforeId, moveAfterId);
+      }
+    }
+  },
+  findListIssue(list, id) {
+    return list.issues.find(issue => issue.id === id);
+  },
+
   welcomeIsHidden() {
     return parseBoolean(Cookies.get('issue_board_welcome_hidden'));
   },
@@ -131,16 +223,102 @@ const boardsStore = {
     listFrom.update();
   },
 
+  addMultipleListIssues(list, issues, listFrom, newIndex) {
+    let moveBeforeId = null;
+    let moveAfterId = null;
+
+    const listHasIssues = issues.every(issue => list.findIssue(issue.id));
+
+    if (!listHasIssues) {
+      if (newIndex !== undefined) {
+        if (list.issues[newIndex - 1]) {
+          moveBeforeId = list.issues[newIndex - 1].id;
+        }
+
+        if (list.issues[newIndex]) {
+          moveAfterId = list.issues[newIndex].id;
+        }
+
+        list.issues.splice(newIndex, 0, ...issues);
+      } else {
+        list.issues.push(...issues);
+      }
+
+      if (list.label) {
+        issues.forEach(issue => issue.addLabel(list.label));
+      }
+
+      if (list.assignee) {
+        if (listFrom && listFrom.type === 'assignee') {
+          issues.forEach(issue => issue.removeAssignee(listFrom.assignee));
+        }
+        issues.forEach(issue => issue.addAssignee(list.assignee));
+      }
+
+      if (IS_EE && list.milestone) {
+        if (listFrom && listFrom.type === 'milestone') {
+          issues.forEach(issue => issue.removeMilestone(listFrom.milestone));
+        }
+        issues.forEach(issue => issue.addMilestone(list.milestone));
+      }
+
+      if (listFrom) {
+        list.issuesSize += issues.length;
+
+        list.updateMultipleIssues(issues, listFrom, moveBeforeId, moveAfterId);
+      }
+    }
+  },
+
+  removeListIssues(list, removeIssue) {
+    list.issues = list.issues.filter(issue => {
+      const matchesRemove = removeIssue.id === issue.id;
+
+      if (matchesRemove) {
+        list.issuesSize -= 1;
+        issue.removeLabel(list.label);
+      }
+
+      return !matchesRemove;
+    });
+  },
+  removeListMultipleIssues(list, removeIssues) {
+    const ids = removeIssues.map(issue => issue.id);
+
+    list.issues = list.issues.filter(issue => {
+      const matchesRemove = ids.includes(issue.id);
+
+      if (matchesRemove) {
+        list.issuesSize -= 1;
+        issue.removeLabel(list.label);
+      }
+
+      return !matchesRemove;
+    });
+  },
+
   startMoving(list, issue) {
     Object.assign(this.moving, { list, issue });
   },
 
+  onNewListIssueResponse(list, issue, data) {
+    issue.refreshData(data);
+
+    if (
+      !gon.features.boardsWithSwimlanes &&
+      !gon.features.graphqlBoardLists &&
+      list.issues.length > 1
+    ) {
+      const moveBeforeId = list.issues[1].id;
+      this.moveIssue(issue.id, null, null, null, moveBeforeId);
+    }
+  },
+
   moveMultipleIssuesToList({ listFrom, listTo, issues, newIndex }) {
     const issueTo = issues.map(issue => listTo.findIssue(issue.id));
-    const issueLists = _.flatten(issues.map(issue => issue.getLists()));
+    const issueLists = issues.map(issue => issue.getLists()).flat();
     const listLabels = issueLists.map(list => list.label);
-
-    const hasMoveableIssues = _.compact(issueTo).length > 0;
+    const hasMoveableIssues = issueTo.filter(Boolean).length > 0;
 
     if (!hasMoveableIssues) {
       // Check if target list assignee is already present in this issue
@@ -288,7 +466,8 @@ const boardsStore = {
     return (
       (listTo.type !== 'label' && listFrom.type === 'assignee') ||
       (listTo.type !== 'assignee' && listFrom.type === 'label') ||
-      listFrom.type === 'backlog'
+      listFrom.type === 'backlog' ||
+      listFrom.type === 'closed'
     );
   },
   moveIssueInList(list, issue, oldIndex, newIndex, idArray) {
@@ -337,6 +516,10 @@ const boardsStore = {
     this.updateFiltersUrl();
 
     eventHub.$emit('updateTokens');
+  },
+
+  performSearch() {
+    eventHub.$emit('performSearch');
   },
 
   setListDetail(newList) {
@@ -404,8 +587,79 @@ const boardsStore = {
     });
   },
 
+  updateListFunc(list) {
+    const collapsed = !list.isExpanded;
+    return this.updateList(list.id, list.position, collapsed).catch(() => {
+      // TODO: handle request error
+    });
+  },
+
   destroyList(id) {
     return axios.delete(`${this.state.endpoints.listsEndpoint}/${id}`);
+  },
+  destroy(list) {
+    const index = this.state.lists.indexOf(list);
+    this.state.lists.splice(index, 1);
+    this.updateNewListDropdown(list.id);
+
+    this.destroyList(list.id).catch(() => {
+      // TODO: handle request error
+    });
+  },
+
+  saveList(list) {
+    const entity = list.label || list.assignee || list.milestone;
+    let entityType = '';
+    if (list.label) {
+      entityType = 'label_id';
+    } else if (list.assignee) {
+      entityType = 'assignee_id';
+    } else if (IS_EE && list.milestone) {
+      entityType = 'milestone_id';
+    }
+
+    return this.createList(entity.id, entityType)
+      .then(res => res.data)
+      .then(data => {
+        list.id = data.id;
+        list.type = data.list_type;
+        list.position = data.position;
+        list.label = data.label;
+
+        return list.getIssues();
+      });
+  },
+
+  getListIssues(list, emptyIssues = true) {
+    const data = {
+      ...urlParamsToObject(this.filter.path),
+      page: list.page,
+    };
+
+    if (list.label && data.label_name) {
+      data.label_name = data.label_name.filter(label => label !== list.label.title);
+    }
+
+    if (emptyIssues) {
+      list.loading = true;
+    }
+
+    return this.getIssuesForList(list.id, data)
+      .then(res => res.data)
+      .then(data => {
+        list.loading = false;
+        list.issuesSize = data.size;
+
+        if (emptyIssues) {
+          list.issues = [];
+        }
+
+        data.issues.forEach(issueObj => {
+          list.addIssue(new ListIssue(issueObj));
+        });
+
+        return data;
+      });
   },
 
   getIssuesForList(id, filter = {}) {
@@ -426,6 +680,15 @@ const boardsStore = {
     });
   },
 
+  moveListIssues(list, issue, oldIndex, newIndex, moveBeforeId, moveAfterId) {
+    list.issues.splice(oldIndex, 1);
+    list.issues.splice(newIndex, 0, issue);
+
+    this.moveIssue(issue.id, null, null, moveBeforeId, moveAfterId).catch(() => {
+      // TODO: handle request error
+    });
+  },
+
   moveMultipleIssues({ ids, fromListId, toListId, moveBeforeId, moveAfterId }) {
     return axios.put(this.generateMultiDragPath(this.state.endpoints.boardId), {
       from_list_id: fromListId,
@@ -436,10 +699,42 @@ const boardsStore = {
     });
   },
 
+  moveListMultipleIssues({ list, issues, oldIndicies, newIndex, moveBeforeId, moveAfterId }) {
+    oldIndicies.reverse().forEach(index => {
+      list.issues.splice(index, 1);
+    });
+    list.issues.splice(newIndex, 0, ...issues);
+
+    return this.moveMultipleIssues({
+      ids: issues.map(issue => issue.id),
+      fromListId: null,
+      toListId: null,
+      moveBeforeId,
+      moveAfterId,
+    });
+  },
+
   newIssue(id, issue) {
+    if (typeof id === 'string') {
+      id = getIdFromGraphQLId(id);
+    }
+
     return axios.post(this.generateIssuesPath(id), {
       issue,
     });
+  },
+
+  newListIssue(list, issue) {
+    list.addIssue(issue, null, 0);
+    list.issuesSize += 1;
+    let listId = list.id;
+    if (typeof listId === 'string') {
+      listId = getIdFromGraphQLId(listId);
+    }
+
+    return this.newIssue(list.id, issue)
+      .then(res => res.data)
+      .then(data => list.onNewIssueResponse(issue, data));
   },
 
   getBacklog(data) {
@@ -449,6 +744,21 @@ const boardsStore = {
         `${gon.relative_url_root}/-/boards/${this.state.endpoints.boardId}/issues.json`,
       ),
     );
+  },
+  removeIssueLabel(issue, removeLabel) {
+    if (removeLabel) {
+      issue.labels = issue.labels.filter(label => removeLabel.id !== label.id);
+    }
+  },
+
+  addIssueAssignee(issue, assignee) {
+    if (!issue.findAssignee(assignee)) {
+      issue.assignees.push(new ListAssignee(assignee));
+    }
+  },
+
+  removeIssueLabels(issue, labels) {
+    labels.forEach(issue.removeLabel.bind(issue));
   },
 
   bulkUpdate(issueIds, extraData = {}) {
@@ -467,10 +777,6 @@ const boardsStore = {
 
   toggleIssueSubscription(endpoint) {
     return axios.post(endpoint);
-  },
-
-  allBoards() {
-    return axios.get(this.generateBoardsPath());
   },
 
   recentBoards() {
@@ -521,9 +827,101 @@ const boardsStore = {
       ...this.multiSelect.list.slice(index + 1),
     ];
   },
+  removeIssueAssignee(issue, removeAssignee) {
+    if (removeAssignee) {
+      issue.assignees = issue.assignees.filter(assignee => assignee.id !== removeAssignee.id);
+    }
+  },
+
+  findIssueAssignee(issue, findAssignee) {
+    return issue.assignees.find(assignee => assignee.id === findAssignee.id);
+  },
 
   clearMultiSelect() {
     this.multiSelect.list = [];
+  },
+
+  removeAllIssueAssignees(issue) {
+    issue.assignees = [];
+  },
+
+  addIssueMilestone(issue, milestone) {
+    const miletoneId = issue.milestone ? issue.milestone.id : null;
+    if (IS_EE && milestone.id !== miletoneId) {
+      issue.milestone = new ListMilestone(milestone);
+    }
+  },
+
+  setIssueLoadingState(issue, key, value) {
+    issue.isLoading[key] = value;
+  },
+
+  updateIssueData(issue, newData) {
+    Object.assign(issue, newData);
+  },
+
+  setIssueFetchingState(issue, key, value) {
+    issue.isFetching[key] = value;
+  },
+
+  removeIssueMilestone(issue, removeMilestone) {
+    if (IS_EE && removeMilestone && removeMilestone.id === issue.milestone.id) {
+      issue.milestone = {};
+    }
+  },
+
+  refreshIssueData(issue, obj) {
+    const convertedObj = convertObjectPropsToCamelCase(obj, {
+      dropKeys: ['issue_sidebar_endpoint', 'real_path', 'webUrl'],
+    });
+    convertedObj.sidebarInfoEndpoint = obj.issue_sidebar_endpoint;
+    issue.path = obj.real_path || obj.webUrl;
+    issue.project_id = obj.project_id;
+    Object.assign(issue, convertedObj);
+
+    if (obj.project) {
+      issue.project = new IssueProject(obj.project);
+    }
+
+    if (obj.milestone) {
+      issue.milestone = new ListMilestone(obj.milestone);
+      issue.milestone_id = obj.milestone.id;
+    }
+
+    if (obj.labels) {
+      issue.labels = obj.labels.map(label => new ListLabel(label));
+    }
+
+    if (obj.assignees) {
+      issue.assignees = obj.assignees.map(a => new ListAssignee(a));
+    }
+  },
+  addIssueLabel(issue, label) {
+    if (!issue.findLabel(label)) {
+      issue.labels.push(new ListLabel(label));
+    }
+  },
+  updateIssue(issue) {
+    const data = {
+      issue: {
+        milestone_id: issue.milestone ? issue.milestone.id : null,
+        due_date: issue.dueDate,
+        assignee_ids: issue.assignees.length > 0 ? issue.assignees.map(({ id }) => id) : [0],
+        label_ids: issue.labels.length > 0 ? issue.labels.map(({ id }) => id) : [''],
+      },
+    };
+
+    return axios.patch(`${issue.path}.json`, data).then(({ data: body = {} } = {}) => {
+      /**
+       * Since post implementation of Scoped labels, server can reject
+       * same key-ed labels. To keep the UI and server Model consistent,
+       * we're just assigning labels that server echo's back to us when we
+       * PATCH the said object.
+       */
+      if (body) {
+        issue.labels = convertObjectPropsToCamelCase(body.labels, { deep: true });
+      }
+    });
   },
 };
 

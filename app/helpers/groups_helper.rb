@@ -7,24 +7,35 @@ module GroupsHelper
       groups#details
       groups#activity
       groups#subgroups
-      analytics#show
     ]
   end
 
-  def group_nav_link_paths
-    %w[groups#projects groups#edit badges#index ci_cd#show ldap_group_links#index hooks#index audit_events#index pipeline_quota#index]
+  def group_settings_nav_link_paths
+    %w[
+      groups#projects
+      groups#edit
+      badges#index
+      repository#show
+      ci_cd#show
+      integrations#index
+      integrations#edit
+      ldap_group_links#index
+      hooks#index
+      audit_events#index
+      pipeline_quota#index
+    ]
   end
 
   def group_packages_nav_link_paths
     %w[
+      groups/packages#index
       groups/container_registries#index
     ]
   end
 
   def group_container_registry_nav?
     Gitlab.config.registry.enabled &&
-      can?(current_user, :read_container_image, @group) &&
-      Feature.enabled?(:group_container_registry_browser, @group)
+      can?(current_user, :read_container_image, @group)
   end
 
   def group_sidebar_links
@@ -37,6 +48,10 @@ module GroupsHelper
 
   def can_change_group_visibility_level?(group)
     can?(current_user, :change_visibility_level, group)
+  end
+
+  def can_update_default_branch_protection?(group)
+    can?(current_user, :update_default_branch_protection, group)
   end
 
   def can_change_share_with_group_lock?(group)
@@ -115,7 +130,7 @@ module GroupsHelper
   end
 
   def remove_group_message(group)
-    _("You are going to remove %{group_name}, this will also remove all of its subgroups and projects. Removed groups CANNOT be restored! Are you ABSOLUTELY sure?") %
+    _("You are going to remove %{group_name}, this will also delete all of its subgroups and projects. Removed groups CANNOT be restored! Are you ABSOLUTELY sure?") %
       { group_name: group.name }
   end
 
@@ -143,7 +158,31 @@ module GroupsHelper
     groups.to_json
   end
 
+  def group_packages_nav?
+    group_packages_list_nav? ||
+      group_container_registry_nav?
+  end
+
+  def group_packages_list_nav?
+    @group.packages_feature_enabled?
+  end
+
+  def show_invite_banner?(group)
+    Feature.enabled?(:invite_your_teammates_banner_a, group) &&
+      can?(current_user, :admin_group, group) &&
+      !just_created? &&
+      !multiple_members?(group)
+  end
+
   private
+
+  def just_created?
+    flash[:notice] =~ /successfully created/
+  end
+
+  def multiple_members?(group)
+    group.member_count > 1
+  end
 
   def get_group_sidebar_links
     links = [:overview, :group_members]
@@ -160,6 +199,10 @@ module GroupsHelper
 
     if can?(current_user, :admin_group, @group)
       links << :settings
+    end
+
+    if can?(current_user, :read_wiki, @group)
+      links << :wiki
     end
 
     links

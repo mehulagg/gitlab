@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ImportExport::MergeRequestParser do
+RSpec.describe Gitlab::ImportExport::MergeRequestParser do
   include ProjectForksHelper
 
   let(:user) { create(:user) }
@@ -33,11 +35,11 @@ describe Gitlab::ImportExport::MergeRequestParser do
   end
 
   it 'parses a MR that has no source branch' do
-    allow_any_instance_of(described_class).to receive(:branch_exists?).and_call_original
-    allow_any_instance_of(described_class).to receive(:branch_exists?).with(merge_request.source_branch).and_return(false)
-    allow_any_instance_of(described_class).to receive(:fork_merge_request?).and_return(true)
-    allow(Gitlab::GitalyClient).to receive(:migrate).and_call_original
-    allow(Gitlab::GitalyClient).to receive(:migrate).with(:fetch_ref).and_return([nil, 0])
+    allow_next_instance_of(described_class) do |instance|
+      allow(instance).to receive(:branch_exists?).and_call_original
+      allow(instance).to receive(:branch_exists?).with(merge_request.source_branch).and_return(false)
+      allow(instance).to receive(:fork_merge_request?).and_return(true)
+    end
 
     expect(parsed_merge_request).to eq(merge_request)
   end
@@ -50,10 +52,10 @@ describe Gitlab::ImportExport::MergeRequestParser do
     context 'when the diff is invalid' do
       let(:merge_request_diff) { build(:merge_request_diff, merge_request: merge_request, base_commit_sha: 'foobar') }
 
-      it 'sets the diff to nil' do
+      it 'sets the diff to empty diff' do
         expect(merge_request_diff).to be_invalid
         expect(merge_request_diff.merge_request).to eq merge_request
-        expect(parsed_merge_request.merge_request_diff).to be_nil
+        expect(parsed_merge_request.merge_request_diff).to be_empty
       end
     end
   end

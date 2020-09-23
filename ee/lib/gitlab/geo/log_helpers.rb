@@ -23,9 +23,15 @@ module Gitlab
       def base_log_data(message)
         {
           class: self.class.name,
+          host: Gitlab.config.gitlab.host,
           message: message,
           job_id: get_sidekiq_job_id
-        }.compact
+        }.merge(extra_log_data).compact
+      end
+
+      # Intended to be overridden elsewhere
+      def extra_log_data
+        {}
       end
 
       def geo_logger
@@ -34,11 +40,9 @@ module Gitlab
 
       def get_sidekiq_job_id
         context_data = Thread.current[:sidekiq_context]&.first
-
         return unless context_data
 
         index = context_data.index('JID-')
-
         return unless index
 
         context_data[index + 4..-1]

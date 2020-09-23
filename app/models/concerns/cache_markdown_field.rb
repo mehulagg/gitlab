@@ -20,6 +20,10 @@ module CacheMarkdownField
     false
   end
 
+  def can_cache_field?(field)
+    true
+  end
+
   # Returns the default Banzai render context for the cached markdown field.
   def banzai_render_context(field)
     raise ArgumentError.new("Unknown field: #{field.inspect}") unless
@@ -35,20 +39,30 @@ module CacheMarkdownField
 
     context[:markdown_engine] = :common_mark
 
+    if Feature.enabled?(:personal_snippet_reference_filters, context[:author])
+      context[:user] = self.parent_user
+    end
+
     context
   end
 
-  # Update every column in a row if any one is invalidated, as we only store
+  def rendered_field_content(markdown_field)
+    return unless can_cache_field?(markdown_field)
+
+    options = { skip_project_check: skip_project_check? }
+    Banzai::Renderer.cacheless_render_field(self, markdown_field, options)
+  end
+
+  # Update every applicable column in a row if any one is invalidated, as we only store
   # one version per row
   def refresh_markdown_cache
-    options = { skip_project_check: skip_project_check? }
-
     updates = cached_markdown_fields.markdown_fields.map do |markdown_field|
       [
         cached_markdown_fields.html_field(markdown_field),
-        Banzai::Renderer.cacheless_render_field(self, markdown_field, options)
+        rendered_field_content(markdown_field)
       ]
     end.to_h
+
     updates['cached_markdown_version'] = latest_cached_markdown_version
 
     updates.each { |field, data| write_markdown_field(field, data) }
@@ -92,7 +106,7 @@ module CacheMarkdownField
   def updated_cached_html_for(markdown_field)
     return unless cached_markdown_fields.markdown_fields.include?(markdown_field)
 
-    refresh_markdown_cache if attribute_invalidated?(cached_markdown_fields.html_field(markdown_field))
+    refresh_markdown_cache! if attribute_invalidated?(cached_markdown_fields.html_field(markdown_field))
 
     cached_html_for(markdown_field)
   end
@@ -120,6 +134,10 @@ module CacheMarkdownField
     else
       0
     end
+  end
+
+  def parent_user
+    nil
   end
 
   included do
@@ -151,7 +169,6 @@ module CacheMarkdownField
       define_method(invalidation_method) do
         changed_fields = changed_attributes.keys
         invalidations  = changed_fields & [markdown_field.to_s, *INVALIDATED_BY]
-        invalidations.delete(markdown_field.to_s) if changed_fields.include?("#{markdown_field}_html")
         !invalidations.empty? || !cached_html_up_to_date?(markdown_field)
       end
     end

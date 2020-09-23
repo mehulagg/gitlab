@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Referencing Epics', :js do
+RSpec.describe 'Referencing Epics', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group, :public) }
   let(:epic) { create(:epic, group: group) }

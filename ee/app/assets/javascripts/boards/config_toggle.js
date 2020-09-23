@@ -30,7 +30,7 @@ export default boardsStore => {
         showPage: page => boardsStore.showPage(page),
       },
       template: `
-        <div class="prepend-left-10">
+        <div class="gl-ml-3">
           <button
             v-tooltip
             :title="tooltipTitle"

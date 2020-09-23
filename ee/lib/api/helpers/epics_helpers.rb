@@ -7,12 +7,24 @@ module API
         forbidden! unless user_group.feature_available?(:epics)
       end
 
+      def authorize_subepics_feature!
+        forbidden! unless user_group.feature_available?(:subepics)
+      end
+
       def authorize_can_read!
         authorize!(:read_epic, epic)
       end
 
-      def authorize_can_admin!
+      def authorize_can_admin_epic!
         authorize!(:admin_epic, epic)
+      end
+
+      def authorize_can_admin_epic_link!
+        authorize!(:admin_epic_link, epic)
+      end
+
+      def authorize_can_destroy_epic_link!
+        authorize!(:destroy_epic_link, epic)
       end
 
       def authorize_can_create!
@@ -41,6 +53,14 @@ module API
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def epic_options
+        {
+          with: EE::API::Entities::Epic,
+          user: current_user,
+          group: user_group
+        }
+      end
     end
   end
 end

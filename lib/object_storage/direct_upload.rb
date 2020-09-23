@@ -2,7 +2,7 @@
 
 module ObjectStorage
   #
-  # The DirectUpload c;ass generates a set of presigned URLs
+  # The DirectUpload class generates a set of presigned URLs
   # that can be used to upload data to object storage from untrusted component: Workhorse, Runner?
   #
   # For Google it assumes that the platform supports variable Content-Length.
@@ -22,16 +22,17 @@ module ObjectStorage
     MAXIMUM_MULTIPART_PARTS = 100
     MINIMUM_MULTIPART_SIZE = 5.megabytes
 
-    attr_reader :credentials, :bucket_name, :object_name
+    attr_reader :config, :credentials, :bucket_name, :object_name
     attr_reader :has_length, :maximum_size
 
-    def initialize(credentials, bucket_name, object_name, has_length:, maximum_size: nil)
+    def initialize(config, object_name, has_length:, maximum_size: nil)
       unless has_length
         raise ArgumentError, 'maximum_size has to be specified if length is unknown' unless maximum_size
       end
 
-      @credentials = credentials
-      @bucket_name = bucket_name
+      @config = config
+      @credentials = config.credentials
+      @bucket_name = config.bucket
       @object_name = object_name
       @has_length = has_length
       @maximum_size = maximum_size
@@ -46,7 +47,7 @@ module ObjectStorage
         MultipartUpload: multipart_upload_hash,
         CustomPutHeaders: true,
         PutHeaders: upload_options
-      }.compact
+      }.merge(workhorse_client_hash).compact
     end
 
     def multipart_upload_hash
@@ -60,13 +61,76 @@ module ObjectStorage
       }
     end
 
+    def workhorse_client_hash
+      if config.aws?
+        workhorse_aws_hash
+      elsif config.azure?
+        workhorse_azure_hash
+      else
+        {}
+      end
+    end
+
+    def workhorse_aws_hash
+      {
+        UseWorkhorseClient: use_workhorse_s3_client?,
+        RemoteTempObjectID: object_name,
+        ObjectStorage: {
+          Provider: 'AWS',
+          S3Config: {
+            Bucket: bucket_name,
+            Region: credentials[:region],
+            Endpoint: credentials[:endpoint],
+            PathStyle: config.use_path_style?,
+            UseIamProfile: config.use_iam_profile?,
+            ServerSideEncryption: config.server_side_encryption,
+            SSEKMSKeyID: config.server_side_encryption_kms_key_id
+          }.compact
+        }
+      }
+    end
+
+    def workhorse_azure_hash
+      {
+        # Azure requires Workhorse client because direct uploads can't
+        # use pre-signed URLs without buffering the whole file to disk.
+        UseWorkhorseClient: true,
+        RemoteTempObjectID: object_name,
+        ObjectStorage: {
+          Provider: 'AzureRM',
+          GoCloudConfig: {
+            URL: azure_gocloud_url
+          }
+        }
+      }
+    end
+
+    def azure_gocloud_url
+      url = "azblob://#{bucket_name}"
+      url += "?domain=#{config.azure_storage_domain}" if config.azure_storage_domain.present?
+      url
+    end
+
+    def use_workhorse_s3_client?
+      return false unless Feature.enabled?(:use_workhorse_s3_client, default_enabled: true)
+      return false unless config.use_iam_profile? || config.consolidated_settings?
+      # The Golang AWS SDK does not support V2 signatures
+      return false unless credentials.fetch(:aws_signature_version, 4).to_i >= 4
+
+      true
+    end
+
     def provider
       credentials[:provider].to_s
     end
 
     # Implements https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectGET.html
     def get_url
-      connection.get_object_url(bucket_name, object_name, expire_at)
+      if config.google?
+        connection.get_object_https_url(bucket_name, object_name, expire_at)
+      else
+        connection.get_object_url(bucket_name, object_name, expire_at)
+      end
     end
 
     # Implements https://docs.aws.amazon.com/AmazonS3/latest/API/RESTObjectDELETE.html
@@ -136,19 +200,15 @@ module ObjectStorage
       ].min
     end
 
-    def aws?
-      provider == 'AWS'
-    end
-
     def requires_multipart_upload?
-      aws? && !has_length
+      config.aws? && !has_length
     end
 
     def upload_id
       return unless requires_multipart_upload?
 
       strong_memoize(:upload_id) do
-        new_upload = connection.initiate_multipart_upload(bucket_name, object_name)
+        new_upload = connection.initiate_multipart_upload(bucket_name, object_name, config.fog_attributes)
         new_upload.body["UploadId"]
       end
     end

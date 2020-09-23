@@ -46,7 +46,7 @@ module Gitlab
 
       module Storage
         # Class that returns the disk path for a project using hashed storage
-        class HashedProject
+        class Hashed
           attr_accessor :project
 
           ROOT_PATH_PREFIX = '@hashed'
@@ -176,7 +176,7 @@ module Gitlab
         def storage
           @storage ||=
             if hashed_storage?
-              Storage::HashedProject.new(self)
+              Storage::Hashed.new(self)
             else
               Storage::LegacyProject.new(self)
             end
@@ -189,7 +189,7 @@ module Gitlab
       end
 
       def perform(start_id, stop_id)
-        Gitlab::Database.bulk_insert(:project_repositories, project_repositories(start_id, stop_id))
+        Gitlab::Database.bulk_insert(:project_repositories, project_repositories(start_id, stop_id)) # rubocop:disable Gitlab/BulkInsert
       end
 
       private

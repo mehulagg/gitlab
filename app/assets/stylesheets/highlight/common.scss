@@ -30,11 +30,14 @@
   }
 }
 
-// Links to URLs, emails, or dependencies
-.code .line a {
-  color: inherit;
+@mixin line-coverage-border-color($coverage, $no-coverage) {
+  transition: border-left 0.1s ease-out;
 
-  &:hover {
-    text-decoration: underline;
+  &.coverage {
+    border-left: 3px solid $coverage;
+  }
+
+  &.no-coverage {
+    border-left: 3px solid $no-coverage;
   }
 }

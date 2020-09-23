@@ -5,6 +5,8 @@ module OmniAuth
     class GroupSaml < SAML
       extend ::Gitlab::Utils::Override
 
+      VERIFY_SAML_RESPONSE = 'VERIFY_SAML_RESPONSE'
+
       option :name, 'group_saml'
       option :callback_path, ->(env) { callback?(env) }
 
@@ -38,6 +40,26 @@ module OmniAuth
         else
           call_app!
         end
+      end
+
+      override :callback_phase
+      def callback_phase
+        return super unless bypass_signin_for_configuration_check?
+
+        store_saml_response
+        redirect("/groups/#{group_lookup.path}/-/saml#response")
+      end
+
+      def bypass_signin_for_configuration_check?
+        request.params['RelayState'] == VERIFY_SAML_RESPONSE
+      end
+
+      def store_saml_response
+        ::Gitlab::Auth::GroupSaml::ResponseStore.new(session_id).set_raw(request.params['SAMLResponse']) if session_id
+      end
+
+      def session_id
+        session.id
       end
 
       def emulate_relay_state

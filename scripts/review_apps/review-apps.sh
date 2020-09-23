@@ -1,31 +1,34 @@
 [[ "$TRACE" ]] && set -x
-export TILLER_NAMESPACE="$KUBE_NAMESPACE"
 
 function deploy_exists() {
   local namespace="${1}"
-  local deploy="${2}"
-  echoinfo "Checking if ${deploy} exists in the ${namespace} namespace..." true
+  local release="${2}"
+  local deploy_exists
 
-  helm status --tiller-namespace "${namespace}" "${deploy}" >/dev/null 2>&1
-  local deploy_exists=$?
+  echoinfo "Checking if ${release} exists in the ${namespace} namespace..." true
 
-  echoinfo "Deployment status for ${deploy} is ${deploy_exists}"
+  helm status --namespace "${namespace}" "${release}" >/dev/null 2>&1
+  deploy_exists=$?
+
+  echoinfo "Deployment status for ${release} is ${deploy_exists}"
   return $deploy_exists
 }
 
 function previous_deploy_failed() {
-  local deploy="${1}"
-  echoinfo "Checking for previous deployment of ${deploy}" true
+  local namespace="${1}"
+  local release="${2}"
 
-  helm status "${deploy}" >/dev/null 2>&1
+  echoinfo "Checking for previous deployment of ${release}" true
+
+  helm status --namespace "${namespace}" "${release}" >/dev/null 2>&1
   local status=$?
 
   # if `status` is `0`, deployment exists, has a status
   if [ $status -eq 0 ]; then
     echoinfo "Previous deployment found, checking status..."
-    deployment_status=$(helm status "${deploy}" | grep ^STATUS | cut -d' ' -f2)
+    deployment_status=$(helm status --namespace "${namespace}" "${release}" | grep ^STATUS | cut -d' ' -f2)
     echoinfo "Previous deployment state: ${deployment_status}"
-    if [[ "$deployment_status" == "FAILED" || "$deployment_status" == "PENDING_UPGRADE" || "$deployment_status" == "PENDING_INSTALL" ]]; then
+    if [[ "$deployment_status" == "failed" || "$deployment_status" == "pending-upgrade" || "$deployment_status" == "pending-install" ]]; then
       status=0;
     else
       status=1;
@@ -37,30 +40,54 @@ function previous_deploy_failed() {
 }
 
 function delete_release() {
-  if [ -z "$CI_ENVIRONMENT_SLUG" ]; then
+  local namespace="${KUBE_NAMESPACE}"
+  local release="${CI_ENVIRONMENT_SLUG}"
+
+  if [ -z "${release}" ]; then
     echoerr "No release given, aborting the delete!"
     return
   fi
 
-  local name="$CI_ENVIRONMENT_SLUG"
+  helm_delete_release "${namespace}" "${release}"
+  kubectl_cleanup_release "${namespace}" "${release}"
+}
 
-  echoinfo "Deleting release '$name'..." true
+function helm_delete_release() {
+  local namespace="${1}"
+  local release="${2}"
 
-  helm delete --purge "$name"
+  echoinfo "Deleting Helm release '${release}'..." true
+
+  helm uninstall --namespace "${namespace}" "${release}"
+}
+
+function kubectl_cleanup_release() {
+  local namespace="${1}"
+  local release="${2}"
+
+  echoinfo "Deleting all K8s resources matching '${release}'..." true
+  kubectl --namespace "${namespace}" get ingress,svc,pdb,hpa,deploy,statefulset,job,pod,secret,configmap,pvc,clusterrole,clusterrolebinding,role,rolebinding,sa,crd 2>&1 \
+    | grep "${release}" \
+    | awk '{print $1}' \
+    | xargs kubectl --namespace "${namespace}" delete \
+    || true
 }
 
 function delete_failed_release() {
-  if [ -z "$CI_ENVIRONMENT_SLUG" ]; then
+  local namespace="${KUBE_NAMESPACE}"
+  local release="${CI_ENVIRONMENT_SLUG}"
+
+  if [ -z "${release}" ]; then
     echoerr "No release given, aborting the delete!"
     return
   fi
 
-  if ! deploy_exists "${KUBE_NAMESPACE}" "${CI_ENVIRONMENT_SLUG}"; then
-    echoinfo "No Review App with ${CI_ENVIRONMENT_SLUG} is currently deployed."
+  if ! deploy_exists "${namespace}" "${release}"; then
+    echoinfo "No Review App with ${release} is currently deployed."
   else
     # Cleanup and previous installs, as FAILED and PENDING_UPGRADE will cause errors with `upgrade`
-    if previous_deploy_failed "$CI_ENVIRONMENT_SLUG" ; then
-      echoinfo "Review App deployment in bad state, cleaning up $CI_ENVIRONMENT_SLUG"
+    if previous_deploy_failed "${namespace}" "${release}" ; then
+      echoinfo "Review App deployment in bad state, cleaning up ${release}"
       delete_release
     else
       echoinfo "Review App deployment in good state"
@@ -68,11 +95,13 @@ function delete_failed_release() {
   fi
 }
 
-
 function get_pod() {
+  local namespace="${KUBE_NAMESPACE}"
+  local release="${CI_ENVIRONMENT_SLUG}"
   local app_name="${1}"
   local status="${2-Running}"
-  get_pod_cmd="kubectl get pods -n ${KUBE_NAMESPACE} --field-selector=status.phase=${status} -lapp=${app_name},release=${CI_ENVIRONMENT_SLUG} --no-headers -o=custom-columns=NAME:.metadata.name | tail -n 1"
+
+  get_pod_cmd="kubectl get pods --namespace ${namespace} --field-selector=status.phase=${status} -lapp=${app_name},release=${release} --no-headers -o=custom-columns=NAME:.metadata.name | tail -n 1"
   echoinfo "Waiting till '${app_name}' pod is ready" true
   echoinfo "Running '${get_pod_cmd}'"
 
@@ -97,6 +126,37 @@ function get_pod() {
   echo "${pod_name}"
 }
 
+function run_task() {
+  local namespace="${KUBE_NAMESPACE}"
+  local ruby_cmd="${1}"
+  local task_runner_pod=$(get_pod "task-runner")
+
+  kubectl exec -it --namespace "${namespace}" "${task_runner_pod}" -- gitlab-rails runner "${ruby_cmd}"
+}
+
+function disable_sign_ups() {
+  if [ -z ${REVIEW_APPS_ROOT_TOKEN+x} ]; then
+    echoerr "In order to protect Review Apps, REVIEW_APPS_ROOT_TOKEN variable must be set"
+    false
+  else
+    true
+  fi
+
+  # Create the root token
+  local ruby_cmd="token = User.find_by_username('root').personal_access_tokens.create(scopes: [:api], name: 'Token to disable sign-ups'); token.set_token('${REVIEW_APPS_ROOT_TOKEN}'); begin; token.save!; rescue(ActiveRecord::RecordNotUnique); end"
+  run_task "${ruby_cmd}"
+
+  # Disable sign-ups
+  local signup_enabled=$(retry 'curl --silent --show-error --request PUT --header "PRIVATE-TOKEN: ${REVIEW_APPS_ROOT_TOKEN}" "${CI_ENVIRONMENT_URL}/api/v4/application/settings?signup_enabled=false" | jq ".signup_enabled"')
+
+  if [[ "${signup_enabled}" == "false" ]]; then
+    echoinfo "Sign-ups have been disabled successfully."
+  else
+    echoerr "Sign-ups are still enabled!"
+    false
+  fi
+}
+
 function check_kube_domain() {
   echoinfo "Checking that Kube domain exists..." true
 
@@ -111,56 +171,36 @@ function check_kube_domain() {
 }
 
 function ensure_namespace() {
-  echoinfo "Ensuring the ${KUBE_NAMESPACE} namespace exists..." true
+  local namespace="${KUBE_NAMESPACE}"
 
-  kubectl describe namespace "$KUBE_NAMESPACE" || kubectl create namespace "$KUBE_NAMESPACE"
-}
+  echoinfo "Ensuring the ${namespace} namespace exists..." true
 
-function install_tiller() {
-  echoinfo "Checking deployment/tiller-deploy status in the ${TILLER_NAMESPACE} namespace..." true
-
-  echoinfo "Initiating the Helm client..."
-  helm init --client-only
-
-  # Set toleration for Tiller to be installed on a specific node pool
-  helm init \
-    --wait \
-    --upgrade \
-    --node-selectors "app=helm" \
-    --replicas 3 \
-    --override "spec.template.spec.tolerations[0].key"="dedicated" \
-    --override "spec.template.spec.tolerations[0].operator"="Equal" \
-    --override "spec.template.spec.tolerations[0].value"="helm" \
-    --override "spec.template.spec.tolerations[0].effect"="NoSchedule"
-
-  kubectl rollout status -n "$TILLER_NAMESPACE" -w "deployment/tiller-deploy"
-
-  if ! helm version --debug; then
-    echo "Failed to init Tiller."
-    return 1
-  fi
+  kubectl describe namespace "${namespace}" || kubectl create namespace "${namespace}"
 }
 
 function install_external_dns() {
-  local release_name="dns-gitlab-review-app"
+  local namespace="${KUBE_NAMESPACE}"
+  local release="dns-gitlab-review-app-helm3"
   local domain
   domain=$(echo "${REVIEW_APPS_DOMAIN}" | awk -F. '{printf "%s.%s", $(NF-1), $NF}')
   echoinfo "Installing external DNS for domain ${domain}..." true
 
-  if ! deploy_exists "${KUBE_NAMESPACE}" "${release_name}" || previous_deploy_failed "${release_name}" ; then
+  if ! deploy_exists "${namespace}" "${release}" || previous_deploy_failed "${namespace}" "${release}" ; then
     echoinfo "Installing external-dns Helm chart"
+    helm repo add bitnami https://charts.bitnami.com/bitnami
     helm repo update
+
     # Default requested: CPU => 0, memory => 0
-    helm install stable/external-dns --version '^2.2.1' \
-      -n "${release_name}" \
-      --namespace "${KUBE_NAMESPACE}" \
+    helm install "${release}" bitnami/external-dns \
+      --namespace "${namespace}" \
+      --version '2.13.3' \
       --set provider="aws" \
       --set aws.credentials.secretKey="${REVIEW_APPS_AWS_SECRET_KEY}" \
       --set aws.credentials.accessKey="${REVIEW_APPS_AWS_ACCESS_KEY}" \
       --set aws.zoneType="public" \
       --set aws.batchChangeSize=400 \
       --set domainFilters[0]="${domain}" \
-      --set txtOwnerId="${KUBE_NAMESPACE}" \
+      --set txtOwnerId="${namespace}" \
       --set rbac.create="true" \
       --set policy="sync" \
       --set resources.requests.cpu=50m \
@@ -172,24 +212,62 @@ function install_external_dns() {
   fi
 }
 
-function create_application_secret() {
-  echoinfo "Creating the ${CI_ENVIRONMENT_SLUG}-gitlab-initial-root-password secret in the ${KUBE_NAMESPACE} namespace..." true
+# This script is used to install cert-manager in the cluster
+# The installation steps are documented in
+# https://gitlab.com/gitlab-org/quality/team-tasks/snippets/1990286
+function install_certmanager() {
+  local namespace="${KUBE_NAMESPACE}"
+  local release="cert-manager-review-app-helm3"
 
-  kubectl create secret generic -n "$KUBE_NAMESPACE" \
-    "${CI_ENVIRONMENT_SLUG}-gitlab-initial-root-password" \
-    --from-literal="password=${REVIEW_APPS_ROOT_PASSWORD}" \
-    --dry-run -o json | kubectl apply -f -
+  echoinfo "Installing cert-manager..." true
+
+  if ! deploy_exists "${namespace}" "${release}" || previous_deploy_failed "${namespace}" "${release}" ; then
+    kubectl apply \
+    -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.10/deploy/manifests/00-crds.yaml
+
+    echoinfo "Installing cert-manager Helm chart"
+    helm repo add jetstack https://charts.jetstack.io
+    helm repo update
+
+    helm install "${release}" jetstack/cert-manager \
+      --namespace "${namespace}" \
+      --version v0.15.1 \
+      --set installCRDS=true
+  else
+    echoinfo "The cert-manager Helm chart is already successfully deployed."
+  fi
+}
+
+function create_application_secret() {
+  local namespace="${KUBE_NAMESPACE}"
+  local release="${CI_ENVIRONMENT_SLUG}"
+  local initial_root_password_shared_secret
+  local gitlab_license_shared_secret
+
+  initial_root_password_shared_secret=$(kubectl get secret --namespace ${namespace} --no-headers -o=custom-columns=NAME:.metadata.name shared-gitlab-initial-root-password | tail -n 1)
+  if [[ "${initial_root_password_shared_secret}" == "" ]]; then
+    echoinfo "Creating the 'shared-gitlab-initial-root-password' secret in the ${namespace} namespace..." true
+    kubectl create secret generic --namespace "${namespace}" \
+      "shared-gitlab-initial-root-password" \
+      --from-literal="password=${REVIEW_APPS_ROOT_PASSWORD}" \
+      --dry-run -o json | kubectl apply -f -
+  else
+    echoinfo "The 'shared-gitlab-initial-root-password' secret already exists in the ${namespace} namespace."
+  fi
 
   if [ -z "${REVIEW_APPS_EE_LICENSE}" ]; then echo "License not found" && return; fi
 
-  echoinfo "Creating the ${CI_ENVIRONMENT_SLUG}-gitlab-license secret in the ${KUBE_NAMESPACE} namespace..." true
-
-  echo "${REVIEW_APPS_EE_LICENSE}" > /tmp/license.gitlab
-
-  kubectl create secret generic -n "$KUBE_NAMESPACE" \
-    "${CI_ENVIRONMENT_SLUG}-gitlab-license" \
-    --from-file=license=/tmp/license.gitlab \
-    --dry-run -o json | kubectl apply -f -
+  gitlab_license_shared_secret=$(kubectl get secret --namespace ${namespace} --no-headers -o=custom-columns=NAME:.metadata.name shared-gitlab-license | tail -n 1)
+  if [[ "${gitlab_license_shared_secret}" == "" ]]; then
+    echoinfo "Creating the 'shared-gitlab-license' secret in the ${namespace} namespace..." true
+    echo "${REVIEW_APPS_EE_LICENSE}" > /tmp/license.gitlab
+    kubectl create secret generic --namespace "${namespace}" \
+      "shared-gitlab-license" \
+      --from-file=license=/tmp/license.gitlab \
+      --dry-run -o json | kubectl apply -f -
+  else
+    echoinfo "The 'shared-gitlab-license' secret already exists in the ${namespace} namespace."
+  fi
 }
 
 function download_chart() {
@@ -212,68 +290,83 @@ function base_config_changed() {
   curl "${CI_API_V4_URL}/projects/${CI_MERGE_REQUEST_PROJECT_ID}/merge_requests/${CI_MERGE_REQUEST_IID}/changes" | jq '.changes | any(.old_path == "scripts/review_apps/base-config.yaml")'
 }
 
+function parse_gitaly_image_tag() {
+  local gitaly_version="${GITALY_VERSION}"
+
+  # prepend semver version with `v`
+  if [[ $gitaly_version =~  ^[0-9]+\.[0-9]+\.[0-9]+(-rc[0-9]+)?(-ee)?$ ]]; then
+    echo "v${gitaly_version}"
+  else
+    echo "${gitaly_version}"
+  fi
+}
+
 function deploy() {
-  local name="$CI_ENVIRONMENT_SLUG"
-  local edition="${GITLAB_EDITION-ce}"
+  local namespace="${KUBE_NAMESPACE}"
+  local release="${CI_ENVIRONMENT_SLUG}"
   local base_config_file_ref="master"
-  if [[ "$(base_config_changed)" == "true" ]]; then base_config_file_ref="$CI_COMMIT_SHA"; fi
+  if [[ "$(base_config_changed)" == "true" ]]; then base_config_file_ref="${CI_COMMIT_SHA}"; fi
   local base_config_file="https://gitlab.com/gitlab-org/gitlab/raw/${base_config_file_ref}/scripts/review_apps/base-config.yaml"
 
-  echoinfo "Deploying ${name}..." true
+  echoinfo "Deploying ${release}..." true
 
   IMAGE_REPOSITORY="registry.gitlab.com/gitlab-org/build/cng-mirror"
-  gitlab_migrations_image_repository="${IMAGE_REPOSITORY}/gitlab-rails-${edition}"
-  gitlab_sidekiq_image_repository="${IMAGE_REPOSITORY}/gitlab-sidekiq-${edition}"
-  gitlab_unicorn_image_repository="${IMAGE_REPOSITORY}/gitlab-unicorn-${edition}"
-  gitlab_task_runner_image_repository="${IMAGE_REPOSITORY}/gitlab-task-runner-${edition}"
+  gitlab_migrations_image_repository="${IMAGE_REPOSITORY}/gitlab-rails-ee"
+  gitlab_sidekiq_image_repository="${IMAGE_REPOSITORY}/gitlab-sidekiq-ee"
+  gitlab_webservice_image_repository="${IMAGE_REPOSITORY}/gitlab-webservice-ee"
+  gitlab_task_runner_image_repository="${IMAGE_REPOSITORY}/gitlab-task-runner-ee"
   gitlab_gitaly_image_repository="${IMAGE_REPOSITORY}/gitaly"
+  gitaly_image_tag=$(parse_gitaly_image_tag)
   gitlab_shell_image_repository="${IMAGE_REPOSITORY}/gitlab-shell"
-  gitlab_workhorse_image_repository="${IMAGE_REPOSITORY}/gitlab-workhorse-${edition}"
+  gitlab_workhorse_image_repository="${IMAGE_REPOSITORY}/gitlab-workhorse-ee"
 
   create_application_secret
 
 HELM_CMD=$(cat << EOF
-  helm upgrade --install \
+  helm upgrade \
+    --namespace="${namespace}" \
+    --install \
     --wait \
-    --timeout 900 \
-    --set ci.branch="$CI_COMMIT_REF_NAME" \
-    --set ci.commit.sha="$CI_COMMIT_SHORT_SHA" \
-    --set ci.job.url="$CI_JOB_URL" \
-    --set ci.pipeline.url="$CI_PIPELINE_URL" \
-    --set releaseOverride="$CI_ENVIRONMENT_SLUG" \
-    --set global.hosts.hostSuffix="$HOST_SUFFIX" \
-    --set global.hosts.domain="$REVIEW_APPS_DOMAIN" \
-    --set gitlab.migrations.image.repository="$gitlab_migrations_image_repository" \
-    --set gitlab.migrations.image.tag="$CI_COMMIT_REF_SLUG" \
-    --set gitlab.gitaly.image.repository="$gitlab_gitaly_image_repository" \
-    --set gitlab.gitaly.image.tag="v$GITALY_VERSION" \
-    --set gitlab.gitlab-shell.image.repository="$gitlab_shell_image_repository" \
-    --set gitlab.gitlab-shell.image.tag="v$GITLAB_SHELL_VERSION" \
-    --set gitlab.sidekiq.image.repository="$gitlab_sidekiq_image_repository" \
-    --set gitlab.sidekiq.image.tag="$CI_COMMIT_REF_SLUG" \
-    --set gitlab.unicorn.image.repository="$gitlab_unicorn_image_repository" \
-    --set gitlab.unicorn.image.tag="$CI_COMMIT_REF_SLUG" \
-    --set gitlab.unicorn.workhorse.image="$gitlab_workhorse_image_repository" \
-    --set gitlab.unicorn.workhorse.tag="$CI_COMMIT_REF_SLUG" \
-    --set gitlab.task-runner.image.repository="$gitlab_task_runner_image_repository" \
-    --set gitlab.task-runner.image.tag="$CI_COMMIT_REF_SLUG"
+    --timeout 15m \
+    --set ci.branch="${CI_COMMIT_REF_NAME}" \
+    --set ci.commit.sha="${CI_COMMIT_SHORT_SHA}" \
+    --set ci.job.url="${CI_JOB_URL}" \
+    --set ci.pipeline.url="${CI_PIPELINE_URL}" \
+    --set releaseOverride="${release}" \
+    --set global.hosts.hostSuffix="${HOST_SUFFIX}" \
+    --set global.hosts.domain="${REVIEW_APPS_DOMAIN}" \
+    --set gitlab.migrations.image.repository="${gitlab_migrations_image_repository}" \
+    --set gitlab.migrations.image.tag="${CI_COMMIT_REF_SLUG}" \
+    --set gitlab.gitaly.image.repository="${gitlab_gitaly_image_repository}" \
+    --set gitlab.gitaly.image.tag="${gitaly_image_tag}" \
+    --set gitlab.gitlab-shell.image.repository="${gitlab_shell_image_repository}" \
+    --set gitlab.gitlab-shell.image.tag="v${GITLAB_SHELL_VERSION}" \
+    --set gitlab.sidekiq.annotations.commit="${CI_COMMIT_SHORT_SHA}" \
+    --set gitlab.sidekiq.image.repository="${gitlab_sidekiq_image_repository}" \
+    --set gitlab.sidekiq.image.tag="${CI_COMMIT_REF_SLUG}" \
+    --set gitlab.webservice.annotations.commit="${CI_COMMIT_SHORT_SHA}" \
+    --set gitlab.webservice.image.repository="${gitlab_webservice_image_repository}" \
+    --set gitlab.webservice.image.tag="${CI_COMMIT_REF_SLUG}" \
+    --set gitlab.webservice.workhorse.image="${gitlab_workhorse_image_repository}" \
+    --set gitlab.webservice.workhorse.tag="${CI_COMMIT_REF_SLUG}" \
+    --set gitlab.task-runner.image.repository="${gitlab_task_runner_image_repository}" \
+    --set gitlab.task-runner.image.tag="${CI_COMMIT_REF_SLUG}"
 EOF
 )
 
 if [ -n "${REVIEW_APPS_EE_LICENSE}" ]; then
 HELM_CMD=$(cat << EOF
   ${HELM_CMD} \
-  --set global.gitlab.license.secret="${CI_ENVIRONMENT_SLUG}-gitlab-license"
+  --set global.gitlab.license.secret="shared-gitlab-license"
 EOF
 )
 fi
 
 HELM_CMD=$(cat << EOF
   ${HELM_CMD} \
-  --namespace="$KUBE_NAMESPACE" \
   --version="${CI_PIPELINE_ID}-${CI_JOB_ID}" \
   -f "${base_config_file}" \
-  "${name}" .
+  "${release}" .
 EOF
 )
 
@@ -284,11 +377,14 @@ EOF
 }
 
 function display_deployment_debug() {
+  local namespace="${KUBE_NAMESPACE}"
+  local release="${CI_ENVIRONMENT_SLUG}"
+
   # Get all pods for this release
-  echoinfo "Pods for release ${CI_ENVIRONMENT_SLUG}"
-  kubectl get pods -n "$KUBE_NAMESPACE" -lrelease=${CI_ENVIRONMENT_SLUG}
+  echoinfo "Pods for release ${release}"
+  kubectl get pods --namespace "${namespace}" -lrelease=${release}
 
   # Get all non-completed jobs
-  echoinfo "Unsuccessful Jobs for release ${CI_ENVIRONMENT_SLUG}"
-  kubectl get jobs -n "$KUBE_NAMESPACE" -lrelease=${CI_ENVIRONMENT_SLUG} --field-selector=status.successful!=1
+  echoinfo "Unsuccessful Jobs for release ${release}"
+  kubectl get jobs --namespace "${namespace}" -lrelease=${release} --field-selector=status.successful!=1
 }

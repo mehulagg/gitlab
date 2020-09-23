@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe ScopedLabelSet do
-  set(:kv_label1) { create(:label, title: 'key::label1') }
-  set(:kv_label2) { create(:label, title: 'key::label2') }
-  set(:kv_label3) { create(:label, title: 'key::label3') }
+RSpec.describe ScopedLabelSet do
+  let_it_be(:kv_label1) { create(:label, title: 'key::label1') }
+  let_it_be(:kv_label2) { create(:label, title: 'key::label2') }
+  let_it_be(:kv_label3) { create(:label, title: 'key::label3') }
 
   describe '.from_label_ids' do
     def get_labels(sets, key)
@@ -26,8 +26,8 @@ describe ScopedLabelSet do
 
       expect(sets.size).to eq 3
       expect(get_labels(sets, nil)).to match_array([labels[0].id, labels[1].id])
-      expect(get_labels(sets, 'key::')).to match_array([labels[2].id, labels[3].id])
-      expect(get_labels(sets, 'key::another key::')).to match_array([labels[4].id, labels[5].id])
+      expect(get_labels(sets, 'key')).to match_array([labels[2].id, labels[3].id])
+      expect(get_labels(sets, 'key::another key')).to match_array([labels[4].id, labels[5].id])
     end
   end
 

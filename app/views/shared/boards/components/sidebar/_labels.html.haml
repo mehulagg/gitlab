@@ -1,22 +1,18 @@
 .block.labels
-  .title
+  .title.gl-h-5.gl-display-flex.gl-align-items-center
     = _("Labels")
     - if can_admin_issue?
-      = icon("spinner spin", class: "block-loading")
-      = link_to _("Edit"), "#", class: "js-sidebar-dropdown-toggle edit-link float-right"
+      = loading_icon(css_class: 'gl-ml-2 block-loading')
+      = link_to _("Edit"), "#", class: "js-sidebar-dropdown-toggle edit-link gl-ml-auto"
   .value.issuable-show-labels.dont-hide
     %span.no-value{ "v-if" => "issue.labels && issue.labels.length === 0" }
       = _("None")
     %span{ "v-for" => "label in issue.labels" }
-      %span.d-inline-block.position-relative.scoped-label-wrapper{ "v-if" => "showScopedLabels(label)" }
-        %a{ href: '#' }
-          %span.badge.color-label.label{ ":style" => "{ backgroundColor: label.color, color: label.textColor }" }
-            {{ label.title }}
-        %a.label.scoped-label{ ":href" => "helpLink()" }
-          %i.fa.fa-question-circle{ ":style" => "{ backgroundColor: label.color, color: label.textColor }" }
-      %a{ href: "#", "v-else" => true }
-        .badge.color-label.has-tooltip{ ":style" => "{ backgroundColor: label.color, color: label.textColor }" }
-          {{ label.title }}
+      %gl-label{ ":key" => "label.id",
+        ":background-color" => "label.color",
+        ":title" => "label.title",
+        ":description" => "label.description",
+        ":scoped" => "showScopedLabels(label)" }
 
   - if can_admin_issue?
     .selectbox

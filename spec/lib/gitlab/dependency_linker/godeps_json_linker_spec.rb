@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::DependencyLinker::GodepsJsonLinker do
+RSpec.describe Gitlab::DependencyLinker::GodepsJsonLinker do
   describe '.support?' do
     it 'supports Godeps.json' do
       expect(described_class.support?('Godeps.json')).to be_truthy
@@ -75,8 +75,8 @@ describe Gitlab::DependencyLinker::GodepsJsonLinker do
     end
 
     it 'links GitLab projects' do
-      expect(subject).to include(link('gitlab.com/group/project/path', 'https://gitlab.com/group/project/tree/master/path'))
-      expect(subject).to include(link('gitlab.com/group/subgroup/project.git/path', 'https://gitlab.com/group/subgroup/project/tree/master/path'))
+      expect(subject).to include(link('gitlab.com/group/project/path', 'https://gitlab.com/group/project/-/tree/master/path'))
+      expect(subject).to include(link('gitlab.com/group/subgroup/project.git/path', 'https://gitlab.com/group/subgroup/project/-/tree/master/path'))
     end
 
     it 'links Golang packages' do

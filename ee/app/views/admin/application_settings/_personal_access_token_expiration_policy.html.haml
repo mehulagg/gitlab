@@ -1,0 +1,7 @@
+- return unless personal_access_token_expiration_policy_licensed?
+- form = local_assigns.fetch(:form)
+
+.form-group
+  = form.label :max_personal_access_token_lifetime, _('Maximum allowable lifetime for personal access token (days)'), class: 'label-light'
+  = form.number_field :max_personal_access_token_lifetime, class: 'form-control input-xs'
+  %span.form-text.text-muted#max_personal_access_token_lifetime= _('Leave blank for no limit. Once set, existing personal access tokens may be revoked.')

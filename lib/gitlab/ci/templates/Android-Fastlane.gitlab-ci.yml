@@ -20,7 +20,7 @@ stages:
     - docker:dind
   script:
     - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
-    - docker pull $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG || true
+    - docker pull --quiet $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG || true
     - docker build --cache-from $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG -t $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG .
     - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
 
@@ -113,10 +113,9 @@ promoteBeta:
 promoteProduction:
   extends: .promote_job
   stage: production
-  # We only allow production promotion on the default branch because
+  # We only allow production promotion on `master` because
   # it has its own production scoped secret variables
   only:
-    variables:
-      - $CI_DEFAULT_BRANCH == $CI_COMMIT_REF_NAME
+    - master
   script:
     - bundle exec fastlane promote_beta_to_production

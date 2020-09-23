@@ -1,0 +1,6 @@
+mutation updateEpic($updateEpicInput: UpdateEpicInput!) {
+  updateEpic(input: $updateEpicInput) {
+    clientMutationId
+    errors
+  }
+}

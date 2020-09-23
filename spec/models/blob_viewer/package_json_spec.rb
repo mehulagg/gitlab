@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BlobViewer::PackageJson do
+RSpec.describe BlobViewer::PackageJson do
   include FakeBlobHelpers
 
   let(:project) { build_stubbed(:project) }
@@ -14,7 +14,9 @@ describe BlobViewer::PackageJson do
       }
     SPEC
   end
+
   let(:blob) { fake_blob(path: 'package.json', data: data) }
+
   subject { described_class.new(blob) }
 
   describe '#package_name' do
@@ -53,7 +55,9 @@ describe BlobViewer::PackageJson do
       }
       SPEC
     end
+
     let(:blob) { fake_blob(path: 'package.json', data: data) }
+
     subject { described_class.new(blob) }
 
     describe '#package_url' do

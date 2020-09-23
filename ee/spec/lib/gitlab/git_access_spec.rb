@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Gitlab::GitAccess do
+RSpec.describe Gitlab::GitAccess do
   include GitHelpers
   include EE::GeoHelpers
 
-  set(:user) { create(:user) }
+  let_it_be(:user) { create(:user) }
 
   let(:actor) { user }
   let(:project) { create(:project, :repository) }
@@ -16,6 +16,18 @@ describe Gitlab::GitAccess do
   let(:protocol) { 'web' }
   let(:authentication_abilities) { %i[read_project download_code push_code] }
   let(:redirected_path) { nil }
+
+  let(:access_class) do
+    Class.new(described_class) do
+      def push_ability
+        :push_code
+      end
+
+      def download_ability
+        :download_code
+      end
+    end
+  end
 
   context "when in a read-only GitLab instance" do
     before do
@@ -49,13 +61,13 @@ describe Gitlab::GitAccess do
       it 'returns false when a commit message is missing required matches (positive regex match)' do
         project.create_push_rule(commit_message_regex: "@only.com")
 
-        expect { push_changes(changes) }.to raise_error(described_class::UnauthorizedError)
+        expect { push_changes(changes) }.to raise_error(described_class::ForbiddenError)
       end
 
       it 'returns false when a commit message contains forbidden characters (negative regex match)' do
         project.create_push_rule(commit_message_negative_regex: "@gmail.com")
 
-        expect { push_changes(changes) }.to raise_error(described_class::UnauthorizedError)
+        expect { push_changes(changes) }.to raise_error(described_class::ForbiddenError)
       end
 
       it 'returns true for tags' do
@@ -68,7 +80,9 @@ describe Gitlab::GitAccess do
         bad_commit = double("Commit", safe_message: 'Some change').as_null_object
         ref_object = double(name: 'heads/master')
         allow(bad_commit).to receive(:refs).and_return([ref_object])
-        allow_any_instance_of(Repository).to receive(:commits_between).and_return([bad_commit])
+        allow_next_instance_of(Repository) do |instance|
+          allow(instance).to receive(:commits_between).and_return([bad_commit])
+        end
 
         project.create_push_rule(commit_message_regex: "Change some files")
 
@@ -99,7 +113,7 @@ describe Gitlab::GitAccess do
         project.create_push_rule(commit_message_regex: "Change some files")
 
         # push to new branch, so use a blank old rev and new ref
-        expect { push_changes("#{start_sha} #{end_sha} refs/heads/master") }.to raise_error(described_class::UnauthorizedError)
+        expect { push_changes("#{start_sha} #{end_sha} refs/heads/master") }.to raise_error(described_class::ForbiddenError)
       end
     end
 
@@ -111,7 +125,7 @@ describe Gitlab::GitAccess do
       end
 
       it 'returns false for non-member user' do
-        expect { push_changes(changes) }.to raise_error(described_class::UnauthorizedError)
+        expect { push_changes(changes) }.to raise_error(described_class::ForbiddenError)
       end
 
       it 'returns true if committer is a gitlab member' do
@@ -134,7 +148,7 @@ describe Gitlab::GitAccess do
       it 'returns false when filename is prohibited' do
         project.create_push_rule(file_name_regex: "jpg$")
 
-        expect { push_changes(changes) }.to raise_error(described_class::UnauthorizedError)
+        expect { push_changes(changes) }.to raise_error(described_class::ForbiddenError)
       end
 
       it 'returns true if file name is allowed' do
@@ -160,7 +174,7 @@ describe Gitlab::GitAccess do
         project.create_push_rule(max_file_size: 1)
 
         expect(repository.new_blobs(end_sha)).to be_present
-        expect { push_changes(changes) }.to raise_error(described_class::UnauthorizedError)
+        expect { push_changes(changes) }.to raise_error(described_class::ForbiddenError)
       end
 
       it "returns true when size is allowed" do
@@ -184,15 +198,15 @@ describe Gitlab::GitAccess do
       repository.delete_branch('2-mb-file')
       repository.delete_branch('wip')
 
-      allow(project).to receive(:repository_and_lfs_size).and_return(repository_size)
       project.update_attribute(:repository_size_limit, repository_size_limit)
+      allow(project.repository_size_checker).to receive_messages(current_size: repository_size)
     end
 
     shared_examples_for 'a push to repository over the limit' do
       it 'rejects the push' do
         expect do
           push_changes("#{Gitlab::Git::BLANK_SHA} #{sha_with_smallest_changes} refs/heads/master")
-        end.to raise_error(described_class::UnauthorizedError, /Your push has been rejected/)
+        end.to raise_error(described_class::ForbiddenError, /Your push has been rejected/)
       end
 
       context 'when deleting a branch' do
@@ -242,7 +256,7 @@ describe Gitlab::GitAccess do
 
             expect do
               push_changes("#{Gitlab::Git::BLANK_SHA} #{sha_with_2_mb_file} refs/heads/my_branch_2")
-            end.to raise_error(described_class::UnauthorizedError, /Your push to this repository would cause it to exceed the size limit/)
+            end.to raise_error(described_class::ForbiddenError, /Your push to this repository would cause it to exceed the size limit/)
           end
         end
 
@@ -292,7 +306,7 @@ describe Gitlab::GitAccess do
           it 'rejects the push' do
             expect do
               push_changes("#{Gitlab::Git::BLANK_SHA} #{sha_with_2_mb_file} refs/heads/my_branch_2")
-            end.to raise_error(described_class::UnauthorizedError, /Your push to this repository would cause it to exceed the size limit/)
+            end.to raise_error(described_class::ForbiddenError, /Your push to this repository would cause it to exceed the size limit/)
           end
         end
 
@@ -324,29 +338,72 @@ describe Gitlab::GitAccess do
           stub_licensed_features(geo: true)
           stub_current_geo_node(create(:geo_node))
 
-          allow_any_instance_of(Gitlab::Geo::HealthCheck).to receive(:db_replication_lag_seconds).and_return(current_replication_lag)
-        end
-
-        context 'that has no DB replication lag' do
-          let(:current_replication_lag) { 0 }
-
-          it 'does not return a replication lag message in the console messages' do
-            expect(pull_changes.console_messages).to be_empty
+          allow_next_instance_of(Gitlab::Geo::HealthCheck) do |instance|
+            allow(instance).to receive(:db_replication_lag_seconds).and_return(current_replication_lag)
           end
         end
 
-        context 'that has DB replication lag > 0' do
-          let(:current_replication_lag) { 7 }
+        context 'for a repository that has been replicated' do
+          context 'that has no DB replication lag' do
+            let(:current_replication_lag) { 0 }
 
-          it 'returns a replication lag message in the console messages' do
-            expect(pull_changes.console_messages).to eq(['Current replication lag: 7 seconds'])
+            it 'does not return a replication lag message in the console messages' do
+              expect(pull_changes.console_messages).to be_empty
+            end
+          end
+
+          context 'that has DB replication lag > 0' do
+            let(:current_replication_lag) { 7 }
+
+            it 'returns a replication lag message in the console messages' do
+              expect(pull_changes.console_messages).to eq(['Current replication lag: 7 seconds'])
+            end
+          end
+        end
+
+        context 'for a repository that has yet to be replicated' do
+          let(:project) { create(:project) }
+          let(:current_replication_lag) { 0 }
+
+          before do
+            create(:geo_node, :primary)
+          end
+
+          it 'returns a custom action' do
+            expected_payload = { "action" => "geo_proxy_to_primary", "data" => { "api_endpoints" => ["/api/v4/geo/proxy_git_ssh/info_refs_upload_pack", "/api/v4/geo/proxy_git_ssh/upload_pack"], "primary_repo" => geo_primary_http_url_to_repo(project) } }
+            expected_console_messages = ["This request to a Geo secondary node will be forwarded to the", "Geo primary node:", "", "  #{geo_primary_ssh_url_to_repo(project)}"]
+
+            response = pull_changes
+
+            expect(response).to be_instance_of(Gitlab::GitAccessResult::CustomAction)
+            expect(response.payload).to eq(expected_payload)
+            expect(response.console_messages).to eq(expected_console_messages)
           end
         end
       end
     end
 
     context 'git push' do
-      it { expect { push_changes }.to raise_unauthorized(Gitlab::GitAccess::ERROR_MESSAGES[:upload]) }
+      it { expect { push_changes }.to raise_forbidden(Gitlab::GitAccess::ERROR_MESSAGES[:upload]) }
+
+      context 'for a secondary' do
+        before do
+          stub_licensed_features(geo: true)
+          create(:geo_node, :primary)
+          stub_current_geo_node(create(:geo_node))
+        end
+
+        it 'returns a custom action' do
+          expected_payload = { "action" => "geo_proxy_to_primary", "data" => { "api_endpoints" => ["/api/v4/geo/proxy_git_ssh/info_refs_receive_pack", "/api/v4/geo/proxy_git_ssh/receive_pack"], "primary_repo" => geo_primary_http_url_to_repo(project) } }
+          expected_console_messages = ["This request to a Geo secondary node will be forwarded to the", "Geo primary node:", "", "  #{geo_primary_ssh_url_to_repo(project)}"]
+
+          response = push_changes
+
+          expect(response).to be_instance_of(Gitlab::GitAccessResult::CustomAction)
+          expect(response.payload).to eq(expected_payload)
+          expect(response.console_messages).to eq(expected_console_messages)
+        end
+      end
     end
   end
 
@@ -419,7 +476,7 @@ describe Gitlab::GitAccess do
                 expect(&check).not_to raise_error,
                   -> { "expected #{action} to be allowed" }
               else
-                expect(&check).to raise_error(Gitlab::GitAccess::UnauthorizedError),
+                expect(&check).to raise_error(Gitlab::GitAccess::ForbiddenError),
                   -> { "expected #{action} to be disallowed" }
               end
             end
@@ -432,9 +489,8 @@ describe Gitlab::GitAccess do
     def self.run_group_permission_checks(permissions_matrix)
       permissions_matrix.each_pair do |role, matrix|
         it "has the correct permissions for group #{role}s" do
-          project
-            .project_group_links
-            .create(group: group, group_access: Gitlab::Access.sym_options[role])
+          create(:project_group_link, role, group: group,
+                                            project: project)
 
           protected_branch.save
 
@@ -446,7 +502,7 @@ describe Gitlab::GitAccess do
                 expect(&check).not_to raise_error,
                   -> { "expected #{action} to be allowed" }
               else
-                expect(&check).to raise_error(Gitlab::GitAccess::UnauthorizedError),
+                expect(&check).to raise_error(Gitlab::GitAccess::ForbiddenError),
                   -> { "expected #{action} to be disallowed" }
               end
             end
@@ -556,6 +612,18 @@ describe Gitlab::GitAccess do
         end
       end
 
+      context "when license blocks changes" do
+        before do
+          create_current_license(starts_at: 1.month.ago.to_date, block_changes_at: Date.current, notify_admins_at: Date.current)
+          user.update_attribute(:admin, true)
+          project.add_role(user, :developer)
+        end
+
+        it 'raises an error' do
+          expect { push_changes(changes[:any]) }.to raise_error(Gitlab::GitAccess::ForbiddenError, /Your subscription will expire/)
+        end
+      end
+
       context "group-specific access control" do
         let(:user) { create(:user) }
         let(:group) { create(:group) }
@@ -638,11 +706,11 @@ describe Gitlab::GitAccess do
 
     context 'user without a smartcard session' do
       it 'does not allow pull changes' do
-        expect { pull_changes }.to raise_error(Gitlab::GitAccess::UnauthorizedError)
+        expect { pull_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError)
       end
 
       it 'does not allow push changes' do
-        expect { push_changes }.to raise_error(Gitlab::GitAccess::UnauthorizedError)
+        expect { push_changes }.to raise_error(Gitlab::GitAccess::ForbiddenError)
       end
     end
 
@@ -664,13 +732,13 @@ describe Gitlab::GitAccess do
   private
 
   def access
-    described_class.new(
+    access_class.new(
       actor,
       project,
       protocol,
       authentication_abilities: authentication_abilities,
       namespace_path: namespace_path,
-      project_path: project_path,
+      repository_path: project_path,
       redirected_path: redirected_path
     )
   end
@@ -683,7 +751,7 @@ describe Gitlab::GitAccess do
     access.check('git-upload-pack', changes)
   end
 
-  def raise_unauthorized(message)
-    raise_error(Gitlab::GitAccess::UnauthorizedError, message)
+  def raise_forbidden(message)
+    raise_error(Gitlab::GitAccess::ForbiddenError, message)
   end
 end

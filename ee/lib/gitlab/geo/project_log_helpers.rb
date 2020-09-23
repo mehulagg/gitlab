@@ -6,14 +6,11 @@ module Gitlab
       include LogHelpers
 
       def base_log_data(message)
-        {
-          class: self.class.name,
-          project_id: project.id,
-          project_path: project.full_path,
-          storage_version: project.storage_version,
-          message: message,
-          job_id: get_sidekiq_job_id
-        }.compact
+        super.merge({
+          project_id: project.try(:id),
+          project_path: project.try(:full_path),
+          storage_version: project.try(:storage_version)
+        }).compact
       end
     end
   end

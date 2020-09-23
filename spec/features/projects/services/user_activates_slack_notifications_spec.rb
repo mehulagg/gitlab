@@ -2,33 +2,27 @@
 
 require 'spec_helper'
 
-describe 'User activates Slack notifications' do
-  let(:user) { create(:user) }
-  let(:service) { SlackService.new }
-  let(:project) { create(:project, slack_service: service) }
-
-  before do
-    project.add_maintainer(user)
-    sign_in(user)
-  end
+RSpec.describe 'User activates Slack notifications', :js do
+  include_context 'project service activation'
 
   context 'when service is not configured yet' do
     before do
-      visit(project_settings_integrations_path(project))
-
-      click_link('Slack notifications')
+      visit_project_integration('Slack notifications')
     end
 
     it 'activates service' do
-      check('Active')
       fill_in('Webhook', with: 'https://hooks.slack.com/services/SVRWFV0VVAR97N/B02R25XN3/ZBqu7xMupaEEICInN685')
-      click_button('Save')
 
-      expect(page).to have_content('Slack notifications activated.')
+      click_test_then_save_integration
+
+      expect(page).to have_content('Slack notifications settings saved and active.')
     end
   end
 
   context 'when service is already configured' do
+    let(:service) { SlackService.new }
+    let(:project) { create(:project, slack_service: service) }
+
     before do
       service.fields
       service.update(
@@ -44,13 +38,13 @@ describe 'User activates Slack notifications' do
     end
 
     it 'filters events by channel' do
-      expect(page.find_field('service_push_channel').value).to have_content('1')
-      expect(page.find_field('service_issue_channel').value).to have_content('2')
-      expect(page.find_field('service_merge_request_channel').value).to have_content('3')
-      expect(page.find_field('service_note_channel').value).to have_content('4')
-      expect(page.find_field('service_tag_push_channel').value).to have_content('5')
-      expect(page.find_field('service_pipeline_channel').value).to have_content('6')
-      expect(page.find_field('service_wiki_page_channel').value).to have_content('7')
+      expect(page.find_field(name: 'service[push_channel]').value).to have_content('1')
+      expect(page.find_field(name: 'service[issue_channel]').value).to have_content('2')
+      expect(page.find_field(name: 'service[merge_request_channel]').value).to have_content('3')
+      expect(page.find_field(name: 'service[note_channel]').value).to have_content('4')
+      expect(page.find_field(name: 'service[tag_push_channel]').value).to have_content('5')
+      expect(page.find_field(name: 'service[pipeline_channel]').value).to have_content('6')
+      expect(page.find_field(name: 'service[wiki_page_channel]').value).to have_content('7')
     end
   end
 end

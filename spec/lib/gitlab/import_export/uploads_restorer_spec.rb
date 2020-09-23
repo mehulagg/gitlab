@@ -1,12 +1,16 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ImportExport::UploadsRestorer do
+RSpec.describe Gitlab::ImportExport::UploadsRestorer do
   describe 'bundle a project Git repo' do
     let(:export_path) { "#{Dir.tmpdir}/uploads_saver_spec" }
     let(:shared) { project.import_export_shared }
 
     before do
-      allow_any_instance_of(Gitlab::ImportExport).to receive(:storage_path).and_return(export_path)
+      allow_next_instance_of(Gitlab::ImportExport) do |instance|
+        allow(instance).to receive(:storage_path).and_return(export_path)
+      end
       FileUtils.mkdir_p(File.join(shared.export_path, 'uploads/random'))
       FileUtils.touch(File.join(shared.export_path, 'uploads/random', 'dummy.txt'))
     end

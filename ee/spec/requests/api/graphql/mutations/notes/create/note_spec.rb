@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe 'Adding a Note to an Epic' do
+RSpec.describe 'Adding a Note to an Epic' do
   include GraphqlHelpers
 
-  set(:current_user) { create(:user) }
+  let_it_be(:current_user) { create(:user) }
   let(:epic) { create(:epic, group: group) }
   let(:mutation) do
     variables = {

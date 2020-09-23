@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Developer updates tag' do
+RSpec.describe 'Developer updates tag' do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, :repository, namespace: group) }
@@ -15,9 +15,7 @@ describe 'Developer updates tag' do
 
   context 'from the tags list page' do
     it 'updates the release notes' do
-      page.within(first('.content-list .controls')) do
-        click_link 'Edit release notes'
-      end
+      find("li > .row-fixed-content.controls a.btn-edit[href='/#{project.full_path}/-/tags/v1.1.0/release/edit']").click
 
       fill_in 'release_description', with: 'Awesome release notes'
       click_button 'Save changes'

@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::SnippetSearchResults do
-  let!(:snippet) { create(:snippet, content: 'foo', file_name: 'foo') }
+RSpec.describe Gitlab::SnippetSearchResults do
+  let_it_be(:snippet) { create(:snippet, title: 'foo', description: 'foo') }
   let(:user) { snippet.author }
   let(:com_value) { true }
   let(:flag_enabled) { true }

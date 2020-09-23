@@ -48,7 +48,7 @@ module Gitlab
           code_owners_file.entry_for_path(path)
         end
 
-        entries.compact.uniq
+        entries.flatten.compact.uniq
       end
 
       def code_owners_file

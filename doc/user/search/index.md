@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Editor
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: index, reference, howto
+---
+
 # Search through GitLab
 
 ## Issues and merge requests
@@ -17,8 +24,8 @@ When you click **Issues**, you'll see the opened issues assigned to you straight
 
 You can search through **Open**, **Closed**, or **All** issues.
 
-You can also filter the results using the search and filter field. This works in the same way as the ones found in the
-per project pages described below.
+You can also filter the results using the search and filter field, as described below in
+[Filtering issue and merge request lists](#filtering-issue-and-merge-request-lists).
 
 ### Issues and MRs assigned to you or created by you
 
@@ -27,18 +34,37 @@ on the search field on the top-right of your screen:
 
 ![shortcut to your issues and mrs](img/issues_mrs_shortcut.png)
 
-### Issues and merge requests per project
+### Filtering issue and merge request lists
 
-If you want to search for issues present in a specific project, navigate to
-a project's **Issues** tab, and click on the field **Search or filter results...**. It will
-display a dropdown menu, from which you can add filters per author, assignee, milestone,
-label, weight, and 'my-reaction' (based on your emoji votes). When done, press **Enter** on your keyboard to filter the issues.
+Follow these steps to filter the **Issues** and **Merge Requests** list pages within projects and
+groups:
 
-![filter issues in a project](img/issue_search_filter.png)
+1. Click in the field **Search or filter results...**.
+1. In the dropdown menu that appears, select the attribute you wish to filter by:
+   - Author
+   - Assignee
+   - [Milestone](../project/milestones/index.md)
+   - Release
+   - [Label](../project/labels.md)
+   - My-reaction
+   - Confidential
+   - Epic ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/195704) in GitLab 12.9),
+     including [child epic](../group/epics/index.md#multi-level-child-epics)
+     ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9029) in
+     [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.0)
+   - Search for this text
+1. Select or type the operator to use for filtering the attribute. The following operators are
+   available:
+   - `=`: Is
+   - `!=`: Is not ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/18059) in GitLab 12.7)
+1. Enter the text to [filter the attribute by](#filters-autocomplete).
+1. Repeat this process to filter by multiple attributes. Multiple attributes are joined by a logical
+   `AND`.
 
-The same process is valid for merge requests. Navigate to your project's **Merge Requests** tab,
-and click **Search or filter results...**. Merge requests can be filtered by author, assignee,
-milestone, and label.
+For example, filtering by Author `=` Jane and Milestone `!=` 12.6 filters for the issues where Jane
+is the author and the milestone is not 12.6.
+
+![filter issues in a project](img/issue_search_filter_v12_7.png)
 
 ### Filtering by **None** / **Any**
 
@@ -61,18 +87,55 @@ You can filter issues and merge requests by specific terms included in titles or
 - Limitation
   - For performance reasons, terms shorter than 3 chars are ignored. E.g.: searching
     issues for `included in titles` is same as `included titles`
+  - Search is limited to 4096 characters and 64 terms per query.
 
 ![filter issues by specific terms](img/issue_search_by_term.png)
 
-### Issues and merge requests per group
+### Filtering by ID
 
-Similar to **Issues and merge requests per project**, you can also search for issues
-within a group. Navigate to a group's **Issues** tab and query search results in
-the same way as you do for projects.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/39908) in GitLab 12.1.
 
-![filter issues in a group](img/group_issues_filter.png)
+You can filter the **Issues** list to individual instances by their ID. For example, enter filter `#10` to return only issue 10. The same applies to the **Merge Requests** list. Enter filter `#30` to return only merge request 30.
 
-The same process is valid for merge requests. Navigate to your project's **Merge Requests** tab.
+![filter issues by specific id](img/issue_search_by_id.png)
+
+### Filtering merge requests by approvers **(STARTER)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/9468) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.9.
+
+To filter merge requests by an individual approver, you can type (or select from
+the dropdown) **Approver** and select the user.
+
+![Filter MRs by an approver](img/filter_approver_merge_requests.png)
+
+### Filtering merge requests by "approved by" **(STARTER)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/30335) in [GitLab Starter](https://about.gitlab.com/pricing/) 13.0.
+
+To filter merge requests already approved by a specific individual, you can type (or select from
+the dropdown) **Approved-By** and select the user.
+
+![Filter MRs by approved by](img/filter_approved_by_merge_requests_v13_0.png)
+
+## Filters autocomplete
+
+GitLab provides many filters across many pages (issues, merge requests, epics,
+and pipelines among others) which you can use to narrow down your search. When
+using the filter functionality, you can start typing characters to bring up
+relevant users or other attributes.
+
+For performance optimization, there is a requirement of a minimum of three
+characters to begin your search. For example, if you want to search for
+issues that have the assignee "Simone Presley", you'll need to type at
+least "Sim" before autocomplete gives any relevant results.
+
+## Code search
+
+To search through code or other documents in a single project, you can use
+the search field on the top-right of your screen while the project page is open.
+
+![code search dropdown](img/project_search_dropdown.png)
+![code search results](img/project_code_search.png)
 
 ## Search history
 
@@ -82,7 +145,9 @@ You can view recent searches by clicking on the little arrow-clock icon, which i
 
 ## Removing search filters
 
-Individual filters can be removed by clicking on the filter's (x) button or backspacing. The entire search filter can be cleared by clicking on the search box's (x) button.
+Individual filters can be removed by clicking on the filter's (x) button or backspacing. The entire search filter can be cleared by clicking on the search box's (x) button or via <kbd>⌘</kbd> (Mac) + <kbd>⌫</kbd>.
+
+To delete filter tokens one at a time, the <kbd>⌥</kbd> (Mac) / <kbd>Ctrl</kbd> + <kbd>⌫</kbd> keyboard combination can be used.
 
 ## Filtering with multiple filters of the same type
 
@@ -90,12 +155,23 @@ Some filters can be added multiple times. These include but are not limited to a
 
 ![multiple assignees filtering](img/multiple_assignees.png)
 
-### Shortcut
+## Shortcut
 
 You'll also find a shortcut on the search field on the top-right of the project's dashboard to
 quickly access issues and merge requests created or assigned to you within that project:
 
 ![search per project - shortcut](img/project_search.png)
+
+### Autocomplete suggestions
+
+You can also type in this search bar to see autocomplete suggestions for:
+
+- Projects and groups
+- Various help pages (try and type **API help**)
+- Project feature pages (try and type **milestones**)
+- Various settings pages (try and type **user settings**)
+- Recently viewed issues (try and type some word from the title of a recently viewed issue)
+- Recently viewed merge requests (try and type some word from the title of a recently merge request)
 
 ## To-Do List
 
@@ -103,7 +179,7 @@ Your [To-Do List](../todos.md#gitlab-to-do-list) can be searched by "to do" and 
 You can [filter](../todos.md#filtering-your-to-do-list) them per project,
 author, type, and action. Also, you can sort them by
 [**Label priority**](../../user/project/labels.md#label-priority),
-**Last created** and **Oldest created**.
+**Last created**, and **Oldest created**.
 
 ## Projects
 
@@ -111,9 +187,9 @@ You can search through your projects from the left menu, by clicking the menu ba
 On the field **Filter by name**, type the project or group name you want to find, and GitLab
 will filter them for you as you type.
 
-You can also look for the projects you starred (**Starred projects**), and **Explore** all
+You can also look for the projects you [starred](../project/index.md#star-a-project) (**Starred projects**), and **Explore** all
 public and internal projects available in GitLab.com, from which you can filter by visibility,
-through **Trending**, best rated with **Most starts**, or **All** of them.
+through **Trending**, best rated with **Most stars**, or **All** of them.
 
 You can also sort them by **Name**, **Last created**, **Oldest created**, **Last updated**,
 **Oldest updated**, **Owner**, and choose to hide or show **archived projects**:
@@ -143,17 +219,15 @@ and **Labels**, select multiple issues to add to a list of your choice:
 
 ![search and select issues to add to board](img/search_issues_board.png)
 
-## Advanced Global Search **(STARTER)**
+## Advanced Search **(STARTER)**
 
 Leverage Elasticsearch for faster, more advanced code search across your entire
 GitLab instance.
 
-[Learn how to use the Advanced Global Search.](advanced_global_search.md)
+[Learn how to use the Advanced Search.](advanced_global_search.md)
 
-## Advanced Syntax Search **(STARTER)**
+## Advanced Search Syntax **(STARTER)**
 
 Use advanced queries for more targeted search results.
 
-[Learn how to use the Advanced Syntax Search.](advanced_search_syntax.md)
-
-[ee]: https://about.gitlab.com/pricing/
+[Learn how to use the Advanced Search Syntax.](advanced_search_syntax.md)

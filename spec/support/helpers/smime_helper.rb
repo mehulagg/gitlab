@@ -1,31 +1,33 @@
 # frozen_string_literal: true
 
 module SmimeHelper
-  include OpenSSL
-
   INFINITE_EXPIRY = 1000.years
   SHORT_EXPIRY = 30.minutes
 
   def generate_root
-    issue(signed_by: nil, expires_in: INFINITE_EXPIRY, certificate_authority: true)
+    issue(cn: 'RootCA', signed_by: nil, expires_in: INFINITE_EXPIRY, certificate_authority: true)
   end
 
-  def generate_cert(root_ca:, expires_in: SHORT_EXPIRY)
-    issue(signed_by: root_ca, expires_in: expires_in, certificate_authority: false)
+  def generate_intermediate(signer_ca:)
+    issue(cn: 'IntermediateCA', signed_by: signer_ca, expires_in: INFINITE_EXPIRY, certificate_authority: true)
+  end
+
+  def generate_cert(signer_ca:, expires_in: SHORT_EXPIRY)
+    issue(signed_by: signer_ca, expires_in: expires_in, certificate_authority: false)
   end
 
   # returns a hash { key:, cert: } containing a generated key, cert pair
-  def issue(email_address: 'test@example.com', signed_by:, expires_in:, certificate_authority:)
+  def issue(email_address: 'test@example.com', cn: nil, signed_by:, expires_in:, certificate_authority:)
     key = OpenSSL::PKey::RSA.new(4096)
     public_key = key.public_key
 
     subject = if certificate_authority
-                X509::Name.parse("/CN=EU")
+                OpenSSL::X509::Name.parse("/CN=#{cn}")
               else
-                X509::Name.parse("/CN=#{email_address}")
+                OpenSSL::X509::Name.parse("/CN=#{email_address}")
               end
 
-    cert = X509::Certificate.new
+    cert = OpenSSL::X509::Certificate.new
     cert.subject = subject
 
     cert.issuer = signed_by&.fetch(:cert, nil)&.subject || subject
@@ -36,7 +38,7 @@ module SmimeHelper
     cert.serial = 0x0
     cert.version = 2
 
-    extension_factory = X509::ExtensionFactory.new
+    extension_factory = OpenSSL::X509::ExtensionFactory.new
     if certificate_authority
       extension_factory.subject_certificate = cert
       extension_factory.issuer_certificate = cert
@@ -50,7 +52,7 @@ module SmimeHelper
       cert.add_extension(extension_factory.create_extension('extendedKeyUsage', 'clientAuth,emailProtection', false))
     end
 
-    cert.sign(signed_by&.fetch(:key, nil) || key, Digest::SHA256.new)
+    cert.sign(signed_by&.fetch(:key, nil) || key, OpenSSL::Digest::SHA256.new)
 
     { key: key, cert: cert }
   end

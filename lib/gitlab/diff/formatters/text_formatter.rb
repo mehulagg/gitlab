@@ -6,10 +6,12 @@ module Gitlab
       class TextFormatter < BaseFormatter
         attr_reader :old_line
         attr_reader :new_line
+        attr_reader :line_range
 
         def initialize(attrs)
           @old_line = attrs[:old_line]
           @new_line = attrs[:new_line]
+          @line_range = attrs[:line_range]
 
           super(attrs)
         end
@@ -19,11 +21,11 @@ module Gitlab
         end
 
         def complete?
-          old_line || new_line
+          old_line.present? || new_line.present?
         end
 
         def to_h
-          super.merge(old_line: old_line, new_line: new_line)
+          super.merge(old_line: old_line, new_line: new_line, line_range: line_range)
         end
 
         def line_age
@@ -43,7 +45,8 @@ module Gitlab
         def ==(other)
           other.is_a?(self.class) &&
             new_line == other.new_line &&
-            old_line == other.old_line
+            old_line == other.old_line &&
+            line_range == other.line_range
         end
       end
     end

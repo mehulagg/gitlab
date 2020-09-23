@@ -1,14 +1,21 @@
 <script>
-import icon from '~/vue_shared/components/icon.vue';
-import { GlTooltipDirective } from '@gitlab/ui';
+import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
+import discussionNavigation from '../mixins/discussion_navigation';
 
 export default {
   name: 'JumpToNextDiscussionButton',
   components: {
-    icon,
+    GlIcon,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+  },
+  mixins: [discussionNavigation],
+  props: {
+    fromDiscussionId: {
+      type: String,
+      required: true,
+    },
   },
 };
 </script>
@@ -19,10 +26,13 @@ export default {
       ref="button"
       v-gl-tooltip
       class="btn btn-default discussion-next-btn"
-      :title="s__('MergeRequests|Jump to next unresolved discussion')"
-      @click="$emit('onClick')"
+      :title="s__('MergeRequests|Jump to next unresolved thread')"
+      data-track-event="click_button"
+      data-track-label="mr_next_unresolved_thread"
+      data-track-property="click_next_unresolved_thread"
+      @click="jumpToNextRelativeDiscussion(fromDiscussionId)"
     >
-      <icon name="comment-next" />
+      <gl-icon name="comment-next" />
     </button>
   </div>
 </template>

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::SyncReportApproverApprovalRules do
+RSpec.describe MergeRequests::SyncReportApproverApprovalRules do
   subject(:service) { described_class.new(merge_request) }
 
   let(:merge_request) { create(:merge_request) }
@@ -46,7 +46,7 @@ describe MergeRequests::SyncReportApproverApprovalRules do
     end
 
     context "when a project has a single `#{ApprovalProjectRule::DEFAULT_NAME_FOR_LICENSE_REPORT}` approval rule" do
-      let!(:project_rule) { create(:approval_project_rule, :license_management, project: merge_request.target_project) }
+      let!(:project_rule) { create(:approval_project_rule, :license_scanning, project: merge_request.target_project) }
 
       context "when the rule has not been synchronized to the merge request yet" do
         let(:result) { merge_request.reload.approval_rules.last }
@@ -57,14 +57,14 @@ describe MergeRequests::SyncReportApproverApprovalRules do
 
         specify { expect(merge_request.reload.approval_rules.count).to be(1) }
         specify { expect(result).to be_report_approver }
-        specify { expect(result.report_type).to eq('license_management') }
+        specify { expect(result.report_type).to eq('license_scanning') }
         specify { expect(result.name).to eq(project_rule.name) }
         specify { expect(result.approval_project_rule).to eq(project_rule) }
         specify { expect(result.approvals_required).to eql(project_rule.approvals_required) }
       end
 
       context "when the rule had previously been synchronized" do
-        let!(:previous_rule) { create(:report_approver_rule, :license_management, merge_request: merge_request) }
+        let!(:previous_rule) { create(:report_approver_rule, :license_scanning, merge_request: merge_request) }
 
         before do
           service.execute
@@ -77,7 +77,7 @@ describe MergeRequests::SyncReportApproverApprovalRules do
 
     context "when a project has multiple report approval rules" do
       let!(:vulnerability_project_rule) { create(:approval_project_rule, :security_report, project: merge_request.target_project) }
-      let!(:license_compliance_project_rule) { create(:approval_project_rule, :license_management, project: merge_request.target_project) }
+      let!(:license_compliance_project_rule) { create(:approval_project_rule, :license_scanning, project: merge_request.target_project) }
 
       context "when none of the rules have been synchronized to the merge request yet" do
         let(:vulnerability_check_rule) { merge_request.reload.approval_rules.security.last }
@@ -100,13 +100,13 @@ describe MergeRequests::SyncReportApproverApprovalRules do
         specify { expect(vulnerability_check_rule.approval_project_rule).to eq(vulnerability_project_rule) }
         specify { expect(license_check_rule).to be_report_approver }
         specify { expect(license_check_rule.approvals_required).to eql(license_compliance_project_rule.approvals_required) }
-        specify { expect(license_check_rule).to be_license_management }
+        specify { expect(license_check_rule).to be_license_scanning }
         specify { expect(license_check_rule.name).to eq(license_compliance_project_rule.name) }
         specify { expect(license_check_rule.approval_project_rule).to eq(license_compliance_project_rule) }
       end
 
       context "when some of the rules have been synchronized to the merge request" do
-        let!(:previous_rule) { create(:report_approver_rule, :license_management, merge_request: merge_request) }
+        let!(:previous_rule) { create(:report_approver_rule, :license_scanning, merge_request: merge_request) }
 
         before do
           service.execute
@@ -114,7 +114,7 @@ describe MergeRequests::SyncReportApproverApprovalRules do
 
         specify { expect(merge_request.reload.approval_rules.count).to be(2) }
         specify { expect(merge_request.reload.approval_rules.security_report.count).to be(1) }
-        specify { expect(merge_request.reload.approval_rules.where(report_type: :license_management)).to match_array([previous_rule]) }
+        specify { expect(merge_request.reload.approval_rules.where(report_type: :license_scanning)).to match_array([previous_rule]) }
       end
     end
 

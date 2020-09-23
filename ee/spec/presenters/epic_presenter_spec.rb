@@ -2,16 +2,16 @@
 
 require 'spec_helper'
 
-describe EpicPresenter do
+RSpec.describe EpicPresenter do
   include UsersHelper
   include Gitlab::Routing.url_helpers
 
   let(:user) { create(:user) }
-  let(:group) { create(:group) }
-  let(:parent_epic) { create(:epic, group: group, start_date: Date.new(2000, 1, 10), due_date: Date.new(2000, 1, 20)) }
+  let(:group) { create(:group, path: "pukeko_parent_group") }
+  let(:parent_epic) { create(:epic, group: group, start_date: Date.new(2000, 1, 10), due_date: Date.new(2000, 1, 20), iid: 10) }
   let(:epic) { create(:epic, group: group, author: user, parent: parent_epic) }
 
-  let(:presenter) { described_class.new(epic, current_user: user) }
+  subject(:presenter) { described_class.new(epic, current_user: user) }
 
   describe '#show_data' do
     let(:milestone1) { create(:milestone, title: 'make me a sandwich', start_date: '2010-01-01', due_date: '2019-12-31') }
@@ -30,7 +30,7 @@ describe EpicPresenter do
     end
 
     it 'has correct ancestors' do
-      metadata     = JSON.parse(presenter.show_data[:meta])
+      metadata     = Gitlab::Json.parse(presenter.show_data[:meta])
       ancestor_url = metadata['ancestors'].first['url']
 
       expect(ancestor_url).to eq "/groups/#{parent_epic.group.full_path}/-/epics/#{parent_epic.iid}"
@@ -72,6 +72,19 @@ describe EpicPresenter do
       expect(presenter.group_epic_link_path).to eq group_epic_link_path(epic.group, epic.parent.iid, epic.id)
     end
 
+    context 'when in subgroups' do
+      let!(:subgroup) { create(:group, parent: group, path: "hedgehogs_subgroup") }
+      let(:child_epic) { create(:epic, group: subgroup, iid: 1, parent: epic) }
+
+      subject(:presenter) { described_class.new(child_epic, current_user: user) }
+
+      it 'returns the correct path' do
+        expected_result = "/groups/#{group.path}/-/epics/#{epic.iid}/links/#{child_epic.id}"
+
+        expect(presenter.group_epic_link_path).to eq expected_result
+      end
+    end
+
     it 'returns nothing with nil parent' do
       epic.parent = nil
 
@@ -85,7 +98,7 @@ describe EpicPresenter do
     end
 
     it 'returns a full reference' do
-      expect(presenter.epic_reference(full: true)).to eq "#{epic.parent.group.name}&#{epic.iid}"
+      expect(presenter.epic_reference(full: true)).to eq "#{epic.parent.group.path}&#{epic.iid}"
     end
   end
 end

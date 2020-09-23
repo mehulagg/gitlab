@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Projects::DetectRepositoryLanguagesService, :clean_gitlab_redis_shared_state do
-  set(:project) { create(:project, :repository) }
+RSpec.describe Projects::DetectRepositoryLanguagesService, :clean_gitlab_redis_shared_state do
+  let_it_be(:project, reload: true) { create(:project, :repository) }
 
   subject { described_class.new(project) }
 
@@ -51,7 +51,7 @@ describe Projects::DetectRepositoryLanguagesService, :clean_gitlab_redis_shared_
     end
 
     context 'when no repository exists' do
-      set(:project) { create(:project) }
+      let_it_be(:project) { create(:project) }
 
       it 'has no languages' do
         expect(subject.execute).to be_empty

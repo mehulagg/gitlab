@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe ErrorTracking::ListProjectsService do
-  set(:user) { create(:user) }
-  set(:project) { create(:project) }
+RSpec.describe ErrorTracking::ListProjectsService do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project, reload: true) { create(:project) }
 
   let(:sentry_url) { 'https://sentrytest.gitlab.com/api/0/projects/sentry-org/sentry-project' }
   let(:token) { 'test-token' }
@@ -60,32 +60,6 @@ describe ErrorTracking::ListProjectsService do
 
         it 'uses database token' do
           expect { subject.execute }.not_to change { error_tracking_setting.token }
-        end
-      end
-
-      context 'sentry client raises exception' do
-        context 'Sentry::Client::Error' do
-          before do
-            expect(error_tracking_setting).to receive(:list_sentry_projects)
-              .and_raise(Sentry::Client::Error, 'Sentry response status code: 500')
-          end
-
-          it 'returns error response' do
-            expect(result[:message]).to eq('Sentry response status code: 500')
-            expect(result[:http_status]).to eq(:bad_request)
-          end
-        end
-
-        context 'Sentry::Client::MissingKeysError' do
-          before do
-            expect(error_tracking_setting).to receive(:list_sentry_projects)
-              .and_raise(Sentry::Client::MissingKeysError, 'Sentry API response is missing keys. key not found: "id"')
-          end
-
-          it 'returns error response' do
-            expect(result[:message]).to eq('Sentry API response is missing keys. key not found: "id"')
-            expect(result[:http_status]).to eq(:internal_server_error)
-          end
         end
       end
 
@@ -147,7 +121,7 @@ describe ErrorTracking::ListProjectsService do
     end
 
     context 'error_tracking_setting is nil' do
-      let(:error_tracking_setting) { build(:project_error_tracking_setting) }
+      let(:error_tracking_setting) { build(:project_error_tracking_setting, project: project) }
       let(:new_api_url) { new_api_host + 'api/0/projects/org/proj/' }
 
       before do

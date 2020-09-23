@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlDropdownItem } from '@gitlab/ui';
+import { GlDeprecatedDropdownItem } from '@gitlab/ui';
 import DateRangeDropdown from 'ee/analytics/shared/components/date_range_dropdown.vue';
 
 describe('DateRangeDropdown component', () => {
@@ -23,7 +23,7 @@ describe('DateRangeDropdown component', () => {
     createComponent();
   });
 
-  const findDropdownElements = () => wrapper.findAll(GlDropdownItem);
+  const findDropdownElements = () => wrapper.findAll(GlDeprecatedDropdownItem);
   const findFirstDropdownElement = () => findDropdownElements().at(0);
 
   afterEach(() => {
@@ -31,7 +31,7 @@ describe('DateRangeDropdown component', () => {
   });
 
   it('renders 3 dropdown items', () => {
-    expect(findDropdownElements().length).toBe(3);
+    expect(findDropdownElements()).toHaveLength(3);
   });
 
   it('displays the correct label for the first dropdown item', () => {
@@ -40,7 +40,10 @@ describe('DateRangeDropdown component', () => {
 
   it('emits the "selected" event with the selected item value', () => {
     findFirstDropdownElement().vm.$emit('click');
-    expect(wrapper.emitted().selected[0]).toEqual([7]);
+
+    return wrapper.vm.$nextTick().then(() => {
+      expect(wrapper.emitted().selected[0]).toEqual([7]);
+    });
   });
 
   it('it renders the correct dropdown text when no item is selected', () => {

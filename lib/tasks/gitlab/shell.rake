@@ -1,6 +1,6 @@
 namespace :gitlab do
   namespace :shell do
-    desc "GitLab | Install or upgrade gitlab-shell"
+    desc "GitLab | Shell | Install or upgrade gitlab-shell"
     task :install, [:repo] => :gitlab_environment do |t, args|
       warn_user_is_not_gitlab
 
@@ -12,7 +12,7 @@ namespace :gitlab do
       gitlab_url += '/' unless gitlab_url.end_with?('/')
       target_dir = Gitlab.config.gitlab_shell.path
 
-      checkout_or_clone_version(version: default_version, repo: args.repo, target_dir: target_dir)
+      checkout_or_clone_version(version: default_version, repo: args.repo, target_dir: target_dir, clone_opts: %w[--depth 1])
 
       # Make sure we're on the right tag
       Dir.chdir(target_dir) do
@@ -21,25 +21,12 @@ namespace :gitlab do
           gitlab_url: gitlab_url,
           http_settings: { self_signed_cert: false }.stringify_keys,
           auth_file: File.join(user_home, ".ssh", "authorized_keys"),
-          redis: {
-            bin: `which redis-cli`.chomp,
-            namespace: "resque:gitlab"
-          }.stringify_keys,
           log_level: "INFO",
           audit_usernames: false
         }.stringify_keys
 
-        redis_url = URI.parse(ENV['REDIS_URL'] || "redis://localhost:6379")
-
-        if redis_url.scheme == 'unix'
-          config['redis']['socket'] = redis_url.path
-        else
-          config['redis']['host'] = redis_url.host
-          config['redis']['port'] = redis_url.port
-        end
-
         # Generate config.yml based on existing gitlab settings
-        File.open("config.yml", "w+") {|f| f.puts config.to_yaml}
+        File.open("config.yml", "w+") {|f| f.puts config.to_yaml }
 
         [
           %w(bin/install) + repository_storage_paths_args,
@@ -54,12 +41,12 @@ namespace :gitlab do
       Gitlab::Shell.ensure_secret_token!
     end
 
-    desc "GitLab | Setup gitlab-shell"
+    desc "GitLab | Shell | Setup gitlab-shell"
     task setup: :gitlab_environment do
       setup
     end
 
-    desc "GitLab | Build missing projects"
+    desc "GitLab | Shell | Build missing projects"
     task build_missing_projects: :gitlab_environment do
       Project.find_each(batch_size: 1000) do |project|
         path_to_repo = project.repository.path_to_repo
@@ -89,10 +76,12 @@ namespace :gitlab do
       puts ""
     end
 
-    Gitlab::Shell.new.remove_all_keys
+    authorized_keys = Gitlab::AuthorizedKeys.new
+
+    authorized_keys.clear
 
     Key.find_in_batches(batch_size: 1000) do |keys|
-      unless Gitlab::Shell.new.batch_add_keys(keys)
+      unless authorized_keys.batch_add_keys(keys)
         puts "Failed to add keys...".color(:red)
         exit 1
       end
@@ -103,7 +92,7 @@ namespace :gitlab do
   end
 
   def ensure_write_to_authorized_keys_is_enabled
-    return if Gitlab::CurrentSettings.current_application_settings.authorized_keys_enabled
+    return if Gitlab::CurrentSettings.authorized_keys_enabled?
 
     puts authorized_keys_is_disabled_warning
 
@@ -113,7 +102,7 @@ namespace :gitlab do
     end
 
     puts 'Enabling the "Write to authorized_keys file" setting...'
-    Gitlab::CurrentSettings.current_application_settings.update!(authorized_keys_enabled: true)
+    Gitlab::CurrentSettings.update!(authorized_keys_enabled: true)
 
     puts 'Successfully enabled "Write to authorized_keys file"!'
     puts ''

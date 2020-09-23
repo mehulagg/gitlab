@@ -5,8 +5,7 @@ class TrialsController < ApplicationController
 
   layout 'trial'
 
-  before_action :check_if_gl_com
-  before_action :check_if_improved_trials_enabled
+  before_action :check_if_gl_com_or_dev
   before_action :authenticate_user!
   before_action :find_or_create_namespace, only: :apply
 
@@ -20,7 +19,7 @@ class TrialsController < ApplicationController
     @result = GitlabSubscriptions::CreateLeadService.new.execute({ trial_user: company_params })
 
     if @result[:success]
-      redirect_to select_trials_url
+      redirect_to select_trials_url(glm_source: params[:glm_source], glm_content: params[:glm_content])
     else
       render :new
     end
@@ -47,30 +46,27 @@ class TrialsController < ApplicationController
   end
 
   def company_params
-    params.permit(:company_name, :company_size, :phone_number, :number_of_users, :country)
+    params.permit(:company_name, :company_size, :first_name, :last_name, :phone_number, :number_of_users, :country)
           .merge(extra_params)
   end
 
   def extra_params
-    attrs = current_user.slice(:first_name, :last_name)
+    attrs = {}
     attrs[:work_email] = current_user.email
     attrs[:uid] = current_user.id
     attrs[:skip_email_confirmation] = true
     attrs[:gitlab_com_trial] = true
     attrs[:provider] = 'gitlab'
+    attrs[:newsletter_segment] = current_user.email_opted_in
 
     attrs
-  end
-
-  def check_if_improved_trials_enabled
-    render_404 unless Feature.enabled?(:improved_trial_signup)
   end
 
   def apply_trial_params
     gl_com_params = { gitlab_com_trial: true, sync_to_gl: true }
 
     {
-      trial_user: params.permit(:namespace_id).merge(gl_com_params),
+      trial_user: params.permit(:namespace_id, :trial_entity, :glm_source, :glm_content).merge(gl_com_params),
       uid: current_user.id
     }
   end
@@ -95,7 +91,7 @@ class TrialsController < ApplicationController
 
   def create_group
     name = sanitize(params[:new_group_name])
-    group = Groups::CreateService.new(current_user, name: name, path: name.parameterize).execute
+    group = Groups::CreateService.new(current_user, name: name, path: Namespace.clean_path(name.parameterize)).execute
 
     params[:namespace_id] = group.id if group.persisted?
 

@@ -8,7 +8,10 @@ class Groups::AutocompleteSourcesController < Groups::ApplicationController
   end
 
   def issues
-    render json: issuable_serializer.represent(@autocomplete_service.issues, parent_group: @group)
+    render json: issuable_serializer.represent(
+      @autocomplete_service.issues(confidential_only: params[:confidential_only], issue_types: params[:issue_types]),
+      parent_group: @group
+    )
   end
 
   def merge_requests
@@ -20,7 +23,7 @@ class Groups::AutocompleteSourcesController < Groups::ApplicationController
   end
 
   def epics
-    render json: @autocomplete_service.epics
+    render json: @autocomplete_service.epics(confidential_only: params[:confidential_only])
   end
 
   def commands

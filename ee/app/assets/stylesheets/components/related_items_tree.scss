@@ -4,6 +4,10 @@
 
   .add-item-form-container {
     border-bottom: 1px solid $border-color;
+
+    .projects-dropdown .dropdown-contents {
+      max-height: $dropdown-max-height - 50;
+    }
   }
 
   .sub-tree-root {
@@ -24,6 +28,15 @@
         cursor: default;
         min-height: $grid-size * 5;
       }
+
+      &.item-closed {
+        background-color: $gray-10;
+      }
+    }
+
+    .item-meta {
+      line-height: $gl-line-height-18;
+      border-top: 1px solid $gray-50;
     }
 
     .btn-tree-item-chevron {
@@ -41,7 +54,7 @@
     }
 
     .tree-item-noexpand {
-      margin-left: $gl-sidebar-padding;
+      margin-left: $gl-sidebar-padding - 2;
     }
 
     .loading-icon {

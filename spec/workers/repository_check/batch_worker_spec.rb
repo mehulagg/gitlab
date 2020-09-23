@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe RepositoryCheck::BatchWorker do
+RSpec.describe RepositoryCheck::BatchWorker do
   let(:shard_name) { 'default' }
+
   subject { described_class.new }
 
   before do

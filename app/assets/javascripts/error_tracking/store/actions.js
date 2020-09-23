@@ -1,52 +1,36 @@
-import Service from '../services';
+import service from '../services';
 import * as types from './mutation_types';
-import createFlash from '~/flash';
-import Poll from '~/lib/utils/poll';
-import { __, sprintf } from '~/locale';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import { visitUrl } from '~/lib/utils/url_utility';
+import { __ } from '~/locale';
 
-let eTagPoll;
-
-export function startPolling({ commit, dispatch }, endpoint) {
-  eTagPoll = new Poll({
-    resource: Service,
-    method: 'getErrorList',
-    data: { endpoint },
-    successCallback: ({ data }) => {
-      if (!data) {
-        return;
-      }
-      commit(types.SET_ERRORS, data.errors);
-      commit(types.SET_EXTERNAL_URL, data.external_url);
-      commit(types.SET_LOADING, false);
-      dispatch('stopPolling');
-    },
-    errorCallback: ({ response }) => {
-      let errorMessage = '';
-      if (response && response.data && response.data.message) {
-        errorMessage = response.data.message;
-      }
-      commit(types.SET_LOADING, false);
-      createFlash(
-        sprintf(__(`Failed to load errors from Sentry. Error message: %{errorMessage}`), {
-          errorMessage,
-        }),
-      );
-    },
-  });
-
-  eTagPoll.makeRequest();
-}
-
-export const stopPolling = () => {
-  if (eTagPoll) eTagPoll.stop();
+export const setStatus = ({ commit }, status) => {
+  commit(types.SET_ERROR_STATUS, status.toLowerCase());
 };
 
-export function restartPolling({ commit }) {
-  commit(types.SET_ERRORS, []);
-  commit(types.SET_EXTERNAL_URL, '');
-  commit(types.SET_LOADING, true);
+export const updateStatus = ({ commit }, { endpoint, redirectUrl, status }) =>
+  service
+    .updateErrorStatus(endpoint, status)
+    .then(resp => {
+      commit(types.SET_ERROR_STATUS, status);
+      if (redirectUrl) visitUrl(redirectUrl);
 
-  if (eTagPoll) eTagPoll.restart();
-}
+      return resp.data.result;
+    })
+    .catch(() => createFlash(__('Failed to update issue status')));
 
-export default () => {};
+export const updateResolveStatus = ({ commit, dispatch }, params) => {
+  commit(types.SET_UPDATING_RESOLVE_STATUS, true);
+
+  return dispatch('updateStatus', params).finally(() => {
+    commit(types.SET_UPDATING_RESOLVE_STATUS, false);
+  });
+};
+
+export const updateIgnoreStatus = ({ commit, dispatch }, params) => {
+  commit(types.SET_UPDATING_IGNORE_STATUS, true);
+
+  return dispatch('updateStatus', params).finally(() => {
+    commit(types.SET_UPDATING_IGNORE_STATUS, false);
+  });
+};

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'layouts/header/_new_dropdown' do
+RSpec.describe 'layouts/header/_new_dropdown' do
   let(:user) { create(:user) }
 
   context 'group-specific links' do
@@ -125,6 +125,16 @@ describe 'layouts/header/_new_dropdown' do
       render
 
       expect(rendered).to have_link('New snippet', href: new_snippet_path)
+    end
+
+    context 'when the user is not allowed to create snippets' do
+      let(:user) { create(:user, :external)}
+
+      it 'has no "New snippet" link' do
+        render
+
+        expect(rendered).not_to have_link('New snippet', href: new_snippet_path)
+      end
     end
   end
 

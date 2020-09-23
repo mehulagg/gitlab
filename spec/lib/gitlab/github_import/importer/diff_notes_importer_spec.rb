@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::DiffNotesImporter do
+RSpec.describe Gitlab::GithubImport::Importer::DiffNotesImporter do
   let(:project) { double(:project, id: 4, import_source: 'foo/bar') }
   let(:client) { double(:client) }
 

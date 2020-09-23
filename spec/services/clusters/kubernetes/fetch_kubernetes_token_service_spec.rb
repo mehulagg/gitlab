@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Kubernetes::FetchKubernetesTokenService do
+RSpec.describe Clusters::Kubernetes::FetchKubernetesTokenService do
   include KubernetesHelpers
 
   describe '#execute' do
@@ -26,6 +26,7 @@ describe Clusters::Kubernetes::FetchKubernetesTokenService do
     context 'when params correct' do
       let(:decoded_token) { 'xxx.token.xxx' }
       let(:token) { Base64.encode64(decoded_token) }
+
       context 'when the secret exists' do
         before do
           stub_kubeclient_get_secret(

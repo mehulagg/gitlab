@@ -39,7 +39,12 @@ export const mockAssignRemoveRes = {
 
 export const noneEpic = {
   id: 0,
-  title: 'none',
+  title: 'No Epic',
+};
+
+export const placeholderEpic = {
+  id: -1,
+  title: 'Select epic',
 };
 
 export const mockEpics = [mockEpic1, mockEpic2];

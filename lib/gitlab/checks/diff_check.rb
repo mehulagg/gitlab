@@ -4,7 +4,6 @@ module Gitlab
   module Checks
     class DiffCheck < BaseChecker
       include Gitlab::Utils::StrongMemoize
-      prepend_if_ee('EE::Gitlab::Checks::DiffCheck') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
       LOG_MESSAGES = {
         validate_file_paths: "Validating diffs' file paths...",
@@ -21,7 +20,7 @@ module Gitlab
         process_commits do |commit|
           validate_once(commit) do
             commit.raw_deltas.each do |diff|
-              file_paths << (diff.new_path || diff.old_path)
+              file_paths.concat([diff.new_path, diff.old_path].compact)
 
               validate_diff(diff)
             end
@@ -46,7 +45,7 @@ module Gitlab
       def validate_diff(diff)
         validations_for_diff.each do |validation|
           if error = validation.call(diff)
-            raise ::Gitlab::GitAccess::UnauthorizedError, error
+            raise ::Gitlab::GitAccess::ForbiddenError, error
           end
         end
       end
@@ -77,7 +76,7 @@ module Gitlab
         logger.log_timed(LOG_MESSAGES[__method__]) do
           path_validations.each do |validation|
             if error = validation.call(file_paths)
-              raise ::Gitlab::GitAccess::UnauthorizedError, error
+              raise ::Gitlab::GitAccess::ForbiddenError, error
             end
           end
         end
@@ -97,3 +96,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Checks::DiffCheck.prepend_if_ee('EE::Gitlab::Checks::DiffCheck')

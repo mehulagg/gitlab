@@ -80,6 +80,17 @@
           "issue_id": 40
         }
       ],
+      "award_emoji": [
+        {
+          "id": 1,
+          "name": "musical_keyboard",
+          "user_id": 1,
+          "awardable_type": "Issue",
+          "awardable_id": 40,
+          "created_at": "2020-01-07T11:55:22.234Z",
+          "updated_at": "2020-01-07T11:55:22.234Z"
+        }
+      ],
       "zoom_meetings": [
         {
           "id": 1,
@@ -188,7 +199,18 @@
           "author": {
             "name": "User 4"
           },
-          "events": []
+          "events": [],
+          "award_emoji": [
+            {
+              "id": 1,
+              "name": "clapper",
+              "user_id": 1,
+              "awardable_type": "Note",
+              "awardable_id": 351,
+              "created_at": "2020-01-07T11:55:22.234Z",
+              "updated_at": "2020-01-07T11:55:22.234Z"
+            }
+          ]
         },
         {
           "id": 352,
@@ -366,7 +388,12 @@
             "type": "ProjectLabel"
           }
         }
-      ]
+      ],
+      "sentry_issue": {
+        "id": 1,
+        "issue_id": 40,
+        "sentry_issue_identifier": 1234567891
+      }
     },
     {
       "id": 39,
@@ -1975,7 +2002,7 @@
     },
     {
       "id": 31,
-      "title": "Libero nam magnam incidunt eaque placeat error et.",
+      "title": "issue_with_timelogs",
       "author_id": 16,
       "project_id": 5,
       "created_at": "2016-06-14T15:02:07.280Z",
@@ -1989,6 +2016,16 @@
       "confidential": false,
       "due_date": null,
       "moved_to_id": null,
+      "timelogs": [
+        {
+          "id": 1,
+          "time_spent": 72000,
+          "user_id": 1,
+          "created_at": "2019-12-27T09:15:22.302Z",
+          "updated_at": "2019-12-27T09:15:22.302Z",
+          "spent_at": "2019-12-27T00:00:00.000Z"
+        }
+      ],
       "notes": [
         {
           "id": 423,
@@ -2260,8 +2297,90 @@
       ]
     }
   ],
-  "snippets": [],
-  "releases": [],
+  "snippets": [
+    {
+      "id": 1,
+      "title": "Test snippet title",
+      "content": "x = 1",
+      "author_id": 1,
+      "project_id": 1,
+      "created_at": "2019-11-05T15:06:06.579Z",
+      "updated_at": "2019-11-05T15:06:06.579Z",
+      "file_name": "",
+      "visibility_level": 20,
+      "description": "Test snippet description",
+      "award_emoji": [
+        {
+          "id": 1,
+          "name": "thumbsup",
+          "user_id": 1,
+          "awardable_type": "Snippet",
+	  "awardable_id": 1,
+          "created_at": "2019-11-05T15:37:21.287Z",
+          "updated_at": "2019-11-05T15:37:21.287Z"
+        },
+        {
+          "id": 2,
+          "name": "coffee",
+          "user_id": 1,
+          "awardable_type": "Snippet",
+	  "awardable_id": 1,
+          "created_at": "2019-11-05T15:37:24.645Z",
+          "updated_at": "2019-11-05T15:37:24.645Z"
+        }
+      ],
+      "notes": [
+        {
+          "id": 872,
+          "note": "This is a test note",
+          "noteable_type": "Snippet",
+          "author_id": 1,
+          "created_at": "2019-11-05T15:37:24.645Z",
+          "updated_at": "2019-11-05T15:37:24.645Z",
+          "noteable_id": 1,
+          "author": {
+            "name": "Random name"
+          },
+          "events": [],
+          "award_emoji": [
+            {
+              "id": 12,
+              "name": "thumbsup",
+              "user_id": 1,
+              "awardable_type": "Note",
+              "awardable_id": 872,
+              "created_at": "2019-11-05T15:37:21.287Z",
+              "updated_at": "2019-11-05T15:37:21.287Z"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "releases": [
+    {
+      "id": 1,
+      "tag": "release-1.1",
+      "description": "Some release notes",
+      "project_id": 5,
+      "created_at": "2019-12-26T10:17:14.621Z",
+      "updated_at": "2019-12-26T10:17:14.621Z",
+      "author_id": 1,
+      "name": "release-1.1",
+      "sha": "901de3a8bd5573f4a049b1457d28bc1592ba6bf9",
+      "released_at": "2019-12-26T10:17:14.615Z",
+      "links": [
+        {
+          "id": 1,
+          "release_id" : 1,
+          "url": "http://localhost/namespace6/project6/-/jobs/140463678/artifacts/download",
+          "name": "release-1.1.dmg",
+          "created_at": "2019-12-26T10:17:14.621Z",
+          "updated_at": "2019-12-26T10:17:14.621Z"
+        }
+      ]
+    }
+  ],
   "project_members": [
     {
       "id": 36,
@@ -2279,7 +2398,7 @@
       "requested_at": null,
       "user": {
         "id": 16,
-        "email": "maritza_schoen@block.ca",
+        "email": "bernard_willms@gitlabexample.com",
         "username": "bernard_willms"
       }
     },
@@ -2299,7 +2418,7 @@
       "requested_at": null,
       "user": {
         "id": 6,
-        "email": "shaina@koelpindenesik.com",
+        "email": "saul_will@gitlabexample.com",
         "username": "saul_will"
       }
     },
@@ -2349,7 +2468,7 @@
       "id": 27,
       "target_branch": "feature",
       "source_branch": "feature_conflict",
-      "source_project_id": 999,
+      "source_project_id": 2147483547,
       "author_id": 1,
       "assignee_id": null,
       "title": "MR1",
@@ -2374,6 +2493,84 @@
       "merge_commit_sha": null,
       "notes": [
         {
+          "id": 669,
+          "note": "added 3 commits\n\n<ul><li>16ea4e20...074a2a32 - 2 commits from branch <code>master</code></li><li>ca223a02 - readme: fix typos</li></ul>\n\n[Compare with previous version](/group/project/merge_requests/1/diffs?diff_id=1189&start_sha=16ea4e207fb258fe4e9c73185a725207c9a4f3e1)",
+          "noteable_type": "MergeRequest",
+          "author_id": 26,
+          "created_at": "2020-03-28T12:47:33.461Z",
+          "updated_at": "2020-03-28T12:47:33.461Z",
+          "project_id": 5,
+          "attachment": {
+            "url": null
+          },
+          "line_code": null,
+          "commit_id": null,
+          "system": true,
+          "st_diff": null,
+          "updated_by_id": null,
+          "position": null,
+          "original_position": null,
+          "resolved_at": null,
+          "resolved_by_id": null,
+          "discussion_id": null,
+          "change_position": null,
+          "resolved_by_push": null,
+          "confidential": null,
+          "type": null,
+          "author": {
+            "name": "User 4"
+          },
+          "award_emoji": [],
+          "system_note_metadata": {
+            "id": 4789,
+            "commit_count": 3,
+            "action": "commit",
+            "created_at": "2020-03-28T12:47:33.461Z",
+            "updated_at": "2020-03-28T12:47:33.461Z"
+          },
+          "events": [],
+          "suggestions": []
+        },
+        {
+          "id": 670,
+          "note": "unmarked as a **Work In Progress**",
+          "noteable_type": "MergeRequest",
+          "author_id": 26,
+          "created_at": "2020-03-28T12:48:36.951Z",
+          "updated_at": "2020-03-28T12:48:36.951Z",
+          "project_id": 5,
+          "attachment": {
+            "url": null
+          },
+          "line_code": null,
+          "commit_id": null,
+          "system": true,
+          "st_diff": null,
+          "updated_by_id": null,
+          "position": null,
+          "original_position": null,
+          "resolved_at": null,
+          "resolved_by_id": null,
+          "discussion_id": null,
+          "change_position": null,
+          "resolved_by_push": null,
+          "confidential": null,
+          "type": null,
+          "author": {
+            "name": "User 4"
+          },
+          "award_emoji": [],
+          "system_note_metadata": {
+            "id": 4790,
+            "commit_count": null,
+            "action": "title",
+            "created_at": "2020-03-28T12:48:36.951Z",
+            "updated_at": "2020-03-28T12:48:36.951Z"
+          },
+          "events": [],
+          "suggestions": []
+        },
+        {
           "id": 671,
           "note": "Sit voluptatibus eveniet architecto quidem.",
           "note_html": "<p>something else entirely</p>",
@@ -2395,7 +2592,18 @@
           "author": {
             "name": "User 4"
           },
-          "events": []
+          "events": [],
+          "award_emoji": [
+            {
+              "id": 1,
+              "name": "tada",
+              "user_id": 1,
+              "awardable_type": "Note",
+              "awardable_id": 1,
+              "created_at": "2019-11-05T15:37:21.287Z",
+              "updated_at": "2019-11-05T15:37:21.287Z"
+            }
+          ]
         },
         {
           "id": 672,
@@ -2801,7 +3009,27 @@
           "author_id": 1
         }
       ],
-      "approvals_before_merge": 1
+      "approvals_before_merge": 1,
+      "award_emoji": [
+        {
+          "id": 1,
+          "name": "thumbsup",
+          "user_id": 1,
+          "awardable_type": "MergeRequest",
+          "awardable_id": 27,
+          "created_at": "2020-01-07T11:21:21.235Z",
+          "updated_at": "2020-01-07T11:21:21.235Z"
+        },
+        {
+          "id": 2,
+          "name": "drum",
+          "user_id": 1,
+          "awardable_type": "MergeRequest",
+          "awardable_id": 27,
+          "created_at": "2020-01-07T11:21:21.235Z",
+          "updated_at": "2020-01-07T11:21:21.235Z"
+        }
+      ]
     },
     {
       "id": 26,
@@ -6168,7 +6396,7 @@
       ]
     }
   ],
-  "pipelines": [
+  "ci_pipelines": [
     {
       "id": 36,
       "project_id": 5,
@@ -6184,13 +6412,13 @@
       "status": "failed",
       "started_at": null,
       "finished_at": null,
-      "user_id": 9999,
+      "user_id": 2147483547,
       "duration": null,
       "source": "push",
       "merge_request_id": null,
       "notes": [
         {
-          "id": 999,
+          "id": 2147483547,
           "note": "Natus rerum qui dolorem dolorum voluptas.",
           "noteable_type": "Commit",
           "author_id": 1,
@@ -6302,7 +6530,7 @@
       ]
     },
     {
-      "id": 37,
+      "id": 26,
       "project_id": 5,
       "ref": "master",
       "sha": "048721d90c449b244b7b4c53a9186b04330174ec",
@@ -6394,7 +6622,7 @@
         "id": 27,
         "target_branch": "feature",
         "source_branch": "feature_conflict",
-        "source_project_id": 999,
+        "source_project_id": 2147483547,
         "author_id": 1,
         "assignee_id": null,
         "title": "MR1",
@@ -6594,7 +6822,7 @@
       ]
     },
     {
-      "id": 40,
+      "id": 19,
       "project_id": 5,
       "ref": "master",
       "sha": "2ea1f3dec713d940208fb5ce4a38765ecb5d3f73",
@@ -6699,6 +6927,40 @@
       "duration": null,
       "stages": [
       ]
+    },
+    {
+      "id": 20,
+      "project_id": 5,
+      "ref": "master",
+      "sha": "ce84140e8b878ce6e7c4d298c7202ff38170e3ac",
+      "before_sha": null,
+      "push_data": null,
+      "created_at": "2016-03-22T15:20:35.763Z",
+      "updated_at": "2016-03-22T15:20:35.763Z",
+      "tag": false,
+      "yaml_errors": null,
+      "committed_at": null,
+      "status": "failed",
+      "started_at": null,
+      "finished_at": null,
+      "duration": null,
+      "stages": [
+      ],
+      "source": "external_pull_request_event",
+      "external_pull_request":
+      {
+        "id": 3,
+        "pull_request_iid": 4,
+        "source_branch": "feature",
+        "target_branch": "master",
+        "source_repository": "the-repository",
+        "target_repository": "the-repository",
+        "source_sha": "ce84140e8b878ce6e7c4d298c7202ff38170e3ac",
+        "target_sha": "a09386439ca39abe575675ffd4b89ae824fec22f",
+        "status": "open",
+	"created_at": "2016-03-22T15:20:35.763Z",
+	"updated_at": "2016-03-22T15:20:35.763Z"
+      }
     }
   ],
   "triggers": [
@@ -6718,416 +6980,33 @@
       "updated_at": "2017-01-16T15:25:29.637Z"
     }
   ],
-  "deploy_keys": [],
-  "services": [
+  "pipeline_schedules": [
     {
-      "id": 101,
-      "title": "YouTrack",
+      "id": 1,
+      "description": "Schedule Description",
+      "ref": "master",
+      "cron": "0 4 * * 0",
+      "cron_timezone": "UTC",
+      "next_run_at": "2019-12-29T04:19:00.000Z",
       "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.327Z",
-      "updated_at": "2016-06-14T15:01:51.327Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "YoutrackService",
-      "category": "issue_tracker",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 100,
-      "title": "JetBrains TeamCity CI",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.315Z",
-      "updated_at": "2016-06-14T15:01:51.315Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "TeamcityService",
-      "category": "ci",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 99,
-      "title": "Slack",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.303Z",
-      "updated_at": "2016-06-14T15:01:51.303Z",
-      "active": false,
-      "properties": {
-        "notify_only_broken_pipelines": true
-      },
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "pipeline_events": true,
-      "type": "SlackService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 98,
-      "title": "Redmine",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.289Z",
-      "updated_at": "2016-06-14T15:01:51.289Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "RedmineService",
-      "category": "issue_tracker",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 97,
-      "title": "Pushover",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.277Z",
-      "updated_at": "2016-06-14T15:01:51.277Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "PushoverService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 96,
-      "title": "PivotalTracker",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.267Z",
-      "updated_at": "2016-06-14T15:01:51.267Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "PivotalTrackerService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 95,
-      "title": "Jira",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.255Z",
-      "updated_at": "2016-06-14T15:01:51.255Z",
-      "active": false,
-      "properties": {
-        "api_url": "",
-        "jira_issue_transition_id": "2"
-      },
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "JiraService",
-      "category": "issue_tracker",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 94,
-      "title": "Irker (IRC gateway)",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.232Z",
-      "updated_at": "2016-06-14T15:01:51.232Z",
+      "owner_id": 1,
       "active": true,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "IrkerService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 93,
-      "title": "HipChat",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.219Z",
-      "updated_at": "2016-06-14T15:01:51.219Z",
-      "active": false,
-      "properties": {
-        "notify_only_broken_pipelines": true
-      },
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "pipeline_events": true,
-      "type": "HipchatService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 91,
-      "title": "Flowdock",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.182Z",
-      "updated_at": "2016-06-14T15:01:51.182Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "FlowdockService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 90,
-      "title": "External Wiki",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.166Z",
-      "updated_at": "2016-06-14T15:01:51.166Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "ExternalWikiService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 89,
-      "title": "Emails on push",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.153Z",
-      "updated_at": "2016-06-14T15:01:51.153Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "EmailsOnPushService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 88,
-      "title": "Drone CI",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.139Z",
-      "updated_at": "2016-06-14T15:01:51.139Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "DroneCiService",
-      "category": "ci",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 87,
-      "title": "Custom Issue Tracker",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.125Z",
-      "updated_at": "2016-06-14T15:01:51.125Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "CustomIssueTrackerService",
-      "category": "issue_tracker",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 86,
-      "title": "Campfire",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.113Z",
-      "updated_at": "2016-06-14T15:01:51.113Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "CampfireService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 84,
-      "title": "Buildkite",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.080Z",
-      "updated_at": "2016-06-14T15:01:51.080Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "BuildkiteService",
-      "category": "ci",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 83,
-      "title": "Atlassian Bamboo CI",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.067Z",
-      "updated_at": "2016-06-14T15:01:51.067Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "BambooService",
-      "category": "ci",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 82,
-      "title": "Assembla",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.047Z",
-      "updated_at": "2016-06-14T15:01:51.047Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "AssemblaService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 81,
-      "title": "Asana",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.031Z",
-      "updated_at": "2016-06-14T15:01:51.031Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "type": "AssemblaService",
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true
-    },
-    {
-      "id": 101,
-      "title": "JenkinsDeprecated",
-      "project_id": 5,
-      "created_at": "2016-06-14T15:01:51.031Z",
-      "updated_at": "2016-06-14T15:01:51.031Z",
-      "active": false,
-      "properties": {},
-      "template": false,
-      "push_events": true,
-      "issues_events": true,
-      "merge_requests_events": true,
-      "tag_push_events": true,
-      "note_events": true,
-      "job_events": true,
-      "category": "common",
-      "default": false,
-      "wiki_page_events": true,
-      "type": "JenkinsDeprecatedService"
+      "created_at": "2019-12-26T10:14:57.778Z",
+      "updated_at": "2019-12-26T10:14:57.778Z"
     }
   ],
+  "container_expiration_policy": {
+    "created_at": "2019-12-13 13:45:04 UTC",
+    "updated_at": "2019-12-13 13:45:04 UTC",
+    "next_run_at": null,
+    "project_id": 5,
+    "name_regex": null,
+    "cadence": "3month",
+    "older_than": null,
+    "keep_n": 100,
+    "enabled": false
+  },
+  "deploy_keys": [],
   "hooks": [],
   "protected_branches": [
     {
@@ -7156,6 +7035,26 @@
       ]
     }
   ],
+  "protected_environments": [
+    {
+      "id": 1,
+      "project_id": 9,
+      "created_at": "2017-10-19T15:36:23.466Z",
+      "updated_at": "2017-10-19T15:36:23.466Z",
+      "name": "production",
+      "deploy_access_levels": [
+        {
+          "id": 1,
+          "protected_environment_id": 1,
+          "created_at": "2017-10-19T15:36:23.466Z",
+          "updated_at": "2017-10-19T15:36:23.466Z",
+          "access_level": 40,
+          "user_id": 1,
+          "group_id": null
+        }
+      ]
+    }
+  ],
   "protected_tags": [
     {
       "id": 1,
@@ -7175,15 +7074,15 @@
     }
   ],
   "project_feature": {
-    "builds_access_level": 0,
+    "builds_access_level": 10,
     "created_at": "2014-12-26T09:26:45.000Z",
     "id": 2,
-    "issues_access_level": 0,
-    "merge_requests_access_level": 20,
+    "issues_access_level": 10,
+    "merge_requests_access_level": 10,
     "project_id": 4,
-    "snippets_access_level": 20,
+    "snippets_access_level": 10,
     "updated_at": "2016-09-23T11:58:28.000Z",
-    "wiki_access_level": 20
+    "wiki_access_level": 10
   },
   "custom_attributes": [
     {
@@ -7221,6 +7120,36 @@
       "type": "ProjectBadge",
       "link_url": "http://www.example.com",
       "image_url": "http://www.example.com"
+    }
+  ],
+  "ci_cd_settings": {
+    "group_runners_enabled": false
+  },
+  "auto_devops": {
+    "id": 1,
+    "created_at": "2017-10-19T15:36:23.466Z",
+    "updated_at": "2017-10-19T15:36:23.466Z",
+    "enabled": null,
+    "deploy_strategy": "continuous"
+  },
+  "error_tracking_setting": {
+    "api_url": "https://gitlab.example.com/api/0/projects/sentry-org/sentry-project",
+    "project_name": "Sentry Project",
+    "organization_name": "Sentry Org"
+  },
+  "external_pull_requests": [
+    {
+       "id": 3,
+       "pull_request_iid": 4,
+       "source_branch": "feature",
+       "target_branch": "master",
+       "source_repository": "the-repository",
+       "target_repository": "the-repository",
+       "source_sha": "ce84140e8b878ce6e7c4d298c7202ff38170e3ac",
+       "target_sha": "a09386439ca39abe575675ffd4b89ae824fec22f",
+       "status": "open",
+       "created_at": "2019-12-24T14:04:50.053Z",
+       "updated_at": "2019-12-24T14:05:18.138Z"
     }
   ],
   "boards": [

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UpdateAllMirrorsWorker
+class UpdateAllMirrorsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include CronjobQueue
 
@@ -38,20 +38,32 @@ class UpdateAllMirrorsWorker
 
     # Ignore mirrors that become due for scheduling once work begins, so we
     # can't end up in an infinite loop
-    now = Time.now
+    now = Time.current
     last = nil
     scheduled = 0
+
+    # On GitLab.com, we stopped processing free mirrors for private
+    # projects on 2020-03-27. Including mirrors with
+    # next_execution_timestamp of that date or earlier in the query will
+    # lead to higher query times:
+    # <https://gitlab.com/gitlab-org/gitlab/-/issues/216252>
+    #
+    # We should remove this workaround in favour of a simpler solution:
+    # <https://gitlab.com/gitlab-org/gitlab/-/issues/216783>
+    #
+    last = Time.utc(2020, 3, 28) if Gitlab.com?
 
     while capacity > 0
       batch_size = [capacity * 2, 500].min
       projects = pull_mirrors_batch(freeze_at: now, batch_size: batch_size, offset_at: last).to_a
       break if projects.empty?
 
-      project_ids = projects.lazy.select(&:mirror?).take(capacity).map(&:id).force
-      capacity -= project_ids.length
+      projects_to_schedule = projects.lazy.select(&:mirror?).take(capacity).force
+      capacity -= projects_to_schedule.size
 
-      ProjectImportScheduleWorker.bulk_perform_async(project_ids.map { |id| [id] })
-      scheduled += project_ids.length
+      schedule_projects_in_batch(projects_to_schedule)
+
+      scheduled += projects_to_schedule.length
 
       # If fewer than `batch_size` projects were returned, we don't need to query again
       break if projects.length < batch_size
@@ -61,8 +73,8 @@ class UpdateAllMirrorsWorker
 
     if scheduled > 0
       # Wait for all ProjectImportScheduleWorker jobs to complete
-      deadline = Time.now + SCHEDULE_WAIT_TIMEOUT
-      sleep 1 while ProjectImportScheduleWorker.queue_size > 0 && Time.now < deadline
+      deadline = Time.current + SCHEDULE_WAIT_TIMEOUT
+      sleep 1 while ProjectImportScheduleWorker.queue_size > 0 && Time.current < deadline
     end
 
     scheduled
@@ -92,14 +104,44 @@ class UpdateAllMirrorsWorker
   # rubocop: disable CodeReuse/ActiveRecord
   def pull_mirrors_batch(freeze_at:, batch_size:, offset_at: nil)
     relation = Project
+      .non_archived
       .mirrors_to_sync(freeze_at)
       .reorder('import_state.next_execution_timestamp')
       .limit(batch_size)
-      .includes(:namespace) # Used by `project.mirror?`
+      .with_route
+      .with_namespace # Used by `project.mirror?`
 
     relation = relation.where('import_state.next_execution_timestamp > ?', offset_at) if offset_at
+
+    if check_mirror_plans_in_query?
+      root_namespaces_sql = Gitlab::ObjectHierarchy
+        .new(Namespace.where('id = projects.namespace_id'))
+        .roots
+        .select(:id)
+        .to_sql
+
+      root_namespaces_join = "INNER JOIN namespaces AS root_namespaces ON root_namespaces.id = (#{root_namespaces_sql})"
+
+      relation = relation
+        .joins(root_namespaces_join)
+        .joins('LEFT JOIN gitlab_subscriptions ON gitlab_subscriptions.namespace_id = root_namespaces.id')
+        .joins('LEFT JOIN plans ON plans.id = gitlab_subscriptions.hosted_plan_id')
+        .where(['plans.name IN (?) OR projects.visibility_level = ?', ::Plan::PAID_HOSTED_PLANS, ::Gitlab::VisibilityLevel::PUBLIC])
+    end
 
     relation
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def schedule_projects_in_batch(projects)
+    ProjectImportScheduleWorker.bulk_perform_async_with_contexts(
+      projects,
+      arguments_proc: -> (project) { project.id },
+      context_proc: -> (project) { { project: project } }
+    )
+  end
+
+  def check_mirror_plans_in_query?
+    ::Gitlab::CurrentSettings.should_check_namespace_plan?
+  end
 end

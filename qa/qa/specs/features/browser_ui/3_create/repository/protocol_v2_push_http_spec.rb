@@ -1,16 +1,13 @@
 # frozen_string_literal: true
 
 module QA
-  # Git protocol v2 is temporarily disabled
-  # https://gitlab.com/gitlab-org/gitlab-foss/issues/55769 (confidential)
-  context 'Create', :quarantine do
+  RSpec.describe 'Create' do
     describe 'Push over HTTP using Git protocol version 2', :requires_git_protocol_v2 do
-      it 'user pushes to the repository' do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+      it 'user pushes to the repository', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/469' do
+        Flow::Login.sign_in
 
         # Create a project to push to
-        project = Resource::Project.fabricate! do |project|
+        project = Resource::Project.fabricate_via_api! do |project|
           project.name = 'git-protocol-project'
         end
 

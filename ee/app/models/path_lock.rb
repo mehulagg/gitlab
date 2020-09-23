@@ -9,6 +9,8 @@ class PathLock < ApplicationRecord
   validates :path, presence: true, uniqueness: { scope: :project_id }
   validate :path_unique_validation
 
+  scope :for_paths, ->(paths) { where(path: paths) }
+
   def downstream?(path)
     self.path.start_with?(path) && !exact?(path)
   end

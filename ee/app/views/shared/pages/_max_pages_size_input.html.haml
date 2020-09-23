@@ -1,0 +1,10 @@
+- return unless can?(current_user, :update_max_pages_size)
+
+- form = local_assigns.fetch(:form)
+
+.form-group
+  = form.label :max_pages_size, class: 'label-bold' do
+    = s_('GitLabPages|Maximum size of pages (MB)')
+  = form.number_field :max_pages_size, value: form.object.max_pages_size, class: 'form-control', min: 0
+  %span.form-text.text-muted#repository_size_limit_help_block
+    = s_('GitLabPages|The total size of deployed static content will be limited to this size.  0 for unlimited.  Leave empty to inherit the global value.')

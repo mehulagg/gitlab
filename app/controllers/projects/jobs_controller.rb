@@ -11,40 +11,20 @@ class Projects::JobsController < Projects::ApplicationController
   before_action :authorize_erase_build!, only: [:erase]
   before_action :authorize_use_build_terminal!, only: [:terminal, :terminal_websocket_authorize]
   before_action :verify_api_request!, only: :terminal_websocket_authorize
-  before_action only: [:show] do
-    push_frontend_feature_flag(:job_log_json, project)
-  end
+  before_action :authorize_create_proxy_build!, only: :proxy_websocket_authorize
+  before_action :verify_proxy_request!, only: :proxy_websocket_authorize
 
   layout 'project'
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def index
+    # We need all builds for tabs counters
+    @all_builds = Ci::JobsFinder.new(current_user: current_user, project: @project).execute
+
     @scope = params[:scope]
-    @all_builds = project.builds.relevant
-    @builds = @all_builds.order('ci_builds.id DESC')
-    @builds =
-      case @scope
-      when 'pending'
-        @builds.pending.reverse_order
-      when 'running'
-        @builds.running.reverse_order
-      when 'finished'
-        @builds.finished
-      else
-        @builds
-      end
-    @builds = @builds.includes([
-      { pipeline: [:project, :user] },
-      :job_artifacts_archive,
-      :metadata,
-      :trigger_request,
-      :project,
-      :user,
-      :tags
-    ])
+    @builds = Ci::JobsFinder.new(current_user: current_user, project: @project, params: params).execute
+    @builds = @builds.eager_load_everything
     @builds = @builds.page(params[:page]).per(30).without_count
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   # rubocop: disable CodeReuse/ActiveRecord
   def show
@@ -70,15 +50,12 @@ class Projects::JobsController < Projects::ApplicationController
     build.trace.read do |stream|
       respond_to do |format|
         format.json do
-          # TODO: when the feature flag is removed we should not pass
-          # content_format to serialize method.
-          content_format = Feature.enabled?(:job_log_json, @project) ? :json : :html
+          build.trace.being_watched!
 
           build_trace = Ci::BuildTrace.new(
             build: @build,
             stream: stream,
-            state: params[:state],
-            content_format: content_format)
+            state: params[:state])
 
           render json: BuildTraceSerializer
             .new(project: @project, current_user: @current_user)
@@ -168,6 +145,10 @@ class Projects::JobsController < Projects::ApplicationController
     render json: Gitlab::Workhorse.channel_websocket(@build.terminal_specification)
   end
 
+  def proxy_websocket_authorize
+    render json: proxy_websocket_service(build_service_specification)
+  end
+
   private
 
   def authorize_update_build!
@@ -182,8 +163,17 @@ class Projects::JobsController < Projects::ApplicationController
     return access_denied! unless can?(current_user, :create_build_terminal, build)
   end
 
+  def authorize_create_proxy_build!
+    return access_denied! unless can?(current_user, :create_build_service_proxy, build)
+  end
+
   def verify_api_request!
     Gitlab::Workhorse.verify_api_request!(request.headers)
+  end
+
+  def verify_proxy_request!
+    verify_api_request!
+    set_workhorse_internal_api_content_type
   end
 
   def raw_send_params
@@ -219,6 +209,27 @@ class Projects::JobsController < Projects::ApplicationController
 
     'attachment'
   end
-end
 
-Projects::JobsController.prepend_if_ee('EE::Projects::JobsController')
+  def build_service_specification
+    build.service_specification(service: params['service'],
+                                port: params['port'],
+                                path: params['path'],
+                                subprotocols: proxy_subprotocol)
+  end
+
+  def proxy_subprotocol
+    # This will allow to reuse the same subprotocol set
+    # in the original websocket connection
+    request.headers['HTTP_SEC_WEBSOCKET_PROTOCOL'].presence || ::Ci::BuildRunnerSession::TERMINAL_SUBPROTOCOL
+  end
+
+  # This method provides the information to Workhorse
+  # about the service we want to proxy to.
+  # For security reasons, in case this operation is started by JS,
+  # it's important to use only sourced GitLab JS code
+  def proxy_websocket_service(service)
+    service[:url] = ::Gitlab::UrlHelpers.as_wss(service[:url])
+
+    ::Gitlab::Workhorse.channel_websocket(service)
+  end
+end

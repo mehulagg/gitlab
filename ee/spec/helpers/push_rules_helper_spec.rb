@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PushRulesHelper do
+RSpec.describe PushRulesHelper do
   let(:global_push_rule) { create(:push_rule_sample) }
   let(:push_rule) { create(:push_rule) }
   let(:admin) { create(:admin) }
@@ -17,6 +17,7 @@ describe PushRulesHelper do
       requires_admin_contact: /Contact an admin to change this setting/
     }
   end
+
   let(:users) do
     {
       admin: admin,

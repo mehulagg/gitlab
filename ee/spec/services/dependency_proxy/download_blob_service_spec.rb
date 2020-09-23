@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe DependencyProxy::DownloadBlobService do
+RSpec.describe DependencyProxy::DownloadBlobService do
   include EE::DependencyProxyHelpers
 
   let(:image) { 'alpine' }
   let(:token) { Digest::SHA256.hexdigest('123') }
-  let(:blob_sha) { Digest::SHA256.hexdigest('ruby:2.3.9') }
+  let(:blob_sha) { Digest::SHA256.hexdigest('ruby:2.7.0') }
 
   subject { described_class.new(image, blob_sha, token).execute }
 

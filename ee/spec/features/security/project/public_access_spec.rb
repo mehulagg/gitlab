@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe '[EE] Public Project Access' do
+RSpec.describe '[EE] Public Project Access' do
   include AccessMatchers
 
-  set(:project) { create(:project, :public, :repository) }
+  let_it_be(:project) { create(:project, :public, :repository) }
 
   describe 'GET /:project_path/insights' do
     before do
@@ -32,32 +32,32 @@ describe '[EE] Public Project Access' do
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/tree/master" do
+  describe "GET /:project_path/-/tree/master" do
     subject { project_tree_path(project, project.repository.root_ref) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/commits/master" do
+  describe "GET /:project_path/-/commits/master" do
     subject { project_commits_path(project, project.repository.root_ref, limit: 1) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/commit/:sha" do
+  describe "GET /:project_path/-/commit/:sha" do
     subject { project_commit_path(project, project.repository.commit) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/compare" do
+  describe "GET /:project_path/-/compare" do
     subject { project_compare_index_path(project) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/settings/members" do
-    subject { project_settings_members_path(project) }
+  describe "GET /:project_path/-/project_members" do
+    subject { project_project_members_path(project) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
@@ -70,6 +70,7 @@ describe '[EE] Public Project Access' do
 
   describe "GET /:project_path/pipelines/:id" do
     let(:pipeline) { create(:ci_pipeline, project: project) }
+
     subject { project_pipeline_path(project, pipeline) }
 
     it { is_expected.to be_allowed_for(:auditor) }
@@ -80,7 +81,7 @@ describe '[EE] Public Project Access' do
 
     context "when allowed for public" do
       before do
-        project.update(public_builds: true)
+        project.update!(public_builds: true)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }
@@ -88,7 +89,7 @@ describe '[EE] Public Project Access' do
 
     context "when disallowed for public" do
       before do
-        project.update(public_builds: false)
+        project.update!(public_builds: false)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }
@@ -98,11 +99,12 @@ describe '[EE] Public Project Access' do
   describe "GET /:project_path/builds/:id" do
     let(:pipeline) { create(:ci_pipeline, project: project) }
     let(:build) { create(:ci_build, pipeline: pipeline) }
+
     subject { project_job_path(project, build.id) }
 
     context "when allowed for public" do
       before do
-        project.update(public_builds: true)
+        project.update!(public_builds: true)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }
@@ -110,33 +112,34 @@ describe '[EE] Public Project Access' do
 
     context "when disallowed for public" do
       before do
-        project.update(public_builds: false)
+        project.update!(public_builds: false)
       end
 
       it { is_expected.to be_allowed_for(:auditor) }
     end
   end
 
-  describe "GET /:project_path/environments" do
+  describe "GET /:project_path/-/environments" do
     subject { project_environments_path(project) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/environments/:id" do
+  describe "GET /:project_path/-/environments/:id" do
     let(:environment) { create(:environment, project: project) }
+
     subject { project_environment_path(project, environment) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/environments/new" do
+  describe "GET /:project_path/-/environments/new" do
     subject { new_project_environment_path(project) }
 
     it { is_expected.to be_denied_for(:auditor) }
   end
 
-  describe "GET /:project_path/blob" do
+  describe "GET /:project_path/-/blob" do
     let(:commit) { project.repository.commit }
 
     subject { project_blob_path(project, File.join(commit.id, '.gitignore')) }
@@ -174,19 +177,19 @@ describe '[EE] Public Project Access' do
     it { is_expected.to be_denied_for(:auditor) }
   end
 
-  describe "GET /:project_path/merge_requests" do
+  describe "GET /:project_path/-/merge_requests" do
     subject { project_merge_requests_path(project) }
 
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/merge_requests/new" do
+  describe "GET /:project_path/-/merge_requests/new" do
     subject { project_new_merge_request_path(project) }
 
     it { is_expected.to be_denied_for(:auditor) }
   end
 
-  describe "GET /:project_path/branches" do
+  describe "GET /:project_path/-/branches" do
     subject { project_branches_path(project) }
 
     before do
@@ -197,7 +200,7 @@ describe '[EE] Public Project Access' do
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/tags" do
+  describe "GET /:project_path/-/tags" do
     subject { project_tags_path(project) }
 
     before do
@@ -208,7 +211,7 @@ describe '[EE] Public Project Access' do
     it { is_expected.to be_allowed_for(:auditor) }
   end
 
-  describe "GET /:project_path/settings/integrations" do
+  describe "GET /:project_path/-/settings/integrations" do
     subject { project_settings_integrations_path(project) }
 
     it { is_expected.to be_denied_for(:auditor) }
@@ -231,7 +234,7 @@ describe '[EE] Public Project Access' do
       it { is_expected.to be_denied_for(:visitor) }
     end
 
-    describe "GET /:project_path/merge_requests/new" do
+    describe "GET /:project_path/-/merge_requests/new" do
       subject { project_new_merge_request_path(project) }
 
       it { is_expected.to be_denied_for(:maintainer).of(project) }

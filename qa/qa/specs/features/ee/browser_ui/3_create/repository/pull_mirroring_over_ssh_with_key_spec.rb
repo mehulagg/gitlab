@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  # Failure issue: https://gitlab.com/gitlab-org/gitlab/issues/35152
-  context 'Create', :quarantine do
+  context 'Create' do
     describe 'Pull mirror a repository over SSH with a private key' do
       let(:source) do
         Resource::Repository::ProjectPush.fabricate! do |project_push|
@@ -12,6 +11,7 @@ module QA
           project_push.commit_message = 'Add README.md'
         end
       end
+
       let(:source_project_uri) { source.project.repository_ssh_location.uri }
       let(:target_project) do
         Resource::Project.fabricate_via_api! do |project|
@@ -20,13 +20,12 @@ module QA
       end
 
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         target_project.visit!
       end
 
-      it 'configures and syncs a (pull) mirrored repository' do
+      it 'configures and syncs a (pull) mirrored repository', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/401' do
         # Configure the target project to pull from the source project
         # And get the public key to be used as a deploy key
         Page::Project::Menu.perform(&:go_to_repository_settings)

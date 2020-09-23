@@ -1,14 +1,12 @@
 <script>
 // import { sprintf, __ } from '~/locale';
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import CodeBlock from '~/vue_shared/components/code_block.vue';
 import { fieldTypes } from '../constants';
 
 export default {
   components: {
     Modal: DeprecatedModal2,
-    LoadingButton,
     CodeBlock,
   },
   props: {
@@ -35,7 +33,7 @@ export default {
         v-for="(field, key, index) in modalData"
         v-if="field.value"
         :key="index"
-        class="row prepend-top-10 append-bottom-10"
+        class="row gl-mt-3 gl-mb-3"
       >
         <strong class="col-sm-3 text-right"> {{ field.text }}: </strong>
 
@@ -48,8 +46,8 @@ export default {
             </a>
           </template>
 
-          <template v-else-if="field.type === $options.fieldTypes.miliseconds">{{
-            sprintf(__('%{value} ms'), { value: field.value })
+          <template v-else-if="field.type === $options.fieldTypes.seconds">{{
+            sprintf(__('%{value} s'), { value: field.value })
           }}</template>
 
           <template v-else-if="field.type === $options.fieldTypes.text">

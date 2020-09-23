@@ -2,54 +2,39 @@
 
 require 'spec_helper'
 
-describe 'User activates issue tracker', :js do
-  let(:user) { create(:user) }
-  let(:project) { create(:project) }
+RSpec.describe 'User activates issue tracker', :js do
+  include_context 'project service activation'
 
   let(:url) { 'http://tracker.example.com' }
 
-  def fill_short_form(active = true)
-    check 'Active' if active
+  def fill_form(disable: false, skip_new_issue_url: false)
+    click_active_checkbox if disable
 
     fill_in 'service_project_url', with: url
     fill_in 'service_issues_url', with: "#{url}/:id"
+
+    fill_in 'service_new_issue_url', with: url unless skip_new_issue_url
   end
 
-  def fill_full_form(active = true)
-    fill_short_form(active)
-    check 'Active' if active
-
-    fill_in 'service_new_issue_url', with: url
-  end
-
-  before do
-    project.add_maintainer(user)
-    sign_in(user)
-
-    visit project_settings_integrations_path(project)
-  end
-
-  shared_examples 'external issue tracker activation' do |tracker:, skip_new_issue_url: false|
+  shared_examples 'external issue tracker activation' do |tracker:, skip_new_issue_url: false, skip_test: false|
     describe 'user sets and activates the Service' do
       context 'when the connection test succeeds' do
         before do
           stub_request(:head, url).to_return(headers: { 'Content-Type' => 'application/json' })
 
-          click_link(tracker)
+          visit_project_integration(tracker)
+          fill_form(skip_new_issue_url: skip_new_issue_url)
 
-          if skip_new_issue_url
-            fill_short_form
+          if skip_test
+            click_save_integration
           else
-            fill_full_form
+            click_test_then_save_integration(expect_test_to_fail: false)
           end
-
-          click_button('Test settings and save changes')
-          wait_for_requests
         end
 
         it 'activates the service' do
-          expect(page).to have_content("#{tracker} activated.")
-          expect(current_path).to eq(project_settings_integrations_path(project))
+          expect(page).to have_content("#{tracker} settings saved and active.")
+          expect(current_path).to eq(edit_project_service_path(project, tracker.parameterize(separator: '_')))
         end
 
         it 'shows the link in the menu' do
@@ -63,45 +48,32 @@ describe 'User activates issue tracker', :js do
         it 'activates the service' do
           stub_request(:head, url).to_raise(Gitlab::HTTP::Error)
 
-          click_link(tracker)
+          visit_project_integration(tracker)
+          fill_form(skip_new_issue_url: skip_new_issue_url)
 
-          if skip_new_issue_url
-            fill_short_form
+          if skip_test
+            click_button('Save changes')
           else
-            fill_full_form
+            click_test_then_save_integration
           end
 
-          click_button('Test settings and save changes')
-          wait_for_requests
-
-          expect(find('.flash-container-page')).to have_content 'Test failed.'
-          expect(find('.flash-container-page')).to have_content 'Save anyway'
-
-          find('.flash-alert .flash-action').click
-          wait_for_requests
-
-          expect(page).to have_content("#{tracker} activated.")
-          expect(current_path).to eq(project_settings_integrations_path(project))
+          expect(page).to have_content("#{tracker} settings saved and active.")
+          expect(current_path).to eq(edit_project_service_path(project, tracker.parameterize(separator: '_')))
         end
       end
     end
 
-    describe 'user sets the service but keeps it disabled' do
+    describe 'user disables the service' do
       before do
-        click_link(tracker)
-
-        if skip_new_issue_url
-          fill_short_form(false)
-        else
-          fill_full_form(false)
-        end
+        visit_project_integration(tracker)
+        fill_form(disable: true, skip_new_issue_url: skip_new_issue_url)
 
         click_button('Save changes')
       end
 
       it 'saves but does not activate the service' do
-        expect(page).to have_content("#{tracker} settings saved, but not activated.")
-        expect(current_path).to eq(project_settings_integrations_path(project))
+        expect(page).to have_content("#{tracker} settings saved, but not active.")
+        expect(current_path).to eq(edit_project_service_path(project, tracker.parameterize(separator: '_')))
       end
 
       it 'does not show the external tracker link in the menu' do
@@ -116,4 +88,5 @@ describe 'User activates issue tracker', :js do
   it_behaves_like 'external issue tracker activation', tracker: 'YouTrack', skip_new_issue_url: true
   it_behaves_like 'external issue tracker activation', tracker: 'Bugzilla'
   it_behaves_like 'external issue tracker activation', tracker: 'Custom Issue Tracker'
+  it_behaves_like 'external issue tracker activation', tracker: 'EWM', skip_test: true
 end

@@ -81,14 +81,40 @@ module Git
     end
 
     def pipeline_params
-      {
-        before: oldrev,
-        after: newrev,
-        ref: ref,
-        push_options: params[:push_options] || {},
-        checkout_sha: Gitlab::DataBuilder::Push.checkout_sha(
-          project.repository, newrev, ref)
-      }
+      strong_memoize(:pipeline_params) do
+        {
+          before: oldrev,
+          after: newrev,
+          ref: ref,
+          variables_attributes: generate_vars_from_push_options || [],
+          push_options: params[:push_options] || {},
+          checkout_sha: Gitlab::DataBuilder::Push.checkout_sha(
+            project.repository, newrev, ref)
+        }
+      end
+    end
+
+    def ci_variables_from_push_options
+      strong_memoize(:ci_variables_from_push_options) do
+        params[:push_options]&.deep_symbolize_keys&.dig(:ci, :variable)
+      end
+    end
+
+    def generate_vars_from_push_options
+      return [] unless ci_variables_from_push_options
+
+      ci_variables_from_push_options.map do |var_definition, _count|
+        key, value = var_definition.to_s.split("=", 2)
+
+        # Accept only valid format. We ignore the following formats
+        # 1. "=123". In this case, `key` will be an empty string
+        # 2. "FOO". In this case, `value` will be nil.
+        # However, the format "FOO=" will result in key beign `FOO` and value
+        # being an empty string. This is acceptable.
+        next if key.blank? || value.nil?
+
+        { "key" => key, "variable_type" => "env_var", "secret_value" => value }
+      end.compact
     end
 
     def push_data_params(commits:, with_changed_files: true)
@@ -132,14 +158,18 @@ module Git
         project_path: project.full_path,
         message: "Error creating pipeline",
         errors: exception.to_s,
-        pipeline_params: pipeline_params
+        pipeline_params: sanitized_pipeline_params
       }
 
       logger.warn(data)
     end
 
+    def sanitized_pipeline_params
+      pipeline_params.except(:push_options)
+    end
+
     def logger
-      if Sidekiq.server?
+      if Gitlab::Runtime.sidekiq?
         Sidekiq.logger
       else
         # This service runs in Sidekiq, so this shouldn't ever be

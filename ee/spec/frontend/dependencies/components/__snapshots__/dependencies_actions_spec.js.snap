@@ -7,17 +7,27 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
   <div
     class="btn-group flex-grow-1 mr-2"
   >
-    <gldropdown-stub
+    <gl-dropdown-stub
+      category="tertiary"
       class="flex-grow-1 text-center"
+      headertext=""
       right=""
-      text="Component name"
+      size="medium"
+      text="Severity"
+      variant="default"
     >
-      <gldropdownitem-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightname=""
+        secondarytext=""
+      >
         <span
           class="d-flex"
         >
-          <icon-stub
-            class="flex-shrink-0 append-right-4"
+          <gl-icon-stub
+            class="flex-shrink-0 gl-mr-2 invisible"
             name="mobile-issue-close"
             size="16"
           />
@@ -25,13 +35,19 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
           Component name
         
         </span>
-      </gldropdownitem-stub>
-      <gldropdownitem-stub>
+      </gl-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightname=""
+        secondarytext=""
+      >
         <span
           class="d-flex"
         >
-          <icon-stub
-            class="flex-shrink-0 append-right-4 invisible"
+          <gl-icon-stub
+            class="flex-shrink-0 gl-mr-2 invisible"
             name="mobile-issue-close"
             size="16"
           />
@@ -39,13 +55,19 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
           Packager
         
         </span>
-      </gldropdownitem-stub>
-      <gldropdownitem-stub>
+      </gl-dropdown-item-stub>
+      <gl-dropdown-item-stub
+        avatarurl=""
+        iconcolor=""
+        iconname=""
+        iconrightname=""
+        secondarytext=""
+      >
         <span
           class="d-flex"
         >
-          <icon-stub
-            class="flex-shrink-0 append-right-4 invisible"
+          <gl-icon-stub
+            class="flex-shrink-0 gl-mr-2"
             name="mobile-issue-close"
             size="16"
           />
@@ -53,32 +75,39 @@ exports[`DependenciesActions component matches the snapshot 1`] = `
           Severity
         
         </span>
-      </gldropdownitem-stub>
-    </gldropdown-stub>
+      </gl-dropdown-item-stub>
+    </gl-dropdown-stub>
      
-    <glbutton-stub
+    <gl-button-stub
+      buttontextclasses=""
+      category="primary"
       class="flex-grow-0 js-sort-order"
-      data-original-title="Sort direction"
-      title=""
+      icon=""
+      size="medium"
+      title="Sort direction"
+      variant="default"
     >
-      <icon-stub
+      <gl-icon-stub
         name="sort-lowest"
         size="16"
       />
-    </glbutton-stub>
+    </gl-button-stub>
   </div>
    
-  <glbutton-stub
+  <gl-button-stub
+    buttontextclasses=""
+    category="primary"
     class="js-download"
-    data-original-title="Export as JSON"
     download="dependencies.json"
     href="http://test.host/dependencies.json"
-    title=""
+    icon="export"
+    size="medium"
+    title="Export as JSON"
+    variant="default"
   >
-    <icon-stub
-      name="download"
-      size="16"
-    />
-  </glbutton-stub>
+    
+    Export
+  
+  </gl-button-stub>
 </div>
 `;

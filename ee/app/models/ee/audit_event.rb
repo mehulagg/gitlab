@@ -5,36 +5,64 @@ module EE
     extend ActiveSupport::Concern
     extend ::Gitlab::Utils::Override
 
-    # While tracking events that could take place even when
-    # a user is not logged in, (eg: downloading repo of a public project),
-    # we set the author_id of such events as -1
-    UNAUTH_USER_AUTHOR_ID = -1
-    # Events that are authored by unathenticated users, should be
-    # shown as authored by `An unauthenticated user` in the UI.
-    UNAUTH_USER_AUTHOR_NAME = 'An unauthenticated user'.freeze
+    TRUNCATED_FIELDS = {
+      entity_path: 5_500,
+      target_details: 5_500
+    }.freeze
 
-    override :author_name
-    def author_name
-      if (author_name = details[:author_name].presence || user&.name)
-        author_name
-      elsif authored_by_unauth_user?
-        UNAUTH_USER_AUTHOR_NAME
-      end
+    prepended do
+      scope :by_entity, -> (entity_type, entity_id) { by_entity_type(entity_type).by_entity_id(entity_id) }
+
+      before_validation :truncate_fields
     end
 
     def entity
-      return unless entity_type && entity_id
+      lazy_entity
+    end
 
-      # Avoiding exception if the record doesn't exist
-      @entity ||= entity_type.constantize.find_by_id(entity_id) # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    def entity_path
+      super || details[:entity_path]
     end
 
     def present
       AuditEventPresenter.new(self)
     end
 
-    def authored_by_unauth_user?
-      author_id == UNAUTH_USER_AUTHOR_ID
+    def target_type
+      super || details[:target_type]
+    end
+
+    def target_id
+      details[:target_id]
+    end
+
+    def target_details
+      super || details[:target_details]
+    end
+
+    def ip_address
+      super&.to_s || details[:ip_address]
+    end
+
+    def lazy_entity
+      BatchLoader.for(entity_id)
+        .batch(
+          key: entity_type, default_value: ::Gitlab::Audit::NullEntity.new
+        ) do |ids, loader, args|
+          model = Object.const_get(args[:key], false)
+          model.where(id: ids).find_each { |record| loader.call(record.id, record) }
+        end
+    end
+
+    private
+
+    def truncate_fields
+      TRUNCATED_FIELDS.each do |name, limit|
+        original = self[name] || self.details[name]
+        next unless original
+
+        self[name] = self.details[name] = String(original).truncate(limit)
+      end
     end
   end
 end

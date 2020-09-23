@@ -20,13 +20,7 @@ module Clusters
       end
 
       def files
-        @files ||= begin
-          files = { 'values.yaml': values }
-
-          files.merge!(certificate_files) if cluster.application_helm.has_ssl?
-
-          files
-        end
+        @files ||= { 'values.yaml': values }
       end
 
       private

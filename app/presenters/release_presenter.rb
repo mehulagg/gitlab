@@ -19,6 +19,12 @@ class ReleasePresenter < Gitlab::View::Presenter::Delegated
     project_tag_path(project, release.tag)
   end
 
+  def self_url
+    return unless ::Feature.enabled?(:release_show_page, project, default_enabled: true)
+
+    project_release_url(project, release)
+  end
+
   def merge_requests_url
     return unless release_mr_issue_urls_available?
 
@@ -37,6 +43,18 @@ class ReleasePresenter < Gitlab::View::Presenter::Delegated
     edit_project_release_url(project, release)
   end
 
+  def assets_count
+    if can_download_code?
+      release.assets_count
+    else
+      release.assets_count(except: [:sources])
+    end
+  end
+
+  def name
+    can_download_code? ? release.name : "Release-#{release.id}"
+  end
+
   private
 
   def can_download_code?
@@ -52,6 +70,6 @@ class ReleasePresenter < Gitlab::View::Presenter::Delegated
   end
 
   def release_edit_page_available?
-    ::Feature.enabled?(:release_edit_page, project)
+    can?(current_user, :update_release, release)
   end
 end

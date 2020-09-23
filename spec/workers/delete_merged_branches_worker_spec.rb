@@ -2,14 +2,16 @@
 
 require 'spec_helper'
 
-describe DeleteMergedBranchesWorker do
+RSpec.describe DeleteMergedBranchesWorker do
   subject(:worker) { described_class.new }
 
   let(:project) { create(:project, :repository) }
 
   describe "#perform" do
-    it "calls DeleteMergedBranchesService" do
-      expect_any_instance_of(DeleteMergedBranchesService).to receive(:execute).and_return(true)
+    it "delegates to Branches::DeleteMergedService" do
+      expect_next_instance_of(::Branches::DeleteMergedService) do |instance|
+        expect(instance).to receive(:execute).and_return(true)
+      end
 
       worker.perform(project.id, project.owner.id)
     end

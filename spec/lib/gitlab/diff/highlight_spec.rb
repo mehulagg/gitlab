@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Diff::Highlight do
+RSpec.describe Gitlab::Diff::Highlight do
   include RepoHelpers
 
   let(:project) { create(:project, :repository) }
@@ -105,7 +105,7 @@ describe Gitlab::Diff::Highlight do
         end
 
         it 'keeps the original rich line' do
-          allow(Gitlab::Sentry).to receive(:track_exception)
+          allow(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
 
           code = %q{+      raise RuntimeError, "System commands must be given as an array of strings"}
 
@@ -114,7 +114,7 @@ describe Gitlab::Diff::Highlight do
         end
 
         it 'reports to Sentry if configured' do
-          expect(Gitlab::Sentry).to receive(:track_exception).and_call_original
+          expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception).and_call_original
 
           expect { subject }. to raise_exception(RangeError)
         end

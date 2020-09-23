@@ -9,15 +9,17 @@ module Ci
     ##
     # Variables in the environment name scope.
     #
-    def scoped_variables(environment: expanded_environment_name)
+    def scoped_variables(environment: expanded_environment_name, dependencies: true)
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
         variables.concat(predefined_variables)
         variables.concat(project.predefined_variables)
         variables.concat(pipeline.predefined_variables)
         variables.concat(runner.predefined_variables) if runnable? && runner
-        variables.concat(project.deployment_variables(environment: environment)) if environment
+        variables.concat(deployment_variables(environment: environment))
         variables.concat(yaml_variables)
         variables.concat(user_variables)
+        variables.concat(dependency_variables) if dependencies
+        variables.concat(secret_instance_variables)
         variables.concat(secret_group_variables)
         variables.concat(secret_project_variables(environment: environment))
         variables.concat(trigger_request.user_variables) if trigger_request
@@ -43,6 +45,12 @@ module Ci
       end
     end
 
+    def simple_variables_without_dependencies
+      strong_memoize(:variables_without_dependencies) do
+        scoped_variables(environment: nil, dependencies: false).to_runner_variables
+      end
+    end
+
     def user_variables
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
         break variables if user.blank?
@@ -54,47 +62,35 @@ module Ci
       end
     end
 
-    def predefined_variables # rubocop:disable Metrics/AbcSize
+    def predefined_variables
       Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        variables.append(key: 'CI', value: 'true')
-        variables.append(key: 'GITLAB_CI', value: 'true')
-        variables.append(key: 'GITLAB_FEATURES', value: project.licensed_features.join(','))
-        variables.append(key: 'CI_SERVER_HOST', value: Gitlab.config.gitlab.host)
-        variables.append(key: 'CI_SERVER_NAME', value: 'GitLab')
-        variables.append(key: 'CI_SERVER_VERSION', value: Gitlab::VERSION)
-        variables.append(key: 'CI_SERVER_VERSION_MAJOR', value: Gitlab.version_info.major.to_s)
-        variables.append(key: 'CI_SERVER_VERSION_MINOR', value: Gitlab.version_info.minor.to_s)
-        variables.append(key: 'CI_SERVER_VERSION_PATCH', value: Gitlab.version_info.patch.to_s)
-        variables.append(key: 'CI_SERVER_REVISION', value: Gitlab.revision)
         variables.append(key: 'CI_JOB_NAME', value: name)
         variables.append(key: 'CI_JOB_STAGE', value: stage)
-        variables.append(key: 'CI_COMMIT_SHA', value: sha)
-        variables.append(key: 'CI_COMMIT_SHORT_SHA', value: short_sha)
-        variables.append(key: 'CI_COMMIT_BEFORE_SHA', value: before_sha)
-        variables.append(key: 'CI_COMMIT_REF_NAME', value: source_ref)
-        variables.append(key: 'CI_COMMIT_REF_SLUG', value: source_ref_slug)
-        variables.append(key: "CI_COMMIT_TAG", value: ref) if tag?
-        variables.append(key: "CI_PIPELINE_TRIGGERED", value: 'true') if trigger_request
-        variables.append(key: "CI_JOB_MANUAL", value: 'true') if action?
-        variables.append(key: "CI_NODE_INDEX", value: self.options[:instance].to_s) if self.options&.include?(:instance)
-        variables.append(key: "CI_NODE_TOTAL", value: (self.options&.dig(:parallel) || 1).to_s)
-        variables.append(key: "CI_DEFAULT_BRANCH", value: project.default_branch)
-        variables.concat(legacy_variables)
+        variables.append(key: 'CI_JOB_MANUAL', value: 'true') if action?
+        variables.append(key: 'CI_PIPELINE_TRIGGERED', value: 'true') if trigger_request
+
+        variables.append(key: 'CI_NODE_INDEX', value: self.options[:instance].to_s) if self.options&.include?(:instance)
+        variables.append(key: 'CI_NODE_TOTAL', value: ci_node_total_value.to_s)
+
+        # legacy variables
+        variables.append(key: 'CI_BUILD_NAME', value: name)
+        variables.append(key: 'CI_BUILD_STAGE', value: stage)
+        variables.append(key: 'CI_BUILD_TRIGGERED', value: 'true') if trigger_request
+        variables.append(key: 'CI_BUILD_MANUAL', value: 'true') if action?
       end
     end
 
-    def legacy_variables
-      Gitlab::Ci::Variables::Collection.new.tap do |variables|
-        variables.append(key: 'CI_BUILD_REF', value: sha)
-        variables.append(key: 'CI_BUILD_BEFORE_SHA', value: before_sha)
-        variables.append(key: 'CI_BUILD_REF_NAME', value: source_ref)
-        variables.append(key: 'CI_BUILD_REF_SLUG', value: source_ref_slug)
-        variables.append(key: 'CI_BUILD_NAME', value: name)
-        variables.append(key: 'CI_BUILD_STAGE', value: stage)
-        variables.append(key: "CI_BUILD_TAG", value: ref) if tag?
-        variables.append(key: "CI_BUILD_TRIGGERED", value: 'true') if trigger_request
-        variables.append(key: "CI_BUILD_MANUAL", value: 'true') if action?
-      end
+    def deployment_variables(environment:)
+      return [] unless environment
+
+      project.deployment_variables(
+        environment: environment,
+        kubernetes_namespace: expanded_kubernetes_namespace
+      )
+    end
+
+    def secret_instance_variables
+      project.ci_instance_variables_for(ref: git_ref)
     end
 
     def secret_group_variables
@@ -105,6 +101,14 @@ module Ci
 
     def secret_project_variables(environment: persisted_environment)
       project.ci_variables_for(ref: git_ref, environment: environment)
+    end
+
+    private
+
+    def ci_node_total_value
+      parallel = self.options&.dig(:parallel)
+      parallel = parallel.dig(:total) if parallel.is_a?(Hash)
+      parallel || 1
     end
   end
 end

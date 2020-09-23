@@ -35,13 +35,13 @@ module DashboardHelper
     tag.p(aria: { label: label }) do
       concat(link_or_title)
 
-      concat(tag.span(class: ['light', 'float-right']) do
+      concat(tag.span(class: %w[light float-right]) do
         boolean_to_icon(enabled)
       end)
 
       if doc_href.present?
-        link_to_doc = link_to(sprite_icon('question', size: 16), doc_href,
-                              class: 'prepend-left-5', title: _('Documentation'),
+        link_to_doc = link_to(sprite_icon('question'), doc_href,
+                              class: 'gl-ml-2', title: _('Documentation'),
                               target: '_blank', rel: 'noopener noreferrer')
 
         concat(link_to_doc)

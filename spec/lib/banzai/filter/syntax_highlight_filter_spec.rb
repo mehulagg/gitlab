@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::SyntaxHighlightFilter do
+RSpec.describe Banzai::Filter::SyntaxHighlightFilter do
   include FilterSpecHelper
 
   shared_examples "XSS prevention" do |lang|
@@ -24,6 +24,14 @@ describe Banzai::Filter::SyntaxHighlightFilter do
     end
 
     include_examples "XSS prevention", ""
+  end
+
+  context "when contains mermaid diagrams" do
+    it "ignores mermaid blocks" do
+      result = filter('<pre data-mermaid-style="display"><code>mermaid code</code></pre>')
+
+      expect(result.to_html).to eq('<pre data-mermaid-style="display"><code>mermaid code</code></pre>')
+    end
   end
 
   context "when a valid language is specified" do
@@ -92,7 +100,9 @@ describe Banzai::Filter::SyntaxHighlightFilter do
 
   context "when Rouge lexing fails" do
     before do
-      allow_any_instance_of(Rouge::Lexers::Ruby).to receive(:stream_tokens).and_raise(StandardError)
+      allow_next_instance_of(Rouge::Lexers::Ruby) do |instance|
+        allow(instance).to receive(:stream_tokens).and_raise(StandardError)
+      end
     end
 
     it "highlights as plaintext" do
@@ -106,7 +116,9 @@ describe Banzai::Filter::SyntaxHighlightFilter do
 
   context "when Rouge lexing fails after a retry" do
     before do
-      allow_any_instance_of(Rouge::Lexers::PlainText).to receive(:stream_tokens).and_raise(StandardError)
+      allow_next_instance_of(Rouge::Lexers::PlainText) do |instance|
+        allow(instance).to receive(:stream_tokens).and_raise(StandardError)
+      end
     end
 
     it "does not add highlighting classes" do

@@ -1,12 +1,13 @@
 <script>
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { mapState } from 'vuex';
+
+import { GlButton } from '@gitlab/ui';
 
 import { __ } from '~/locale';
 
 export default {
   components: {
     GlButton,
-    GlLoadingIcon,
   },
   props: {
     isSubmitting: {
@@ -21,6 +22,7 @@ export default {
     };
   },
   computed: {
+    ...mapState(['parentItem']),
     isSubmitButtonDisabled() {
       return this.inputValue.length === 0 || this.isSubmitting;
     },
@@ -29,7 +31,11 @@ export default {
     },
   },
   mounted() {
-    this.$refs.input.focus();
+    this.$nextTick()
+      .then(() => {
+        this.$refs.input.focus();
+      })
+      .catch(() => {});
   },
   methods: {
     onFormSubmit() {
@@ -47,7 +53,9 @@ export default {
     <input
       ref="input"
       v-model="inputValue"
-      :placeholder="__('New epic title')"
+      :placeholder="
+        parentItem.confidential ? __('New confidential epic title ') : __('New epic title')
+      "
       type="text"
       class="form-control"
       @keyup.escape.exact="onFormCancel"
@@ -55,12 +63,13 @@ export default {
     <div class="add-issuable-form-actions clearfix">
       <gl-button
         :disabled="isSubmitButtonDisabled"
+        :loading="isSubmitting"
         variant="success"
+        category="primary"
         type="submit"
         class="float-left"
       >
         {{ buttonLabel }}
-        <gl-loading-icon v-if="isSubmitting" :inline="true" />
       </gl-button>
       <gl-button class="float-right" @click="onFormCancel">{{ __('Cancel') }}</gl-button>
     </div>

@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe 'shared/_clone_panel' do
+RSpec.describe 'shared/_clone_panel' do
   include EE::GeoHelpers
 
-  set(:primary) { create(:geo_node, :primary) }
-  set(:secondary) { create(:geo_node) }
-  set(:project) { create(:project) }
+  let_it_be(:primary) { create(:geo_node, :primary) }
+  let_it_be(:secondary) { create(:geo_node) }
+  let_it_be(:project) { create(:project) }
 
   shared_examples 'has no geo-specific instructions' do
     it 'has no geo-specific instructions' do

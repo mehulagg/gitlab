@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 module Geo
-  class PruneEventLogWorker
+  class PruneEventLogWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
+    # rubocop:disable Scalability/CronWorkerContext
+    # This worker does not perform work scoped to a context
     include CronjobQueue
-    include ::Gitlab::Utils::StrongMemoize
+    # rubocop:enable Scalability/CronWorkerContext
     include ::Gitlab::Geo::LogHelpers
 
     feature_category :geo_replication
-
-    LEASE_TIMEOUT = 5.minutes
 
     def perform
       return if Gitlab::Database.read_only?

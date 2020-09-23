@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Auth::LDAP::Sync::Group do
+RSpec.describe EE::Gitlab::Auth::Ldap::Sync::Group do
   include LdapHelpers
 
   let(:adapter) { ldap_adapter }
@@ -42,7 +42,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
       it 'logs a debug message' do
         group.start_ldap_sync
 
-        expect(Rails.logger)
+        expect(Gitlab::AppLogger)
           .to receive(:warn)
                 .with(/^Group '\w*' is not ready for LDAP sync. Skipping/)
                 .at_least(:once)
@@ -67,7 +67,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
       end
 
       it 'logs a debug message' do
-        expect(Rails.logger)
+        expect(Gitlab::AppLogger)
           .to receive(:warn).at_least(:once)
 
         execute
@@ -91,7 +91,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
 
       adapter = ldap_adapter('ldapmain')
       proxy = proxy(adapter, 'ldapmain')
-      allow(EE::Gitlab::Auth::LDAP::Sync::Proxy).to receive(:open).and_yield(proxy)
+      allow(EE::Gitlab::Auth::Ldap::Sync::Proxy).to receive(:open).and_yield(proxy)
     end
 
     let(:group) do
@@ -99,6 +99,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
              cn: 'ldap_group1',
              group_access: ::Gitlab::Access::DEVELOPER)
     end
+
     let(:ldap_group1) { ldap_group_entry(user_dn(user.username)) }
 
     include_examples :group_state_machine
@@ -114,6 +115,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
              cn: 'ldap_group1',
              group_access: ::Gitlab::Access::DEVELOPER)
     end
+
     let(:ldap_group1) { ldap_group_entry(user_dn(user.username)) }
 
     include_examples :group_state_machine
@@ -175,6 +177,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
              cn: 'ldap_group1',
              group_access: ::Gitlab::Access::DEVELOPER)
     end
+
     let(:sync_group) { described_class.new(group, proxy(adapter)) }
 
     context 'with all functionality against one LDAP group type' do
@@ -184,7 +187,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
         it 'does not update permissions unless ldap sync status is started' do
           group.finish_ldap_sync
 
-          expect(Rails.logger)
+          expect(Gitlab::AppLogger)
             .to receive(:warn).with(/status must be 'started' before updating permissions/)
 
           sync_group.update_permissions
@@ -311,6 +314,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
       context 'when user inherits higher permissions from parent' do
         let(:parent_group) { create(:group) }
         let(:ldap_group1) { ldap_group_entry(user_dn(user.username)) }
+
         before do
           group.update(parent: parent_group)
           parent_group.add_maintainer(user)
@@ -350,6 +354,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
       context 'when user inherits lower permissions from parent' do
         let(:parent_group) { create(:group) }
         let(:ldap_group1) { ldap_group_entry(user_dn(user.username)) }
+
         before do
           group.update(parent: parent_group)
           parent_group.add_reporter(user)
@@ -390,6 +395,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
         let(:parent_group) { create(:group) }
         let(:ldap_group1) { ldap_group_entry(user_dn(user.username)) }
         let(:access_requester) { parent_group.request_access(user) }
+
         before do
           group.update(parent: parent_group)
           parent_group.add_owner(create(:user))
@@ -415,6 +421,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
       context 'when user inherits permissions from parent and user is no longer in LDAP group' do
         let(:parent_group) { create(:group) }
         let(:ldap_group1) { ldap_group_entry(user_dn('other_user')) }
+
         before do
           group.update(parent: parent_group)
           parent_group.add_maintainer(user)
@@ -434,6 +441,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
         let(:group1) { create(:group) }
         let(:group2) { create(:group) }
         let(:group3) { create(:group) }
+
         before do
           group1.add_reporter(user)
 
@@ -492,7 +500,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
         it 'does not update permissions when group base is missing' do
           stub_ldap_config(group_base: nil)
 
-          expect_any_instance_of(EE::Gitlab::Auth::LDAP::Sync::Proxy).not_to receive(:dns_for_group_cn)
+          expect_any_instance_of(EE::Gitlab::Auth::Ldap::Sync::Proxy).not_to receive(:dns_for_group_cn)
 
           sync_group.update_permissions
         end
@@ -527,6 +535,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
             member_attr: 'memberUid'
           )
         end
+
         let(:ldap_user) do
           ldap_user_entry(user.username)
         end
@@ -579,6 +588,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
         create(:group_with_ldap_group_filter_link,
                group_access: ::Gitlab::Access::DEVELOPER)
       end
+
       let(:sync_group) { described_class.new(group, proxy(adapter)) }
 
       before do
@@ -601,7 +611,7 @@ describe EE::Gitlab::Auth::LDAP::Sync::Group do
           it 'does not update permissions unless ldap sync status is started' do
             group.finish_ldap_sync
 
-            expect(Rails.logger)
+            expect(Gitlab::AppLogger)
                 .to receive(:warn).with(/status must be 'started' before updating permissions/)
 
             sync_group.update_permissions

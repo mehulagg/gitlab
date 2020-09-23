@@ -2,24 +2,24 @@
 
 require 'spec_helper'
 
-describe 'Git HTTP requests' do
+RSpec.describe 'Git HTTP requests' do
   include GitHttpHelpers
   include WorkhorseHelpers
 
   shared_examples_for 'pulls are allowed' do
-    it do
+    specify do
       download(path, env) do |response|
         expect(response).to have_gitlab_http_status(:ok)
-        expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+        expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
       end
     end
   end
 
   shared_examples_for 'pushes are allowed' do
-    it do
+    specify do
       upload(path, env) do |response|
         expect(response).to have_gitlab_http_status(:ok)
-        expect(response.content_type.to_s).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
+        expect(response.media_type).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
       end
     end
   end
@@ -33,12 +33,12 @@ describe 'Git HTTP requests' do
       let(:env) { { spnego_request_token: 'opaque_request_token' } }
 
       before do
-        allow_any_instance_of(Projects::GitHttpController).to receive(:allow_kerberos_spnego_auth?).and_return(true)
+        allow_any_instance_of(Repositories::GitHttpController).to receive(:allow_kerberos_spnego_auth?).and_return(true)
       end
 
       context "when authentication fails because of invalid Kerberos token" do
         before do
-          allow_any_instance_of(Projects::GitHttpController).to receive(:spnego_credentials!).and_return(nil)
+          allow_any_instance_of(Repositories::GitHttpController).to receive(:spnego_credentials!).and_return(nil)
         end
 
         it "responds with status 401 Unauthorized" do
@@ -50,7 +50,7 @@ describe 'Git HTTP requests' do
 
       context "when authentication fails because of unknown Kerberos identity" do
         before do
-          allow_any_instance_of(Projects::GitHttpController).to receive(:spnego_credentials!).and_return("mylogin@FOO.COM")
+          allow_any_instance_of(Repositories::GitHttpController).to receive(:spnego_credentials!).and_return("mylogin@FOO.COM")
         end
 
         it "responds with status 401 Unauthorized" do
@@ -62,7 +62,7 @@ describe 'Git HTTP requests' do
 
       context "when authentication succeeds" do
         before do
-          allow_any_instance_of(Projects::GitHttpController).to receive(:spnego_credentials!).and_return("mylogin@FOO.COM")
+          allow_any_instance_of(Repositories::GitHttpController).to receive(:spnego_credentials!).and_return("mylogin@FOO.COM")
           user.identities.create!(provider: "kerberos", extern_uid: "mylogin@FOO.COM")
         end
 
@@ -101,7 +101,7 @@ describe 'Git HTTP requests' do
           end
 
           it "complies with RFC4559" do
-            allow_any_instance_of(Projects::GitHttpController).to receive(:spnego_response_token).and_return("opaque_response_token")
+            allow_any_instance_of(Repositories::GitHttpController).to receive(:spnego_response_token).and_return("opaque_response_token")
             download(path, env) do |response|
               expect(response.headers['WWW-Authenticate'].split("\n")).to include("Negotiate #{::Base64.strict_encode64('opaque_response_token')}")
             end
@@ -116,7 +116,7 @@ describe 'Git HTTP requests' do
           end
 
           it "complies with RFC4559" do
-            allow_any_instance_of(Projects::GitHttpController).to receive(:spnego_response_token).and_return("opaque_response_token")
+            allow_any_instance_of(Repositories::GitHttpController).to receive(:spnego_response_token).and_return("opaque_response_token")
             download(path, env) do |response|
               expect(response.headers['WWW-Authenticate'].split("\n")).to include("Negotiate #{::Base64.strict_encode64('opaque_response_token')}")
             end

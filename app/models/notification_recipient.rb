@@ -52,9 +52,9 @@ class NotificationRecipient
     when :mention
       @type == :mention
     when :participating
-      @custom_action == :failed_pipeline || %i[participating mention].include?(@type)
+      participating_custom_action? || participating_or_mention?
     when :custom
-      custom_enabled? || %i[participating mention].include?(@type)
+      custom_enabled? || participating_or_mention?
     when :watch
       !excluded_watcher_action?
     else
@@ -63,14 +63,22 @@ class NotificationRecipient
   end
 
   def custom_enabled?
-    @custom_action && notification_setting&.event_enabled?(@custom_action)
+    return false unless @custom_action
+    return false unless notification_setting
+
+    notification_setting.event_enabled?(@custom_action) ||
+      # fixed_pipeline is a subset of success_pipeline event
+      (@custom_action == :fixed_pipeline &&
+       notification_setting.event_enabled?(:success_pipeline))
   end
 
   def unsubscribed?
-    return false unless @target
-    return false unless @target.respond_to?(:subscriptions)
+    subscribable_target = @target.is_a?(Note) ? @target.noteable : @target
 
-    subscription = @target.subscriptions.find { |subscription| subscription.user_id == @user.id }
+    return false unless subscribable_target
+    return false unless subscribable_target.respond_to?(:subscriptions)
+
+    subscription = subscribable_target.subscriptions.find { |subscription| subscription.user_id == @user.id }
     subscription && !subscription.subscribed
   end
 
@@ -165,5 +173,13 @@ class NotificationRecipient
       .where(user: user)
       .where.not(level: NotificationSetting.levels[:global])
       .first
+  end
+
+  def participating_custom_action?
+    %i[failed_pipeline fixed_pipeline moved_project].include?(@custom_action)
+  end
+
+  def participating_or_mention?
+    %i[participating mention].include?(@type)
   end
 end

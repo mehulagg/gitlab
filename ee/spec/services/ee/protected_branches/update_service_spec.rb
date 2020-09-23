@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProtectedBranches::UpdateService do
+RSpec.describe ProtectedBranches::UpdateService do
   let(:branch_name) { 'feature' }
   let(:protected_branch) { create(:protected_branch, :no_one_can_push, name: branch_name) }
   let(:project) { protected_branch.project }
@@ -20,7 +20,7 @@ describe ProtectedBranches::UpdateService do
     subject(:service) { described_class.new(project, user, params) }
 
     it 'adds a security audit event entry' do
-      expect { service.execute(protected_branch) }.to change(::SecurityEvent, :count).by(1)
+      expect { service.execute(protected_branch) }.to change(::AuditEvent, :count).by(1)
     end
 
     context 'with invalid params' do
@@ -32,7 +32,7 @@ describe ProtectedBranches::UpdateService do
       end
 
       it "doesn't add a security audit event entry" do
-        expect { service.execute(protected_branch) }.not_to change(::SecurityEvent, :count)
+        expect { service.execute(protected_branch) }.not_to change(::AuditEvent, :count)
       end
     end
   end

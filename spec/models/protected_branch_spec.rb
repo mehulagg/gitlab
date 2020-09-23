@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProtectedBranch do
+RSpec.describe ProtectedBranch do
   subject { build_stubbed(:protected_branch) }
 
   describe 'Associations' do
@@ -164,31 +164,45 @@ describe ProtectedBranch do
       end
     end
 
-    context "new project" do
+    context 'new project' do
+      using RSpec::Parameterized::TableSyntax
+
       let(:project) { create(:project) }
 
-      it 'returns false when default_protected_branch is unprotected' do
-        stub_application_setting(default_branch_protection: Gitlab::Access::PROTECTION_NONE)
+      context 'when the group has set their own default_branch_protection level' do
+        where(:default_branch_protection_level, :result) do
+          Gitlab::Access::PROTECTION_NONE          | false
+          Gitlab::Access::PROTECTION_DEV_CAN_PUSH  | false
+          Gitlab::Access::PROTECTION_DEV_CAN_MERGE | true
+          Gitlab::Access::PROTECTION_FULL          | true
+        end
 
-        expect(described_class.protected?(project, 'master')).to be false
+        with_them do
+          it 'protects the default branch based on the default branch protection setting of the group' do
+            expect(project.namespace).to receive(:default_branch_protection).and_return(default_branch_protection_level)
+
+            expect(described_class.protected?(project, 'master')).to eq(result)
+          end
+        end
       end
 
-      it 'returns false when default_protected_branch lets developers push' do
-        stub_application_setting(default_branch_protection: Gitlab::Access::PROTECTION_DEV_CAN_PUSH)
+      context 'when the group has not set their own default_branch_protection level' do
+        where(:default_branch_protection_level, :result) do
+          Gitlab::Access::PROTECTION_NONE          | false
+          Gitlab::Access::PROTECTION_DEV_CAN_PUSH  | false
+          Gitlab::Access::PROTECTION_DEV_CAN_MERGE | true
+          Gitlab::Access::PROTECTION_FULL          | true
+        end
 
-        expect(described_class.protected?(project, 'master')).to be false
-      end
+        with_them do
+          before do
+            stub_application_setting(default_branch_protection: default_branch_protection_level)
+          end
 
-      it 'returns true when default_branch_protection does not let developers push but let developer merge branches' do
-        stub_application_setting(default_branch_protection: Gitlab::Access::PROTECTION_DEV_CAN_MERGE)
-
-        expect(described_class.protected?(project, 'master')).to be true
-      end
-
-      it 'returns true when default_branch_protection is in full protection' do
-        stub_application_setting(default_branch_protection: Gitlab::Access::PROTECTION_FULL)
-
-        expect(described_class.protected?(project, 'master')).to be true
+          it 'protects the default branch based on the instance level default branch protection setting' do
+            expect(described_class.protected?(project, 'master')).to eq(result)
+          end
+        end
       end
     end
   end
@@ -218,6 +232,34 @@ describe ProtectedBranch do
 
         expect(described_class.any_protected?(project, ['staging/some-branch'])).to eq(false)
       end
+    end
+  end
+
+  describe '.by_name' do
+    let!(:protected_branch) { create(:protected_branch, name: 'master') }
+    let!(:another_protected_branch) { create(:protected_branch, name: 'stable') }
+
+    it 'returns protected branches with a matching name' do
+      expect(described_class.by_name(protected_branch.name))
+        .to eq([protected_branch])
+    end
+
+    it 'returns protected branches with a partially matching name' do
+      expect(described_class.by_name(protected_branch.name[0..2]))
+        .to eq([protected_branch])
+    end
+
+    it 'returns protected branches with a matching name regardless of the casing' do
+      expect(described_class.by_name(protected_branch.name.upcase))
+        .to eq([protected_branch])
+    end
+
+    it 'returns nothing when nothing matches' do
+      expect(described_class.by_name('unknown')).to be_empty
+    end
+
+    it 'return nothing when query is blank' do
+      expect(described_class.by_name('')).to be_empty
     end
   end
 end

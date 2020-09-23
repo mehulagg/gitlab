@@ -2,18 +2,21 @@
 
 require 'spec_helper'
 
-describe API::EpicLinks do
+RSpec.describe API::EpicLinks do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:epic) { create(:epic, group: group) }
+  let(:features_when_forbidden) { { epics: true, subepics: false } }
 
   shared_examples 'user does not have access' do
-    it 'returns 403 when epics feature is disabled' do
+    it 'returns 403 when subepics feature is disabled' do
+      stub_licensed_features(features_when_forbidden)
+
       group.add_developer(user)
 
       subject
 
-      expect(response).to have_gitlab_http_status(403)
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
 
     context 'unauthenticated user' do
@@ -22,7 +25,7 @@ describe API::EpicLinks do
       it 'returns 401 unauthorized error' do
         subject
 
-        expect(response).to have_gitlab_http_status(401)
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
     end
 
@@ -31,20 +34,21 @@ describe API::EpicLinks do
 
       subject
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
   end
 
   describe 'GET /groups/:id/epics/:epic_iid/epics' do
     let(:url) { "/groups/#{group.path}/epics/#{epic.iid}/epics" }
+    let(:features_when_forbidden) { { epics: false } }
 
     subject { get api(url, user) }
 
     it_behaves_like 'user does not have access'
 
-    context 'when epics feature is enabled' do
+    context 'when subepics feature is enabled' do
       before do
-        stub_licensed_features(epics: true)
+        stub_licensed_features(epics: true, subepics: true)
       end
 
       let!(:child_epic1) { create(:epic, group: group, parent: epic, relative_position: 200) }
@@ -55,7 +59,7 @@ describe API::EpicLinks do
 
         epics = json_response
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to match_response_schema('public_api/v4/epics', dir: 'ee')
         expect(epics.map { |epic| epic["id"] }).to eq([child_epic2.id, child_epic1.id])
       end
@@ -70,9 +74,9 @@ describe API::EpicLinks do
 
     it_behaves_like 'user does not have access'
 
-    context 'when epics feature is enabled' do
+    context 'when subepics feature is enabled' do
       before do
-        stub_licensed_features(epics: true)
+        stub_licensed_features(epics: true, subepics: true)
       end
 
       context 'when user is guest' do
@@ -81,7 +85,7 @@ describe API::EpicLinks do
 
           subject
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
 
@@ -91,7 +95,7 @@ describe API::EpicLinks do
 
           subject
 
-          expect(response).to have_gitlab_http_status(201)
+          expect(response).to have_gitlab_http_status(:created)
           expect(response).to match_response_schema('public_api/v4/epic', dir: 'ee')
           expect(epic.reload.children).to include(child_epic)
         end
@@ -106,7 +110,7 @@ describe API::EpicLinks do
 
           subject
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -119,9 +123,9 @@ describe API::EpicLinks do
 
     it_behaves_like 'user does not have access'
 
-    context 'when epics feature is enabled' do
+    context 'when subepics feature is enabled' do
       before do
-        stub_licensed_features(epics: true)
+        stub_licensed_features(epics: true, subepics: true)
       end
 
       context 'when user is guest' do
@@ -130,19 +134,58 @@ describe API::EpicLinks do
 
           subject
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
 
       context 'when user is developer' do
-        it 'returns 201 status' do
+        before do
           group.add_developer(user)
+        end
 
+        it 'returns 201 status' do
           subject
 
-          expect(response).to have_gitlab_http_status(201)
+          expect(response).to have_gitlab_http_status(:created)
           expect(response).to match_response_schema('public_api/v4/linked_epic', dir: 'ee')
           expect(epic.reload.children).to include(Epic.last)
+        end
+
+        context 'when the parent epic is confidential' do
+          let(:epic) { create(:epic, group: group, confidential: true) }
+
+          it 'copies the confidentiality status from the parent epic' do
+            subject
+
+            expect(Epic.last).to be_confidential
+          end
+
+          it 'does not allow creating a non-confidential sub-epic' do
+            post api(url, user), params: { title: 'child epic', confidential: false }
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
+        end
+
+        it 'does apply the confidential parameter if set' do
+          post api(url, user), params: { title: 'child epic', confidential: true }
+
+          expect(Epic.last).to be_confidential
+        end
+
+        context 'and epic has errors' do
+          it 'returns 400 error' do
+            child_epic = Epic.new(title: 'with errors')
+            errors = ActiveModel::Errors.new(child_epic).tap { |e| e.add(:parent_id, "error message") }
+            allow(child_epic).to receive(:errors).and_return(errors)
+            allow_next_instance_of(Epics::CreateService) do |service|
+              allow(service).to receive(:execute).and_return(child_epic)
+            end
+
+            subject
+
+            expect(response).to have_gitlab_http_status(:bad_request)
+          end
         end
       end
     end
@@ -159,9 +202,9 @@ describe API::EpicLinks do
 
     it_behaves_like 'user does not have access'
 
-    context 'when epics are enabled' do
+    context 'when subepics are enabled' do
       before do
-        stub_licensed_features(epics: true)
+        stub_licensed_features(epics: true, subepics: true)
       end
 
       context 'when user has permissions to reorder epics' do
@@ -172,7 +215,7 @@ describe API::EpicLinks do
         it 'returns status 200' do
           subject
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response).to match_response_schema('public_api/v4/epics', dir: 'ee')
           expect(json_response.map { |epic| epic['id'] }).to eq([sibling_1.id, child_epic.id, sibling_2.id])
         end
@@ -184,7 +227,7 @@ describe API::EpicLinks do
 
           subject
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
     end
@@ -193,6 +236,7 @@ describe API::EpicLinks do
   describe 'DELETE /groups/:id/epics/:epic_iid/epics' do
     let!(:child_epic) { create(:epic, group: group, parent: epic)}
     let(:url) { "/groups/#{group.path}/epics/#{epic.iid}/epics/#{child_epic.id}" }
+    let(:features_when_forbidden) { { epics: false } }
 
     subject { delete api(url, user) }
 
@@ -209,7 +253,7 @@ describe API::EpicLinks do
 
           subject
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
 
@@ -219,9 +263,27 @@ describe API::EpicLinks do
 
           subject
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response).to match_response_schema('public_api/v4/epic', dir: 'ee')
           expect(epic.reload.children).not_to include(child_epic)
+        end
+      end
+    end
+
+    context 'when epics feature is disabled' do
+      before do
+        stub_licensed_features(epics: false)
+      end
+
+      context 'when user is developer' do
+        before do
+          group.add_developer(user)
+        end
+
+        it 'returns 403 status' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
     end

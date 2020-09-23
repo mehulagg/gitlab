@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe MergeRequests::MigrateExternalDiffsService do
+RSpec.describe MergeRequests::MigrateExternalDiffsService do
   let(:merge_request) { create(:merge_request) }
   let(:diff) { merge_request.merge_request_diff }
 
-  describe '.enqueue!', :sidekiq do
+  describe '.enqueue!' do
     around do |example|
       Sidekiq::Testing.fake! { example.run }
     end

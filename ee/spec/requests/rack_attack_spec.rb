@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Rack Attack EE throttles' do
+RSpec.describe 'Rack Attack EE throttles' do
   include RackAttackSpecHelpers
 
   let(:project) { create(:project) }
@@ -40,7 +40,7 @@ describe 'Rack Attack EE throttles' do
           # At first, allow requests under the rate limit.
           requests_per_period.times do
             post(*post_args)
-            expect(response).to have_http_status 200
+            expect(response).to have_gitlab_http_status(:ok)
           end
 
           # the last straw
@@ -50,7 +50,7 @@ describe 'Rack Attack EE throttles' do
         it 'allows requests after throttling and then waiting for the next period' do
           requests_per_period.times do
             post(*post_args)
-            expect(response).to have_http_status 200
+            expect(response).to have_gitlab_http_status(:ok)
           end
 
           expect_rejection { post(*post_args) }
@@ -58,7 +58,7 @@ describe 'Rack Attack EE throttles' do
           Timecop.travel(period.from_now) do
             requests_per_period.times do
               post(*post_args)
-              expect(response).to have_http_status 200
+              expect(response).to have_gitlab_http_status(:ok)
             end
 
             expect_rejection { post(*post_args) }
@@ -73,12 +73,12 @@ describe 'Rack Attack EE throttles' do
           # At first, allow requests under the rate limit.
           requests_per_period.times do
             post(*post_args)
-            expect(response).to have_http_status 200
+            expect(response).to have_gitlab_http_status(:ok)
           end
 
           # requests still allowed
           post(*post_args)
-          expect(response).to have_http_status 200
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
     end
@@ -86,7 +86,9 @@ describe 'Rack Attack EE throttles' do
 
   describe 'requests to prometheus alert notify endpoint with oauth token' do
     before do
-      allow_any_instance_of(Projects::Prometheus::Alerts::NotifyService).to receive(:execute).and_return true
+      allow_next_instance_of(Projects::Prometheus::Alerts::NotifyService) do |instance|
+        allow(instance).to receive(:execute).and_return(ServiceResponse.success)
+      end
     end
 
     it_behaves_like 'incident management rate limiting' do
@@ -96,7 +98,9 @@ describe 'Rack Attack EE throttles' do
 
   describe 'requests to generic alert notify endpoint with oauth token' do
     before do
-      allow_any_instance_of(Projects::Alerting::NotifyService).to receive(:execute).and_return double(success?: true)
+      allow_next_instance_of(Projects::Alerting::NotifyService) do |instance|
+        allow(instance).to receive(:execute).and_return(ServiceResponse.success)
+      end
     end
 
     it_behaves_like 'incident management rate limiting' do

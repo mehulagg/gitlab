@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PrometheusMetric do
+RSpec.describe PrometheusMetric do
   subject { build(:prometheus_metric) }
 
   it_behaves_like 'having unique enum values'
@@ -11,6 +11,7 @@ describe PrometheusMetric do
   it { is_expected.to validate_presence_of(:title) }
   it { is_expected.to validate_presence_of(:query) }
   it { is_expected.to validate_presence_of(:group) }
+  it { is_expected.to validate_uniqueness_of(:identifier).scoped_to(:project_id).allow_nil }
 
   describe 'common metrics' do
     using RSpec::Parameterized::TableSyntax
@@ -67,6 +68,7 @@ describe PrometheusMetric do
     it_behaves_like 'group_title', :business, 'Business metrics (Custom)'
     it_behaves_like 'group_title', :response, 'Response metrics (Custom)'
     it_behaves_like 'group_title', :system, 'System metrics (Custom)'
+    it_behaves_like 'group_title', :cluster_health, 'Cluster Health'
   end
 
   describe '#priority' do
@@ -82,6 +84,7 @@ describe PrometheusMetric do
       :business          | 0
       :response          | -5
       :system            | -10
+      :cluster_health    | 10
     end
 
     with_them do
@@ -106,6 +109,7 @@ describe PrometheusMetric do
       :business          | %w()
       :response          | %w()
       :system            | %w()
+      :cluster_health    | %w(container_memory_usage_bytes container_cpu_usage_seconds_total)
     end
 
     with_them do
@@ -132,10 +136,6 @@ describe PrometheusMetric do
 
     it 'queryable metric has no required_metric' do
       expect(subject.to_query_metric.required_metrics).to eq([])
-    end
-
-    it 'queryable metric has weight 0' do
-      expect(subject.to_query_metric.weight).to eq(0)
     end
 
     it 'queryable metrics has query description' do

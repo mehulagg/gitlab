@@ -12,16 +12,25 @@ module EE
           return false if group.errors.present?
         end
 
-        return false unless valid_path_change_with_npm_packages?
-
         handle_changes
 
         remove_insight_if_insight_project_absent
+
+        return false if group.errors.present?
 
         super.tap { |success| log_audit_event if success }
       end
 
       private
+
+      override :after_update
+      def after_update
+        super
+
+        if group.saved_change_to_max_personal_access_token_lifetime?
+          group.update_personal_access_tokens_lifetime
+        end
+      end
 
       override :before_assignment_hook
       def before_assignment_hook(group, params)
@@ -54,7 +63,7 @@ module EE
 
       def check_file_template_project_id_change!
         unless can?(current_user, :admin_group, group)
-          group.errors.add(:file_template_project_id, 'cannot be changed by you')
+          group.errors.add(:file_template_project_id, s_('GroupSettings|cannot be changed by you'))
           return
         end
 
@@ -82,8 +91,9 @@ module EE
       end
 
       def handle_changes
-        handle_allowed_domain_deletion
+        handle_allowed_email_domains_update
         handle_ip_restriction_update
+        handle_settings_update
       end
 
       def handle_ip_restriction_update
@@ -94,37 +104,19 @@ module EE
         IpRestrictions::UpdateService.new(group, comma_separated_ranges).execute
       end
 
-      def associations_editable?
-        return false if group.parent_id.present?
+      def handle_allowed_email_domains_update
+        return unless params.key?(:allowed_email_domains_list)
 
-        true
+        comma_separated_domains = params.delete(:allowed_email_domains_list)
+
+        AllowedEmailDomains::UpdateService.new(current_user, group, comma_separated_domains).execute
       end
 
-      def handle_allowed_domain_deletion
-        return unless associations_editable?
-        return unless group.allowed_email_domain.present?
-        return unless allowed_domain_params
+      def handle_settings_update
+        settings_params = params.slice(:prevent_forking_outside_group)
+        params.delete(:prevent_forking_outside_group)
 
-        if allowed_domain_params[:domain]&.blank?
-          allowed_domain_params[:_destroy] = 1
-        end
-      end
-
-      def valid_path_change_with_npm_packages?
-        return true unless group.packages_feature_available?
-        return true if !group.has_parent? && group.path == params[:path]
-
-        npm_packages = Packages::GroupPackagesFinder.new(current_user, group, package_type: :npm).execute
-        if npm_packages.exists?
-          group.errors.add(:path, s_('GroupSettings|cannot change when group contains projects with NPM packages'))
-          return
-        end
-
-        true
-      end
-
-      def allowed_domain_params
-        @allowed_domain_params ||= params[:allowed_email_domain_attributes]
+        NamespaceSettings::UpdateService.new(current_user, group, settings_params).execute
       end
 
       def log_audit_event

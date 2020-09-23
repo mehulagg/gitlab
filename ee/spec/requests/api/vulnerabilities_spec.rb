@@ -2,44 +2,20 @@
 
 require 'spec_helper'
 
-describe API::Vulnerabilities do
+RSpec.describe API::Vulnerabilities do
+  include AccessMatchersForRequest
+
   before do
     stub_licensed_features(security_dashboard: true)
   end
 
-  let_it_be(:project) { create(:project, :with_vulnerabilities) }
   let_it_be(:user) { create(:user) }
-
-  shared_examples 'forbids actions on vulnerability in case of disabled features' do
-    context 'when "first-class vulnerabilities" feature is disabled' do
-      before do
-        stub_feature_flags(first_class_vulnerabilities: false)
-      end
-
-      it 'responds with "not found"' do
-        subject
-
-        expect(response).to have_gitlab_http_status(404)
-      end
-    end
-
-    context 'when security dashboard feature is not available' do
-      before do
-        stub_licensed_features(security_dashboard: false)
-      end
-
-      it 'responds with 403 Forbidden' do
-        subject
-
-        expect(response).to have_gitlab_http_status(403)
-      end
-    end
-  end
+  let(:project_vulnerabilities_path) { "/projects/#{project.id}/vulnerabilities" }
 
   describe 'GET /projects/:id/vulnerabilities' do
-    let(:project_vulnerabilities_path) { "/projects/#{project.id}/vulnerabilities" }
+    let_it_be(:project) { create(:project, :with_vulnerabilities) }
 
-    subject { get api(project_vulnerabilities_path, user) }
+    subject(:get_vulnerabilities) { get api(project_vulnerabilities_path, user) }
 
     context 'with an authorized user with proper permissions' do
       before do
@@ -47,9 +23,9 @@ describe API::Vulnerabilities do
       end
 
       it 'returns all vulnerabilities of a project' do
-        subject
+        get_vulnerabilities
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to include_pagination_headers
         expect(response).to match_response_schema('public_api/v4/vulnerabilities', dir: 'ee')
         expect(response.headers['X-Total']).to eq project.vulnerabilities.count.to_s
@@ -59,28 +35,156 @@ describe API::Vulnerabilities do
         let(:project_vulnerabilities_path) { "#{super()}?page=2&per_page=1" }
 
         it 'paginates the vulnerabilities according to the pagination params' do
-          subject
+          get_vulnerabilities
 
-          expect(response).to have_gitlab_http_status(200)
-          expect(json_response.map { |v| v['id'] }).to contain_exactly(project.vulnerabilities.second.id)
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(json_response.map { |v| v['id'] }).to contain_exactly(project.vulnerabilities.order_severity_desc.second.id)
         end
       end
 
-      it_behaves_like 'forbids actions on vulnerability in case of disabled features'
+      it_behaves_like 'forbids access to vulnerability API endpoint in case of disabled features'
     end
 
-    it_behaves_like 'responds with "not found" when there is no access to the project'
-    it_behaves_like 'prevents working with vulnerabilities in case of insufficient privileges'
+    describe 'permissions' do
+      it { expect { get_vulnerabilities }.to be_allowed_for(:admin) }
+      it { expect { get_vulnerabilities }.to be_allowed_for(:owner).of(project) }
+      it { expect { get_vulnerabilities }.to be_allowed_for(:maintainer).of(project) }
+      it { expect { get_vulnerabilities }.to be_allowed_for(:developer).of(project) }
+      it { expect { get_vulnerabilities }.to be_allowed_for(:auditor) }
+
+      it { expect { get_vulnerabilities }.to be_denied_for(:reporter).of(project) }
+      it { expect { get_vulnerabilities }.to be_denied_for(:guest).of(project) }
+      it { expect { get_vulnerabilities }.to be_denied_for(:anonymous) }
+    end
   end
 
-  describe "POST /vulnerabilities:id/dismiss" do
+  describe 'GET /vulnerabilities/:id' do
+    let_it_be(:project) { create(:project, :with_vulnerabilities) }
+    let_it_be(:vulnerability) { project.vulnerabilities.first }
+    let_it_be(:finding) { create(:vulnerabilities_occurrence, vulnerability: vulnerability) }
+    let(:vulnerability_id) { vulnerability.id }
+
+    subject(:get_vulnerability) { get api("/vulnerabilities/#{vulnerability_id}", user) }
+
+    context 'with an authorized user with proper permissions' do
+      before do
+        project.add_developer(user)
+      end
+
+      it 'returns the desired vulnerability' do
+        get_vulnerability
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to match_response_schema('public_api/v4/vulnerability', dir: 'ee')
+        expect(json_response['id']).to eq vulnerability_id
+      end
+
+      it 'returns the desired findings' do
+        get_vulnerability
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(response).to match_response_schema('public_api/v4/vulnerability', dir: 'ee')
+        expect(json_response['finding']['id']).to eq finding.id
+      end
+
+      it_behaves_like 'responds with "not found" for an unknown vulnerability ID'
+      it_behaves_like 'forbids access to vulnerability API endpoint in case of disabled features'
+    end
+
+    describe 'permissions' do
+      it { expect { get_vulnerability }.to be_allowed_for(:admin) }
+      it { expect { get_vulnerability }.to be_allowed_for(:owner).of(project) }
+      it { expect { get_vulnerability }.to be_allowed_for(:maintainer).of(project) }
+      it { expect { get_vulnerability }.to be_allowed_for(:developer).of(project) }
+      it { expect { get_vulnerability }.to be_allowed_for(:auditor) }
+
+      it { expect { get_vulnerability }.to be_denied_for(:reporter).of(project) }
+      it { expect { get_vulnerability }.to be_denied_for(:guest).of(project) }
+      it { expect { get_vulnerability }.to be_denied_for(:anonymous) }
+    end
+  end
+
+  describe 'POST /projects/:id/vulnerabilities' do
+    let_it_be(:project) { create(:project) }
+    let(:finding) { create(:vulnerabilities_occurrence, project: project) }
+    let(:finding_id) { finding.id }
+    let(:expected_error_messages) { { 'base' => ['finding is not found or is already attached to a vulnerability'] } }
+
+    subject(:create_vulnerability) { post api(project_vulnerabilities_path, user), params: { finding_id: finding_id } }
+
+    context 'with an authorized user with proper permissions' do
+      before do
+        project.add_developer(user)
+      end
+
+      it 'creates a vulnerability from finding and attaches it to the vulnerability' do
+        expect { subject }.to change { project.vulnerabilities.count }.by(1)
+        expect(project.vulnerabilities.last).to(
+          have_attributes(
+            author: user,
+            title: finding.name,
+            state: 'detected',
+            severity: finding.severity,
+            severity_overridden: false,
+            confidence: finding.confidence,
+            confidence_overridden: false,
+            report_type: finding.report_type
+          ))
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(response).to match_response_schema('public_api/v4/vulnerability', dir: 'ee')
+      end
+
+      context 'when finding id is unknown' do
+        let(:finding_id) { 0 }
+
+        it 'responds with expected error' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq(expected_error_messages)
+        end
+      end
+
+      context 'when a vulnerability already exists for a specific finding' do
+        before do
+          create(:vulnerability, findings: [finding], project: finding.project)
+        end
+
+        it 'rejects creation of a new vulnerability from this finding' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq(expected_error_messages)
+        end
+      end
+
+      it_behaves_like 'forbids access to vulnerability API endpoint in case of disabled features'
+    end
+
+    describe 'permissions' do
+      it { expect { create_vulnerability }.to be_allowed_for(:admin) }
+      it { expect { create_vulnerability }.to be_allowed_for(:owner).of(project) }
+      it { expect { create_vulnerability }.to be_allowed_for(:maintainer).of(project) }
+      it { expect { create_vulnerability }.to be_allowed_for(:developer).of(project) }
+
+      it { expect { create_vulnerability }.to be_denied_for(:auditor) }
+      it { expect { create_vulnerability }.to be_denied_for(:reporter).of(project) }
+      it { expect { create_vulnerability }.to be_denied_for(:guest).of(project) }
+      it { expect { create_vulnerability }.to be_denied_for(:anonymous) }
+    end
+  end
+
+  describe 'POST /vulnerabilities:id/dismiss' do
     before do
       create_list(:vulnerabilities_occurrence, 2, vulnerability: vulnerability, project: vulnerability.project)
     end
 
+    let_it_be(:project) { create(:project, :with_vulnerabilities) }
     let(:vulnerability) { project.vulnerabilities.first }
+    let(:vulnerability_id) { vulnerability.id }
 
-    subject { post api("/vulnerabilities/#{vulnerability.id}/dismiss", user) }
+    subject(:dismiss_vulnerability) { post api("/vulnerabilities/#{vulnerability_id}/dismiss", user) }
 
     context 'with an authorized user with proper permissions' do
       before do
@@ -89,16 +193,18 @@ describe API::Vulnerabilities do
 
       it 'dismisses a vulnerability and its associated findings' do
         Timecop.freeze do
-          subject
+          dismiss_vulnerability
 
-          expect(response).to have_gitlab_http_status(201)
+          expect(response).to have_gitlab_http_status(:created)
           expect(response).to match_response_schema('public_api/v4/vulnerability', dir: 'ee')
 
           expect(vulnerability.reload).to(
-            have_attributes(state: 'closed', closed_by: user, closed_at: be_like_time(Time.zone.now)))
+            have_attributes(state: 'dismissed', dismissed_by: user, dismissed_at: be_like_time(Time.current)))
           expect(vulnerability.findings).to all have_vulnerability_dismissal_feedback
         end
       end
+
+      it_behaves_like 'responds with "not found" for an unknown vulnerability ID'
 
       context 'when there is a dismissal error' do
         before do
@@ -123,37 +229,49 @@ describe API::Vulnerabilities do
         end
 
         it 'responds with error' do
-          subject
+          dismiss_vulnerability
 
-          expect(response).to have_gitlab_http_status(400)
+          expect(response).to have_gitlab_http_status(:bad_request)
           expect(json_response['message']).to eq('base' => ['something went wrong'])
         end
       end
 
       context 'if a vulnerability is already dismissed' do
-        let(:vulnerability) { create(:vulnerability, :closed, project: project) }
+        let(:vulnerability) { create(:vulnerability, :dismissed, project: project) }
 
         it 'responds with 304 Not Modified' do
-          subject
+          dismiss_vulnerability
 
-          expect(response).to have_gitlab_http_status(304)
+          expect(response).to have_gitlab_http_status(:not_modified)
         end
       end
 
-      it_behaves_like 'forbids actions on vulnerability in case of disabled features'
+      it_behaves_like 'forbids access to vulnerability API endpoint in case of disabled features'
     end
 
-    it_behaves_like 'prevents working with vulnerabilities in case of insufficient privileges'
+    describe 'permissions' do
+      it { expect { dismiss_vulnerability }.to be_allowed_for(:admin) }
+      it { expect { dismiss_vulnerability }.to be_allowed_for(:owner).of(project) }
+      it { expect { dismiss_vulnerability }.to be_allowed_for(:maintainer).of(project) }
+      it { expect { dismiss_vulnerability }.to be_allowed_for(:developer).of(project) }
+
+      it { expect { dismiss_vulnerability }.to be_denied_for(:auditor) }
+      it { expect { dismiss_vulnerability }.to be_denied_for(:reporter).of(project) }
+      it { expect { dismiss_vulnerability }.to be_denied_for(:guest).of(project) }
+      it { expect { dismiss_vulnerability }.to be_denied_for(:anonymous) }
+    end
   end
 
-  describe "POST /vulnerabilities:id/resolve" do
+  describe 'POST /vulnerabilities/:id/resolve' do
     before do
       create_list(:vulnerabilities_finding, 2, vulnerability: vulnerability)
     end
 
+    let_it_be(:project) { create(:project, :with_vulnerabilities) }
     let(:vulnerability) { project.vulnerabilities.first }
+    let(:vulnerability_id) { vulnerability.id }
 
-    subject { post api("/vulnerabilities/#{vulnerability.id}/resolve", user) }
+    subject(:resolve_vulnerability) { post api("/vulnerabilities/#{vulnerability_id}/resolve", user) }
 
     context 'with an authorized user with proper permissions' do
       before do
@@ -162,30 +280,99 @@ describe API::Vulnerabilities do
 
       it 'resolves a vulnerability and its associated findings' do
         Timecop.freeze do
-          subject
+          resolve_vulnerability
 
-          expect(response).to have_gitlab_http_status(201)
+          expect(response).to have_gitlab_http_status(:created)
           expect(response).to match_response_schema('public_api/v4/vulnerability', dir: 'ee')
 
           expect(vulnerability.reload).to(
-            have_attributes(state: 'closed', closed_by: user, closed_at: be_like_time(Time.zone.now)))
+            have_attributes(state: 'resolved', resolved_by: user, resolved_at: be_like_time(Time.current)))
           expect(vulnerability.findings).to all have_attributes(state: 'resolved')
         end
       end
 
+      it_behaves_like 'responds with "not found" for an unknown vulnerability ID'
+
       context 'when the vulnerability is already resolved' do
-        let(:vulnerability) { create(:vulnerability, :closed, project: project) }
+        let(:vulnerability) { create(:vulnerability, :resolved, project: project) }
 
         it 'responds with 304 Not Modified response' do
-          subject
+          resolve_vulnerability
 
-          expect(response).to have_gitlab_http_status(304)
+          expect(response).to have_gitlab_http_status(:not_modified)
         end
       end
 
-      it_behaves_like 'forbids actions on vulnerability in case of disabled features'
+      it_behaves_like 'forbids access to vulnerability API endpoint in case of disabled features'
     end
 
-    it_behaves_like 'prevents working with vulnerabilities in case of insufficient privileges'
+    describe 'permissions' do
+      it { expect { resolve_vulnerability }.to be_allowed_for(:admin) }
+      it { expect { resolve_vulnerability }.to be_allowed_for(:owner).of(project) }
+      it { expect { resolve_vulnerability }.to be_allowed_for(:maintainer).of(project) }
+      it { expect { resolve_vulnerability }.to be_allowed_for(:developer).of(project) }
+
+      it { expect { resolve_vulnerability }.to be_denied_for(:auditor) }
+      it { expect { resolve_vulnerability }.to be_denied_for(:reporter).of(project) }
+      it { expect { resolve_vulnerability }.to be_denied_for(:guest).of(project) }
+      it { expect { resolve_vulnerability }.to be_denied_for(:anonymous) }
+    end
+  end
+
+  describe 'POST /vulnerabilities/:id/confirm' do
+    before do
+      create_list(:vulnerabilities_finding, 2, vulnerability: vulnerability)
+    end
+
+    let_it_be(:project) { create(:project, :with_vulnerabilities) }
+    let(:vulnerability) { project.vulnerabilities.first }
+    let(:vulnerability_id) { vulnerability.id }
+
+    subject(:confirm_vulnerability) { post api("/vulnerabilities/#{vulnerability_id}/confirm", user) }
+
+    context 'with an authorized user with proper permissions' do
+      before do
+        project.add_developer(user)
+      end
+
+      it 'confirms a vulnerability and its associated findings' do
+        Timecop.freeze do
+          confirm_vulnerability
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(response).to match_response_schema('public_api/v4/vulnerability', dir: 'ee')
+
+          expect(vulnerability.reload).to(
+            have_attributes(state: 'confirmed', confirmed_by: user, confirmed_at: be_like_time(Time.current)))
+          expect(vulnerability.findings).to all have_attributes(state: 'confirmed')
+        end
+      end
+
+      it_behaves_like 'responds with "not found" for an unknown vulnerability ID'
+
+      context 'when the vulnerability is already confirmed' do
+        let(:vulnerability) { create(:vulnerability, :confirmed, project: project) }
+
+        it 'responds with 304 Not Modified response' do
+          confirm_vulnerability
+
+          expect(response).to have_gitlab_http_status(:not_modified)
+        end
+      end
+
+      it_behaves_like 'forbids access to vulnerability API endpoint in case of disabled features'
+    end
+
+    describe 'permissions' do
+      it { expect { confirm_vulnerability }.to be_allowed_for(:admin) }
+      it { expect { confirm_vulnerability }.to be_allowed_for(:owner).of(project) }
+      it { expect { confirm_vulnerability }.to be_allowed_for(:maintainer).of(project) }
+      it { expect { confirm_vulnerability }.to be_allowed_for(:developer).of(project) }
+
+      it { expect { confirm_vulnerability }.to be_denied_for(:auditor) }
+      it { expect { confirm_vulnerability }.to be_denied_for(:reporter).of(project) }
+      it { expect { confirm_vulnerability }.to be_denied_for(:guest).of(project) }
+      it { expect { confirm_vulnerability }.to be_denied_for(:anonymous) }
+    end
   end
 end

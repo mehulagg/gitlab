@@ -6,6 +6,8 @@ class AvatarUploader < GitlabUploader
   include ObjectStorage::Concern
   prepend ObjectStorage::Extension::RecordsUploads
 
+  MIME_WHITELIST = %w[image/png image/jpeg image/gif image/bmp image/tiff image/vnd.microsoft.icon].freeze
+
   def exists?
     model.avatar.file && model.avatar.file.present?
   end
@@ -20,6 +22,14 @@ class AvatarUploader < GitlabUploader
 
   def absolute_path
     self.class.absolute_path(upload)
+  end
+
+  def mounted_as
+    super || 'avatar'
+  end
+
+  def content_type_whitelist
+    MIME_WHITELIST
   end
 
   private

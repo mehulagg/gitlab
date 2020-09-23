@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::SquashService do
+RSpec.describe MergeRequests::SquashService do
   include GitHelpers
 
   let(:service) { described_class.new(project, user, { merge_request: merge_request }) }
@@ -13,6 +13,7 @@ describe MergeRequests::SquashService do
   let(:squash_dir_path) do
     File.join(Gitlab.config.shared.path, 'tmp/squash', repository.gl_repository, merge_request.id.to_s)
   end
+
   let(:merge_request_with_one_commit) do
     create(:merge_request,
            source_branch: 'feature', source_project: project,
@@ -131,6 +132,42 @@ describe MergeRequests::SquashService do
       include_examples 'the squash succeeds'
     end
 
+    context 'when squashing is disabled by default on the project' do
+      # Squashing is disabled by default, but it should still allow you
+      # to squash-and-merge if selected through the UI
+      let(:merge_request) { merge_request_with_only_new_files }
+
+      before do
+        merge_request.project.project_setting.squash_default_off!
+      end
+
+      include_examples 'the squash succeeds'
+    end
+
+    context 'when squashing is forbidden on the project' do
+      let(:merge_request) { merge_request_with_only_new_files }
+
+      before do
+        merge_request.project.project_setting.squash_never!
+      end
+
+      it 'raises a squash error' do
+        expect(service.execute).to match(
+          status: :error,
+          message: a_string_including('does not allow squashing commits when merge requests are accepted'))
+      end
+    end
+
+    context 'when squashing is enabled by default on the project' do
+      let(:merge_request) { merge_request_with_only_new_files }
+
+      before do
+        merge_request.project.project_setting.squash_always!
+      end
+
+      include_examples 'the squash succeeds'
+    end
+
     context 'when squashing with files too large to display' do
       let(:merge_request) { merge_request_with_large_files }
 
@@ -141,15 +178,14 @@ describe MergeRequests::SquashService do
       let(:merge_request) { merge_request_with_only_new_files }
       let(:error) { 'A test error' }
 
-      context 'with gitaly enabled' do
+      context 'with an error in Gitaly UserSquash RPC' do
         before do
           allow(repository.gitaly_operation_client).to receive(:user_squash)
             .and_raise(Gitlab::Git::Repository::GitError, error)
         end
 
-        it 'logs the stage and output' do
-          expect(service).to receive(:log_error).with(log_error)
-          expect(service).to receive(:log_error).with(error)
+        it 'logs the error' do
+          expect(service).to receive(:log_error).with(exception: an_instance_of(Gitlab::Git::Repository::GitError), message: 'Failed to squash merge request')
 
           service.execute
         end
@@ -158,19 +194,42 @@ describe MergeRequests::SquashService do
           expect(service.execute).to match(status: :error, message: a_string_including('squash'))
         end
       end
+
+      context 'with an error in squash in progress check' do
+        before do
+          allow(repository).to receive(:squash_in_progress?)
+            .and_raise(Gitlab::Git::Repository::GitError, error)
+        end
+
+        it 'logs the stage and output' do
+          expect(service).to receive(:log_error).with(exception: an_instance_of(Gitlab::Git::Repository::GitError), message: 'Failed to check squash in progress')
+
+          service.execute
+        end
+
+        it 'returns an error' do
+          expect(service.execute).to match(status: :error, message: 'An error occurred while checking whether another squash is in progress.')
+        end
+      end
     end
 
     context 'when any other exception is thrown' do
       let(:merge_request) { merge_request_with_only_new_files }
-      let(:error) { 'A test error' }
+      let(:merge_request_ref) { merge_request.to_reference(full: true) }
+      let(:exception) { RuntimeError.new('A test error') }
 
       before do
-        allow(merge_request.target_project.repository).to receive(:squash).and_raise(error)
+        allow(merge_request.target_project.repository).to receive(:squash).and_raise(exception)
       end
 
-      it 'logs the MR reference and exception' do
-        expect(service).to receive(:log_error).with(a_string_including("#{project.full_path}#{merge_request.to_reference}"))
-        expect(service).to receive(:log_error).with(error)
+      it 'logs the error' do
+        expect(service).to receive(:log_error).with(exception: exception, message: 'Failed to squash merge request').and_call_original
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).with(exception,
+          class: described_class.to_s,
+          merge_request: merge_request_ref,
+          merge_request_id: merge_request.id,
+          message: 'Failed to squash merge request',
+          save_message_on_model: false).and_call_original
 
         service.execute
       end

@@ -7,10 +7,10 @@ module RuboCop
     #
     # @example
     #   # bad
-    #   root to: redirect('/-/instance/statistics/conversational_development_index')
+    #   root to: redirect('/-/autocomplete/users')
     #
     #   # good
-    #   root to: redirect('-/instance/statistics/conversational_development_index')
+    #   root to: redirect('-/autocomplete/users')
     #
 
     class AvoidRouteRedirectLeadingSlash < RuboCop::Cop::Cop

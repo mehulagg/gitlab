@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Pipeline::FullPipeline do
+RSpec.describe Banzai::Pipeline::FullPipeline do
   describe 'References' do
     let(:project) { create(:project, :public) }
     let(:issue)   { create(:issue, project: project) }
@@ -24,7 +24,7 @@ describe Banzai::Pipeline::FullPipeline do
     it 'escapes the data-original attribute on a reference' do
       markdown = %Q{[">bad things](#{issue.to_reference})}
       result = described_class.to_html(markdown, project: project)
-      expect(result).to include(%{data-original='\"&gt;bad things'})
+      expect(result).to include(%{data-original='\"&amp;gt;bad things'})
     end
   end
 
@@ -97,6 +97,38 @@ describe Banzai::Pipeline::FullPipeline do
 
         expect(link[:class]).to be_nil
       end
+    end
+  end
+
+  describe 'table of contents' do
+    let(:project) { create(:project, :public) }
+    let(:markdown) do
+      <<-MARKDOWN.strip_heredoc
+          [[_TOC_]]
+
+          # Header
+      MARKDOWN
+    end
+
+    let(:invalid_markdown) do
+      <<-MARKDOWN.strip_heredoc
+          test [[_TOC_]]
+
+          # Header
+      MARKDOWN
+    end
+
+    it 'inserts a table of contents' do
+      output = described_class.to_html(markdown, project: project)
+
+      expect(output).to include("<ul class=\"section-nav\">")
+      expect(output).to include("<li><a href=\"#header\">Header</a></li>")
+    end
+
+    it 'does not insert a table of contents' do
+      output = described_class.to_html(invalid_markdown, project: project)
+
+      expect(output).to include("test [[<em>TOC</em>]]")
     end
   end
 end

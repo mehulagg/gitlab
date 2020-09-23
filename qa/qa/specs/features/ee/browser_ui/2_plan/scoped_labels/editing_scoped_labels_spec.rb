@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Editing scoped labels on issues' do
       let(:initial_label) { 'animal::fox' }
       let(:new_label_same_scope) { 'animal::dolphin' }
@@ -12,11 +12,9 @@ module QA
       let(:new_label_different_scope_multi_colon) { 'group::truck::mercedes-bens' }
 
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         issue = Resource::Issue.fabricate_via_api! do |issue|
-          issue.title = 'Issue to test scoped labels'
           issue.labels = [initial_label, initial_label_multi_colon]
         end
 
@@ -35,7 +33,7 @@ module QA
         issue.visit!
       end
 
-      it 'correctly applies simple and multiple colon scoped pairs labels' do
+      it 'correctly applies simple and multiple colon scoped pairs labels', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/595' do
         Page::Project::Issue::Show.perform do |show|
           show.select_labels_and_refresh([
             new_label_same_scope,
@@ -46,17 +44,13 @@ module QA
 
           show.select_all_activities_filter
 
-          initial_labels = "#{initial_label} #{initial_label_multi_colon}"
-          new_labels = "#{new_label_same_scope} #{new_label_same_scope_multi_colon} #{new_label_different_scope_multi_colon} #{new_label_different_scope}"
+          expect(show).to have_label(new_label_same_scope)
+          expect(show).to have_label(new_label_different_scope)
+          expect(show).to have_label('group::car::porsche')
+          expect(show).to have_label('group::truck::mercedes-bens')
 
-          expect(page).to have_content("added #{initial_labels}")
-          expect(page).to have_content("added #{new_labels} scoped labels and automatically removed #{initial_labels}")
-          expect(show.text_of_labels_block).to have_content(new_label_same_scope)
-          expect(show.text_of_labels_block).to have_content(new_label_different_scope)
-          expect(show.text_of_labels_block).not_to have_content(initial_label)
-          expect(show.text_of_labels_block).to have_content(new_label_same_scope_multi_colon)
-          expect(show.text_of_labels_block).to have_content(new_label_different_scope_multi_colon)
-          expect(show.text_of_labels_block).not_to have_content(initial_label_multi_colon)
+          expect(show).not_to have_label(initial_label)
+          expect(show).not_to have_label('group::car::ferrari')
         end
       end
     end

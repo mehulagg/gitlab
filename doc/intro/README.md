@@ -1,4 +1,7 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 comments: false
 ---
 
@@ -35,7 +38,7 @@ Create merge requests and review code.
 
 Use the built-in continuous integration in GitLab.
 
-- [Get started with GitLab CI](../ci/quick_start/README.md)
+- [Get started with GitLab CI/CD](../ci/quick_start/README.md)
 
 ## Install and Update
 

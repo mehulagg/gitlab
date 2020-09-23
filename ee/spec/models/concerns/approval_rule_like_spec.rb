@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalRuleLike do
+RSpec.describe ApprovalRuleLike do
   let(:user1) { create(:user) }
   let(:user2) { create(:user) }
   let(:user3) { create(:user) }
@@ -40,8 +40,9 @@ describe ApprovalRuleLike do
           subject.group_users
         end
 
-        it 'does not perform any queries when all users are loaded already' do
-          expect { subject.approvers }.not_to exceed_query_limit(0)
+        it 'does not perform any new queries when all users are loaded already' do
+          # single query is triggered for license check
+          expect { subject.approvers }.not_to exceed_query_limit(1)
         end
 
         it_behaves_like 'approvers contains the right users'
@@ -83,15 +84,99 @@ describe ApprovalRuleLike do
     subject { create(:approval_merge_request_rule, merge_request: merge_request) }
 
     it_behaves_like 'approval rule like'
+
+    describe '#overridden?' do
+      it 'returns false' do
+        expect(subject.overridden?).to be_falsy
+      end
+
+      context 'when rule has source rule' do
+        let(:source_rule) do
+          create(
+            :approval_project_rule,
+            project: merge_request.target_project,
+            name: 'Source Rule',
+            approvals_required: 2,
+            users: [user1, user2],
+            groups: [group1, group2]
+          )
+        end
+
+        before do
+          subject.update!(approval_project_rule: source_rule)
+        end
+
+        context 'and any attributes differ from source rule' do
+          shared_examples_for 'overridden rule' do
+            it 'returns true' do
+              expect(subject.overridden?).to be_truthy
+            end
+          end
+
+          context 'name' do
+            before do
+              subject.update!(name: 'Overridden Rule')
+            end
+
+            it_behaves_like 'overridden rule'
+          end
+
+          context 'approvals_required' do
+            before do
+              subject.update!(approvals_required: 1)
+            end
+
+            it_behaves_like 'overridden rule'
+          end
+
+          context 'users' do
+            before do
+              subject.update!(users: [user1])
+            end
+
+            it_behaves_like 'overridden rule'
+          end
+
+          context 'groups' do
+            before do
+              subject.update!(groups: [group1])
+            end
+
+            it_behaves_like 'overridden rule'
+          end
+        end
+
+        context 'and no changes made to attributes' do
+          before do
+            subject.update!(
+              name: source_rule.name,
+              approvals_required: source_rule.approvals_required,
+              users: source_rule.users,
+              groups: source_rule.groups
+            )
+          end
+
+          it 'returns false' do
+            expect(subject.overridden?).to be_falsy
+          end
+        end
+      end
+    end
   end
 
   context 'Project' do
     subject { create(:approval_project_rule) }
 
     it_behaves_like 'approval rule like'
+
+    describe '#overridden?' do
+      it 'returns false' do
+        expect(subject.overridden?).to be_falsy
+      end
+    end
   end
 
-  context '.group_users' do
+  describe '.group_users' do
     subject { create(:approval_project_rule) }
 
     it 'returns distinct users' do

@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe ProjectImportState, type: :model do
+RSpec.describe ProjectImportState, type: :model do
+  include ::EE::GeoHelpers
+
   describe 'Project import job' do
     let(:project) { import_state.project }
 
@@ -12,8 +14,7 @@ describe ProjectImportState, type: :model do
 
       # Works around https://github.com/rspec/rspec-mocks/issues/910
       allow(Project).to receive(:find).with(project.id).and_return(project)
-      expect(project.repository).to receive(:after_import).and_call_original
-      expect(project.wiki.repository).to receive(:after_import).and_call_original
+      expect(project).to receive(:after_import).and_call_original
     end
 
     context 'with a mirrored project' do
@@ -34,6 +35,47 @@ describe ProjectImportState, type: :model do
     let(:project) { import_state.project }
 
     context 'state transition: [:started] => [:finished]' do
+      context 'Geo repository update events' do
+        let(:repository_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+        let(:wiki_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+        let(:design_updated_service) { instance_double('::Geo::RepositoryUpdatedService') }
+
+        before do
+          allow(::Geo::RepositoryUpdatedService)
+            .to receive(:new)
+            .with(project.repository)
+            .and_return(repository_updated_service)
+
+          allow(::Geo::RepositoryUpdatedService)
+            .to receive(:new)
+            .with(project.wiki.repository)
+            .and_return(wiki_updated_service)
+
+          allow(::Geo::RepositoryUpdatedService)
+            .to receive(:new)
+            .with(project.design_repository)
+            .and_return(design_updated_service)
+        end
+
+        it 'calls Geo::RepositoryUpdatedService when running on a Geo primary node', :aggregate_failures do
+          stub_primary_node
+
+          expect(repository_updated_service).to receive(:execute).once
+          expect(wiki_updated_service).to receive(:execute).once
+          expect(design_updated_service).to receive(:execute).once
+
+          import_state.finish
+        end
+
+        it 'does not call Geo::RepositoryUpdatedService when not running on a Geo primary node', :aggregate_failures do
+          expect(repository_updated_service).not_to receive(:execute)
+          expect(wiki_updated_service).not_to receive(:execute)
+          expect(design_updated_service).not_to receive(:execute)
+
+          import_state.finish
+        end
+      end
+
       context 'elasticsearch indexing disabled for this project' do
         before do
           expect(project).to receive(:use_elasticsearch?).and_return(false)
@@ -53,17 +95,17 @@ describe ProjectImportState, type: :model do
 
         context 'no index status' do
           it 'schedules a full index of the repository' do
-            expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(import_state.project_id, nil)
+            expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(import_state.project_id)
 
             import_state.finish
           end
         end
 
         context 'with index status' do
-          let(:index_status) { IndexStatus.create!(project: project, indexed_at: Time.now, last_commit: 'foo') }
+          let(:index_status) { IndexStatus.create!(project: project, indexed_at: Time.current, last_commit: 'foo') }
 
-          it 'schedules a progressive index of the repository' do
-            expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(import_state.project_id, index_status.last_commit)
+          it 'schedules a full index of the repository' do
+            expect(ElasticCommitIndexerWorker).to receive(:perform_async).with(import_state.project_id)
 
             import_state.finish
           end
@@ -74,10 +116,10 @@ describe ProjectImportState, type: :model do
 
   describe 'when create' do
     it 'sets next execution timestamp to now' do
-      Timecop.freeze(Time.now) do
+      Timecop.freeze(Time.current) do
         import_state = create(:import_state, :mirror)
 
-        expect(import_state.next_execution_timestamp).to be_like_time(Time.now)
+        expect(import_state.next_execution_timestamp).to be_like_time(Time.current)
       end
     end
   end
@@ -224,16 +266,34 @@ describe ProjectImportState, type: :model do
                               :finished,
                               :mirror,
                               :repository,
-                              next_execution_timestamp: Time.now - 2.minutes)
+                              next_execution_timestamp: Time.current - 2.minutes)
 
         expect(import_state.mirror_update_due?).to be true
+      end
+    end
+
+    context 'when the project is archived' do
+      let(:import_state) do
+        create(:import_state,
+               :finished,
+               :mirror,
+               :repository,
+               next_execution_timestamp: Time.current - 2.minutes)
+      end
+
+      before do
+        import_state.project.update!(archived: true)
+      end
+
+      it 'returns false' do
+        expect(import_state.mirror_update_due?).to be false
       end
     end
 
     context 'when mirror has no content' do
       it 'returns false' do
         import_state = create(:import_state, :finished, :mirror)
-        import_state.next_execution_timestamp = Time.now - 2.minutes
+        import_state.next_execution_timestamp = Time.current - 2.minutes
 
         expect(import_state.mirror_update_due?).to be false
       end
@@ -250,6 +310,15 @@ describe ProjectImportState, type: :model do
     context 'mirror is updating' do
       it 'returns false when scheduled' do
         import_state = create(:import_state, :scheduled, :mirror, :repository)
+
+        expect(import_state.mirror_update_due?).to be false
+      end
+    end
+
+    context 'when next_execution_timestamp is nil' do
+      it 'returns false' do
+        import_state = create(:import_state, :finished, :mirror, :repository)
+        import_state.next_execution_timestamp = nil
 
         expect(import_state.mirror_update_due?).to be false
       end
@@ -275,7 +344,7 @@ describe ProjectImportState, type: :model do
       end
 
       context 'when mirror has updated' do
-        let(:timestamp) { Time.now }
+        let(:timestamp) { Time.current }
 
         before do
           import_state.last_update_at = timestamp
@@ -315,15 +384,15 @@ describe ProjectImportState, type: :model do
       end
 
       it 'returns false when first update failed' do
-        import_state.last_update_at = Time.now
+        import_state.last_update_at = Time.current
 
         expect(import_state.ever_updated_successfully?).to be_falsey
       end
 
       it 'returns true when a successful update timestamp exists' do
         # It does not matter if the last update was successful or not
-        import_state.last_update_at = Time.now
-        import_state.last_successful_update_at = Time.now - 5.minutes
+        import_state.last_update_at = Time.current
+        import_state.last_successful_update_at = Time.current - 5.minutes
 
         expect(import_state.ever_updated_successfully?).to be_truthy
       end
@@ -332,7 +401,7 @@ describe ProjectImportState, type: :model do
 
   describe '#set_next_execution_timestamp' do
     let(:import_state) { create(:import_state, :mirror, :finished) }
-    let!(:timestamp) { Time.now.change(usec: 0) }
+    let!(:timestamp) { Time.current.change(usec: 0) }
     let!(:jitter) { 2.seconds }
 
     before do
@@ -432,7 +501,7 @@ describe ProjectImportState, type: :model do
       import_state = create(:import_state,
                             :repository,
                             :mirror,
-                            next_execution_timestamp: Time.now - 2.minutes)
+                            next_execution_timestamp: Time.current - 2.minutes)
 
       expect(import_state.force_import_job!).to be_nil
     end
@@ -444,7 +513,7 @@ describe ProjectImportState, type: :model do
     end
 
     it 'sets next execution timestamp to 5 minutes ago and schedules UpdateAllMirrorsWorker' do
-      timestamp = Time.now
+      timestamp = Time.current
       import_state = create(:import_state, :mirror)
 
       expect(UpdateAllMirrorsWorker).to receive(:perform_async)
@@ -456,7 +525,7 @@ describe ProjectImportState, type: :model do
 
     context 'when mirror is hard failed' do
       it 'resets retry count and schedules a mirroring worker' do
-        timestamp = Time.now
+        timestamp = Time.current
         import_state = create(:import_state, :mirror, :hard_failed)
 
         expect(UpdateAllMirrorsWorker).to receive(:perform_async)

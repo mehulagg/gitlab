@@ -1,10 +1,10 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { GlTooltipDirective } from '@gitlab/ui';
 
 export default {
   directives: {
-    tooltip,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     value: {
@@ -53,8 +53,7 @@ export default {
 <template>
   <fieldset>
     <label
-      v-tooltip
-      :title="tooltipTitle"
+      v-gl-tooltip="tooltipTitle"
       :class="{
         'is-disabled': disabled,
       }"
@@ -67,8 +66,8 @@ export default {
         name="commit-action"
         @change="updateCommitAction($event.target.value)"
       />
-      <span class="prepend-left-10">
-        <span v-if="label" class="ide-radio-label"> {{ label }} </span> <slot v-else></slot>
+      <span class="gl-ml-3">
+        <span v-if="label" class="ide-option-label"> {{ label }} </span> <slot v-else></slot>
       </span>
     </label>
     <div v-if="commitAction === value && showInput" class="ide-commit-new-branch">

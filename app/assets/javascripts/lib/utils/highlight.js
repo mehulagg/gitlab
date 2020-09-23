@@ -1,6 +1,5 @@
 import fuzzaldrinPlus from 'fuzzaldrin-plus';
-import _ from 'underscore';
-import sanitize from 'sanitize-html';
+import { sanitize } from '~/lib/dompurify';
 
 /**
  * Wraps substring matches with HTML `<span>` elements.
@@ -17,15 +16,15 @@ import sanitize from 'sanitize-html';
  * @param {String} matchSuffix The string to insert at the end of a match
  */
 export default function highlight(string, match = '', matchPrefix = '<b>', matchSuffix = '</b>') {
-  if (_.isUndefined(string) || _.isNull(string)) {
+  if (!string) {
     return '';
   }
 
-  if (_.isUndefined(match) || _.isNull(match) || match === '') {
+  if (!match) {
     return string;
   }
 
-  const sanitizedValue = sanitize(string.toString(), { allowedTags: [] });
+  const sanitizedValue = sanitize(string.toString(), { ALLOWED_TAGS: [] });
 
   // occurrences is an array of character indices that should be
   // highlighted in the original string, i.e. [3, 4, 5, 7]
@@ -34,7 +33,7 @@ export default function highlight(string, match = '', matchPrefix = '<b>', match
   return sanitizedValue
     .split('')
     .map((character, i) => {
-      if (_.contains(occurrences, i)) {
+      if (occurrences.includes(i)) {
         return `${matchPrefix}${character}${matchSuffix}`;
       }
 

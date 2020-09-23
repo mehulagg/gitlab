@@ -26,9 +26,9 @@ module EE
 
         def log_error!(extra_context = {})
           error = LimitExceededError.new(message)
-          # TODO: change this to Gitlab::Sentry.log_exception(error, extra_context)
+          # TODO: change this to Gitlab::ErrorTracking.log_exception(error, extra_context)
           # https://gitlab.com/gitlab-org/gitlab/issues/32906
-          ::Gitlab::Sentry.track_acceptable_exception(error, extra: extra_context)
+          ::Gitlab::ErrorTracking.track_exception(error, extra_context)
         end
       end
     end

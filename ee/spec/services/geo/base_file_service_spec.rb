@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::BaseFileService do
+RSpec.describe Geo::BaseFileService do
   subject { described_class.new('file', 8) }
 
   describe '#execute' do

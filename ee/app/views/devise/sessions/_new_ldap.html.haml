@@ -1,5 +1,9 @@
+- hide_remember_me = local_assigns.fetch(:hide_remember_me, false)
+- submit_message = local_assigns.fetch(:submit_message, _('Sign in'))
+
 - unless smartcard_enabled_for_ldap?(server['provider_name'], required: true)
-  = render_ce('devise/sessions/new_ldap', server: server)
-  %hr
+  = render_ce('devise/sessions/new_ldap', server: server, hide_remember_me: hide_remember_me, submit_message: submit_message)
+  - if smartcard_enabled_for_ldap?(server['provider_name'])
+    %hr
 
 = render 'devise/sessions/new_smartcard_ldap', server: server

@@ -10,7 +10,7 @@ module Elastic
 
         query_hash = project_ids_filter(query_hash, options)
 
-        search(query_hash)
+        search(query_hash, options)
       end
     end
   end

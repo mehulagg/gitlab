@@ -7,17 +7,16 @@ module Gitlab
         class Build < Seed::Base
           include Gitlab::Utils::StrongMemoize
 
-          delegate :dig, to: :@seed_attributes
+          EnvironmentCreationFailure = Class.new(StandardError)
 
-          # When the `ci_dag_limit_needs` is enabled it uses the lower limit
-          LOW_NEEDS_LIMIT = 5
-          HARD_NEEDS_LIMIT = 50
+          delegate :dig, to: :@seed_attributes
 
           def initialize(pipeline, attributes, previous_stages)
             @pipeline = pipeline
             @seed_attributes = attributes
             @previous_stages = previous_stages
             @needs_attributes = dig(:needs_attributes)
+            @resource_group_key = attributes.delete(:resource_group_key)
 
             @using_rules  = attributes.key?(:rules)
             @using_only   = attributes.key?(:only)
@@ -28,7 +27,9 @@ module Gitlab
             @except = Gitlab::Ci::Build::Policy
               .fabricate(attributes.delete(:except))
             @rules = Gitlab::Ci::Build::Rules
-              .new(attributes.delete(:rules))
+              .new(attributes.delete(:rules), default_when: 'on_success')
+            @cache = Seed::Build::Cache
+              .new(pipeline, attributes.delete(:cache))
           end
 
           def name
@@ -38,7 +39,7 @@ module Gitlab
           def included?
             strong_memoize(:inclusion) do
               if @using_rules
-                included_by_rules?
+                rules_result.pass?
               elsif @using_only || @using_except
                 all_of_only? && none_of_except?
               else
@@ -59,6 +60,7 @@ module Gitlab
             @seed_attributes
               .deep_merge(pipeline_attributes)
               .deep_merge(rules_attributes)
+              .deep_merge(cache_attributes)
           end
 
           def bridge?
@@ -73,33 +75,47 @@ module Gitlab
               if bridge?
                 ::Ci::Bridge.new(attributes)
               else
-                ::Ci::Build.new(attributes).tap do |job|
-                  job.deployment = Seed::Deployment.new(job).to_resource
+                ::Ci::Build.new(attributes).tap do |build|
+                  build.assign_attributes(self.class.environment_attributes_for(build))
+                  build.resource_group = Seed::Build::ResourceGroup.new(build, @resource_group_key).to_resource
                 end
               end
             end
           end
 
-          def scoped_variables_hash
-            strong_memoize(:scoped_variables_hash) do
-              # This is a temporary piece of technical debt to allow us access
-              # to the CI variables to evaluate rules before we persist a Build
-              # with the result. We should refactor away the extra Build.new,
-              # but be able to get CI Variables directly from the Seed::Build.
-              ::Ci::Build.new(
-                @seed_attributes.merge(pipeline_attributes)
-              ).scoped_variables_hash
+          def self.environment_attributes_for(build)
+            return {} unless build.has_environment?
+
+            environment = Seed::Environment.new(build).to_resource
+
+            # If there is a validation error on environment creation, such as
+            # the name contains invalid character, the build falls back to a
+            # non-environment job.
+            unless environment.persisted?
+              Gitlab::ErrorTracking.track_exception(
+                EnvironmentCreationFailure.new,
+                project_id: build.project_id,
+                reason: environment.errors.full_messages.to_sentence)
+
+              return { environment: nil }
             end
+
+            {
+              deployment: Seed::Deployment.new(build, environment).to_resource,
+              metadata_attributes: {
+                expanded_environment_name: environment.name
+              }
+            }
           end
 
           private
 
           def all_of_only?
-            @only.all? { |spec| spec.satisfied_by?(@pipeline, self) }
+            @only.all? { |spec| spec.satisfied_by?(@pipeline, evaluate_context) }
           end
 
           def none_of_except?
-            @except.none? { |spec| spec.satisfied_by?(@pipeline, self) }
+            @except.none? { |spec| spec.satisfied_by?(@pipeline, evaluate_context) }
           end
 
           def needs_errors
@@ -122,11 +138,7 @@ module Gitlab
           end
 
           def max_needs_allowed
-            if Feature.enabled?(:ci_dag_limit_needs, @project, default_enabled: true)
-              LOW_NEEDS_LIMIT
-            else
-              HARD_NEEDS_LIMIT
-            end
+            @pipeline.project.actual_limits.ci_needs_size_limit
           end
 
           def pipeline_attributes
@@ -141,13 +153,27 @@ module Gitlab
             }
           end
 
-          def included_by_rules?
-            rules_attributes[:when] != 'never'
+          def rules_attributes
+            return {} unless @using_rules
+
+            rules_result.build_attributes
           end
 
-          def rules_attributes
-            strong_memoize(:rules_attributes) do
-              @using_rules ? @rules.evaluate(@pipeline, self).build_attributes : {}
+          def rules_result
+            strong_memoize(:rules_result) do
+              @rules.evaluate(@pipeline, evaluate_context)
+            end
+          end
+
+          def evaluate_context
+            strong_memoize(:evaluate_context) do
+              Gitlab::Ci::Build::Context::Build.new(@pipeline, @seed_attributes)
+            end
+          end
+
+          def cache_attributes
+            strong_memoize(:cache_attributes) do
+              @cache.build_attributes
             end
           end
         end

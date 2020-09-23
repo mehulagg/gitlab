@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-describe AwardEmojis::ToggleService do
-  set(:user) { create(:user) }
-  set(:project) { create(:project, :public) }
-  set(:awardable) { create(:note, project: project) }
+RSpec.describe AwardEmojis::ToggleService do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :public) }
+  let_it_be(:awardable) { create(:note, project: project) }
   let(:name) { 'thumbsup' }
+
   subject(:service) { described_class.new(awardable, name, user) }
 
   describe '#execute' do

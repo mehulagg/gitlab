@@ -178,62 +178,38 @@ module Gitlab
           timeout: GitalyClient.long_timeout
         )
 
+        if response.pre_receive_error.present?
+          raise Gitlab::Git::PreReceiveError.new(response.pre_receive_error, "GL-HOOK-ERR: pre-receive hook failed.")
+        end
+
         Gitlab::Git::OperationService::BranchUpdate.from_gitaly(response.branch_update)
       rescue GRPC::FailedPrecondition => e
         raise Gitlab::Git::CommitError, e
       end
 
-      def user_cherry_pick(user:, commit:, branch_name:, message:, start_branch_name:, start_repository:)
+      def user_cherry_pick(user:, commit:, branch_name:, message:, start_branch_name:, start_repository:, dry_run: false)
         call_cherry_pick_or_revert(:cherry_pick,
                                    user: user,
                                    commit: commit,
                                    branch_name: branch_name,
                                    message: message,
                                    start_branch_name: start_branch_name,
-                                   start_repository: start_repository)
+                                   start_repository: start_repository,
+                                   dry_run: dry_run)
       end
 
-      def user_revert(user:, commit:, branch_name:, message:, start_branch_name:, start_repository:)
+      def user_revert(user:, commit:, branch_name:, message:, start_branch_name:, start_repository:, dry_run: false)
         call_cherry_pick_or_revert(:revert,
                                    user: user,
                                    commit: commit,
                                    branch_name: branch_name,
                                    message: message,
                                    start_branch_name: start_branch_name,
-                                   start_repository: start_repository)
+                                   start_repository: start_repository,
+                                   dry_run: dry_run)
       end
 
-      # DEPRECATED: https://gitlab.com/gitlab-org/gitaly/issues/1628
-      def user_rebase(user, rebase_id, branch:, branch_sha:, remote_repository:, remote_branch:)
-        request = Gitaly::UserRebaseRequest.new(
-          repository: @gitaly_repo,
-          user: Gitlab::Git::User.from_gitlab(user).to_gitaly,
-          rebase_id: rebase_id.to_s,
-          branch: encode_binary(branch),
-          branch_sha: branch_sha,
-          remote_repository: remote_repository.gitaly_repository,
-          remote_branch: encode_binary(remote_branch)
-        )
-
-        response = GitalyClient.call(
-          @repository.storage,
-          :operation_service,
-          :user_rebase,
-          request,
-          timeout: GitalyClient.long_timeout,
-          remote_storage: remote_repository.storage
-        )
-
-        if response.pre_receive_error.presence
-          raise Gitlab::Git::PreReceiveError, response.pre_receive_error
-        elsif response.git_error.presence
-          raise Gitlab::Git::Repository::GitError, response.git_error
-        else
-          response.rebase_sha
-        end
-      end
-
-      def rebase(user, rebase_id, branch:, branch_sha:, remote_repository:, remote_branch:)
+      def rebase(user, rebase_id, branch:, branch_sha:, remote_repository:, remote_branch:, push_options: [])
         request_enum = QueueEnumerator.new
         rebase_sha = nil
 
@@ -256,7 +232,8 @@ module Gitlab
               branch: encode_binary(branch),
               branch_sha: branch_sha,
               remote_repository: remote_repository.gitaly_repository,
-              remote_branch: encode_binary(remote_branch)
+              remote_branch: encode_binary(remote_branch),
+              git_push_options: push_options
             )
           )
         )
@@ -277,12 +254,11 @@ module Gitlab
         request_enum.close
       end
 
-      def user_squash(user, squash_id, branch, start_sha, end_sha, author, message)
+      def user_squash(user, squash_id, start_sha, end_sha, author, message)
         request = Gitaly::UserSquashRequest.new(
           repository: @gitaly_repo,
           user: Gitlab::Git::User.from_gitlab(user).to_gitaly,
           squash_id: squash_id.to_s,
-          branch: encode_binary(branch),
           start_sha: start_sha,
           end_sha: end_sha,
           author: Gitlab::Git::User.from_gitlab(author).to_gitaly,
@@ -416,7 +392,7 @@ module Gitlab
         response
       end
 
-      def call_cherry_pick_or_revert(rpc, user:, commit:, branch_name:, message:, start_branch_name:, start_repository:)
+      def call_cherry_pick_or_revert(rpc, user:, commit:, branch_name:, message:, start_branch_name:, start_repository:, dry_run:)
         request_class = "Gitaly::User#{rpc.to_s.camelcase}Request".constantize
 
         request = request_class.new(
@@ -426,7 +402,8 @@ module Gitlab
           branch_name: encode_binary(branch_name),
           message: encode_binary(message),
           start_branch_name: encode_binary(start_branch_name.to_s),
-          start_repository: start_repository.gitaly_repository
+          start_repository: start_repository.gitaly_repository,
+          dry_run: dry_run
         )
 
         response = GitalyClient.call(
@@ -447,7 +424,7 @@ module Gitlab
         elsif response.commit_error.presence
           raise Gitlab::Git::CommitError, response.commit_error
         elsif response.create_tree_error.presence
-          raise Gitlab::Git::Repository::CreateTreeError, response.create_tree_error
+          raise Gitlab::Git::Repository::CreateTreeError, response.create_tree_error_code
         end
 
         Gitlab::Git::OperationService::BranchUpdate.from_gitaly(response.branch_update)

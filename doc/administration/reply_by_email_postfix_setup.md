@@ -1,7 +1,7 @@
 # Set up Postfix for incoming email
 
 This document will take you through the steps of setting up a basic Postfix mail
-server with IMAP authentication on Ubuntu, to be used with [incoming email].
+server with IMAP authentication on Ubuntu, to be used with [incoming email](incoming_email.md).
 
 The instructions make the assumption that you will be using the email address `incoming@gitlab.example.com`, that is, username `incoming` on host `gitlab.example.com`. Don't forget to change it to your actual host when executing the example code snippets.
 
@@ -14,7 +14,7 @@ The instructions make the assumption that you will be using the email address `i
 
 1. Install the `postfix` package if it is not installed already:
 
-   ```sh
+   ```shell
    sudo apt-get install postfix
    ```
 
@@ -22,7 +22,7 @@ The instructions make the assumption that you will be using the email address `i
 
 1. Install the `mailutils` package.
 
-   ```sh
+   ```shell
    sudo apt-get install mailutils
    ```
 
@@ -30,13 +30,13 @@ The instructions make the assumption that you will be using the email address `i
 
 1. Create a user for incoming email.
 
-   ```sh
+   ```shell
    sudo useradd -m -s /bin/bash incoming
    ```
 
 1. Set a password for this user.
 
-   ```sh
+   ```shell
    sudo passwd incoming
    ```
 
@@ -46,13 +46,13 @@ The instructions make the assumption that you will be using the email address `i
 
 1. Connect to the local SMTP server:
 
-   ```sh
+   ```shell
    telnet localhost 25
    ```
 
    You should see a prompt like this:
 
-   ```sh
+   ```shell
    Trying 127.0.0.1...
    Connected to localhost.
    Escape character is '^]'.
@@ -61,19 +61,19 @@ The instructions make the assumption that you will be using the email address `i
 
    If you get a `Connection refused` error instead, verify that `postfix` is running:
 
-   ```sh
+   ```shell
    sudo postfix status
    ```
 
    If it is not, start it:
 
-   ```sh
+   ```shell
    sudo postfix start
    ```
 
 1. Send the new `incoming` user a dummy email to test SMTP, by entering the following into the SMTP prompt:
 
-   ```
+   ```plaintext
    ehlo localhost
    mail from: root@localhost
    rcpt to: incoming@localhost
@@ -94,27 +94,27 @@ The instructions make the assumption that you will be using the email address `i
 
 1. Check if the `incoming` user received the email:
 
-   ```sh
+   ```shell
    su - incoming
    mail
    ```
 
    You should see output like this:
 
-   ```
+   ```plaintext
    "/var/mail/incoming": 1 message 1 unread
    >U   1 root@localhost                           59/2842  Re: Some issue
    ```
 
    Quit the mail app:
 
-   ```sh
+   ```shell
    q
    ```
 
 1. Log out of the `incoming` account and go back to being `root`:
 
-   ```sh
+   ```shell
    logout
    ```
 
@@ -124,13 +124,13 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
 1. Configure Postfix to use Maildir-style mailboxes:
 
-   ```sh
+   ```shell
    sudo postconf -e "home_mailbox = Maildir/"
    ```
 
 1. Restart Postfix:
 
-   ```sh
+   ```shell
    sudo /etc/init.d/postfix restart
    ```
 
@@ -139,7 +139,7 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
    1. Follow steps 1 and 2 of _[Test the out-of-the-box setup](#test-the-out-of-the-box-setup)_.
    1. Check if the `incoming` user received the email:
 
-      ```sh
+      ```shell
       su - incoming
       MAIL=/home/incoming/Maildir
       mail
@@ -147,14 +147,14 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
       You should see output like this:
 
-      ```
+      ```plaintext
       "/home/incoming/Maildir": 1 message 1 unread
       >U   1 root@localhost                           59/2842  Re: Some issue
       ```
 
       Quit the mail app:
 
-      ```sh
+      ```shell
       q
       ```
 
@@ -166,7 +166,7 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
 1. Log out of the `incoming` account and go back to being `root`:
 
-   ```sh
+   ```shell
    logout
    ```
 
@@ -174,25 +174,25 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
 1. Install the `courier-imap` package:
 
-   ```sh
+   ```shell
    sudo apt-get install courier-imap
    ```
 
    And start `imapd`:
 
-   ```sh
+   ```shell
    imapd start
    ```
 
-1. The courier-authdaemon isn't started after installation. Without it, imap authentication will fail:
+1. The `courier-authdaemon` isn't started after installation. Without it, IMAP authentication will fail:
 
-   ```sh
+   ```shell
    sudo service courier-authdaemon start
    ```
 
-   You can also configure courier-authdaemon to start on boot:
+   You can also configure `courier-authdaemon` to start on boot:
 
-   ```sh
+   ```shell
    sudo systemctl enable courier-authdaemon
    ```
 
@@ -200,7 +200,7 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
 1. Let Postfix know about the domains that it should consider local:
 
-   ```sh
+   ```shell
    sudo postconf -e "mydestination = gitlab.example.com, localhost.localdomain, localhost"
    ```
 
@@ -208,25 +208,25 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
    We'll assume `192.168.1.0/24` is your local LAN. You can safely skip this step if you don't have other machines in the same local network.
 
-   ```sh
+   ```shell
    sudo postconf -e "mynetworks = 127.0.0.0/8, 192.168.1.0/24"
    ```
 
 1. Configure Postfix to receive mail on all interfaces, which includes the internet:
 
-   ```sh
+   ```shell
    sudo postconf -e "inet_interfaces = all"
    ```
 
 1. Configure Postfix to use the `+` delimiter for sub-addressing:
 
-   ```sh
+   ```shell
    sudo postconf -e "recipient_delimiter = +"
    ```
 
 1. Restart Postfix:
 
-   ```sh
+   ```shell
    sudo service postfix restart
    ```
 
@@ -236,13 +236,13 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
    1. Connect to the SMTP server:
 
-      ```sh
+      ```shell
       telnet gitlab.example.com 25
       ```
 
       You should see a prompt like this:
 
-      ```sh
+      ```shell
       Trying 123.123.123.123...
       Connected to gitlab.example.com.
       Escape character is '^]'.
@@ -253,7 +253,7 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
    1. Send the `incoming` user a dummy email to test SMTP, by entering the following into the SMTP prompt:
 
-      ```
+      ```plaintext
       ehlo gitlab.example.com
       mail from: root@gitlab.example.com
       rcpt to: incoming@gitlab.example.com
@@ -269,7 +269,7 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
    1. Check if the `incoming` user received the email:
 
-      ```sh
+      ```shell
       su - incoming
       MAIL=/home/incoming/Maildir
       mail
@@ -277,20 +277,20 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
       You should see output like this:
 
-      ```
+      ```plaintext
       "/home/incoming/Maildir": 1 message 1 unread
       >U   1 root@gitlab.example.com                           59/2842  Re: Some issue
       ```
 
       Quit the mail app:
 
-      ```sh
+      ```shell
       q
       ```
 
    1. Log out of the `incoming` account and go back to being `root`:
 
-      ```sh
+      ```shell
       logout
       ```
 
@@ -298,22 +298,22 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
    1. Connect to the IMAP server:
 
-      ```sh
+      ```shell
       telnet gitlab.example.com 143
       ```
 
       You should see a prompt like this:
 
-      ```sh
+      ```shell
       Trying 123.123.123.123...
-      Connected to mail.example.gitlab.com.
+      Connected to mail.gitlab.example.com.
       Escape character is '^]'.
       - OK [CAPABILITY IMAP4rev1 UIDPLUS CHILDREN NAMESPACE THREAD=ORDEREDSUBJECT THREAD=REFERENCES SORT QUOTA IDLE ACL ACL2=UNION] Courier-IMAP ready. Copyright 1998-2011 Double Precision, Inc.  See COPYING for distribution information.
       ```
 
    1. Sign in as the `incoming` user to test IMAP, by entering the following into the IMAP prompt:
 
-      ```
+      ```plaintext
       a login incoming PASSWORD
       ```
 
@@ -321,22 +321,20 @@ Courier, which we will install later to add IMAP authentication, requires mailbo
 
       You should see output like this:
 
-      ```
+      ```plaintext
       a OK LOGIN Ok.
       ```
 
    1. Disconnect from the IMAP server:
 
-      ```sh
+      ```shell
       a logout
       ```
 
 ## Done
 
-If all the tests were successful, Postfix is all set up and ready to receive email! Continue with the [incoming email] guide to configure GitLab.
+If all the tests were successful, Postfix is all set up and ready to receive email! Continue with the [incoming email](incoming_email.md) guide to configure GitLab.
 
 ---
 
 _This document was adapted from <https://help.ubuntu.com/community/PostfixBasicSetupHowto>, by contributors to the Ubuntu documentation wiki._
-
-[incoming email]: incoming_email.md

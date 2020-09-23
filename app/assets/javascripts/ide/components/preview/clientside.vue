@@ -1,6 +1,6 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import _ from 'underscore';
+import { isEmpty } from 'lodash';
 import { Manager } from 'smooshpack';
 import { listen } from 'codesandbox-api';
 import { GlLoadingIcon } from '@gitlab/ui';
@@ -21,7 +21,7 @@ export default {
     };
   },
   computed: {
-    ...mapState(['entries', 'promotionSvgPath', 'links']),
+    ...mapState(['entries', 'promotionSvgPath', 'links', 'codesandboxBundlerUrl']),
     ...mapGetters(['packageJson', 'currentProject']),
     normalizedEntries() {
       return Object.keys(this.entries).reduce((acc, path) => {
@@ -78,7 +78,7 @@ export default {
       .then(() => this.initPreview());
   },
   beforeDestroy() {
-    if (!_.isEmpty(this.manager)) {
+    if (!isEmpty(this.manager)) {
       this.manager.listener();
     }
     this.manager = {};
@@ -106,12 +106,7 @@ export default {
       return this.loadFileContent(this.mainEntry)
         .then(() => this.$nextTick())
         .then(() => {
-          this.initManager('#ide-preview', this.sandboxOpts, {
-            fileResolver: {
-              isFile: p => Promise.resolve(Boolean(this.entries[createPathWithExt(p)])),
-              readFile: p => this.loadFileContent(createPathWithExt(p)).then(content => content),
-            },
-          });
+          this.initManager();
 
           this.listener = listen(e => {
             switch (e.type) {
@@ -130,7 +125,7 @@ export default {
       clearTimeout(this.timeout);
 
       this.timeout = setTimeout(() => {
-        if (_.isEmpty(this.manager)) {
+        if (isEmpty(this.manager)) {
           this.initPreview();
 
           return;
@@ -139,8 +134,18 @@ export default {
         this.manager.updatePreview(this.sandboxOpts);
       }, 250);
     },
-    initManager(el, opts, resolver) {
-      this.manager = new Manager(el, opts, resolver);
+    initManager() {
+      const { codesandboxBundlerUrl: bundlerURL } = this;
+
+      const settings = {
+        fileResolver: {
+          isFile: p => Promise.resolve(Boolean(this.entries[createPathWithExt(p)])),
+          readFile: p => this.loadFileContent(createPathWithExt(p)).then(content => content),
+        },
+        ...(bundlerURL ? { bundlerURL } : {}),
+      };
+
+      this.manager = new Manager('#ide-preview', this.sandboxOpts, settings);
     },
   },
 };
@@ -171,6 +176,6 @@ export default {
         {{ s__('IDE|Get started with Live Preview') }}
       </a>
     </div>
-    <gl-loading-icon v-else :size="2" class="align-self-center mt-auto mb-auto" />
+    <gl-loading-icon v-else size="lg" class="align-self-center mt-auto mb-auto" />
   </div>
 </template>

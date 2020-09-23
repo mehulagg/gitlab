@@ -2,16 +2,16 @@
 
 require 'spec_helper'
 
-describe MarkupHelper do
-  set(:project) { create(:project, :repository) }
-  set(:user) do
+RSpec.describe MarkupHelper do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) do
     user = create(:user, username: 'gfm')
     project.add_maintainer(user)
     user
   end
-  set(:issue) { create(:issue, project: project) }
-  set(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
-  set(:snippet) { create(:project_snippet, project: project) }
+  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
+  let_it_be(:snippet) { create(:project_snippet, project: project) }
   let(:commit) { project.commit }
 
   before do
@@ -44,8 +44,9 @@ describe MarkupHelper do
 
     describe "override default project" do
       let(:actual) { issue.to_reference }
-      set(:second_project) { create(:project, :public) }
-      set(:second_issue) { create(:issue, project: second_project) }
+
+      let_it_be(:second_project) { create(:project, :public) }
+      let_it_be(:second_issue) { create(:issue, project: second_project) }
 
       it 'links to the issue' do
         expected = urls.project_issue_path(second_project, second_issue)
@@ -55,7 +56,8 @@ describe MarkupHelper do
 
     describe 'uploads' do
       let(:text) { "![ImageTest](/uploads/test.png)" }
-      set(:group) { create(:group) }
+
+      let_it_be(:group) { create(:group) }
 
       subject { helper.markdown(text) }
 
@@ -77,7 +79,7 @@ describe MarkupHelper do
       end
 
       describe "with a group in the context" do
-        set(:project_in_group) { create(:project, group: group) }
+        let_it_be(:project_in_group) { create(:project, group: group) }
 
         before do
           helper.instance_variable_set(:@group, group)
@@ -86,6 +88,66 @@ describe MarkupHelper do
 
         it 'renders uploads relative to project' do
           expect(subject).to include("#{project_in_group.path_with_namespace}/uploads/test.png")
+        end
+      end
+    end
+
+    context 'when text contains a relative link to an image in the repository' do
+      let(:image_file) { "logo-white.png" }
+      let(:text_with_relative_path) { "![](./#{image_file})\n" }
+      let(:generated_html) { helper.markdown(text_with_relative_path, requested_path: requested_path, ref: ref) }
+
+      subject { Nokogiri::HTML.parse(generated_html) }
+
+      context 'when requested_path is provided, but ref isn\'t' do
+        let(:requested_path) { 'files/images/README.md' }
+        let(:ref) { nil }
+
+        it 'returns the correct HTML for the image' do
+          expanded_path = "/#{project.full_path}/-/raw/master/files/images/#{image_file}"
+
+          expect(subject.css('a')[0].attr('href')).to eq(expanded_path)
+          expect(subject.css('img')[0].attr('data-src')).to eq(expanded_path)
+        end
+      end
+
+      context 'when requested_path and ref parameters are both provided' do
+        let(:requested_path) { 'files/images/README.md' }
+        let(:ref) { 'other_branch' }
+
+        it 'returns the correct HTML for the image' do
+          project.repository.create_branch('other_branch')
+
+          expanded_path = "/#{project.full_path}/-/raw/#{ref}/files/images/#{image_file}"
+
+          expect(subject.css('a')[0].attr('href')).to eq(expanded_path)
+          expect(subject.css('img')[0].attr('data-src')).to eq(expanded_path)
+        end
+      end
+
+      context 'when ref is provided, but requested_path isn\'t' do
+        let(:ref) { 'other_branch' }
+        let(:requested_path) { nil }
+
+        it 'returns the correct HTML for the image' do
+          project.repository.create_branch('other_branch')
+
+          expanded_path = "/#{project.full_path}/-/blob/#{ref}/./#{image_file}"
+
+          expect(subject.css('a')[0].attr('href')).to eq(expanded_path)
+          expect(subject.css('img')[0].attr('data-src')).to eq(expanded_path)
+        end
+      end
+
+      context 'when neither requested_path, nor ref parameter is provided' do
+        let(:ref) { nil }
+        let(:requested_path) { nil }
+
+        it 'returns the correct HTML for the image' do
+          expanded_path = "/#{project.full_path}/-/blob/master/./#{image_file}"
+
+          expect(subject.css('a')[0].attr('href')).to eq(expanded_path)
+          expect(subject.css('img')[0].attr('data-src')).to eq(expanded_path)
         end
       end
     end
@@ -107,8 +169,18 @@ describe MarkupHelper do
     describe 'without redacted attribute' do
       it 'renders the markdown value' do
         expect(Banzai).to receive(:render_field).with(commit, attribute, {}).and_call_original
+        expect(Banzai).to receive(:post_process)
 
         helper.markdown_field(commit, attribute)
+      end
+    end
+
+    context 'when post_process is false' do
+      it 'does not run Markdown post processing' do
+        expect(Banzai).to receive(:render_field).with(commit, attribute, {}).and_call_original
+        expect(Banzai).not_to receive(:post_process)
+
+        helper.markdown_field(commit, attribute, post_process: false)
       end
     end
   end
@@ -242,17 +314,20 @@ describe MarkupHelper do
 
   describe '#render_wiki_content' do
     let(:wiki) { double('WikiPage', path: "file.#{extension}") }
+    let(:wiki_repository) { double('Repository') }
     let(:context) do
       {
-        pipeline: :wiki, project: project, project_wiki: wiki,
-        page_slug: 'nested/page', issuable_state_filter_enabled: true
+        pipeline: :wiki, project: project, wiki: wiki,
+        page_slug: 'nested/page', issuable_state_filter_enabled: true,
+        repository: wiki_repository
       }
     end
 
     before do
       expect(wiki).to receive(:content).and_return('wiki content')
       expect(wiki).to receive(:slug).and_return('nested/page')
-      helper.instance_variable_set(:@project_wiki, wiki)
+      expect(wiki).to receive(:repository).and_return(wiki_repository)
+      helper.instance_variable_set(:@wiki, wiki)
     end
 
     context 'when file is Markdown' do
@@ -323,10 +398,10 @@ describe MarkupHelper do
   describe '#markup_unsafe' do
     subject { helper.markup_unsafe(file_name, text, context) }
 
+    let_it_be(:project_base) { create(:project, :repository) }
+    let_it_be(:context) { { project: project_base } }
     let(:file_name) { 'foo.bar' }
     let(:text) { 'Noël' }
-    let(:project_base) { build(:project, :repository) }
-    let(:context) { { project: project_base } }
 
     context 'when text is missing' do
       let(:text) { nil }
@@ -349,11 +424,20 @@ describe MarkupHelper do
 
       context 'when renderer returns an error' do
         before do
-          allow(Banzai).to receive(:render).and_raise("An error")
+          allow(Banzai).to receive(:render).and_raise(StandardError, "An error")
         end
 
         it 'returns html (rendered by ActionView:TextHelper)' do
           is_expected.to eq('<p>Noël</p>')
+        end
+
+        it 'logs the error' do
+          expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
+            instance_of(StandardError),
+            project_id: project.id, file_name: 'foo.md'
+          )
+
+          subject
         end
       end
     end
@@ -379,7 +463,7 @@ describe MarkupHelper do
     end
 
     context 'when file has an unknown type' do
-      let(:file_name) { 'foo' }
+      let(:file_name) { 'foo.tex' }
 
       it 'returns html (rendered by Gitlab::OtherMarkup)' do
         expected_html = 'Noël'
@@ -478,15 +562,28 @@ describe MarkupHelper do
 
         it 'preserves style attribute for a label that can be accessed by current_user' do
           project = create(:project, :public)
+          label = create_and_format_label(project)
 
-          expect(create_and_format_label(project)).to match(/span class=.*style=.*/)
+          expect(label).to match(/span class=.*style=.*/)
+          expect(label).to include('data-html="true"')
         end
 
         it 'does not style a label that can not be accessed by current_user' do
           project = create(:project, :private)
+          label = create_and_format_label(project)
 
-          expect(create_and_format_label(project)).to eq("<p>#{label_title}</p>")
+          expect(label).to include("~label_1")
+          expect(label).not_to match(/span class=.*style=.*/)
         end
+      end
+
+      it 'keeps whitelisted tags' do
+        html = '<a><i></i></a> <strong>strong</strong><em>em</em><b>b</b>'
+
+        object = create_object(html)
+        result = first_line_in_markdown(object, attribute, 100, project: project)
+
+        expect(result).to include(html)
       end
 
       it 'truncates Markdown properly' do
@@ -521,6 +618,14 @@ describe MarkupHelper do
         expect(doc.css('gl-emoji')[1].attr('data-name')).to eq 'grinning'
 
         expect(doc.content).to eq "foo 😉\nbar 😀"
+      end
+
+      it 'does not post-process truncated text', :request_store do
+        object = create_object("hello \n\n [Test](README.md)")
+
+        expect do
+          first_line_in_markdown(object, attribute, nil, project: project)
+        end.not_to change { Gitlab::GitalyClient.get_request_count }
       end
     end
 

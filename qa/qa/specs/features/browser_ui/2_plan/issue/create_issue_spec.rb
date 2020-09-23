@@ -1,23 +1,41 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan', :smoke do
+  RSpec.describe 'Plan', :smoke do
     describe 'Issue creation' do
-      let(:issue_title) { 'issue title' }
+      let(:closed_issue) { Resource::Issue.fabricate_via_api! }
 
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
       end
 
-      it 'user creates an issue' do
-        Resource::Issue.fabricate_via_browser_ui! do |issue|
-          issue.title = issue_title
-        end
+      it 'creates an issue', :reliable, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/432' do
+        issue = Resource::Issue.fabricate_via_browser_ui!
 
         Page::Project::Menu.perform(&:click_issues)
 
-        expect(page).to have_content(issue_title)
+        Page::Project::Issue::Index.perform do |index|
+          expect(index).to have_issue(issue)
+        end
+      end
+
+      it 'closes an issue', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/225303', type: :bug }, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/852' do
+        closed_issue.visit!
+
+        Page::Project::Issue::Show.perform do |issue_page|
+          issue_page.click_close_issue_button
+
+          expect(issue_page).to have_element(:reopen_issue_button)
+        end
+
+        Page::Project::Menu.perform(&:click_issues)
+        Page::Project::Issue::Index.perform do |index|
+          expect(index).not_to have_issue(closed_issue)
+
+          index.click_closed_issues_link
+
+          expect(index).to have_issue(closed_issue)
+        end
       end
 
       context 'when using attachments in comments', :object_storage do
@@ -27,14 +45,10 @@ module QA
         end
 
         before do
-          issue = Resource::Issue.fabricate_via_api! do |issue|
-            issue.title = issue_title
-          end
-
-          issue.visit!
+          Resource::Issue.fabricate_via_api!.visit!
         end
 
-        it 'user comments on an issue with an attachment' do
+        it 'comments on an issue with an attachment', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/393' do
           Page::Project::Issue::Show.perform do |show|
             show.comment('See attached banana for scale', attachment: file_to_attach)
 

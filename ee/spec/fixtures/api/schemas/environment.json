@@ -1,76 +1,88 @@
 {
-    "type": "object",
-    "additionalProperties": false,
-    "required": [
-        "id",
-        "name",
-        "state",
-        "last_deployment",
-        "environment_path",
-        "created_at",
-        "updated_at"
-    ],
-    "properties": {
-        "id": {
-            "type": "integer"
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "name",
+    "state",
+    "last_deployment",
+    "environment_path",
+    "created_at",
+    "updated_at"
+  ],
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "name_without_type": {
+      "type": "string"
+    },
+    "state": {
+      "type": "string"
+    },
+    "external_url": {
+      "type": "string"
+    },
+    "environment_type": {
+      "type": ["string", "null"]
+    },
+    "last_deployment": {
+      "oneOf": [
+        {
+          "$ref": "../../../../../spec/fixtures/api/schemas/deployment.json"
         },
-        "name": {
-            "type": "string"
-        },
-        "name_without_type": {
-          "type": "string"
-        },
-        "state": {
-            "type": "string"
-        },
-        "external_url": {
-            "type": "string"
-        },
-        "environment_type": {
-            "type": [
-                "string",
-                "null"
-            ]
-        },
-        "last_deployment": {
-            "oneOf": [
-                {
-                    "$ref": "../../../../../spec/fixtures/api/schemas/deployment.json"
-                },
-                {
-                    "type": ["null"]
-                }
-            ]
-        },
-        "has_stop_action": {
-            "type": "boolean"
-        },
-        "rollout_status": {
-            "$ref": "rollout_status.json"
-        },
-        "environment_path": {
-            "type": "string"
-        },
-        "stop_path": {
-            "type": "string"
-        },
-        "terminal_path": {
-            "type": "string"
-        },
-        "folder_path": {
-            "type": "string"
-        },
-        "logs_path": {
-            "type": "string"
-        },
-        "created_at": {
-            "type": "date"
-        },
-        "updated_at": {
-            "type": "date"
-        },
-        "can_stop": {
-            "type": "boolean"
+        {
+          "type": ["null"]
         }
+      ]
+    },
+    "has_stop_action": {
+      "type": "boolean"
+    },
+    "rollout_status": {
+      "$ref": "rollout_status.json"
+    },
+    "environment_path": {
+      "type": "string"
+    },
+    "stop_path": {
+      "type": "string"
+    },
+    "terminal_path": {
+      "type": "string"
+    },
+    "folder_path": {
+      "type": "string"
+    },
+    "logs_path": {
+      "type": "string"
+    },
+    "logs_api_path": {
+      "type": "string"
+    },
+    "enable_advanced_logs_querying": {
+      "type": "boolean"
+    },
+    "created_at": {
+      "type": "date"
+    },
+    "updated_at": {
+      "type": "date"
+    },
+    "can_stop": {
+      "type": "boolean"
+    },
+    "has_opened_alert": { "type": "boolean" },
+    "cancel_auto_stop_path": { "type": "string" },
+    "auto_stop_at": { "type": "string", "format": "date-time" },
+    "can_delete": {
+      "type": "boolean"
+    },
+    "delete_path": {
+      "type": "string"
     }
+  }
 }

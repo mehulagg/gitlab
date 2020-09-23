@@ -3,11 +3,10 @@
 require 'securerandom'
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan' do
     describe 'Group issue boards' do
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         group = QA::Resource::Group.fabricate_via_api!
 
@@ -18,8 +17,8 @@ module QA
         Page::Group::Menu.perform(&:go_to_issue_boards)
       end
 
-      it 'creates a group issue board via the GUI' do
-        EE::Page::Component::IssueBoard::Show.perform do |show|
+      it 'creates a group issue board via the GUI', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/576' do
+        Page::Component::IssueBoard::Show.perform do |show|
           new_board = "Board-#{SecureRandom.hex(4)}"
 
           show.create_new_board(new_board)

@@ -9,16 +9,18 @@ module Gitlab
         new(*args).save
       end
 
-      def initialize(project:, shared:)
-        @project = project
+      def initialize(exportable:, shared:)
+        @exportable = exportable
         @shared = shared
       end
 
       def save
         if compress_and_save
-          remove_export_path
-
-          Rails.logger.info("Saved project export #{archive_file}") # rubocop:disable Gitlab/RailsLogger
+          Gitlab::Export::Logger.info(
+            message: 'Export archive saved',
+            exportable_class: @exportable.class.to_s,
+            archive_file: archive_file
+          )
 
           save_upload
         else
@@ -29,8 +31,7 @@ module Gitlab
         @shared.error(e)
         false
       ensure
-        remove_archive
-        remove_export_path
+        remove_base_tmp_dir
       end
 
       private
@@ -39,20 +40,16 @@ module Gitlab
         tar_czf(archive: archive_file, dir: @shared.export_path)
       end
 
-      def remove_export_path
-        FileUtils.rm_rf(@shared.export_path)
-      end
-
-      def remove_archive
-        FileUtils.rm_rf(@shared.archive_path)
+      def remove_base_tmp_dir
+        FileUtils.rm_rf(@shared.base_path)
       end
 
       def archive_file
-        @archive_file ||= File.join(@shared.archive_path, Gitlab::ImportExport.export_filename(project: @project))
+        @archive_file ||= File.join(@shared.archive_path, Gitlab::ImportExport.export_filename(exportable: @exportable))
       end
 
       def save_upload
-        upload = ImportExportUpload.find_or_initialize_by(project: @project)
+        upload = initialize_upload
 
         File.open(archive_file) { |file| upload.export_file = file }
 
@@ -61,6 +58,12 @@ module Gitlab
 
       def error_message
         "Unable to save #{archive_file} into #{@shared.export_path}."
+      end
+
+      def initialize_upload
+        exportable_kind = @exportable.class.name.downcase
+
+        ImportExportUpload.find_or_initialize_by(Hash[exportable_kind, @exportable])
       end
     end
   end

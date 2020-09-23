@@ -2,25 +2,22 @@
 
 require 'spec_helper'
 
-describe CommitRange do
+RSpec.describe CommitRange do
+  let(:range2) { described_class.new("#{sha_from}..#{sha_to}", project) }
+  let(:range)  { described_class.new("#{sha_from}...#{sha_to}", project) }
+  let(:full_sha_to)   { commit2.id }
+  let(:full_sha_from) { commit1.id }
+  let(:sha_to)   { commit2.short_id }
+  let(:sha_from) { commit1.short_id }
+  let!(:commit2) { project.commit }
+  let!(:commit1) { project.commit("HEAD~2") }
+  let!(:project) { create(:project, :public, :repository) }
+
   describe 'modules' do
     subject { described_class }
 
     it { is_expected.to include_module(Referable) }
   end
-
-  let!(:project) { create(:project, :public, :repository) }
-  let!(:commit1) { project.commit("HEAD~2") }
-  let!(:commit2) { project.commit }
-
-  let(:sha_from) { commit1.short_id }
-  let(:sha_to)   { commit2.short_id }
-
-  let(:full_sha_from) { commit1.id }
-  let(:full_sha_to)   { commit2.id }
-
-  let(:range)  { described_class.new("#{sha_from}...#{sha_to}", project) }
-  let(:range2) { described_class.new("#{sha_from}..#{sha_to}", project) }
 
   it 'raises ArgumentError when given an invalid range string' do
     expect { described_class.new("Foo", project) }.to raise_error(ArgumentError)
@@ -135,31 +132,6 @@ describe CommitRange do
       it 'returns false' do
         expect(range).not_to be_valid_commits
       end
-    end
-  end
-
-  describe '#has_been_reverted?' do
-    let(:user) { create(:user) }
-    let(:issue) { create(:issue, author: user, project: project) }
-
-    it 'returns true if the commit has been reverted' do
-      create(:note_on_issue,
-             noteable: issue,
-             system: true,
-             note: commit1.revert_description(user),
-             project: issue.project)
-
-      expect_next_instance_of(Commit) do |commit|
-        expect(commit).to receive(:reverts_commit?)
-          .with(commit1, user)
-          .and_return(true)
-      end
-
-      expect(commit1.has_been_reverted?(user, issue.notes_with_associations)).to eq(true)
-    end
-
-    it 'returns false if the commit has not been reverted' do
-      expect(commit1.has_been_reverted?(user, issue.notes_with_associations)).to eq(false)
     end
   end
 end

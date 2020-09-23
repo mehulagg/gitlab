@@ -5,7 +5,12 @@ THROUGHPUT_LABELS = [
   'security',
   'bug',
   'feature',
-  'backstage'
+  'feature::addition',
+  'feature::maintenance',
+  'tooling',
+  'tooling::pipelines',
+  'tooling::workflow',
+  'documentation'
 ].freeze
 
 if gitlab.mr_body.size < 5
@@ -32,7 +37,7 @@ end
 
 has_pick_into_stable_label = gitlab.mr_labels.find { |label| label.start_with?('Pick into') }
 
-if gitlab.branch_for_base != "master" && !has_pick_into_stable_label
+if gitlab.branch_for_base != "master" && !has_pick_into_stable_label && !helper.security_mr?
   warn "Most of the time, merge requests should target `master`. Otherwise, please set the relevant `Pick into X.Y` label."
 end
 

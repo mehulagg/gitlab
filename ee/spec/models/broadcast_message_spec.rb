@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe BroadcastMessage do
+RSpec.describe BroadcastMessage do
   subject { build(:broadcast_message) }
 
   describe '.current', :use_clean_rails_memory_store_caching do
     context 'without Geo' do
       it 'caches the output of the query for two weeks' do
-        expect(Gitlab::Geo).to receive(:enabled?).and_return(false).exactly(2).times
+        expect(Gitlab::Geo).to receive(:enabled?).and_return(false).twice
 
         create(:broadcast_message)
 
@@ -25,7 +25,7 @@ describe BroadcastMessage do
     context 'with Geo' do
       context 'on the primary' do
         it 'caches the output of the query for two weeks' do
-          expect(Gitlab::Geo).to receive(:enabled?).and_return(false).exactly(2).times
+          expect(Gitlab::Geo).to receive(:enabled?).and_return(false).twice
 
           create(:broadcast_message)
 

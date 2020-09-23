@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::IssuableFinder, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::GithubImport::IssuableFinder, :clean_gitlab_redis_cache do
   let(:project) { double(:project, id: 4) }
   let(:issue) do
     double(:issue, issuable_type: MergeRequest, iid: 1)
@@ -28,7 +30,7 @@ describe Gitlab::GithubImport::IssuableFinder, :clean_gitlab_redis_cache do
 
   describe '#cache_database_id' do
     it 'caches the ID of a database row' do
-      expect(Gitlab::GithubImport::Caching)
+      expect(Gitlab::Cache::Import::Caching)
         .to receive(:write)
         .with('github-import/issuable-finder/4/MergeRequest/1', 10)
 

@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Git::GitmodulesParser do
+RSpec.describe Gitlab::Git::GitmodulesParser do
   it 'parses a .gitmodules file correctly' do
     data = <<~GITMODULES
       [submodule "vendor/libgit2"]

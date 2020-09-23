@@ -2,12 +2,14 @@
  * @module common-utils
  */
 
+import { GlBreakpointInstance as breakpointInstance } from '@gitlab/ui/dist/utils';
 import $ from 'jquery';
+import { isFunction } from 'lodash';
+import Cookies from 'js-cookie';
 import axios from './axios_utils';
 import { getLocationHash } from './url_utility';
-import { convertToCamelCase } from './text_utility';
+import { convertToCamelCase, convertToSnakeCase } from './text_utility';
 import { isObject } from './type_utility';
-import breakpointInstance from '../../breakpoints';
 
 export const getPagePath = (index = 0) => {
   const page = $('body').attr('data-page') || '';
@@ -29,7 +31,7 @@ export const getProjectSlug = () => {
 };
 
 export const getGroupSlug = () => {
-  if (isInGroupsPage()) {
+  if (isInProjectPage() || isInGroupsPage()) {
     return $('body').data('group');
   }
   return null;
@@ -50,16 +52,6 @@ export const getCspNonceValue = () => {
   const metaTag = document.querySelector('meta[name=csp-nonce]');
   return metaTag && metaTag.content;
 };
-
-export const ajaxGet = url =>
-  axios
-    .get(url, {
-      params: { format: 'js' },
-      responseType: 'text',
-    })
-    .then(({ data }) => {
-      $.globalEval(data, { nonce: getCspNonceValue() });
-    });
 
 export const rstrip = val => {
   if (val) {
@@ -103,6 +95,7 @@ export const handleLocationHash = () => {
   const topPadding = 8;
   const diffFileHeader = document.querySelector('.js-file-title');
   const versionMenusContainer = document.querySelector('.mr-version-menus-container');
+  const fixedIssuableTitle = document.querySelector('.issue-sticky-header');
 
   let adjustment = 0;
   if (fixedNav) adjustment -= fixedNav.offsetHeight;
@@ -131,11 +124,17 @@ export const handleLocationHash = () => {
     adjustment -= versionMenusContainer.offsetHeight;
   }
 
+  if (isInIssuePage()) {
+    adjustment -= fixedIssuableTitle.offsetHeight;
+  }
+
   if (isInMRPage()) {
     adjustment -= topPadding;
   }
 
-  window.scrollBy(0, adjustment);
+  setTimeout(() => {
+    window.scrollBy(0, adjustment);
+  });
 };
 
 // Check if element scrolled into viewport from above or below
@@ -240,19 +239,26 @@ export const contentTop = () => {
   );
 };
 
-export const scrollToElement = element => {
+export const scrollToElement = (element, options = {}) => {
   let $el = element;
   if (!(element instanceof $)) {
     $el = $(element);
   }
   const { top } = $el.offset();
+  const { offset = 0 } = options;
 
+  // eslint-disable-next-line no-jquery/no-animate
   return $('body, html').animate(
     {
-      scrollTop: top - contentTop(),
+      scrollTop: top - contentTop() + offset,
     },
     200,
   );
+};
+
+export const scrollToElementWithContext = element => {
+  const offsetMultiplier = -0.1;
+  return scrollToElement(element, { offset: window.innerHeight * offsetMultiplier });
 };
 
 /**
@@ -324,7 +330,10 @@ export const getSelectedFragment = restrictToNode => {
       documentFragment.originalNodes.push(range.commonAncestorContainer);
     }
   }
-  if (documentFragment.textContent.length === 0) return null;
+
+  if (documentFragment.textContent.length === 0 && documentFragment.children.length === 0) {
+    return null;
+  }
 
   return documentFragment;
 };
@@ -356,34 +365,6 @@ export const insertText = (target, text) => {
   target.dispatchEvent(event);
 };
 
-export const nodeMatchesSelector = (node, selector) => {
-  const matches =
-    Element.prototype.matches ||
-    Element.prototype.matchesSelector ||
-    Element.prototype.mozMatchesSelector ||
-    Element.prototype.msMatchesSelector ||
-    Element.prototype.oMatchesSelector ||
-    Element.prototype.webkitMatchesSelector;
-
-  if (matches) {
-    return matches.call(node, selector);
-  }
-
-  // IE11 doesn't support `node.matches(selector)`
-
-  let { parentNode } = node;
-
-  if (!parentNode) {
-    parentNode = document.createElement('div');
-    // eslint-disable-next-line no-param-reassign
-    node = node.cloneNode(true);
-    parentNode.appendChild(node);
-  }
-
-  const matchingNodes = parentNode.querySelectorAll(selector);
-  return Array.prototype.indexOf.call(matchingNodes, node) !== -1;
-};
-
 /**
   this will take in the headers from an API response and normalize them
   this way we don't run into production issues when nginx gives us lowercased header keys
@@ -396,24 +377,6 @@ export const normalizeHeaders = headers => {
   });
 
   return upperCaseHeaders;
-};
-
-/**
-  this will take in the getAllResponseHeaders result and normalize them
-  this way we don't run into production issues when nginx gives us lowercased header keys
-*/
-export const normalizeCRLFHeaders = headers => {
-  const headersObject = {};
-  const headersArray = headers.split('\n');
-
-  headersArray.forEach(header => {
-    const keyValue = header.split(': ');
-
-    // eslint-disable-next-line prefer-destructuring
-    headersObject[keyValue[0]] = keyValue[1];
-  });
-
-  return normalizeHeaders(headersObject);
 };
 
 /**
@@ -481,6 +444,16 @@ export const historyPushState = newUrl => {
 };
 
 /**
+ * Based on the current location and the string parameters provided
+ * overwrites the current entry in the history without reloading the page.
+ *
+ * @param {String} param
+ */
+export const historyReplaceState = newUrl => {
+  window.history.replaceState({}, document.title, newUrl);
+};
+
+/**
  * Returns true for a String value of "true" and false otherwise.
  * This is the opposite of Boolean(...).toString().
  * `parseBoolean` is idempotent.
@@ -489,6 +462,8 @@ export const historyPushState = newUrl => {
  * @returns {Boolean}
  */
 export const parseBoolean = value => (value && value.toString()) === 'true';
+
+export const BACKOFF_TIMEOUT = 'BACKOFF_TIMEOUT';
 
 /**
  * @callback backOffCallback
@@ -541,7 +516,7 @@ export const backOff = (fn, timeout = 60000) => {
         timeElapsed += nextInterval;
         nextInterval = Math.min(nextInterval + nextInterval, maxInterval);
       } else {
-        reject(new Error('BACKOFF_TIMEOUT'));
+        reject(new Error(BACKOFF_TIMEOUT));
       }
     };
 
@@ -612,13 +587,6 @@ export const setFaviconOverlay = overlayPath => {
   );
 };
 
-export const setFavicon = faviconPath => {
-  const faviconEl = document.getElementById('favicon');
-  if (faviconEl && faviconPath) {
-    faviconEl.setAttribute('href', faviconPath);
-  }
-};
-
 export const resetFavicon = () => {
   const faviconEl = document.getElementById('favicon');
 
@@ -649,30 +617,34 @@ export const spriteIcon = (icon, className = '') => {
 };
 
 /**
- * This method takes in object with snake_case property names
- * and returns a new object with camelCase property names
- *
- * Reasoning for this method is to ensure consistent property
- * naming conventions across JS code.
+ * @callback ConversionFunction
+ * @param {string} prop
+ */
+
+/**
+ * This function takes a conversion function as the first parameter
+ * and applies this function to each prop in the provided object.
  *
  * This method also supports additional params in `options` object
  *
+ * @param {ConversionFunction} conversionFunction - Function to apply to each prop of the object.
  * @param {Object} obj - Object to be converted.
  * @param {Object} options - Object containing additional options.
  * @param {boolean} options.deep - FLag to allow deep object converting
- * @param {Array[]} dropKeys - List of properties to discard while building new object
- * @param {Array[]} ignoreKeyNames - List of properties to leave intact (as snake_case) while building new object
+ * @param {Array[]} options.dropKeys - List of properties to discard while building new object
+ * @param {Array[]} options.ignoreKeyNames - List of properties to leave intact (as snake_case) while building new object
  */
-export const convertObjectPropsToCamelCase = (obj = {}, options = {}) => {
-  if (obj === null) {
+export const convertObjectProps = (conversionFunction, obj = {}, options = {}) => {
+  if (!isFunction(conversionFunction) || obj === null) {
     return {};
   }
 
-  const initial = Array.isArray(obj) ? [] : {};
   const { deep = false, dropKeys = [], ignoreKeyNames = [] } = options;
 
+  const isObjParameterArray = Array.isArray(obj);
+  const initialValue = isObjParameterArray ? [] : {};
+
   return Object.keys(obj).reduce((acc, prop) => {
-    const result = acc;
     const val = obj[prop];
 
     // Drop properties from new object if
@@ -684,18 +656,56 @@ export const convertObjectPropsToCamelCase = (obj = {}, options = {}) => {
     // Skip converting properties in new object
     // if there are any mentioned in options
     if (ignoreKeyNames.indexOf(prop) > -1) {
-      result[prop] = obj[prop];
+      acc[prop] = val;
       return acc;
     }
 
     if (deep && (isObject(val) || Array.isArray(val))) {
-      result[convertToCamelCase(prop)] = convertObjectPropsToCamelCase(val, options);
+      if (isObjParameterArray) {
+        acc[prop] = convertObjectProps(conversionFunction, val, options);
+      } else {
+        acc[conversionFunction(prop)] = convertObjectProps(conversionFunction, val, options);
+      }
+    } else if (isObjParameterArray) {
+      acc[prop] = val;
     } else {
-      result[convertToCamelCase(prop)] = obj[prop];
+      acc[conversionFunction(prop)] = val;
     }
     return acc;
-  }, initial);
+  }, initialValue);
 };
+
+/**
+ * This method takes in object with snake_case property names
+ * and returns a new object with camelCase property names
+ *
+ * Reasoning for this method is to ensure consistent property
+ * naming conventions across JS code.
+ *
+ * This method also supports additional params in `options` object
+ *
+ * @param {Object} obj - Object to be converted.
+ * @param {Object} options - Object containing additional options.
+ * @param {boolean} options.deep - FLag to allow deep object converting
+ * @param {Array[]} options.dropKeys - List of properties to discard while building new object
+ * @param {Array[]} options.ignoreKeyNames - List of properties to leave intact (as snake_case) while building new object
+ */
+export const convertObjectPropsToCamelCase = (obj = {}, options = {}) =>
+  convertObjectProps(convertToCamelCase, obj, options);
+
+/**
+ * Converts all the object keys to snake case
+ *
+ * This method also supports additional params in `options` object
+ *
+ * @param {Object} obj - Object to be converted.
+ * @param {Object} options - Object containing additional options.
+ * @param {boolean} options.deep - FLag to allow deep object converting
+ * @param {Array[]} options.dropKeys - List of properties to discard while building new object
+ * @param {Array[]} options.ignoreKeyNames - List of properties to leave intact (as snake_case) while building new object
+ */
+export const convertObjectPropsToSnakeCase = (obj = {}, options = {}) =>
+  convertObjectProps(convertToSnakeCase, obj, options);
 
 export const imagePath = imgUrl =>
   `${gon.asset_host || ''}${gon.relative_url_root || ''}/assets/${imgUrl}`;
@@ -815,31 +825,24 @@ export const searchBy = (query = '', searchSpace = {}) => {
  */
 export const isScopedLabel = ({ title = '' }) => title.indexOf('::') !== -1;
 
-window.gl = window.gl || {};
-window.gl.utils = {
-  ...(window.gl.utils || {}),
-  getPagePath,
-  isInGroupsPage,
-  isInProjectPage,
-  getProjectSlug,
-  getGroupSlug,
-  isInIssuePage,
-  ajaxGet,
-  rstrip,
-  updateTooltipTitle,
-  disableButtonIfEmptyField,
-  handleLocationHash,
-  isInViewport,
-  parseUrl,
-  parseUrlPathname,
-  getUrlParamsArray,
-  isMetaKey,
-  isMetaClick,
-  scrollToElement,
-  getParameterByName,
-  getSelectedFragment,
-  insertText,
-  nodeMatchesSelector,
-  spriteIcon,
-  imagePath,
-};
+// Methods to set and get Cookie
+export const setCookie = (name, value) => Cookies.set(name, value, { expires: 365 });
+
+export const getCookie = name => Cookies.get(name);
+
+export const removeCookie = name => Cookies.remove(name);
+
+/**
+ * Returns the status of a feature flag.
+ * Currently, there is no way to access feature
+ * flags in Vuex other than directly tapping into
+ * window.gon.
+ *
+ * This should only be used on Vuex. If feature flags
+ * need to be accessed in Vue components consider
+ * using the Vue feature flag mixin.
+ *
+ * @param {String} flag Feature flag
+ * @returns {Boolean} on/off
+ */
+export const isFeatureFlagEnabled = flag => window.gon.features?.[flag];

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::PersistentRef do
+RSpec.describe Ci::PersistentRef do
   it 'cleans up persistent refs after pipeline finished' do
     pipeline = create(:ci_pipeline, :running)
 
@@ -11,7 +11,7 @@ describe Ci::PersistentRef do
     pipeline.succeed!
   end
 
-  context '#exist?' do
+  describe '#exist?' do
     subject { pipeline.persistent_ref.exist? }
 
     let(:pipeline) { create(:ci_pipeline, sha: sha, project: project) }
@@ -24,15 +24,15 @@ describe Ci::PersistentRef do
 
     context 'when a persistent ref exists' do
       before do
-        pipeline.persistent_ref.create
+        pipeline.persistent_ref.create # rubocop: disable Rails/SaveBang
       end
 
       it { is_expected.to eq(true) }
     end
   end
 
-  context '#create' do
-    subject { pipeline.persistent_ref.create }
+  describe '#create' do
+    subject { pipeline.persistent_ref.create } # rubocop: disable Rails/SaveBang
 
     let(:pipeline) { create(:ci_pipeline, sha: sha, project: project) }
     let(:project) { create(:project, :repository) }
@@ -58,18 +58,18 @@ describe Ci::PersistentRef do
 
     context 'when a persistent ref already exists' do
       before do
-        pipeline.persistent_ref.create
+        pipeline.persistent_ref.create # rubocop: disable Rails/SaveBang
       end
 
-      it 'does not create a persistent ref' do
-        expect(project.repository).not_to receive(:create_ref)
+      it 'overwrites a persistent ref' do
+        expect(project.repository).to receive(:create_ref).and_call_original
 
         subject
       end
     end
   end
 
-  context '#delete' do
+  describe '#delete' do
     subject { pipeline.persistent_ref.delete }
 
     let(:pipeline) { create(:ci_pipeline, sha: sha, project: project) }
@@ -78,7 +78,7 @@ describe Ci::PersistentRef do
 
     context 'when a persistent ref exists' do
       before do
-        pipeline.persistent_ref.create
+        pipeline.persistent_ref.create # rubocop: disable Rails/SaveBang
       end
 
       it 'deletes the ref' do

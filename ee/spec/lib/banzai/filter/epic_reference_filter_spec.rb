@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::EpicReferenceFilter do
+RSpec.describe Banzai::Filter::EpicReferenceFilter do
   include FilterSpecHelper
 
   let(:urls) { Gitlab::Routing.url_helpers }
@@ -62,11 +62,11 @@ describe Banzai::Filter::EpicReferenceFilter do
       link = doc.css('a').first
 
       expect(link).to have_attribute('data-original')
-      expect(link.attr('data-original')).to eq(reference)
+      expect(link.attr('data-original')).to eq(CGI.escapeHTML(reference))
     end
 
-    it 'ignores invalid epic IDs' do
-      text = "Check &9999"
+    it 'ignores invalid epic IIDs' do
+      text = "Check &#{non_existing_record_iid}"
 
       expect(doc(text).to_s).to eq(ERB::Util.html_escape_once(text))
     end
@@ -100,8 +100,8 @@ describe Banzai::Filter::EpicReferenceFilter do
       expect(doc.css('a').first.attr('class')).to eq('gfm gfm-epic has-tooltip')
     end
 
-    it 'ignores invalid epic IDs' do
-      text = "Check &amp;9999"
+    it 'ignores invalid epic IIDs' do
+      text = "Check &amp;#{non_existing_record_iid}"
 
       expect(doc(text).to_s).to eq(ERB::Util.html_escape_once(text))
     end

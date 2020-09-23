@@ -1,4 +1,4 @@
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import { __, s__, sprintf } from '~/locale';
 
 import axios from '~/lib/utils/axios_utils';
@@ -7,11 +7,42 @@ import { visitUrl } from '~/lib/utils/url_utility';
 import epicUtils from '../utils/epic_utils';
 import { statusType, statusEvent, dateTypes } from '../constants';
 
+import epicDetailsQuery from '../queries/epicDetails.query.graphql';
+import updateEpic from '../queries/updateEpic.mutation.graphql';
+import epicSetSubscription from '../queries/epicSetSubscription.mutation.graphql';
+
 import * as types from './mutation_types';
 
 export const setEpicMeta = ({ commit }, meta) => commit(types.SET_EPIC_META, meta);
 
 export const setEpicData = ({ commit }, data) => commit(types.SET_EPIC_DATA, data);
+
+export const fetchEpicDetails = ({ state, dispatch }) => {
+  const variables = {
+    fullPath: state.fullPath,
+    iid: state.epicIid,
+  };
+
+  epicUtils.gqClient
+    .query({
+      query: epicDetailsQuery,
+      variables,
+    })
+    .then(({ data }) => {
+      const participants = data.group.epic.participants.edges.map(participant => ({
+        name: participant.node.name,
+        avatar_url: participant.node.avatarUrl,
+        web_url: participant.node.webUrl,
+      }));
+
+      dispatch('setEpicData', { participants });
+    })
+    .catch(() => dispatch('requestEpicParticipantsFailure'));
+};
+
+export const requestEpicParticipantsFailure = () => {
+  flash(__('There was an error getting the epic participants.'));
+};
 
 export const requestEpicStatusChange = ({ commit }) => commit(types.REQUEST_EPIC_STATUS_CHANGE);
 
@@ -125,29 +156,112 @@ export const requestEpicDateSaveFailure = ({ commit }, data) => {
   );
 };
 export const saveDate = ({ state, dispatch }, { dateType, dateTypeIsFixed, newDate }) => {
-  const requestBody = {
-    [dateType === dateTypes.start ? 'start_date_is_fixed' : 'due_date_is_fixed']: dateTypeIsFixed,
+  const updateEpicInput = {
+    iid: `${state.epicIid}`,
+    groupPath: state.fullPath,
+    [dateType === dateTypes.start ? 'startDateIsFixed' : 'dueDateIsFixed']: dateTypeIsFixed,
   };
 
   if (dateTypeIsFixed) {
-    requestBody[dateType === dateTypes.start ? 'start_date_fixed' : 'due_date_fixed'] = newDate;
+    updateEpicInput[dateType === dateTypes.start ? 'startDateFixed' : 'dueDateFixed'] = newDate;
   }
 
   dispatch('requestEpicDateSave', { dateType });
-  axios
-    .put(state.endpoint, requestBody)
-    .then(() => {
-      dispatch('requestEpicDateSaveSuccess', {
-        dateType,
-        dateTypeIsFixed,
-        newDate,
-      });
+  epicUtils.gqClient
+    .mutate({
+      mutation: updateEpic,
+      variables: {
+        updateEpicInput,
+      },
+    })
+    .then(({ data }) => {
+      if (!data?.updateEpic?.errors.length) {
+        dispatch('requestEpicDateSaveSuccess', {
+          dateType,
+          dateTypeIsFixed,
+          newDate,
+        });
+      } else {
+        // eslint-disable-next-line @gitlab/require-i18n-strings
+        throw new Error('An error occurred while saving the date');
+      }
     })
     .catch(() => {
       dispatch('requestEpicDateSaveFailure', {
         dateType,
         dateTypeIsFixed: !dateTypeIsFixed,
       });
+    });
+};
+
+export const updateConfidentialityOnIssuable = ({ state, commit }, { confidential }) => {
+  const updateEpicInput = {
+    iid: `${state.epicIid}`,
+    groupPath: state.fullPath,
+    confidential,
+  };
+
+  return epicUtils.gqClient
+    .mutate({
+      mutation: updateEpic,
+      variables: {
+        updateEpicInput,
+      },
+    })
+    .then(({ data }) => {
+      if (!data?.updateEpic?.errors.length) {
+        commit(types.SET_EPIC_CONFIDENTIAL, confidential);
+      } else {
+        const errMsg =
+          data?.updateEpic?.errors[0]?.replace(/Confidential /, '') ||
+          s__('Epics|Unable to perform this action');
+        throw errMsg;
+      }
+    })
+    .catch(error => {
+      flash(error);
+      throw error;
+    });
+};
+
+/**
+ * Methods to handle Epic labels selection from sidebar
+ */
+export const requestEpicLabelsSelect = ({ commit }) => commit(types.REQUEST_EPIC_LABELS_SELECT);
+export const receiveEpicLabelsSelectSuccess = ({ commit }, labels) =>
+  commit(types.RECEIVE_EPIC_LABELS_SELECT_SUCCESS, labels);
+export const receiveEpicLabelsSelectFailure = ({ commit }) => {
+  commit(types.RECEIVE_EPIC_LABELS_SELECT_FAILURE);
+  flash(s__('Epics|An error occurred while updating labels.'));
+};
+export const updateEpicLabels = ({ dispatch, state }, labels) => {
+  const addLabelIds = labels.filter(label => label.set).map(label => label.id);
+  const removeLabelIds = labels.filter(label => !label.set).map(label => label.id);
+  const updateEpicInput = {
+    iid: `${state.epicIid}`,
+    groupPath: state.fullPath,
+    addLabelIds,
+    removeLabelIds,
+  };
+
+  dispatch('requestEpicLabelsSelect');
+  epicUtils.gqClient
+    .mutate({
+      mutation: updateEpic,
+      variables: {
+        updateEpicInput,
+      },
+    })
+    .then(({ data }) => {
+      if (!data?.updateEpic?.errors.length) {
+        dispatch('receiveEpicLabelsSelectSuccess', labels);
+      } else {
+        // eslint-disable-next-line @gitlab/require-i18n-strings
+        throw new Error('An error occurred while updating labels');
+      }
+    })
+    .catch(() => {
+      dispatch('receiveEpicLabelsSelectFailure');
     });
 };
 
@@ -168,12 +282,26 @@ export const requestEpicSubscriptionToggleFailure = ({ commit, state }) => {
 };
 export const toggleEpicSubscription = ({ state, dispatch }) => {
   dispatch('requestEpicSubscriptionToggle');
-  axios
-    .post(state.toggleSubscriptionPath)
-    .then(() => {
-      dispatch('requestEpicSubscriptionToggleSuccess', {
-        subscribed: !state.subscribed,
-      });
+  epicUtils.gqClient
+    .mutate({
+      mutation: epicSetSubscription,
+      variables: {
+        epicSetSubscriptionInput: {
+          iid: `${state.epicIid}`,
+          groupPath: state.fullPath,
+          subscribedState: !state.subscribed,
+        },
+      },
+    })
+    .then(({ data }) => {
+      if (!data?.epicSetSubscription?.errors.length) {
+        dispatch('requestEpicSubscriptionToggleSuccess', {
+          subscribed: !state.subscribed,
+        });
+      } else {
+        // eslint-disable-next-line @gitlab/require-i18n-strings
+        throw new Error('An error occurred while toggling to notifications.');
+      }
     })
     .catch(() => {
       dispatch('requestEpicSubscriptionToggleFailure');
@@ -184,6 +312,8 @@ export const toggleEpicSubscription = ({ state, dispatch }) => {
  * Methods to handle Epic create from Epics index page
  */
 export const setEpicCreateTitle = ({ commit }, data) => commit(types.SET_EPIC_CREATE_TITLE, data);
+export const setEpicCreateConfidential = ({ commit }, data) =>
+  commit(types.SET_EPIC_CREATE_CONFIDENTIAL, data);
 export const requestEpicCreate = ({ commit }) => commit(types.REQUEST_EPIC_CREATE);
 export const requestEpicCreateSuccess = (_, webUrl) => visitUrl(webUrl);
 export const requestEpicCreateFailure = ({ commit }) => {
@@ -195,6 +325,7 @@ export const createEpic = ({ state, dispatch }) => {
   axios
     .post(state.endpoint, {
       title: state.newEpicTitle,
+      confidential: state.newEpicConfidential,
     })
     .then(({ data }) => {
       dispatch('requestEpicCreateSuccess', data.web_url);
@@ -203,6 +334,3 @@ export const createEpic = ({ state, dispatch }) => {
       dispatch('requestEpicCreateFailure');
     });
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

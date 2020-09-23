@@ -31,7 +31,7 @@ class Label < ApplicationRecord
   validates :title, uniqueness: { scope: [:group_id, :project_id] }
   validates :title, length: { maximum: 255 }
 
-  default_scope { order(title: :asc) }
+  default_scope { order(title: :asc) } # rubocop:disable Cop/DefaultScope
 
   scope :templates, -> { where(template: true, type: [Label.name, nil]) }
   scope :with_title, ->(title) { where(title: title) }
@@ -41,6 +41,22 @@ class Label < ApplicationRecord
   scope :order_name_asc, -> { reorder(title: :asc) }
   scope :order_name_desc, -> { reorder(title: :desc) }
   scope :subscribed_by, ->(user_id) { joins(:subscriptions).where(subscriptions: { user_id: user_id, subscribed: true }) }
+
+  scope :top_labels_by_target, -> (target_relation) {
+    label_id_column = arel_table[:id]
+
+    # Window aggregation to count labels
+    count_by_id = Arel::Nodes::Over.new(
+      Arel::Nodes::NamedFunction.new('count', [label_id_column]),
+      Arel::Nodes::Window.new.partition(label_id_column)
+    ).as('count_by_id')
+
+    select(arel_table[Arel.star], count_by_id)
+      .joins(:label_links)
+      .merge(LabelLink.where(target: target_relation))
+      .reorder(count_by_id: :desc)
+      .distinct
+  }
 
   def self.prioritized(project)
     joins(:priorities)
@@ -117,12 +133,12 @@ class Label < ApplicationRecord
 
   # Searches for labels with a matching title or description.
   #
-  # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+  # This method uses ILIKE on PostgreSQL.
   #
   # query - The search query as a String.
   #
   # Returns an ActiveRecord::Relation.
-  def self.search(query)
+  def self.search(query, **options)
     fuzzy_search(query, [:title, :description])
   end
 
@@ -133,14 +149,15 @@ class Label < ApplicationRecord
     1
   end
 
-  def self.by_ids(ids)
-    where(id: ids)
-  end
-
   def self.on_project_board?(project_id, label_id)
     return false if label_id.blank?
 
     on_project_boards(project_id).where(id: label_id).exists?
+  end
+
+  # Generate a hex color based on hex-encoded value
+  def self.color_for(value)
+    "##{Digest::MD5.hexdigest(value)[0..5]}"
   end
 
   def open_issues_count(user = nil)
@@ -186,10 +203,6 @@ class Label < ApplicationRecord
     priorities.present?
   end
 
-  def template?
-    template
-  end
-
   def color
     super || DEFAULT_COLOR
   end
@@ -225,7 +238,7 @@ class Label < ApplicationRecord
     reference = "#{self.class.reference_prefix}#{format_reference}"
 
     if from
-      "#{from.to_reference(target_project, full: full)}#{reference}"
+      "#{from.to_reference_base(target_project, full: full)}#{reference}"
     else
       reference
     end

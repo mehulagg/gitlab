@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::IssuesController do
+RSpec.describe Boards::IssuesController do
   include ExternalAuthorizationServiceHelpers
 
   let(:group) { create(:group, :private) }
@@ -28,9 +28,9 @@ describe Boards::IssuesController do
 
     context 'with invalid board id' do
       it 'returns a not found 404 response' do
-        list_issues user: user, board: 999, list: list2
+        list_issues user: user, board: non_existing_record_id, list: list2
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -49,13 +49,47 @@ describe Boards::IssuesController do
           expect(json_response['issues'].length).to eq 2
           expect(development.issues.map(&:relative_position)).not_to include(nil)
         end
+
+        it 'returns blocked status for each issue where the blocking issue is still opened' do
+          issue1 = create(:labeled_issue, project: project_1, labels: [development], relative_position: 1)
+          issue2 = create(:labeled_issue, project: project_1, labels: [development], relative_position: 2)
+          issue3 = create(:labeled_issue, project: project_1, labels: [development], relative_position: 3)
+          issue4 = create(:labeled_issue, project: project_1, labels: [development], relative_position: 4)
+          closed_issue = create(:issue, :closed, project: project_1)
+
+          create(:issue_link, source: issue1, target: issue2, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+          create(:issue_link, source: issue2, target: issue3, link_type: IssueLink::TYPE_BLOCKS)
+          create(:issue_link, source: issue4, target: closed_issue, link_type: IssueLink::TYPE_IS_BLOCKED_BY)
+
+          list_issues user: user, board: board, list: list2
+
+          expect(response).to match_response_schema('entities/issue_boards')
+          issues = json_response['issues']
+          expect(issues.length).to eq 4
+          expect(issues[0]['blocked']).to be_truthy
+          expect(issues[1]['blocked']).to be_falsey
+          expect(issues[2]['blocked']).to be_truthy
+          expect(issues[3]['blocked']).to be_falsey
+        end
+
+        context 'with search param' do
+          it 'returns matching issues using optimized search' do
+            create(:labeled_issue, project: project_1, labels: [planning], title: 'Test Issue')
+            create(:labeled_issue, project: project_1, labels: [planning], title: 'Sample Issue')
+
+            list_issues user: user, board: board, list: list1, search: 'Te'
+
+            expect(response).to match_response_schema('issues')
+            expect(json_response['issues'].length).to eq 1
+          end
+        end
       end
 
       context 'with invalid list id' do
         it 'returns a not found 404 response' do
-          list_issues user: user, board: board, list: 999
+          list_issues user: user, board: board, list: non_existing_record_id
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -73,26 +107,39 @@ describe Boards::IssuesController do
         expect(response).to match_response_schema('issues')
         expect(json_response['issues'].length).to eq 2
       end
+
+      context 'with search param' do
+        it 'returns matching issues using optimized search' do
+          create(:issue, project: project_1, title: 'Issue XI')
+          create(:issue, project: project_1, title: 'Issue XX')
+
+          list_issues user: user, board: board, search: 'XI'
+
+          expect(response).to match_response_schema('issues')
+          expect(json_response['issues'].length).to eq 1
+        end
+      end
     end
 
     context 'with unauthorized user' do
       before do
-        group.group_member(user).destroy
+        group.group_member(user).destroy!
       end
 
       it 'returns a forbidden 403 response' do
         list_issues user: user, board: board, list: list2
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
-    def list_issues(user:, board:, list: nil)
+    def list_issues(user:, board:, list: nil, search: nil)
       sign_in(user)
 
       params = {
         board_id: board.to_param,
-        list_id: list.try(:to_param)
+        list_id: list.try(:to_param),
+        search: search.try(:to_param)
       }
 
       get :index, params: params.compact
@@ -104,7 +151,7 @@ describe Boards::IssuesController do
       it 'returns a successful 200 response' do
         create_issue user: user, board: board, list: list1, title: 'New issue'
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'returns the created issue' do
@@ -119,7 +166,7 @@ describe Boards::IssuesController do
         it 'returns an unprocessable entity 422 response' do
           create_issue user: user, board: board, list: list1, title: nil
 
-          expect(response).to have_gitlab_http_status(422)
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
         end
       end
 
@@ -129,23 +176,23 @@ describe Boards::IssuesController do
 
           create_issue user: user, board: board, list: list, title: 'New issue'
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
       context 'with invalid board id' do
         it 'returns a not found 404 response' do
-          create_issue user: user, board: 999, list: list1, title: 'New issue'
+          create_issue user: user, board: non_existing_record_id, list: list1, title: 'New issue'
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
       context 'with invalid list id' do
         it 'returns a not found 404 response' do
-          create_issue user: user, board: board, list: 999, title: 'New issue'
+          create_issue user: user, board: board, list: non_existing_record_id, title: 'New issue'
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -154,7 +201,7 @@ describe Boards::IssuesController do
       it 'returns a forbidden 403 response' do
         create_issue user: guest, board: board, list: list1, title: 'New issue'
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -177,7 +224,7 @@ describe Boards::IssuesController do
       it 'returns a successful 200 response' do
         move user: user, board: board, issue: issue, from_list_id: list1.id, to_list_id: list2.id
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'moves issue to the desired list' do
@@ -191,19 +238,19 @@ describe Boards::IssuesController do
       it 'returns a unprocessable entity 422 response for invalid lists' do
         move user: user, board: board, issue: issue, from_list_id: nil, to_list_id: nil
 
-        expect(response).to have_gitlab_http_status(422)
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
 
       it 'returns a not found 404 response for invalid board id' do
-        move user: user, board: 999, issue: issue, from_list_id: list1.id, to_list_id: list2.id
+        move user: user, board: non_existing_record_id, issue: issue, from_list_id: list1.id, to_list_id: list2.id
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
 
       it 'returns a not found 404 response for invalid issue id' do
-        move user: user, board: board, issue: double(id: 999), from_list_id: list1.id, to_list_id: list2.id
+        move user: user, board: board, issue: double(id: non_existing_record_id), from_list_id: list1.id, to_list_id: list2.id
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -217,7 +264,7 @@ describe Boards::IssuesController do
       it 'returns a forbidden 403 response' do
         move user: guest, board: board, issue: issue, from_list_id: list1.id, to_list_id: list2.id
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 

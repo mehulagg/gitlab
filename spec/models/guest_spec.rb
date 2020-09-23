@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Guest do
-  set(:public_project) { create(:project, :public) }
-  set(:private_project) { create(:project, :private) }
-  set(:internal_project) { create(:project, :internal) }
+RSpec.describe Guest do
+  let_it_be(:public_project, reload: true) { create(:project, :public) }
+  let_it_be(:private_project) { create(:project, :private) }
+  let_it_be(:internal_project) { create(:project, :internal) }
 
   describe '.can_pull?' do
     context 'when project is private' do

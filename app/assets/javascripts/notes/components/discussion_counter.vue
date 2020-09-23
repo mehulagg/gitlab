@@ -1,7 +1,6 @@
 <script>
-import { mapActions, mapGetters } from 'vuex';
-import { GlTooltipDirective } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { mapGetters, mapActions } from 'vuex';
+import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import discussionNavigation from '../mixins/discussion_navigation';
 
 export default {
@@ -9,7 +8,7 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   components: {
-    Icon,
+    GlIcon,
   },
   mixins: [discussionNavigation],
   computed: {
@@ -17,14 +16,11 @@ export default {
       'getUserData',
       'getNoteableData',
       'resolvableDiscussionsCount',
-      'firstUnresolvedDiscussionId',
       'unresolvedDiscussionsCount',
+      'discussions',
     ]),
     isLoggedIn() {
       return this.getUserData.id;
-    },
-    hasNextButton() {
-      return this.isLoggedIn && !this.allResolved;
     },
     allResolved() {
       return this.unresolvedDiscussionsCount === 0;
@@ -32,36 +28,43 @@ export default {
     resolveAllDiscussionsIssuePath() {
       return this.getNoteableData.create_issue_to_resolve_discussions_path;
     },
-    resolvedDiscussionsCount() {
-      return this.resolvableDiscussionsCount - this.unresolvedDiscussionsCount;
+    toggeableDiscussions() {
+      return this.discussions.filter(discussion => !discussion.individual_note);
+    },
+    allExpanded() {
+      return this.toggeableDiscussions.every(discussion => discussion.expanded);
     },
   },
   methods: {
-    ...mapActions(['expandDiscussion']),
-    jumpToFirstUnresolvedDiscussion() {
-      const diffTab = window.mrTabs.currentAction === 'diffs';
-      const discussionId = this.firstUnresolvedDiscussionId(diffTab);
-
-      this.jumpToDiscussion(discussionId);
+    ...mapActions(['setExpandDiscussions']),
+    handleExpandDiscussions() {
+      this.setExpandDiscussions({
+        discussionIds: this.toggeableDiscussions.map(discussion => discussion.id),
+        expanded: !this.allExpanded,
+      });
     },
   },
 };
 </script>
 
 <template>
-  <div v-if="resolvableDiscussionsCount > 0" class="line-resolve-all-container full-width-mobile">
-    <div class="full-width-mobile d-flex d-sm-block">
-      <div :class="{ 'has-next-btn': hasNextButton }" class="line-resolve-all">
+  <div
+    v-if="resolvableDiscussionsCount > 0"
+    ref="discussionCounter"
+    class="line-resolve-all-container full-width-mobile"
+  >
+    <div class="full-width-mobile d-flex d-sm-flex">
+      <div class="line-resolve-all">
         <span
-          :class="{ 'is-active': allResolved }"
-          class="line-resolve-btn is-disabled"
-          type="button"
+          :class="{ 'line-resolve-btn is-active': allResolved, 'line-resolve-text': !allResolved }"
         >
-          <icon :name="allResolved ? 'check-circle-filled' : 'check-circle'" />
-        </span>
-        <span class="line-resolve-text">
-          {{ resolvedDiscussionsCount }}/{{ resolvableDiscussionsCount }}
-          {{ n__('thread resolved', 'threads resolved', resolvableDiscussionsCount) }}
+          <template v-if="allResolved">
+            <gl-icon name="check-circle-filled" />
+            {{ __('All threads resolved') }}
+          </template>
+          <template v-else>
+            {{ n__('%d unresolved thread', '%d unresolved threads', unresolvedDiscussionsCount) }}
+          </template>
         </span>
       </div>
       <div
@@ -75,17 +78,30 @@ export default {
           :title="s__('Resolve all threads in new issue')"
           class="new-issue-for-discussion btn btn-default discussion-create-issue-btn"
         >
-          <icon name="issue-new" />
+          <gl-icon name="issue-new" />
         </a>
       </div>
       <div v-if="isLoggedIn && !allResolved" class="btn-group btn-group-sm" role="group">
         <button
           v-gl-tooltip
-          title="Jump to first unresolved thread"
+          :title="__('Jump to next unresolved thread')"
           class="btn btn-default discussion-next-btn"
-          @click="jumpToFirstUnresolvedDiscussion"
+          data-track-event="click_button"
+          data-track-label="mr_next_unresolved_thread"
+          data-track-property="click_next_unresolved_thread_top"
+          @click="jumpToNextDiscussion"
         >
-          <icon name="comment-next" />
+          <gl-icon name="comment-next" />
+        </button>
+      </div>
+      <div class="btn-group btn-group-sm" role="group">
+        <button
+          v-gl-tooltip
+          :title="__('Toggle all threads')"
+          class="btn btn-default toggle-all-discussions-btn"
+          @click="handleExpandDiscussions"
+        >
+          <gl-icon :name="allExpanded ? 'angle-up' : 'angle-down'" />
         </button>
       </div>
     </div>

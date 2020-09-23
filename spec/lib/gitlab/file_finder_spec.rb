@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 
-describe Gitlab::FileFinder do
+RSpec.describe Gitlab::FileFinder do
   describe '#find' do
     let(:project) { create(:project, :public, :repository) }
+
     subject { described_class.new(project, project.default_branch) }
 
     it_behaves_like 'file finder' do
@@ -12,22 +13,50 @@ describe Gitlab::FileFinder do
       let(:expected_file_by_content) { 'CHANGELOG' }
     end
 
-    it 'filters by filename' do
-      results = subject.find('files filename:wm.svg')
+    context 'with inclusive filters' do
+      it 'filters by filename' do
+        results = subject.find('files filename:wm.svg')
 
-      expect(results.count).to eq(1)
+        expect(results.count).to eq(1)
+      end
+
+      it 'filters by path' do
+        results = subject.find('white path:images')
+
+        expect(results.count).to eq(1)
+      end
+
+      it 'filters by extension' do
+        results = subject.find('files extension:md')
+
+        expect(results.count).to eq(4)
+      end
     end
 
-    it 'filters by path' do
-      results = subject.find('white path:images')
+    context 'with exclusive filters' do
+      it 'filters by filename' do
+        results = subject.find('files -filename:wm.svg')
 
-      expect(results.count).to eq(1)
+        expect(results.count).to eq(26)
+      end
+
+      it 'filters by path' do
+        results = subject.find('white -path:images')
+
+        expect(results.count).to eq(4)
+      end
+
+      it 'filters by extension' do
+        results = subject.find('files -extension:md')
+
+        expect(results.count).to eq(23)
+      end
     end
 
-    it 'filters by extension' do
-      results = subject.find('files extension:svg')
+    it 'does not cause N+1 query' do
+      expect(Gitlab::GitalyClient).to receive(:call).at_most(10).times.and_call_original
 
-      expect(results.count).to eq(1)
+      subject.find(': filename:wm.svg')
     end
   end
 end

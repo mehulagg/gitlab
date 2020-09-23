@@ -13,12 +13,7 @@ document.addEventListener(
       },
       render(createElement) {
         return createElement(EnvironmentDashboardComponent, {
-          props: {
-            listPath: this.$el.dataset.listPath,
-            addPath: this.$el.dataset.addPath,
-            emptyDashboardSvgPath: this.$el.dataset.emptyDashboardSvgPath,
-            emptyDashboardHelpPath: this.$el.dataset.emptyDashboardHelpPath,
-          },
+          props: this.$el.dataset,
         });
       },
     }),

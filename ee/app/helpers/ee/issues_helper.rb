@@ -2,6 +2,8 @@
 
 module EE
   module IssuesHelper
+    extend ::Gitlab::Utils::Override
+
     def weight_dropdown_tag(issuable, opts = {}, &block)
       title = issuable.weight || 'Weight'
       additional_toggle_class = opts.delete(:toggle_class)
@@ -27,6 +29,26 @@ module EE
       else
         h(weight.presence || 'Weight')
       end
+    end
+
+    override :issue_closed_link
+    def issue_closed_link(issue, current_user, css_class: '')
+      if issue.promoted? && can?(current_user, :read_epic, issue.promoted_to_epic)
+        link_to(s_('IssuableStatus|promoted'), issue.promoted_to_epic, class: css_class)
+      else
+        super
+      end
+    end
+
+    def issue_in_subepic?(issue, epic_id)
+      # This helper is used if a list of issues are filtered by epic id
+      return false if epic_id.blank?
+      return false if %w(any none).include?(epic_id)
+      return false if issue.epic_issue.nil?
+
+      # An issue is member of a subepic when its epic id is different
+      # than the filter epic id on params
+      epic_id.to_i != issue.epic_issue.epic_id
     end
   end
 end

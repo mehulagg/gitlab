@@ -4,7 +4,7 @@ require 'spec_helper'
 
 # We stub Gitaly in `spec/support/gitaly.rb` for other tests. We don't want
 # those stubs while testing the GitalyClient itself.
-describe Gitlab::GitalyClient do
+RSpec.describe Gitlab::GitalyClient do
   let(:sample_cert) { Rails.root.join('spec/fixtures/clusters/sample_cert.pem').to_s }
 
   before do
@@ -19,6 +19,15 @@ describe Gitlab::GitalyClient do
     })
   end
 
+  describe '.query_time', :request_store do
+    it 'increments query times' do
+      subject.add_query_time(0.4510004)
+      subject.add_query_time(0.3220004)
+
+      expect(subject.query_time).to eq(0.773001)
+    end
+  end
+
   describe '.long_timeout' do
     context 'default case' do
       it { expect(subject.long_timeout).to eq(6.hours) }
@@ -26,7 +35,7 @@ describe Gitlab::GitalyClient do
 
     context 'running in Unicorn' do
       before do
-        stub_const('Unicorn', 1)
+        allow(Gitlab::Runtime).to receive(:unicorn?).and_return(true)
       end
 
       it { expect(subject.long_timeout).to eq(55) }
@@ -34,7 +43,7 @@ describe Gitlab::GitalyClient do
 
     context 'running in Puma' do
       before do
-        stub_const('Puma', 1)
+        allow(Gitlab::Runtime).to receive(:puma?).and_return(true)
       end
 
       it { expect(subject.long_timeout).to eq(55) }
@@ -52,12 +61,71 @@ describe Gitlab::GitalyClient do
   end
 
   describe '.filesystem_id' do
-    it 'returns an empty string when the storage is not found in the response' do
+    it 'returns an empty string when the relevant storage status is not found in the response' do
       response = double("response")
       allow(response).to receive(:storage_statuses).and_return([])
-      allow_any_instance_of(Gitlab::GitalyClient::ServerService).to receive(:info).and_return(response)
+      allow_next_instance_of(Gitlab::GitalyClient::ServerService) do |instance|
+        allow(instance).to receive(:info).and_return(response)
+      end
 
       expect(described_class.filesystem_id('default')).to eq(nil)
+    end
+  end
+
+  context 'when the relevant storage status is not found' do
+    before do
+      response = double('response')
+      allow(response).to receive(:storage_statuses).and_return([])
+      allow_next_instance_of(Gitlab::GitalyClient::ServerService) do |instance|
+        allow(instance).to receive(:disk_statistics).and_return(response)
+        expect(instance).to receive(:storage_disk_statistics)
+      end
+    end
+
+    describe '.filesystem_disk_available' do
+      it 'returns nil when the relevant storage status is not found in the response' do
+        expect(described_class.filesystem_disk_available('default')).to eq(nil)
+      end
+    end
+
+    describe '.filesystem_disk_used' do
+      it 'returns nil when the relevant storage status is not found in the response' do
+        expect(described_class.filesystem_disk_used('default')).to eq(nil)
+      end
+    end
+  end
+
+  context 'when the relevant storage status is found' do
+    let(:disk_available) { 42 }
+    let(:disk_used) { 42 }
+    let(:storage_status) { double('storage_status') }
+
+    before do
+      allow(storage_status).to receive(:storage_name).and_return('default')
+      allow(storage_status).to receive(:used).and_return(disk_used)
+      allow(storage_status).to receive(:available).and_return(disk_available)
+      response = double('response')
+      allow(response).to receive(:storage_statuses).and_return([storage_status])
+      allow_next_instance_of(Gitlab::GitalyClient::ServerService) do |instance|
+        allow(instance).to receive(:disk_statistics).and_return(response)
+      end
+      expect_next_instance_of(Gitlab::GitalyClient::ServerService) do |instance|
+        expect(instance).to receive(:storage_disk_statistics).and_return(storage_status)
+      end
+    end
+
+    describe '.filesystem_disk_available' do
+      it 'returns disk available when the relevant storage status is found in the response' do
+        expect(storage_status).to receive(:available)
+        expect(described_class.filesystem_disk_available('default')).to eq(disk_available)
+      end
+    end
+
+    describe '.filesystem_disk_used' do
+      it 'returns disk used when the relevant storage status is found in the response' do
+        expect(storage_status).to receive(:used)
+        expect(described_class.filesystem_disk_used('default')).to eq(disk_used)
+      end
     end
   end
 
@@ -84,12 +152,11 @@ describe Gitlab::GitalyClient do
 
   describe '.stub_certs' do
     it 'skips certificates if OpenSSLError is raised and report it' do
-      expect(Rails.logger).to receive(:error).at_least(:once)
-      expect(Gitlab::Sentry)
-        .to receive(:track_exception)
+      expect(Gitlab::ErrorTracking)
+        .to receive(:track_and_raise_for_dev_exception)
         .with(
           a_kind_of(OpenSSL::X509::CertificateError),
-          extra: { cert_file: a_kind_of(String) }).at_least(:once)
+          cert_file: a_kind_of(String)).at_least(:once)
 
       expect(OpenSSL::X509::Certificate)
         .to receive(:new)
@@ -226,6 +293,59 @@ describe Gitlab::GitalyClient do
             expect(described_class.request_kwargs('default', timeout: 1)[:metadata]['gitaly-session-id']).to eq(gitaly_session_id)
           end
         end
+      end
+    end
+
+    context 'deadlines', :request_store do
+      let(:request_deadline) { real_time + 10.0 }
+
+      before do
+        allow(Gitlab::RequestContext.instance).to receive(:request_deadline).and_return(request_deadline)
+      end
+
+      it 'includes the deadline information' do
+        kword_args = described_class.request_kwargs('default', timeout: 2)
+
+        expect(kword_args[:deadline])
+          .to be_within(1).of(real_time + 2)
+        expect(kword_args[:metadata][:deadline_type]).to eq("regular")
+      end
+
+      it 'limits the deadline do the request deadline if that is closer', :aggregate_failures do
+        kword_args = described_class.request_kwargs('default', timeout: 15)
+
+        expect(kword_args[:deadline]).to eq(request_deadline)
+        expect(kword_args[:metadata][:deadline_type]).to eq("limited")
+      end
+
+      it 'does not limit calls in sidekiq' do
+        expect(Sidekiq).to receive(:server?).and_return(true)
+
+        kword_args = described_class.request_kwargs('default', timeout: 6.hours.to_i)
+
+        expect(kword_args[:deadline]).to be_within(1).of(real_time + 6.hours.to_i)
+        expect(kword_args[:metadata][:deadline_type]).to be_nil
+      end
+
+      it 'does not limit calls in sidekiq when allowed unlimited' do
+        expect(Sidekiq).to receive(:server?).and_return(true)
+
+        kword_args = described_class.request_kwargs('default', timeout: 0)
+
+        expect(kword_args[:deadline]).to be_nil
+        expect(kword_args[:metadata][:deadline_type]).to be_nil
+      end
+
+      it 'includes only the deadline specified by the timeout when there was no deadline' do
+        allow(Gitlab::RequestContext.instance).to receive(:request_deadline).and_return(nil)
+        kword_args = described_class.request_kwargs('default', timeout: 6.hours.to_i)
+
+        expect(kword_args[:deadline]).to be_within(1).of(Gitlab::Metrics::System.real_time + 6.hours.to_i)
+        expect(kword_args[:metadata][:deadline_type]).to be_nil
+      end
+
+      def real_time
+        Gitlab::Metrics::System.real_time
       end
     end
   end
@@ -401,8 +521,6 @@ describe Gitlab::GitalyClient do
 
     context 'when the request store is active', :request_store do
       it 'records call details if a RPC is called' do
-        expect(described_class).to receive(:measure_timings).and_call_original
-
         gitaly_server.server_version
 
         expect(described_class.list_call_details).not_to be_empty

@@ -1,0 +1,11 @@
+#import "./project.fragment.graphql"
+
+query group($fullPath: ID!) {
+  group(fullPath: $fullPath) {
+    projects(includeSubgroups: true, hasVulnerabilities: true) {
+      nodes {
+        ...Project
+      }
+    }
+  }
+}

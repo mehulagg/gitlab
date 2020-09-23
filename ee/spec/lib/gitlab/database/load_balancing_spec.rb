@@ -2,7 +2,38 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing do
+RSpec.describe Gitlab::Database::LoadBalancing do
+  describe '.proxy' do
+    context 'when configured' do
+      before do
+        allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
+        subject.configure_proxy
+      end
+
+      after do
+        subject.configure_proxy(nil)
+      end
+
+      it 'returns the connection proxy' do
+        expect(subject.proxy).to be_an_instance_of(subject::ConnectionProxy)
+      end
+    end
+
+    context 'when not configured' do
+      it 'returns nil' do
+        expect(subject.proxy).to be_nil
+      end
+
+      it 'tracks an error to sentry' do
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
+          an_instance_of(subject::ProxyNotConfiguredError)
+        )
+
+        subject.proxy
+      end
+    end
+  end
+
   describe '.configuration' do
     it 'returns a Hash' do
       config = { 'hosts' => %w(foo) }
@@ -109,7 +140,7 @@ describe Gitlab::Database::LoadBalancing do
 
     it 'returns false when Sidekiq is being used' do
       allow(described_class).to receive(:hosts).and_return(%w(foo))
-      allow(Sidekiq).to receive(:server?).and_return(true)
+      allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(true)
 
       expect(described_class.enable?).to eq(false)
     end
@@ -122,14 +153,14 @@ describe Gitlab::Database::LoadBalancing do
 
     it 'returns true when load balancing should be enabled' do
       allow(described_class).to receive(:hosts).and_return(%w(foo))
-      allow(Sidekiq).to receive(:server?).and_return(false)
+      allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(false)
 
       expect(described_class.enable?).to eq(true)
     end
 
     it 'returns true when service discovery is enabled' do
       allow(described_class).to receive(:hosts).and_return([])
-      allow(Sidekiq).to receive(:server?).and_return(false)
+      allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(false)
 
       allow(described_class)
         .to receive(:service_discovery_enabled?)
@@ -140,7 +171,7 @@ describe Gitlab::Database::LoadBalancing do
 
     context 'without a license' do
       before do
-        License.destroy_all # rubocop: disable DestroyAll
+        License.destroy_all # rubocop: disable Cop/DestroyAll
       end
 
       it 'is disabled' do
@@ -161,7 +192,7 @@ describe Gitlab::Database::LoadBalancing do
 
       it 'is enabled' do
         allow(described_class).to receive(:hosts).and_return(%w(foo))
-        allow(Sidekiq).to receive(:server?).and_return(false)
+        allow(Gitlab::Runtime).to receive(:sidekiq?).and_return(false)
 
         expect(described_class.enable?).to eq(true)
       end
@@ -176,14 +207,16 @@ describe Gitlab::Database::LoadBalancing do
 
   describe '.configure_proxy' do
     after do
-      described_class.proxy = nil
+      described_class.configure_proxy(nil)
     end
 
     it 'configures the connection proxy' do
-      expect(ActiveRecord::Base.singleton_class).to receive(:prepend)
-        .with(Gitlab::Database::LoadBalancing::ActiveRecordProxy)
+      allow(ActiveRecord::Base.singleton_class).to receive(:prepend)
 
       described_class.configure_proxy
+
+      expect(ActiveRecord::Base.singleton_class).to have_received(:prepend)
+        .with(Gitlab::Database::LoadBalancing::ActiveRecordProxy)
     end
   end
 

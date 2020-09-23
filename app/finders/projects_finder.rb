@@ -17,14 +17,17 @@
 #     tags: string[]
 #     personal: boolean
 #     search: string
+#     search_namespaces: boolean
 #     non_archived: boolean
 #     archived: 'only' or boolean
 #     min_access_level: integer
+#     last_activity_after: datetime
+#     last_activity_before: datetime
+#     repository_storage: string
+#     without_deleted: boolean
 #
 class ProjectsFinder < UnionFinder
   include CustomAttributesFilter
-
-  prepend_if_ee('::EE::ProjectsFinder') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
   attr_accessor :params
   attr_reader :current_user, :project_ids_relation
@@ -44,6 +47,8 @@ class ProjectsFinder < UnionFinder
         init_collection
       end
 
+    use_cte = params.delete(:use_cte)
+    collection = Project.wrap_with_cte(collection) if use_cte
     collection = filter_projects(collection)
     sort(collection)
   end
@@ -70,6 +75,9 @@ class ProjectsFinder < UnionFinder
     collection = by_archived(collection)
     collection = by_custom_attributes(collection)
     collection = by_deleted_status(collection)
+    collection = by_last_activity_after(collection)
+    collection = by_last_activity_before(collection)
+    collection = by_repository_storage(collection)
     collection
   end
 
@@ -79,7 +87,7 @@ class ProjectsFinder < UnionFinder
     elsif min_access_level?
       current_user.authorized_projects(params[:min_access_level])
     else
-      if private_only?
+      if private_only? || impossible_visibility_level?
         current_user.authorized_projects
       else
         Project.public_or_visible_to_user(current_user)
@@ -96,6 +104,30 @@ class ProjectsFinder < UnionFinder
     end
   end
 
+  # This is an optimization - surprisingly PostgreSQL does not optimize
+  # for this.
+  #
+  # If the default visiblity level and desired visiblity level filter cancels
+  # each other out, don't use the SQL clause for visibility level in
+  # `Project.public_or_visible_to_user`. In fact, this then becames equivalent
+  # to just authorized projects for the user.
+  #
+  # E.g.
+  # (EXISTS(<authorized_projects>) OR projects.visibility_level IN (10,20))
+  #   AND "projects"."visibility_level" = 0
+  #
+  # is essentially
+  # EXISTS(<authorized_projects>) AND "projects"."visibility_level" = 0
+  #
+  # See https://gitlab.com/gitlab-org/gitlab/issues/37007
+  def impossible_visibility_level?
+    return unless params[:visibility_level].present?
+
+    public_visibility_levels = Gitlab::VisibilityLevel.levels_for_user(current_user)
+
+    !public_visibility_levels.include?(params[:visibility_level])
+  end
+
   def owned_projects?
     params[:owned].present?
   end
@@ -110,7 +142,10 @@ class ProjectsFinder < UnionFinder
 
   # rubocop: disable CodeReuse/ActiveRecord
   def by_ids(items)
-    project_ids_relation ? items.where(id: project_ids_relation) : items
+    items = items.where(id: project_ids_relation) if project_ids_relation
+    items = items.where('projects.id > ?', params[:id_after]) if params[:id_after]
+    items = items.where('projects.id < ?', params[:id_before]) if params[:id_before]
+    items
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -119,11 +154,11 @@ class ProjectsFinder < UnionFinder
   end
 
   def by_personal(items)
-    (params[:personal].present? && current_user) ? items.personal(current_user) : items
+    params[:personal].present? && current_user ? items.personal(current_user) : items
   end
 
   def by_starred(items)
-    (params[:starred].present? && current_user) ? items.starred_by(current_user) : items
+    params[:starred].present? && current_user ? items.starred_by(current_user) : items
   end
 
   def by_trending(items)
@@ -142,15 +177,39 @@ class ProjectsFinder < UnionFinder
 
   def by_search(items)
     params[:search] ||= params[:name]
-    params[:search].present? ? items.search(params[:search]) : items
+    items.optionally_search(params[:search], include_namespace: params[:search_namespaces].present?)
   end
 
   def by_deleted_status(items)
     params[:without_deleted].present? ? items.without_deleted : items
   end
 
+  def by_last_activity_after(items)
+    if params[:last_activity_after].present?
+      items.where("last_activity_at > ?", params[:last_activity_after]) # rubocop: disable CodeReuse/ActiveRecord
+    else
+      items
+    end
+  end
+
+  def by_last_activity_before(items)
+    if params[:last_activity_before].present?
+      items.where("last_activity_at < ?", params[:last_activity_before]) # rubocop: disable CodeReuse/ActiveRecord
+    else
+      items
+    end
+  end
+
+  def by_repository_storage(items)
+    if params[:repository_storage].present?
+      items.where(repository_storage: params[:repository_storage]) # rubocop: disable CodeReuse/ActiveRecord
+    else
+      items
+    end
+  end
+
   def sort(items)
-    params[:sort].present? ? items.sort_by_attribute(params[:sort]) : items.order_id_desc
+    params[:sort].present? ? items.sort_by_attribute(params[:sort]) : items.projects_order_id_desc
   end
 
   def by_archived(projects)
@@ -175,3 +234,5 @@ class ProjectsFinder < UnionFinder
     { min_access_level: params[:min_access_level] }
   end
 end
+
+ProjectsFinder.prepend_if_ee('::EE::ProjectsFinder')

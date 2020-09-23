@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe 'GPG signed commits' do
+RSpec.describe 'GPG signed commits' do
   let(:project) { create(:project, :public, :repository) }
 
-  it 'changes from unverified to verified when the user changes his email to match the gpg key', :sidekiq_might_not_need_inline do
+  it 'changes from unverified to verified when the user changes their email to match the gpg key', :sidekiq_might_not_need_inline do
     ref = GpgHelpers::SIGNED_AND_AUTHORED_SHA
     user = create(:user, email: 'unrelated.user@example.org')
 
@@ -15,10 +15,9 @@ describe 'GPG signed commits' do
 
     visit project_commit_path(project, ref)
 
-    expect(page).to have_button 'Unverified'
-    expect(page).not_to have_button 'Verified'
+    expect(page).to have_selector('.gpg-status-box', text: 'Unverified')
 
-    # user changes his email which makes the gpg key verified
+    # user changes their email which makes the gpg key verified
     perform_enqueued_jobs do
       user.skip_reconfirmation!
       user.update!(email: GpgHelpers::User1.emails.first)
@@ -26,8 +25,7 @@ describe 'GPG signed commits' do
 
     visit project_commit_path(project, ref)
 
-    expect(page).not_to have_button 'Unverified'
-    expect(page).to have_button 'Verified'
+    expect(page).to have_selector('.gpg-status-box', text: 'Verified')
   end
 
   it 'changes from unverified to verified when the user adds the missing gpg key', :sidekiq_might_not_need_inline do
@@ -36,8 +34,7 @@ describe 'GPG signed commits' do
 
     visit project_commit_path(project, ref)
 
-    expect(page).to have_button 'Unverified'
-    expect(page).not_to have_button 'Verified'
+    expect(page).to have_selector('.gpg-status-box', text: 'Unverified')
 
     # user adds the gpg key which makes the signature valid
     perform_enqueued_jobs do
@@ -46,8 +43,7 @@ describe 'GPG signed commits' do
 
     visit project_commit_path(project, ref)
 
-    expect(page).not_to have_button 'Unverified'
-    expect(page).to have_button 'Verified'
+    expect(page).to have_selector('.gpg-status-box', text: 'Verified')
   end
 
   context 'shows popover badges', :js do
@@ -76,8 +72,9 @@ describe 'GPG signed commits' do
 
     it 'unverified signature' do
       visit project_commit_path(project, GpgHelpers::SIGNED_COMMIT_SHA)
+      wait_for_all_requests
 
-      click_on 'Unverified'
+      page.find('.gpg-status-box', text: 'Unverified').click
 
       within '.popover' do
         expect(page).to have_content 'This commit was signed with an unverified signature.'
@@ -89,8 +86,9 @@ describe 'GPG signed commits' do
       user_2_key
 
       visit project_commit_path(project, GpgHelpers::DIFFERING_EMAIL_SHA)
+      wait_for_all_requests
 
-      click_on 'Unverified'
+      page.find('.gpg-status-box', text: 'Unverified').click
 
       within '.popover' do
         expect(page).to have_content 'This commit was signed with a verified signature, but the committer email is not verified to belong to the same user.'
@@ -104,8 +102,9 @@ describe 'GPG signed commits' do
       user_2_key
 
       visit project_commit_path(project, GpgHelpers::SIGNED_COMMIT_SHA)
+      wait_for_all_requests
 
-      click_on 'Unverified'
+      page.find('.gpg-status-box', text: 'Unverified').click
 
       within '.popover' do
         expect(page).to have_content "This commit was signed with a different user's verified signature."
@@ -119,8 +118,9 @@ describe 'GPG signed commits' do
       user_1_key
 
       visit project_commit_path(project, GpgHelpers::SIGNED_AND_AUTHORED_SHA)
+      wait_for_all_requests
 
-      click_on 'Verified'
+      page.find('.gpg-status-box', text: 'Verified').click
 
       within '.popover' do
         expect(page).to have_content 'This commit was signed with a verified signature and the committer email is verified to belong to the same user.'
@@ -134,15 +134,17 @@ describe 'GPG signed commits' do
       user_1_key
 
       visit project_commit_path(project, GpgHelpers::SIGNED_AND_AUTHORED_SHA)
+      wait_for_all_requests
 
       # wait for the signature to get generated
-      expect(page).to have_button 'Verified'
+      expect(page).to have_selector('.gpg-status-box', text: 'Verified')
 
       user_1.destroy!
 
       refresh
+      wait_for_all_requests
 
-      click_on 'Verified'
+      page.find('.gpg-status-box', text: 'Verified').click
 
       within '.popover' do
         expect(page).to have_content 'This commit was signed with a verified signature and the committer email is verified to belong to the same user.'
@@ -157,12 +159,13 @@ describe 'GPG signed commits' do
     shared_examples 'a commit with a signature' do
       before do
         visit project_tree_path(project, 'signed-commits')
+        wait_for_all_requests
       end
 
       it 'displays commit signature' do
-        expect(page).to have_button 'Unverified'
+        expect(page).to have_selector('.gpg-status-box', text: 'Unverified')
 
-        click_on 'Unverified'
+        page.find('.gpg-status-box', text: 'Unverified').click
 
         within '.popover' do
           expect(page).to have_content 'This commit was signed with an unverified signature'
@@ -171,14 +174,6 @@ describe 'GPG signed commits' do
     end
 
     context 'with vue tree view enabled' do
-      it_behaves_like 'a commit with a signature'
-    end
-
-    context 'with vue tree view disabled' do
-      before do
-        stub_feature_flags(vue_file_list: false)
-      end
-
       it_behaves_like 'a commit with a signature'
     end
   end

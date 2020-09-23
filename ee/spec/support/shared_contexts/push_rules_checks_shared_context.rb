@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_context 'push rules checks context' do
+RSpec.shared_context 'push rules checks context' do
   include_context 'change access checks context'
 
   let(:project) { create(:project, :public, :repository, push_rule: push_rule) }

@@ -11,42 +11,43 @@ module EE
     include ::Gitlab::Utils::StrongMemoize
 
     NAMESPACE_PLANS_TO_LICENSE_PLANS = {
-      Plan::BRONZE        => License::STARTER_PLAN,
-      Plan::SILVER        => License::PREMIUM_PLAN,
-      Plan::GOLD          => License::ULTIMATE_PLAN,
-      Plan::EARLY_ADOPTER => License::EARLY_ADOPTER_PLAN
+      ::Plan::BRONZE        => License::STARTER_PLAN,
+      ::Plan::SILVER        => License::PREMIUM_PLAN,
+      ::Plan::GOLD          => License::ULTIMATE_PLAN
     }.freeze
 
     LICENSE_PLANS_TO_NAMESPACE_PLANS = NAMESPACE_PLANS_TO_LICENSE_PLANS.invert.freeze
     PLANS = (NAMESPACE_PLANS_TO_LICENSE_PLANS.keys + [Plan::FREE]).freeze
-
-    CI_USAGE_ALERT_LEVELS = [30, 5].freeze
+    TEMPORARY_STORAGE_INCREASE_DAYS = 30
 
     prepended do
       include EachBatch
 
-      belongs_to :plan
+      attr_writer :root_ancestor
 
       has_one :namespace_statistics
-      has_one :gitlab_subscription, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+      has_one :namespace_limit, inverse_of: :namespace
+      has_one :gitlab_subscription
+      has_one :elasticsearch_indexed_namespace
 
-      accepts_nested_attributes_for :gitlab_subscription
+      accepts_nested_attributes_for :gitlab_subscription, update_only: true
+      accepts_nested_attributes_for :namespace_limit
 
-      scope :with_plan, -> { where.not(plan_id: nil) }
-      scope :with_shared_runners_minutes_limit, -> { where("namespaces.shared_runners_minutes_limit > 0") }
-      scope :with_extra_shared_runners_minutes_limit, -> { where("namespaces.extra_shared_runners_minutes_limit > 0") }
-      scope :with_shared_runners_minutes_exceeding_default_limit, -> do
-        where('namespace_statistics.namespace_id = namespaces.id')
-        .where('namespace_statistics.shared_runners_seconds > (namespaces.shared_runners_minutes_limit * 60)')
-      end
+      scope :include_gitlab_subscription, -> { includes(:gitlab_subscription) }
+      scope :join_gitlab_subscription, -> { joins("LEFT OUTER JOIN gitlab_subscriptions ON gitlab_subscriptions.namespace_id=namespaces.id") }
 
-      scope :with_ci_minutes_notification_sent, -> do
-        where('last_ci_minutes_notification_at IS NOT NULL OR last_ci_minutes_usage_notification_level IS NOT NULL')
+      scope :eligible_for_trial, -> do
+        left_joins(gitlab_subscription: :hosted_plan)
+          .where(
+            parent_id: nil,
+            gitlab_subscriptions: { trial: [nil, false], trial_ends_on: [nil] },
+            plans: { name: [nil, *::Plan::PLANS_ELIGIBLE_FOR_TRIAL] }
+          )
       end
 
       scope :with_feature_available_in_plan, -> (feature) do
         plans = plans_with_feature(feature)
-        matcher = Plan.where(name: plans)
+        matcher = ::Plan.where(name: plans)
           .joins(:hosted_subscriptions)
           .where("gitlab_subscriptions.namespace_id = namespaces.id")
           .select('1')
@@ -56,13 +57,24 @@ module EE
       delegate :shared_runners_minutes, :shared_runners_seconds, :shared_runners_seconds_last_reset,
         :extra_shared_runners_minutes, to: :namespace_statistics, allow_nil: true
 
+      delegate :additional_purchased_storage_size, :additional_purchased_storage_size=,
+        :additional_purchased_storage_ends_on, :additional_purchased_storage_ends_on=,
+        :temporary_storage_increase_ends_on, :temporary_storage_increase_ends_on=,
+        :temporary_storage_increase_enabled?, :eligible_for_temporary_storage_increase?,
+        to: :namespace_limit, allow_nil: true
+
+      delegate :email, to: :owner, allow_nil: true, prefix: true
+
       # Opportunistically clear the +file_template_project_id+ if invalid
       before_validation :clear_file_template_project_id
 
-      validate :validate_plan_name
       validate :validate_shared_runner_minutes_support
 
-      delegate :trial?, :trial_ends_on, :upgradable?, to: :gitlab_subscription, allow_nil: true
+      validates :max_pages_size,
+                numericality: { only_integer: true, greater_than_or_equal_to: 0, allow_nil: true,
+                                less_than: ::Gitlab::Pages::MAX_SIZE / 1.megabyte }
+
+      delegate :trial?, :trial_ends_on, :trial_starts_on, :upgradable?, to: :gitlab_subscription, allow_nil: true
 
       before_create :sync_membership_lock_with_parent
 
@@ -70,7 +82,13 @@ module EE
       before_save :clear_feature_available_cache
     end
 
+    def namespace_limit
+      super.presence || build_namespace_limit
+    end
+
     class_methods do
+      extend ::Gitlab::Utils::Override
+
       def plans_with_feature(feature)
         LICENSE_PLANS_TO_NAMESPACE_PLANS.values_at(*License.plans_with_feature(feature))
       end
@@ -107,9 +125,9 @@ module EE
     #   it. This is the case when we're ready to enable a feature for anyone
     #   with the correct license.
     def beta_feature_available?(feature)
-      ::Feature.enabled?(feature, self) ||
-        (::Feature.enabled?(feature) && feature_available?(feature))
+      ::Feature.enabled?(feature, type: :licensed) ? feature_available?(feature) : ::Feature.enabled?(feature, self, type: :licensed)
     end
+    alias_method :alpha_feature_available?, :beta_feature_available?
 
     # Checks features (i.e. https://about.gitlab.com/pricing/) availabily
     # for a given Namespace plan. This method should consider ancestor groups
@@ -117,7 +135,7 @@ module EE
     override :feature_available?
     def feature_available?(feature)
       # This feature might not be behind a feature flag at all, so default to true
-      return false unless ::Feature.enabled?(feature, default_enabled: true)
+      return false unless ::Feature.enabled?(feature, type: :licensed, default_enabled: true)
 
       available_features = strong_memoize(:feature_available) do
         Hash.new do |h, f|
@@ -129,8 +147,6 @@ module EE
     end
 
     def feature_available_in_plan?(feature)
-      return true if ::License::ANY_PLAN_FEATURES.include?(feature)
-
       available_features = strong_memoize(:features_available_in_plan) do
         Hash.new do |h, f|
           h[f] = (plans.map(&:name) & self.class.plans_with_feature(f)).any?
@@ -140,16 +156,38 @@ module EE
       available_features[feature]
     end
 
+    override :actual_plan
     def actual_plan
       strong_memoize(:actual_plan) do
-        subscription = find_or_create_subscription
+        if parent_id
+          root_ancestor.actual_plan
+        else
+          subscription = find_or_create_subscription
+          subscription&.hosted_plan
+        end
+      end || fallback_plan
+    end
 
-        subscription&.hosted_plan || Plan.free || Plan.default
+    def closest_gitlab_subscription
+      strong_memoize(:closest_gitlab_subscription) do
+        if parent_id
+          root_ancestor.gitlab_subscription
+        else
+          gitlab_subscription
+        end
       end
     end
 
-    def actual_plan_name
-      actual_plan&.name || Plan::FREE
+    def plan_name_for_upgrading
+      return ::Plan::FREE if trial_active?
+
+      actual_plan_name
+    end
+
+    def over_storage_limit?
+      ::Gitlab::CurrentSettings.enforce_namespace_storage_limit? &&
+        ::Feature.enabled?(:namespace_storage_limit, root_ancestor) &&
+        RootStorageSize.new(root_ancestor).above_size_limit?
     end
 
     def actual_size_limit
@@ -160,6 +198,10 @@ module EE
       if parent&.membership_lock?
         self.membership_lock = true
       end
+    end
+
+    def ci_minutes_quota
+      @ci_minutes_quota ||= ::Ci::Minutes::Quota.new(self)
     end
 
     def shared_runner_minutes_supported?
@@ -178,7 +220,7 @@ module EE
 
     def shared_runners_minutes_limit_enabled?
       shared_runner_minutes_supported? &&
-        shared_runners_enabled? &&
+        any_project_with_shared_runners_enabled? &&
         actual_shared_runners_minutes_limit.nonzero?
     end
 
@@ -187,41 +229,28 @@ module EE
         shared_runners_minutes.to_i >= actual_shared_runners_minutes_limit
     end
 
+    def shared_runners_remaining_minutes_percent
+      return 0 if shared_runners_remaining_minutes.to_f <= 0
+      return 0 if actual_shared_runners_minutes_limit.to_f == 0
+
+      (shared_runners_remaining_minutes.to_f * 100) / actual_shared_runners_minutes_limit.to_f
+    end
+
+    def shared_runners_remaining_minutes_below_threshold?
+      shared_runners_remaining_minutes_percent.to_i <= last_ci_minutes_usage_notification_level.to_i
+    end
+
     def extra_shared_runners_minutes_used?
       shared_runners_minutes_limit_enabled? &&
         extra_shared_runners_minutes_limit &&
         extra_shared_runners_minutes.to_i >= extra_shared_runners_minutes_limit
     end
 
-    def shared_runners_enabled?
+    def any_project_with_shared_runners_enabled?
       all_projects.with_shared_runners.any?
     end
 
     # These helper methods are required to not break the Namespace API.
-    def plan=(plan_name)
-      if plan_name.is_a?(String)
-        @plan_name = plan_name # rubocop:disable Gitlab/ModuleWithInstanceVariables
-
-        super(Plan.find_by(name: @plan_name)) # rubocop:disable Gitlab/ModuleWithInstanceVariables
-      else
-        super
-      end
-    end
-
-    # TODO, CI/CD Quotas feature check
-    #
-    def max_active_pipelines
-      actual_plan&.active_pipelines_limit.to_i
-    end
-
-    def max_pipeline_size
-      actual_plan&.pipeline_size_limit.to_i
-    end
-
-    def max_active_jobs
-      actual_plan&.active_jobs_limit.to_i
-    end
-
     def memoized_plans=(plans)
       @plans = plans # rubocop: disable Gitlab/ModuleWithInstanceVariables
     end
@@ -229,9 +258,9 @@ module EE
     def plans
       @plans ||=
         if parent_id
-          Plan.hosted_plans_for_namespaces(self_and_ancestors.select(:id))
+          ::Plan.hosted_plans_for_namespaces(self_and_ancestors.select(:id))
         else
-          Plan.hosted_plans_for_namespaces(self)
+          ::Plan.hosted_plans_for_namespaces(self)
         end
     end
 
@@ -243,11 +272,19 @@ module EE
       1
     end
 
+    # When a purchasing a GL.com plan for a User namespace
+    # we only charge for a single user.
+    # This method is overwritten in Group where we made the calculation
+    # for Group namespaces.
+    def billed_user_ids(_requested_hosted_plan = nil)
+      [owner_id]
+    end
+
     def eligible_for_trial?
       ::Gitlab.com? &&
-        parent_id.nil? &&
-        trial_ends_on.blank? &&
-        [Plan::EARLY_ADOPTER, Plan::FREE].include?(actual_plan_name)
+        !has_parent? &&
+        never_had_trial? &&
+        plan_eligible_for_trial?
     end
 
     def trial_active?
@@ -259,9 +296,7 @@ module EE
     end
 
     def trial_expired?
-      trial_ends_on.present? &&
-        trial_ends_on < Date.today &&
-        actual_plan_name == Plan::FREE
+      trial_ends_on.present? && trial_ends_on < Date.today
     end
 
     # A namespace may not have a file template project
@@ -275,40 +310,48 @@ module EE
 
     def store_security_reports_available?
       feature_available?(:sast) ||
+      feature_available?(:secret_detection) ||
       feature_available?(:dependency_scanning) ||
       feature_available?(:container_scanning) ||
-      feature_available?(:dast)
+      feature_available?(:dast) ||
+      feature_available?(:coverage_fuzzing)
     end
 
     def free_plan?
-      actual_plan_name == Plan::FREE
-    end
-
-    def early_adopter_plan?
-      actual_plan_name == Plan::EARLY_ADOPTER
+      actual_plan_name == ::Plan::FREE
     end
 
     def bronze_plan?
-      actual_plan_name == Plan::BRONZE
+      actual_plan_name == ::Plan::BRONZE
     end
 
     def silver_plan?
-      actual_plan_name == Plan::SILVER
+      actual_plan_name == ::Plan::SILVER
     end
 
     def gold_plan?
-      actual_plan_name == Plan::GOLD
+      actual_plan_name == ::Plan::GOLD
+    end
+
+    def plan_eligible_for_trial?
+      ::Plan::PLANS_ELIGIBLE_FOR_TRIAL.include?(actual_plan_name)
     end
 
     def use_elasticsearch?
       ::Gitlab::CurrentSettings.elasticsearch_indexes_namespace?(self)
     end
 
+    def enable_temporary_storage_increase!
+      update(temporary_storage_increase_ends_on: TEMPORARY_STORAGE_INCREASE_DAYS.days.from_now)
+    end
+
     private
 
-    def validate_plan_name
-      if @plan_name.present? && PLANS.exclude?(@plan_name) # rubocop:disable Gitlab/ModuleWithInstanceVariables
-        errors.add(:plan, 'is not included in the list')
+    def fallback_plan
+      if ::Gitlab.com?
+        ::Plan.free
+      else
+        ::Plan.default
       end
     end
 
@@ -349,12 +392,19 @@ module EE
     end
 
     def generate_subscription
+      return unless persisted?
+      return if ::Gitlab::Database.read_only?
+
       create_gitlab_subscription(
-        plan_code: plan&.name,
+        plan_code: Plan::FREE,
         trial: trial_active?,
         start_date: created_at,
         seats: 0
       )
+    end
+
+    def shared_runners_remaining_minutes
+      [actual_shared_runners_minutes_limit.to_f - shared_runners_minutes.to_f, 0].max
     end
   end
 end

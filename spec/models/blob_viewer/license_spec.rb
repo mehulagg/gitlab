@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-describe BlobViewer::License do
+RSpec.describe BlobViewer::License do
   include FakeBlobHelpers
 
   let(:project) { create(:project, :repository) }
   let(:blob) { fake_blob(path: 'LICENSE') }
+
   subject { described_class.new(blob) }
 
   describe '#license' do

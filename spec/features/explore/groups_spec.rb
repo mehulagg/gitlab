@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Explore Groups', :js do
+RSpec.describe 'Explore Groups', :js do
   let(:user) { create :user }
   let(:group) { create :group }
   let!(:private_project) do
@@ -24,10 +24,6 @@ describe 'Explore Groups', :js do
       create(:issue, project: project)
       create(:merge_request, source_project: project, target_project: project)
     end
-  end
-
-  before do
-    stub_feature_flags({ vue_issuables_list: { enabled: false, thing: group } })
   end
 
   shared_examples 'renders public and internal projects' do
@@ -89,5 +85,17 @@ describe 'Explore Groups', :js do
     end
 
     it_behaves_like 'renders group in public groups area'
+
+    context 'when visibility is restricted to public' do
+      before do
+        stub_application_setting(restricted_visibility_levels: [Gitlab::VisibilityLevel::PUBLIC])
+      end
+
+      it 'redirects to the sign in page' do
+        visit explore_groups_path
+
+        expect(page).to have_current_path(new_user_session_path)
+      end
+    end
   end
 end

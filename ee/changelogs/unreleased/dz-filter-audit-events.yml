@@ -1,5 +1,0 @@
----
-title: Add created_before/after filter to audit events
-merge_request: 19035
-author:
-type: changed

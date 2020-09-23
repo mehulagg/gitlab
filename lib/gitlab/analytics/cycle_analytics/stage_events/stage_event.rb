@@ -7,6 +7,9 @@ module Gitlab
         # Base class for expressing an event that can be used for a stage.
         class StageEvent
           include Gitlab::CycleAnalytics::MetricsTables
+          extend Gitlab::Utils::Override
+
+          delegate :label_based?, to: :class
 
           def initialize(params)
             @params = params
@@ -30,12 +33,19 @@ module Gitlab
             raise NotImplementedError
           end
 
+          # List of columns that are referenced in the `timestamp_projection` expression
+          # Example timestamp projection: COALESCE(issue_metrics.created_at, issue_metrics.updated_at)
+          # Expected column list: issue_metrics.created_at, issue_metrics.updated_at
+          def column_list
+            []
+          end
+
           # Optionally a StageEvent may apply additional filtering or join other tables on the base query.
           def apply_query_customization(query)
             query
           end
 
-          def label_based?
+          def self.label_based?
             false
           end
 

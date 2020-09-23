@@ -1,17 +1,12 @@
 import $ from 'jquery';
 import axios from './lib/utils/axios_utils';
-import flash from './flash';
+import { deprecatedCreateFlash as flash } from './flash';
 import { mouseenter, debouncedMouseleave, togglePopover } from './shared/popover';
 import { __ } from './locale';
 
 export default class Milestone {
   constructor() {
     this.bindTabsSwitching();
-
-    // Load merge request tab if it is active
-    // merge request tab is active based on different conditions in the backend
-    this.loadTab($('.js-milestone-tabs .active a'));
-
     this.loadInitialTab();
   }
 
@@ -23,12 +18,14 @@ export default class Milestone {
       this.loadTab($target);
     });
   }
-  // eslint-disable-next-line class-methods-use-this
+
   loadInitialTab() {
-    const $target = $(`.js-milestone-tabs a[href="${window.location.hash}"]`);
+    const $target = $(`.js-milestone-tabs a:not(.active)[href="${window.location.hash}"]`);
 
     if ($target.length) {
       $target.tab('show');
+    } else {
+      this.loadTab($('.js-milestone-tabs a.active'));
     }
   }
   // eslint-disable-next-line class-methods-use-this

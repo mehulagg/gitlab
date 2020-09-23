@@ -2,19 +2,17 @@
 
 require 'spec_helper'
 
-describe Projects::EnvironmentsController do
+RSpec.describe Projects::EnvironmentsController do
   include MetricsDashboardHelpers
 
-  let_it_be(:user) { create(:user) }
   let_it_be(:project) { create(:project) }
+  let_it_be(:maintainer) { create(:user, name: 'main-dos').tap { |u| project.add_maintainer(u) } }
+  let_it_be(:reporter) { create(:user, name: 'repo-dos').tap { |u| project.add_reporter(u) } }
+  let(:user) { maintainer }
 
-  let_it_be(:environment) do
-    create(:environment, name: 'production', project: project)
-  end
+  let!(:environment) { create(:environment, name: 'production', project: project) }
 
   before do
-    project.add_maintainer(user)
-
     sign_in(user)
   end
 
@@ -178,10 +176,10 @@ describe Projects::EnvironmentsController do
     context 'with invalid id' do
       it 'responds with a status code 404' do
         params = environment_params
-        params[:id] = 12345
+        params[:id] = non_existing_record_id
         get :show, params: params
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -199,7 +197,7 @@ describe Projects::EnvironmentsController do
       patch_params = environment_params.merge(environment: { external_url: 'https://git.gitlab.com' })
       patch :update, params: patch_params
 
-      expect(response).to have_gitlab_http_status(302)
+      expect(response).to have_gitlab_http_status(:found)
     end
   end
 
@@ -210,7 +208,7 @@ describe Projects::EnvironmentsController do
 
         patch :stop, params: environment_params(format: :json)
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -223,7 +221,7 @@ describe Projects::EnvironmentsController do
 
         patch :stop, params: environment_params(format: :json)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to eq(
           { 'redirect_url' =>
               project_job_url(project, action) })
@@ -237,10 +235,40 @@ describe Projects::EnvironmentsController do
 
         patch :stop, params: environment_params(format: :json)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to eq(
           { 'redirect_url' =>
               project_environment_url(project, environment) })
+      end
+    end
+  end
+
+  describe 'POST #cancel_auto_stop' do
+    subject { post :cancel_auto_stop, params: params }
+
+    let(:params) { environment_params }
+
+    context 'when environment is set as auto-stop' do
+      let(:environment) { create(:environment, :will_auto_stop, name: 'staging', project: project) }
+
+      it_behaves_like 'successful response for #cancel_auto_stop'
+
+      context 'when user is reporter' do
+        let(:user) { reporter }
+
+        it 'shows NOT Found' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+    end
+
+    context 'when environment is not set as auto-stop' do
+      let(:environment) { create(:environment, name: 'staging', project: project) }
+
+      it_behaves_like 'failed response for #cancel_auto_stop' do
+        let(:message) { 'the environment is not set as auto stop' }
       end
     end
   end
@@ -250,7 +278,7 @@ describe Projects::EnvironmentsController do
       it 'responds with a status code 200' do
         get :terminal, params: environment_params
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'loads the terminals for the environment' do
@@ -267,7 +295,7 @@ describe Projects::EnvironmentsController do
       it 'responds with a status code 404' do
         get :terminal, params: environment_params(id: 666)
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -293,7 +321,7 @@ describe Projects::EnvironmentsController do
 
           get :terminal_websocket_authorize, params: environment_params
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response.headers["Content-Type"]).to eq(Gitlab::Workhorse::INTERNAL_API_CONTENT_TYPE)
           expect(response.body).to eq('{"workhorse":"response"}')
         end
@@ -303,7 +331,7 @@ describe Projects::EnvironmentsController do
         it 'returns 404' do
           get :terminal_websocket_authorize, params: environment_params(id: 666)
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -320,21 +348,10 @@ describe Projects::EnvironmentsController do
   end
 
   describe 'GET #metrics_redirect' do
-    let(:project) { create(:project) }
-
-    it 'redirects to environment if it exists' do
-      environment = create(:environment, name: 'production', project: project)
-
+    it 'redirects to metrics dashboard page' do
       get :metrics_redirect, params: { namespace_id: project.namespace, project_id: project }
 
-      expect(response).to redirect_to(environment_metrics_path(environment))
-    end
-
-    it 'redirects to empty metrics page if no environment exists' do
-      get :metrics_redirect, params: { namespace_id: project.namespace, project_id: project }
-
-      expect(response).to be_ok
-      expect(response).to render_template 'empty_metrics'
+      expect(response).to redirect_to(project_metrics_dashboard_path(project))
     end
   end
 
@@ -344,12 +361,12 @@ describe Projects::EnvironmentsController do
     end
 
     context 'when environment has no metrics' do
-      it 'returns a metrics page' do
+      it 'redirects to metrics dashboard page' do
         expect(environment).not_to receive(:metrics)
 
         get :metrics, params: environment_params
 
-        expect(response).to be_ok
+        expect(response).to redirect_to(project_metrics_dashboard_path(project, environment: environment))
       end
 
       context 'when requesting metrics as JSON' do
@@ -358,7 +375,7 @@ describe Projects::EnvironmentsController do
 
           get :metrics, params: environment_params(format: :json)
 
-          expect(response).to have_gitlab_http_status(204)
+          expect(response).to have_gitlab_http_status(:no_content)
           expect(json_response).to eq({})
         end
       end
@@ -382,6 +399,31 @@ describe Projects::EnvironmentsController do
         expect(json_response['last_update']).to eq(42)
       end
     end
+
+    context 'permissions' do
+      before do
+        allow(controller).to receive(:can?).and_return true
+      end
+
+      it 'checks :metrics_dashboard ability' do
+        expect(controller).to receive(:can?).with(anything, :metrics_dashboard, anything)
+
+        get :metrics, params: environment_params
+      end
+    end
+
+    context 'with anonymous user and public dashboard visibility' do
+      let(:project) { create(:project, :public) }
+      let(:user) { create(:user) }
+
+      it 'redirects to metrics dashboard page' do
+        project.project_feature.update!(metrics_dashboard_access_level: ProjectFeature::ENABLED)
+
+        get :metrics, params: environment_params
+
+        expect(response).to redirect_to(project_metrics_dashboard_path(project, environment: environment))
+      end
+    end
   end
 
   describe 'GET #additional_metrics' do
@@ -400,7 +442,7 @@ describe Projects::EnvironmentsController do
         it 'returns a metrics JSON document' do
           additional_metrics(window_params)
 
-          expect(response).to have_gitlab_http_status(204)
+          expect(response).to have_gitlab_http_status(:no_content)
           expect(json_response).to eq({})
         end
       end
@@ -445,31 +487,55 @@ describe Projects::EnvironmentsController do
           .to raise_error(ActionController::ParameterMissing)
       end
     end
-  end
 
-  describe 'GET #metrics_dashboard' do
-    shared_examples_for 'correctly formatted response' do |status_code|
-      it 'returns a json object with the correct keys' do
-        get :metrics_dashboard, params: environment_params(dashboard_params)
+    context 'permissions' do
+      before do
+        allow(controller).to receive(:can?).and_return true
+      end
 
-        # Exlcude `all_dashboards` to handle separately.
-        found_keys = json_response.keys - ['all_dashboards']
+      it 'checks :metrics_dashboard ability' do
+        expect(controller).to receive(:can?).with(anything, :metrics_dashboard, anything)
 
-        expect(response).to have_gitlab_http_status(status_code)
-        expect(found_keys).to contain_exactly(*expected_keys)
+        get :metrics, params: environment_params
       end
     end
 
-    shared_examples_for '200 response' do
-      let(:expected_keys) { %w(dashboard status) }
+    context 'with anonymous user and public dashboard visibility' do
+      let(:project) { create(:project, :public) }
+      let(:user) { create(:user) }
 
-      it_behaves_like 'correctly formatted response', :ok
+      it 'does not fail' do
+        allow(environment)
+          .to receive(:additional_metrics)
+          .and_return({
+            success: true,
+            data: {},
+            last_update: 42
+          })
+        project.project_feature.update!(metrics_dashboard_access_level: ProjectFeature::ENABLED)
+
+        additional_metrics(window_params)
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+    end
+  end
+
+  describe 'GET #metrics_dashboard' do
+    let(:metrics_dashboard_req_params) { environment_params(dashboard_params) }
+
+    shared_examples_for '200 response' do
+      it_behaves_like 'GET #metrics_dashboard correctly formatted response' do
+        let(:expected_keys) { %w(dashboard status metrics_data) }
+        let(:status_code) { :ok }
+      end
     end
 
     shared_examples_for 'error response' do |status_code|
-      let(:expected_keys) { %w(message status) }
-
-      it_behaves_like 'correctly formatted response', status_code
+      it_behaves_like 'GET #metrics_dashboard correctly formatted response' do
+        let(:expected_keys) { %w(message status) }
+        let(:status_code) { status_code }
+      end
     end
 
     shared_examples_for 'includes all dashboards' do
@@ -483,29 +549,14 @@ describe Projects::EnvironmentsController do
     end
 
     shared_examples_for 'the default dashboard' do
-      it_behaves_like '200 response'
       it_behaves_like 'includes all dashboards'
-
-      it 'is the default dashboard' do
-        get :metrics_dashboard, params: environment_params(dashboard_params)
-
-        expect(json_response['dashboard']['dashboard']).to eq('Environment metrics')
-      end
+      it_behaves_like 'GET #metrics_dashboard for dashboard', 'Environment metrics'
     end
 
     shared_examples_for 'the specified dashboard' do |expected_dashboard|
-      it_behaves_like '200 response'
       it_behaves_like 'includes all dashboards'
 
-      it 'has the correct name' do
-        get :metrics_dashboard, params: environment_params(dashboard_params)
-
-        dashboard_name = json_response['dashboard']['dashboard']
-
-        # 'Environment metrics' is the default dashboard.
-        expect(dashboard_name).not_to eq('Environment metrics')
-        expect(dashboard_name).to eq(expected_dashboard)
-      end
+      it_behaves_like 'GET #metrics_dashboard for dashboard', expected_dashboard
 
       context 'when the dashboard cannot not be processed' do
         before do
@@ -548,6 +599,10 @@ describe Projects::EnvironmentsController do
           let(:dashboard_yml) { fixture_file('lib/gitlab/metrics/dashboard/sample_dashboard.yml') }
           let(:project) { project_with_dashboard(dashboard_path, dashboard_yml) }
           let(:environment) { create(:environment, name: 'production', project: project) }
+
+          before do
+            project.add_maintainer(user)
+          end
 
           it_behaves_like 'the specified dashboard', 'Test Dashboard'
         end
@@ -616,6 +671,29 @@ describe Projects::EnvironmentsController do
     it_behaves_like 'the default dashboard'
     it_behaves_like 'dashboard can be specified'
     it_behaves_like 'dashboard can be embedded'
+
+    context 'with anonymous user and public dashboard visibility' do
+      let(:project) { create(:project, :public) }
+      let(:user) { create(:user) }
+
+      before do
+        project.project_feature.update!(metrics_dashboard_access_level: ProjectFeature::ENABLED)
+      end
+
+      it_behaves_like 'the default dashboard'
+    end
+
+    context 'permissions' do
+      before do
+        allow(controller).to receive(:can?).and_return true
+      end
+
+      it 'checks :metrics_dashboard ability' do
+        expect(controller).to receive(:can?).with(anything, :metrics_dashboard, anything)
+
+        get :metrics, params: environment_params
+      end
+    end
   end
 
   describe 'GET #search' do

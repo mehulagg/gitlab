@@ -28,7 +28,7 @@ describe('error tracking settings actions', () => {
     });
 
     it('should request and transform the project list', done => {
-      mock.onPost(TEST_HOST).reply(() => [200, { projects: projectList }]);
+      mock.onGet(TEST_HOST).reply(() => [200, { projects: projectList }]);
       testAction(
         actions.fetchProjects,
         null,
@@ -42,14 +42,14 @@ describe('error tracking settings actions', () => {
           },
         ],
         () => {
-          expect(mock.history.post.length).toBe(1);
+          expect(mock.history.get.length).toBe(1);
           done();
         },
       );
     });
 
     it('should handle a server error', done => {
-      mock.onPost(`${TEST_HOST}.json`).reply(() => [400]);
+      mock.onGet(`${TEST_HOST}.json`).reply(() => [400]);
       testAction(
         actions.fetchProjects,
         null,
@@ -62,14 +62,21 @@ describe('error tracking settings actions', () => {
           },
         ],
         () => {
-          expect(mock.history.post.length).toBe(1);
+          expect(mock.history.get.length).toBe(1);
           done();
         },
       );
     });
 
     it('should request projects correctly', done => {
-      testAction(actions.requestProjects, null, state, [{ type: types.RESET_CONNECT }], [], done);
+      testAction(
+        actions.requestProjects,
+        null,
+        state,
+        [{ type: types.SET_PROJECTS_LOADING, payload: true }, { type: types.RESET_CONNECT }],
+        [],
+        done,
+      );
     });
 
     it('should receive projects correctly', done => {
@@ -81,6 +88,7 @@ describe('error tracking settings actions', () => {
         [
           { type: types.UPDATE_CONNECT_SUCCESS },
           { type: types.RECEIVE_PROJECTS, payload: testPayload },
+          { type: types.SET_PROJECTS_LOADING, payload: false },
         ],
         [],
         done,
@@ -93,7 +101,11 @@ describe('error tracking settings actions', () => {
         actions.receiveProjectsError,
         testPayload,
         state,
-        [{ type: types.UPDATE_CONNECT_ERROR }, { type: types.CLEAR_PROJECTS }],
+        [
+          { type: types.UPDATE_CONNECT_ERROR },
+          { type: types.CLEAR_PROJECTS },
+          { type: types.SET_PROJECTS_LOADING, payload: false },
+        ],
         [],
         done,
       );

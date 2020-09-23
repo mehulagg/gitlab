@@ -3,9 +3,6 @@
 module Gitlab
   module Database
     module LoadBalancing
-      # The connection proxy to use for load balancing (if enabled).
-      cattr_accessor :proxy
-
       # The exceptions raised for connection errors.
       CONNECTION_ERRORS = if defined?(PG)
                             [
@@ -21,6 +18,21 @@ module Gitlab
                           else
                             [].freeze
                           end
+
+      ProxyNotConfiguredError = Class.new(StandardError)
+
+      # The connection proxy to use for load balancing (if enabled).
+      def self.proxy
+        unless @proxy
+          Gitlab::ErrorTracking.track_exception(
+            ProxyNotConfiguredError.new(
+              "Attempting to access the database load balancing proxy, but it wasn't configured.\n" \
+              "Did you forget to call '#{self.name}.configure_proxy'?"
+            ))
+        end
+
+        @proxy
+      end
 
       # Returns a Hash containing the load balancing configuration.
       def self.configuration
@@ -73,7 +85,7 @@ module Gitlab
       # Returns true if load balancing is to be enabled.
       def self.enable?
         return false unless ::License.feature_available?(:db_load_balancing)
-        return false if program_name == 'rake' || Sidekiq.server?
+        return false if program_name == 'rake' || Gitlab::Runtime.sidekiq?
 
         hosts.any? || service_discovery_enabled?
       end
@@ -89,8 +101,8 @@ module Gitlab
       end
 
       # Configures proxying of requests.
-      def self.configure_proxy
-        self.proxy = ConnectionProxy.new(hosts)
+      def self.configure_proxy(proxy = ConnectionProxy.new(hosts))
+        @proxy = proxy
 
         # This hijacks the "connection" method to ensure both
         # `ActiveRecord::Base.connection` and all models use the same load

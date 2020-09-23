@@ -4,8 +4,6 @@ module Gitlab
   module SlashCommands
     module Presenters
       module IssueBase
-        prepend_if_ee('EE::Gitlab::SlashCommands::Presenters::IssueBase') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
         def color(issuable)
           issuable.open? ? '#38ae67' : '#d22852'
         end
@@ -42,18 +40,14 @@ module Gitlab
           ]
         end
 
-        def project_link
-          "[#{project.full_name}](#{project.web_url})"
-        end
-
-        def author_profile_link
-          "[#{author.to_reference}](#{url_for(author)})"
-        end
-
         private
 
         attr_reader :resource
+
+        alias_method :issue, :resource
       end
     end
   end
 end
+
+Gitlab::SlashCommands::Presenters::IssueBase.prepend_if_ee('EE::Gitlab::SlashCommands::Presenters::IssueBase')

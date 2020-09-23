@@ -4,14 +4,12 @@ class Projects::GrafanaApiController < Projects::ApplicationController
   include RenderServiceResults
   include MetricsDashboard
 
-  before_action :validate_feature_enabled!, only: [:metrics_dashboard]
-
   def proxy
     result = ::Grafana::ProxyService.new(
       project,
       params[:datasource_id],
       params[:proxy_path],
-      query_params.to_h
+      prometheus_params
     ).execute
 
     return continue_polling_response if result.nil?
@@ -26,11 +24,16 @@ class Projects::GrafanaApiController < Projects::ApplicationController
     params.permit(:embedded, :grafana_url)
   end
 
-  def validate_feature_enabled!
-    render_403 unless Feature.enabled?(:gfm_grafana_integration)
+  def query_params
+    params.permit(:query, :start_time, :end_time, :step)
   end
 
-  def query_params
-    params.permit(:query, :start, :end, :step)
+  def prometheus_params
+    query_params.to_h
+      .except(:start_time, :end_time)
+      .merge(
+        start: query_params[:start_time],
+        end: query_params[:end_time]
+      )
   end
 end

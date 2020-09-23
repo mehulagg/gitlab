@@ -6,14 +6,11 @@ class MilestoneRelease < ApplicationRecord
 
   validate :same_project_between_milestone_and_release
 
-  # Keep until 2019-11-29
-  self.ignored_columns += %i[id]
-
   private
 
   def same_project_between_milestone_and_release
     return if milestone&.project_id == release&.project_id
 
-    errors.add(:base, 'does not have the same project as the milestone')
+    errors.add(:base, _('Release does not have the same project as the milestone'))
   end
 end

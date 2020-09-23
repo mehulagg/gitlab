@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RedisCacheable do
+RSpec.describe RedisCacheable do
   let(:model) do
     Struct.new(:id, :attributes) do
       def read_attribute(attribute)
@@ -28,15 +28,15 @@ describe RedisCacheable do
   end
 
   describe '#cached_attribute' do
-    subject { instance.cached_attribute(payload.keys.first) }
+    subject { instance.cached_attribute(payload.each_key.first) }
 
     it 'gets the cache attribute' do
-      Gitlab::Redis::SharedState.with do |redis|
+      Gitlab::Redis::Cache.with do |redis|
         expect(redis).to receive(:get).with(cache_key)
           .and_return(payload.to_json)
       end
 
-      expect(subject).to eq(payload.values.first)
+      expect(subject).to eq(payload.each_value.first)
     end
   end
 
@@ -44,7 +44,7 @@ describe RedisCacheable do
     subject { instance.cache_attributes(payload) }
 
     it 'sets the cache attributes' do
-      Gitlab::Redis::SharedState.with do |redis|
+      Gitlab::Redis::Cache.with do |redis|
         expect(redis).to receive(:set).with(cache_key, payload.to_json, anything)
       end
 
@@ -52,7 +52,7 @@ describe RedisCacheable do
     end
   end
 
-  describe '#cached_attr_reader', :clean_gitlab_redis_shared_state do
+  describe '#cached_attr_reader', :clean_gitlab_redis_cache do
     subject { instance.name }
 
     before do

@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe RootController do
+RSpec.describe RootController do
   include ::EE::GeoHelpers
 
   describe 'GET #index' do
     context 'when user is not logged in' do
       context 'on a Geo primary node' do
-        set(:primary_node) { create(:geo_node, :primary) }
+        let_it_be(:primary_node) { create(:geo_node, :primary) }
 
         before do
           stub_current_geo_node(primary_node)
@@ -34,7 +34,7 @@ describe RootController do
       end
 
       context 'on a Geo secondary node' do
-        set(:secondary_node) { create(:geo_node) }
+        let_it_be(:secondary_node) { create(:geo_node) }
 
         before do
           stub_current_geo_node(secondary_node)

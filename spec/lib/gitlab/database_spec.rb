@@ -2,9 +2,17 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database do
+RSpec.describe Gitlab::Database do
   before do
     stub_const('MigrationTest', Class.new { include Gitlab::Database })
+  end
+
+  describe 'EXTRA_SCHEMAS' do
+    it 'contains only schemas starting with gitlab_ prefix' do
+      described_class::EXTRA_SCHEMAS.each do |schema|
+        expect(schema.to_s).to start_with('gitlab_')
+      end
+    end
   end
 
   describe '.config' do
@@ -82,36 +90,63 @@ describe Gitlab::Database do
   end
 
   describe '.postgresql_minimum_supported_version?' do
-    it 'returns false when using PostgreSQL 9.5' do
-      allow(described_class).to receive(:version).and_return('9.5')
+    it 'returns false when using PostgreSQL 10' do
+      allow(described_class).to receive(:version).and_return('10')
 
       expect(described_class.postgresql_minimum_supported_version?).to eq(false)
     end
 
-    it 'returns true when using PostgreSQL 9.6' do
-      allow(described_class).to receive(:version).and_return('9.6')
+    it 'returns true when using PostgreSQL 11' do
+      allow(described_class).to receive(:version).and_return('11')
 
       expect(described_class.postgresql_minimum_supported_version?).to eq(true)
     end
 
-    it 'returns true when using PostgreSQL 10 or newer' do
-      allow(described_class).to receive(:version).and_return('10')
+    it 'returns true when using PostgreSQL 12' do
+      allow(described_class).to receive(:version).and_return('12')
 
       expect(described_class.postgresql_minimum_supported_version?).to eq(true)
     end
   end
 
-  describe '.replication_slots_supported?' do
-    it 'returns false when using PostgreSQL 9.3' do
-      allow(described_class).to receive(:version).and_return('9.3.1')
+  describe '.check_postgres_version_and_print_warning' do
+    subject { described_class.check_postgres_version_and_print_warning }
 
-      expect(described_class.replication_slots_supported?).to eq(false)
+    it 'prints a warning if not compliant with minimum postgres version' do
+      allow(described_class).to receive(:postgresql_minimum_supported_version?).and_return(false)
+
+      expect(Kernel).to receive(:warn).with(/You are using PostgreSQL/)
+
+      subject
     end
 
-    it 'returns true when using PostgreSQL 9.4.0 or newer' do
-      allow(described_class).to receive(:version).and_return('9.4.0')
+    it 'doesnt print a warning if compliant with minimum postgres version' do
+      allow(described_class).to receive(:postgresql_minimum_supported_version?).and_return(true)
 
-      expect(described_class.replication_slots_supported?).to eq(true)
+      expect(Kernel).not_to receive(:warn).with(/You are using PostgreSQL/)
+
+      subject
+    end
+
+    it 'doesnt print a warning in Rails runner environment' do
+      allow(described_class).to receive(:postgresql_minimum_supported_version?).and_return(false)
+      allow(Gitlab::Runtime).to receive(:rails_runner?).and_return(true)
+
+      expect(Kernel).not_to receive(:warn).with(/You are using PostgreSQL/)
+
+      subject
+    end
+
+    it 'ignores ActiveRecord errors' do
+      allow(described_class).to receive(:postgresql_minimum_supported_version?).and_raise(ActiveRecord::ActiveRecordError)
+
+      expect { subject }.not_to raise_error
+    end
+
+    it 'ignores Postgres errors' do
+      allow(described_class).to receive(:postgresql_minimum_supported_version?).and_raise(PG::Error)
+
+      expect { subject }.not_to raise_error
     end
   end
 
@@ -307,6 +342,15 @@ describe Gitlab::Database do
 
         expect(ids).to eq([10])
       end
+
+      it 'allows setting the upsert to do nothing' do
+        expect(connection)
+          .to receive(:execute)
+          .with(/ON CONFLICT DO NOTHING/)
+
+        described_class
+          .bulk_insert('test', [{ number: 10 }], on_conflict: :do_nothing)
+      end
     end
   end
 
@@ -366,6 +410,26 @@ describe Gitlab::Database do
         expect(described_class.cached_table_exists?(:projects)).to be_truthy
         expect(described_class.cached_table_exists?(:bogus_table_name)).to be_falsey
       end
+    end
+
+    it 'returns false when database does not exist' do
+      expect(ActiveRecord::Base).to receive(:connection) { raise ActiveRecord::NoDatabaseError, 'broken' }
+
+      expect(described_class.cached_table_exists?(:projects)).to be(false)
+    end
+  end
+
+  describe '.exists?' do
+    it 'returns true if `ActiveRecord::Base.connection` succeeds' do
+      expect(ActiveRecord::Base).to receive(:connection)
+
+      expect(described_class.exists?).to be(true)
+    end
+
+    it 'returns false if `ActiveRecord::Base.connection` fails' do
+      expect(ActiveRecord::Base).to receive(:connection) { raise ActiveRecord::NoDatabaseError, 'broken' }
+
+      expect(described_class.exists?).to be(false)
     end
   end
 

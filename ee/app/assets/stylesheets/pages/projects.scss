@@ -1,7 +1,7 @@
 .protected-branch-push-access-list,
 .protected-branch-merge-access-list {
   a {
-    color: $white-light;
+    color: $white;
   }
 }
 
@@ -40,11 +40,6 @@
       text-decoration: line-through;
     }
   }
-
-  .changing-auth-method {
-    display: flex;
-    justify-content: center;
-  }
 }
 
 .load-wrapper {
@@ -70,6 +65,14 @@
   @include media-breakpoint-up(sm) {
     float: right;
     margin-top: 0;
+  }
+}
+
+.projects-list {
+  .project-details {
+    .compliance-framework-pill {
+      margin: 1px 0;
+    }
   }
 }
 
@@ -154,7 +157,6 @@
 
   .template-option {
     display: none;
-    background: $gray-light;
 
     .avatar-container {
       margin-left: 34px;

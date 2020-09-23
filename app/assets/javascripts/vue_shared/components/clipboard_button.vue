@@ -12,8 +12,7 @@
  *    css-class="btn-transparent"
  * />
  */
-import { GlButton, GlTooltipDirective } from '@gitlab/ui';
-import Icon from '../components/icon.vue';
+import { GlDeprecatedButton, GlTooltipDirective, GlIcon } from '@gitlab/ui';
 
 export default {
   name: 'ClipboardButton',
@@ -21,8 +20,8 @@ export default {
     GlTooltip: GlTooltipDirective,
   },
   components: {
-    GlButton,
-    Icon,
+    GlDeprecatedButton,
+    GlIcon,
   },
   props: {
     text: {
@@ -66,12 +65,13 @@ export default {
 </script>
 
 <template>
-  <gl-button
+  <gl-deprecated-button
     v-gl-tooltip="{ placement: tooltipPlacement, container: tooltipContainer }"
+    v-gl-tooltip.hover.blur
     :class="cssClass"
     :title="title"
     :data-clipboard-text="clipboardText"
   >
-    <icon name="duplicate" />
-  </gl-button>
+    <gl-icon name="copy-to-clipboard" />
+  </gl-deprecated-button>
 </template>

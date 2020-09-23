@@ -1,18 +1,16 @@
 ---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 disqus_identifier: 'https://docs.gitlab.com/ee/articles/artifactory_and_gitlab/index.html'
-author: Fabio Busatto
-author_gitlab: bikebilly
-level: intermediate
-article_type: tutorial
 type: tutorial
-date: 2017-08-15
 ---
 
 # How to deploy Maven projects to Artifactory with GitLab CI/CD
 
 ## Introduction
 
-In this article, we will show how you can leverage the power of [GitLab CI/CD](https://about.gitlab.com/product/continuous-integration/)
+In this article, we show how you can leverage the power of [GitLab CI/CD](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/)
 to build a [Maven](https://maven.apache.org/) project, deploy it to [Artifactory](https://jfrog.com/artifactory/), and then use it from another Maven application as a dependency.
 
 You'll create two different projects:
@@ -20,7 +18,7 @@ You'll create two different projects:
 - `simple-maven-dep`: the app built and deployed to Artifactory (see the [simple-maven-dep](https://gitlab.com/gitlab-examples/maven/simple-maven-dep) example project)
 - `simple-maven-app`: the app using the previous one as a dependency (see the [simple-maven-app](https://gitlab.com/gitlab-examples/maven/simple-maven-app) example project)
 
-We assume that you already have a GitLab account on [GitLab.com](https://gitlab.com/), and that you know the basic usage of Git and [GitLab CI/CD](https://about.gitlab.com/product/continuous-integration/).
+We assume that you already have a GitLab account on [GitLab.com](https://gitlab.com/), and that you know the basic usage of Git and [GitLab CI/CD](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/).
 We also assume that an Artifactory instance is available and reachable from the internet, and that you have valid credentials to deploy on it.
 
 ## Create the simple Maven dependency
@@ -39,7 +37,7 @@ project:
 1. Create a new project by selecting **Import project from ➔ Repo by URL**
 1. Add the following URL:
 
-   ```
+   ```plaintext
    https://gitlab.com/gitlab-examples/maven/simple-maven-dep.git
    ```
 
@@ -79,7 +77,7 @@ is to configure the authentication data. It is a simple task, but Maven requires
 it to stay in a file called `settings.xml` that has to be in the `.m2` subdirectory
 in the user's homedir.
 
-Since you want to use GitLab Runner to automatically deploy the application, you
+Since you want to use a runner to automatically deploy the application, you
 should create the file in the project's home directory and set a command line
 parameter in `.gitlab-ci.yml` to use the custom location instead of the default one:
 
@@ -104,10 +102,10 @@ parameter in `.gitlab-ci.yml` to use the custom location instead of the default 
 
 ### Configure GitLab CI/CD for `simple-maven-dep`
 
-Now it's time we set up [GitLab CI/CD](https://about.gitlab.com/product/continuous-integration/) to automatically build, test and deploy the dependency!
+Now it's time we set up [GitLab CI/CD](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/) to automatically build, test and deploy the dependency!
 
-GitLab CI/CD uses a file in the root of the repo, named `.gitlab-ci.yml`, to read the definitions for jobs
-that will be executed by the configured GitLab Runners. You can read more about this file in the [GitLab Documentation](../../yaml/README.md).
+GitLab CI/CD uses a file in the root of the repository, named `.gitlab-ci.yml`, to read the definitions for jobs
+that will be executed by the configured runners. You can read more about this file in the [GitLab Documentation](../../yaml/README.md).
 
 First of all, remember to set up variables for your deployment. Navigate to your project's **Settings > CI/CD > Environment variables** page
 and add the following ones (replace them with your current values, of course):
@@ -116,7 +114,7 @@ and add the following ones (replace them with your current values, of course):
 - **MAVEN_REPO_USER**: `gitlab` (your Artifactory username)
 - **MAVEN_REPO_PASS**: `AKCp2WXr3G61Xjz1PLmYa3arm3yfBozPxSta4taP3SeNu2HPXYa7FhNYosnndFNNgoEds8BCS` (your Artifactory Encrypted Password)
 
-Now it's time to define jobs in `.gitlab-ci.yml` and push it to the repo:
+Now it's time to define jobs in `.gitlab-ci.yml` and push it to the repository:
 
 ```yaml
 image: maven:latest
@@ -148,10 +146,10 @@ deploy:
     - master
 ```
 
-GitLab Runner will use the latest [Maven Docker image](https://hub.docker.com/_/maven/), which already contains all the tools and the dependencies you need to manage the project,
+The runner will use the latest [Maven Docker image](https://hub.docker.com/_/maven/), which already contains all the tools and the dependencies you need to manage the project,
 in order to run the jobs.
 
-Environment variables are set to instruct Maven to use the `homedir` of the repo instead of the user's home when searching for configuration and dependencies.
+Environment variables are set to instruct Maven to use the `homedir` of the repository instead of the user's home when searching for configuration and dependencies.
 
 Caching the `.m2/repository folder` (where all the Maven files are stored), and the `target` folder (where our application will be created), is useful for speeding up the process
 by running all Maven phases in a sequential order, therefore, executing `mvn test` will automatically run `mvn compile` if necessary.
@@ -161,10 +159,10 @@ Both `build` and `test` jobs leverage the `mvn` command to compile the applicati
 Deploy to Artifactory is done as defined by the variables we have just set up.
 The deployment occurs only if we're pushing or merging to `master` branch, so that the development versions are tested but not published.
 
-Done! Now you have all the changes in the GitLab repo, and a pipeline has already been started for this commit. In the **Pipelines** tab you can see what's happening.
+Done! Now you have all the changes in the GitLab repository, and a pipeline has already been started for this commit. In the **Pipelines** tab you can see what's happening.
 If the deployment has been successful, the deploy job log will output:
 
-```
+```plaintext
 [INFO] ------------------------------------------------------------------------
 [INFO] BUILD SUCCESS
 [INFO] ------------------------------------------------------------------------
@@ -174,7 +172,7 @@ If the deployment has been successful, the deploy job log will output:
 >**Note**:
 the `mvn` command downloads a lot of files from the internet, so you'll see a lot of extra activity in the log the first time you run it.
 
-Yay! You did it! Checking in Artifactory will confirm that you have a new artifact available in the `libs-release-local` repo.
+Yay! You did it! Checking in Artifactory will confirm that you have a new artifact available in the `libs-release-local` repository.
 
 ## Create the main Maven application
 
@@ -188,7 +186,7 @@ We'll use again a Maven app that can be cloned from our example project:
 1. Create a new project by selecting **Import project from ➔ Repo by URL**
 1. Add the following URL:
 
-   ```
+   ```plaintext
    https://gitlab.com/gitlab-examples/maven/simple-maven-app.git
    ```
 
@@ -225,7 +223,7 @@ Here is how you can get the content of the file directly from Artifactory:
 1. Click on **Generate Maven Settings**
 1. Click on **Generate Settings**
 1. Copy to clipboard the configuration file
-1. Save the file as `.m2/settings.xml` in your repo
+1. Save the file as `.m2/settings.xml` in your repository
 
 Now you are ready to use the Artifactory repository to resolve dependencies and use `simple-maven-dep` in your main application!
 
@@ -233,10 +231,10 @@ Now you are ready to use the Artifactory repository to resolve dependencies and 
 
 You need a last step to have everything in place: configure the `.gitlab-ci.yml` file for this project, as you already did for `simple-maven-dep`.
 
-You want to leverage [GitLab CI/CD](https://about.gitlab.com/product/continuous-integration/) to automatically build, test and run your awesome application,
+You want to leverage [GitLab CI/CD](https://about.gitlab.com/stages-devops-lifecycle/continuous-integration/) to automatically build, test and run your awesome application,
 and see if you can get the greeting as expected!
 
-All you need to do is to add the following `.gitlab-ci.yml` to the repo:
+All you need to do is to add the following `.gitlab-ci.yml` to the repository:
 
 ```yaml
 image: maven:latest

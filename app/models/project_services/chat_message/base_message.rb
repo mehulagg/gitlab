@@ -1,25 +1,23 @@
 # frozen_string_literal: true
 
-require 'slack-notifier'
-
 module ChatMessage
   class BaseMessage
+    RELATIVE_LINK_REGEX = /!\[[^\]]*\]\((\/uploads\/[^\)]*)\)/.freeze
+
     attr_reader :markdown
     attr_reader :user_full_name
     attr_reader :user_name
     attr_reader :user_avatar
     attr_reader :project_name
     attr_reader :project_url
-    attr_reader :commit_message_html
 
     def initialize(params)
       @markdown = params[:markdown] || false
-      @project_name = params.dig(:project, :path_with_namespace) || params[:project_name]
+      @project_name = params[:project_name] || params.dig(:project, :path_with_namespace)
       @project_url = params.dig(:project, :web_url) || params[:project_url]
       @user_full_name = params.dig(:user, :name) || params[:user_full_name]
       @user_name = params.dig(:user, :username) || params[:user_name]
       @user_avatar = params.dig(:user, :avatar_url) || params[:user_avatar]
-      @commit_message_html = params[:commit_message_html] || false
     end
 
     def user_combined_name
@@ -59,7 +57,11 @@ module ChatMessage
     end
 
     def format(string)
-      Slack::Notifier::LinkFormatter.format(string)
+      Slack::Messenger::Util::LinkFormatter.format(format_relative_links(string))
+    end
+
+    def format_relative_links(string)
+      string.gsub(RELATIVE_LINK_REGEX, "#{project_url}\\1")
     end
 
     def attachment_color

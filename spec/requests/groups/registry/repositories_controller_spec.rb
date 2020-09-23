@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Groups::Registry::RepositoriesController do
+RSpec.describe Groups::Registry::RepositoriesController do
   let_it_be(:group, reload: true) { create(:group) }
   let_it_be(:user) { create(:user) }
 
   before do
     stub_container_registry_config(enabled: true)
-
+    stub_container_registry_tags(repository: :any, tags: [])
     group.add_reporter(user)
     login_as(user)
   end
@@ -28,7 +28,7 @@ describe Groups::Registry::RepositoriesController do
       expect { get(endpoint) }.not_to exceed_all_query_limit(control_count)
 
       # sanity check that response is 200
-      expect(response).to have_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       repositories = json_response
       expect(repositories.count).to eq(5)
     end

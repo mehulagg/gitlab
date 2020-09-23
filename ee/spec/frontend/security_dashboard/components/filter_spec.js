@@ -1,62 +1,80 @@
-import Vue from 'vue';
-import component from 'ee/security_dashboard/components/filter.vue';
-import createStore from 'ee/security_dashboard/store';
-import { mountComponentWithStore } from 'helpers/vue_mount_component_helper';
+import Filter from 'ee/security_dashboard/components/filter.vue';
+import { mount } from '@vue/test-utils';
+import stubChildren from 'helpers/stub_children';
+import { trimText } from 'helpers/text_helper';
+
+const generateOption = index => ({
+  name: `Option ${index}`,
+  id: `option-${index}`,
+});
+
+const generateOptions = length => {
+  return Array.from({ length }).map((_, i) => generateOption(i));
+};
 
 describe('Filter component', () => {
-  let vm;
-  let props;
-  let store;
-  let Component;
+  let wrapper;
+
+  const createWrapper = propsData => {
+    wrapper = mount(Filter, {
+      stubs: {
+        ...stubChildren(Filter),
+        GlDeprecatedDropdown: false,
+        GlSearchBoxByType: false,
+      },
+      propsData,
+      attachToDocument: true,
+    });
+  };
+
+  const findSearchInput = () =>
+    wrapper.find({ ref: 'searchBox' }).exists() && wrapper.find({ ref: 'searchBox' }).find('input');
+  const findDropdownToggle = () => wrapper.find('.dropdown-toggle');
+  const dropdownItemsCount = () => wrapper.findAll('.dropdown-item').length;
 
   function isDropdownOpen() {
-    const toggleButton = vm.$el.querySelector('.dropdown-toggle');
-    return toggleButton.getAttribute('aria-expanded') === 'true';
+    const toggleButton = findDropdownToggle();
+    return toggleButton.attributes('aria-expanded') === 'true';
   }
-
-  function setProjectsCount(count) {
-    const projects = new Array(count).fill(null).map((_, i) => ({
-      name: i.toString(),
-      id: i.toString(),
-    }));
-
-    store.dispatch('filters/setFilterOptions', {
-      filterId: 'project_id',
-      options: projects,
-    });
-  }
-
-  const findSearchInput = () => vm.$refs.searchBox && vm.$refs.searchBox.$el.querySelector('input');
-
-  beforeEach(() => {
-    store = createStore();
-    Component = Vue.extend(component);
-  });
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
   });
 
   describe('severity', () => {
+    let options;
+
     beforeEach(() => {
-      props = { filterId: 'severity' };
-      vm = mountComponentWithStore(Component, { store, props });
+      options = generateOptions(8);
+      const filter = {
+        name: 'Severity',
+        id: 'severity',
+        options,
+        selection: new Set([options[0].id, options[1].id, options[2].id]),
+      };
+      createWrapper({ filter });
     });
 
     it('should display all 8 severity options', () => {
-      expect(vm.$el.querySelectorAll('.dropdown-item').length).toEqual(8);
+      expect(dropdownItemsCount()).toEqual(8);
     });
 
-    it('should display a check next to only the selected item', () => {
-      expect(vm.$el.querySelectorAll('.dropdown-item .js-check').length).toEqual(1);
+    it('should display a check next to only the selected items', () => {
+      expect(wrapper.findAll('.dropdown-item .js-check')).toHaveLength(3);
+    });
+
+    it('should correctly display the selected text', () => {
+      const selectedText = trimText(wrapper.find('.dropdown-toggle').text());
+
+      expect(selectedText).toBe(`${options[0].name} +2 more`);
     });
 
     it('should display "Severity" as the option name', () => {
-      expect(vm.$el.querySelector('.js-name').textContent).toContain('Severity');
+      expect(wrapper.find('.js-name').text()).toContain('Severity');
     });
 
     it('should not have a search box', () => {
-      expect(findSearchInput()).not.toEqual(jasmine.any(HTMLElement));
+      expect(findSearchInput()).toBe(false);
     });
 
     it('should not be open', () => {
@@ -65,27 +83,25 @@ describe('Filter component', () => {
 
     describe('when the dropdown is open', () => {
       beforeEach(done => {
-        vm.$el.querySelector('.dropdown-toggle').click();
-        vm.$on('bv::dropdown::shown', () => {
+        findDropdownToggle().trigger('click');
+        wrapper.vm.$root.$on('bv::dropdown::shown', () => {
           done();
         });
       });
 
-      it('should keep the menu open after clicking on an item', done => {
+      it('should keep the menu open after clicking on an item', () => {
         expect(isDropdownOpen()).toBe(true);
-        vm.$el.querySelector('.dropdown-item').click();
-        vm.$nextTick(() => {
+        wrapper.find('.dropdown-item').trigger('click');
+        return wrapper.vm.$nextTick().then(() => {
           expect(isDropdownOpen()).toBe(true);
-          done();
         });
       });
 
-      it('should close the menu when the close button is clicked', done => {
+      it('should close the menu when the close button is clicked', () => {
         expect(isDropdownOpen()).toBe(true);
-        vm.$refs.close.click();
-        vm.$nextTick(() => {
+        wrapper.find({ ref: 'close' }).trigger('click');
+        return wrapper.vm.$nextTick().then(() => {
           expect(isDropdownOpen()).toBe(false);
-          done();
         });
       });
     });
@@ -93,29 +109,34 @@ describe('Filter component', () => {
 
   describe('Project', () => {
     describe('when there are lots of projects', () => {
-      const lots = 30;
-      beforeEach(done => {
-        props = { filterId: 'project_id', dashboardDocumentation: '' };
-        vm = mountComponentWithStore(Component, { store, props });
-        setProjectsCount(lots);
-        vm.$nextTick(done);
+      const LOTS = 30;
+
+      beforeEach(() => {
+        const options = generateOptions(LOTS);
+        const filter = {
+          name: 'Project',
+          id: 'project',
+          options,
+          selection: new Set([options[0].id]),
+        };
+
+        createWrapper({ filter });
       });
 
       it('should display a search box', () => {
-        expect(findSearchInput()).toEqual(jasmine.any(HTMLElement));
+        expect(findSearchInput().exists()).toBe(true);
       });
 
       it(`should show all projects`, () => {
-        expect(vm.$el.querySelectorAll('.dropdown-item').length).toBe(lots);
+        expect(dropdownItemsCount()).toBe(LOTS);
       });
 
-      it('should show only matching projects when a search term is entered', done => {
+      it('should show only matching projects when a search term is entered', () => {
         const input = findSearchInput();
-        input.value = '0';
-        input.dispatchEvent(new Event('input'));
-        vm.$nextTick(() => {
-          expect(vm.$el.querySelectorAll('.dropdown-item').length).toBe(3);
-          done();
+        input.vm.$el.value = '0';
+        input.vm.$el.dispatchEvent(new Event('input'));
+        return wrapper.vm.$nextTick().then(() => {
+          expect(dropdownItemsCount()).toBe(3);
         });
       });
     });

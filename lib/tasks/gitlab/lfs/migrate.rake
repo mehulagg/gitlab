@@ -1,6 +1,6 @@
 require 'logger'
 
-desc "GitLab | Migrate LFS objects to remote storage"
+desc "GitLab | LFS | Migrate LFS objects to remote storage"
 namespace :gitlab do
   namespace :lfs do
     task migrate: :environment do
@@ -9,13 +9,12 @@ namespace :gitlab do
 
       LfsObject.with_files_stored_locally
         .find_each(batch_size: 10) do |lfs_object|
+        lfs_object.file.migrate!(LfsObjectUploader::Store::REMOTE)
 
-          lfs_object.file.migrate!(LfsObjectUploader::Store::REMOTE)
-
-          logger.info("Transferred LFS object #{lfs_object.oid} of size #{lfs_object.size.to_i.bytes} to object storage")
-        rescue => e
-          logger.error("Failed to transfer LFS object #{lfs_object.oid} with error: #{e.message}")
-        end
+        logger.info("Transferred LFS object #{lfs_object.oid} of size #{lfs_object.size.to_i.bytes} to object storage")
+      rescue => e
+        logger.error("Failed to transfer LFS object #{lfs_object.oid} with error: #{e.message}")
+      end
     end
 
     task migrate_to_local: :environment do
@@ -24,7 +23,6 @@ namespace :gitlab do
 
       LfsObject.with_files_stored_remotely
         .find_each(batch_size: 10) do |lfs_object|
-
         lfs_object.file.migrate!(LfsObjectUploader::Store::LOCAL)
 
         logger.info("Transferred LFS object #{lfs_object.oid} of size #{lfs_object.size.to_i.bytes} to local storage")

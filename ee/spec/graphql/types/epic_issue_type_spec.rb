@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['EpicIssue'] do
+RSpec.describe GitlabSchema.types['EpicIssue'] do
   it { expect(described_class.graphql_name).to eq('EpicIssue') }
 
   it { expect(described_class).to require_graphql_authorizations(:read_issue) }

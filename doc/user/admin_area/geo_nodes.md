@@ -1,13 +1,16 @@
 ---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: howto
 ---
 
-# Geo nodes admin area **(PREMIUM ONLY)**
+# Geo nodes Admin Area **(PREMIUM ONLY)**
 
 You can configure various settings for GitLab Geo nodes. For more information, see
-[Geo documentation](../../administration/geo/replication/index.md).
+[Geo documentation](../../administration/geo/index.md).
 
-On the primary node, go to **Admin area > Geo**. On secondary nodes, go to **Admin area > Geo > Nodes**.
+On the primary node, go to **Admin Area > Geo**. On secondary nodes, go to **Admin Area > Geo > Nodes**.
 
 ## Common settings
 
@@ -45,7 +48,7 @@ download them all at once, so GitLab places an upper limit on the concurrency of
 these operations.
 
 How long the backfill takes is a function of the maximum concurrency, but higher
-values place more strain on the **primary** node. From [GitLab 10.2](https://gitlab.com/gitlab-org/gitlab/merge_requests/3107),
+values place more strain on the **primary** node. From [GitLab 10.2](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/3107),
 the limits are configurable. If your **primary** node has lots of surplus capacity,
 you can increase the values to complete backfill in a shorter time. If it's
 under heavy load and backfill is reducing its availability for normal requests,
@@ -59,7 +62,7 @@ The **primary** node's Internal URL is used by **secondary** nodes to contact it
 which is used by users. Internal URL does not need to be a private address.
 
 Internal URL defaults to External URL, but you can customize it under
-**Admin area > Geo Nodes**.
+**Admin Area > Geo > Nodes**.
 
 CAUTION: **Warning:**
 We recommend using an HTTPS connection while configuring the Geo nodes. To avoid

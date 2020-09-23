@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::AutocompleteService do
+RSpec.describe Groups::AutocompleteService do
   let!(:group) { create(:group, :nested, :private, avatar: fixture_file_upload('spec/fixtures/dk.png')) }
   let!(:sub_group) { create(:group, :private, parent: group) }
   let(:user) { create(:user) }
@@ -61,11 +61,20 @@ describe Groups::AutocompleteService do
     let(:sub_group_project) { create(:project, group: sub_group) }
 
     let!(:project_issue) { create(:issue, project: project) }
-    let!(:sub_group_project_issue) { create(:issue, project: sub_group_project) }
+    let!(:sub_group_project_issue) { create(:issue, confidential: true, project: sub_group_project) }
 
     it 'returns issues in group and subgroups' do
-      expect(subject.issues.map(&:iid)).to contain_exactly(project_issue.iid, sub_group_project_issue.iid)
-      expect(subject.issues.map(&:title)).to contain_exactly(project_issue.title, sub_group_project_issue.title)
+      issues = subject.issues
+
+      expect(issues.map(&:iid)).to contain_exactly(project_issue.iid, sub_group_project_issue.iid)
+      expect(issues.map(&:title)).to contain_exactly(project_issue.title, sub_group_project_issue.title)
+    end
+
+    it 'returns only confidential issues if confidential_only is true' do
+      issues = subject.issues(confidential_only: true)
+
+      expect(issues.map(&:iid)).to contain_exactly(sub_group_project_issue.iid)
+      expect(issues.map(&:title)).to contain_exactly(sub_group_project_issue.title)
     end
   end
 
@@ -83,16 +92,29 @@ describe Groups::AutocompleteService do
   end
 
   describe '#epics' do
-    it 'returns nothing if not allowed' do
-      allow(Ability).to receive(:allowed?).with(user, :read_epic, group).and_return(false)
+    before do
+      stub_licensed_features(epics: true)
+    end
 
-      expect(subject.epics).to eq([])
+    it 'returns nothing if not allowed' do
+      guest = create(:user)
+
+      epics = described_class.new(group, guest).epics
+
+      expect(epics).to be_empty
     end
 
     it 'returns epics from group' do
-      allow(Ability).to receive(:allowed?).with(user, :read_epic, group).and_return(true)
-
       expect(subject.epics.map(&:iid)).to contain_exactly(epic.iid)
+    end
+
+    it 'returns only confidential epics if confidential_only is true' do
+      confidential_epic = create(:epic, :confidential, group: group)
+
+      epics = subject.epics(confidential_only: true)
+
+      expect(epics.map(&:iid)).to contain_exactly(confidential_epic.iid)
+      expect(epics.map(&:title)).to contain_exactly(confidential_epic.title)
     end
   end
 
@@ -101,17 +123,33 @@ describe Groups::AutocompleteService do
       let(:parent_epic) { create(:epic, group: group, author: user) }
       let(:epic)        { create(:epic, group: group, author: user, parent: parent_epic) }
 
-      before do
-        stub_licensed_features(epics: true)
+      context 'with subepics feature enabled' do
+        before do
+          stub_licensed_features(epics: true, subepics: true)
+        end
+
+        it 'returns available commands' do
+          available_commands = [
+            :todo, :unsubscribe, :award, :shrug, :tableflip, :cc, :title, :close,
+            :child_epic, :remove_child_epic, :parent_epic, :remove_parent_epic
+          ]
+
+          expect(subject.commands(epic).map { |c| c[:name] }).to match_array(available_commands)
+        end
       end
 
-      it 'returns available commands' do
-        available_commands = [
-          :todo, :unsubscribe, :award, :shrug, :tableflip, :cc, :title, :close,
-          :child_epic, :remove_child_epic, :parent_epic, :remove_parent_epic
-        ]
+      context 'with subepics feature disabled' do
+        before do
+          stub_licensed_features(epics: true, subepics: false)
+        end
 
-        expect(subject.commands(epic).map { |c| c[:name] }).to match_array(available_commands)
+        it 'returns available commands' do
+          available_commands = [
+            :todo, :unsubscribe, :award, :shrug, :tableflip, :cc, :title, :close
+          ]
+
+          expect(subject.commands(epic).map { |c| c[:name] }).to match_array(available_commands)
+        end
       end
     end
   end
@@ -121,7 +159,7 @@ describe Groups::AutocompleteService do
     let!(:subgroup_milestone) { create(:milestone, group: sub_group) }
 
     before do
-      sub_group.add_master(user)
+      sub_group.add_maintainer(user)
     end
 
     context 'when group is public' do

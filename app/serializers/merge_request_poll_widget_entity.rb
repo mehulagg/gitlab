@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
-class MergeRequestPollWidgetEntity < IssuableEntity
+class MergeRequestPollWidgetEntity < Grape::Entity
+  include RequestAwareEntity
+
   expose :auto_merge_strategy
   expose :available_auto_merge_strategies do |merge_request|
     AutoMergeService.new(merge_request.project, current_user).available_strategies(merge_request) # rubocop: disable CodeReuse/ServiceClass
@@ -17,9 +19,21 @@ class MergeRequestPollWidgetEntity < IssuableEntity
   # User entities
   expose :merge_user, using: UserEntity
 
-  expose :actual_head_pipeline, with: PipelineDetailsEntity, as: :pipeline, if: -> (mr, _) { presenter(mr).can_read_pipeline? }
+  expose :actual_head_pipeline, as: :pipeline, if: -> (mr, _) { presenter(mr).can_read_pipeline? } do |merge_request, options|
+    if Feature.enabled?(:merge_request_short_pipeline_serializer, merge_request.project, default_enabled: true)
+      MergeRequests::PipelineEntity.represent(merge_request.actual_head_pipeline, options)
+    else
+      PipelineDetailsEntity.represent(merge_request.actual_head_pipeline, options)
+    end
+  end
 
-  expose :merge_pipeline, with: PipelineDetailsEntity, if: ->(mr, _) { mr.merged? && can?(request.current_user, :read_pipeline, mr.target_project)}
+  expose :merge_pipeline, if: ->(mr, _) { mr.merged? && can?(request.current_user, :read_pipeline, mr.target_project)} do |merge_request, options|
+    if Feature.enabled?(:merge_request_short_pipeline_serializer, merge_request.project, default_enabled: true)
+      MergeRequests::PipelineEntity.represent(merge_request.merge_pipeline, options)
+    else
+      PipelineDetailsEntity.represent(merge_request.merge_pipeline, options)
+    end
+  end
 
   expose :default_merge_commit_message
 
@@ -51,9 +65,15 @@ class MergeRequestPollWidgetEntity < IssuableEntity
 
   # CI related
   expose :has_ci?, as: :has_ci
-  expose :ci_status do |merge_request|
+  expose :ci_status, if: -> (mr, _) { presenter(mr).can_read_pipeline? } do |merge_request|
     presenter(merge_request).ci_status
   end
+
+  expose :pipeline_coverage_delta do |merge_request|
+    presenter(merge_request).pipeline_coverage_delta
+  end
+
+  expose :head_pipeline_builds_with_coverage, as: :builds_with_coverage, using: BuildCoverageEntity
 
   expose :cancel_auto_merge_path do |merge_request|
     presenter(merge_request).cancel_auto_merge_path
@@ -62,6 +82,18 @@ class MergeRequestPollWidgetEntity < IssuableEntity
   expose :test_reports_path do |merge_request|
     if merge_request.has_test_reports?
       test_reports_project_merge_request_path(merge_request.project, merge_request, format: :json)
+    end
+  end
+
+  expose :accessibility_report_path do |merge_request|
+    if merge_request.has_accessibility_reports?
+      accessibility_reports_project_merge_request_path(merge_request.project, merge_request, format: :json)
+    end
+  end
+
+  expose :terraform_reports_path do |merge_request|
+    if merge_request.has_terraform_reports?
+      terraform_reports_project_merge_request_path(merge_request.project, merge_request, format: :json)
     end
   end
 
@@ -125,6 +157,22 @@ class MergeRequestPollWidgetEntity < IssuableEntity
 
   expose :revert_in_fork_path do |merge_request|
     presenter(merge_request).revert_in_fork_path
+  end
+
+  expose :squash_enabled_by_default do |merge_request|
+    presenter(merge_request).project.squash_enabled_by_default?
+  end
+
+  expose :squash_readonly do |merge_request|
+    presenter(merge_request).project.squash_readonly?
+  end
+
+  expose :squash_on_merge do |merge_request|
+    presenter(merge_request).squash_on_merge?
+  end
+
+  expose :approvals_widget_type do |merge_request|
+    presenter(merge_request).approvals_widget_type
   end
 
   private

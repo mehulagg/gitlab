@@ -1,61 +1,71 @@
 <script>
-/* eslint-disable @gitlab/vue-i18n/no-bare-strings */
+/* eslint-disable @gitlab/vue-require-i18n-strings */
+import { isEmpty } from 'lodash';
+import { GlTooltipDirective, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
-import Timeago from 'timeago.js';
-import _ from 'underscore';
-import { GlTooltipDirective } from '@gitlab/ui';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
+import timeagoMixin from '~/vue_shared/mixins/timeago';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
-import Icon from '~/vue_shared/components/icon.vue';
-import environmentItemMixin from 'ee_else_ce/environments/mixins/environment_item_mixin';
+import CommitComponent from '~/vue_shared/components/commit.vue';
+import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
+import eventHub from '../event_hub';
 import ActionsComponent from './environment_actions.vue';
 import ExternalUrlComponent from './environment_external_url.vue';
+import MonitoringButtonComponent from './environment_monitoring.vue';
+import PinComponent from './environment_pin.vue';
+import DeleteComponent from './environment_delete.vue';
 import StopComponent from './environment_stop.vue';
 import RollbackComponent from './environment_rollback.vue';
 import TerminalButtonComponent from './environment_terminal_button.vue';
-import MonitoringButtonComponent from './environment_monitoring.vue';
-import CommitComponent from '../../vue_shared/components/commit.vue';
-import eventHub from '../event_hub';
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 /**
  * Environment Item Component
  *
  * Renders a table row for each environment.
  */
-const timeagoInstance = new Timeago();
 
 export default {
   components: {
-    UserAvatarLink,
-    CommitComponent,
-    Icon,
     ActionsComponent,
+    CommitComponent,
     ExternalUrlComponent,
-    StopComponent,
-    RollbackComponent,
-    TerminalButtonComponent,
+    GlIcon,
     MonitoringButtonComponent,
+    PinComponent,
+    DeleteComponent,
+    RollbackComponent,
+    StopComponent,
+    TerminalButtonComponent,
+    TooltipOnTruncate,
+    UserAvatarLink,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [environmentItemMixin],
+  mixins: [timeagoMixin],
 
   props: {
-    model: {
-      type: Object,
-      required: true,
-      default: () => ({}),
-    },
-
     canReadEnvironment: {
       type: Boolean,
       required: false,
       default: false,
     },
+
+    model: {
+      type: Object,
+      required: true,
+    },
+
+    tableData: {
+      type: Object,
+      required: true,
+    },
   },
 
   computed: {
+    deployIconName() {
+      return this.model.isDeployBoardVisible ? 'chevron-down' : 'chevron-right';
+    },
     /**
      * Verifies if `last_deployment` key exists in the current Environment.
      * This key is required to render most of the html - this method works has
@@ -64,10 +74,20 @@ export default {
      * @returns {Boolean}
      */
     hasLastDeploymentKey() {
-      if (this.model && this.model.last_deployment && !_.isEmpty(this.model.last_deployment)) {
+      if (this.model && this.model.last_deployment && !isEmpty(this.model.last_deployment)) {
         return true;
       }
       return false;
+    },
+
+    /**
+     * Checkes whether the row displayed is a folder.
+     *
+     * @returns {Boolean}
+     */
+
+    isFolder() {
+      return this.model.isFolder;
     },
 
     /**
@@ -90,6 +110,15 @@ export default {
     },
 
     /**
+     * Returns whether the environment can be deleted.
+     *
+     * @returns {Boolean}
+     */
+    canDeleteEnvironment() {
+      return Boolean(this.model && this.model.can_delete && this.model.delete_path);
+    },
+
+    /**
      * Verifies if the `deployable` key is present in `last_deployment` key.
      * Used to verify whether we should or not render the rollback partial.
      *
@@ -106,24 +135,64 @@ export default {
     },
 
     /**
-     * Verifies if the date to be shown is present.
+     * Verifies if the autostop date is present.
+     *
+     * @returns {Boolean}
+     */
+    canShowAutoStopDate() {
+      if (!this.model.auto_stop_at) {
+        return false;
+      }
+
+      const autoStopDate = new Date(this.model.auto_stop_at);
+      const now = new Date();
+
+      return now < autoStopDate;
+    },
+
+    /**
+     * Human readable deployment date.
+     *
+     * @returns {String}
+     */
+    autoStopDate() {
+      if (this.canShowAutoStopDate) {
+        return {
+          formatted: this.timeFormatted(this.model.auto_stop_at),
+          tooltip: this.tooltipTitle(this.model.auto_stop_at),
+        };
+      }
+      return {
+        formatted: '',
+        tooltip: '',
+      };
+    },
+
+    /**
+     * Verifies if the deployment date is present.
      *
      * @returns {Boolean|Undefined}
      */
-    canShowDate() {
+    canShowDeploymentDate() {
       return this.model && this.model.last_deployment && this.model.last_deployment.deployed_at;
     },
 
     /**
-     * Human readable date.
+     * Human readable deployment date.
      *
      * @returns {String}
      */
     deployedDate() {
-      if (this.canShowDate) {
-        return timeagoInstance.format(this.model.last_deployment.deployed_at);
+      if (this.canShowDeploymentDate) {
+        return {
+          formatted: this.timeFormatted(this.model.last_deployment.deployed_at),
+          tooltip: this.tooltipTitle(this.model.last_deployment.deployed_at),
+        };
       }
-      return '';
+      return {
+        formatted: '',
+        tooltip: '',
+      };
     },
 
     actions() {
@@ -140,6 +209,10 @@ export default {
         ...action,
         name: action.name,
       }));
+    },
+
+    shouldRenderDeployBoard() {
+      return this.model.hasDeployBoard;
     },
 
     /**
@@ -279,7 +352,7 @@ export default {
     isLastDeployment() {
       // name: 'last?' is a false positive: https://gitlab.com/gitlab-org/frontend/eslint-plugin-i18n/issues/26#possible-false-positives
       // Vue i18n ESLint rules issue: https://gitlab.com/gitlab-org/gitlab-foss/issues/63560
-      // eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings
+      // eslint-disable-next-line @gitlab/require-i18n-strings
       return this.model && this.model.last_deployment && this.model.last_deployment['last?'];
     },
 
@@ -316,8 +389,8 @@ export default {
     deploymentHasUser() {
       return (
         this.model &&
-        !_.isEmpty(this.model.last_deployment) &&
-        !_.isEmpty(this.model.last_deployment.user)
+        !isEmpty(this.model.last_deployment) &&
+        !isEmpty(this.model.last_deployment.user)
       );
     },
 
@@ -330,12 +403,21 @@ export default {
     deploymentUser() {
       if (
         this.model &&
-        !_.isEmpty(this.model.last_deployment) &&
-        !_.isEmpty(this.model.last_deployment.user)
+        !isEmpty(this.model.last_deployment) &&
+        !isEmpty(this.model.last_deployment.user)
       ) {
         return this.model.last_deployment.user;
       }
       return {};
+    },
+
+    /**
+     * Checkes whether to display no deployment text.
+     *
+     * @returns {Boolean}
+     */
+    showNoDeployments() {
+      return !this.hasLastDeploymentKey && !this.isFolder;
     },
 
     /**
@@ -347,9 +429,9 @@ export default {
      */
     shouldRenderBuildName() {
       return (
-        !this.model.isFolder &&
-        !_.isEmpty(this.model.last_deployment) &&
-        !_.isEmpty(this.model.last_deployment.deployable)
+        !this.isFolder &&
+        !isEmpty(this.model.last_deployment) &&
+        !isEmpty(this.model.last_deployment.deployable)
       );
     },
 
@@ -377,11 +459,7 @@ export default {
      * @return {String}
      */
     externalURL() {
-      if (this.model && this.model.external_url) {
-        return this.model.external_url;
-      }
-
-      return '';
+      return this.model.external_url || '';
     },
 
     /**
@@ -393,26 +471,22 @@ export default {
      */
     shouldRenderDeploymentID() {
       return (
-        !this.model.isFolder &&
-        !_.isEmpty(this.model.last_deployment) &&
+        !this.isFolder &&
+        !isEmpty(this.model.last_deployment) &&
         this.model.last_deployment.iid !== undefined
       );
     },
 
     environmentPath() {
-      if (this.model && this.model.environment_path) {
-        return this.model.environment_path;
-      }
-
-      return '';
+      return this.model.environment_path || '';
     },
 
     monitoringUrl() {
-      if (this.model && this.model.metrics_path) {
-        return this.model.metrics_path;
-      }
+      return this.model.metrics_path || '';
+    },
 
-      return '';
+    autoStopUrl() {
+      return this.model.cancel_auto_stop_path || '';
     },
 
     displayEnvironmentActions() {
@@ -421,6 +495,7 @@ export default {
         this.externalURL ||
         this.monitoringUrl ||
         this.canStopEnvironment ||
+        this.canDeleteEnvironment ||
         this.canRetry
       );
     },
@@ -431,6 +506,9 @@ export default {
   },
 
   methods: {
+    toggleDeployBoard() {
+      eventHub.$emit('toggleDeployBoard', this.model);
+    },
     onClickFolder() {
       eventHub.$emit('toggleFolder', this.model);
     },
@@ -441,22 +519,26 @@ export default {
   <div
     :class="{
       'js-child-row environment-child-row': model.isChildren,
-      'folder-row': model.isFolder,
+      'folder-row': isFolder,
     }"
     class="gl-responsive-table-row"
     role="row"
   >
-    <div class="table-section section-wrap section-15 text-truncate" role="gridcell">
-      <div v-if="!model.isFolder" class="table-mobile-header" role="rowheader">
-        {{ s__('Environments|Environment') }}
+    <div
+      class="table-section section-wrap text-truncate"
+      :class="tableData.name.spacing"
+      role="gridcell"
+    >
+      <div v-if="!isFolder" class="table-mobile-header" role="rowheader">
+        {{ tableData.name.title }}
       </div>
 
       <span v-if="shouldRenderDeployBoard" class="deploy-board-icon" @click="toggleDeployBoard">
-        <icon :name="deployIconName" />
+        <gl-icon :name="deployIconName" />
       </span>
 
       <span
-        v-if="!model.isFolder"
+        v-if="!isFolder"
         v-gl-tooltip
         :title="model.name"
         class="environment-name table-mobile-content"
@@ -477,9 +559,9 @@ export default {
         role="button"
         @click="onClickFolder"
       >
-        <icon :name="folderIconName" class="folder-icon" />
+        <gl-icon :name="folderIconName" class="folder-icon" />
 
-        <icon name="folder" class="folder-icon" />
+        <gl-icon name="folder" class="folder-icon" />
 
         <span> {{ model.folderName }} </span>
 
@@ -488,14 +570,15 @@ export default {
     </div>
 
     <div
-      class="table-section section-10 deployment-column d-none d-sm-none d-md-block"
+      class="table-section deployment-column d-none d-sm-none d-md-block"
+      :class="tableData.deploy.spacing"
       role="gridcell"
     >
       <span v-if="shouldRenderDeploymentID" class="text-break-word">
         {{ deploymentInternalId }}
       </span>
 
-      <span v-if="!model.isFolder && deploymentHasUser" class="text-break-word">
+      <span v-if="!isFolder && deploymentHasUser" class="text-break-word">
         by
         <user-avatar-link
           :link-href="deploymentUser.web_url"
@@ -505,20 +588,32 @@ export default {
           class="js-deploy-user-container float-none"
         />
       </span>
+
+      <div v-if="showNoDeployments" class="commit-title table-mobile-content">
+        {{ s__('Environments|No deployments yet') }}
+      </div>
     </div>
 
-    <div class="table-section section-15 d-none d-sm-none d-md-block" role="gridcell">
-      <a
-        v-if="shouldRenderBuildName"
-        :href="buildPath"
-        class="build-link cgray flex-truncate-parent"
-      >
-        <span class="flex-truncate-child">{{ buildName }}</span>
+    <div
+      class="table-section d-none d-sm-none d-md-block"
+      :class="tableData.build.spacing"
+      role="gridcell"
+    >
+      <a v-if="shouldRenderBuildName" :href="buildPath" class="build-link cgray">
+        <tooltip-on-truncate
+          :title="buildName"
+          truncate-target="child"
+          class="flex-truncate-parent"
+        >
+          <span class="flex-truncate-child">
+            {{ buildName }}
+          </span>
+        </tooltip-on-truncate>
       </a>
     </div>
 
-    <div v-if="!model.isFolder" class="table-section section-20" role="gridcell">
-      <div role="rowheader" class="table-mobile-header">{{ s__('Environments|Commit') }}</div>
+    <div v-if="!isFolder" class="table-section" :class="tableData.commit.spacing" role="gridcell">
+      <div role="rowheader" class="table-mobile-header">{{ tableData.commit.title }}</div>
       <div v-if="hasLastDeploymentKey" class="js-commit-component table-mobile-content">
         <commit-component
           :tag="commitTag"
@@ -529,24 +624,43 @@ export default {
           :author="commitAuthor"
         />
       </div>
-      <div v-if="!hasLastDeploymentKey" class="commit-title table-mobile-content">
-        {{ s__('Environments|No deployments yet') }}
-      </div>
     </div>
 
-    <div v-if="!model.isFolder" class="table-section section-10" role="gridcell">
-      <div role="rowheader" class="table-mobile-header">{{ s__('Environments|Updated') }}</div>
-      <span v-if="canShowDate" class="environment-created-date-timeago table-mobile-content">
-        {{ deployedDate }}
+    <div v-if="!isFolder" class="table-section" :class="tableData.date.spacing" role="gridcell">
+      <div role="rowheader" class="table-mobile-header">{{ tableData.date.title }}</div>
+      <span
+        v-if="canShowDeploymentDate"
+        v-gl-tooltip
+        :title="deployedDate.tooltip"
+        class="environment-created-date-timeago table-mobile-content flex-truncate-parent"
+      >
+        <span class="flex-truncate-child">
+          {{ deployedDate.formatted }}
+        </span>
+      </span>
+    </div>
+
+    <div v-if="!isFolder" class="table-section" :class="tableData.autoStop.spacing" role="gridcell">
+      <div role="rowheader" class="table-mobile-header">{{ tableData.autoStop.title }}</div>
+      <span
+        v-if="canShowAutoStopDate"
+        v-gl-tooltip
+        :title="autoStopDate.tooltip"
+        class="table-mobile-content flex-truncate-parent"
+      >
+        <span class="flex-truncate-child js-auto-stop">{{ autoStopDate.formatted }}</span>
       </span>
     </div>
 
     <div
-      v-if="!model.isFolder && displayEnvironmentActions"
-      class="table-section section-30 table-button-footer"
+      v-if="!isFolder && displayEnvironmentActions"
+      class="table-section table-button-footer"
+      :class="tableData.actions.spacing"
       role="gridcell"
     >
       <div class="btn-group table-action-buttons" role="group">
+        <pin-component v-if="canShowAutoStopDate" :auto-stop-url="autoStopUrl" />
+
         <external-url-component
           v-if="externalURL && canReadEnvironment"
           :external-url="externalURL"
@@ -572,6 +686,8 @@ export default {
         />
 
         <stop-component v-if="canStopEnvironment" :environment="model" />
+
+        <delete-component v-if="canDeleteEnvironment" :environment="model" />
       </div>
     </div>
   </div>

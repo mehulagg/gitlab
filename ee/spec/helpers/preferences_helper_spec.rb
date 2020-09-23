@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PreferencesHelper do
+RSpec.describe PreferencesHelper do
   before do
     allow(helper).to receive(:current_user).and_return(user)
   end

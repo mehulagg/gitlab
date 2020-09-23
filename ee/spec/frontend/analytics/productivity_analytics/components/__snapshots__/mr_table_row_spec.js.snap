@@ -10,7 +10,7 @@ exports[`MergeRequestTableRow component on creation matches the snapshot 1`] = `
     <div
       class="d-flex mr-md-2"
     >
-      <glavatar-stub
+      <gl-avatar-stub
         alt="avatar"
         entityid="0"
         entityname=""
@@ -25,12 +25,12 @@ exports[`MergeRequestTableRow component on creation matches the snapshot 1`] = `
       <h5
         class="item-title mr-title my-0 d-block str-truncated"
       >
-        <gllink-stub
+        <gl-link-stub
           href="http://gitlab.example.com/gitlab-org/gitlab-test/merge_requests/10"
           target="_blank"
         >
           This is a test MR
-        </gllink-stub>
+        </gl-link-stub>
       </h5>
        
       <ul
@@ -62,13 +62,13 @@ exports[`MergeRequestTableRow component on creation matches the snapshot 1`] = `
   <div
     class="table-section section-50 d-flex flex-row align-items-start js-mr-metrics"
   >
-    <metriccolumn-stub
+    <metric-column-stub
       label="Time to merge"
       type="days_to_merge"
       value="24"
     />
      
-    <metriccolumn-stub
+    <metric-column-stub
       label="Time from first comment to last commit"
       type="time_to_last_commit"
       value="0"

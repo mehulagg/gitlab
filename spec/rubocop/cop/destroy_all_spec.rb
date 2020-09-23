@@ -1,23 +1,23 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 require 'rubocop'
 require 'rubocop/rspec/support'
 require_relative '../../../rubocop/cop/destroy_all'
 
-describe RuboCop::Cop::DestroyAll do
+RSpec.describe RuboCop::Cop::DestroyAll, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
 
   it 'flags the use of destroy_all with a send receiver' do
-    inspect_source('foo.destroy_all # rubocop: disable DestroyAll')
+    inspect_source('foo.destroy_all # rubocop: disable Cop/DestroyAll')
 
     expect(cop.offenses.size).to eq(1)
   end
 
   it 'flags the use of destroy_all with a constant receiver' do
-    inspect_source('User.destroy_all # rubocop: disable DestroyAll')
+    inspect_source('User.destroy_all # rubocop: disable Cop/DestroyAll')
 
     expect(cop.offenses.size).to eq(1)
   end
@@ -31,7 +31,7 @@ describe RuboCop::Cop::DestroyAll do
   it 'flags the use of destroy_all with a local variable receiver' do
     inspect_source(<<~RUBY)
     users = User.all
-    users.destroy_all # rubocop: disable DestroyAll
+    users.destroy_all # rubocop: disable Cop/DestroyAll
     RUBY
 
     expect(cop.offenses.size).to eq(1)

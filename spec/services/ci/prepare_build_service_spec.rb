@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::PrepareBuildService do
+RSpec.describe Ci::PrepareBuildService do
   describe '#execute' do
     let(:build) { create(:ci_build, :preparing) }
 
@@ -14,7 +14,7 @@ describe Ci::PrepareBuildService do
 
     shared_examples 'build enqueueing' do
       it 'enqueues the build' do
-        expect(build).to receive(:enqueue).once
+        expect(build).to receive(:enqueue_preparing).once
 
         subject
       end
@@ -34,7 +34,7 @@ describe Ci::PrepareBuildService do
 
       context 'prerequisites fail to complete' do
         before do
-          allow(build).to receive(:enqueue).and_return(false)
+          allow(build).to receive(:enqueue_preparing).and_return(false)
         end
 
         it 'drops the build' do
@@ -51,8 +51,8 @@ describe Ci::PrepareBuildService do
 
         it 'drops the build and notifies Sentry' do
           expect(build).to receive(:drop).with(:unmet_prerequisites).once
-          expect(Gitlab::Sentry).to receive(:track_acceptable_exception)
-            .with(instance_of(Kubeclient::HttpError), hash_including(extra: { build_id: build.id }))
+          expect(Gitlab::ErrorTracking).to receive(:track_exception)
+            .with(instance_of(Kubeclient::HttpError), hash_including(build_id: build.id))
 
           subject
         end

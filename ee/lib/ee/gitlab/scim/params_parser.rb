@@ -4,7 +4,7 @@ module EE
   module Gitlab
     module Scim
       class ParamsParser
-        OPERATIONS_OPERATORS = %w[Replace Add].freeze
+        OPERATIONS_OPERATORS = %w[replace add].freeze
 
         def initialize(params)
           @params = params.with_indifferent_access
@@ -13,6 +13,10 @@ module EE
 
         def deprovision_user?
           update_params[:active] == false
+        end
+
+        def reprovision_user?
+          !deprovision_user?
         end
 
         def post_params
@@ -39,9 +43,9 @@ module EE
 
         def process_operations
           @params[:Operations].each_with_object({}) do |operation, hash|
-            next unless OPERATIONS_OPERATORS.include?(operation[:op])
+            next unless OPERATIONS_OPERATORS.include?(operation[:op].downcase)
 
-            hash.merge!(AttributeTransform.new(operation[:path]).map_to(operation[:value]))
+            hash.merge!(transformed_operation(operation))
           end
         end
 
@@ -71,6 +75,19 @@ module EE
           formatted_name = name[:formatted]&.presence
           formatted_name ||= [name[:givenName], name[:familyName]].compact.join(' ')
           @hash[:name] = formatted_name
+        end
+
+        # The `path` key is optional per the SCIM spec.
+        # Ex. Azure uses `path` while Okta does not.
+        def transformed_operation(operation)
+          key, value =
+            if operation[:path]
+              operation.values_at(:path, :value)
+            else
+              [operation[:value].each_key.first, operation[:value].each_value.first]
+            end
+
+          AttributeTransform.new(key).map_to(value)
         end
       end
     end

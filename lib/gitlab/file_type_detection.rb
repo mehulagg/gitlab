@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# The method `filename` must be defined in classes that use this module.
+# The method `filename` must be defined in classes that mix in this module.
 #
 # This module is intended to be used as a helper and not a security gate
 # to validate that a file is safe, as it identifies files only by the
@@ -20,6 +20,9 @@
 module Gitlab
   module FileTypeDetection
     SAFE_IMAGE_EXT = %w[png jpg jpeg gif bmp tiff ico].freeze
+    SAFE_IMAGE_FOR_SCALING_EXT = %w[png jpg jpeg].freeze
+
+    PDF_EXT = 'pdf'
     # We recommend using the .mp4 format over .mov. Videos in .mov format can
     # still be used but you really need to make sure they are served with the
     # proper MIME type video/mp4 and not video/quicktime or your videos won't play
@@ -34,8 +37,21 @@ module Gitlab
     DANGEROUS_VIDEO_EXT = [].freeze # None, yet
     DANGEROUS_AUDIO_EXT = [].freeze # None, yet
 
+    def self.extension_match?(filename, extensions)
+      return false unless filename.present?
+
+      extension = File.extname(filename).delete('.')
+      extensions.include?(extension.downcase)
+    end
+
     def image?
       extension_match?(SAFE_IMAGE_EXT)
+    end
+
+    # For the time being, we restrict image scaling requests to the most popular and safest formats only,
+    # which are JPGs and PNGs. See https://gitlab.com/gitlab-org/gitlab/-/issues/237848 for more info.
+    def image_safe_for_scaling?
+      extension_match?(SAFE_IMAGE_FOR_SCALING_EXT)
     end
 
     def video?
@@ -44,6 +60,10 @@ module Gitlab
 
     def audio?
       extension_match?(SAFE_AUDIO_EXT)
+    end
+
+    def pdf?
+      extension_match?([PDF_EXT])
     end
 
     def embeddable?
@@ -69,10 +89,7 @@ module Gitlab
     private
 
     def extension_match?(extensions)
-      return false unless filename
-
-      extension = File.extname(filename).delete('.')
-      extensions.include?(extension.downcase)
+      ::Gitlab::FileTypeDetection.extension_match?(filename, extensions)
     end
   end
 end

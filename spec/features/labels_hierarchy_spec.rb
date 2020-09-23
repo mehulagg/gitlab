@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Labels Hierarchy', :js do
+RSpec.describe 'Labels Hierarchy', :js do
   include FilteredSearchHelpers
 
   let!(:user) { create(:user) }
@@ -23,7 +23,7 @@ describe 'Labels Hierarchy', :js do
   end
 
   shared_examples 'assigning labels from sidebar' do
-    it 'can assign all ancestors labels', :quarantine do
+    it 'can assign all ancestors labels', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/27952' do
       [grandparent_group_label, parent_group_label, project_label_1].each do |label|
         page.within('.block.labels') do
           find('.edit-link').click
@@ -42,12 +42,12 @@ describe 'Labels Hierarchy', :js do
 
     it 'does not find child group labels on dropdown' do
       page.within('.block.labels') do
-        find('.edit-link').click
+        click_on 'Edit'
+
+        wait_for_requests
+
+        expect(page).not_to have_text(child_group_label.title)
       end
-
-      wait_for_requests
-
-      expect(page).not_to have_selector('.badge', text: child_group_label.title)
     end
   end
 
@@ -70,7 +70,7 @@ describe 'Labels Hierarchy', :js do
     end
 
     it 'does not filter by descendant group labels' do
-      filtered_search.set("label:")
+      filtered_search.set("label=")
 
       wait_for_requests
 
@@ -134,7 +134,7 @@ describe 'Labels Hierarchy', :js do
     end
 
     it 'does not filter by descendant group project labels' do
-      filtered_search.set("label:")
+      filtered_search.set("label=")
 
       wait_for_requests
 
@@ -161,9 +161,9 @@ describe 'Labels Hierarchy', :js do
       find('.btn-success').click
 
       expect(page.find('.issue-details h2.title')).to have_content('new created issue')
-      expect(page).to have_selector('span.badge', text: grandparent_group_label.title)
-      expect(page).to have_selector('span.badge', text: parent_group_label.title)
-      expect(page).to have_selector('span.badge', text: project_label_1.title)
+      expect(page).to have_selector('span.gl-label-text', text: grandparent_group_label.title)
+      expect(page).to have_selector('span.gl-label-text', text: parent_group_label.title)
+      expect(page).to have_selector('span.gl-label-text', text: project_label_1.title)
     end
   end
 
@@ -227,7 +227,7 @@ describe 'Labels Hierarchy', :js do
       it_behaves_like 'filtering by ancestor labels for projects'
 
       it 'does not filter by descendant group labels' do
-        filtered_search.set("label:")
+        filtered_search.set("label=")
 
         wait_for_requests
 
@@ -296,6 +296,7 @@ describe 'Labels Hierarchy', :js do
       let(:board) { create(:board, group: parent) }
 
       before do
+        stub_feature_flags(graphql_board_lists: false)
         parent.add_developer(user)
         visit group_board_path(parent, board)
         find('.js-new-board-list').click

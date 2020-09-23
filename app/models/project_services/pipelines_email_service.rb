@@ -49,17 +49,11 @@ class PipelinesEmailService < Service
     return unless all_recipients.any?
 
     pipeline_id = data[:object_attributes][:id]
-    PipelineNotificationWorker.new.perform(pipeline_id, all_recipients)
+    PipelineNotificationWorker.new.perform(pipeline_id, recipients: all_recipients)
   end
 
   def can_test?
-    project.ci_pipelines.any?
-  end
-
-  def test_data(project, user)
-    data = Gitlab::DataBuilder::Pipeline.build(project.ci_pipelines.last)
-    data[:user] = user.hook_attrs
-    data
+    project&.ci_pipelines&.any?
   end
 
   def fields
@@ -72,7 +66,7 @@ class PipelinesEmailService < Service
         name: 'notify_only_broken_pipelines' },
       { type: 'select',
         name: 'branches_to_be_notified',
-        choices: BRANCH_CHOICES }
+        choices: branch_choices }
     ]
   end
 
@@ -100,6 +94,6 @@ class PipelinesEmailService < Service
   end
 
   def retrieve_recipients(data)
-    recipients.to_s.split(/[,(?:\r?\n) ]+/).reject(&:empty?)
+    recipients.to_s.split(/[,\r\n ]+/).reject(&:empty?)
   end
 end

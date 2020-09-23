@@ -1,4 +1,6 @@
-shared_context 'simple_check' do |metrics_prefix, check_name, success_result|
+# frozen_string_literal: true
+
+RSpec.shared_context 'simple_check' do |metrics_prefix, check_name, success_result|
   describe '#metrics' do
     subject { described_class.metrics }
 

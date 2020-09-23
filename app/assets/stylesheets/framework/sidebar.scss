@@ -1,6 +1,5 @@
 .content-wrapper {
   width: 100%;
-  transition: padding $sidebar-transition-duration;
 
   .container-fluid {
     padding: 0 $gl-padding;
@@ -13,6 +12,10 @@
   }
 }
 
+.page-initialised  .content-wrapper {
+  transition: padding $sidebar-transition-duration;
+}
+
 .nav-header-btn {
   padding: 10px $gl-sidebar-padding;
   color: inherit;
@@ -23,7 +26,7 @@
 
   &:hover,
   &:focus {
-    color: $white-light;
+    color: $white;
     text-decoration: none;
   }
 }
@@ -61,10 +64,6 @@
   padding-right: 0;
   z-index: 300;
 
-  .btn-sidebar-action {
-    display: inline-flex;
-  }
-
   @include media-breakpoint-only(sm) {
     &:not(.wiki-sidebar):not(.build-sidebar):not(.issuable-bulk-update-sidebar) .content-wrapper {
       padding-right: $gutter-collapsed-width;
@@ -88,6 +87,12 @@
 
 .right-sidebar {
   border-left: 1px solid $border-color;
+
+  .sidebar-container,
+  .issuable-sidebar {
+    // Add 100px so that potentially visible vertical scroll bar is hidden
+    width: calc(100% + 100px);
+  }
 }
 
 .with-performance-bar .right-sidebar.affix {
@@ -133,13 +138,19 @@
 
   .issuable-sidebar {
     padding: 0 3px;
-    width: calc(100% + 35px);
   }
 }
 
 .issuable-sidebar .labels {
   .value.dont-hide ~ .selectbox {
     padding-top: $gl-padding-8;
+  }
+
+  // This is for sidebar components using gl-button for the Edit button to be consistent with the
+  // rest of the sidebar, and could be removed once the sidebar has been fully converted to use
+  // gitlab-ui components.
+  .title .gl-button {
+    color: $gl-text-color;
   }
 }
 
@@ -167,7 +178,7 @@
 
     &::before {
       content: '';
-      border-left: 1px solid $gray-500;
+      border-left: 1px solid $gray-300;
       position: absolute;
       top: $gl-padding;
       bottom: $gl-padding;
@@ -206,6 +217,18 @@
     &-content {
       line-height: initial;
       margin-left: $gl-padding-8;
+    }
+  }
+}
+
+.health-status {
+  .dropdown-body {
+    .health-divider {
+      border-top-color: $gray-100;
+    }
+
+    .dropdown-item:not(.health-dropdown-item) {
+      padding: 0;
     }
   }
 }

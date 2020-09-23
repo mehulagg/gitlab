@@ -11,5 +11,5 @@
     = icon("refresh")
     Sync now
 - if @group.ldap_sync_ready? && @group.ldap_sync_last_successful_update_at
-  %p.inline.prepend-left-10
+  %p.inline.gl-ml-3
     Successfully synced #{time_ago_with_tooltip(@group.ldap_sync_last_successful_update_at)}.

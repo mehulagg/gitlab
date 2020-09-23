@@ -2,11 +2,44 @@
 
 require 'spec_helper'
 
-describe 'Profile > Account', :js do
+RSpec.describe 'Profile > Account', :js do
   let(:user) { create(:user, username: 'foo') }
 
   before do
     sign_in(user)
+  end
+
+  describe 'Social sign-in' do
+    context 'when an identity does not exist' do
+      before do
+        allow(Devise).to receive_messages(omniauth_configs: { google_oauth2: {} })
+      end
+
+      it 'allows the user to connect' do
+        visit profile_account_path
+
+        expect(page).to have_link('Connect Google', href: '/users/auth/google_oauth2')
+      end
+    end
+
+    context 'when an identity already exists' do
+      before do
+        allow(Devise).to receive_messages(omniauth_configs: { twitter: {}, saml: {} })
+
+        create(:identity, user: user, provider: :twitter)
+        create(:identity, user: user, provider: :saml)
+
+        visit profile_account_path
+      end
+
+      it 'allows the user to disconnect when there is an existing identity' do
+        expect(page).to have_link('Disconnect Twitter', href: '/profile/account/unlink?provider=twitter')
+      end
+
+      it 'shows active for a provider that is not allowed to unlink' do
+        expect(page).to have_content('Saml Active')
+      end
+    end
   end
 
   describe 'Change username' do
@@ -53,6 +86,37 @@ describe 'Profile > Account', :js do
         visit old_project_path
         expect(current_path).to eq(new_project_path)
         expect(find('.breadcrumbs-sub-title')).to have_content('Details')
+      end
+    end
+  end
+
+  describe 'Delete account' do
+    before do
+      create_list(:project, number_of_projects, namespace: user.namespace)
+      visit profile_account_path
+    end
+
+    context 'when there are no personal projects' do
+      let(:number_of_projects) { 0 }
+
+      it 'does not show personal projects removal message' do
+        expect(page).not_to have_content(/\d personal projects? will be removed and cannot be restored/)
+      end
+    end
+
+    context 'when one personal project exists' do
+      let(:number_of_projects) { 1 }
+
+      it 'does show personal project removal message' do
+        expect(page).to have_content('1 personal project will be removed and cannot be restored')
+      end
+    end
+
+    context 'when more than one personal projects exists' do
+      let(:number_of_projects) { 3 }
+
+      it 'shows pluralized personal project removal message' do
+        expect(page).to have_content('3 personal projects will be removed and cannot be restored')
       end
     end
   end

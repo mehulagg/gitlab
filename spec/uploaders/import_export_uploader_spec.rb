@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ImportExportUploader do
+RSpec.describe ImportExportUploader do
   let(:model) { build_stubbed(:import_export_upload) }
   let(:upload) { create(:upload, model: model) }
   let(:import_export_upload) { ImportExportUpload.new }
@@ -49,6 +49,12 @@ describe ImportExportUploader do
 
         expect(Dir[cache_dir]).to be_empty
       end
+    end
+  end
+
+  describe '.workhorse_local_upload_path' do
+    it 'returns path that includes uploads dir' do
+      expect(described_class.workhorse_local_upload_path).to end_with('/uploads/tmp/uploads')
     end
   end
 end

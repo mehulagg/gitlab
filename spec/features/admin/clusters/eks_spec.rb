@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Instance-level AWS EKS Cluster', :js do
+RSpec.describe 'Instance-level AWS EKS Cluster', :js do
   let(:user) { create(:admin) }
 
   before do
@@ -22,7 +22,7 @@ describe 'Instance-level AWS EKS Cluster', :js do
       end
 
       it 'user sees a form to create an EKS cluster' do
-        expect(page).to have_content('Create new Cluster on EKS')
+        expect(page).to have_content('Create new cluster on EKS')
       end
     end
   end

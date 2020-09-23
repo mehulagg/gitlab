@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User cherry-picks', :js do
+RSpec.describe 'Merge request > User cherry-picks', :js do
   let(:group) { create(:group) }
   let(:project) { create(:project, :repository, namespace: group) }
   let(:user) { project.creator }
@@ -15,7 +15,7 @@ describe 'Merge request > User cherry-picks', :js do
 
   context 'Viewing a merged merge request' do
     before do
-      service = MergeRequests::MergeService.new(project, user)
+      service = MergeRequests::MergeService.new(project, user, sha: merge_request.diff_head_sha)
 
       perform_enqueued_jobs do
         service.execute(merge_request)
@@ -26,7 +26,7 @@ describe 'Merge request > User cherry-picks', :js do
     context 'without a merge commit' do
       before do
         merge_request.merge_commit_sha = nil
-        merge_request.save
+        merge_request.save!
       end
 
       it 'does not show a Cherry-pick button' do

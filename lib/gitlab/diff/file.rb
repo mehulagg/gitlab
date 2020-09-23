@@ -225,16 +225,28 @@ module Gitlab
         new_path.presence || old_path
       end
 
+      def file_hash
+        Digest::SHA1.hexdigest(file_path)
+      end
+
       def added_lines
-        @stats&.additions || diff_lines.count(&:added?)
+        strong_memoize(:added_lines) do
+          @stats&.additions || diff_lines.count(&:added?)
+        end
       end
 
       def removed_lines
-        @stats&.deletions || diff_lines.count(&:removed?)
+        strong_memoize(:removed_lines) do
+          @stats&.deletions || diff_lines.count(&:removed?)
+        end
       end
 
       def file_identifier
         "#{file_path}-#{new_file?}-#{deleted_file?}-#{renamed_file?}"
+      end
+
+      def file_identifier_hash
+        Digest::SHA1.hexdigest(file_identifier)
       end
 
       def diffable?
@@ -314,6 +326,10 @@ module Gitlab
         @rich_viewer = rich_viewer_class&.new(self)
       end
 
+      def alternate_viewer
+        alternate_viewer_class&.new(self)
+      end
+
       def rendered_as_text?(ignore_errors: true)
         simple_viewer.is_a?(DiffViewer::Text) && (ignore_errors || simple_viewer.render_error.nil?)
       end
@@ -350,12 +366,22 @@ module Gitlab
 
       private
 
+      def fetch_blob(sha, path)
+        return unless sha
+
+        Blob.lazy(repository, sha, path)
+      end
+
       def total_blob_lines(blob)
         @total_lines ||= begin
           line_count = blob.lines.size
           line_count -= 1 if line_count > 0 && blob.lines.last.blank?
           line_count
         end
+      end
+
+      def modified_file?
+        new_file? || deleted_file? || content_changed?
       end
 
       # We can't use Object#try because Blob doesn't inherit from Object, but
@@ -381,45 +407,24 @@ module Gitlab
       end
 
       def new_blob_lazy
-        return unless new_content_sha
-
-        Blob.lazy(repository.project, new_content_sha, file_path)
+        fetch_blob(new_content_sha, file_path)
       end
 
       def old_blob_lazy
-        return unless old_content_sha
-
-        Blob.lazy(repository.project, old_content_sha, old_path)
+        fetch_blob(old_content_sha, old_path)
       end
 
       def simple_viewer_class
+        return DiffViewer::Collapsed if collapsed?
         return DiffViewer::NotDiffable unless diffable?
+        return DiffViewer::Text if modified_file? && text?
+        return DiffViewer::NoPreview if content_changed?
+        return DiffViewer::Added if new_file?
+        return DiffViewer::Deleted if deleted_file?
+        return DiffViewer::Renamed if renamed_file?
+        return DiffViewer::ModeChanged if mode_changed?
 
-        if content_changed?
-          if text?
-            DiffViewer::Text
-          else
-            DiffViewer::NoPreview
-          end
-        elsif new_file?
-          if text?
-            DiffViewer::Text
-          else
-            DiffViewer::Added
-          end
-        elsif deleted_file?
-          if text?
-            DiffViewer::Text
-          else
-            DiffViewer::Deleted
-          end
-        elsif renamed_file?
-          DiffViewer::Renamed
-        elsif mode_changed?
-          DiffViewer::ModeChanged
-        else
-          DiffViewer::NoPreview
-        end
+        DiffViewer::NoPreview
       end
 
       def rich_viewer_class
@@ -427,8 +432,20 @@ module Gitlab
       end
 
       def viewer_class_from(classes)
+        return if collapsed?
         return unless diffable?
-        return unless new_file? || deleted_file? || content_changed?
+        return unless modified_file?
+
+        find_renderable_viewer_class(classes)
+      end
+
+      def alternate_viewer_class
+        return unless viewer.class == DiffViewer::Renamed
+
+        find_renderable_viewer_class(RICH_VIEWERS) || (DiffViewer::Text if text?)
+      end
+
+      def find_renderable_viewer_class(classes)
         return if different_type? || external_storage_error?
 
         verify_binary = !stored_externally?

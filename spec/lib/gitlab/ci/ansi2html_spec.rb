@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Ansi2html do
+RSpec.describe Gitlab::Ci::Ansi2html do
   subject { described_class }
 
   it "prints non-ansi as-is" do
@@ -213,6 +213,7 @@ describe Gitlab::Ci::Ansi2html do
       " data-timestamp=\"#{section_start_time.to_i}\" data-section=\"#{class_name(section_name)}\"" \
       ' role="button"></div>'
     end
+
     let(:section_end_html) do
       "<div class=\"section-end\" data-section=\"#{class_name(section_name)}\"></div>"
     end

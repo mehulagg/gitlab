@@ -12,14 +12,14 @@ module QA
           def initialize
             @es_enabled = true
             @es_indexing = true
-            @es_url = 'http://elastic68:9200'
+            @es_url = QA::Runtime::Env.elasticsearch_url
           end
 
           def fabricate!
-            QA::Page::Main::Menu.perform(&:click_admin_area)
-            QA::Page::Admin::Menu.perform(&:go_to_integration_settings)
-            QA::EE::Page::Admin::Settings::Integration.perform do |integration|
-              integration.expand_elasticsearch do |es|
+            QA::Page::Main::Menu.perform(&:go_to_admin_area)
+            QA::Page::Admin::Menu.perform(&:go_to_general_settings)
+            QA::EE::Page::Admin::Settings::Elasticsearch.perform do |settings|
+              settings.expand_elasticsearch do |es|
                 es.check_indexing if @es_indexing
                 es.check_search if @es_enabled
                 es.enter_link(@es_url)
@@ -29,7 +29,7 @@ module QA
           end
 
           def fabricate_via_api!
-            @es_enabled ? api_post : resource_web_url(api_get)
+            @es_enabled ? api_put : resource_web_url(api_get)
           end
 
           def resource_web_url(resource)
@@ -42,11 +42,11 @@ module QA
             "/application/settings"
           end
 
-          def api_post_path
+          def api_put_path
             "/application/settings"
           end
 
-          def api_post_body
+          def api_put_body
             {
               elasticsearch_search: @es_enabled,
               elasticsearch_indexing: @es_indexing,

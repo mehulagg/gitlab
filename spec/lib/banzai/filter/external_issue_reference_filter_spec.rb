@@ -2,12 +2,8 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::ExternalIssueReferenceFilter do
+RSpec.describe Banzai::Filter::ExternalIssueReferenceFilter do
   include FilterSpecHelper
-
-  def helper
-    IssuesHelper
-  end
 
   shared_examples_for "external issue tracker" do
     it_behaves_like 'a reference containing an element node'
@@ -36,7 +32,7 @@ describe Banzai::Filter::ExternalIssueReferenceFilter do
       issue_id = doc.css('a').first.attr("data-external-issue")
 
       expect(doc.css('a').first.attr('href'))
-        .to eq helper.url_for_issue(issue_id, project)
+        .to eq project.external_issue_tracker.issue_url(issue_id)
     end
 
     it 'links to the external tracker' do
@@ -45,7 +41,7 @@ describe Banzai::Filter::ExternalIssueReferenceFilter do
       link = doc.css('a').first.attr('href')
       issue_id = doc.css('a').first.attr("data-external-issue")
 
-      expect(link).to eq(helper.url_for_issue(issue_id, project))
+      expect(link).to eq(project.external_issue_tracker.issue_url(issue_id))
     end
 
     it 'links with adjacent text' do
@@ -56,7 +52,7 @@ describe Banzai::Filter::ExternalIssueReferenceFilter do
 
     it 'includes a title attribute' do
       doc = filter("Issue #{reference}")
-      expect(doc.css('a').first.attr('title')).to include("Issue in #{project.issues_tracker.title}")
+      expect(doc.css('a').first.attr('title')).to include("Issue in #{project.external_issue_tracker.title}")
     end
 
     it 'escapes the title attribute' do
@@ -78,7 +74,25 @@ describe Banzai::Filter::ExternalIssueReferenceFilter do
       link = doc.css('a').first.attr('href')
       issue_id = doc.css('a').first["data-external-issue"]
 
-      expect(link).to eq helper.url_for_issue(issue_id, project, only_path: true)
+      expect(link).to eq project.external_issue_tracker.issue_path(issue_id)
+    end
+
+    it 'has an empty link if issue_url is invalid' do
+      expect_any_instance_of(project.external_issue_tracker.class).to receive(:issue_url) { 'javascript:alert("foo");' }
+
+      doc = filter("Issue #{reference}")
+      link = doc.css('a').first.attr('href')
+
+      expect(link).to eq ''
+    end
+
+    it 'has an empty link if issue_path is invalid' do
+      expect_any_instance_of(project.external_issue_tracker.class).to receive(:issue_path) { 'javascript:alert("foo");' }
+
+      doc = filter("Issue #{reference}", only_path: true)
+      link = doc.css('a').first.attr('href')
+
+      expect(link).to eq ''
     end
 
     context 'with RequestStore enabled', :request_store do
@@ -192,6 +206,49 @@ describe Banzai::Filter::ExternalIssueReferenceFilter do
         exp = act = "Issue #{reference}"
         expect(filter(act).to_html).to eq exp
       end
+    end
+  end
+
+  context "ewm project" do
+    let_it_be(:project) { create(:ewm_project) }
+
+    before do
+      project.update!(issues_enabled: false)
+    end
+
+    context "rtcwi keyword" do
+      let(:issue) { ExternalIssue.new("rtcwi 123", project) }
+      let(:reference) { issue.to_reference }
+
+      it_behaves_like "external issue tracker"
+    end
+
+    context "workitem keyword" do
+      let(:issue) { ExternalIssue.new("workitem 123", project) }
+      let(:reference) { issue.to_reference }
+
+      it_behaves_like "external issue tracker"
+    end
+
+    context "defect keyword" do
+      let(:issue) { ExternalIssue.new("defect 123", project) }
+      let(:reference) { issue.to_reference }
+
+      it_behaves_like "external issue tracker"
+    end
+
+    context "task keyword" do
+      let(:issue) { ExternalIssue.new("task 123", project) }
+      let(:reference) { issue.to_reference }
+
+      it_behaves_like "external issue tracker"
+    end
+
+    context "bug keyword" do
+      let(:issue) { ExternalIssue.new("bug 123", project) }
+      let(:reference) { issue.to_reference }
+
+      it_behaves_like "external issue tracker"
     end
   end
 end

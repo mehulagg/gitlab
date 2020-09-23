@@ -2,12 +2,13 @@
 
 require 'spec_helper'
 
-describe CommitEntity do
-  SIGNATURE_HTML = 'TEST'.freeze
+RSpec.describe CommitEntity do
+  let(:signature_html) { 'TEST' }
 
   let(:entity) do
     described_class.new(commit, request: request)
   end
+
   let(:request) { double('request') }
   let(:project) { create(:project, :repository) }
   let(:commit) { project.commit }
@@ -16,7 +17,7 @@ describe CommitEntity do
 
   before do
     render = double('render')
-    allow(render).to receive(:call).and_return(SIGNATURE_HTML)
+    allow(render).to receive(:call).and_return(signature_html)
 
     allow(request).to receive(:project).and_return(project)
     allow(request).to receive(:render).and_return(render)
@@ -83,7 +84,7 @@ describe CommitEntity do
 
       it 'exposes "signature_html"' do
         expect(request.render).to receive(:call)
-        expect(subject.fetch(:signature_html)).to be SIGNATURE_HTML
+        expect(subject.fetch(:signature_html)).to be signature_html
       end
     end
 

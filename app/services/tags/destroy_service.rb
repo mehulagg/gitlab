@@ -18,10 +18,7 @@ module Tags
           .new(project, current_user, tag: tag_name)
           .execute
 
-        push_data = build_push_data(tag)
-        EventCreateService.new.push(project, current_user, push_data)
-        project.execute_hooks(push_data.dup, :tag_push_hooks)
-        project.execute_services(push_data.dup, :tag_push_hooks)
+        unlock_artifacts(tag_name)
 
         success('Tag was removed')
       else
@@ -39,13 +36,10 @@ module Tags
       super().merge(message: message)
     end
 
-    def build_push_data(tag)
-      Gitlab::DataBuilder::Push.build(
-        project: project,
-        user: current_user,
-        oldrev: tag.dereferenced_target.sha,
-        newrev: Gitlab::Git::BLANK_SHA,
-        ref: "#{Gitlab::Git::TAG_REF_PREFIX}#{tag.name}")
+    private
+
+    def unlock_artifacts(tag_name)
+      Ci::RefDeleteUnlockArtifactsWorker.perform_async(project.id, current_user.id, "#{::Gitlab::Git::TAG_REF_PREFIX}#{tag_name}")
     end
   end
 end

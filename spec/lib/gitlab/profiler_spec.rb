@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Profiler do
+RSpec.describe Gitlab::Profiler do
   let(:null_logger) { Logger.new('/dev/null') }
   let(:private_token) { 'private' }
 
@@ -84,7 +84,7 @@ describe Gitlab::Profiler do
           expect(severity).to eq(Logger::DEBUG)
           expect(message).to include('public').and include(described_class::FILTERED_STRING)
           expect(message).not_to include(private_token)
-        end.twice
+        end.at_least(1) # This spec could be wrapped in more blocks in the future
 
         custom_logger.debug("public #{private_token}")
       end
@@ -117,51 +117,6 @@ describe Gitlab::Profiler do
         # file.
         described_class.with_custom_logger(nil) { custom_logger.debug('Foo') }
       end
-    end
-  end
-
-  describe '.clean_backtrace' do
-    it 'uses the Rails backtrace cleaner' do
-      backtrace = []
-
-      expect(Rails.backtrace_cleaner).to receive(:clean).with(backtrace)
-
-      described_class.clean_backtrace(backtrace)
-    end
-
-    it 'removes lines from IGNORE_BACKTRACES' do
-      backtrace = [
-        "lib/gitlab/gitaly_client.rb:294:in `block (2 levels) in migrate'",
-        "lib/gitlab/gitaly_client.rb:331:in `allow_n_plus_1_calls'",
-        "lib/gitlab/gitaly_client.rb:280:in `block in migrate'",
-        "lib/gitlab/metrics/influx_db.rb:103:in `measure'",
-        "lib/gitlab/gitaly_client.rb:278:in `migrate'",
-        "lib/gitlab/git/repository.rb:1451:in `gitaly_migrate'",
-        "lib/gitlab/git/commit.rb:66:in `find'",
-        "app/models/repository.rb:1047:in `find_commit'",
-        "lib/gitlab/metrics/instrumentation.rb:159:in `block in find_commit'",
-        "lib/gitlab/metrics/method_call.rb:36:in `measure'",
-        "lib/gitlab/metrics/instrumentation.rb:159:in `find_commit'",
-        "app/models/repository.rb:113:in `commit'",
-        "lib/gitlab/i18n.rb:50:in `with_locale'",
-        "lib/gitlab/middleware/multipart.rb:95:in `call'",
-        "lib/gitlab/request_profiler/middleware.rb:14:in `call'",
-        "ee/lib/gitlab/database/load_balancing/rack_middleware.rb:37:in `call'",
-        "ee/lib/gitlab/jira/middleware.rb:15:in `call'"
-      ]
-
-      expect(described_class.clean_backtrace(backtrace))
-        .to eq([
-                 "lib/gitlab/gitaly_client.rb:294:in `block (2 levels) in migrate'",
-                 "lib/gitlab/gitaly_client.rb:331:in `allow_n_plus_1_calls'",
-                 "lib/gitlab/gitaly_client.rb:280:in `block in migrate'",
-                 "lib/gitlab/gitaly_client.rb:278:in `migrate'",
-                 "lib/gitlab/git/repository.rb:1451:in `gitaly_migrate'",
-                 "lib/gitlab/git/commit.rb:66:in `find'",
-                 "app/models/repository.rb:1047:in `find_commit'",
-                 "app/models/repository.rb:113:in `commit'",
-                 "ee/lib/gitlab/jira/middleware.rb:15:in `call'"
-               ])
     end
   end
 
@@ -235,6 +190,52 @@ describe Gitlab::Profiler do
       expect(null_logger).not_to receive(:info)
 
       expect(described_class.log_load_times_by_model(null_logger)).to be_nil
+    end
+  end
+
+  describe '.print_by_total_time' do
+    let(:stdout) { StringIO.new }
+    let(:regexp) { /^\s+\d+\.\d+\s+(\d+\.\d+)/ }
+
+    let(:output) do
+      stdout.rewind
+      stdout.read
+    end
+
+    let_it_be(:result) do
+      Thread.new { sleep 1 }
+
+      RubyProf.profile do
+        sleep 0.1
+        1.to_s
+      end
+    end
+
+    before do
+      stub_const('STDOUT', stdout)
+    end
+
+    it 'prints a profile result sorted by total time' do
+      described_class.print_by_total_time(result)
+
+      expect(output).to include('Kernel#sleep')
+
+      thread_profiles = output.split('Sort by: total_time').select { |x| x =~ regexp }
+
+      thread_profiles.each do |profile|
+        total_times =
+          profile
+            .scan(regexp)
+            .map { |(total)| total.to_f }
+
+        expect(total_times).to eq(total_times.sort.reverse)
+      end
+    end
+
+    it 'accepts a max_percent option' do
+      described_class.print_by_total_time(result, max_percent: 50)
+
+      expect(output).not_to include('Kernel#sleep')
     end
   end
 end

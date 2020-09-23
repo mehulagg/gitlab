@@ -2,8 +2,42 @@
 
 require 'spec_helper'
 
-describe ProjectsHelper do
+RSpec.describe ProjectsHelper do
   include ProjectForksHelper
+
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user) }
+
+  describe '#project_incident_management_setting' do
+    let(:project) { create(:project) }
+
+    before do
+      helper.instance_variable_set(:@project, project)
+    end
+
+    context 'when incident_management_setting exists' do
+      let(:project_incident_management_setting) do
+        create(:project_incident_management_setting, project: project)
+      end
+
+      it 'return project_incident_management_setting' do
+        expect(helper.project_incident_management_setting).to(
+          eq(project_incident_management_setting)
+        )
+      end
+    end
+
+    context 'when incident_management_setting does not exist' do
+      it 'builds incident_management_setting' do
+        setting = helper.project_incident_management_setting
+
+        expect(setting).not_to be_persisted
+        expect(setting.create_issue).to be_falsey
+        expect(setting.send_email).to be_falsey
+        expect(setting.issue_template_key).to be_nil
+      end
+    end
+  end
 
   describe '#error_tracking_setting_project_json' do
     let(:project) { create(:project) }
@@ -92,7 +126,7 @@ describe ProjectsHelper do
       it "returns false if there are permissions and origin project is PRIVATE" do
         allow(helper).to receive(:can?) { true }
 
-        project.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
+        project.update!(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
 
         expect(helper.can_change_visibility_level?(forked_project, user)).to be_falsey
       end
@@ -100,7 +134,7 @@ describe ProjectsHelper do
       it "returns true if there are permissions and origin project is INTERNAL" do
         allow(helper).to receive(:can?) { true }
 
-        project.update(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
+        project.update!(visibility_level: Gitlab::VisibilityLevel::INTERNAL)
 
         expect(helper.can_change_visibility_level?(forked_project, user)).to be_truthy
       end
@@ -157,6 +191,7 @@ describe ProjectsHelper do
       allow(helper).to receive(:current_user).and_return(user)
       allow(helper).to receive(:can?).with(user, :read_cross_project) { true }
       allow(user).to receive(:max_member_access_for_project).and_return(40)
+      allow(Gitlab::I18n).to receive(:locale).and_return('es')
     end
 
     it "includes the route" do
@@ -193,7 +228,7 @@ describe ProjectsHelper do
       expect(helper.project_list_cache_key(project).last).to start_with('v')
     end
 
-    it 'includes wether or not the user can read cross project' do
+    it 'includes whether or not the user can read cross project' do
       expect(helper.project_list_cache_key(project)).to include('cross-project:true')
     end
 
@@ -201,6 +236,10 @@ describe ProjectsHelper do
       create(:ci_pipeline, :success, project: project, sha: project.commit.sha)
 
       expect(helper.project_list_cache_key(project)).to include("pipeline-status/#{project.commit.sha}-success")
+    end
+
+    it "includes the user locale" do
+      expect(helper.project_list_cache_key(project)).to include('es')
     end
 
     it "includes the user max member access" do
@@ -308,6 +347,7 @@ describe ProjectsHelper do
   describe '#link_to_project' do
     let(:group)   { create(:group, name: 'group name with space') }
     let(:project) { create(:project, group: group, name: 'project name with space') }
+
     subject { link_to_project(project) }
 
     it 'returns an HTML link to the project' do
@@ -326,13 +366,13 @@ describe ProjectsHelper do
     end
 
     it 'returns image tag for member avatar' do
-      expect(helper).to receive(:image_tag).with(expected, { width: 16, class: ["avatar", "avatar-inline", "s16"], alt: "", "data-src" => anything })
+      expect(helper).to receive(:image_tag).with(expected, { width: 16, class: %w[avatar avatar-inline s16], alt: "", "data-src" => anything })
 
       helper.link_to_member_avatar(user)
     end
 
     it 'returns image tag with avatar class' do
-      expect(helper).to receive(:image_tag).with(expected, { width: 16, class: ["avatar", "avatar-inline", "s16", "any-avatar-class"], alt: "", "data-src" => anything })
+      expect(helper).to receive(:image_tag).with(expected, { width: 16, class: %w[avatar avatar-inline s16 any-avatar-class], alt: "", "data-src" => anything })
 
       helper.link_to_member_avatar(user, avatar_class: "any-avatar-class")
     end
@@ -404,8 +444,8 @@ describe ProjectsHelper do
   end
 
   describe '#get_project_nav_tabs' do
+    let_it_be(:user) { create(:user) }
     let(:project) { create(:project) }
-    let(:user)    { create(:user) }
 
     before do
       allow(helper).to receive(:can?) { true }
@@ -461,6 +501,37 @@ describe ProjectsHelper do
         is_expected.not_to include(:external_wiki)
       end
     end
+
+    context 'when project has confluence enabled' do
+      before do
+        allow(project).to receive(:has_confluence?).and_return(true)
+      end
+
+      it { is_expected.to include(:confluence) }
+      it { is_expected.not_to include(:wiki) }
+    end
+
+    context 'when project does not have confluence enabled' do
+      it { is_expected.not_to include(:confluence) }
+      it { is_expected.to include(:wiki) }
+    end
+  end
+
+  describe '#can_view_operations_tab?' do
+    before do
+      allow(helper).to receive(:current_user).and_return(user)
+    end
+
+    subject { helper.send(:can_view_operations_tab?, user, project) }
+
+    [:read_environment, :read_cluster, :metrics_dashboard].each do |ability|
+      it 'includes operations tab' do
+        allow(helper).to receive(:can?).and_return(false)
+        allow(helper).to receive(:can?).with(user, ability, project).and_return(true)
+
+        is_expected.to be(true)
+      end
+    end
   end
 
   describe '#show_projects' do
@@ -501,7 +572,6 @@ describe ProjectsHelper do
 
     it 'returns the command to push to create project over SSH' do
       allow(Gitlab::CurrentSettings.current_application_settings).to receive(:enabled_git_access_protocol) { 'ssh' }
-      allow(Gitlab.config.gitlab_shell).to receive(:ssh_path_prefix).and_return('git@localhost:')
 
       expect(helper.push_to_create_project_command(user)).to eq("git push --set-upstream #{Gitlab.config.gitlab.user}@localhost:john/$(git rev-parse --show-toplevel | xargs basename).git $(git rev-parse --abbrev-ref HEAD)")
     end
@@ -540,6 +610,7 @@ describe ProjectsHelper do
 
   describe '#git_user_name' do
     let(:user) { double(:user, name: 'John "A" Doe53') }
+
     before do
       allow(helper).to receive(:current_user).and_return(user)
     end
@@ -562,6 +633,7 @@ describe ProjectsHelper do
 
     context 'user logged in' do
       let(:user) { create(:user) }
+
       before do
         allow(helper).to receive(:current_user).and_return(user)
       end
@@ -575,7 +647,7 @@ describe ProjectsHelper do
       context 'user has a configured commit email' do
         before do
           confirmed_email = create(:email, :confirmed, user: user)
-          user.update(commit_email: confirmed_email)
+          user.update!(commit_email: confirmed_email)
         end
 
         it 'returns the commit email' do
@@ -627,11 +699,11 @@ describe ProjectsHelper do
     end
   end
 
-  describe 'link_to_bfg' do
-    subject { helper.link_to_bfg }
+  describe 'link_to_filter_repo' do
+    subject { helper.link_to_filter_repo }
 
-    it 'generates a hardcoded link to the BFG Repo-Cleaner' do
-      result = helper.link_to_bfg
+    it 'generates a hardcoded link to git filter-repo' do
+      result = helper.link_to_filter_repo
       doc = Nokogiri::HTML.fragment(result)
 
       expect(doc.children.size).to eq(1)
@@ -644,8 +716,8 @@ describe ProjectsHelper do
         expect(link.name).to eq('a')
         expect(link[:target]).to eq('_blank')
         expect(link[:rel]).to eq('noopener noreferrer')
-        expect(link[:href]).to eq('https://rtyley.github.io/bfg-repo-cleaner/')
-        expect(link.inner_html).to eq('BFG')
+        expect(link[:href]).to eq('https://github.com/newren/git-filter-repo')
+        expect(link.inner_html).to eq('git filter-repo')
 
         expect(result).to be_html_safe
       end
@@ -681,11 +753,7 @@ describe ProjectsHelper do
   end
 
   describe '#show_merge_request_count' do
-    context 'when the feature flag is enabled' do
-      before do
-        stub_feature_flags(project_list_show_mr_count: true)
-      end
-
+    context 'enabled flag' do
       it 'returns true if compact mode is disabled' do
         expect(helper.show_merge_request_count?).to be_truthy
       end
@@ -695,22 +763,7 @@ describe ProjectsHelper do
       end
     end
 
-    context 'when the feature flag is disabled' do
-      before do
-        stub_feature_flags(project_list_show_mr_count: false)
-      end
-
-      it 'always returns false' do
-        expect(helper.show_merge_request_count?(disabled: false)).to be_falsy
-        expect(helper.show_merge_request_count?(disabled: true)).to be_falsy
-      end
-    end
-
     context 'disabled flag' do
-      before do
-        stub_feature_flags(project_list_show_mr_count: true)
-      end
-
       it 'returns false if disabled flag is true' do
         expect(helper.show_merge_request_count?(disabled: true)).to be_falsey
       end
@@ -722,11 +775,7 @@ describe ProjectsHelper do
   end
 
   describe '#show_issue_count?' do
-    context 'when the feature flag is enabled' do
-      before do
-        stub_feature_flags(project_list_show_issue_count: true)
-      end
-
+    context 'enabled flag' do
       it 'returns true if compact mode is disabled' do
         expect(helper.show_issue_count?).to be_truthy
       end
@@ -736,22 +785,7 @@ describe ProjectsHelper do
       end
     end
 
-    context 'when the feature flag is disabled' do
-      before do
-        stub_feature_flags(project_list_show_issue_count: false)
-      end
-
-      it 'always returns false' do
-        expect(helper.show_issue_count?(disabled: false)).to be_falsy
-        expect(helper.show_issue_count?(disabled: true)).to be_falsy
-      end
-    end
-
     context 'disabled flag' do
-      before do
-        stub_feature_flags(project_list_show_issue_count: true)
-      end
-
       it 'returns false if disabled flag is true' do
         expect(helper.show_issue_count?(disabled: true)).to be_falsey
       end
@@ -832,7 +866,7 @@ describe ProjectsHelper do
       when :developer, :maintainer
         project.add_user(user, access)
       when :owner
-        project.namespace.update(owner: user)
+        project.namespace.update!(owner: user)
       end
     end
 
@@ -928,14 +962,14 @@ describe ProjectsHelper do
       helper.instance_variable_set(:@project, project)
     end
 
-    subject { helper.grafana_integration_token }
+    subject { helper.grafana_integration_masked_token }
 
     it { is_expected.to eq(nil) }
 
     context 'grafana integration exists' do
       let!(:grafana_integration) { create(:grafana_integration, project: project) }
 
-      it { is_expected.to eq(grafana_integration.token) }
+      it { is_expected.to eq(grafana_integration.masked_token) }
     end
   end
 
@@ -954,6 +988,77 @@ describe ProjectsHelper do
       let!(:grafana_integration) { create(:grafana_integration, project: project) }
 
       it { is_expected.to eq(grafana_integration.enabled) }
+    end
+  end
+
+  describe '#project_license_name(project)', :request_store do
+    let_it_be(:project) { create(:project) }
+    let_it_be(:repository) { project.repository }
+
+    subject { project_license_name(project) }
+
+    def license_name
+      project_license_name(project)
+    end
+
+    context 'gitaly is working appropriately' do
+      let(:license) { Licensee::License.new('mit') }
+
+      before do
+        expect(repository).to receive(:license).and_return(license)
+      end
+
+      it 'returns the license name' do
+        expect(subject).to eq(license.name)
+      end
+
+      it 'memoizes the value' do
+        expect do
+          2.times { expect(license_name).to eq(license.name) }
+        end.to change { Gitlab::GitalyClient.get_request_count }.by_at_most(1)
+      end
+    end
+
+    context 'gitaly is unreachable' do
+      shared_examples 'returns nil and tracks exception' do
+        it { is_expected.to be_nil }
+
+        it 'tracks the exception' do
+          expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
+            an_instance_of(exception)
+          )
+
+          subject
+        end
+
+        it 'memoizes the nil value' do
+          expect do
+            2.times { expect(license_name).to be_nil }
+          end.to change { Gitlab::GitalyClient.get_request_count }.by_at_most(1)
+        end
+      end
+
+      before do
+        expect(repository).to receive(:license).and_raise(exception)
+      end
+
+      context "Gitlab::Git::CommandError" do
+        let(:exception) { Gitlab::Git::CommandError }
+
+        it_behaves_like 'returns nil and tracks exception'
+      end
+
+      context "GRPC::Unavailable" do
+        let(:exception) { GRPC::Unavailable }
+
+        it_behaves_like 'returns nil and tracks exception'
+      end
+
+      context "GRPC::DeadlineExceeded" do
+        let(:exception) { GRPC::DeadlineExceeded }
+
+        it_behaves_like 'returns nil and tracks exception'
+      end
     end
   end
 end

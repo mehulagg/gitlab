@@ -2,18 +2,18 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::Replication::JobArtifactTransfer, :geo do
+RSpec.describe Gitlab::Geo::Replication::JobArtifactTransfer, :geo do
   include ::EE::GeoHelpers
 
-  set(:primary_node) { create(:geo_node, :primary) }
-  set(:secondary_node) { create(:geo_node) }
-  set(:job_artifact) { create(:ci_job_artifact, :archive, :correct_checksum) }
+  let_it_be(:primary_node) { create(:geo_node, :primary) }
+  let_it_be(:secondary_node) { create(:geo_node) }
+  let_it_be(:job_artifact) { create(:ci_job_artifact, :archive, :correct_checksum) }
 
   subject do
     described_class.new(job_artifact)
   end
 
-  context '#initialize' do
+  describe '#initialize' do
     it 'sets file_type to :ci_trace' do
       expect(subject.file_type).to eq(:job_artifact)
     end
@@ -35,7 +35,7 @@ describe Gitlab::Geo::Replication::JobArtifactTransfer, :geo do
     end
   end
 
-  context '#download_from_primary' do
+  describe '#download_from_primary' do
     before do
       stub_current_geo_node(secondary_node)
     end

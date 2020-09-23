@@ -2,18 +2,18 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::Replication::LfsTransfer do
+RSpec.describe Gitlab::Geo::Replication::LfsTransfer do
   include ::EE::GeoHelpers
 
-  set(:primary_node) { create(:geo_node, :primary) }
-  set(:secondary_node) { create(:geo_node) }
-  set(:lfs_object) { create(:lfs_object, :with_file, :correct_oid) }
+  let_it_be(:primary_node) { create(:geo_node, :primary) }
+  let_it_be(:secondary_node) { create(:geo_node) }
+  let_it_be(:lfs_object) { create(:lfs_object, :with_file, :correct_oid) }
 
   subject do
     described_class.new(lfs_object)
   end
 
-  context '#download_from_primary' do
+  describe '#download_from_primary' do
     before do
       stub_current_geo_node(secondary_node)
     end

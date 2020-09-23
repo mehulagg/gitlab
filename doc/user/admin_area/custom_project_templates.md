@@ -1,10 +1,13 @@
 ---
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
 # Custom instance-level project templates **(PREMIUM ONLY)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/6860) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.2.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/6860) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.2.
 
 GitLab administrators can configure the group where all the custom project
 templates are sourced.
@@ -28,7 +31,7 @@ see [Custom group-level project templates](../group/custom_project_templates.md)
 GitLab administrators can configure a GitLab group that serves as template
 source for an entire GitLab instance by:
 
-1. Navigating to **Admin area > Settings > Templates**.
+1. Navigating to **Admin Area > Settings > Templates**.
 1. Expanding **Custom project templates**.
 1. Selecting a group to use.
 1. Pressing **Save changes**.

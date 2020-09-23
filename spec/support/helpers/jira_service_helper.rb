@@ -5,14 +5,13 @@ module JiraServiceHelper
   JIRA_API = JIRA_URL + "/rest/api/2"
 
   def jira_service_settings
-    title = "Jira tracker"
     url = JIRA_URL
     username = 'jira-user'
     password = 'my-secret-password'
     jira_issue_transition_id = '1'
 
-    jira_tracker.update(
-      title: title, url: url, username: username, password: password,
+    jira_tracker.update!(
+      url: url, username: username, password: password,
       jira_issue_transition_id: jira_issue_transition_id, active: true
     )
   end
@@ -76,6 +75,10 @@ module JiraServiceHelper
 
   def jira_issue_url(issue_id)
     JIRA_API + "/issue/#{issue_id}"
+  end
+
+  def stub_jira_service_test
+    WebMock.stub_request(:get, /serverInfo/).to_return(body: { url: 'http://url' }.to_json)
   end
 
   def stub_jira_urls(issue_id)

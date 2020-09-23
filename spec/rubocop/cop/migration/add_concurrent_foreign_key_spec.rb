@@ -1,13 +1,10 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
-
+require 'fast_spec_helper'
 require 'rubocop'
-require 'rubocop/rspec/support'
-
 require_relative '../../../../rubocop/cop/migration/add_concurrent_foreign_key'
 
-describe RuboCop::Cop::Migration::AddConcurrentForeignKey do
+RSpec.describe RuboCop::Cop::Migration::AddConcurrentForeignKey, type: :rubocop do
   include CopHelper
 
   let(:cop) { described_class.new }
@@ -32,6 +29,12 @@ describe RuboCop::Cop::Migration::AddConcurrentForeignKey do
         expect(cop.offenses.size).to eq(1)
         expect(cop.offenses.map(&:line)).to eq([1])
       end
+    end
+
+    it 'does not register an offense when a `NOT VALID` foreign key is added' do
+      inspect_source('def up; add_foreign_key(:projects, :users, column: :user_id, validate: false); end')
+
+      expect(cop.offenses).to be_empty
     end
   end
 end

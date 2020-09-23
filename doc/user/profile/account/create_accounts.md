@@ -1,5 +1,8 @@
 ---
 type: reference
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # Creating users **(CORE ONLY)**
@@ -15,7 +18,7 @@ If you have [sign-up enabled](../../admin_area/settings/sign_up_restrictions.md)
 
 ![Register Tab](img/register_tab.png)
 
-## Create users in admin area
+## Create users in Admin Area
 
 As an admin user, you can manually create users by:
 
@@ -32,5 +35,5 @@ You can also [create users through the API](../../../api/users.md) as an admin.
 
 Users will be:
 
-- Automatically created upon first login with the [LDAP integration](../../../administration/auth/ldap.md).
+- Automatically created upon first login with the [LDAP integration](../../../administration/auth/ldap/index.md).
 - Created when first logging in via an [OmniAuth provider](../../../integration/omniauth.md) if the `allow_single_sign_on` setting is present.

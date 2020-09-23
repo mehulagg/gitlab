@@ -1,5 +1,0 @@
----
-title: Fix rake task to rollback Geo migrations
-merge_request: 18975
-author:
-type: fixed

@@ -2,25 +2,16 @@
 
 require 'spec_helper'
 
-describe 'User activates Irker (IRC gateway)' do
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
+RSpec.describe 'User activates Irker (IRC gateway)' do
+  include_context 'project service activation'
 
-  before do
-    project.add_maintainer(user)
-    sign_in(user)
-
-    visit(project_settings_integrations_path(project))
-
-    click_link('Irker (IRC gateway)')
-  end
-
-  it 'activates service' do
-    check('Active')
+  it 'activates service', :js do
+    visit_project_integration('Irker (IRC gateway)')
     check('Colorize messages')
     fill_in('Recipients', with: 'irc://chat.freenode.net/#commits')
-    click_button('Save')
 
-    expect(page).to have_content('Irker (IRC gateway) activated.')
+    click_test_then_save_integration(expect_test_to_fail: false)
+
+    expect(page).to have_content('Irker (IRC gateway) settings saved and active.')
   end
 end

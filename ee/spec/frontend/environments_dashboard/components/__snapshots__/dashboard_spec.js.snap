@@ -2,22 +2,24 @@
 
 exports[`dashboard should match the snapshot 1`] = `
 <div
-  class="operations-dashboard"
+  class="environments-dashboard"
 >
-  <glmodal-stub
+  <gl-modal-stub
     modalclass=""
     modalid="add-projects-modal"
     ok-disabled="true"
     ok-title="Add projects"
     ok-variant="success"
+    size="md"
     title="Add projects"
     titletag="h4"
   >
-    <projectselector-stub
+    <project-selector-stub
       projectsearchresults=""
       selectedprojects=""
+      totalresults="0"
     />
-  </glmodal-stub>
+  </gl-modal-stub>
    
   <div
     class="page-title-holder flex-fill d-flex align-items-center"
@@ -30,64 +32,44 @@ exports[`dashboard should match the snapshot 1`] = `
     
     </h1>
      
-    <glbutton-stub
-      class="js-add-projects-button btn btn-success"
+    <gl-button-stub
+      buttontextclasses=""
+      category="primary"
+      class="js-add-projects-button"
+      icon=""
       role="button"
+      size="medium"
+      tabindex="0"
+      variant="success"
     >
       
       Add projects
     
-    </glbutton-stub>
+    </gl-button-stub>
   </div>
    
-  <div
-    class="prepend-top-default"
+  <p
+    class="mt-2 mb-4 js-page-limits-message"
   >
-    <div
-      class="row prepend-top-20 text-center"
+    This dashboard displays 3 environments per project, and is linked to the Operations Dashboard. When you add or remove a project from one dashboard, GitLab adds or removes the project from the other. 
+    <gl-link-stub
+      href="/help/user/operations_dashboard/index.html"
+      rel="noopener noreferrer"
+      target="_blank"
     >
-      <div
-        class="col-12 d-flex justify-content-center svg-content"
-      >
-        <img
-          class="js-empty-state-svg col-12 prepend-top-20"
-          src="/assets/illustrations/operations-dashboard_empty.svg"
-        />
-      </div>
-       
-      <h4
-        class="js-title col-12 prepend-top-20"
-      >
-        
-        Add a project to the dashboard
       
-      </h4>
-       
-      <div
-        class="col-12 d-flex justify-content-center"
-      >
-        <span
-          class="js-sub-title mw-460 text-tertiary text-left"
-        >
-          
-          The environments dashboard provides a summary of each project's environments' status, including pipeline and alert statuses.
+          More information
         
-        </span>
-      </div>
-       
-      <div
-        class="col-12"
-      >
-        <a
-          class="js-documentation-link btn btn-primary prepend-top-default append-bottom-default"
-          href="/help/user/operations_dashboard/index.html"
-        >
-          
-          View documentation
-        
-        </a>
-      </div>
-    </div>
+    </gl-link-stub>
+  </p>
+   
+  <div
+    class="gl-mt-3"
+  >
+    <gl-empty-state-stub
+      svgpath="/assets/illustrations/operations-dashboard_empty.svg"
+      title="Add a project to the dashboard"
+    />
   </div>
 </div>
 `;

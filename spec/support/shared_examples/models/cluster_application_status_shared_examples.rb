@@ -1,16 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples 'cluster application status specs' do |application_name|
-  describe '#status' do
-    let(:cluster) { create(:cluster, :provided_by_gcp) }
-
-    subject { described_class.new(cluster: cluster) }
-
-    it 'sets a default status' do
-      expect(subject.status_name).to be(:not_installable)
-    end
-  end
-
+RSpec.shared_examples 'cluster application status specs' do |application_name|
   describe '#status_states' do
     let(:cluster) { create(:cluster, :provided_by_gcp) }
 
@@ -58,24 +48,22 @@ shared_examples 'cluster application status specs' do |application_name|
         expect(subject).to be_installed
       end
 
-      it 'updates helm version' do
+      it 'does not update the helm version' do
         subject.cluster.application_helm.update!(version: '1.2.3')
 
-        subject.make_installed!
+        expect do
+          subject.make_installed!
 
-        subject.cluster.application_helm.reload
-
-        expect(subject.cluster.application_helm.version).to eq(Gitlab::Kubernetes::Helm::HELM_VERSION)
+          subject.cluster.application_helm.reload
+        end.not_to change { subject.cluster.application_helm.version }
       end
 
-      it 'sets the correct version of the application' do
-        subject.update!(version: '0.0.0')
+      context 'the cluster has no helm installed' do
+        subject { create(application_name, :installing, :no_helm_installed) }
 
-        subject.make_installed!
-
-        subject.reload
-
-        expect(subject.version).to eq(subject.class.const_get(:VERSION, false))
+        it 'runs without errors' do
+          expect { subject.make_installed! }.not_to raise_error
+        end
       end
 
       context 'application is updating' do
@@ -87,24 +75,22 @@ shared_examples 'cluster application status specs' do |application_name|
           expect(subject).to be_updated
         end
 
-        it 'updates helm version' do
+        it 'does not update the helm version' do
           subject.cluster.application_helm.update!(version: '1.2.3')
 
-          subject.make_installed!
+          expect do
+            subject.make_installed!
 
-          subject.cluster.application_helm.reload
-
-          expect(subject.cluster.application_helm.version).to eq(Gitlab::Kubernetes::Helm::HELM_VERSION)
+            subject.cluster.application_helm.reload
+          end.not_to change { subject.cluster.application_helm.version }
         end
 
-        it 'updates the version of the application' do
-          subject.update!(version: '0.0.0')
+        context 'the cluster has no helm installed' do
+          subject { create(application_name, :updating, :no_helm_installed) }
 
-          subject.make_installed!
-
-          subject.reload
-
-          expect(subject.version).to eq(subject.class.const_get(:VERSION, false))
+          it 'runs without errors' do
+            expect { subject.make_installed! }.not_to raise_error
+          end
         end
       end
     end
@@ -140,6 +126,107 @@ shared_examples 'cluster application status specs' do |application_name|
 
           expect(subject).to be_uninstall_errored
           expect(subject.status_reason).to eq(reason)
+        end
+      end
+    end
+
+    describe '#make_externally_installed' do
+      subject { create(application_name, :installing) }
+
+      let(:old_helm) { create(:clusters_applications_helm, version: '1.2.3') }
+
+      it 'is installed' do
+        subject.make_externally_installed
+
+        expect(subject).to be_installed
+      end
+
+      context 'helm record does not exist' do
+        subject { build(application_name, :installing, :no_helm_installed) }
+
+        it 'does not create a helm record' do
+          subject.make_externally_installed!
+
+          subject.cluster.reload
+          expect(subject.cluster.application_helm).to be_nil
+        end
+      end
+
+      context 'helm record exists' do
+        subject { build(application_name, :installing, cluster: old_helm.cluster) }
+
+        it 'does not update helm version' do
+          subject.make_externally_installed!
+
+          subject.cluster.application_helm.reload
+
+          expect(subject.cluster.application_helm.version).to eq('1.2.3')
+        end
+      end
+
+      context 'application is updated' do
+        subject { create(application_name, :updated) }
+
+        it 'is installed' do
+          subject.make_externally_installed
+
+          expect(subject).to be_installed
+        end
+      end
+
+      context 'application is errored' do
+        subject { create(application_name, :errored) }
+
+        it 'is installed' do
+          subject.make_externally_installed
+
+          expect(subject).to be_installed
+        end
+
+        it 'clears #status_reason' do
+          expect(subject.status_reason).not_to be_nil
+
+          subject.make_externally_installed!
+
+          expect(subject.status_reason).to be_nil
+        end
+      end
+    end
+
+    describe '#make_externally_uninstalled' do
+      subject { create(application_name, :installed) }
+
+      it 'is uninstalled' do
+        subject.make_externally_uninstalled
+
+        expect(subject).to be_uninstalled
+      end
+
+      context 'application is updated' do
+        subject { create(application_name, :updated) }
+
+        it 'is uninstalled' do
+          subject.make_externally_uninstalled
+
+          expect(subject).to be_uninstalled
+        end
+      end
+
+      context 'application is errored' do
+        subject { create(application_name, :errored) }
+
+        it 'is uninstalled' do
+          subject.make_externally_uninstalled
+
+          expect(subject).to be_uninstalled
+        end
+
+        it 'clears #status_reason' do
+          expect(subject.status_reason).not_to be_nil
+
+          subject.make_externally_uninstalled!
+
+          expect(subject.status_reason).to be_nil
         end
       end
     end
@@ -214,6 +301,8 @@ shared_examples 'cluster application status specs' do |application_name|
   describe '#available?' do
     using RSpec::Parameterized::TableSyntax
 
+    let_it_be(:cluster) { create(:cluster, :provided_by_gcp) }
+
     where(:trait, :available) do
       :not_installable   | false
       :installable       | false
@@ -226,11 +315,12 @@ shared_examples 'cluster application status specs' do |application_name|
       :update_errored    | false
       :uninstalling      | false
       :uninstall_errored | false
+      :uninstalled       | false
       :timed_out         | false
     end
 
     with_them do
-      subject { build(application_name, trait) }
+      subject { build(application_name, trait, cluster: cluster) }
 
       if params[:available]
         it { is_expected.to be_available }

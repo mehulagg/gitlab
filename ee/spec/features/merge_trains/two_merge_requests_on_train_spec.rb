@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe 'Two merge requests on a merge train' do
+RSpec.describe 'Two merge requests on a merge train' do
   include RepoHelpers
 
   let(:project) { create(:project, :repository) }
-  set(:maintainer_1) { create(:user) }
-  set(:maintainer_2) { create(:user) }
+  let_it_be(:maintainer_1) { create(:user) }
+  let_it_be(:maintainer_2) { create(:user) }
 
   let(:merge_request_1) do
     create(:merge_request,
@@ -28,6 +28,7 @@ describe 'Two merge requests on a merge train' do
   end
 
   before do
+    stub_feature_flags(disable_merge_trains: false)
     project.add_maintainer(maintainer_1)
     project.add_maintainer(maintainer_2)
     stub_licensed_features(merge_pipelines: true, merge_trains: true)
@@ -39,10 +40,10 @@ describe 'Two merge requests on a merge train' do
     allow(merge_request_1).to receive(:actual_head_pipeline) { head_pipeline }
     allow(merge_request_2).to receive(:actual_head_pipeline) { head_pipeline }
 
-    AutoMergeService.new(project, maintainer_1)
+    AutoMergeService.new(project, maintainer_1, { sha: merge_request_1.diff_head_sha })
       .execute(merge_request_1, AutoMergeService::STRATEGY_MERGE_TRAIN)
-    AutoMergeService.new(project, maintainer_2)
-      .execute(merge_request_2, AutoMergeService::STRATEGY_MERGE_TRAIN)
+    AutoMergeService.new(project, maintainer_2, { sha: merge_request_2.diff_head_sha })
+      .execute(merge_request_2, AutoMergeService::STRATEGY_MERGE_TRAIN )
 
     merge_request_1.reload
     merge_request_2.reload
@@ -92,7 +93,7 @@ describe 'Two merge requests on a merge train' do
       it 'merges merge request 2', :sidekiq_might_not_need_inline do
         expect(merge_request_2).to be_merged
         expect(merge_request_2.metrics.merged_by).to eq(maintainer_2)
-        expect(merge_request_2.merge_train).to be_nil
+        expect(merge_request_2.merge_train).to be_merged
       end
     end
   end
@@ -114,7 +115,7 @@ describe 'Two merge requests on a merge train' do
       it 'merges merge request 2', :sidekiq_might_not_need_inline do
         expect(merge_request_2).to be_merged
         expect(merge_request_2.metrics.merged_by).to eq(maintainer_2)
-        expect(merge_request_2.merge_train).to be_nil
+        expect(merge_request_2.merge_train).to be_merged
       end
     end
   end
@@ -130,7 +131,7 @@ describe 'Two merge requests on a merge train' do
     it 'merges merge request 1', :sidekiq_might_not_need_inline do
       expect(merge_request_1).to be_merged
       expect(merge_request_1.metrics.merged_by).to eq(maintainer_1)
-      expect(merge_request_1.merge_train).to be_nil
+      expect(merge_request_1.merge_train).to be_merged
     end
 
     it_behaves_like 'has an intact pipeline for merge request 2'
@@ -155,7 +156,7 @@ describe 'Two merge requests on a merge train' do
     end
   end
 
-  context 'when merge request 1 is canceled by a user' do
+  context 'when merge request 1 is canceled by a user', :sidekiq_inline do
     before do
       AutoMergeService.new(project, maintainer_1).cancel(merge_request_1)
 
@@ -166,6 +167,29 @@ describe 'Two merge requests on a merge train' do
     it_behaves_like 'drops merge request 1 from the merge train' do
       let(:system_note) do
         'removed this merge request from the merge train'
+      end
+    end
+
+    it_behaves_like 're-creates a pipeline for merge request 2' do
+      let(:target_branch_sha) { project.repository.commit('refs/heads/master').sha }
+    end
+  end
+
+  context 'when merge request 1 got a new commit' do
+    before do
+      oldrev = project.repository.commit('feature').sha
+      create_file_in_repo(project, 'refs/heads/feature', 'refs/heads/feature', 'test.txt', 'This is test')
+      newrev = project.repository.commit('feature').sha
+      MergeRequests::RefreshService.new(project, maintainer_1)
+        .execute(oldrev, newrev, 'refs/heads/feature')
+
+      merge_request_1.reload
+      merge_request_2.reload
+    end
+
+    it_behaves_like 'drops merge request 1 from the merge train' do
+      let(:system_note) do
+        'removed this merge request from the merge train because source branch was updated'
       end
     end
 
@@ -194,11 +218,10 @@ describe 'Two merge requests on a merge train' do
     end
   end
 
-  context 'when master got a new commit and pipeline for merge request 1 finished', :sidekiq_might_not_need_inline do
+  context 'when master got a new commit', :sidekiq_inline do
     before do
-      create_file_in_repo(project, 'master', 'master', 'test.txt', 'This is test')
+      push_commit_to_master
 
-      merge_request_1.merge_train.pipeline.succeed!
       merge_request_1.reload
       merge_request_2.reload
     end
@@ -213,6 +236,11 @@ describe 'Two merge requests on a merge train' do
       expect(merge_request_2.all_pipelines.count).to eq(2)
       expect(merge_request_2.merge_train.pipeline.target_sha)
         .to eq(project.repository.commit(merge_request_1.train_ref_path).sha)
+    end
+
+    it 'does not recreate pipeline when merge request 1 refreshed again' do
+      expect { AutoMergeProcessWorker.perform_async(merge_request_1.id) }
+        .not_to change { merge_request_1.all_pipelines.count }
     end
 
     context 'when the pipeline for merge request 1 succeeded' do
@@ -239,6 +267,13 @@ describe 'Two merge requests on a merge train' do
           expect(merge_request_2.metrics.merged_by).to eq(maintainer_2)
         end
       end
+    end
+
+    def push_commit_to_master
+      create_file_in_repo(project, 'master', 'master', 'test.txt', 'This is test')
+      changes = Base64.encode64("123456 789012 refs/heads/master")
+      key_id = create(:key, user: project.owner).shell_id
+      PostReceive.new.perform("project-#{project.id}", key_id, changes)
     end
   end
 end

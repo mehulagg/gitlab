@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Badge do
+RSpec.describe Badge do
   let(:placeholder_url) { 'http://www.example.com/%{project_path}/%{project_id}/%{default_branch}/%{commit_sha}' }
 
   describe 'validations' do
@@ -81,16 +81,32 @@ describe Badge do
     let(:badge) { build(:badge, link_url: placeholder_url, image_url: placeholder_url) }
     let!(:project) { create(:project) }
 
-    context '#rendered_link_url' do
+    describe '#rendered_link_url' do
       let(:method) { :link_url }
 
       it_behaves_like 'rendered_links'
     end
 
-    context '#rendered_image_url' do
+    describe '#rendered_image_url' do
       let(:method) { :image_url }
 
       it_behaves_like 'rendered_links'
+
+      context 'when asset proxy is enabled' do
+        let(:placeholder_url) { 'http://www.example.com/image' }
+
+        before do
+          stub_asset_proxy_setting(
+            enabled: true,
+            url: 'https://assets.example.com',
+            secret_key: 'shared-secret'
+          )
+        end
+
+        it 'returns a proxied URL' do
+          expect(badge.rendered_image_url).to start_with('https://assets.example.com')
+        end
+      end
     end
   end
 end

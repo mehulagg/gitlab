@@ -6,7 +6,6 @@ module Projects
     FailedToExtractError = Class.new(StandardError)
 
     BLOCK_SIZE = 32.kilobytes
-    MAX_SIZE = 1.terabyte
     PUBLIC_DIR = 'public'
 
     # this has to be invalid group name,
@@ -28,7 +27,7 @@ module Projects
       @status.run!
 
       raise InvalidStateError, 'missing pages artifacts' unless build.artifacts?
-      raise InvalidStateError, 'pages are outdated' unless latest?
+      raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
 
       # Create temporary directory in which we will extract the artifacts
       make_secure_tmp_dir(tmp_path) do |archive_path|
@@ -37,7 +36,7 @@ module Projects
         # Check if we did extract public directory
         archive_public_path = File.join(archive_path, PUBLIC_DIR)
         raise InvalidStateError, 'pages miss the public folder' unless Dir.exist?(archive_public_path)
-        raise InvalidStateError, 'pages are outdated' unless latest?
+        raise InvalidStateError, 'build SHA is outdated for this ref' unless latest?
 
         deploy_page!(archive_public_path)
         success
@@ -53,7 +52,7 @@ module Projects
 
     def success
       @status.success
-      @project.mark_pages_as_deployed
+      @project.mark_pages_as_deployed(artifacts_archive: build.job_artifacts_archive)
       super
     end
 
@@ -130,12 +129,16 @@ module Projects
       1 + max_size / BLOCK_SIZE
     end
 
+    def max_size_from_settings
+      Gitlab::CurrentSettings.max_pages_size.megabytes
+    end
+
     def max_size
-      max_pages_size = Gitlab::CurrentSettings.max_pages_size.megabytes
+      max_pages_size = max_size_from_settings
 
-      return MAX_SIZE if max_pages_size.zero?
+      return ::Gitlab::Pages::MAX_SIZE if max_pages_size == 0
 
-      [max_pages_size, MAX_SIZE].min
+      max_pages_size
     end
 
     def tmp_path
@@ -200,3 +203,5 @@ module Projects
     end
   end
 end
+
+Projects::UpdatePagesService.prepend_if_ee('EE::Projects::UpdatePagesService')

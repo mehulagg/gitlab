@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::PagesController do
+RSpec.describe Projects::PagesController do
   let(:user) { create(:user) }
   let(:project) { create(:project, :public) }
 
@@ -23,7 +23,7 @@ describe Projects::PagesController do
     it 'returns 200 status' do
       get :show, params: request_params
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
 
     context 'when the project is in a subgroup' do
@@ -33,7 +33,7 @@ describe Projects::PagesController do
       it 'returns a 200 status code' do
         get :show, params: request_params
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
   end
@@ -42,7 +42,7 @@ describe Projects::PagesController do
     it 'returns 302 status' do
       delete :destroy, params: request_params
 
-      expect(response).to have_gitlab_http_status(302)
+      expect(response).to have_gitlab_http_status(:found)
     end
 
     context 'when user is developer' do
@@ -53,7 +53,7 @@ describe Projects::PagesController do
       it 'returns 404 status' do
         delete :destroy, params: request_params
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -67,7 +67,7 @@ describe Projects::PagesController do
       it 'returns 404 status' do
         get :show, params: request_params
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -75,7 +75,7 @@ describe Projects::PagesController do
       it 'returns 404 status' do
         delete :destroy, params: request_params
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -114,6 +114,17 @@ describe Projects::PagesController do
         .and_return(update_service)
 
       patch :update, params: request_params
+    end
+
+    context 'when update_service returns an error message' do
+      let(:update_service) { double(execute: { status: :error, message: 'some error happened' }) }
+
+      it 'adds an error message' do
+        patch :update, params: request_params
+
+        expect(response).to redirect_to(project_pages_path(project))
+        expect(flash[:alert]).to eq('some error happened')
+      end
     end
   end
 end

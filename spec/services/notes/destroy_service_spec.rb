@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe Notes::DestroyService do
-  set(:project) { create(:project, :public) }
-  set(:issue) { create(:issue, project: project) }
+RSpec.describe Notes::DestroyService do
+  let_it_be(:project) { create(:project, :public) }
+  let_it_be(:issue) { create(:issue, project: project) }
   let(:user) { issue.author }
 
   describe '#execute' do

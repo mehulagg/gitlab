@@ -1,28 +1,40 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require "spec_helper"
 
-describe LicenseEntity do
-  describe '#as_json' do
-    subject { described_class.represent(license).as_json }
+RSpec.describe LicenseEntity do
+  describe "#as_json" do
+    subject { described_class.represent(license_policy).as_json }
 
-    let(:license) { build(:ci_reports_license_scanning_report, :mit).licenses.first }
-
-    let(:assert_license) do
-      {
-        name:       'MIT',
-        url:        'https://opensource.org/licenses/mit',
-        components: [{
-                       name:     'rails',
-                       blob_path: 'some_path'
-                     }]
-      }
-    end
+    let(:license) { build(:license_scanning_license, :mit) }
+    let(:license_policy) { ::SCA::LicensePolicy.new(license, software_policy) }
+    let(:software_policy) { build(:software_license_policy) }
+    let(:path) { 'some_path' }
 
     before do
-      license.dependencies.first.path = 'some_path'
+      license.add_dependency('rails')
+      allow(license.dependencies.first).to receive(:path).and_return(path)
     end
 
-    it { is_expected.to eq(assert_license) }
+    it "produces the correct representation" do
+      is_expected.to eq({
+        id: license_policy.id,
+        name: license_policy.name,
+        url: license_policy.url,
+        spdx_identifier: license_policy.spdx_identifier,
+        classification: license_policy.classification,
+        components: [{ name: 'rails', blob_path: path }]
+      })
+    end
+
+    context "when the url is blank" do
+      where(url: ['', nil])
+
+      with_them do
+        let(:license) { build(:license_scanning_license, :unknown) }
+
+        it { expect(subject[:url]).to be_nil }
+      end
+    end
   end
 end

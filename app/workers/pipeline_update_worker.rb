@@ -1,16 +1,17 @@
 # frozen_string_literal: true
 
+# This worker is deprecated and will be removed in 14.0
+# See: https://gitlab.com/gitlab-org/gitlab/-/issues/232806
 class PipelineUpdateWorker
   include ApplicationWorker
   include PipelineQueue
 
   queue_namespace :pipeline_processing
-  latency_sensitive_worker!
+  urgency :high
 
-  # rubocop: disable CodeReuse/ActiveRecord
-  def perform(pipeline_id)
-    Ci::Pipeline.find_by(id: pipeline_id)
-      .try(:update_status)
+  idempotent!
+
+  def perform(_pipeline_id)
+    # no-op
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 end

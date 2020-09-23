@@ -1,12 +1,6 @@
 # frozen_string_literal: true
 
 module BlobHelper
-  def highlight(file_name, file_content, language: nil, plain: false)
-    highlighted = Gitlab::Highlight.highlight(file_name, file_content, plain: plain, language: language)
-
-    raw %(<pre class="code highlight"><code>#{highlighted}</code></pre>)
-  end
-
   def no_highlight_files
     %w(credits changelog news copying copyright license authors)
   end
@@ -17,7 +11,7 @@ module BlobHelper
                            options[:link_opts])
   end
 
-  def ide_edit_path(project = @project, ref = @ref, path = @path, options = {})
+  def ide_edit_path(project = @project, ref = @ref, path = @path)
     project_path =
       if !current_user || can?(current_user, :push_code, project)
         project.full_path
@@ -27,7 +21,7 @@ module BlobHelper
         "#{current_user.namespace.full_path}/#{project.path}"
       end
 
-    segments = [ide_path, 'project', project_path, 'edit', ref]
+    segments = [ide_path, 'project', project_path, 'edit', encode_ide_path(ref)]
     segments.concat(['-', encode_ide_path(path)]) if path.present?
     File.join(segments)
   end
@@ -41,39 +35,51 @@ module BlobHelper
   end
 
   def encode_ide_path(path)
-    url_encode(path).gsub('%2F', '/')
+    ERB::Util.url_encode(path).gsub('%2F', '/')
   end
 
   def edit_blob_button(project = @project, ref = @ref, path = @path, options = {})
     return unless blob = readable_blob(options, path, project, ref)
 
-    common_classes = "btn btn-primary js-edit-blob #{options[:extra_class]}"
+    common_classes = "btn btn-primary js-edit-blob ml-2 #{options[:extra_class]}"
+    data = { track_event: 'click_edit', track_label: 'Edit' }
+
+    if Feature.enabled?(:web_ide_primary_edit, project.group)
+      common_classes += " btn-inverted"
+      data[:track_property] = 'secondary'
+    end
 
     edit_button_tag(blob,
                     common_classes,
                     _('Edit'),
-                    Feature.enabled?(:web_ide_default) ? ide_edit_path(project, ref, path, options) : edit_blob_path(project, ref, path, options),
+                    edit_blob_path(project, ref, path, options),
                     project,
-                    ref)
+                    ref,
+                    data)
   end
 
-  def ide_edit_button(project = @project, ref = @ref, path = @path, options = {})
-    return if Feature.enabled?(:web_ide_default)
-    return unless blob = readable_blob(options, path, project, ref)
+  def ide_edit_button(project = @project, ref = @ref, path = @path, blob:)
+    return unless blob
+
+    common_classes = 'btn btn-primary ide-edit-button ml-2'
+    data = { track_event: 'click_edit_ide', track_label: 'Web IDE' }
+
+    unless Feature.enabled?(:web_ide_primary_edit, project.group)
+      common_classes += " btn-inverted"
+      data[:track_property] = 'secondary'
+    end
 
     edit_button_tag(blob,
-                    'btn btn-inverted btn-primary ide-edit-button',
+                    common_classes,
                     _('Web IDE'),
-                    ide_edit_path(project, ref, path, options),
+                    ide_edit_path(project, ref, path),
                     project,
-                    ref)
+                    ref,
+                    data)
   end
 
-  def modify_file_button(project = @project, ref = @ref, path = @path, label:, action:, btn_class:, modal_type:)
+  def modify_file_button(project = @project, ref = @ref, path = @path, blob:, label:, action:, btn_class:, modal_type:)
     return unless current_user
-
-    blob = project.repository.blob_at(ref, path) rescue nil
-
     return unless blob
 
     common_classes = "btn btn-#{btn_class}"
@@ -89,11 +95,12 @@ module BlobHelper
     end
   end
 
-  def replace_blob_link(project = @project, ref = @ref, path = @path)
+  def replace_blob_link(project = @project, ref = @ref, path = @path, blob:)
     modify_file_button(
       project,
       ref,
       path,
+      blob: blob,
       label:      _("Replace"),
       action:     "replace",
       btn_class:  "default",
@@ -101,11 +108,12 @@ module BlobHelper
     )
   end
 
-  def delete_blob_link(project = @project, ref = @ref, path = @path)
+  def delete_blob_link(project = @project, ref = @ref, path = @path, blob:)
     modify_file_button(
       project,
       ref,
       path,
+      blob: blob,
       label:      _("Delete"),
       action:     "delete",
       btn_class:  "default",
@@ -141,7 +149,7 @@ module BlobHelper
     if @build && @entry
       raw_project_job_artifacts_url(@project, @build, path: @entry.path, **kwargs)
     elsif @snippet
-      reliable_raw_snippet_url(@snippet)
+      gitlab_raw_snippet_url(@snippet)
     elsif @blob
       project_raw_url(@project, @id, **kwargs)
     end
@@ -186,6 +194,10 @@ module BlobHelper
     @gitlab_ci_ymls ||= template_dropdown_names(TemplateFinder.build(:gitlab_ci_ymls, project).execute)
   end
 
+  def metrics_dashboard_ymls(project)
+    @metrics_dashboard_ymls ||= template_dropdown_names(TemplateFinder.build(:metrics_dashboard_ymls, project).execute)
+  end
+
   def dockerfile_names(project)
     @dockerfile_names ||= template_dropdown_names(TemplateFinder.build(:dockerfiles, project).execute)
   end
@@ -215,14 +227,29 @@ module BlobHelper
     return if blob.binary? || blob.stored_externally?
 
     title = _('Open raw')
-    link_to icon('file-code-o'), blob_raw_path, class: 'btn btn-sm has-tooltip', target: '_blank', rel: 'noopener noreferrer', title: title, data: { container: 'body' }
+    link_to sprite_icon('doc-code'),
+      external_storage_url_or_path(blob_raw_path),
+      class: 'btn btn-sm has-tooltip',
+      target: '_blank',
+      rel: 'noopener noreferrer',
+      aria: { label: title },
+      title: title,
+      data: { container: 'body' }
   end
 
   def download_blob_button(blob)
     return if blob.empty?
 
     title = _('Download')
-    link_to sprite_icon('download'), blob_raw_path(inline: false), download: @path, class: 'btn btn-sm has-tooltip', target: '_blank', rel: 'noopener noreferrer', title: title, data: { container: 'body' }
+    link_to sprite_icon('download'),
+      external_storage_url_or_path(blob_raw_path(inline: false)),
+      download: @path,
+      class: 'btn btn-sm has-tooltip',
+      target: '_blank',
+      rel: 'noopener noreferrer',
+      aria: { label: title },
+      title: title,
+      data: { container: 'body' }
   end
 
   def blob_render_error_reason(viewer)
@@ -312,18 +339,39 @@ module BlobHelper
     button_tag(button_text, class: "#{common_classes} disabled has-tooltip", title: _('You can only edit files when you are on a branch'), data: { container: 'body' })
   end
 
-  def edit_link_tag(link_text, edit_path, common_classes)
-    link_to link_text, edit_path, class: "#{common_classes} btn-sm"
+  def edit_link_tag(link_text, edit_path, common_classes, data)
+    link_to link_text, edit_path, class: "#{common_classes} btn-sm", data: data
   end
 
-  def edit_button_tag(blob, common_classes, text, edit_path, project, ref)
+  def edit_button_tag(blob, common_classes, text, edit_path, project, ref, data)
     if !on_top_of_branch?(project, ref)
       edit_disabled_button_tag(text, common_classes)
       # This condition only applies to users who are logged in
     elsif !current_user || (current_user && can_modify_blob?(blob, project, ref))
-      edit_link_tag(text, edit_path, common_classes)
+      edit_link_tag(text, edit_path, common_classes, data)
     elsif can?(current_user, :fork_project, project) && can?(current_user, :create_merge_request_in, project)
       edit_fork_button_tag(common_classes, project, text, edit_blob_fork_params(edit_path))
     end
+  end
+
+  def show_suggest_pipeline_creation_celebration?
+    experiment_enabled?(:suggest_pipeline) &&
+      @blob.path == Gitlab::FileDetector::PATTERNS[:gitlab_ci] &&
+      @blob.auxiliary_viewer&.valid?(project: @project, sha: @commit.sha, user: current_user) &&
+      @project.uses_default_ci_config? &&
+      cookies[suggest_pipeline_commit_cookie_name].present?
+  end
+
+  def suggest_pipeline_commit_cookie_name
+    "suggest_gitlab_ci_yml_commit_#{@project.id}"
+  end
+
+  def human_access
+    @project.team.human_max_access(current_user&.id).try(:downcase)
+  end
+
+  def editing_ci_config?
+    @path.to_s.end_with?(Ci::Pipeline::CONFIG_EXTENSION) ||
+      @path.to_s == @project.ci_config_path_or_default
   end
 end

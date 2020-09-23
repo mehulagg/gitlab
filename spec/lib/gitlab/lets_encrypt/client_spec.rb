@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::Gitlab::LetsEncrypt::Client do
+RSpec.describe ::Gitlab::LetsEncrypt::Client do
   include LetsEncryptHelpers
 
   let(:client) { described_class.new }
@@ -86,6 +86,7 @@ describe ::Gitlab::LetsEncrypt::Client do
 
   describe '#load_order' do
     let(:url) { 'https://example.com/order' }
+
     subject { client.load_order(url) }
 
     before do
@@ -102,6 +103,7 @@ describe ::Gitlab::LetsEncrypt::Client do
 
   describe '#load_challenge' do
     let(:url) { 'https://example.com/challenge' }
+
     subject { client.load_challenge(url) }
 
     before do

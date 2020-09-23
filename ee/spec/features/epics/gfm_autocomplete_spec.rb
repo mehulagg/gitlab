@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'GFM autocomplete', :js do
+RSpec.describe 'GFM autocomplete', :js do
   let(:user) { create(:user, name: '💃speciąl someone💃', username: 'someone.special') }
   let(:group) { create(:group) }
   let(:label) { create(:group_label, group: group, title: 'special+') }
@@ -15,6 +15,14 @@ describe 'GFM autocomplete', :js do
     visit group_epic_path(group, epic)
 
     wait_for_requests
+  end
+
+  it 'opens quick action autocomplete when updating description' do
+    find('.js-issuable-edit').click
+
+    find('#issue-description').native.send_keys('/')
+
+    expect(page).to have_selector('.atwho-container')
   end
 
   context 'issuables' do

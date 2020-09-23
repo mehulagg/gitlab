@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProtectedBranch do
+RSpec.describe ProtectedBranch do
   subject { create(:protected_branch) }
 
   let(:project) { subject.project }
@@ -19,13 +19,13 @@ describe ProtectedBranch do
         first_protected_branch = create(:protected_branch, default_access_level: false)
         second_protected_branch = create(:protected_branch, default_access_level: false)
 
-        first_protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MASTER)
-        second_protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MASTER)
+        first_protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MAINTAINER)
+        second_protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MAINTAINER)
 
         expect(first_protected_branch).to be_valid
         expect(second_protected_branch).to be_valid
 
-        first_protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MASTER)
+        first_protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MAINTAINER)
         expect(first_protected_branch).to be_invalid
         expect(first_protected_branch.errors.full_messages.first).to match("access level has already been taken")
       end
@@ -34,8 +34,8 @@ describe ProtectedBranch do
         protected_branch = create(:protected_branch, default_access_level: false)
         protected_branch.project.add_developer(user)
 
-        protected_branch.send(association_name) << build(factory_name, user: user, access_level: Gitlab::Access::MASTER)
-        protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MASTER)
+        protected_branch.send(association_name) << build(factory_name, user: user, access_level: Gitlab::Access::MAINTAINER)
+        protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MAINTAINER)
 
         expect(protected_branch).to be_valid
       end
@@ -45,8 +45,8 @@ describe ProtectedBranch do
         protected_branch = create(:protected_branch, default_access_level: false)
         protected_branch.project.project_group_links.create(group: group)
 
-        protected_branch.send(association_name) << build(factory_name, group: group, access_level: Gitlab::Access::MASTER)
-        protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MASTER)
+        protected_branch.send(association_name) << build(factory_name, group: group, access_level: Gitlab::Access::MAINTAINER)
+        protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MAINTAINER)
 
         expect(protected_branch).to be_valid
       end
@@ -75,8 +75,8 @@ describe ProtectedBranch do
         protected_branch = create(:protected_branch, default_access_level: false)
         protected_branch.project.add_developer(user)
 
-        protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MASTER)
-        protected_branch.send(association_name) << build(factory_name, user: user, access_level: Gitlab::Access::MASTER)
+        protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MAINTAINER)
+        protected_branch.send(association_name) << build(factory_name, user: user, access_level: Gitlab::Access::MAINTAINER)
 
         expect(protected_branch).to be_valid
       end
@@ -107,8 +107,8 @@ describe ProtectedBranch do
         protected_branch = create(:protected_branch, default_access_level: false)
         protected_branch.project.project_group_links.create(group: group)
 
-        protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MASTER)
-        protected_branch.send(association_name) << build(factory_name, group: group, access_level: Gitlab::Access::MASTER)
+        protected_branch.send(association_name) << build(factory_name, access_level: Gitlab::Access::MAINTAINER)
+        protected_branch.send(association_name) << build(factory_name, group: group, access_level: Gitlab::Access::MAINTAINER)
 
         expect(protected_branch).to be_valid
       end

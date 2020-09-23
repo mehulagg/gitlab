@@ -1,9 +1,8 @@
 <script>
-import _ from 'underscore';
 import autoMergeMixin from 'ee_else_ce/vue_merge_request_widget/mixins/auto_merge';
-import Flash from '../../../flash';
+import { deprecatedCreateFlash as Flash } from '../../../flash';
 import statusIcon from '../mr_widget_status_icon.vue';
-import MrWidgetAuthor from '../../components/mr_widget_author.vue';
+import MrWidgetAuthor from '../mr_widget_author.vue';
 import eventHub from '../../event_hub';
 import { AUTO_MERGE_STRATEGIES } from '../../constants';
 import { __ } from '~/locale';
@@ -71,7 +70,7 @@ export default {
         .merge(options)
         .then(res => res.data)
         .then(data => {
-          if (_.includes(AUTO_MERGE_STRATEGIES, data.status)) {
+          if (AUTO_MERGE_STRATEGIES.includes(data.status)) {
             eventHub.$emit('MRWidgetUpdateRequested');
           }
         })
@@ -88,7 +87,7 @@ export default {
     <status-icon status="success" />
     <div class="media-body">
       <h4 class="d-flex align-items-start">
-        <span class="append-right-10">
+        <span class="gl-mr-3">
           <span class="js-status-text-before-author">{{ statusTextBeforeAuthor }}</span>
           <mr-widget-author :author="mr.setToAutoMergeBy" />
           <span class="js-status-text-after-author">{{ statusTextAfterAuthor }}</span>
@@ -114,9 +113,7 @@ export default {
           {{ s__('mrWidget|The source branch will be deleted') }}
         </p>
         <p v-else class="d-flex align-items-start">
-          <span class="append-right-10">{{
-            s__('mrWidget|The source branch will not be deleted')
-          }}</span>
+          <span class="gl-mr-3">{{ s__('mrWidget|The source branch will not be deleted') }}</span>
           <a
             v-if="canRemoveSourceBranch"
             :disabled="isRemovingSourceBranch"

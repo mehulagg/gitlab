@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EpicLinks::ListService do
+RSpec.describe EpicLinks::ListService do
   let(:user) { create :user }
   let(:group) { create(:group, :public) }
   let(:parent_epic) { create(:epic, group: group) }
@@ -54,7 +54,7 @@ describe EpicLinks::ListService do
 
     context 'when epics feature is enabled' do
       before do
-        stub_licensed_features(epics: true)
+        stub_licensed_features(epics: true, subepics: true)
       end
 
       context 'group member can see all child epics' do

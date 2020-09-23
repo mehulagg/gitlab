@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Unleash < Grape::API
+  class Unleash < Grape::API::Instance
     include PaginationParams
 
     namespace :feature_flags do
@@ -66,13 +66,16 @@ module API
       end
 
       def authorize_feature_flags_feature!
-        forbidden! unless project.feature_available?(:feature_flags)
+        forbidden! unless project.feature_available?(:repository)
       end
 
       def feature_flags
         return [] unless unleash_app_name.present?
 
-        Operations::FeatureFlagScope.for_unleash_client(project, unleash_app_name)
+        legacy_flags = Operations::FeatureFlagScope.for_unleash_client(project, unleash_app_name)
+        new_version_flags = Operations::FeatureFlag.for_unleash_client(project, unleash_app_name)
+
+        legacy_flags + new_version_flags
       end
     end
   end

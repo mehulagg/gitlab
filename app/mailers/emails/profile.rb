@@ -32,5 +32,57 @@ module Emails
       mail(to: @user.notification_email, subject: subject("GPG key was added to your account"))
     end
     # rubocop: enable CodeReuse/ActiveRecord
+
+    def access_token_about_to_expire_email(user)
+      return unless user
+
+      @user = user
+      @target_url = profile_personal_access_tokens_url
+      @days_to_expire = PersonalAccessToken::DAYS_TO_EXPIRE
+
+      Gitlab::I18n.with_locale(@user.preferred_language) do
+        mail(to: @user.notification_email, subject: subject(_("Your Personal Access Tokens will expire in %{days_to_expire} days or less") % { days_to_expire: @days_to_expire }))
+      end
+    end
+
+    def access_token_expired_email(user)
+      return unless user && user.active?
+
+      @user = user
+      @target_url = profile_personal_access_tokens_url
+
+      Gitlab::I18n.with_locale(@user.preferred_language) do
+        mail(to: @user.notification_email, subject: subject(_("Your personal access token has expired")))
+      end
+    end
+
+    def unknown_sign_in_email(user, ip, time)
+      @user = user
+      @ip = ip
+      @time = time
+      @target_url = edit_profile_password_url
+
+      Gitlab::I18n.with_locale(@user.preferred_language) do
+        mail(
+          to: @user.notification_email,
+          subject: subject(_("%{host} sign-in from new location") % { host: Gitlab.config.gitlab.host })
+        ) do |format|
+          format.html { render layout: 'mailer' }
+          format.text { render layout: 'mailer' }
+        end
+      end
+    end
+
+    def disabled_two_factor_email(user)
+      return unless user
+
+      @user = user
+
+      Gitlab::I18n.with_locale(@user.preferred_language) do
+        mail(to: @user.notification_email, subject: subject(_("Two-factor authentication disabled")))
+      end
+    end
   end
 end
+
+Emails::Profile.prepend_if_ee('EE::Emails::Profile')

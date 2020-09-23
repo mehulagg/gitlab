@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Build::Policy::Variables do
-  set(:project) { create(:project) }
+RSpec.describe Gitlab::Ci::Build::Policy::Variables do
+  let_it_be(:project) { create(:project) }
 
   let(:pipeline) do
     build(:ci_empty_pipeline, project: project, ref: 'master', source: :push)
@@ -16,7 +16,7 @@ describe Gitlab::Ci::Build::Policy::Variables do
   let(:seed) do
     double('build seed',
       to_resource: ci_build,
-      scoped_variables_hash: ci_build.scoped_variables_hash
+      variables: ci_build.scoped_variables_hash
     )
   end
 
@@ -91,7 +91,7 @@ describe Gitlab::Ci::Build::Policy::Variables do
       let(:seed) do
         double('bridge seed',
           to_resource: bridge,
-          scoped_variables_hash: ci_build.scoped_variables_hash
+          variables: ci_build.scoped_variables_hash
         )
       end
 

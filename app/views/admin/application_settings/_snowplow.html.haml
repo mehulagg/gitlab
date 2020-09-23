@@ -8,8 +8,7 @@
     %p
       = _('Configure the %{link} integration.').html_safe % { link: link_to('Snowplow', 'https://snowplowanalytics.com/', target: '_blank') }
   .settings-content
-
-    = form_for @application_setting, url: integrations_admin_application_settings_path(anchor: 'js-snowplow-settings'), html: { class: 'fieldset-form' } do |f|
+    = form_for @application_setting, url: general_admin_application_settings_path(anchor: 'js-snowplow-settings'), html: { class: 'fieldset-form' } do |f|
       = form_errors(@application_setting) if expanded
 
       %fieldset
@@ -26,8 +25,5 @@
         .form-group
           = f.label :snowplow_cookie_domain, _('Cookie domain'), class: 'label-light'
           = f.text_field :snowplow_cookie_domain, class: 'form-control'
-        .form-group
-          = f.label :snowplow_iglu_registry_url, _('Iglu registry URL (optional)'), class: 'label-light'
-          = f.text_field :snowplow_iglu_registry_url, class: 'form-control'
 
       = f.submit _('Save changes'), class: 'btn btn-success'

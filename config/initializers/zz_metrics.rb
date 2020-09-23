@@ -8,6 +8,8 @@
 #
 # rubocop:disable Metrics/AbcSize
 def instrument_classes(instrumentation)
+  return if ENV['STATIC_VERIFICATION']
+
   instrumentation.instrument_instance_methods(Gitlab::Shell)
 
   instrumentation.instrument_methods(Gitlab::Git)
@@ -88,8 +90,8 @@ def instrument_classes(instrumentation)
   instrumentation.instrument_instance_methods(Gitlab::Highlight)
 
   Gitlab.ee do
-    instrumentation.instrument_methods(Elasticsearch::Git::Repository)
-    instrumentation.instrument_instance_methods(Elasticsearch::Git::Repository)
+    instrumentation.instrument_instance_methods(Elastic::Latest::GitInstanceProxy)
+    instrumentation.instrument_instance_methods(Elastic::Latest::GitClassProxy)
 
     instrumentation.instrument_instance_methods(Search::GlobalService)
     instrumentation.instrument_instance_methods(Search::ProjectService)
@@ -98,7 +100,7 @@ def instrument_classes(instrumentation)
     instrumentation.instrument_instance_methods(Gitlab::Elastic::ProjectSearchResults)
     instrumentation.instrument_instance_methods(Gitlab::Elastic::Indexer)
     instrumentation.instrument_instance_methods(Gitlab::Elastic::SnippetSearchResults)
-    instrumentation.instrument_methods(Gitlab::Elastic::Helper)
+    instrumentation.instrument_instance_methods(Gitlab::Elastic::Helper)
 
     instrumentation.instrument_instance_methods(Elastic::ApplicationVersionedSearch)
     instrumentation.instrument_instance_methods(Elastic::ProjectsSearch)
@@ -133,7 +135,6 @@ end
 # loading of our custom migration templates.
 if Gitlab::Metrics.enabled? && !Rails.env.test? && !(Rails.env.development? && defined?(Rails::Generators))
   require 'pathname'
-  require 'influxdb'
   require 'connection_pool'
   require 'method_source'
 
@@ -146,6 +147,7 @@ if Gitlab::Metrics.enabled? && !Rails.env.test? && !(Rails.env.development? && d
   Gitlab::Application.configure do |config|
     config.middleware.use(Gitlab::Metrics::RackMiddleware)
     config.middleware.use(Gitlab::Middleware::RailsQueueDuration)
+    config.middleware.use(Gitlab::Metrics::ElasticsearchRackMiddleware)
   end
 
   Sidekiq.configure_server do |config|
@@ -191,16 +193,12 @@ if Gitlab::Metrics.enabled? && !Rails.env.test? && !(Rails.env.development? && d
 
   GC::Profiler.enable
 
-  Gitlab::Cluster::LifecycleEvents.on_worker_start do
-    Gitlab::Metrics::Samplers::InfluxSampler.initialize_instance.start
-  end
-
   module TrackNewRedisConnections
     def connect(*args)
       val = super
 
       if current_transaction = ::Gitlab::Metrics::Transaction.current
-        current_transaction.increment(:new_redis_connections, 1)
+        current_transaction.increment(:gitlab_transaction_new_redis_connections_total, 1)
       end
 
       val

@@ -15,10 +15,15 @@ module Gitlab
                     %w(FileUploader Project),
                     %w(PersonalFileUploader Snippet),
                     %w(NamespaceFileUploader Snippet),
+                    %w(DesignManagement::DesignV432x230Uploader DesignManagement::Action :image_v432x230),
                     %w(FileUploader MergeRequest)].freeze
 
       def initialize(args, logger)
         prepare_variables(args, logger)
+      end
+
+      def self.categories
+        CATEGORIES
       end
 
       def migrate_to_remote_storage

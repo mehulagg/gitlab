@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Groups > Members > Manage members' do
+RSpec.describe 'Groups > Members > Manage members' do
   include Select2Helper
   include Spec::Support::Helpers::Features::ListRowsHelpers
 
@@ -11,6 +11,8 @@ describe 'Groups > Members > Manage members' do
   let(:group) { create(:group) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     sign_in(user1)
   end
 
@@ -68,9 +70,12 @@ describe 'Groups > Members > Manage members' do
 
     visit group_group_members_path(group)
 
-    accept_confirm do
-      find(:css, '.project-members-page li', text: user2.name).find(:css, 'a.btn-remove').click
-    end
+    # Open modal
+    find(:css, '.project-members-page li', text: user2.name).find(:css, 'button.btn-danger').click
+
+    expect(page).to have_unchecked_field 'Also unassign this user from related issues and merge requests'
+
+    click_on('Remove member')
 
     wait_for_requests
 
@@ -98,7 +103,7 @@ describe 'Groups > Members > Manage members' do
 
     add_user('test@example.com', 'Reporter')
 
-    click_link('Pending')
+    click_link('Invited')
 
     page.within('.content-list.members-list') do
       expect(page).to have_content('test@example.com')
@@ -113,23 +118,23 @@ describe 'Groups > Members > Manage members' do
 
     visit group_group_members_path(group)
 
-    expect(page).not_to have_button 'Add to group'
+    expect(page).not_to have_selector '.invite-users-form'
+    expect(page).not_to have_selector '.invite-group-form'
 
     page.within(second_row) do
       # Can not modify user2 role
       expect(page).not_to have_button 'Developer'
 
       # Can not remove user2
-      expect(page).not_to have_css('a.btn-remove')
+      expect(page).not_to have_css('a.btn-danger')
     end
   end
 
   def add_user(id, role)
-    page.within ".users-group-form" do
+    page.within ".invite-users-form" do
       select2(id, from: "#user_ids", multiple: true)
       select(role, from: "access_level")
+      click_button "Invite"
     end
-
-    click_button "Add to group"
   end
 end

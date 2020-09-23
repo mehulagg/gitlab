@@ -2,7 +2,7 @@
 
 require 'rake_helper'
 
-describe 'geo rake tasks', :geo do
+RSpec.describe 'geo rake tasks', :geo do
   include ::EE::GeoHelpers
 
   before do
@@ -28,8 +28,6 @@ describe 'geo rake tasks', :geo do
 
   it 'Gitlab::Geo::GeoTasks responds to all methods used in Geo rake tasks' do
     %i[
-      foreign_server_configured?
-      refresh_foreign_tables!
       set_primary_geo_node
       update_primary_geo_node_url
     ].each do |method|
@@ -111,15 +109,6 @@ describe 'geo rake tasks', :geo do
       expect(Gitlab::Geo::DatabaseTasks).to receive(:load_seed)
 
       run_rake_task('geo:db:seed')
-    end
-  end
-
-  describe 'geo:db:refresh_foreign_tables' do
-    it 'refreshes foreign tables definition on secondary node' do
-      allow(Gitlab::Geo::GeoTasks).to receive(:foreign_server_configured?).and_return(true)
-      expect(Gitlab::Geo::GeoTasks).to receive(:refresh_foreign_tables!)
-
-      run_rake_task('geo:db:refresh_foreign_tables')
     end
   end
 
@@ -230,15 +219,6 @@ describe 'geo rake tasks', :geo do
     end
   end
 
-  describe 'geo:db:test:refresh_foreign_tables' do
-    it 'refreshes foreign tables definitions in test environment' do
-      allow(ActiveRecord::Tasks::DatabaseTasks).to receive(:env)
-      expect(Rake::Task['geo:db:refresh_foreign_tables']).to receive(:invoke)
-
-      run_rake_task('geo:db:test:refresh_foreign_tables')
-    end
-  end
-
   describe 'geo:set_primary_node' do
     before do
       stub_config_setting(url: 'https://example.com:1234/relative_part')
@@ -261,15 +241,20 @@ describe 'geo rake tasks', :geo do
     end
   end
 
-  describe 'geo:set_secondary_as_primary' do
+  describe 'geo:set_secondary_as_primary', :use_clean_rails_memory_store_caching do
     let!(:current_node) { create(:geo_node) }
     let!(:primary_node) { create(:geo_node, :primary) }
 
     before do
       stub_current_geo_node(current_node)
+
+      allow(GeoNode).to receive(:current_node).and_return(current_node)
     end
 
     it 'removes primary and sets secondary as primary' do
+      # Pre-warming the cache. See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/22021
+      Gitlab::Geo.primary_node
+
       run_rake_task('geo:set_secondary_as_primary')
 
       expect(current_node.primary?).to be_truthy
@@ -278,21 +263,45 @@ describe 'geo rake tasks', :geo do
   end
 
   describe 'geo:update_primary_node_url' do
-    let(:primary_node) { create(:geo_node, :primary, url: 'https://secondary.geo.example.com') }
-
     before do
       allow(GeoNode).to receive(:current_node_url).and_return('https://primary.geo.example.com')
       stub_current_geo_node(primary_node)
     end
 
-    it 'updates Geo primary node URL' do
-      run_rake_task('geo:update_primary_node_url')
+    context 'when the machine Geo node name is not explicitly configured' do
+      let(:primary_node) { create(:geo_node, :primary, url: 'https://secondary.geo.example.com', name: 'https://secondary.geo.example.com') }
 
-      expect(primary_node.reload.url).to eq 'https://primary.geo.example.com/'
+      before do
+        # As if Gitlab.config.geo.node_name is defaulting to external_url (this happens in an initializer)
+        allow(GeoNode).to receive(:current_node_name).and_return('https://primary.geo.example.com')
+      end
+
+      it 'updates Geo primary node URL and name' do
+        run_rake_task('geo:update_primary_node_url')
+
+        expect(primary_node.reload.url).to eq 'https://primary.geo.example.com/'
+        expect(primary_node.name).to eq 'https://primary.geo.example.com/'
+      end
+    end
+
+    context 'when the machine Geo node name is explicitly configured' do
+      let(:node_name) { 'Brazil DC' }
+      let(:primary_node) { create(:geo_node, :primary, url: 'https://secondary.geo.example.com', name: node_name) }
+
+      before do
+        allow(GeoNode).to receive(:current_node_name).and_return(node_name)
+      end
+
+      it 'updates Geo primary node URL only' do
+        run_rake_task('geo:update_primary_node_url')
+
+        expect(primary_node.reload.url).to eq 'https://primary.geo.example.com/'
+        expect(primary_node.name).to eq node_name
+      end
     end
   end
 
-  describe 'geo:status', :geo_fdw do
+  describe 'geo:status' do
     context 'without a valid license' do
       before do
         stub_licensed_features(geo: false)
@@ -313,7 +322,8 @@ describe 'geo rake tasks', :geo do
         stub_licensed_features(geo: true)
         stub_current_geo_node(current_node)
 
-        allow(GeoNodeStatus).to receive(:current_node_status).once.and_return(geo_node_status)
+        allow(GeoNodeStatus).to receive(:current_node_status).and_return(geo_node_status)
+        allow(Gitlab.config.geo.registry_replication).to receive(:enabled).and_return(true)
       end
 
       it 'runs with no error' do
@@ -331,6 +341,35 @@ describe 'geo rake tasks', :geo do
 
         it 'does not show health status summary' do
           expect { run_rake_task('geo:status') }.not_to output(/Health Status Summary/).to_stdout
+        end
+
+        it 'prints messages for all the checks' do
+          checks = [
+            /Name: /,
+            /URL: /,
+            /GitLab Version: /,
+            /Geo Role: /,
+            /Health Status: /,
+            /Sync Settings: /,
+            /Database replication lag: /,
+            /Repositories: /,
+            /Verified Repositories: /,
+            /Wikis: /,
+            /Verified Wikis: /,
+            /LFS Objects: /,
+            /Attachments: /,
+            /CI job artifacts: /,
+            /Container repositories: /,
+            /Design repositories: /,
+            /Repositories Checked: /,
+            /Last event ID seen from primary: /,
+            /Last status report was: /
+          ] + Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural} Checked:/ } +
+              Gitlab::Geo.enabled_replicator_classes.map { |k| /#{k.replicable_title_plural}:/ }
+
+          checks.each do |text|
+            expect { run_rake_task('geo:status') }.to output(text).to_stdout
+          end
         end
       end
 

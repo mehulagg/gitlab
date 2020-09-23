@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ReleasePresenter do
+RSpec.describe ReleasePresenter do
   include Gitlab::Routing.url_helpers
 
   let_it_be(:project) { create(:project, :repository) }
@@ -51,6 +51,22 @@ describe ReleasePresenter do
     end
   end
 
+  describe '#self_url' do
+    subject { presenter.self_url }
+
+    it 'returns its own url' do
+      is_expected.to match /#{project_release_url(project, release)}/
+    end
+
+    context 'when release_show_page feature flag is disabled' do
+      before do
+        stub_feature_flags(release_show_page: false)
+      end
+
+      it { is_expected.to be_nil }
+    end
+  end
+
   describe '#merge_requests_url' do
     subject { presenter.merge_requests_url }
 
@@ -90,12 +106,42 @@ describe ReleasePresenter do
       is_expected.to match /#{edit_project_release_url(project, release)}/
     end
 
-    context 'when release_edit_page feature flag is disabled' do
-      before do
-        stub_feature_flags(release_edit_page: false)
-      end
+    context 'when a user is not allowed to update a release' do
+      let(:presenter) { described_class.new(release, current_user: guest) }
 
       it { is_expected.to be_nil }
+    end
+  end
+
+  describe '#assets_count' do
+    subject { presenter.assets_count }
+
+    it 'returns the number of assets associated to the release' do
+      is_expected.to be release.assets_count
+    end
+
+    context 'when a user is not allowed to download release sources' do
+      let(:presenter) { described_class.new(release, current_user: guest) }
+
+      it 'returns the number of all non-source assets associated to the release' do
+        is_expected.to be release.assets_count(except: [:sources])
+      end
+    end
+  end
+
+  describe '#name' do
+    subject { presenter.name }
+
+    it 'returns the release name' do
+      is_expected.to eq release.name
+    end
+
+    context "when a user is not allowed to access any repository information" do
+      let(:presenter) { described_class.new(release, current_user: guest) }
+
+      it 'returns a replacement name to avoid potentially leaking tag information' do
+        is_expected.to eq "Release-#{release.id}"
+      end
     end
   end
 end

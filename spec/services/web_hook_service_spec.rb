@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe WebHookService do
+RSpec.describe WebHookService do
   include StubRequests
 
   let(:project) { create(:project) }
@@ -13,9 +13,11 @@ describe WebHookService do
       'X-Gitlab-Event' => 'Push Hook'
     }
   end
+
   let(:data) do
     { before: 'oldrev', after: 'newrev', ref: 'ref' }
   end
+
   let(:service_instance) { described_class.new(project_hook, data, :push_hooks) }
 
   describe '#initialize' do
@@ -69,16 +71,6 @@ describe WebHookService do
           headers: headers.merge({ 'X-Gitlab-Token' => project_hook.token })
         ).once
       end
-    end
-
-    it 'POSTs to the webhook URL' do
-      stub_full_request(project_hook.url, method: :post)
-
-      service_instance.execute
-
-      expect(WebMock).to have_requested(:post, stubbed_hostname(project_hook.url)).with(
-        headers: headers
-      ).once
     end
 
     it 'POSTs the data as JSON' do
@@ -135,6 +127,14 @@ describe WebHookService do
         stub_full_request(project_hook.url, method: :post).to_raise(exception)
         expect(service_instance.execute).to eq({ status: :error, message: exception.to_s })
         expect { service_instance.execute }.not_to raise_error
+      end
+    end
+
+    context 'when request body size is too big' do
+      it 'does not perform the request' do
+        stub_const("#{described_class}::REQUEST_BODY_SIZE_LIMIT", 10.bytes)
+
+        expect(service_instance.execute).to eq({ status: :error, message: "Gitlab::Json::LimitedEncoder::LimitExceeded" })
       end
     end
 
@@ -202,17 +202,6 @@ describe WebHookService do
           expect(hook_log.execution_duration).to be > 0
           expect(hook_log.internal_error_message).to be_nil
         end
-      end
-
-      context 'should not log ServiceHooks' do
-        let(:service_hook) { create(:service_hook) }
-        let(:service_instance) { described_class.new(service_hook, data, 'service_hook') }
-
-        before do
-          stub_full_request(service_hook.url, method: :post).to_return(status: 200, body: 'Success')
-        end
-
-        it { expect { service_instance.execute }.not_to change(WebHookLog, :count) }
       end
     end
   end

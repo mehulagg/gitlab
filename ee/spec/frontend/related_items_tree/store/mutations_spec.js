@@ -19,6 +19,8 @@ describe('RelatedItemsTree', () => {
             issuesEndpoint: '/bar',
             autoCompleteEpics: true,
             autoCompleteIssues: false,
+            allowSubEpics: true,
+            allowIssuableHealthStatus: true,
           };
 
           mutations[types.SET_INITIAL_CONFIG](state, data);
@@ -27,6 +29,13 @@ describe('RelatedItemsTree', () => {
           expect(state).toHaveProperty('issuesEndpoint', '/bar');
           expect(state).toHaveProperty('autoCompleteEpics', true);
           expect(state).toHaveProperty('autoCompleteIssues', false);
+          expect(state).toHaveProperty('allowSubEpics', true);
+          expect(state).toHaveProperty('allowIssuableHealthStatus', true);
+          expect(state).toHaveProperty('healthStatus', {
+            issuesNeedingAttention: 0,
+            issuesAtRisk: 0,
+            issuesOnTrack: 0,
+          });
         });
       });
 
@@ -49,14 +58,15 @@ describe('RelatedItemsTree', () => {
       describe(types.SET_CHILDREN_COUNT, () => {
         it('should set provided `epicsCount` and `issuesCount` to state', () => {
           const data = {
-            epicsCount: 4,
-            issuesCount: 5,
+            openedEpics: 4,
+            closedEpics: 5,
+            openedIssues: 6,
+            closedIssues: 7,
           };
 
           mutations[types.SET_CHILDREN_COUNT](state, data);
 
-          expect(state.epicsCount).toBe(data.epicsCount);
-          expect(state.issuesCount).toBe(data.issuesCount);
+          expect(state.descendantCounts).toEqual(data);
         });
       });
 
@@ -86,7 +96,7 @@ describe('RelatedItemsTree', () => {
           data.append = true;
           mutations[types.SET_ITEM_CHILDREN](state, data);
 
-          expect(state.children[data.parentItem.reference].length).toEqual(4);
+          expect(state.children[data.parentItem.reference]).toHaveLength(4);
         });
       });
 
@@ -386,6 +396,18 @@ describe('RelatedItemsTree', () => {
 
           expect(state.showCreateEpicForm).toBe(data.toggleState);
           expect(state.showAddItemForm).toBe(false);
+          expect(state.issuableType).toEqual('epic');
+        });
+      });
+
+      describe(types.TOGGLE_CREATE_ISSUE_FORM, () => {
+        it('should set value of `showCreateIssueForm` as it is and `showAddItemForm` as false on state', () => {
+          const data = { toggleState: true };
+
+          mutations[types.TOGGLE_CREATE_ISSUE_FORM](state, data);
+
+          expect(state.showCreateIssueForm).toBe(data.toggleState);
+          expect(state.showAddItemForm).toBe(false);
         });
       });
 
@@ -410,6 +432,16 @@ describe('RelatedItemsTree', () => {
             expect.arrayContaining(['foo'].concat(reference)),
           );
         });
+
+        it('should not add duplicated `references` param to `pendingReferences` within state', () => {
+          const references = ['foo', 'bar'];
+
+          state.pendingReferences = ['foo'];
+
+          mutations[types.ADD_PENDING_REFERENCES](state, references);
+
+          expect(state.pendingReferences).toEqual(['foo', 'bar']);
+        });
       });
 
       describe(types.REMOVE_PENDING_REFERENCE, () => {
@@ -419,6 +451,16 @@ describe('RelatedItemsTree', () => {
           mutations[types.REMOVE_PENDING_REFERENCE](state, 1);
 
           expect(state.pendingReferences).toEqual(expect.arrayContaining(['foo']));
+        });
+
+        it('should update `itemAddFailure` to false if no `pendingReferences` are left', () => {
+          state.pendingReferences = ['foo'];
+          state.itemAddFailure = true;
+
+          mutations[types.REMOVE_PENDING_REFERENCE](state, 0);
+
+          expect(state.pendingReferences).toHaveLength(0);
+          expect(state.itemAddFailure).toBe(false);
         });
       });
 
@@ -457,10 +499,16 @@ describe('RelatedItemsTree', () => {
       });
 
       describe(types.RECEIVE_ADD_ITEM_FAILURE, () => {
-        it('should set `itemAddInProgress` to false within state', () => {
-          mutations[types.RECEIVE_ADD_ITEM_FAILURE](state);
+        it('should set `itemAddInProgress` to false, `itemAddFailure` to true and `itemAddFailureType` value within state', () => {
+          mutations[types.RECEIVE_ADD_ITEM_FAILURE](state, {
+            itemAddFailureMessage: 'foo',
+            itemAddFailureType: 'bar',
+          });
 
           expect(state.itemAddInProgress).toBe(false);
+          expect(state.itemAddFailure).toBe(true);
+          expect(state.itemAddFailureMessage).toEqual('foo');
+          expect(state.itemAddFailureType).toEqual('bar');
         });
       });
 
@@ -499,7 +547,7 @@ describe('RelatedItemsTree', () => {
       });
 
       describe(types.REORDER_ITEM, () => {
-        it('should reorder an item within children of provided parent based on provided indices', () => {
+        it('should reorder an item within children of provided parent based on provided indexes', () => {
           state.parentItem = { reference: '&1' };
           state.children[state.parentItem.reference] = ['foo', 'bar'];
 
@@ -515,6 +563,139 @@ describe('RelatedItemsTree', () => {
           expect(state.children[state.parentItem.reference]).toEqual(
             expect.arrayContaining(['bar', 'foo']),
           );
+        });
+      });
+
+      describe(types.MOVE_ITEM, () => {
+        const defaultPayload = {
+          oldParentItem: {
+            reference: '&1',
+          },
+          targetItem: 'bar',
+          oldIndex: 1,
+          newIndex: 0,
+          isFirstChild: false,
+        };
+
+        it('should move an item from one parent to another with children based on provided indexes', () => {
+          const newParentItem = {
+            parentReference: '&2',
+          };
+          state.parentItem = { reference: '&1' };
+          state.children[state.parentItem.reference] = ['foo', 'bar'];
+          state.children[newParentItem.parentReference] = ['baz'];
+
+          mutations[types.MOVE_ITEM](state, {
+            ...defaultPayload,
+            newParentItem,
+          });
+
+          expect(state.children[state.parentItem.reference]).toEqual(
+            expect.arrayContaining(['foo']),
+          );
+          expect(state.children[newParentItem.parentReference]).toEqual(
+            expect.arrayContaining(['bar', 'baz']),
+          );
+        });
+
+        it('should move an item from one parent to another without children based on provided indexes', () => {
+          const newParentItem = {
+            parentReference: '&2',
+          };
+          state.parentItem = { reference: '&1' };
+          state.children[state.parentItem.reference] = ['foo', 'bar'];
+
+          mutations[types.MOVE_ITEM](state, {
+            ...defaultPayload,
+            newParentItem,
+            isFirstChild: true,
+          });
+
+          expect(state.children[state.parentItem.reference]).toEqual(
+            expect.arrayContaining(['foo']),
+          );
+          expect(state.children[newParentItem.parentReference]).toEqual(
+            expect.arrayContaining(['bar']),
+          );
+        });
+
+        it('should update itemHasChildren flags', () => {
+          const newParentItem = {
+            parentReference: '&2',
+          };
+          state.parentItem = { reference: '&1' };
+          state.children[state.parentItem.reference] = ['bar'];
+          state.childrenFlags[state.parentItem.reference] = { itemHasChildren: true };
+
+          mutations[types.MOVE_ITEM](state, {
+            ...defaultPayload,
+            newParentItem,
+            oldIndex: 0,
+            isFirstChild: true,
+          });
+
+          expect(state.children[state.parentItem.reference].length).toEqual(0);
+          expect(state.childrenFlags[state.parentItem.reference].itemHasChildren).toEqual(false);
+          expect(state.children[newParentItem.parentReference]).toEqual(
+            expect.arrayContaining(['bar']),
+          );
+          expect(state.childrenFlags[newParentItem.parentReference].itemHasChildren).toEqual(true);
+        });
+      });
+
+      describe(types.MOVE_ITEM_FAILURE, () => {
+        it('should move an item from one parent to another with children based on provided indexes', () => {
+          const newParentItem = {
+            parentReference: '&2',
+          };
+          state.parentItem = { reference: '&1' };
+          state.children[state.parentItem.reference] = ['foo'];
+          state.children[newParentItem.parentReference] = ['bar', 'baz'];
+
+          mutations[types.MOVE_ITEM_FAILURE](state, {
+            oldParentItem: {
+              reference: '&1',
+            },
+            newParentItem,
+            targetItem: 'bar',
+            oldIndex: 1,
+            newIndex: 0,
+            isFirstChild: false,
+          });
+
+          expect(state.children[state.parentItem.reference]).toEqual(
+            expect.arrayContaining(['foo', 'bar']),
+          );
+          expect(state.children[newParentItem.parentReference]).toEqual(
+            expect.arrayContaining(['baz']),
+          );
+        });
+      });
+
+      describe(types.REQUEST_PROJECTS, () => {
+        it('should set `projectsFetchInProgress` to true within state', () => {
+          mutations[types.REQUEST_PROJECTS](state);
+
+          expect(state.projectsFetchInProgress).toBe(true);
+        });
+      });
+
+      describe(types.RECIEVE_PROJECTS_SUCCESS, () => {
+        it('should set `projectsFetchInProgress` to false and provided `projects` param as it is within the state', () => {
+          const projects = [{ id: 1, name: 'foo' }, { id: 2, name: 'bar' }];
+
+          mutations[types.RECIEVE_PROJECTS_SUCCESS](state, projects);
+
+          expect(state.projects).toBe(projects);
+          expect(state.projectsFetchInProgress).toBe(false);
+        });
+      });
+
+      describe(types.RECIEVE_PROJECTS_FAILURE, () => {
+        it('should set `projectsFetchInProgress` to false within state', () => {
+          mutations[types.RECIEVE_PROJECTS_FAILURE](state);
+
+          expect(state.projectsFetchInProgress).toBe(false);
         });
       });
     });

@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Gfm::UploadsRewriter do
+RSpec.describe Gitlab::Gfm::UploadsRewriter do
   let(:user) { create(:user) }
   let(:old_project) { create(:project) }
   let(:new_project) { create(:project) }
@@ -51,6 +53,14 @@ describe Gitlab::Gfm::UploadsRewriter do
         it 'generates a new secret for each file' do
           expect(new_paths).not_to include image_uploader.secret
           expect(new_paths).not_to include zip_uploader.secret
+        end
+
+        it 'skips nil files do' do
+          allow_next_instance_of(UploaderFinder) do |finder|
+            allow(finder).to receive(:execute).and_return(nil)
+          end
+
+          expect(new_files).to be_empty
         end
       end
     end

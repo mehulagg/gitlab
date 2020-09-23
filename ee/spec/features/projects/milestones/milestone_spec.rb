@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Milestones on EE' do
+RSpec.describe 'Milestones on EE' do
   let(:user) { create(:user) }
   let(:project) { create(:project, name: 'test', namespace: user.namespace) }
   let(:milestone) { create(:milestone, project: project, start_date: Date.today, due_date: 7.days.from_now) }
@@ -27,11 +27,11 @@ describe 'Milestones on EE' do
              due_date: Date.tomorrow)
     end
 
-    context 'with the burndown chart feature available' do
+    context 'with the milestone charts feature available' do
       let(:issue_params) { { project: project, assignees: [user], author: user, milestone: milestone } }
 
       before do
-        stub_licensed_features(burndown_charts: true)
+        stub_licensed_features(milestone_charts: true)
       end
 
       it 'shows a burndown chart' do
@@ -123,9 +123,9 @@ describe 'Milestones on EE' do
       end
     end
 
-    context 'with the burndown chart feature disabled' do
+    context 'with the milestone charts feature disabled' do
       before do
-        stub_licensed_features(burndown_charts: false)
+        stub_licensed_features(milestone_charts: false)
       end
 
       include_examples 'burndown charts disabled'

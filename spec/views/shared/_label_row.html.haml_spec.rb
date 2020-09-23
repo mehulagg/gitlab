@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'shared/_label_row.html.haml' do
+RSpec.describe 'shared/_label_row.html.haml' do
   label_types = {
     'project label': :label,
     'group label': :group_label
@@ -9,7 +9,7 @@ describe 'shared/_label_row.html.haml' do
 
   label_types.each do |label_type, label_factory|
     let!(:label) do
-      label_record = create(label_factory)
+      label_record = create(label_factory) # rubocop: disable Rails/SaveBang
       label_record.present(issuable_subject: label_record.subject)
     end
 

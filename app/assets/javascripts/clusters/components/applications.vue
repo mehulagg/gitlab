@@ -1,33 +1,34 @@
 <script>
-import _ from 'underscore';
-import helmInstallIllustration from '@gitlab/svgs/dist/illustrations/kubernetes-installation.svg';
-import { GlLoadingIcon } from '@gitlab/ui';
-import elasticsearchLogo from 'images/cluster_app_logos/elasticsearch.png';
+import { GlLoadingIcon, GlSprintf, GlLink } from '@gitlab/ui';
 import gitlabLogo from 'images/cluster_app_logos/gitlab.png';
-import helmLogo from 'images/cluster_app_logos/helm.png';
-import jeagerLogo from 'images/cluster_app_logos/jeager.png';
 import jupyterhubLogo from 'images/cluster_app_logos/jupyterhub.png';
 import kubernetesLogo from 'images/cluster_app_logos/kubernetes.png';
 import certManagerLogo from 'images/cluster_app_logos/cert_manager.png';
+import crossplaneLogo from 'images/cluster_app_logos/crossplane.png';
 import knativeLogo from 'images/cluster_app_logos/knative.png';
-import meltanoLogo from 'images/cluster_app_logos/meltano.png';
 import prometheusLogo from 'images/cluster_app_logos/prometheus.png';
 import elasticStackLogo from 'images/cluster_app_logos/elastic_stack.png';
-import { s__, sprintf } from '../../locale';
+import fluentdLogo from 'images/cluster_app_logos/fluentd.png';
 import applicationRow from './application_row.vue';
 import clipboardButton from '../../vue_shared/components/clipboard_button.vue';
 import KnativeDomainEditor from './knative_domain_editor.vue';
 import { CLUSTER_TYPE, PROVIDER_TYPE, APPLICATION_STATUS, INGRESS } from '../constants';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import eventHub from '~/clusters/event_hub';
+import CrossplaneProviderStack from './crossplane_provider_stack.vue';
+import IngressModsecuritySettings from './ingress_modsecurity_settings.vue';
+import FluentdOutputSettings from './fluentd_output_settings.vue';
 
 export default {
   components: {
     applicationRow,
     clipboardButton,
-    LoadingButton,
     GlLoadingIcon,
+    GlSprintf,
+    GlLink,
     KnativeDomainEditor,
+    CrossplaneProviderStack,
+    IngressModsecuritySettings,
+    FluentdOutputSettings,
   },
   props: {
     type: {
@@ -51,6 +52,11 @@ export default {
       default: '',
     },
     ingressDnsHelpPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    ingressModSecurityHelpPath: {
       type: String,
       required: false,
       default: '',
@@ -80,30 +86,13 @@ export default {
       required: false,
       default: false,
     },
+    ciliumHelpPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
-  data: () => ({
-    elasticsearchLogo,
-    gitlabLogo,
-    helmLogo,
-    jeagerLogo,
-    jupyterhubLogo,
-    kubernetesLogo,
-    certManagerLogo,
-    knativeLogo,
-    meltanoLogo,
-    prometheusLogo,
-    elasticStackLogo,
-  }),
   computed: {
-    isProjectCluster() {
-      return this.type === CLUSTER_TYPE.PROJECT;
-    },
-    helmInstalled() {
-      return (
-        this.applications.helm.status === APPLICATION_STATUS.INSTALLED ||
-        this.applications.helm.status === APPLICATION_STATUS.UPDATED
-      );
-    },
     ingressId() {
       return INGRESS;
     },
@@ -116,159 +105,76 @@ export default {
     certManagerInstalled() {
       return this.applications.cert_manager.status === APPLICATION_STATUS.INSTALLED;
     },
-    enableClusterApplicationElasticStack() {
-      return gon.features && gon.features.enableClusterApplicationElasticStack;
-    },
-    ingressDescription() {
-      return sprintf(
-        _.escape(
-          s__(
-            `ClusterIntegration|Installing Ingress may incur additional costs. Learn more about %{pricingLink}.`,
-          ),
-        ),
-        {
-          pricingLink: `<strong><a href="https://cloud.google.com/compute/pricing#lb"
-              target="_blank" rel="noopener noreferrer">
-              ${_.escape(s__('ClusterIntegration|pricing'))}</a></strong>`,
-        },
-        false,
-      );
-    },
-    certManagerDescription() {
-      return sprintf(
-        _.escape(
-          s__(
-            `ClusterIntegration|Cert-Manager is a native Kubernetes certificate management controller that helps with issuing certificates.
-            Installing Cert-Manager on your cluster will issue a certificate by %{letsEncrypt} and ensure that certificates
-            are valid and up-to-date.`,
-          ),
-        ),
-        {
-          letsEncrypt: `<a href="https://letsencrypt.org/"
-              target="_blank" rel="noopener noreferrer">
-              ${_.escape(s__("ClusterIntegration|Let's Encrypt"))}</a>`,
-        },
-        false,
-      );
-    },
-    prometheusDescription() {
-      return sprintf(
-        _.escape(
-          s__(
-            `ClusterIntegration|Prometheus is an open-source monitoring system
-            with %{gitlabIntegrationLink} to monitor deployed applications.`,
-          ),
-        ),
-        {
-          gitlabIntegrationLink: `<a href="https://docs.gitlab.com/ce/user/project/integrations/prometheus.html"
-              target="_blank" rel="noopener noreferrer">
-              ${_.escape(s__('ClusterIntegration|GitLab Integration'))}</a>`,
-        },
-        false,
-      );
-    },
     jupyterInstalled() {
       return this.applications.jupyter.status === APPLICATION_STATUS.INSTALLED;
     },
     jupyterHostname() {
       return this.applications.jupyter.hostname;
     },
-    elasticStackInstalled() {
-      return this.applications.elastic_stack.status === APPLICATION_STATUS.INSTALLED;
-    },
-    elasticStackKibanaHostname() {
-      return this.applications.elastic_stack.kibana_hostname;
-    },
     knative() {
       return this.applications.knative;
+    },
+    crossplane() {
+      return this.applications.crossplane;
     },
     cloudRun() {
       return this.providerType === PROVIDER_TYPE.GCP && this.preInstalledKnative;
     },
-    installedVia() {
-      if (this.cloudRun) {
-        return sprintf(
-          _.escape(s__(`ClusterIntegration|installed via %{installed_via}`)),
-          {
-            installed_via: `<a href="${
-              this.cloudRunHelpPath
-            }" target="_blank" rel="noopener noreferrer">${_.escape(
-              s__('ClusterIntegration|Cloud Run'),
-            )}</a>`,
-          },
-          false,
-        );
-      }
-      return null;
+    ingress() {
+      return this.applications.ingress;
     },
-  },
-  created() {
-    this.helmInstallIllustration = helmInstallIllustration;
   },
   methods: {
-    saveKnativeDomain(hostname) {
+    saveKnativeDomain() {
       eventHub.$emit('saveKnativeDomain', {
         id: 'knative',
-        params: { hostname },
+        params: {
+          hostname: this.applications.knative.hostname,
+          pages_domain_id: this.applications.knative.pagesDomain?.id,
+        },
       });
     },
-    setKnativeHostname(hostname) {
-      eventHub.$emit('setKnativeHostname', {
+    setKnativeDomain({ domainId, domain }) {
+      eventHub.$emit('setKnativeDomain', {
         id: 'knative',
-        hostname,
+        domainId,
+        domain,
       });
     },
+    setCrossplaneProviderStack(stack) {
+      eventHub.$emit('setCrossplaneProviderStack', {
+        id: 'crossplane',
+        stack,
+      });
+    },
+  },
+  logos: {
+    gitlabLogo,
+    jupyterhubLogo,
+    kubernetesLogo,
+    certManagerLogo,
+    crossplaneLogo,
+    knativeLogo,
+    prometheusLogo,
+    elasticStackLogo,
+    fluentdLogo,
   },
 };
 </script>
 
 <template>
   <section id="cluster-applications">
-    <h4>{{ s__('ClusterIntegration|Applications') }}</h4>
-    <p class="append-bottom-0">
+    <p class="gl-mb-0">
       {{
-        s__(`ClusterIntegration|Choose which applications to install on your Kubernetes cluster.
-      Helm Tiller is required to install any of the following applications.`)
+        s__(`ClusterIntegration|Choose which applications to install on your Kubernetes cluster.`)
       }}
-      <a :href="helpPath">{{ __('More information') }}</a>
+      <gl-link :href="helpPath">{{ __('More information') }}</gl-link>
     </p>
 
-    <div class="cluster-application-list prepend-top-10">
-      <application-row
-        id="helm"
-        :logo-url="helmLogo"
-        :title="applications.helm.title"
-        :status="applications.helm.status"
-        :status-reason="applications.helm.statusReason"
-        :request-status="applications.helm.requestStatus"
-        :request-reason="applications.helm.requestReason"
-        :installed="applications.helm.installed"
-        :install-failed="applications.helm.installFailed"
-        :uninstallable="applications.helm.uninstallable"
-        :uninstall-successful="applications.helm.uninstallSuccessful"
-        :uninstall-failed="applications.helm.uninstallFailed"
-        class="rounded-top"
-        title-link="https://docs.helm.sh/"
-      >
-        <div slot="description">
-          {{
-            s__(`ClusterIntegration|Helm streamlines installing
-          and managing Kubernetes applications.
-          Tiller runs inside of your Kubernetes Cluster,
-          and manages releases of your charts.`)
-          }}
-        </div>
-      </application-row>
-      <div v-show="!helmInstalled" class="cluster-application-warning">
-        <div class="svg-container" v-html="helmInstallIllustration"></div>
-        {{
-          s__(`ClusterIntegration|You must first install Helm Tiller before
-        installing the applications below`)
-        }}
-      </div>
+    <div class="cluster-application-list gl-mt-3">
       <application-row
         :id="ingressId"
-        :logo-url="kubernetesLogo"
+        :logo-url="$options.logos.kubernetesLogo"
         :title="applications.ingress.title"
         :status="applications.ingress.status"
         :status-reason="applications.ingress.statusReason"
@@ -276,77 +182,104 @@ export default {
         :request-reason="applications.ingress.requestReason"
         :installed="applications.ingress.installed"
         :install-failed="applications.ingress.installFailed"
+        :install-application-request-params="{
+          modsecurity_enabled: applications.ingress.modsecurity_enabled,
+          modsecurity_mode: applications.ingress.modsecurity_mode,
+        }"
         :uninstallable="applications.ingress.uninstallable"
         :uninstall-successful="applications.ingress.uninstallSuccessful"
         :uninstall-failed="applications.ingress.uninstallFailed"
-        :disabled="!helmInstalled"
+        :updateable="false"
         title-link="https://kubernetes.io/docs/concepts/services-networking/ingress/"
       >
-        <div slot="description">
+        <template #description>
           <p>
             {{
               s__(`ClusterIntegration|Ingress gives you a way to route
-            requests to services based on the request host or path,
-            centralizing a number of services into a single entrypoint.`)
+                        requests to services based on the request host or path,
+                        centralizing a number of services into a single entrypoint.`)
             }}
           </p>
+
+          <ingress-modsecurity-settings
+            :ingress="ingress"
+            :ingress-mod-security-help-path="ingressModSecurityHelpPath"
+          />
 
           <template v-if="ingressInstalled">
             <div class="form-group">
               <label for="ingress-endpoint">{{ s__('ClusterIntegration|Ingress Endpoint') }}</label>
-              <div v-if="ingressExternalEndpoint" class="input-group">
-                <input
-                  id="ingress-endpoint"
-                  :value="ingressExternalEndpoint"
-                  type="text"
-                  class="form-control js-endpoint"
-                  readonly
-                />
-                <span class="input-group-append">
-                  <clipboard-button
-                    :text="ingressExternalEndpoint"
-                    :title="s__('ClusterIntegration|Copy Ingress Endpoint')"
-                    class="input-group-text js-clipboard-btn"
+              <div class="input-group">
+                <template v-if="ingressExternalEndpoint">
+                  <input
+                    id="ingress-endpoint"
+                    :value="ingressExternalEndpoint"
+                    type="text"
+                    class="form-control js-endpoint"
+                    readonly
                   />
-                </span>
-              </div>
-              <div v-else class="input-group">
-                <input type="text" class="form-control js-endpoint" readonly />
-                <gl-loading-icon
-                  class="position-absolute align-self-center ml-2 js-ingress-ip-loading-icon"
-                />
+                  <span class="input-group-append">
+                    <clipboard-button
+                      :text="ingressExternalEndpoint"
+                      :title="s__('ClusterIntegration|Copy Ingress Endpoint')"
+                      class="input-group-text js-clipboard-btn"
+                    />
+                  </span>
+                </template>
+                <template v-else>
+                  <input type="text" class="form-control js-endpoint" readonly />
+                  <gl-loading-icon
+                    class="position-absolute align-self-center ml-2 js-ingress-ip-loading-icon"
+                  />
+                </template>
               </div>
               <p class="form-text text-muted">
                 {{
                   s__(`ClusterIntegration|Point a wildcard DNS to this
-                generated endpoint in order to access
-                your application after it has been deployed.`)
+                                generated endpoint in order to access
+                                your application after it has been deployed.`)
                 }}
-                <a :href="ingressDnsHelpPath" target="_blank" rel="noopener noreferrer">
+                <gl-link :href="ingressDnsHelpPath" target="_blank">
                   {{ __('More information') }}
-                </a>
+                </gl-link>
               </p>
             </div>
 
             <p v-if="!ingressExternalEndpoint" class="settings-message js-no-endpoint-message">
               {{
                 s__(`ClusterIntegration|The endpoint is in
-              the process of being assigned. Please check your Kubernetes
-              cluster or Quotas on Google Kubernetes Engine if it takes a long time.`)
+                            the process of being assigned. Please check your Kubernetes
+                            cluster or Quotas on Google Kubernetes Engine if it takes a long time.`)
               }}
-              <a :href="ingressDnsHelpPath" target="_blank" rel="noopener noreferrer">
+              <gl-link :href="ingressDnsHelpPath" target="_blank">
                 {{ __('More information') }}
-              </a>
+              </gl-link>
             </p>
           </template>
-          <template v-if="!ingressInstalled">
-            <div class="bs-callout bs-callout-info" v-html="ingressDescription"></div>
+          <template v-else>
+            <div class="bs-callout bs-callout-info">
+              <strong data-testid="ingressCostWarning">
+                <gl-sprintf
+                  :message="
+                    s__(
+                      'ClusterIntegration|Installing Ingress may incur additional costs. Learn more about %{linkStart}pricing%{linkEnd}.',
+                    )
+                  "
+                >
+                  <template #link="{ content }">
+                    <gl-link href="https://cloud.google.com/compute/pricing#lb" target="_blank">{{
+                      content
+                    }}</gl-link>
+                  </template>
+                </gl-sprintf>
+              </strong>
+            </div>
           </template>
-        </div>
+        </template>
       </application-row>
       <application-row
         id="cert_manager"
-        :logo-url="certManagerLogo"
+        :logo-url="$options.logos.certManagerLogo"
         :title="applications.cert_manager.title"
         :status="applications.cert_manager.status"
         :status-reason="applications.cert_manager.statusReason"
@@ -358,43 +291,52 @@ export default {
         :uninstallable="applications.cert_manager.uninstallable"
         :uninstall-successful="applications.cert_manager.uninstallSuccessful"
         :uninstall-failed="applications.cert_manager.uninstallFailed"
-        :disabled="!helmInstalled"
         title-link="https://cert-manager.readthedocs.io/en/latest/#"
       >
-        <template>
-          <div slot="description">
-            <p v-html="certManagerDescription"></p>
-            <div class="form-group">
-              <label for="cert-manager-issuer-email">
-                {{ s__('ClusterIntegration|Issuer Email') }}
-              </label>
-              <div class="input-group">
-                <input
-                  v-model="applications.cert_manager.email"
-                  :readonly="certManagerInstalled"
-                  type="text"
-                  class="form-control js-email"
-                />
-              </div>
-              <p class="form-text text-muted">
-                {{
-                  s__(`ClusterIntegration|Issuers represent a certificate authority.
-                You must provide an email address for your Issuer. `)
-                }}
-                <a
-                  href="http://docs.cert-manager.io/en/latest/reference/issuers.html?highlight=email"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >{{ __('More information') }}</a
-                >
-              </p>
+        <template #description>
+          <p data-testid="certManagerDescription">
+            <gl-sprintf
+              :message="
+                s__(`ClusterIntegration|Cert-Manager is a native Kubernetes certificate management controller that helps with issuing certificates.
+            Installing Cert-Manager on your cluster will issue a certificate by %{linkStart}Let's Encrypt%{linkEnd} and ensure that certificates
+            are valid and up-to-date.`)
+              "
+            >
+              <template #link="{ content }">
+                <gl-link href="https://letsencrypt.org/" target="_blank">{{ content }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </p>
+          <div class="form-group">
+            <label for="cert-manager-issuer-email">
+              {{ s__('ClusterIntegration|Issuer Email') }}
+            </label>
+            <div class="input-group">
+              <input
+                id="cert-manager-issuer-email"
+                v-model="applications.cert_manager.email"
+                :readonly="certManagerInstalled"
+                type="text"
+                class="form-control js-email"
+              />
             </div>
+            <p class="form-text text-muted">
+              {{
+                s__(`ClusterIntegration|Issuers represent a certificate authority.
+                              You must provide an email address for your Issuer.`)
+              }}
+              <gl-link
+                href="http://docs.cert-manager.io/en/latest/reference/issuers.html?highlight=email"
+                target="_blank"
+                >{{ __('More information') }}</gl-link
+              >
+            </p>
           </div>
         </template>
       </application-row>
       <application-row
         id="prometheus"
-        :logo-url="prometheusLogo"
+        :logo-url="$options.logos.prometheusLogo"
         :title="applications.prometheus.title"
         :manage-link="managePrometheusPath"
         :status="applications.prometheus.status"
@@ -406,14 +348,30 @@ export default {
         :uninstallable="applications.prometheus.uninstallable"
         :uninstall-successful="applications.prometheus.uninstallSuccessful"
         :uninstall-failed="applications.prometheus.uninstallFailed"
-        :disabled="!helmInstalled"
         title-link="https://prometheus.io/docs/introduction/overview/"
       >
-        <div slot="description" v-html="prometheusDescription"></div>
+        <template #description>
+          <span data-testid="prometheusDescription">
+            <gl-sprintf
+              :message="
+                s__(`ClusterIntegration|Prometheus is an open-source monitoring system
+                          with %{linkStart}GitLab Integration%{linkEnd} to monitor deployed applications.`)
+              "
+            >
+              <template #link="{ content }">
+                <gl-link
+                  href="https://docs.gitlab.com/ce/user/project/integrations/prometheus.html"
+                  target="_blank"
+                  >{{ content }}</gl-link
+                >
+              </template>
+            </gl-sprintf>
+          </span>
+        </template>
       </application-row>
       <application-row
         id="runner"
-        :logo-url="gitlabLogo"
+        :logo-url="$options.logos.gitlabLogo"
         :title="applications.runner.title"
         :status="applications.runner.status"
         :status-reason="applications.runner.statusReason"
@@ -429,21 +387,64 @@ export default {
         :uninstallable="applications.runner.uninstallable"
         :uninstall-successful="applications.runner.uninstallSuccessful"
         :uninstall-failed="applications.runner.uninstallFailed"
-        :disabled="!helmInstalled"
         title-link="https://docs.gitlab.com/runner/"
       >
-        <div slot="description">
+        <template #description>
           {{
             s__(`ClusterIntegration|GitLab Runner connects to the
-          repository and executes CI/CD jobs,
-          pushing results back and deploying
-          applications to production.`)
+                    repository and executes CI/CD jobs,
+                    pushing results back and deploying
+                    applications to production.`)
           }}
-        </div>
+        </template>
       </application-row>
       <application-row
+        id="crossplane"
+        :logo-url="$options.logos.crossplaneLogo"
+        :title="applications.crossplane.title"
+        :status="applications.crossplane.status"
+        :status-reason="applications.crossplane.statusReason"
+        :request-status="applications.crossplane.requestStatus"
+        :request-reason="applications.crossplane.requestReason"
+        :installed="applications.crossplane.installed"
+        :install-failed="applications.crossplane.installFailed"
+        :uninstallable="applications.crossplane.uninstallable"
+        :uninstall-successful="applications.crossplane.uninstallSuccessful"
+        :uninstall-failed="applications.crossplane.uninstallFailed"
+        :install-application-request-params="{ stack: applications.crossplane.stack }"
+        title-link="https://crossplane.io"
+      >
+        <template #description>
+          <p data-testid="crossplaneDescription">
+            <gl-sprintf
+              :message="
+                s__(
+                  `ClusterIntegration|Crossplane enables declarative provisioning of managed services from your cloud of choice using %{codeStart}kubectl%{codeEnd} or %{linkStart}GitLab Integration%{linkEnd}.
+              Crossplane runs inside your Kubernetes cluster and supports secure connectivity and secrets management between app containers and the cloud services they depend on.`,
+                )
+              "
+            >
+              <template #code="{content}">
+                <code>{{ content }}</code>
+              </template>
+              <template #link="{ content }">
+                <gl-link
+                  href="https://docs.gitlab.com/ee/user/clusters/applications.html#crossplane"
+                  target="_blank"
+                  >{{ content }}</gl-link
+                >
+              </template>
+            </gl-sprintf>
+          </p>
+          <div class="form-group">
+            <CrossplaneProviderStack :crossplane="crossplane" @set="setCrossplaneProviderStack" />
+          </div>
+        </template>
+      </application-row>
+
+      <application-row
         id="jupyter"
-        :logo-url="jupyterhubLogo"
+        :logo-url="$options.logos.jupyterhubLogo"
         :title="applications.jupyter.title"
         :status="applications.jupyter.status"
         :status-reason="applications.jupyter.statusReason"
@@ -455,17 +456,16 @@ export default {
         :uninstall-successful="applications.jupyter.uninstallSuccessful"
         :uninstall-failed="applications.jupyter.uninstallFailed"
         :install-application-request-params="{ hostname: applications.jupyter.hostname }"
-        :disabled="!helmInstalled"
         title-link="https://jupyterhub.readthedocs.io/en/stable/"
       >
-        <div slot="description">
+        <template #description>
           <p>
             {{
               s__(`ClusterIntegration|JupyterHub, a multi-user Hub, spawns,
-            manages, and proxies multiple instances of the single-user
-            Jupyter notebook server. JupyterHub can be used to serve
-            notebooks to a class of students, a corporate data science group,
-            or a scientific research group.`)
+                        manages, and proxies multiple instances of the single-user
+                        Jupyter notebook server. JupyterHub can be used to serve
+                        notebooks to a class of students, a corporate data science group,
+                        or a scientific research group.`)
             }}
           </p>
 
@@ -475,6 +475,7 @@ export default {
 
               <div class="input-group">
                 <input
+                  id="jupyter-hostname"
                   v-model="applications.jupyter.hostname"
                   :readonly="jupyterInstalled"
                   type="text"
@@ -492,19 +493,19 @@ export default {
               <p v-if="ingressInstalled" class="form-text text-muted">
                 {{
                   s__(`ClusterIntegration|Replace this with your own hostname if you want.
-                If you do so, point hostname to Ingress IP Address from above.`)
+                                If you do so, point hostname to Ingress IP Address from above.`)
                 }}
-                <a :href="ingressDnsHelpPath" target="_blank" rel="noopener noreferrer">
+                <gl-link :href="ingressDnsHelpPath" target="_blank">
                   {{ __('More information') }}
-                </a>
+                </gl-link>
               </p>
             </div>
           </template>
-        </div>
+        </template>
       </application-row>
       <application-row
         id="knative"
-        :logo-url="knativeLogo"
+        :logo-url="$options.logos.knativeLogo"
         :title="applications.knative.title"
         :status="applications.knative.status"
         :status-reason="applications.knative.statusReason"
@@ -512,51 +513,57 @@ export default {
         :request-reason="applications.knative.requestReason"
         :installed="applications.knative.installed"
         :install-failed="applications.knative.installFailed"
-        :install-application-request-params="{ hostname: applications.knative.hostname }"
-        :installed-via="installedVia"
+        :install-application-request-params="{
+          hostname: applications.knative.hostname,
+          pages_domain_id: applications.knative.pagesDomain && applications.knative.pagesDomain.id,
+        }"
         :uninstallable="applications.knative.uninstallable"
         :uninstall-successful="applications.knative.uninstallSuccessful"
         :uninstall-failed="applications.knative.uninstallFailed"
         :updateable="false"
-        :disabled="!helmInstalled"
         v-bind="applications.knative"
         title-link="https://github.com/knative/docs"
       >
-        <div slot="description">
-          <span v-if="!rbac">
-            <p v-if="!rbac" class="rbac-notice bs-callout bs-callout-info append-bottom-0">
-              {{
-                s__(`ClusterIntegration|You must have an RBAC-enabled cluster
-              to install Knative.`)
-              }}
-              <a :href="helpPath" target="_blank" rel="noopener noreferrer">
-                {{ __('More information') }}
-              </a>
-            </p>
-            <br />
-          </span>
+        <template #description>
+          <p v-if="!rbac" class="rbac-notice bs-callout bs-callout-info">
+            {{
+              s__(`ClusterIntegration|You must have an RBAC-enabled cluster
+            to install Knative.`)
+            }}
+            <gl-link :href="helpPath" target="_blank">{{ __('More information') }}</gl-link>
+          </p>
           <p>
             {{
               s__(`ClusterIntegration|Knative extends Kubernetes to provide
-            a set of middleware components that are essential to build modern,
-            source-centric, and container-based applications that can run
-            anywhere: on premises, in the cloud, or even in a third-party data center.`)
+                        a set of middleware components that are essential to build modern,
+                        source-centric, and container-based applications that can run
+                        anywhere: on premises, in the cloud, or even in a third-party data center.`)
             }}
           </p>
 
           <knative-domain-editor
-            v-if="(knative.installed || (helmInstalled && rbac)) && !preInstalledKnative"
+            v-if="(knative.installed || rbac) && !preInstalledKnative"
             :knative="knative"
             :ingress-dns-help-path="ingressDnsHelpPath"
             @save="saveKnativeDomain"
-            @set="setKnativeHostname"
+            @set="setKnativeDomain"
           />
-        </div>
+        </template>
+        <template v-if="cloudRun" #installedVia>
+          <span data-testid="installedVia">
+            <gl-sprintf
+              :message="s__('ClusterIntegration|installed via %{linkStart}Cloud Run%{linkEnd}')"
+            >
+              <template #link="{ content }">
+                <gl-link :href="cloudRunHelpPath" target="_blank">{{ content }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </span>
+        </template>
       </application-row>
       <application-row
-        v-if="enableClusterApplicationElasticStack"
         id="elastic_stack"
-        :logo-url="elasticStackLogo"
+        :logo-url="$options.logos.elasticStackLogo"
         :title="applications.elastic_stack.title"
         :status="applications.elastic_stack.status"
         :status-reason="applications.elastic_stack.statusReason"
@@ -572,13 +579,9 @@ export default {
         :uninstallable="applications.elastic_stack.uninstallable"
         :uninstall-successful="applications.elastic_stack.uninstallSuccessful"
         :uninstall-failed="applications.elastic_stack.uninstallFailed"
-        :disabled="!helmInstalled"
-        :install-application-request-params="{
-          kibana_hostname: applications.elastic_stack.kibana_hostname,
-        }"
-        title-link="https://github.com/helm/charts/tree/master/stable/elastic-stack"
+        title-link="https://gitlab.com/gitlab-org/charts/elastic-stack"
       >
-        <div slot="description">
+        <template #description>
           <p>
             {{
               s__(
@@ -586,41 +589,84 @@ export default {
               )
             }}
           </p>
+        </template>
+      </application-row>
 
-          <template v-if="ingressExternalEndpoint">
-            <div class="form-group">
-              <label for="elastic-stack-kibana-hostname">{{
-                s__('ClusterIntegration|Kibana Hostname')
-              }}</label>
+      <application-row
+        id="fluentd"
+        :logo-url="$options.logos.fluentdLogo"
+        :title="applications.fluentd.title"
+        :status="applications.fluentd.status"
+        :status-reason="applications.fluentd.statusReason"
+        :request-status="applications.fluentd.requestStatus"
+        :request-reason="applications.fluentd.requestReason"
+        :installed="applications.fluentd.installed"
+        :install-failed="applications.fluentd.installFailed"
+        :install-application-request-params="{
+          host: applications.fluentd.host,
+          port: applications.fluentd.port,
+          protocol: applications.fluentd.protocol,
+          waf_log_enabled: applications.fluentd.wafLogEnabled,
+          cilium_log_enabled: applications.fluentd.ciliumLogEnabled,
+        }"
+        :uninstallable="applications.fluentd.uninstallable"
+        :uninstall-successful="applications.fluentd.uninstallSuccessful"
+        :uninstall-failed="applications.fluentd.uninstallFailed"
+        :updateable="false"
+        title-link="https://github.com/helm/charts/tree/master/stable/fluentd"
+      >
+        <template #description>
+          <p>
+            {{
+              s__(
+                `ClusterIntegration|Fluentd is an open source data collector, which lets you unify the data collection and consumption for a better use and understanding of data. It requires at least one of the following logs to be successfully installed.`,
+              )
+            }}
+          </p>
 
-              <div class="input-group">
-                <input
-                  v-model="applications.elastic_stack.kibana_hostname"
-                  :readonly="elasticStackInstalled"
-                  type="text"
-                  class="form-control js-hostname"
-                />
-                <span class="input-group-btn">
-                  <clipboard-button
-                    :text="elasticStackKibanaHostname"
-                    :title="s__('ClusterIntegration|Copy Kibana Hostname')"
-                    class="js-clipboard-btn"
-                  />
-                </span>
-              </div>
+          <fluentd-output-settings
+            :port="applications.fluentd.port"
+            :protocol="applications.fluentd.protocol"
+            :host="applications.fluentd.host"
+            :waf-log-enabled="applications.fluentd.wafLogEnabled"
+            :cilium-log-enabled="applications.fluentd.ciliumLogEnabled"
+            :status="applications.fluentd.status"
+            :update-failed="applications.fluentd.updateFailed"
+          />
+        </template>
+      </application-row>
 
-              <p v-if="ingressInstalled" class="form-text text-muted">
-                {{
-                  s__(`ClusterIntegration|Replace this with your own hostname if you want.
-                If you do so, point hostname to Ingress IP Address from above.`)
-                }}
-                <a :href="ingressDnsHelpPath" target="_blank" rel="noopener noreferrer">
-                  {{ __('More information') }}
-                </a>
-              </p>
-            </div>
-          </template>
-        </div>
+      <div class="gl-mt-7 gl-border-1 gl-border-t-solid gl-border-gray-100">
+        <!-- This empty div serves as a separator. The applications below can be externally installed using a cluster-management project. -->
+      </div>
+
+      <application-row
+        id="cilium"
+        :title="applications.cilium.title"
+        :logo-url="$options.logos.gitlabLogo"
+        :status="applications.cilium.status"
+        :status-reason="applications.cilium.statusReason"
+        :installable="applications.cilium.installable"
+        :uninstallable="applications.cilium.uninstallable"
+        :installed="applications.cilium.installed"
+        :install-failed="applications.cilium.installFailed"
+        :title-link="ciliumHelpPath"
+      >
+        <template #description>
+          <p data-testid="ciliumDescription">
+            <gl-sprintf
+              :message="
+                s__(
+                  'ClusterIntegration|Protect your clusters with GitLab Container Network Policies by enforcing how pods communicate with each other and other network endpoints. %{linkStart}Learn more about configuring Network Policies here.%{linkEnd}',
+                )
+              "
+            >
+              <template #link="{ content }">
+                <gl-link :href="ciliumHelpPath" target="_blank">{{ content }}</gl-link>
+              </template>
+            </gl-sprintf>
+          </p>
+        </template>
       </application-row>
     </div>
   </section>

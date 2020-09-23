@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupClusterablePresenter do
+RSpec.describe GroupClusterablePresenter do
   include Gitlab::Routing.url_helpers
 
   let(:presenter) { described_class.new(group) }
@@ -83,9 +83,21 @@ describe GroupClusterablePresenter do
     it { is_expected.to eq(update_applications_group_cluster_path(group, cluster, application)) }
   end
 
+  describe '#clear_cluster_cache_path' do
+    subject { presenter.clear_cluster_cache_path(cluster) }
+
+    it { is_expected.to eq(clear_cache_group_cluster_path(group, cluster)) }
+  end
+
   describe '#cluster_path' do
     subject { presenter.cluster_path(cluster) }
 
     it { is_expected.to eq(group_cluster_path(group, cluster)) }
+  end
+
+  describe '#metrics_dashboard_path' do
+    subject { presenter.metrics_dashboard_path(cluster) }
+
+    it { is_expected.to eq(metrics_dashboard_group_cluster_path(group, cluster)) }
   end
 end

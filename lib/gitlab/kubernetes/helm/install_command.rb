@@ -3,19 +3,16 @@
 module Gitlab
   module Kubernetes
     module Helm
-      class InstallCommand
-        include BaseCommand
+      class InstallCommand < BaseCommand
         include ClientCommand
 
-        attr_reader :name, :files, :chart, :repository, :preinstall, :postinstall
+        attr_reader :chart, :repository, :preinstall, :postinstall
         attr_accessor :version
 
-        def initialize(name:, chart:, files:, rbac:, version: nil, repository: nil, preinstall: nil, postinstall: nil)
-          @name = name
+        def initialize(chart:, version: nil, repository: nil, preinstall: nil, postinstall: nil, **args)
+          super(**args)
           @chart = chart
           @version = version
-          @rbac = rbac
-          @files = files
           @repository = repository
           @preinstall = preinstall
           @postinstall = postinstall
@@ -24,7 +21,6 @@ module Gitlab
         def generate_script
           super + [
             init_command,
-            wait_for_tiller_command,
             repository_command,
             repository_update_command,
             preinstall,
@@ -33,23 +29,15 @@ module Gitlab
           ].compact.join("\n")
         end
 
-        def rbac?
-          @rbac
-        end
-
         private
-
-        def repository_update_command
-          'helm repo update'
-        end
 
         # Uses `helm upgrade --install` which means we can use this for both
         # installation and uprade of applications
         def install_command
           command = ['helm', 'upgrade', name, chart] +
             install_flag +
+            rollback_support_flag +
             reset_values_flag +
-            optional_tls_flags +
             optional_version_flag +
             rbac_create_flag +
             namespace_flag +
@@ -86,6 +74,10 @@ module Gitlab
           return [] unless version
 
           ['--version', version]
+        end
+
+        def rollback_support_flag
+          ['--atomic', '--cleanup-on-fail']
         end
       end
     end

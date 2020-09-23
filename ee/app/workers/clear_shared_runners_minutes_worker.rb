@@ -1,46 +1,34 @@
 # frozen_string_literal: true
 
-class ClearSharedRunnersMinutesWorker
-  LEASE_TIMEOUT = 3600
-
+class ClearSharedRunnersMinutesWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+  # rubocop:disable Scalability/CronWorkerContext
+  # This worker does not perform work scoped to a context
+  # all queries are scoped across multiple namespaces
   include CronjobQueue
-
+  # rubocop:enable Scalability/CronWorkerContext
   feature_category :continuous_integration
 
+  LEASE_TIMEOUT = 3600
+  BATCH_SIZE = 100_000
+
   def perform
-    return unless try_obtain_lease
+    if Feature.enabled?(:ci_parallel_minutes_reset, default_enabled: true)
+      start_id = Namespace.minimum(:id)
+      last_id = Namespace.maximum(:id)
 
-    Namespace.with_shared_runners_minutes_limit
-      .with_extra_shared_runners_minutes_limit
-      .with_shared_runners_minutes_exceeding_default_limit
-      .update_all("extra_shared_runners_minutes_limit = #{extra_minutes_left_sql} FROM namespace_statistics")
-
-    Namespace.with_ci_minutes_notification_sent.each_batch do |namespaces|
-      namespaces.update_all(last_ci_minutes_notification_at: nil, last_ci_minutes_usage_notification_level: nil)
-    end
-
-    Namespace.select(:id).each_batch do |namespaces|
-      Namespace.transaction do
-        reset_statistics(NamespaceStatistics, namespaces)
-        reset_statistics(ProjectStatistics, namespaces)
+      (start_id..last_id).step(BATCH_SIZE) do |batch_start_id|
+        batch_end_id = batch_start_id + BATCH_SIZE - 1
+        Ci::BatchResetMinutesWorker.perform_async(batch_start_id, batch_end_id)
       end
+    else
+      return unless try_obtain_lease
+
+      Ci::Minutes::BatchResetService.new.execute!
     end
   end
 
   private
-
-  # rubocop: disable CodeReuse/ActiveRecord
-  def reset_statistics(model, namespaces)
-    model.where(namespace: namespaces).where.not(shared_runners_seconds: 0).update_all(
-      shared_runners_seconds: 0,
-      shared_runners_seconds_last_reset: Time.now)
-  end
-  # rubocop: enable CodeReuse/ActiveRecord
-
-  def extra_minutes_left_sql
-    "GREATEST((namespaces.shared_runners_minutes_limit + namespaces.extra_shared_runners_minutes_limit) - ROUND(namespace_statistics.shared_runners_seconds / 60.0), 0)"
-  end
 
   def try_obtain_lease
     Gitlab::ExclusiveLease.new('gitlab_clear_shared_runners_minutes_worker',

@@ -20,7 +20,9 @@ module EE
 
     def mock_group_saml(uid:)
       allow(Devise).to receive(:omniauth_providers).and_return(%i(group_saml))
-      allow_any_instance_of(::Gitlab::Auth::Saml::OriginValidator).to receive(:gitlab_initiated?).and_return(true)
+      allow_next_instance_of(::Gitlab::Auth::Saml::OriginValidator) do |instance|
+        allow(instance).to receive(:gitlab_initiated?).and_return(true)
+      end
       configure_group_saml_mock_auth(uid: uid)
       stub_omniauth_provider(:group_saml)
     end

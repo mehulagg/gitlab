@@ -1,0 +1,37 @@
+query getStorageCounter($fullPath: ID!) {
+  namespace(fullPath: $fullPath) {
+    id
+    storageSizeLimit
+    rootStorageStatistics {
+      storageSize
+      repositorySize
+      lfsObjectsSize
+      buildArtifactsSize
+      packagesSize
+      wikiSize
+      snippetsSize
+    }
+    projects(includeSubgroups: true) {
+      edges {
+        node {
+          id
+          fullPath
+          nameWithNamespace
+          avatarUrl
+          webUrl
+          name
+          statistics {
+            commitCount
+            storageSize
+            repositorySize
+            lfsObjectsSize
+            buildArtifactsSize
+            packagesSize
+            wikiSize
+            snippetsSize
+          }
+        }
+      }
+    }
+  }
+}

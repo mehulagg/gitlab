@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-class StuckMergeJobsWorker
+class StuckMergeJobsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
-  include CronjobQueue
+  include CronjobQueue # rubocop:disable Scalability/CronWorkerContext
 
   feature_category :source_code_management
 
   def self.logger
-    Rails.logger # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger
   end
 
   # rubocop: disable CodeReuse/ActiveRecord

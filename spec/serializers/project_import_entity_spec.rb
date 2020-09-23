@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe ProjectImportEntity do
+RSpec.describe ProjectImportEntity do
   include ImportHelper
 
-  set(:project) { create(:project, import_status: :started, import_source: 'namespace/project') }
+  let_it_be(:project) { create(:project, import_status: :started, import_source: 'namespace/project') }
   let(:provider_url) { 'https://provider.com' }
   let(:entity) { described_class.represent(project, provider_url: provider_url) }
 

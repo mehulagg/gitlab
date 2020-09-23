@@ -4,9 +4,10 @@ module Gitlab
   module Ci
     module Reports
       class TestSuite
-        attr_reader :name
-        attr_reader :test_cases
-        attr_reader :total_time
+        attr_accessor :name
+        attr_accessor :test_cases
+        attr_accessor :total_time
+        attr_reader :suite_error
 
         def initialize(name = nil)
           @name = name
@@ -25,32 +26,78 @@ module Gitlab
 
         # rubocop: disable CodeReuse/ActiveRecord
         def total_count
-          test_cases.values.sum(&:count)
+          return 0 if suite_error
+
+          [success_count, failed_count, skipped_count, error_count].sum
         end
         # rubocop: enable CodeReuse/ActiveRecord
 
         def total_status
-          if failed_count > 0 || error_count > 0
+          if suite_error
+            TestCase::STATUS_ERROR
+          elsif failed_count > 0 || error_count > 0
             TestCase::STATUS_FAILED
           else
             TestCase::STATUS_SUCCESS
           end
         end
 
+        def with_attachment!
+          @test_cases = @test_cases.extract!("failed")
+
+          @test_cases.keep_if do |status, hash|
+            hash.any? do |key, test_case|
+              test_case.has_attachment?
+            end
+          end
+        end
+
         TestCase::STATUS_TYPES.each do |status_type|
           define_method("#{status_type}") do
-            test_cases[status_type] || {}
+            return {} if suite_error || test_cases[status_type].nil?
+
+            test_cases[status_type]
           end
 
           define_method("#{status_type}_count") do
-            test_cases[status_type]&.length.to_i
+            return 0 if suite_error || test_cases[status_type].nil?
+
+            test_cases[status_type].length
           end
+        end
+
+        def set_suite_error(msg)
+          @suite_error = msg
+        end
+
+        def +(other)
+          self.class.new.tap do |test_suite|
+            test_suite.name = self.name
+            test_suite.test_cases = self.test_cases.deep_merge(other.test_cases)
+            test_suite.total_time = self.total_time + other.total_time
+          end
+        end
+
+        def sorted
+          sort_by_status
+          sort_by_execution_time_desc
+          self
         end
 
         private
 
         def existing_key?(test_case)
           @test_cases[test_case.status]&.key?(test_case.key)
+        end
+
+        def sort_by_status
+          @test_cases = @test_cases.sort_by { |status, _| Gitlab::Ci::Reports::TestCase::STATUS_TYPES.index(status) }.to_h
+        end
+
+        def sort_by_execution_time_desc
+          @test_cases = @test_cases.keys.each_with_object({}) do |key, hash|
+            hash[key] = @test_cases[key].sort_by { |_key, test_case| -test_case.execution_time }.to_h
+          end
         end
       end
     end

@@ -3,7 +3,7 @@
 require 'spec_helper'
 require 'rake_helper'
 
-describe SystemCheck::Geo::GeoDatabaseConfiguredCheck do
+RSpec.describe SystemCheck::Geo::GeoDatabaseConfiguredCheck do
   before do
     silence_output
   end

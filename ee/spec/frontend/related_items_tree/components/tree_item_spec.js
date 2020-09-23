@@ -1,7 +1,6 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
-
-import Icon from '~/vue_shared/components/icon.vue';
+import Vuex from 'vuex';
+import { GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 
 import TreeItem from 'ee/related_items_tree/components/tree_item.vue';
 import TreeItemBody from 'ee/related_items_tree/components/tree_item_body.vue';
@@ -9,23 +8,18 @@ import TreeRoot from 'ee/related_items_tree/components/tree_root.vue';
 
 import createDefaultStore from 'ee/related_items_tree/store';
 import * as epicUtils from 'ee/related_items_tree/utils/epic_utils';
-import { ChildType } from 'ee/related_items_tree/constants';
-import { PathIdSeparator } from 'ee/related_issues/constants';
+import { ChildType, treeItemChevronBtnClassName } from 'ee/related_items_tree/constants';
+import { PathIdSeparator } from '~/related_issues/constants';
 
-import {
-  mockParentItem,
-  mockQueryResponse,
-  mockEpic1,
-} from '../../../javascripts/related_items_tree/mock_data';
+import { mockParentItem, mockQueryResponse, mockEpic1 } from '../mock_data';
 
-const mockItem = Object.assign({}, mockEpic1, {
-  type: ChildType.Epic,
-  pathIdSeparator: PathIdSeparator.Epic,
-});
+const mockItem = { ...mockEpic1, type: ChildType.Epic, pathIdSeparator: PathIdSeparator.Epic };
+
+const localVue = createLocalVue();
+localVue.use(Vuex);
 
 const createComponent = (parentItem = mockParentItem, item = mockItem) => {
   const store = createDefaultStore();
-  const localVue = createLocalVue();
   const children = epicUtils.processQueryResponse(mockQueryResponse.data.group);
 
   store.dispatch('setInitialParentItem', mockParentItem);
@@ -141,12 +135,18 @@ describe('RelatedItemsTree', () => {
         const chevronButton = wrapper.find(GlButton);
 
         expect(chevronButton.isVisible()).toBe(true);
-        expect(chevronButton.attributes('data-original-title')).toBe('Collapse');
+        expect(chevronButton.attributes('title')).toBe('Collapse');
+      });
+
+      it('has the proper class on the expand/collapse button to avoid dragging', () => {
+        const chevronButton = wrapper.find(GlButton);
+
+        expect(chevronButton.attributes('class')).toContain(treeItemChevronBtnClassName);
       });
 
       it('renders expand/collapse icon', () => {
-        const expandedIcon = wrapperExpanded.find(Icon);
-        const collapsedIcon = wrapperCollapsed.find(Icon);
+        const expandedIcon = wrapperExpanded.find(GlIcon);
+        const collapsedIcon = wrapperCollapsed.find(GlIcon);
 
         expect(expandedIcon.isVisible()).toBe(true);
         expect(expandedIcon.props('name')).toBe('chevron-down');
@@ -154,18 +154,16 @@ describe('RelatedItemsTree', () => {
         expect(collapsedIcon.props('name')).toBe('chevron-right');
       });
 
-      it('renders loading icon when item expand is in progress', done => {
+      it('renders loading icon when item expand is in progress', () => {
         wrapper.vm.$store.dispatch('requestItems', {
           parentItem: mockItem,
           isSubItem: true,
         });
 
-        wrapper.vm.$nextTick(() => {
+        return wrapper.vm.$nextTick(() => {
           const loadingIcon = wrapper.find(GlLoadingIcon);
 
           expect(loadingIcon.isVisible()).toBe(true);
-
-          done();
         });
       });
 

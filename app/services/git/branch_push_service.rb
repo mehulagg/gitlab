@@ -29,6 +29,7 @@ module Git
       perform_housekeeping
 
       stop_environments
+      unlock_artifacts
 
       true
     end
@@ -36,6 +37,8 @@ module Git
     # Update merge requests that may be affected by this push. A new branch
     # could cause the last commit of a merge request to change.
     def enqueue_update_mrs
+      return if params[:merge_request_branches]&.exclude?(branch_name)
+
       UpdateMergeRequestsWorker.perform_async(
         project.id,
         current_user.id,
@@ -56,6 +59,12 @@ module Git
       return unless removing_branch?
 
       Ci::StopEnvironmentsService.new(project, current_user).execute(branch_name)
+    end
+
+    def unlock_artifacts
+      return unless removing_branch?
+
+      Ci::RefDeleteUnlockArtifactsWorker.perform_async(project.id, current_user.id, ref)
     end
 
     def execute_related_hooks

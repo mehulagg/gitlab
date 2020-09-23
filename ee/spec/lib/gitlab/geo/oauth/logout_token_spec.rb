@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::Oauth::LogoutToken do
+RSpec.describe Gitlab::Geo::Oauth::LogoutToken do
   let(:user) { create(:user) }
   let(:node) { create(:geo_node) }
   let(:access_token) { create(:doorkeeper_access_token, resource_owner_id: user.id, application_id: node.oauth_application_id) }
@@ -32,9 +32,9 @@ describe Gitlab::Geo::Oauth::LogoutToken do
     end
 
     it 'returns false when token has an incorrect encoding' do
-      allow_any_instance_of(Gitlab::Geo::Oauth::LogoutState)
-        .to receive(:decode)
-        .and_return("\xD800\xD801\xD802")
+      allow_next_instance_of(Gitlab::Geo::Oauth::LogoutState) do |instance|
+        allow(instance).to receive(:decode).and_return("\xD800\xD801\xD802")
+      end
 
       token = described_class.new(user, state)
 

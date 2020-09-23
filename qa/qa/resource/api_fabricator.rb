@@ -8,19 +8,22 @@ module QA
     module ApiFabricator
       include Capybara::DSL
 
-      ResourceNotFoundError = Class.new(RuntimeError)
       ResourceFabricationFailedError = Class.new(RuntimeError)
-      ResourceURLMissingError = Class.new(RuntimeError)
       ResourceNotDeletedError = Class.new(RuntimeError)
+      ResourceNotFoundError = Class.new(RuntimeError)
+      ResourceQueryError = Class.new(RuntimeError)
+      ResourceUpdateFailedError = Class.new(RuntimeError)
+      ResourceURLMissingError = Class.new(RuntimeError)
+      InternalServerError = Class.new(RuntimeError)
 
       attr_reader :api_resource, :api_response
       attr_writer :api_client
-      attr_accessor :user
+      attr_accessor :api_user
 
       def api_support?
         respond_to?(:api_get_path) &&
-          respond_to?(:api_post_path) &&
-          respond_to?(:api_post_body)
+          (respond_to?(:api_post_path) && respond_to?(:api_post_body)) ||
+          (respond_to?(:api_put_path) && respond_to?(:api_put_body))
       end
 
       def fabricate_via_api!
@@ -29,6 +32,12 @@ module QA
         end
 
         resource_web_url(api_post)
+      end
+
+      def reload!
+        api_get
+
+        self
       end
 
       def remove_via_api!
@@ -46,10 +55,22 @@ module QA
         end
       end
 
-      private
-
       include Support::Api
       attr_writer :api_resource, :api_response
+
+      def api_put(body = api_put_body)
+        response = put(
+          Runtime::API::Request.new(api_client, api_put_path).url,
+          body)
+
+        unless response.code == HTTP_STATUS_OK
+          raise ResourceFabricationFailedError, "Updating #{self.class.name} using the API failed (#{response.code}) with `#{response}`."
+        end
+
+        process_api_response(parse_body(response))
+      end
+
+      private
 
       def resource_web_url(resource)
         resource.fetch(:web_url) do
@@ -62,34 +83,59 @@ module QA
       end
 
       def api_get_from(get_path)
-        url = Runtime::API::Request.new(api_client, get_path).url
-        response = get(url)
+        request = Runtime::API::Request.new(api_client, get_path)
+        response = get(request.url)
 
-        unless response.code == HTTP_STATUS_OK
-          raise ResourceNotFoundError, "Resource at #{url} could not be found (#{response.code}): `#{response}`."
+        if response.code == HTTP_STATUS_SERVER_ERROR
+          raise InternalServerError, "Failed to GET #{request.mask_url} - (#{response.code}): `#{response}`."
+        elsif response.code != HTTP_STATUS_OK
+          raise ResourceNotFoundError, "Resource at #{request.mask_url} could not be found (#{response.code}): `#{response}`."
         end
 
         response
       end
 
       def api_post
-        response = post(
-          Runtime::API::Request.new(api_client, api_post_path).url,
-          api_post_body)
+        if api_post_path == "/graphql"
+          graphql_response = post(
+            Runtime::API::Request.new(api_client, api_post_path).url,
+            query: api_post_body)
 
-        unless response.code == HTTP_STATUS_CREATED
-          raise ResourceFabricationFailedError, "Fabrication of #{self.class.name} using the API failed (#{response.code}) with `#{response}`."
+          flattened_response = flatten_hash(parse_body(graphql_response))
+
+          unless graphql_response.code == HTTP_STATUS_OK && flattened_response[:errors].empty?
+            raise ResourceFabricationFailedError, "Fabrication of #{self.class.name} using the API failed (#{graphql_response.code}) with `#{graphql_response}`."
+          end
+
+          flattened_response[:web_url] = flattened_response.delete(:webUrl)
+          flattened_response[:id] = flattened_response.fetch(:id).split('/')[-1]
+
+          process_api_response(flattened_response)
+        else
+          response = post(
+            Runtime::API::Request.new(api_client, api_post_path).url,
+            api_post_body)
+
+          unless response.code == HTTP_STATUS_CREATED
+            raise ResourceFabricationFailedError, "Fabrication of #{self.class.name} using the API failed (#{response.code}) with `#{response}`."
+          end
+
+          process_api_response(parse_body(response))
         end
+      end
 
-        process_api_response(parse_body(response))
+      def flatten_hash(param)
+        param.each_pair.reduce({}) do |a, (k, v)|
+          v.is_a?(Hash) ? a.merge(flatten_hash(v)) : a.merge(k.to_sym => v)
+        end
       end
 
       def api_delete
-        url = Runtime::API::Request.new(api_client, api_delete_path).url
-        response = delete(url)
+        request = Runtime::API::Request.new(api_client, api_delete_path)
+        response = delete(request.url)
 
-        unless response.code == HTTP_STATUS_NO_CONTENT
-          raise ResourceNotDeletedError, "Resource at #{url} could not be deleted (#{response.code}): `#{response}`."
+        unless [HTTP_STATUS_NO_CONTENT, HTTP_STATUS_ACCEPTED].include? response.code
+          raise ResourceNotDeletedError, "Resource at #{request.mask_url} could not be deleted (#{response.code}): `#{response}`."
         end
 
         response
@@ -97,7 +143,7 @@ module QA
 
       def api_client
         @api_client ||= begin
-          Runtime::API::Client.new(:gitlab, is_new_session: !current_url.start_with?('http'), user: user)
+          Runtime::API::Client.new(:gitlab, is_new_session: !current_url.start_with?('http'), user: api_user)
         end
       end
 

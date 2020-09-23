@@ -6,6 +6,7 @@ module EE
       extend ActiveSupport::Concern
 
       prepended do
+        with_scope :global
         condition(:cluster_deployments_available) do
           License.feature_available?(:cluster_deployments)
         end

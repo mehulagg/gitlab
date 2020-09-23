@@ -27,12 +27,12 @@ module EE
       end
 
       def log_audit_event
-        AuditEvents::ImpersonationAuditEventService.new(current_user, request.remote_ip, 'Started Impersonation').for_user(user.username).security_event
+        EE::AuditEvents::ImpersonationAuditEventService.new(current_user, request.remote_ip, 'Started Impersonation')
+          .for_user(user.username).security_event
       end
 
       def allowed_user_params
         super + [
-          :note,
           namespace_attributes: [
             :id,
             :shared_runners_minutes_limit,

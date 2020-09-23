@@ -17,8 +17,9 @@ module API
         authorize! :admin_note, note
 
         opts = {
-          note: params[:body]
-        }
+          note: params[:body],
+          confidential: params[:confidential]
+        }.compact
         parent = noteable_parent(noteable)
         project = parent if parent.is_a?(Project)
 
@@ -62,7 +63,7 @@ module API
 
       def get_note(noteable, note_id)
         note = noteable.notes.with_metadata.find(note_id)
-        can_read_note = note.visible_for?(current_user)
+        can_read_note = note.readable_by?(current_user)
 
         if can_read_note
           present note, with: Entities::Note
@@ -72,18 +73,26 @@ module API
       end
 
       def noteable_read_ability_name(noteable)
-        "read_#{noteable.class.to_s.underscore}".to_sym
+        "read_#{ability_name(noteable)}".to_sym
       end
 
-      def find_noteable(parent_type, parent_id, noteable_type, noteable_id)
-        params = finder_params_by_noteable_type_and_id(noteable_type, noteable_id, parent_id)
+      def ability_name(noteable)
+        if noteable.respond_to?(:to_ability_name)
+          noteable.to_ability_name
+        else
+          noteable.class.to_s.underscore
+        end
+      end
+
+      def find_noteable(noteable_type, noteable_id)
+        params = finder_params_by_noteable_type_and_id(noteable_type, noteable_id)
 
         noteable = NotesFinder.new(current_user, params).target
         noteable = nil unless can?(current_user, noteable_read_ability_name(noteable), noteable)
         noteable || not_found!(noteable_type)
       end
 
-      def finder_params_by_noteable_type_and_id(type, id, parent_id)
+      def finder_params_by_noteable_type_and_id(type, id)
         target_type = type.name.underscore
         { target_type: target_type }.tap do |h|
           if %w(issue merge_request).include?(target_type)
@@ -92,11 +101,11 @@ module API
             h[:target_id] = id
           end
 
-          add_parent_to_finder_params(h, type, parent_id)
+          add_parent_to_finder_params(h, type)
         end
       end
 
-      def add_parent_to_finder_params(finder_params, noteable_type, parent_id)
+      def add_parent_to_finder_params(finder_params, noteable_type)
         finder_params[:project] = user_project
       end
 
@@ -105,6 +114,7 @@ module API
       end
 
       def create_note(noteable, opts)
+        whitelist_query_limiting
         authorize!(:create_note, noteable)
 
         parent = noteable_parent(noteable)
@@ -124,12 +134,16 @@ module API
 
         if resolved
           parent = noteable_parent(noteable)
-          ::Discussions::ResolveService.new(parent, current_user, merge_request: noteable).execute(discussion)
+          ::Discussions::ResolveService.new(parent, current_user, one_or_more_discussions: discussion).execute
         else
           discussion.unresolve!
         end
 
         present discussion, with: Entities::Discussion
+      end
+
+      def whitelist_query_limiting
+        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/-/issues/211538')
       end
     end
   end

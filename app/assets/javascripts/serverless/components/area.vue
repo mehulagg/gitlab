@@ -1,7 +1,7 @@
 <script>
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
-import { debounceByAnimationFrame } from '~/lib/utils/common_utils';
 import dateFormat from 'dateformat';
+import { debounceByAnimationFrame } from '~/lib/utils/common_utils';
 import { X_INTERVAL } from '../constants';
 import { validateGraphData } from '../utils';
 import { __ } from '~/locale';
@@ -138,8 +138,8 @@ export default {
       :width="width"
       :include-legend-avg-max="false"
     >
-      <template slot="tooltipTitle">{{ tooltipPopoverTitle }}</template>
-      <template slot="tooltipContent">{{ tooltipPopoverContent }}</template>
+      <template #tooltipTitle>{{ tooltipPopoverTitle }}</template>
+      <template #tooltipContent>{{ tooltipPopoverContent }}</template>
     </gl-area-chart>
   </div>
 </template>

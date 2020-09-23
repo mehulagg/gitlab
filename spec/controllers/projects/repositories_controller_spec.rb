@@ -2,10 +2,14 @@
 
 require "spec_helper"
 
-describe Projects::RepositoriesController do
+RSpec.describe Projects::RepositoriesController do
   let(:project) { create(:project, :repository) }
 
   describe "GET archive" do
+    before do
+      allow(controller).to receive(:archive_rate_limit_reached?).and_return(false)
+    end
+
     context 'as a guest' do
       it 'responds with redirect in correct format' do
         get :archive, params: { namespace_id: project.namespace, project_id: project, id: "master" }, format: "zip"
@@ -17,10 +21,17 @@ describe Projects::RepositoriesController do
 
     context 'as a user' do
       let(:user) { create(:user) }
+      let(:archive_name) { "#{project.path}-master" }
 
       before do
         project.add_developer(user)
         sign_in(user)
+      end
+
+      it_behaves_like "hotlink interceptor" do
+        let(:http_request) do
+          get :archive, params: { namespace_id: project.namespace, project_id: project, id: "master" }, format: "zip"
+        end
       end
 
       it "uses Gitlab::Workhorse" do
@@ -30,9 +41,18 @@ describe Projects::RepositoriesController do
       end
 
       it 'responds with redirect to the short name archive if fully qualified' do
-        get :archive, params: { namespace_id: project.namespace, project_id: project, id: "master/#{project.path}-master" }, format: "zip"
+        get :archive, params: { namespace_id: project.namespace, project_id: project, id: "master/#{archive_name}" }, format: "zip"
 
         expect(assigns(:ref)).to eq("master")
+        expect(assigns(:filename)).to eq(archive_name)
+        expect(response.header[Gitlab::Workhorse::SEND_DATA_HEADER]).to start_with("git-archive:")
+      end
+
+      it 'responds with redirect for a path with multiple slashes' do
+        get :archive, params: { namespace_id: project.namespace, project_id: project, id: "improve/awesome/#{archive_name}" }, format: "zip"
+
+        expect(assigns(:ref)).to eq("improve/awesome")
+        expect(assigns(:filename)).to eq(archive_name)
         expect(response.header[Gitlab::Workhorse::SEND_DATA_HEADER]).to start_with("git-archive:")
       end
 
@@ -45,7 +65,7 @@ describe Projects::RepositoriesController do
       it 'handles legacy queries with the ref specified as ref in params' do
         get :archive, params: { namespace_id: project.namespace, project_id: project, ref: 'feature' }, format: 'zip'
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(assigns(:ref)).to eq('feature')
         expect(response.header[Gitlab::Workhorse::SEND_DATA_HEADER]).to start_with("git-archive:")
       end
@@ -53,7 +73,7 @@ describe Projects::RepositoriesController do
       it 'handles legacy queries with the ref specified as id in params' do
         get :archive, params: { namespace_id: project.namespace, project_id: project, id: 'feature' }, format: 'zip'
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(assigns(:ref)).to eq('feature')
         expect(response.header[Gitlab::Workhorse::SEND_DATA_HEADER]).to start_with("git-archive:")
       end
@@ -61,7 +81,7 @@ describe Projects::RepositoriesController do
       it 'prioritizes the id param over the ref param when both are specified' do
         get :archive, params: { namespace_id: project.namespace, project_id: project, id: 'feature', ref: 'feature_conflict' }, format: 'zip'
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(assigns(:ref)).to eq('feature')
         expect(response.header[Gitlab::Workhorse::SEND_DATA_HEADER]).to start_with("git-archive:")
       end
@@ -74,7 +94,25 @@ describe Projects::RepositoriesController do
         it "renders Not Found" do
           get :archive, params: { namespace_id: project.namespace, project_id: project, id: "master" }, format: "zip"
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+
+      context "when the request format is HTML" do
+        it "renders 404" do
+          get :archive, params: { namespace_id: project.namespace, project_id: project, id: 'master' }, format: "html"
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+
+      describe 'rate limiting' do
+        it 'rate limits user when thresholds hit' do
+          expect(controller).to receive(:archive_rate_limit_reached?).and_return(true)
+
+          get :archive, params: { namespace_id: project.namespace, project_id: project, id: 'master' }, format: "html"
+
+          expect(response).to have_gitlab_http_status(:too_many_requests)
         end
       end
 
@@ -82,7 +120,7 @@ describe Projects::RepositoriesController do
         it 'sets appropriate caching headers' do
           get_archive
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response.header['ETag']).to be_present
           expect(response.header['Cache-Control']).to include('max-age=60, private')
         end
@@ -93,7 +131,7 @@ describe Projects::RepositoriesController do
           it 'sets appropriate caching headers' do
             get_archive
 
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
             expect(response.header['ETag']).to be_present
             expect(response.header['Cache-Control']).to include('max-age=60, public')
           end
@@ -103,7 +141,7 @@ describe Projects::RepositoriesController do
           it 'max-age is set to 3600 in Cache-Control header' do
             get_archive('ddd0f15ae83993f5cb66a927a28673882e99100b')
 
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
             expect(response.header['Cache-Control']).to include('max-age=3600')
           end
         end
@@ -116,7 +154,7 @@ describe Projects::RepositoriesController do
             request.headers['If-None-Match'] = response.headers['ETag']
             get_archive
 
-            expect(response).to have_gitlab_http_status(304)
+            expect(response).to have_gitlab_http_status(:not_modified)
           end
         end
 
@@ -137,7 +175,7 @@ describe Projects::RepositoriesController do
         it 'redirects to sign in page' do
           get :archive, params: { namespace_id: project.namespace, project_id: project, id: 'master' }, format: 'zip'
 
-          expect(response).to have_gitlab_http_status(302)
+          expect(response).to have_gitlab_http_status(:found)
         end
       end
 
@@ -146,7 +184,7 @@ describe Projects::RepositoriesController do
           it 'calls the action normally' do
             get :archive, params: { namespace_id: project.namespace, project_id: project, id: 'master', token: user.static_object_token }, format: 'zip'
 
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
           end
         end
 
@@ -154,7 +192,7 @@ describe Projects::RepositoriesController do
           it 'redirects to sign in page' do
             get :archive, params: { namespace_id: project.namespace, project_id: project, id: 'master', token: 'foobar' }, format: 'zip'
 
-            expect(response).to have_gitlab_http_status(302)
+            expect(response).to have_gitlab_http_status(:found)
           end
         end
       end
@@ -165,7 +203,7 @@ describe Projects::RepositoriesController do
             request.headers['X-Gitlab-Static-Object-Token'] = user.static_object_token
             get :archive, params: { namespace_id: project.namespace, project_id: project, id: 'master' }, format: 'zip'
 
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
           end
         end
 
@@ -174,7 +212,7 @@ describe Projects::RepositoriesController do
             request.headers['X-Gitlab-Static-Object-Token'] = 'foobar'
             get :archive, params: { namespace_id: project.namespace, project_id: project, id: 'master' }, format: 'zip'
 
-            expect(response).to have_gitlab_http_status(302)
+            expect(response).to have_gitlab_http_status(:found)
           end
         end
       end

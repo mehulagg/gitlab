@@ -66,16 +66,16 @@ export default {
 <template>
   <assignee-avatar-link
     v-if="hasOneUser"
-    v-slot="{ user }"
+    #default="{ user }"
     tooltip-placement="left"
     :tooltip-has-name="false"
     :user="firstUser"
     :root-path="rootPath"
     :issuable-type="issuableType"
   >
-    <div class="ml-2">
-      <span class="author"> {{ user.name }} </span>
-      <span class="username"> {{ username }} </span>
+    <div class="ml-2 gl-line-height-normal">
+      <div>{{ user.name }}</div>
+      <div>{{ username }}</div>
     </div>
   </assignee-avatar-link>
   <div v-else>

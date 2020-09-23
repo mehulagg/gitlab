@@ -2,12 +2,26 @@
 
 require 'spec_helper'
 
-describe Deployments::FinishedWorker do
+RSpec.describe Deployments::FinishedWorker do
   let(:worker) { described_class.new }
 
   describe '#perform' do
     before do
       allow(ProjectServiceWorker).to receive(:perform_async)
+    end
+
+    it 'links merge requests to the deployment' do
+      deployment = create(:deployment)
+      service = instance_double(Deployments::LinkMergeRequestsService)
+
+      expect(Deployments::LinkMergeRequestsService)
+        .to receive(:new)
+        .with(deployment)
+        .and_return(service)
+
+      expect(service).to receive(:execute)
+
+      worker.perform(deployment.id)
     end
 
     it 'executes project services for deployment_hooks' do
@@ -34,6 +48,18 @@ describe Deployments::FinishedWorker do
       worker.perform(0)
 
       expect(ProjectServiceWorker).not_to have_received(:perform_async)
+    end
+
+    it 'execute webhooks' do
+      deployment = create(:deployment)
+      project = deployment.project
+      web_hook = create(:project_hook, deployment_events: true, project: project)
+
+      expect_next_instance_of(WebHookService, web_hook, an_instance_of(Hash), "deployment_hooks") do |service|
+        expect(service).to receive(:async_execute)
+      end
+
+      worker.perform(deployment.id)
     end
   end
 end

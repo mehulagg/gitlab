@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::ListService do
+RSpec.describe Boards::ListService do
   describe '#execute' do
     context 'when board parent is a project' do
       let(:parent) { create(:project) }
@@ -10,6 +10,7 @@ describe Boards::ListService do
       subject(:service) { described_class.new(parent, double) }
 
       it_behaves_like 'boards list service'
+      it_behaves_like 'multiple boards list service'
     end
 
     context 'when board parent is a group' do

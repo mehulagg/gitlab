@@ -12,6 +12,7 @@ module EE
       include Referable
       include Awardable
       include LabelEventable
+      include StateEventable
       include UsageStatistics
       include FromUnion
       include EpicTreeSorting
@@ -51,9 +52,13 @@ module EE
 
       has_many :epic_issues
       has_many :issues, through: :epic_issues
+      has_many :user_mentions, class_name: "EpicUserMention", dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
+      has_many :boards_epic_user_preferences, class_name: 'Boards::EpicUserPreference', inverse_of: :epic
 
       validates :group, presence: true
       validate :validate_parent, on: :create
+      validate :validate_confidential_issues_and_subepics
+      validate :validate_confidential_parent
 
       alias_attribute :parent_ids, :parent_id
       alias_method :issuing_parent, :group
@@ -61,12 +66,20 @@ module EE
       scope :for_ids, -> (ids) { where(id: ids) }
       scope :in_parents, -> (parent_ids) { where(parent_id: parent_ids) }
       scope :inc_group, -> { includes(:group) }
+      scope :in_selected_groups, -> (groups) { where(group_id: groups) }
       scope :in_milestone, -> (milestone_id) { joins(:issues).where(issues: { milestone_id: milestone_id }) }
       scope :in_issues, -> (issues) { joins(:epic_issues).where(epic_issues: { issue_id: issues }).distinct }
       scope :has_parent, -> { where.not(parent_id: nil) }
+      scope :iid_starts_with, -> (query) { where("CAST(iid AS VARCHAR) LIKE ?", "#{sanitize_sql_like(query)}%") }
+
+      scope :within_timeframe, -> (start_date, end_date) do
+        where('start_date is not NULL or end_date is not NULL')
+          .where('start_date is NULL or start_date <= ?', end_date)
+          .where('end_date is NULL or end_date >= ?', start_date)
+      end
 
       scope :order_start_or_end_date_asc, -> do
-        reorder("COALESCE(start_date, end_date) ASC NULLS FIRST")
+        reorder(Arel.sql("COALESCE(start_date, end_date) ASC NULLS FIRST"))
       end
 
       scope :order_start_date_asc, -> do
@@ -92,6 +105,14 @@ module EE
       scope :with_api_entity_associations, -> { preload(:author, :labels, group: :route) }
       scope :start_date_inherited, -> { where(start_date_is_fixed: [nil, false]) }
       scope :due_date_inherited, -> { where(due_date_is_fixed: [nil, false]) }
+
+      scope :counts_by_state, -> { group(:state_id).count }
+
+      scope :public_only, -> { where(confidential: false) }
+      scope :confidential, -> { where(confidential: true) }
+      scope :not_confidential_or_in_groups, -> (groups) do
+        public_only.or(where(confidential: true, group_id: groups))
+      end
 
       MAX_HIERARCHY_DEPTH = 5
 
@@ -177,6 +198,11 @@ module EE
         ::Group
       end
 
+      def nullify_lost_group_parents(groups, lost_groups)
+        epics_to_update = in_selected_groups(groups).where(parent: in_selected_groups(lost_groups))
+        epics_to_update.update_all(parent_id: nil)
+      end
+
       # Return the deepest relation level for an epic.
       # Example 1:
       # epic1 - parent: nil
@@ -191,6 +217,17 @@ module EE
       def deepest_relationship_level
         ::Gitlab::ObjectHierarchy.new(self.where(parent_id: nil)).max_descendants_depth
       end
+
+      def related_issues(ids: nil, preload: nil)
+        items = ::Issue.select('issues.*, epic_issues.id as epic_issue_id, epic_issues.relative_position, epic_issues.epic_id as epic_id')
+          .joins(:epic_issue)
+          .preload(preload)
+          .order('epic_issues.relative_position, epic_issues.id')
+
+        return items unless ids
+
+        items.where("epic_issues.epic_id": ids)
+      end
     end
 
     def resource_parent
@@ -203,10 +240,6 @@ module EE
 
     def project
       nil
-    end
-
-    def supports_weight?
-      false
     end
 
     def upcoming?
@@ -253,12 +286,12 @@ module EE
     def to_reference(from = nil, full: false)
       reference = "#{self.class.reference_prefix}#{iid}"
 
-      return reference unless (cross_reference?(from) && !group.projects.include?(from)) || full
+      return reference unless (cross_referenced?(from) && !group.projects.include?(from)) || full
 
       "#{group.full_path}#{reference}"
     end
 
-    def cross_reference?(from)
+    def cross_referenced?(from)
       from && from != group
     end
 
@@ -276,6 +309,10 @@ module EE
       hierarchy.descendants
     end
 
+    def base_and_descendants
+      hierarchy.base_and_descendants
+    end
+
     def has_ancestor?(epic)
       ancestors.exists?(epic.id)
     end
@@ -286,6 +323,10 @@ module EE
 
     def has_issues?
       issues.any?
+    end
+
+    def has_parent?
+      !!parent_id
     end
 
     def child?(id)
@@ -300,32 +341,34 @@ module EE
     def update_project_counter_caches
     end
 
-    # we call this when creating a new epic (Epics::CreateService) or linking an existing one (EpicLinks::CreateService)
-    # when called from EpicLinks::CreateService we pass
-    #   parent_epic - because we don't have parent attribute set on epic
-    #   parent_group_descendants - we have preloaded them in the service and we want to prevent performance problems
-    #     when linking a lot of issues
     def valid_parent?(parent_epic: nil, parent_group_descendants: nil)
-      parent_epic ||= parent
+      self.parent = parent_epic if parent_epic
 
-      return true unless parent_epic
+      validate_parent(parent_group_descendants)
 
-      parent_group_descendants ||= parent_epic.group.self_and_descendants
+      errors.empty?
+    end
 
-      return false if self == parent_epic
-      return false if level_depth_exceeded?(parent_epic)
-      return false if parent_epic.has_ancestor?(self)
-      return false if parent_epic.children.to_a.include?(self)
+    def validate_parent(preloaded_parent_group_and_descendants = nil)
+      return unless parent
 
-      parent_group_descendants.include?(group)
+      preloaded_parent_group_and_descendants ||= parent.group.self_and_descendants
+
+      if self == parent
+        errors.add :parent, "This epic cannot be added. An epic cannot be added to itself."
+      elsif parent.children.to_a.include?(self)
+        errors.add :parent, "This epic cannot be added. It is already assigned to the parent epic."
+      elsif parent.has_ancestor?(self)
+        errors.add :parent, "This epic cannot be added. It is already an ancestor of the parent epic."
+      elsif !preloaded_parent_group_and_descendants.include?(group)
+        errors.add :parent, "This epic cannot be added. An epic must belong to the same group or subgroup as its parent epic."
+      elsif level_depth_exceeded?(parent)
+        errors.add :parent, "This epic cannot be added. One or more epics would exceed the maximum depth (#{MAX_HIERARCHY_DEPTH}) from its most distant ancestor."
+      end
     end
 
     def issues_readable_by(current_user, preload: nil)
-      related_issues = ::Issue.select('issues.*, epic_issues.id as epic_issue_id, epic_issues.relative_position')
-        .joins(:epic_issue)
-        .preload(preload)
-        .where("epic_issues.epic_id = #{id}")
-        .order('epic_issues.relative_position, epic_issues.id')
+      related_issues = self.class.related_issues(ids: id, preload: preload)
 
       Ability.issues_readable_by_user(related_issues, current_user)
     end
@@ -342,15 +385,8 @@ module EE
       super.merge(label_url_method: :group_epics_url)
     end
 
-    def validate_parent
-      return true if valid_parent?
-
-      errors.add :parent, 'The parent is not valid'
-    end
-    private :validate_parent
-
     def level_depth_exceeded?(parent_epic)
-      hierarchy.max_descendants_depth.to_i + parent_epic.ancestors.count >= MAX_HIERARCHY_DEPTH
+      hierarchy.max_descendants_depth.to_i + parent_epic.base_and_ancestors.count >= MAX_HIERARCHY_DEPTH
     end
     private :level_depth_exceeded?
 
@@ -359,6 +395,25 @@ module EE
 
       hierarchy.base_and_ancestors(hierarchy_order: :asc)
     end
-    private :base_and_ancestors
+
+    def validate_confidential_issues_and_subepics
+      return unless confidential?
+
+      if issues.public_only.any?
+        errors.add :confidential, _('Cannot make the epic confidential if it contains non-confidential issues')
+      end
+
+      if children.public_only.any?
+        errors.add :confidential, _('Cannot make the epic confidential if it contains non-confidential child epics')
+      end
+    end
+
+    def validate_confidential_parent
+      return unless parent
+
+      if !confidential? && parent.confidential?
+        errors.add :confidential, _('A non-confidential epic cannot be assigned to a confidential parent epic')
+      end
+    end
   end
 end

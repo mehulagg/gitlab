@@ -2,10 +2,10 @@
 
 require "spec_helper"
 
-describe Projects::UpdatePagesService do
-  set(:project) { create(:project, :repository) }
-  set(:pipeline) { create(:ci_pipeline, project: project, sha: project.commit('HEAD').sha) }
-  set(:build) { create(:ci_build, pipeline: pipeline, ref: 'HEAD') }
+RSpec.describe Projects::UpdatePagesService do
+  let_it_be(:project, refind: true) { create(:project, :repository) }
+  let_it_be(:pipeline) { create(:ci_pipeline, project: project, sha: project.commit('HEAD').sha) }
+  let(:build) { create(:ci_build, pipeline: pipeline, ref: 'HEAD') }
   let(:invalid_file) { fixture_file_upload('spec/fixtures/dk.png') }
 
   let(:file) { fixture_file_upload("spec/fixtures/pages.zip") }
@@ -29,8 +29,9 @@ describe Projects::UpdatePagesService do
 
   context 'for new artifacts' do
     context "for a valid job" do
+      let!(:artifacts_archive) { create(:ci_job_artifact, file: file, job: build) }
+
       before do
-        create(:ci_job_artifact, file: file, job: build)
         create(:ci_job_artifact, file_type: :metadata, file_format: :gzip, file: metadata, job: build)
 
         build.reload
@@ -49,11 +50,12 @@ describe Projects::UpdatePagesService do
         expect(project.pages_deployed?).to be_falsey
         expect(execute).to eq(:success)
         expect(project.pages_metadatum).to be_deployed
+        expect(project.pages_metadatum.artifacts_archive).to eq(artifacts_archive)
         expect(project.pages_deployed?).to be_truthy
 
         # Check that all expected files are extracted
         %w[index.html zero .hidden/file].each do |filename|
-          expect(File.exist?(File.join(project.public_pages_path, filename))).to be_truthy
+          expect(File.exist?(File.join(project.pages_path, 'public', filename))).to be_truthy
         end
       end
 
@@ -65,15 +67,17 @@ describe Projects::UpdatePagesService do
       it 'removes pages after destroy' do
         expect(PagesWorker).to receive(:perform_in)
         expect(project.pages_deployed?).to be_falsey
+        expect(Dir.exist?(File.join(project.pages_path))).to be_falsey
 
         expect(execute).to eq(:success)
 
         expect(project.pages_metadatum).to be_deployed
         expect(project.pages_deployed?).to be_truthy
+        expect(Dir.exist?(File.join(project.pages_path))).to be_truthy
 
         project.destroy
 
-        expect(project.pages_deployed?).to be_falsey
+        expect(Dir.exist?(File.join(project.pages_path))).to be_falsey
         expect(ProjectPagesMetadatum.find_by_project_id(project)).to be_nil
       end
 
@@ -82,6 +86,9 @@ describe Projects::UpdatePagesService do
 
         expect(execute).not_to eq(:success)
         expect(project.pages_metadatum).not_to be_deployed
+
+        expect(deploy_status).to be_failed
+        expect(deploy_status.description).to eq('build SHA is outdated for this ref')
       end
 
       context 'when using empty file' do
@@ -110,8 +117,9 @@ describe Projects::UpdatePagesService do
 
       context 'when timeout happens by DNS error' do
         before do
-          allow_any_instance_of(described_class)
-            .to receive(:extract_zip_archive!).and_raise(SocketError)
+          allow_next_instance_of(described_class) do |instance|
+            allow(instance).to receive(:extract_zip_archive!).and_raise(SocketError)
+          end
         end
 
         it 'raises an error' do
@@ -125,9 +133,10 @@ describe Projects::UpdatePagesService do
 
       context 'when failed to extract zip artifacts' do
         before do
-          expect_any_instance_of(described_class)
-            .to receive(:extract_zip_archive!)
-            .and_raise(Projects::UpdatePagesService::FailedToExtractError)
+          expect_next_instance_of(described_class) do |instance|
+            expect(instance).to receive(:extract_zip_archive!)
+              .and_raise(Projects::UpdatePagesService::FailedToExtractError)
+          end
         end
 
         it 'raises an error' do
@@ -151,6 +160,13 @@ describe Projects::UpdatePagesService do
           build.reload
           expect(deploy_status).to be_failed
           expect(project.pages_metadatum).not_to be_deployed
+        end
+      end
+
+      context 'with background jobs running', :sidekiq_inline do
+        it 'succeeds' do
+          expect(project.pages_deployed?).to be_falsey
+          expect(execute).to eq(:success)
         end
       end
     end
@@ -185,60 +201,46 @@ describe Projects::UpdatePagesService do
         .and_return(metadata)
     end
 
-    shared_examples 'pages size limit exceeded' do
-      it 'limits the maximum size of gitlab pages' do
-        subject.execute
-
-        expect(deploy_status.description)
-          .to match(/artifacts for pages are too large/)
-        expect(deploy_status).to be_script_failure
-        expect(project.pages_metadatum).not_to be_deployed
-      end
-    end
-
     context 'when maximum pages size is set to zero' do
       before do
         stub_application_setting(max_pages_size: 0)
       end
 
-      context 'when page size does not exceed internal maximum' do
-        before do
-          allow(metadata).to receive(:total_size).and_return(200.megabytes)
-        end
-
-        it 'updates pages correctly' do
-          subject.execute
-
-          expect(deploy_status.description).not_to be_present
-          expect(project.pages_metadatum).to be_deployed
-        end
-      end
-
-      context 'when pages size does exceed internal maximum' do
-        before do
-          allow(metadata).to receive(:total_size).and_return(2.terabytes)
-        end
-
-        it_behaves_like 'pages size limit exceeded'
-      end
+      it_behaves_like 'pages size limit is', ::Gitlab::Pages::MAX_SIZE
     end
 
-    context 'when pages size is greater than max size setting' do
+    context 'when size is limited on the instance level' do
       before do
-        stub_application_setting(max_pages_size: 200)
-        allow(metadata).to receive(:total_size).and_return(201.megabytes)
+        stub_application_setting(max_pages_size: 100)
       end
 
-      it_behaves_like 'pages size limit exceeded'
+      it_behaves_like 'pages size limit is', 100.megabytes
+    end
+  end
+
+  context 'when file size is spoofed' do
+    let(:metadata) { spy('metadata') }
+
+    include_context 'pages zip with spoofed size'
+
+    before do
+      file = fixture_file_upload(fake_zip_path, 'pages.zip')
+      metafile = fixture_file_upload('spec/fixtures/pages.zip.meta')
+
+      create(:ci_job_artifact, :archive, file: file, job: build)
+      create(:ci_job_artifact, :metadata, file: metafile, job: build)
+
+      allow(build).to receive(:artifacts_metadata_entry)
+                        .and_return(metadata)
+      allow(metadata).to receive(:total_size).and_return(100)
     end
 
-    context 'when max size setting is greater than internal max size' do
-      before do
-        stub_application_setting(max_pages_size: 3.terabytes / 1.megabyte)
-        allow(metadata).to receive(:total_size).and_return(2.terabytes)
-      end
-
-      it_behaves_like 'pages size limit exceeded'
+    it 'raises an error' do
+      expect do
+        subject.execute
+      end.to raise_error(Projects::UpdatePagesService::FailedToExtractError,
+                         'Entry public/index.html should be 1B but is larger when inflated')
+      expect(deploy_status).to be_script_failure
     end
   end
 

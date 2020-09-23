@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Notes::CreateService do
-  set(:project) { create(:project, :repository) }
-  set(:issue) { create(:issue, project: project) }
-  set(:user) { create(:user) }
+RSpec.describe Notes::CreateService do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:issue) { create(:issue, project: project) }
+  let_it_be(:user) { create(:user) }
   let(:opts) do
-    { note: 'Awesome comment', noteable_type: 'Issue', noteable_id: issue.id }
+    { note: 'Awesome comment', noteable_type: 'Issue', noteable_id: issue.id, confidential: true }
   end
 
   describe '#execute' do
@@ -41,7 +41,7 @@ describe Notes::CreateService do
       end
 
       it 'TodoService#new_note is called' do
-        note = build(:note, project: project)
+        note = build(:note, project: project, noteable: issue)
         allow(Note).to receive(:new).with(opts) { note }
 
         expect_any_instance_of(TodoService).to receive(:new_note).with(note, user)
@@ -50,12 +50,22 @@ describe Notes::CreateService do
       end
 
       it 'enqueues NewNoteWorker' do
-        note = build(:note, id: 999, project: project)
+        note = build(:note, id: non_existing_record_id, project: project, noteable: issue)
         allow(Note).to receive(:new).with(opts) { note }
 
         expect(NewNoteWorker).to receive(:perform_async).with(note.id)
 
         described_class.new(project, user, opts).execute
+      end
+
+      context 'issue is an incident' do
+        subject { described_class.new(project, user, opts).execute }
+
+        let(:issue) { create(:incident, project: project) }
+
+        it_behaves_like 'an incident management tracked event', :incident_management_incident_comment do
+          let(:current_user) { user }
+        end
       end
     end
 
@@ -117,6 +127,7 @@ describe Notes::CreateService do
                source_project: project_with_repo,
                target_project: project_with_repo)
       end
+
       let(:line_number) { 14 }
       let(:position) do
         Gitlab::Diff::Position.new(old_path: "files/ruby/popen.rb",
@@ -125,6 +136,7 @@ describe Notes::CreateService do
                                    new_line: line_number,
                                    diff_refs: merge_request.diff_refs)
       end
+
       let(:previous_note) do
         create(:diff_note_on_merge_request, noteable: merge_request, project: project_with_repo)
       end
@@ -143,10 +155,21 @@ describe Notes::CreateService do
         end
 
         it 'note is associated with a note diff file' do
+          MergeRequests::MergeToRefService.new(merge_request.project, merge_request.author).execute(merge_request)
+
           note = described_class.new(project_with_repo, user, new_opts).execute
 
           expect(note).to be_persisted
           expect(note.note_diff_file).to be_present
+          expect(note.diff_note_positions).to be_present
+        end
+
+        it 'does not create diff positions merge_ref_head_comments is disabled' do
+          stub_feature_flags(merge_ref_head_comments: false)
+
+          expect(Discussions::CaptureDiffNotePositionService).not_to receive(:new)
+
+          described_class.new(project_with_repo, user, new_opts).execute
         end
       end
 
@@ -160,6 +183,8 @@ describe Notes::CreateService do
         end
 
         it 'note is not associated with a note diff file' do
+          expect(Discussions::CaptureDiffNotePositionService).not_to receive(:new)
+
           note = described_class.new(project_with_repo, user, new_opts).execute
 
           expect(note).to be_persisted
@@ -198,12 +223,12 @@ describe Notes::CreateService do
 
     context 'note with commands' do
       context 'all quick actions' do
-        set(:milestone) { create(:milestone, project: project, title: "sprint") }
-        set(:bug_label) { create(:label, project: project, title: 'bug') }
-        set(:to_be_copied_label) { create(:label, project: project, title: 'to be copied') }
-        set(:feature_label) { create(:label, project: project, title: 'feature') }
-        set(:issue) { create(:issue, project: project, labels: [bug_label], due_date: '2019-01-01') }
-        set(:issue_2) { create(:issue, project: project, labels: [bug_label, to_be_copied_label]) }
+        let_it_be(:milestone) { create(:milestone, project: project, title: "sprint") }
+        let_it_be(:bug_label) { create(:label, project: project, title: 'bug') }
+        let_it_be(:to_be_copied_label) { create(:label, project: project, title: 'to be copied') }
+        let_it_be(:feature_label) { create(:label, project: project, title: 'feature') }
+        let_it_be(:issue, reload: true) { create(:issue, project: project, labels: [bug_label], due_date: '2019-01-01') }
+        let_it_be(:issue_2) { create(:issue, project: project, labels: [bug_label, to_be_copied_label]) }
 
         context 'for issues' do
           let(:issuable) { issue }
@@ -254,7 +279,7 @@ describe Notes::CreateService do
         end
 
         context 'for merge requests' do
-          set(:merge_request) { create(:merge_request, source_project: project, labels: [bug_label]) }
+          let_it_be(:merge_request) { create(:merge_request, source_project: project, labels: [bug_label]) }
           let(:issuable) { merge_request }
           let(:note_params) { opts.merge(noteable_type: 'MergeRequest', noteable_id: merge_request.id) }
           let(:merge_request_quick_actions) do
@@ -329,6 +354,60 @@ describe Notes::CreateService do
       end
     end
 
+    context 'design note' do
+      subject(:service) { described_class.new(project, user, params) }
+
+      let_it_be(:design) { create(:design, :with_file) }
+      let_it_be(:project) { design.project }
+      let_it_be(:user) { project.owner }
+      let_it_be(:params) do
+        {
+          type: 'DiffNote',
+          noteable: design,
+          note: "A message",
+          position: {
+            old_path: design.full_path,
+            new_path: design.full_path,
+            position_type: 'image',
+            width: '100',
+            height: '100',
+            x: '50',
+            y: '50',
+            base_sha: design.diff_refs.base_sha,
+            start_sha: design.diff_refs.base_sha,
+            head_sha: design.diff_refs.head_sha
+          }
+        }
+      end
+
+      it 'can create diff notes for designs' do
+        note = service.execute
+
+        expect(note).to be_a(DiffNote)
+        expect(note).to be_persisted
+        expect(note.noteable).to eq(design)
+      end
+
+      it 'sends a notification about this note', :sidekiq_might_not_need_inline do
+        notifier = double
+        allow(::NotificationService).to receive(:new).and_return(notifier)
+
+        expect(notifier)
+          .to receive(:new_note)
+          .with have_attributes(noteable: design)
+
+        service.execute
+      end
+
+      it 'correctly builds the position of the note' do
+        note = service.execute
+
+        expect(note.position.new_path).to eq(design.full_path)
+        expect(note.position.old_path).to eq(design.full_path)
+        expect(note.position.diff_refs).to eq(design.diff_refs)
+      end
+    end
+
     context 'note with emoji only' do
       it 'creates regular note' do
         opts = {
@@ -358,11 +437,31 @@ describe Notes::CreateService do
         expect do
           existing_note
 
-          Timecop.freeze(Time.now + 1.minute) { subject }
+          Timecop.freeze(Time.current + 1.minute) { subject }
 
           existing_note.reload
         end.to change { existing_note.type }.from(nil).to('DiscussionNote')
             .and change { existing_note.updated_at }
+      end
+
+      it 'returns a DiscussionNote with its parent discussion refreshed correctly' do
+        discussion_notes = subject.discussion.notes
+
+        expect(discussion_notes.size).to eq(2)
+        expect(discussion_notes.first).to be_a(DiscussionNote)
+      end
+
+      context 'discussion to reply cannot be found' do
+        before do
+          existing_note.delete
+        end
+
+        it 'returns an note with errors' do
+          note = subject
+
+          expect(note.errors).not_to be_empty
+          expect(note.errors[:base]).to eq(['Discussion to reply to cannot be found'])
+        end
       end
     end
 

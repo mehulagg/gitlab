@@ -2,13 +2,57 @@
 
 require 'spec_helper'
 
-describe Groups::UpdateService do
+RSpec.describe Groups::UpdateService do
   let!(:user) { create(:user) }
   let!(:private_group) { create(:group, :private) }
   let!(:internal_group) { create(:group, :internal) }
   let!(:public_group) { create(:group, :public) }
 
   describe "#execute" do
+    shared_examples 'with packages' do
+      before do
+        group.add_owner(user)
+      end
+
+      context 'with npm packages' do
+        let!(:package) { create(:npm_package, project: project) }
+
+        it 'does not allow a path update' do
+          expect(update_group(group, user, path: 'updated')).to be false
+          expect(group.errors[:path]).to include('cannot change when group contains projects with NPM packages')
+        end
+
+        it 'allows name update' do
+          expect(update_group(group, user, name: 'Updated')).to be true
+          expect(group.errors).to be_empty
+          expect(group.name).to eq('Updated')
+        end
+      end
+    end
+
+    context 'with project' do
+      let!(:group) { create(:group, :public) }
+      let(:project) { create(:project, namespace: group) }
+
+      it_behaves_like 'with packages'
+
+      context 'located in a subgroup' do
+        let(:subgroup) { create(:group, parent: group) }
+        let!(:project) { create(:project, namespace: subgroup) }
+
+        before do
+          subgroup.add_owner(user)
+        end
+
+        it_behaves_like 'with packages'
+
+        it 'does allow a path update if there is not a root namespace change' do
+          expect(update_group(subgroup, user, path: 'updated')).to be true
+          expect(subgroup.errors[:path]).to be_empty
+        end
+      end
+    end
+
     context "project visibility_level validation" do
       context "public group with public projects" do
         let!(:service) { described_class.new(public_group, user, visibility_level: Gitlab::VisibilityLevel::INTERNAL) }
@@ -148,6 +192,26 @@ describe Groups::UpdateService do
     end
   end
 
+  context 'updating default_branch_protection' do
+    let(:service) do
+      described_class.new(internal_group, user, default_branch_protection: Gitlab::Access::PROTECTION_NONE)
+    end
+
+    context 'for users who have the ability to update default_branch_protection' do
+      it 'updates the attribute' do
+        internal_group.add_owner(user)
+
+        expect { service.execute }.to change { internal_group.default_branch_protection }.to(Gitlab::Access::PROTECTION_NONE)
+      end
+    end
+
+    context 'for users who do not have the ability to update default_branch_protection' do
+      it 'does not update the attribute' do
+        expect { service.execute }.not_to change { internal_group.default_branch_protection }
+      end
+    end
+  end
+
   context 'rename group' do
     let!(:service) { described_class.new(internal_group, user, path: SecureRandom.hex) }
 
@@ -217,5 +281,9 @@ describe Groups::UpdateService do
         end
       end
     end
+  end
+
+  def update_group(group, user, opts)
+    Groups::UpdateService.new(group, user, opts).execute
   end
 end

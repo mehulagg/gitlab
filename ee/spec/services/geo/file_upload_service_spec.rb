@@ -2,13 +2,10 @@
 
 require 'spec_helper'
 
-describe Geo::FileUploadService do
+RSpec.describe Geo::FileUploadService do
   include EE::GeoHelpers
 
-  set(:node) { create(:geo_node, :primary) }
-
-  let(:transfer_request) { Gitlab::Geo::TransferRequest.new(request_data) }
-  let(:req_header) { transfer_request.headers['Authorization'] }
+  let_it_be(:node) { create(:geo_node, :primary) }
 
   before do
     stub_current_geo_node(node)
@@ -36,23 +33,13 @@ describe Geo::FileUploadService do
     end
   end
 
-  shared_examples 'no authorization header' do
-    it 'returns nil' do
+  shared_examples 'no decoded params' do
+    it 'returns invalid request error' do
       service = described_class.new(params, nil)
 
-      expect(service.execute).to be_nil
-    end
-  end
-
-  shared_examples 'wrong scope' do
-    context 'at least one scope parameter is wrong' do
-      let(:transfer_request) { Gitlab::Geo::TransferRequest.new(request_data.merge(file_type: 'wrong')) }
-
-      it 'returns nil' do
-        service = described_class.new(params, req_header)
-
-        expect(service.execute).to be_nil
-      end
+      response = service.execute
+      expect(response[:code]).to eq(:not_found)
+      expect(response[:message]).to eq('Invalid request')
     end
   end
 
@@ -64,7 +51,7 @@ describe Geo::FileUploadService do
       let(:request_data) { Gitlab::Geo::Replication::FileTransfer.new(:avatar, upload).request_data }
 
       it 'sends avatar file' do
-        service = described_class.new(params, req_header)
+        service = described_class.new(params, request_data)
 
         response = service.execute
 
@@ -72,8 +59,7 @@ describe Geo::FileUploadService do
         expect(response[:file].path).to eq(user.avatar.path)
       end
 
-      include_examples 'no authorization header'
-      include_examples 'wrong scope'
+      include_examples 'no decoded params'
     end
 
     context 'group avatar' do
@@ -83,7 +69,7 @@ describe Geo::FileUploadService do
       let(:request_data) { Gitlab::Geo::Replication::FileTransfer.new(:avatar, upload).request_data }
 
       it 'sends avatar file' do
-        service = described_class.new(params, req_header)
+        service = described_class.new(params, request_data)
 
         response = service.execute
 
@@ -91,8 +77,7 @@ describe Geo::FileUploadService do
         expect(response[:file].path).to eq(group.avatar.path)
       end
 
-      include_examples 'no authorization header'
-      include_examples 'wrong scope'
+      include_examples 'no decoded params'
     end
 
     context 'project avatar' do
@@ -102,7 +87,7 @@ describe Geo::FileUploadService do
       let(:request_data) { Gitlab::Geo::Replication::FileTransfer.new(:avatar, upload).request_data }
 
       it 'sends avatar file' do
-        service = described_class.new(params, req_header)
+        service = described_class.new(params, request_data)
 
         response = service.execute
 
@@ -110,8 +95,7 @@ describe Geo::FileUploadService do
         expect(response[:file].path).to eq(project.avatar.path)
       end
 
-      include_examples 'no authorization header'
-      include_examples 'wrong scope'
+      include_examples 'no decoded params'
     end
 
     context 'attachment' do
@@ -121,7 +105,7 @@ describe Geo::FileUploadService do
       let(:request_data) { Gitlab::Geo::Replication::FileTransfer.new(:attachment, upload).request_data }
 
       it 'sends attachment file' do
-        service = described_class.new(params, req_header)
+        service = described_class.new(params, request_data)
 
         response = service.execute
 
@@ -129,8 +113,7 @@ describe Geo::FileUploadService do
         expect(response[:file].path).to eq(note.attachment.path)
       end
 
-      include_examples 'no authorization header'
-      include_examples 'wrong scope'
+      include_examples 'no decoded params'
     end
 
     context 'file upload' do
@@ -145,7 +128,7 @@ describe Geo::FileUploadService do
       end
 
       it 'sends the file' do
-        service = described_class.new(params, req_header)
+        service = described_class.new(params, request_data)
 
         response = service.execute
 
@@ -153,8 +136,7 @@ describe Geo::FileUploadService do
         expect(response[:file].path).to end_with('dk.png')
       end
 
-      include_examples 'no authorization header'
-      include_examples 'wrong scope'
+      include_examples 'no decoded params'
     end
 
     context 'namespace file upload' do
@@ -169,7 +151,7 @@ describe Geo::FileUploadService do
       end
 
       it 'sends the file' do
-        service = described_class.new(params, req_header)
+        service = described_class.new(params, request_data)
 
         response = service.execute
 
@@ -177,8 +159,7 @@ describe Geo::FileUploadService do
         expect(response[:file].path).to end_with('dk.png')
       end
 
-      include_examples 'no authorization header'
-      include_examples 'wrong scope'
+      include_examples 'no decoded params'
     end
 
     context 'LFS Object' do
@@ -187,7 +168,7 @@ describe Geo::FileUploadService do
       let(:request_data) { Gitlab::Geo::Replication::LfsTransfer.new(lfs_object).request_data }
 
       it 'sends LFS file' do
-        service = described_class.new(params, req_header)
+        service = described_class.new(params, request_data)
 
         response = service.execute
 
@@ -195,8 +176,7 @@ describe Geo::FileUploadService do
         expect(response[:file].path).to eq(lfs_object.file.path)
       end
 
-      include_examples 'no authorization header'
-      include_examples 'wrong scope'
+      include_examples 'no decoded params'
     end
 
     context 'job artifact' do
@@ -205,16 +185,13 @@ describe Geo::FileUploadService do
       let(:request_data) { Gitlab::Geo::Replication::JobArtifactTransfer.new(job_artifact).request_data }
 
       it 'sends job artifact file' do
-        service = described_class.new(params, req_header)
+        service = described_class.new(params, request_data)
 
         response = service.execute
 
         expect(response[:code]).to eq(:ok)
         expect(response[:file].path).to eq(job_artifact.file.path)
       end
-
-      include_examples 'no authorization header'
-      include_examples 'wrong scope'
     end
 
     context 'import export archive' do
@@ -229,7 +206,7 @@ describe Geo::FileUploadService do
       end
 
       it 'sends the file' do
-        service = described_class.new(params, req_header)
+        service = described_class.new(params, request_data)
 
         response = service.execute
 
@@ -237,8 +214,7 @@ describe Geo::FileUploadService do
         expect(response[:file].path).to end_with('tar.gz')
       end
 
-      include_examples 'no authorization header'
-      include_examples 'wrong scope'
+      include_examples 'no decoded params'
     end
   end
 end

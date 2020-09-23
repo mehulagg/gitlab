@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User Cluster', :js do
+RSpec.describe 'User Cluster', :js do
   include GoogleApi::CloudPlatformHelpers
 
   let(:project) { create(:project) }
@@ -13,8 +13,12 @@ describe 'User Cluster', :js do
     gitlab_sign_in(user)
 
     allow(Projects::ClustersController).to receive(:STATUS_POLLING_INTERVAL) { 100 }
-    allow_any_instance_of(Clusters::Kubernetes::CreateOrUpdateNamespaceService).to receive(:execute)
-    allow_any_instance_of(Clusters::Cluster).to receive(:retrieve_connection_status).and_return(:connected)
+    allow_next_instance_of(Clusters::Kubernetes::CreateOrUpdateNamespaceService) do |instance|
+      allow(instance).to receive(:execute)
+    end
+    allow_next_instance_of(Clusters::Cluster) do |instance|
+      allow(instance).to receive(:retrieve_connection_status).and_return(:connected)
+    end
   end
 
   context 'when user does not have a cluster and visits cluster index page' do
@@ -22,7 +26,7 @@ describe 'User Cluster', :js do
       visit project_clusters_path(project)
 
       click_link 'Add Kubernetes cluster'
-      click_link 'Add existing cluster'
+      click_link 'Connect existing cluster'
     end
 
     context 'when user filled form with valid parameters' do
@@ -37,12 +41,12 @@ describe 'User Cluster', :js do
       it 'user sees a cluster details page' do
         subject
 
-        expect(page).to have_content('Kubernetes cluster integration')
+        expect(page).to have_content('GitLab Integration')
         expect(page.find_field('cluster[name]').value).to eq('dev-cluster')
         expect(page.find_field('cluster[platform_kubernetes_attributes][api_url]').value)
           .to have_content('http://example.com')
         expect(page.find_field('cluster[platform_kubernetes_attributes][token]').value)
-          .to have_content('my-token')
+          .to be_empty
       end
 
       it 'user sees RBAC is enabled by default' do
@@ -69,13 +73,14 @@ describe 'User Cluster', :js do
     end
 
     it 'user sees a cluster details page' do
+      expect(page).to have_content('GitLab Integration')
       expect(page).to have_button('Save changes')
     end
 
     context 'when user disables the cluster' do
       before do
         page.find(:css, '.js-cluster-enable-toggle-area .js-project-feature-toggle').click
-        page.within('#cluster-integration') { click_button 'Save changes' }
+        page.within('.js-cluster-integration-form') { click_button 'Save changes' }
       end
 
       it 'user sees the successful message' do
@@ -87,7 +92,7 @@ describe 'User Cluster', :js do
       before do
         fill_in 'cluster_name', with: 'my-dev-cluster'
         fill_in 'cluster_platform_kubernetes_attributes_namespace', with: 'my-namespace'
-        page.within('#js-cluster-details') { click_button 'Save changes' }
+        page.within('.js-provider-details') { click_button 'Save changes' }
       end
 
       it 'user sees the successful message' do
@@ -97,11 +102,12 @@ describe 'User Cluster', :js do
       end
     end
 
-    context 'when user destroy the cluster' do
+    context 'when user destroys the cluster' do
       before do
-        page.accept_confirm do
-          click_link 'Remove integration'
-        end
+        click_link 'Advanced Settings'
+        click_button 'Remove integration and resources'
+        fill_in 'confirm_cluster_name_input', with: cluster.name
+        click_button 'Remove integration'
       end
 
       it 'user sees creation form with the successful message' do

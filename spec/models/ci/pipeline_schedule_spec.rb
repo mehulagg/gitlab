@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::PipelineSchedule do
+RSpec.describe Ci::PipelineSchedule do
   subject { build(:ci_pipeline_schedule) }
 
   it { is_expected.to belong_to(:project) }
@@ -17,14 +17,18 @@ describe Ci::PipelineSchedule do
   it { is_expected.to respond_to(:description) }
   it { is_expected.to respond_to(:next_run_at) }
 
+  it_behaves_like 'includes Limitable concern' do
+    subject { build(:ci_pipeline_schedule) }
+  end
+
   describe 'validations' do
-    it 'does not allow invalid cron patters' do
+    it 'does not allow invalid cron patterns' do
       pipeline_schedule = build(:ci_pipeline_schedule, cron: '0 0 0 * *')
 
       expect(pipeline_schedule).not_to be_valid
     end
 
-    it 'does not allow invalid cron patters' do
+    it 'does not allow invalid cron patterns' do
       pipeline_schedule = build(:ci_pipeline_schedule, cron_timezone: 'invalid')
 
       expect(pipeline_schedule).not_to be_valid
@@ -80,9 +84,9 @@ describe Ci::PipelineSchedule do
     it 'preloads the associations' do
       subject
 
-      query = ActiveRecord::QueryRecorder.new { subject.each(&:project) }
+      query = ActiveRecord::QueryRecorder.new { subject.map(&:project).each(&:route) }
 
-      expect(query.count).to eq(2)
+      expect(query.count).to eq(3)
     end
   end
 
@@ -114,7 +118,7 @@ describe Ci::PipelineSchedule do
       let(:pipeline_schedule) { create(:ci_pipeline_schedule, :every_minute) }
 
       it "updates next_run_at to the sidekiq worker's execution time" do
-        Timecop.freeze(Time.parse("2019-06-01 12:18:00+0000")) do
+        Timecop.freeze(Time.zone.parse("2019-06-01 12:18:00+0000")) do
           expect(pipeline_schedule.next_run_at).to eq(cron_worker_next_run_at)
         end
       end

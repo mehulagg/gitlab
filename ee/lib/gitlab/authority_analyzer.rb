@@ -3,6 +3,7 @@
 module Gitlab
   class AuthorityAnalyzer
     COMMITS_TO_CONSIDER = 25
+    FILES_TO_CONSIDER = 100
 
     def initialize(merge_request, skip_user)
       @merge_request = merge_request
@@ -30,20 +31,7 @@ module Gitlab
     end
 
     def list_of_involved_files
-      diffable = [@merge_request.compare, @merge_request.merge_request_diff].compact
-      return [] if diffable.empty?
-
-      compare_diffs = diffable.first.raw_diffs
-
-      return [] unless compare_diffs.present?
-
-      compare_diffs.map do |diff|
-        if diff.deleted_file || diff.renamed_file
-          diff.old_path
-        else
-          diff.new_path
-        end
-      end
+      @merge_request.modified_paths.first(FILES_TO_CONSIDER)
     end
   end
 end

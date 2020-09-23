@@ -2,20 +2,18 @@
 
 require 'spec_helper'
 
-describe Gitlab::SearchResults do
+RSpec.describe Gitlab::SearchResults do
   include ProjectForksHelper
   include SearchHelpers
 
-  let(:user) { create(:user) }
-  let!(:project) { create(:project, name: 'foo') }
-  let!(:issue) { create(:issue, project: project, title: 'foo') }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, name: 'foo') }
+  let_it_be(:issue) { create(:issue, project: project, title: 'foo') }
+  let_it_be(:milestone) { create(:milestone, project: project, title: 'foo') }
+  let(:merge_request) { create(:merge_request, source_project: project, title: 'foo') }
+  let(:filters) { {} }
 
-  let!(:merge_request) do
-    create(:merge_request, source_project: project, title: 'foo')
-  end
-
-  let!(:milestone) { create(:milestone, project: project, title: 'foo') }
-  let(:results) { described_class.new(user, Project.all, 'foo') }
+  subject(:results) { described_class.new(user, 'foo', Project.order(:id), filters: filters) }
 
   context 'as a user with access' do
     before do
@@ -28,7 +26,15 @@ describe Gitlab::SearchResults do
       end
 
       it 'returns with counts collection when requested' do
-        expect(results.objects('projects', 1, false)).not_to be_kind_of(Kaminari::PaginatableWithoutCount)
+        expect(results.objects('projects', page: 1, per_page: 1, without_count: false)).not_to be_kind_of(Kaminari::PaginatableWithoutCount)
+      end
+
+      it 'uses page and per_page to paginate results' do
+        project2 = create(:project, name: 'foo')
+
+        expect(results.objects('projects', page: 1, per_page: 1).to_a).to eq([project])
+        expect(results.objects('projects', page: 2, per_page: 1).to_a).to eq([project2])
+        expect(results.objects('projects', page: 1, per_page: 2).count).to eq(2)
       end
     end
 
@@ -48,6 +54,25 @@ describe Gitlab::SearchResults do
         it 'returns the expected formatted count' do
           expect(results).to receive(count_method).and_return(1234) if count_method
           expect(results.formatted_count(scope)).to eq(expected)
+        end
+      end
+    end
+
+    describe '#highlight_map' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:scope, :expected) do
+        'projects'       | {}
+        'issues'         | {}
+        'merge_requests' | {}
+        'milestones'     | {}
+        'users'          | {}
+        'unknown'        | {}
+      end
+
+      with_them do
+        it 'returns the expected highlight_map' do
+          expect(results.highlight_map(scope)).to eq(expected)
         end
       end
     end
@@ -100,10 +125,10 @@ describe Gitlab::SearchResults do
 
       describe '#limited_issues_count' do
         it 'runs single SQL query to get the limited amount of issues' do
-          create(:milestone, project: project, title: 'foo2')
+          create(:issue, project: project, title: 'foo2')
 
           expect(results).to receive(:issues).with(public_only: true).and_call_original
-          expect(results).not_to receive(:issues).with(no_args).and_call_original
+          expect(results).not_to receive(:issues).with(no_args)
 
           expect(results.limited_issues_count).to eq(1)
         end
@@ -125,7 +150,7 @@ describe Gitlab::SearchResults do
       forked_project = fork_project(project, user)
       merge_request_2 = create(:merge_request, target_project: project, source_project: forked_project, title: 'foo')
 
-      results = described_class.new(user, Project.where(id: forked_project.id), 'foo')
+      results = described_class.new(user, 'foo', Project.where(id: forked_project.id))
 
       expect(results.objects('merge_requests')).to include merge_request_2
     end
@@ -144,6 +169,15 @@ describe Gitlab::SearchResults do
 
         results.objects('merge_requests')
       end
+
+      context 'filtering' do
+        let!(:opened_result) { create(:merge_request, :opened, source_project: project, title: 'foo opened') }
+        let!(:closed_result) { create(:merge_request, :closed, source_project: project, title: 'foo closed') }
+        let(:scope) { 'merge_requests' }
+        let(:query) { 'foo' }
+
+        include_examples 'search results filtered by state'
+      end
     end
 
     describe '#issues' do
@@ -159,6 +193,15 @@ describe Gitlab::SearchResults do
         expect(results).not_to receive(:project_ids_relation)
 
         results.objects('issues')
+      end
+
+      context 'filtering' do
+        let(:scope) { 'issues' }
+
+        let_it_be(:closed_result) { create(:issue, :closed, project: project, title: 'foo closed') }
+        let_it_be(:opened_result) { create(:issue, :opened, project: project, title: 'foo open') }
+
+        include_examples 'search results filtered by state'
       end
     end
 
@@ -206,7 +249,7 @@ describe Gitlab::SearchResults do
     let!(:security_issue_5) { create(:issue, :confidential, project: project_4, title: 'Security issue 5') }
 
     it 'does not list confidential issues for non project members' do
-      results = described_class.new(non_member, limit_projects, query)
+      results = described_class.new(non_member, query, limit_projects)
       issues = results.objects('issues')
 
       expect(issues).to include issue
@@ -222,7 +265,7 @@ describe Gitlab::SearchResults do
       project_1.add_guest(member)
       project_2.add_guest(member)
 
-      results = described_class.new(member, limit_projects, query)
+      results = described_class.new(member, query, limit_projects)
       issues = results.objects('issues')
 
       expect(issues).to include issue
@@ -235,7 +278,7 @@ describe Gitlab::SearchResults do
     end
 
     it 'lists confidential issues for author' do
-      results = described_class.new(author, limit_projects, query)
+      results = described_class.new(author, query, limit_projects)
       issues = results.objects('issues')
 
       expect(issues).to include issue
@@ -248,7 +291,7 @@ describe Gitlab::SearchResults do
     end
 
     it 'lists confidential issues for assignee' do
-      results = described_class.new(assignee, limit_projects, query)
+      results = described_class.new(assignee, query, limit_projects)
       issues = results.objects('issues')
 
       expect(issues).to include issue
@@ -264,7 +307,7 @@ describe Gitlab::SearchResults do
       project_1.add_developer(member)
       project_2.add_developer(member)
 
-      results = described_class.new(member, limit_projects, query)
+      results = described_class.new(member, query, limit_projects)
       issues = results.objects('issues')
 
       expect(issues).to include issue
@@ -277,7 +320,7 @@ describe Gitlab::SearchResults do
     end
 
     it 'lists all issues for admin' do
-      results = described_class.new(admin, limit_projects, query)
+      results = described_class.new(admin, query, limit_projects)
       issues = results.objects('issues')
 
       expect(issues).to include issue
@@ -315,7 +358,7 @@ describe Gitlab::SearchResults do
       # Global search scope takes user authorized projects, internal projects and public projects.
       limit_projects = ProjectsFinder.new(current_user: user).execute
 
-      milestones = described_class.new(user, limit_projects, 'milestone').objects('milestones')
+      milestones = described_class.new(user, 'milestone', limit_projects).objects('milestones')
 
       expect(milestones).to match_array([milestone_1, milestone_2, milestone_3])
     end

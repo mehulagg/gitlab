@@ -1,9 +1,7 @@
 import Vuex from 'vuex';
 import { shallowMount, createLocalVue } from '@vue/test-utils';
-
+import { GlButton } from '@gitlab/ui';
 import ServiceCredentialsForm from '~/create_cluster/eks_cluster/components/service_credentials_form.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
-
 import eksClusterState from '~/create_cluster/eks_cluster/store/state';
 
 const localVue = createLocalVue();
@@ -46,8 +44,7 @@ describe('ServiceCredentialsForm', () => {
   const findExternalIdInput = () => vm.find('#eks-external-id');
   const findCopyExternalIdButton = () => vm.find('.js-copy-external-id-button');
   const findInvalidCredentials = () => vm.find('.js-invalid-credentials');
-  const findSubmitButton = () => vm.find(LoadingButton);
-  const findForm = () => vm.find('form[name="service-credentials-form"]');
+  const findSubmitButton = () => vm.find(GlButton);
 
   it('displays provided account id', () => {
     expect(findAccountIdInput().attributes('value')).toBe(accountId);
@@ -72,11 +69,15 @@ describe('ServiceCredentialsForm', () => {
   it('enables submit button when role ARN is not provided', () => {
     vm.setData({ roleArn: '123' });
 
-    expect(findSubmitButton().attributes('disabled')).toBeFalsy();
+    return vm.vm.$nextTick().then(() => {
+      expect(findSubmitButton().attributes('disabled')).toBeFalsy();
+    });
   });
 
-  it('dispatches createRole action when form is submitted', () => {
-    findForm().trigger('submit');
+  it('dispatches createRole action when submit button is clicked', () => {
+    vm.setData({ roleArn: '123' }); // set role ARN to enable button
+
+    findSubmitButton().vm.$emit('click', new Event('click'));
 
     expect(createRoleAction).toHaveBeenCalled();
   });
@@ -86,6 +87,8 @@ describe('ServiceCredentialsForm', () => {
       vm.setData({ roleArn: '123' }); // set role ARN to enable button
 
       state.isCreatingRole = true;
+
+      return vm.vm.$nextTick();
     });
 
     it('disables submit button', () => {
@@ -97,7 +100,7 @@ describe('ServiceCredentialsForm', () => {
     });
 
     it('displays Authenticating label on submit button', () => {
-      expect(findSubmitButton().props('label')).toBe('Authenticating');
+      expect(findSubmitButton().text()).toBe('Authenticating');
     });
   });
 

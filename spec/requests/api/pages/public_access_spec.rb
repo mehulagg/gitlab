@@ -2,25 +2,24 @@
 
 require 'spec_helper'
 
-describe "Public Project Pages Access" do
+RSpec.describe "Public Project Pages Access" do
   using RSpec::Parameterized::TableSyntax
   include AccessMatchers
 
-  set(:group) { create(:group) }
-  set(:project) { create(:project, :public, pages_access_level: ProjectFeature::ENABLED, namespace: group) }
-
-  set(:admin) { create(:admin) }
-  set(:owner) { create(:user) }
-  set(:master) { create(:user) }
-  set(:developer) { create(:user) }
-  set(:reporter) { create(:user) }
-  set(:guest) { create(:user) }
-  set(:user) { create(:user) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project, reload: true) { create(:project, :public, pages_access_level: ProjectFeature::ENABLED, namespace: group) }
+  let_it_be(:admin) { create(:admin) }
+  let_it_be(:owner) { create(:user) }
+  let_it_be(:master) { create(:user) }
+  let_it_be(:developer) { create(:user) }
+  let_it_be(:reporter) { create(:user) }
+  let_it_be(:guest) { create(:user) }
+  let_it_be(:user) { create(:user) }
 
   before do
     allow(Gitlab.config.pages).to receive(:access_control).and_return(true)
     group.add_owner(owner)
-    project.add_master(master)
+    project.add_maintainer(master)
     project.add_developer(developer)
     project.add_reporter(reporter)
     project.add_guest(guest)
@@ -73,7 +72,7 @@ describe "Public Project Pages Access" do
 
       with_them do
         before do
-          project.project_feature.update(pages_access_level: pages_access_level)
+          project.project_feature.update!(pages_access_level: pages_access_level)
         end
         it "correct return value" do
           if !with_user.nil?

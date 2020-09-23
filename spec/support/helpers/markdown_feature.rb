@@ -36,12 +36,12 @@ class MarkdownFeature
     end
   end
 
-  def project_wiki
-    @project_wiki ||= ProjectWiki.new(project, user)
+  def wiki
+    @wiki ||= ProjectWiki.new(project, user)
   end
 
-  def project_wiki_page
-    @project_wiki_page ||= build(:wiki_page, wiki: project_wiki)
+  def wiki_page
+    @wiki_page ||= build(:wiki_page, wiki: wiki)
   end
 
   def issue
@@ -87,6 +87,10 @@ class MarkdownFeature
     @group_milestone ||= create(:milestone, name: 'group-milestone', group: group)
   end
 
+  def alert
+    @alert ||= create(:alert_management_alert, project: project)
+  end
+
   # Cross-references -----------------------------------------------------------
 
   def xproject
@@ -123,6 +127,10 @@ class MarkdownFeature
 
   def xmilestone
     @xmilestone ||= create(:milestone, project: xproject)
+  end
+
+  def xalert
+    @xalert ||= create(:alert_management_alert, project: xproject)
   end
 
   def urls

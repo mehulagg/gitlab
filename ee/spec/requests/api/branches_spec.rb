@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::Branches do
+RSpec.describe API::Branches do
   describe 'PUT /projects/:id/repository/branches/:branch/protect' do
     context 'when authenticated', 'as a maintainer' do
       let(:user) { create(:user) }
@@ -24,7 +24,7 @@ describe API::Branches do
             put api("/projects/#{project.id}/repository/branches/#{protected_branch.name}/protect", user),
                 params: { developers_can_push: true, developers_can_merge: true }
 
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
             expect(json_response['name']).to eq(protected_branch.name)
             expect(protected_branch.reload.push_access_levels.pluck(:access_level)).to include(Gitlab::Access::NO_ACCESS)
           end

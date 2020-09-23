@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::UpdateService, :mailer do
+RSpec.describe MergeRequests::UpdateService, :mailer do
   include ProjectForksHelper
 
   let(:group) { create(:group, :public) }
@@ -75,6 +75,7 @@ describe MergeRequests::UpdateService, :mailer do
         expect(@merge_request).to be_valid
         expect(@merge_request.title).to eq('New title')
         expect(@merge_request.assignees).to match_array([user])
+        expect(@merge_request.reviewers).to match_array([])
         expect(@merge_request).to be_closed
         expect(@merge_request.labels.count).to eq(1)
         expect(@merge_request.labels.first.title).to eq(label.name)
@@ -92,6 +93,8 @@ describe MergeRequests::UpdateService, :mailer do
               labels: [],
               mentioned_users: [user2],
               assignees: [user3],
+              reviewers: [],
+              milestone: nil,
               total_time_spent: 0,
               description: "FYI #{user2.to_reference}"
             }
@@ -160,9 +163,78 @@ describe MergeRequests::UpdateService, :mailer do
           expect(@merge_request.merge_params["force_remove_source_branch"]).to eq("1")
         end
       end
+
+      it_behaves_like 'reviewer_ids filter' do
+        let(:opts) { {} }
+        let(:execute) { update_merge_request(opts) }
+      end
+
+      context 'with an existing reviewer' do
+        let(:merge_request) do
+          create(:merge_request, :simple, source_project: project, reviewer_ids: [user2.id])
+        end
+
+        context 'when merge_request_reviewer feature is enabled' do
+          before do
+            stub_feature_flags(merge_request_reviewer: true)
+          end
+
+          let(:opts) { { reviewer_ids: [IssuableFinder::Params::NONE] } }
+
+          it 'removes reviewers' do
+            expect(update_merge_request(opts).reviewers).to eq []
+          end
+        end
+      end
     end
 
-    context 'merge' do
+    context 'after_save callback to store_mentions' do
+      let(:merge_request) { create(:merge_request, title: 'Old title', description: "simple description", source_branch: 'test', source_project: project, author: user) }
+      let(:labels) { create_pair(:label, project: project) }
+      let(:milestone) { create(:milestone, project: project) }
+      let(:req_opts) { { source_branch: 'feature', target_branch: 'master' } }
+
+      subject { MergeRequests::UpdateService.new(project, user, opts).execute(merge_request) }
+
+      context 'when mentionable attributes change' do
+        let(:opts) { { description: "Description with #{user.to_reference}" }.merge(req_opts) }
+
+        it 'saves mentions' do
+          expect(merge_request).to receive(:store_mentions!).and_call_original
+
+          expect { subject }.to change { MergeRequestUserMention.count }.by(1)
+
+          expect(merge_request.referenced_users).to match_array([user])
+        end
+      end
+
+      context 'when mentionable attributes do not change' do
+        let(:opts) { { label_ids: [label.id, label2.id], milestone_id: milestone.id }.merge(req_opts) }
+
+        it 'does not call store_mentions' do
+          expect(merge_request).not_to receive(:store_mentions!).and_call_original
+
+          expect { subject }.not_to change { MergeRequestUserMention.count }
+
+          expect(merge_request.referenced_users).to be_empty
+        end
+      end
+
+      context 'when save fails' do
+        let(:opts) { { title: '', label_ids: labels.map(&:id), milestone_id: milestone.id } }
+
+        it 'does not call store_mentions' do
+          expect(merge_request).not_to receive(:store_mentions!).and_call_original
+
+          expect { subject }.not_to change { MergeRequestUserMention.count }
+
+          expect(merge_request.referenced_users).to be_empty
+          expect(merge_request.valid?).to be false
+        end
+      end
+    end
+
+    shared_examples_for 'correct merge behavior' do
       let(:opts) do
         {
           merge: merge_request.diff_head_sha
@@ -190,7 +262,7 @@ describe MergeRequests::UpdateService, :mailer do
 
       context 'with finished pipeline' do
         before do
-          create(:ci_pipeline_with_one_job,
+          create(:ci_pipeline,
             project: project,
             ref:     merge_request.source_branch,
             sha:     merge_request.diff_head_sha,
@@ -212,14 +284,14 @@ describe MergeRequests::UpdateService, :mailer do
         before do
           service_mock = double
           create(
-            :ci_pipeline_with_one_job,
+            :ci_pipeline,
             project: project,
             ref: merge_request.source_branch,
             sha: merge_request.diff_head_sha,
             head_pipeline_of: merge_request
           )
 
-          expect(AutoMerge::MergeWhenPipelineSucceedsService).to receive(:new).with(project, user, {})
+          expect(AutoMerge::MergeWhenPipelineSucceedsService).to receive(:new).with(project, user, { sha: merge_request.diff_head_sha })
             .and_return(service_mock)
           allow(service_mock).to receive(:available_for?) { true }
           expect(service_mock).to receive(:execute).with(merge_request)
@@ -262,6 +334,18 @@ describe MergeRequests::UpdateService, :mailer do
         end
 
         it { expect(@merge_request.state).to eq('opened') }
+      end
+    end
+
+    describe 'merge' do
+      it_behaves_like 'correct merge behavior'
+
+      context 'when merge_orchestration_service feature flag is disabled' do
+        before do
+          stub_feature_flags(merge_orchestration_service: false)
+        end
+
+        it_behaves_like 'correct merge behavior'
       end
     end
 
@@ -320,6 +404,41 @@ describe MergeRequests::UpdateService, :mailer do
         end
       end
 
+      context 'when reviewers gets changed' do
+        it 'marks pending todo as done' do
+          update_merge_request({ reviewer_ids: [user2.id] })
+
+          expect(pending_todo.reload).to be_done
+        end
+
+        it 'creates a pending todo for new review request' do
+          update_merge_request({ reviewer_ids: [user2.id] })
+
+          attributes = {
+            project: project,
+            author: user,
+            user: user2,
+            target_id: merge_request.id,
+            target_type: merge_request.class.name,
+            action: Todo::REVIEW_REQUESTED,
+            state: :pending
+          }
+
+          expect(Todo.where(attributes).count).to eq 1
+        end
+
+        it 'sends email reviewer change notifications to old and new reviewers', :sidekiq_might_not_need_inline do
+          merge_request.reviewers = [user2]
+
+          perform_enqueued_jobs do
+            update_merge_request({ reviewer_ids: [user3.id] })
+          end
+
+          should_email(user2)
+          should_email(user3)
+        end
+      end
+
       context 'when the milestone is removed' do
         let!(:non_subscriber) { create(:user) }
 
@@ -330,12 +449,10 @@ describe MergeRequests::UpdateService, :mailer do
           end
         end
 
-        it_behaves_like 'system notes for milestones'
-
         it 'sends notifications for subscribers of changed milestone', :sidekiq_might_not_need_inline do
           merge_request.milestone = create(:milestone, project: project)
 
-          merge_request.save
+          merge_request.save!
 
           perform_enqueued_jobs do
             update_merge_request(milestone_id: "")
@@ -362,8 +479,6 @@ describe MergeRequests::UpdateService, :mailer do
           expect(pending_todo.reload).to be_done
         end
 
-        it_behaves_like 'system notes for milestones'
-
         it 'sends notifications for subscribers of changed milestone', :sidekiq_might_not_need_inline do
           perform_enqueued_jobs do
             update_merge_request(milestone: create(:milestone, project: project))
@@ -386,7 +501,7 @@ describe MergeRequests::UpdateService, :mailer do
         end
 
         it 'updates updated_at' do
-          expect(merge_request.reload.updated_at).to be > Time.now
+          expect(merge_request.reload.updated_at).to be > Time.current
         end
       end
 
@@ -411,7 +526,7 @@ describe MergeRequests::UpdateService, :mailer do
 
       context 'when auto merge is enabled and target branch changed' do
         before do
-          AutoMergeService.new(project, user).execute(merge_request, AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS)
+          AutoMergeService.new(project, user, { sha: merge_request.diff_head_sha }).execute(merge_request, AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS)
 
           update_merge_request({ target_branch: 'target' })
         end
@@ -561,7 +676,7 @@ describe MergeRequests::UpdateService, :mailer do
 
     context 'updating asssignee_ids' do
       it 'does not update assignee when assignee_id is invalid' do
-        merge_request.update(assignee_ids: [user.id])
+        merge_request.update!(assignee_ids: [user.id])
 
         update_merge_request(assignee_ids: [-1])
 
@@ -569,7 +684,7 @@ describe MergeRequests::UpdateService, :mailer do
       end
 
       it 'unassigns assignee when user id is 0' do
-        merge_request.update(assignee_ids: [user.id])
+        merge_request.update!(assignee_ids: [user.id])
 
         update_merge_request(assignee_ids: [0])
 
@@ -597,7 +712,7 @@ describe MergeRequests::UpdateService, :mailer do
         levels.each do |level|
           it "does not update with unauthorized assignee when project is #{Gitlab::VisibilityLevel.level_name(level)}" do
             assignee = create(:user)
-            project.update(visibility_level: level)
+            project.update!(visibility_level: level)
             feature_visibility_attr = :"#{merge_request.model_name.plural}_access_level"
             project.project_feature.update_attribute(feature_visibility_attr, ProjectFeature::PRIVATE)
 
@@ -669,6 +784,11 @@ describe MergeRequests::UpdateService, :mailer do
         expect { update_merge_request(force_remove_source_branch: true) }
           .to change { merge_request.reload.force_remove_source_branch? }.from(nil).to(true)
       end
+    end
+
+    it_behaves_like 'issuable record that supports quick actions' do
+      let(:existing_merge_request) { create(:merge_request, source_project: project) }
+      let(:issuable) { described_class.new(project, user, params).execute(existing_merge_request) }
     end
   end
 end

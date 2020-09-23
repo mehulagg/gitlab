@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe ProtectedEnvironments::EnvironmentDropdownService, '#roles' do
+RSpec.describe ProtectedEnvironments::EnvironmentDropdownService, '#roles' do
   let(:roles) do
     [
       { id: 40, text: 'Maintainers', before_divider: true },

@@ -13,6 +13,8 @@ require_dependency 'declarative_policy/step'
 require_dependency 'declarative_policy/base'
 
 module DeclarativePolicy
+  extend PreferredScope
+
   CLASS_CACHE_MUTEX = Mutex.new
   CLASS_CACHE_IVAR = :@__DeclarativePolicy_CLASS_CACHE
 
@@ -70,11 +72,17 @@ module DeclarativePolicy
     end
 
     def compute_class_for_class(subject_class)
+      if subject_class.respond_to?(:declarative_policy_class)
+        return subject_class.declarative_policy_class.constantize
+      end
+
       subject_class.ancestors.each do |klass|
-        next unless klass.name
+        name = klass.name
+
+        next unless name
 
         begin
-          policy_class = "#{klass.name}Policy".constantize
+          policy_class = "#{name}Policy".constantize
 
           # NOTE: the < operator here tests whether policy_class
           # inherits from Base. We can't use #is_a? because that

@@ -1,3 +1,10 @@
+---
+type: reference, howto
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Gemnasium **(ULTIMATE)**
 
 This guide describes how to migrate from Gemnasium.com to your own GitLab
@@ -44,7 +51,7 @@ some steps to migrate your projects. There is no automatic import since GitLab
 doesn't know anything about any projects which existed on Gemnasium.com.
 Security features are free for public (open-source) projects hosted on GitLab.com.
 
-### If your project is hosted on GitLab (`https://gitlab.com` / self-hosted)
+### If your project is hosted on GitLab (`https://gitlab.com` / self-managed)
 
 You're almost set! If you're already using
 [Auto DevOps](../../../topics/autodevops/), you are already covered.
@@ -76,7 +83,7 @@ back to both GitLab and GitHub when completed.
 
    ![click on connected project](img/gemnasium/project_connected.png)
 
-   Your project is now mirrored on GitLab, where the Runners will be able to access
+   Your project is now mirrored on GitLab, where the runners will be able to access
    your source code and run your tests.
 
    Optional step: If you set this up on GitLab.com, make sure the project is
@@ -98,9 +105,9 @@ back to both GitLab and GitHub when completed.
 
 1. The result of the job will be visible directly from the pipeline view:
 
-   ![Security Dashboard](../../application_security/security_dashboard/img/pipeline_security_dashboard_v12_3.png)
+   ![Security Dashboard](../../application_security/security_dashboard/img/pipeline_security_dashboard_v13_3.png)
 
 NOTE: **Note:**
 If you don't commit very often to your project, you may want to use
-[scheduled pipelines](../pipelines/schedules.md) to run the job on a regular
+[scheduled pipelines](../../../ci/pipelines/schedules.md) to run the job on a regular
 basis.

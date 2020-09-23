@@ -1,16 +1,20 @@
 import { mount } from '@vue/test-utils';
 import component from 'ee/vue_shared/security_reports/components/dismiss_button.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
+import { GlButton } from '@gitlab/ui';
 
 describe('DismissalButton', () => {
   let wrapper;
+
+  const mountComponent = options => {
+    wrapper = mount(component, options);
+  };
 
   describe('With a non-dismissed vulnerability', () => {
     beforeEach(() => {
       const propsData = {
         isDismissed: false,
       };
-      wrapper = mount(component, { propsData });
+      mountComponent({ propsData });
     });
 
     it('should render the dismiss button', () => {
@@ -18,8 +22,10 @@ describe('DismissalButton', () => {
     });
 
     it('should emit dismiss vulnerabilty when clicked', () => {
-      wrapper.find(LoadingButton).trigger('click');
-      expect(wrapper.emitted().dismissVulnerability).toBeTruthy();
+      wrapper.find(GlButton).trigger('click');
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().dismissVulnerability).toBeTruthy();
+      });
     });
 
     it('should render the dismiss with comment button', () => {
@@ -28,7 +34,9 @@ describe('DismissalButton', () => {
 
     it('should emit openDismissalCommentBox when clicked', () => {
       wrapper.find('.js-dismiss-with-comment').trigger('click');
-      expect(wrapper.emitted().openDismissalCommentBox).toBeTruthy();
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().openDismissalCommentBox).toBeTruthy();
+      });
     });
   });
 
@@ -37,7 +45,7 @@ describe('DismissalButton', () => {
       const propsData = {
         isDismissed: true,
       };
-      wrapper = mount(component, { propsData });
+      mountComponent({ propsData });
     });
 
     it('should render the undo dismiss button', () => {
@@ -45,8 +53,10 @@ describe('DismissalButton', () => {
     });
 
     it('should emit revertDismissVulnerabilty when clicked', () => {
-      wrapper.find(LoadingButton).trigger('click');
-      expect(wrapper.emitted().revertDismissVulnerability).toBeTruthy();
+      wrapper.find(GlButton).trigger('click');
+      return wrapper.vm.$nextTick().then(() => {
+        expect(wrapper.emitted().revertDismissVulnerability).toBeTruthy();
+      });
     });
 
     it('should not render the dismiss with comment button', () => {

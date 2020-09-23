@@ -1,20 +1,23 @@
 # frozen_string_literal: true
 
 module FormHelper
-  prepend_if_ee('::EE::FormHelper') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
-  def form_errors(model, type: 'form')
+  def form_errors(model, type: 'form', truncate: [])
     return unless model.errors.any?
 
     headline = n_('The %{type} contains the following error:', 'The %{type} contains the following errors:', model.errors.count) % { type: type }
+    truncate = Array.wrap(truncate)
 
     content_tag(:div, class: 'alert alert-danger', id: 'error_explanation') do
       content_tag(:h4, headline) <<
         content_tag(:ul) do
-          model.errors.full_messages
-            .map { |msg| content_tag(:li, msg) }
-            .join
-            .html_safe
+          messages = model.errors.map do |attribute, message|
+            message = html_escape_once(model.errors.full_message(attribute, message)).html_safe
+            message = content_tag(:span, message, class: 'str-truncated-100') if truncate.include?(attribute)
+
+            content_tag(:li, message)
+          end
+
+          messages.join.html_safe
         end
     end
   end
@@ -52,6 +55,29 @@ module FormHelper
     dropdown_data
   end
 
+  def reviewers_dropdown_options(issuable_type)
+    {
+      toggle_class: 'js-reviewer-search js-multiselect js-save-user-data',
+      title: 'Request review from',
+      filter: true,
+      dropdown_class: 'dropdown-menu-user dropdown-menu-selectable dropdown-menu-reviewer',
+      placeholder: _('Search users'),
+      data: {
+        first_user: current_user&.username,
+        null_user: true,
+        current_user: true,
+        project_id: (@target_project || @project)&.id,
+        field_name: "#{issuable_type}[reviewer_ids][]",
+        default_label: 'Unassigned',
+        'dropdown-header': 'Reviewer(s)',
+        multi_select: true,
+        'input-meta': 'name',
+        'always-show-selectbox': true,
+        current_user_info: UserSerializer.new.represent(current_user)
+      }
+    }
+  end
+
   # Overwritten
   def issue_supports_multiple_assignees?
     false
@@ -74,3 +100,5 @@ module FormHelper
     new_options
   end
 end
+
+FormHelper.prepend_if_ee('::EE::FormHelper')

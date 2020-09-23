@@ -1,4 +1,7 @@
 ---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 comments: false
 type: index
 ---
@@ -10,9 +13,8 @@ implement [GitLab CI/CD](../README.md) for your specific use case.
 
 Examples are available in several forms. As a collection of:
 
-- `.gitlab-ci.yml` [template files](https://gitlab.com/gitlab-org/gitlab-foss/tree/master/lib/gitlab/ci/templates) maintained in GitLab. When you create a new file via the UI,
-  GitLab will give you the option to choose one of these templates. This will allow you to start using CI/CD with your project quickly.
-  If your favorite programming language or framework are missing, we would love your help by sending a merge request with a new `.gitlab-ci.yml` to this project.
+- `.gitlab-ci.yml` [template files](#cicd-templates) maintained in GitLab, for many
+  common frameworks and programming languages.
 - Repositories with [example projects](https://gitlab.com/gitlab-examples) for various languages. You can fork and adjust them to your own needs. Projects include demonstrations of [multi-project pipelines](https://gitlab.com/gitlab-examples/multi-project-pipelines) and using [Review Apps with a static site served by NGINX](https://gitlab.com/gitlab-examples/review-apps-nginx/).
 - Examples and [other resources](#other-resources) listed below.
 
@@ -20,35 +22,84 @@ Examples are available in several forms. As a collection of:
 
 The following table lists examples with step-by-step tutorials that are contained in this section.
 
-| Use case                    | Resource                                                                                                                   |
-|:----------------------------|:---------------------------------------------------------------------------------------------------------------------------|
-| Browser performance testing | [Browser Performance Testing with the Sitespeed.io container](../../user/project/merge_requests/browser_performance_testing.md). |
-| Clojure                     | [Test a Clojure application with GitLab CI/CD](test-clojure-application.md).                                               |
-| Deployment with Dpl         | [Using `dpl` as deployment tool](deployment/README.md).                                                                    |
-| Elixir                      | [Testing a Phoenix application with GitLab CI/CD](test_phoenix_app_with_gitlab_ci_cd/index.md).                            |
-| End-to-end testing          | [End-to-end testing with GitLab CI/CD and WebdriverIO](end_to_end_testing_webdriverio/index.md).                           |
-| Game development            | [DevOps and Game Dev with GitLab CI/CD](devops_and_game_dev_with_gitlab_ci_cd/index.md).                                   |
-| GitLab Pages                | See the [GitLab Pages](../../user/project/pages/index.md) documentation for a complete example of deploying a static site. |
-| Java with Spring Boot       | [Deploy a Spring Boot application to Cloud Foundry with GitLab CI/CD](deploy_spring_boot_to_cloud_foundry/index.md).       |
-| Java with Maven             | [How to deploy Maven projects to Artifactory with GitLab CI/CD](artifactory_and_gitlab/index.md).                          |
-| PHP with PHPunit, atoum     | [Testing PHP projects](php.md).                                                                                            |
-| PHP with NPM, SCP           | [Running Composer and NPM scripts with deployment via SCP in GitLab CI/CD](deployment/composer-npm-deploy.md).             |
-| PHP with Laravel, Envoy     | [Test and deploy Laravel applications with GitLab CI/CD and Envoy](laravel_with_gitlab_and_envoy/index.md).                |
-| Python on Heroku            | [Test and deploy a Python application with GitLab CI/CD](test-and-deploy-python-application-to-heroku.md).                 |
-| Ruby on Heroku              | [Test and deploy a Ruby application with GitLab CI/CD](test-and-deploy-ruby-application-to-heroku.md).                     |
-| Scala on Heroku             | [Test and deploy a Scala application to Heroku](test-scala-application.md).                                                |
-| Parallel testing Ruby & JS  | [GitLab CI parallel jobs testing for Ruby & JavaScript projects](https://docs.knapsackpro.com/2019/how-to-run-parallel-jobs-for-rspec-tests-on-gitlab-ci-pipeline-and-speed-up-ruby-javascript-testing). |
+| Use case                      | Resource                                                                                                                   |
+|:------------------------------|:---------------------------------------------------------------------------------------------------------------------------|
+| Browser performance testing   | [Browser Performance Testing with the Sitespeed.io container](../../user/project/merge_requests/browser_performance_testing.md). |
+| Load performance testing      | [Load Performance Testing with the k6 container](../../user/project/merge_requests/load_performance_testing.md). |
+| Clojure                       | [Test a Clojure application with GitLab CI/CD](test-clojure-application.md).                                               |
+| Deployment with Dpl           | [Using `dpl` as deployment tool](deployment/README.md).                                                                    |
+| Elixir                        | [Testing a Phoenix application with GitLab CI/CD](test_phoenix_app_with_gitlab_ci_cd/index.md).                            |
+| End-to-end testing            | [End-to-end testing with GitLab CI/CD and WebdriverIO](end_to_end_testing_webdriverio/index.md).                           |
+| Game development              | [DevOps and Game Dev with GitLab CI/CD](devops_and_game_dev_with_gitlab_ci_cd/index.md).                                   |
+| GitLab Pages                  | See the [GitLab Pages](../../user/project/pages/index.md) documentation for a complete example of deploying a static site. |
+| Java with Spring Boot         | [Deploy a Spring Boot application to Cloud Foundry with GitLab CI/CD](deploy_spring_boot_to_cloud_foundry/index.md).       |
+| Java with Maven               | [How to deploy Maven projects to Artifactory with GitLab CI/CD](artifactory_and_gitlab/index.md).                          |
+| PHP with PHPunit, atoum       | [Testing PHP projects](php.md).                                                                                            |
+| PHP with NPM, SCP             | [Running Composer and NPM scripts with deployment via SCP in GitLab CI/CD](deployment/composer-npm-deploy.md).             |
+| PHP with Laravel, Envoy       | [Test and deploy Laravel applications with GitLab CI/CD and Envoy](laravel_with_gitlab_and_envoy/index.md).                |
+| Python on Heroku              | [Test and deploy a Python application with GitLab CI/CD](test-and-deploy-python-application-to-heroku.md).                 |
+| Ruby on Heroku                | [Test and deploy a Ruby application with GitLab CI/CD](test-and-deploy-ruby-application-to-heroku.md).                     |
+| Scala on Heroku               | [Test and deploy a Scala application to Heroku](test-scala-application.md).                                                |
+| Parallel testing Ruby & JS    | [GitLab CI/CD parallel jobs testing for Ruby & JavaScript projects](https://docs.knapsackpro.com/2019/how-to-run-parallel-jobs-for-rspec-tests-on-gitlab-ci-pipeline-and-speed-up-ruby-javascript-testing). |
+| Secrets management with Vault | [Authenticating and Reading Secrets With Hashicorp Vault](authenticating-with-hashicorp-vault/index.md).                    |
 
 ### Contributing examples
 
 Contributions are welcome! You can help your favorite programming
 language users and GitLab by sending a merge request with a guide for that language.
-You may want to apply for the [GitLab Community Writers Program](https://about.gitlab.com/community/writers/)
-to get paid for writing complete articles for GitLab.
 
-## Adding templates to your GitLab installation **(PREMIUM ONLY)**
+## CI/CD templates
 
-If you want to have customized examples and templates for your own self-managed GitLab instance available to your team, your GitLab administrator can [designate an instance template repository](../../user/admin_area/settings/instance_template_repository.md) that contains examples and templates specific to your enterprise.
+Get started with GitLab CI/CD and your favorite programming language or framework by using a
+`.gitlab-ci.yml` [template](https://gitlab.com/gitlab-org/gitlab/tree/master/lib/gitlab/ci/templates).
+
+When you create a `gitlab-ci.yml` file in the UI, you can
+choose one of these templates:
+
+- [Android (`Android.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android.gitlab-ci.yml)
+- [Android with fastlane (`Android-Fastlane.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Android-Fastlane.gitlab-ci.yml)
+- [Bash (`Bash.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Bash.gitlab-ci.yml)
+- [C++ (`C++.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/C++.gitlab-ci.yml)
+- [Chef (`Chef.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Chef.gitlab-ci.yml)
+- [Clojure (`Clojure.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Clojure.gitlab-ci.yml)
+- [Composer `Composer.gitlab-ci.yml`](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Composer.gitlab-ci.yml)
+- [Crystal (`Crystal.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Crystal.gitlab-ci.yml)
+- [Dart (`Dart.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Dart.gitlab-ci.yml)
+- [Django (`Django.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Django.gitlab-ci.yml)
+- [Docker (`Docker.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Docker.gitlab-ci.yml)
+- [dotNET (`dotNET.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/dotNET.gitlab-ci.yml)
+- [dotNET Core (`dotNET-Core.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/dotNET-Core.yml)
+- [Elixir (`Elixir.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Elixir.gitlab-ci.yml)
+- [goLang (`Go.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Go.gitlab-ci.yml)
+- [Gradle (`Gradle.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Gradle.gitlab-ci.yml)
+- [Grails (`Grails.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Grails.gitlab-ci.yml)
+- [iOS with fastlane (`iOS-Fastlane.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/iOS-Fastlane.gitlab-ci.yml)
+- [Julia (`Julia.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Julia.gitlab-ci.yml)
+- [Laravel (`Laravel.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Laravel.gitlab-ci.yml)
+- [LaTeX (`LaTeX.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/LaTeX.gitlab-ci.yml)
+- [Maven (`Maven.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Maven.gitlab-ci.yml)
+- [Mono (`Mono.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Mono.gitlab-ci.yml)
+- [NPM (`npm.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/npm.gitlab-ci.yml)
+- [Node.js (`Nodejs.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Nodejs.gitlab-ci.yml)
+- [OpenShift (`OpenShift.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/OpenShift.gitlab-ci.yml)
+- [Packer (`Packer.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Packer.gitlab-ci.yml)
+- [PHP (`PHP.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/PHP.gitlab-ci.yml)
+- [Python (`Python.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Python.gitlab-ci.yml)
+- [Ruby (`Ruby.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Ruby.gitlab-ci.yml)
+- [Rust (`Rust.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Rust.gitlab-ci.yml)
+- [Scala (`Scala.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Scala.gitlab-ci.yml)
+- [Swift (`Swift.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Swift.gitlab-ci.yml)
+- [Terraform (`Terraform.gitlab-ci.yml`)](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/ci/templates/Terraform.gitlab-ci.yml)
+
+If a programming language or framework template is not in this list, you can contribute
+one. To create a template, submit a merge request
+to <https://gitlab.com/gitlab-org/gitlab/tree/master/lib/gitlab/ci/templates>.
+
+### Adding templates to your GitLab installation **(PREMIUM ONLY)**
+
+You can add custom examples and templates to your self-managed GitLab instance.
+Your GitLab administrator can [designate an instance template repository](../../user/admin_area/settings/instance_template_repository.md)
+that contains examples and templates specific to your organization.
 
 ## Other resources
 
@@ -67,7 +118,7 @@ For examples of setting up GitLab CI/CD for cloud-based environments, see:
 
 See also the following video overviews:
 
-- [Containers, Schedulers, and GitLab CI](https://www.youtube.com/watch?v=d-9awBxEbvQ).
+- [Kubernetes, GitLab, and Cloud Native](https://www.youtube.com/watch?v=d-9awBxEbvQ).
 - [Deploying to IBM Cloud with GitLab CI/CD](https://www.youtube.com/watch?v=6ZF4vgKMd-g).
 
 ### Customer stories

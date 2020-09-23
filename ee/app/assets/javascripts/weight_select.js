@@ -1,17 +1,17 @@
-/* eslint-disable one-var, no-var, no-shadow, no-else-return */
+/* eslint-disable no-shadow */
 
 import $ from 'jquery';
-import '~/gl_dropdown';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 function WeightSelect(els, options = {}) {
   const $els = $(els || '.js-weight-select');
 
   $els.each((i, dropdown) => {
-    var $block, $dropdown, $selectbox, $value;
-    $dropdown = $(dropdown);
-    $selectbox = $dropdown.closest('.selectbox');
-    $block = $selectbox.closest('.block');
-    $value = $block.find('.value');
+    const $dropdown = $(dropdown);
+    const $selectbox = $dropdown.closest('.selectbox');
+    const $block = $selectbox.closest('.block');
+    const $value = $block.find('.value');
+    // eslint-disable-next-line no-jquery/no-fade
     $block.find('.block-loading').fadeOut();
     const fieldName = options.fieldName || $dropdown.data('fieldName');
     const inputField = $dropdown.closest('.selectbox').find(`input[name='${fieldName}']`);
@@ -20,7 +20,7 @@ function WeightSelect(els, options = {}) {
       inputField.val(options.selected);
     }
 
-    return $dropdown.glDropdown({
+    return initDeprecatedJQueryDropdown($dropdown, {
       selectable: true,
       fieldName,
       toggleLabel(selected, el) {
@@ -33,13 +33,12 @@ function WeightSelect(els, options = {}) {
       id(obj, el) {
         if ($(el).data('none') == null) {
           return $(el).data('id');
-        } else {
-          return '';
         }
+        return '';
       },
-      clicked(glDropdownEvt) {
-        const { e } = glDropdownEvt;
-        let selected = glDropdownEvt.selectedObj;
+      clicked(deprecatedJQueryDropdownEvt) {
+        const { e } = deprecatedJQueryDropdownEvt;
+        let selected = deprecatedJQueryDropdownEvt.selectedObj;
         const inputField = $dropdown.closest('.selectbox').find(`input[name='${fieldName}']`);
 
         if (options.handleClick) {

@@ -1,13 +1,12 @@
 <script>
-import { GlButton } from '@gitlab/ui';
-
-import Icon from '~/vue_shared/components/icon.vue';
+import { debounce } from 'lodash';
+import { GlButton, GlIcon } from '@gitlab/ui';
 import autofocusonshow from '~/vue_shared/directives/autofocusonshow';
 
 export default {
   components: {
     GlButton,
-    Icon,
+    GlIcon,
   },
   directives: {
     autofocusonshow,
@@ -18,9 +17,9 @@ export default {
     };
   },
   methods: {
-    handleKeyUp() {
+    handleKeyUp: debounce(function debouncedKeyUp() {
       this.$emit('onSearchInput', this.query);
-    },
+    }, 300),
     handleInputClear() {
       this.query = '';
       this.handleKeyUp();
@@ -40,10 +39,11 @@ export default {
       type="search"
       @keyup="handleKeyUp"
     />
-    <icon v-show="!query" name="search" />
+    <gl-icon v-show="!query" name="search" />
     <gl-button
       variant="link"
-      class="fa fa-times dropdown-input-clear js-dropdown-input-clear"
+      icon="close"
+      class="dropdown-input-clear js-dropdown-input-clear"
       data-hidden="true"
       @click.stop="handleInputClear"
     />

@@ -2,7 +2,7 @@
 
 module Issues
   class UpdateService < Issues::BaseService
-    include SpamCheckService
+    include SpamCheckMethods
 
     def execute(issue)
       handle_move_between_ids(issue)
@@ -18,7 +18,12 @@ module Issues
     end
 
     def before_update(issue, skip_spam_check: false)
-      spam_check(issue, current_user) unless skip_spam_check
+      spam_check(issue, current_user, action: :update) unless skip_spam_check
+    end
+
+    def after_update(issue)
+      add_incident_label(issue)
+      IssuesChannel.broadcast_to(issue, event: 'updated') if Gitlab::ActionCable::Config.in_app? || Feature.enabled?(:broadcast_issue_updates, issue.project)
     end
 
     def handle_changes(issue, options)
@@ -28,7 +33,7 @@ module Issues
       old_assignees = old_associations.fetch(:assignees, [])
 
       if has_changes?(issue, old_labels: old_labels, old_assignees: old_assignees)
-        todo_service.mark_pending_todos_as_done(issue, current_user)
+        todo_service.resolve_todos_for_target(issue, current_user)
       end
 
       if issue.previous_changes.include?('title') ||
@@ -39,13 +44,15 @@ module Issues
       if issue.assignees != old_assignees
         create_assignee_note(issue, old_assignees)
         notification_service.async.reassigned_issue(issue, current_user, old_assignees)
-        todo_service.reassigned_issuable(issue, current_user, old_assignees)
+        todo_service.reassigned_assignable(issue, current_user, old_assignees)
+        track_incident_action(current_user, issue, :incident_assigned)
       end
 
       if issue.previous_changes.include?('confidential')
         # don't enqueue immediately to prevent todos removal in case of a mistake
         TodosDestroyer::ConfidentialIssueWorker.perform_in(Todo::WAIT_FOR_DELETE, issue.id) if issue.confidential?
         create_confidentiality_note(issue)
+        track_usage_event(:incident_management_incident_change_confidential, current_user.id)
       end
 
       added_labels = issue.labels - old_labels
@@ -64,7 +71,7 @@ module Issues
     end
 
     def handle_task_changes(issuable)
-      todo_service.mark_pending_todos_as_done(issuable, current_user)
+      todo_service.resolve_todos_for_target(issuable, current_user)
       todo_service.update_issue(issuable, current_user)
     end
 
@@ -79,6 +86,7 @@ module Issues
       raise ActiveRecord::RecordNotFound unless issue_before || issue_after
 
       issue.move_between(issue_before, issue_after)
+      rebalance_if_needed(issue)
     end
 
     # rubocop: disable CodeReuse/ActiveRecord
@@ -115,9 +123,25 @@ module Issues
     end
 
     def handle_milestone_change(issue)
-      return if skip_milestone_email
-
       return unless issue.previous_changes.include?('milestone_id')
+
+      invalidate_milestone_issue_counters(issue)
+      send_milestone_change_notification(issue)
+    end
+
+    def invalidate_milestone_issue_counters(issue)
+      issue.previous_changes['milestone_id'].each do |milestone_id|
+        next unless milestone_id
+
+        milestone = Milestone.find_by_id(milestone_id)
+
+        delete_milestone_closed_issue_counter_cache(milestone)
+        delete_milestone_total_issue_counter_cache(milestone)
+      end
+    end
+
+    def send_milestone_change_notification(issue)
+      return if skip_milestone_email
 
       if issue.milestone.nil?
         notification_service.async.removed_milestone_issue(issue, current_user)

@@ -1,7 +1,7 @@
-import _ from 'underscore';
+import { pick, clone } from 'lodash';
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
 import ProjectDropdown from '~/error_tracking_settings/components/project_dropdown.vue';
 import { defaultProps, projectList, staleProject } from '../mock';
 
@@ -15,7 +15,7 @@ describe('error tracking settings project dropdown', () => {
     wrapper = shallowMount(ProjectDropdown, {
       localVue,
       propsData: {
-        ..._.pick(
+        ...pick(
           defaultProps,
           'dropdownLabel',
           'invalidProjectLabel',
@@ -43,7 +43,7 @@ describe('error tracking settings project dropdown', () => {
   describe('empty project list', () => {
     it('renders the dropdown', () => {
       expect(wrapper.find('#project-dropdown').exists()).toBeTruthy();
-      expect(wrapper.find(GlDropdown).exists()).toBeTruthy();
+      expect(wrapper.find(GlDeprecatedDropdown).exists()).toBeTruthy();
     });
 
     it('shows helper text', () => {
@@ -58,32 +58,35 @@ describe('error tracking settings project dropdown', () => {
     });
 
     it('does not contain any dropdown items', () => {
-      expect(wrapper.find(GlDropdownItem).exists()).toBeFalsy();
-      expect(wrapper.find(GlDropdown).props('text')).toBe('No projects available');
+      expect(wrapper.find(GlDeprecatedDropdownItem).exists()).toBeFalsy();
+      expect(wrapper.find(GlDeprecatedDropdown).props('text')).toBe('No projects available');
     });
   });
 
   describe('populated project list', () => {
     beforeEach(() => {
-      wrapper.setProps({ projects: _.clone(projectList), hasProjects: true });
+      wrapper.setProps({ projects: clone(projectList), hasProjects: true });
+
+      return wrapper.vm.$nextTick();
     });
 
     it('renders the dropdown', () => {
       expect(wrapper.find('#project-dropdown').exists()).toBeTruthy();
-      expect(wrapper.find(GlDropdown).exists()).toBeTruthy();
+      expect(wrapper.find(GlDeprecatedDropdown).exists()).toBeTruthy();
     });
 
     it('contains a number of dropdown items', () => {
-      expect(wrapper.find(GlDropdownItem).exists()).toBeTruthy();
-      expect(wrapper.findAll(GlDropdownItem).length).toBe(2);
+      expect(wrapper.find(GlDeprecatedDropdownItem).exists()).toBeTruthy();
+      expect(wrapper.findAll(GlDeprecatedDropdownItem).length).toBe(2);
     });
   });
 
   describe('selected project', () => {
-    const selectedProject = _.clone(projectList[0]);
+    const selectedProject = clone(projectList[0]);
 
     beforeEach(() => {
-      wrapper.setProps({ projects: _.clone(projectList), selectedProject, hasProjects: true });
+      wrapper.setProps({ projects: clone(projectList), selectedProject, hasProjects: true });
+      return wrapper.vm.$nextTick();
     });
 
     it('does not show helper text', () => {
@@ -95,10 +98,11 @@ describe('error tracking settings project dropdown', () => {
   describe('invalid project selected', () => {
     beforeEach(() => {
       wrapper.setProps({
-        projects: _.clone(projectList),
+        projects: clone(projectList),
         selectedProject: staleProject,
         isProjectInvalid: true,
       });
+      return wrapper.vm.$nextTick();
     });
 
     it('displays a error', () => {

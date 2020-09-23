@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Geo::NodeUpdateService do
+RSpec.describe Geo::NodeUpdateService do
   include EE::GeoHelpers
 
-  set(:primary) { create(:geo_node, :primary) }
+  let_it_be(:primary, reload: true) { create(:geo_node, :primary) }
 
   let(:geo_node) { create(:geo_node) }
   let(:groups) { create_list(:group, 2) }

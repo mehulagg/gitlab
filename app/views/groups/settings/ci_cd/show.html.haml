@@ -1,5 +1,5 @@
-- breadcrumb_title "CI / CD Settings"
-- page_title "CI / CD"
+- breadcrumb_title _("CI / CD Settings")
+- page_title _("CI / CD")
 
 - expanded = expanded_by_default?
 - general_expanded = @group.errors.empty? ? expanded : true
@@ -11,7 +11,7 @@
     .settings-header
       %h4
         = _("General pipelines")
-      %button.btn.js-settings-toggle{ type: 'button' }
+      %button.btn.gl-button.js-settings-toggle{ type: 'button' }
         = expanded ? _('Collapse') : _('Expand')
       %p
         = _("Customize your pipeline configuration.")
@@ -28,10 +28,11 @@
   .settings-header
     %h4
       = _('Runners')
-    %button.btn.btn-default.js-settings-toggle{ type: "button" }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: "button" }
       = expanded ? _('Collapse') : _('Expand')
     %p
-      = _('Register and see your runners for this group.')
+      = _("Runners are processes that pick up and execute jobs for GitLab. Here you can register and see your Runners for this project.")
+      = link_to s_('More information'), help_page_path('ci/runners/README')
   .settings-content
     = render 'groups/runners/index'
 
@@ -39,12 +40,14 @@
   .settings-header
     %h4
       = _('Auto DevOps')
-    %button.btn.btn-default.js-settings-toggle{ type: "button" }
+    %button.btn.gl-button.btn-default.js-settings-toggle{ type: "button" }
       = expanded ? _('Collapse') : _('Expand')
     %p
       - auto_devops_url = help_page_path('topics/autodevops/index')
+      - quickstart_url = help_page_path('topics/autodevops/quick_start_guide')
       - auto_devops_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: auto_devops_url }
-      = s_('GroupSettings|Auto DevOps will automatically build, test and deploy your application based on a predefined Continuous Integration and Delivery configuration. %{auto_devops_start}Learn more about Auto DevOps%{auto_devops_end}').html_safe % { auto_devops_start: auto_devops_start, auto_devops_end: '</a>'.html_safe }
+      - quickstart_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: quickstart_url }
+      = s_('AutoDevOps|Auto DevOps can automatically build, test, and deploy applications based on predefined continuous integration and delivery configuration. %{auto_devops_start}Learn more about Auto DevOps%{auto_devops_end} or use our %{quickstart_start}quick start guide%{quickstart_end} to get started right away.').html_safe % { auto_devops_start: auto_devops_start, auto_devops_end: '</a>'.html_safe, quickstart_start: quickstart_start, quickstart_end: '</a>'.html_safe }
 
   .settings-content
     = render 'groups/settings/ci_cd/auto_devops_form', group: @group

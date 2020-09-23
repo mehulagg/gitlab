@@ -35,6 +35,17 @@ When adding a foreign key in PostgreSQL the column is not indexed automatically,
 thus you must also add a concurrent index. Not doing so will result in cascading
 deletes being very slow.
 
+## Naming foreign keys
+
+By default Ruby on Rails uses the `_id` suffix for foreign keys. So we should
+only use this suffix for associations between two tables. If you want to
+reference an ID on a third party platform the `_xid` suffix is recommended.
+
+The spec `spec/db/schema_spec.rb` will test if all columns with the `_id` suffix
+have a foreign key constraint. So if that spec fails, don't add the column to
+`IGNORED_FK_COLUMNS`, but instead add the FK constraint, or consider naming it
+differently.
+
 ## Dependent Removals
 
 Don't define options such as `dependent: :destroy` or `dependent: :delete` when
@@ -61,3 +72,39 @@ introduces non database logic to a model, and means we can no longer rely on
 foreign keys to remove the data as this would result in the filesystem data
 being left behind. In such a case you should use a service class instead that
 takes care of removing non database data.
+
+## Alternative primary keys with has_one associations
+
+Sometimes a `has_one` association is used to create a one-to-one relationship:
+
+```ruby
+class User < ActiveRecord::Base
+  has_one :user_config
+end
+
+class UserConfig < ActiveRecord::Base
+  belongs_to :user
+end
+```
+
+In these cases, there may be an opportunity to remove the unnecessary `id`
+column on the associated table, `user_config.id` in this example. Instead,
+the originating table ID can be used as the primary key for the associated
+table:
+
+```ruby
+create_table :user_configs, id: false do |t|
+  t.references :users, primary_key: true, default: nil, index: false, foreign_key: { on_delete: :cascade }
+  ...
+end
+```
+
+You will also need to add the new primary key to the model:
+
+```ruby
+class UserConfig < ActiveRecord::Base
+  self.primary_key = :user_id
+
+  belongs_to :user
+end
+```

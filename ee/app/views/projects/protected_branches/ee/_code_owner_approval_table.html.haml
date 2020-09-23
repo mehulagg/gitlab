@@ -1,8 +1,3 @@
 - if @project.feature_available?(:code_owner_approval_required)
   %td
-    %button{ type: 'button',
-      class: "js-code-owner-toggle project-feature-toggle mr-5 #{'is-checked' if protected_branch.code_owner_approval_required}",
-      "aria-label": s_("ProtectedBranch|Toggle code owner approval") }
-      %span.toggle-icon
-        = sprite_icon('status_success_borderless', size: 16, css_class: 'toggle-icon-svg toggle-status-checked')
-        = sprite_icon('status_failed_borderless', size: 16, css_class: 'toggle-icon-svg toggle-status-unchecked')
+    = render "shared/buttons/project_feature_toggle", is_checked: protected_branch.code_owner_approval_required, label: s_("ProtectedBranch|Toggle code owner approval"), class_list: "js-code-owner-toggle project-feature-toggle mr-5", data: { qa_selector: 'code_owner_toggle_button', qa_branch_name: protected_branch.name }

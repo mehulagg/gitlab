@@ -31,7 +31,7 @@ module VisibilityLevelHelper
   def project_visibility_level_description(level)
     case level
     when Gitlab::VisibilityLevel::PRIVATE
-      _("Project access must be granted explicitly to each user.")
+      _("Project access must be granted explicitly to each user. If this project is part of a group, access will be granted to members of the group.")
     when Gitlab::VisibilityLevel::INTERNAL
       _("The project can be accessed by any logged in user.")
     when Gitlab::VisibilityLevel::PUBLIC
@@ -165,6 +165,17 @@ module VisibilityLevelHelper
       end
 
     [requested_level, max_allowed_visibility_level(form_model)].min
+  end
+
+  def available_visibility_levels(form_model)
+    Gitlab::VisibilityLevel.values.reject do |level|
+      disallowed_visibility_level?(form_model, level) ||
+      restricted_visibility_levels.include?(level)
+    end
+  end
+
+  def snippets_selected_visibility_level(visibility_levels, selected)
+    visibility_levels.find { |level| level == selected } || visibility_levels.min
   end
 
   def multiple_visibility_levels_restricted?

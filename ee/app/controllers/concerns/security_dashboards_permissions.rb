@@ -3,6 +3,12 @@
 module SecurityDashboardsPermissions
   extend ActiveSupport::Concern
 
+  VULNERABLE_POLICIES = {
+    group: :read_group_security_dashboard,
+    instance_security_dashboard: :read_instance_security_dashboard,
+    project: :read_project_security_dashboard
+  }.freeze
+
   included do
     before_action :ensure_security_dashboard_feature_enabled!
     before_action :authorize_read_security_dashboard!
@@ -19,6 +25,6 @@ module SecurityDashboardsPermissions
   end
 
   def read_security_dashboard
-    "read_#{vulnerable.class.name.downcase}_security_dashboard".to_sym
+    VULNERABLE_POLICIES[vulnerable.class.name.underscore.to_sym]
   end
 end

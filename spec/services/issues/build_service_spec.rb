@@ -2,7 +2,7 @@
 
 require 'spec_helper.rb'
 
-describe Issues::BuildService do
+RSpec.describe Issues::BuildService do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
 
@@ -146,6 +146,20 @@ describe Issues::BuildService do
       issue = build_issue(milestone_id: milestone.id)
 
       expect(issue.milestone).to be_nil
+    end
+
+    context 'setting issue type' do
+      it 'sets the issue_type on the issue' do
+        issue = build_issue(issue_type: 'incident')
+
+        expect(issue.issue_type).to eq('incident')
+      end
+
+      it 'defaults to issue if issue_type not given' do
+        issue = build_issue
+
+        expect(issue.issue_type).to eq('issue')
+      end
     end
   end
 end

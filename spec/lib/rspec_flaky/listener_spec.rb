@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RspecFlaky::Listener, :aggregate_failures do
+RSpec.describe RspecFlaky::Listener, :aggregate_failures do
   let(:already_flaky_example_uid) { '6e869794f4cfd2badd93eb68719371d1' }
   let(:suite_flaky_example_report) do
     {
@@ -19,6 +19,7 @@ describe RspecFlaky::Listener, :aggregate_failures do
       }
     }
   end
+
   let(:already_flaky_example_attrs) do
     {
       id: 'spec/foo/bar_spec.rb:2',
@@ -30,6 +31,7 @@ describe RspecFlaky::Listener, :aggregate_failures do
       execution_result: double(status: 'passed', exception: nil)
     }
   end
+
   let(:already_flaky_example) { RspecFlaky::FlakyExample.new(suite_flaky_example_report[already_flaky_example_uid]) }
   let(:new_example_attrs) do
     {

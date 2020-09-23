@@ -9,24 +9,8 @@ module EE
         helpers do
           extend ::Gitlab::Utils::Override
 
-          # rubocop: disable CodeReuse/ActiveRecord
-          def epic
-            @epic ||= user_group.epics.find_by(iid: params[:epic_iid])
-          end
-          # rubocop: enable CodeReuse/ActiveRecord
-
           def authorize_can_read!
-            authorize!(:read_epic, epic)
-          end
-
-          override :find_todos
-          def find_todos
-            todos = super
-
-            return todos if ::Feature.enabled?(:design_management_todos_api, default_enabled: true)
-
-            # Exclude Design Todos if the feature is disabled
-            todos.where.not(target_type: ::DesignManagement::Design.name) # rubocop: disable CodeReuse/ActiveRecord
+            authorize!(:read_epic, user_group)
           end
         end
 
@@ -39,6 +23,7 @@ module EE
           end
           post ":id/epics/:epic_iid/todo" do
             authorize_can_read!
+            epic = find_group_epic(params[:epic_iid])
             todo = ::TodoService.new.mark_todo(epic, current_user).first
 
             if todo

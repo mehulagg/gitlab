@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IssuablesAnalytics do
+RSpec.describe IssuablesAnalytics do
   describe '#data' do
     let(:project) { create(:project, :empty_repo) }
 
@@ -13,7 +13,7 @@ describe IssuablesAnalytics do
     end
 
     before do
-      Timecop.freeze(Time.now) do
+      Timecop.freeze(Time.current) do
         seed.each_pair do |months_back, issues_count|
           create_list(:issue, issues_count, project: project, created_at: months_back.months.ago)
         end

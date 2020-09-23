@@ -9,6 +9,11 @@ module EE
     CANARY_DEPLOYMENT = 'canary_deployment'
     GOLD_TRIAL = 'gold_trial'
     GOLD_TRIAL_BILLINGS = 'gold_trial_billings'
+    THREAT_MONITORING_INFO = 'threat_monitoring_info'
+    ACCOUNT_RECOVERY_REGULAR_CHECK = 'account_recovery_regular_check'
+    ACTIVE_USER_COUNT_THRESHOLD = 'active_user_count_threshold'
+    PERSONAL_ACCESS_TOKEN_EXPIRY = 'personal_access_token_expiry'
+    FEATURE_FLAGS_NEW_VERISION = 'feature_flags_new_version'
 
     def show_canary_deployment_callout?(project)
       !user_dismissed?(CANARY_DEPLOYMENT) &&
@@ -50,10 +55,20 @@ module EE
     def render_dashboard_gold_trial(user)
       return unless show_gold_trial?(user, GOLD_TRIAL) &&
           user_default_dashboard?(user) &&
-          has_no_trial_or_gold_plan?(user) &&
-          has_some_namespaces_with_no_trials?(user)
+          ::Feature.enabled?(:render_dashboard_gold_trial, default_enabled: true) &&
+          !user.owns_paid_namespace? &&
+          user.any_namespace_without_trial?
 
       render 'shared/gold_trial_callout_content'
+    end
+
+    def render_account_recovery_regular_check
+      return unless current_user &&
+          ::Gitlab.com? &&
+          3.months.ago > current_user.created_at &&
+          !user_dismissed?(ACCOUNT_RECOVERY_REGULAR_CHECK, 3.months.ago)
+
+      render 'shared/check_recovery_settings'
     end
 
     def render_billings_gold_trial(user, namespace)
@@ -62,6 +77,22 @@ module EE
       return unless show_gold_trial?(user, GOLD_TRIAL_BILLINGS)
 
       render 'shared/gold_trial_callout_content', is_dismissable: !namespace.free_plan?, callout: GOLD_TRIAL_BILLINGS
+    end
+
+    def show_threat_monitoring_info?
+      !user_dismissed?(THREAT_MONITORING_INFO)
+    end
+
+    def show_token_expiry_notification?
+      return false unless current_user
+
+      !token_expiration_enforced? &&
+        current_user.active? &&
+        !user_dismissed?(PERSONAL_ACCESS_TOKEN_EXPIRY, 1.week.ago)
+    end
+
+    def show_feature_flags_new_version?
+      !user_dismissed?(FEATURE_FLAGS_NEW_VERISION)
     end
 
     private
@@ -87,7 +118,7 @@ module EE
     end
 
     def add_migrate_to_hashed_storage_link(message)
-      migrate_link = link_to(_('For more info, read the documentation.'), help_page_path('administration/repository_storage_types.md', anchor: 'how-to-migrate-to-hashed-storage'), target: '_blank')
+      migrate_link = link_to(_('For more info, read the documentation.'), help_page_path('administration/raketasks/storage.md', anchor: 'migrate-to-hashed-storage'), target: '_blank')
       linked_message = message % { migrate_link: migrate_link }
       linked_message.html_safe
     end
@@ -104,14 +135,8 @@ module EE
       ::Gitlab.com? && !::Gitlab::Database.read_only?
     end
 
-    def has_no_trial_or_gold_plan?(user)
-      return false if user.any_namespace_with_gold?
-
-      !user.any_namespace_with_trial?
-    end
-
-    def has_some_namespaces_with_no_trials?(user)
-      user&.any_namespace_without_trial?
+    def token_expiration_enforced?
+      ::PersonalAccessToken.expiration_enforced?
     end
   end
 end

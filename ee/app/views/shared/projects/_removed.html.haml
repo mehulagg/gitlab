@@ -1,0 +1,14 @@
+- if current_user&.admin? && scheduled_for_deletion?(project)
+  .gl-display-flex.gl-align-items-center.gl-flex-wrap.project-title
+    %span.small
+      = _("Marked For Deletion At - %{deletion_time}") % { deletion_time: project.marked_for_deletion_at.strftime(Date::DATE_FORMATS[:medium]) }
+  .gl-display-flex.gl-align-items-center.gl-flex-wrap.project-title
+    %p.small
+      = _("Scheduled Deletion At - %{permanent_deletion_time}") % { permanent_deletion_time: DateTime.parse(permanent_deletion_date(project.marked_for_deletion_at)).strftime(Date::DATE_FORMATS[:medium]) }
+  .gl-display-flex.gl-align-items-center.gl-flex-wrap.project-title
+    %span.small
+      = link_to project_restore_path(project),
+                  class: "gl-display-flex gl-align-items-center icon-wrapper stars has-tooltip",
+                  title: _('Restore'), data: { container: 'body', placement: 'top' },
+                  method: :post do
+        = _("Restore")

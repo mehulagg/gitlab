@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'settingslogic'
 require 'digest/md5'
 
@@ -42,7 +44,8 @@ class Settings < Settingslogic
     end
 
     def build_gitlab_shell_ssh_path_prefix
-      user_host = "#{gitlab_shell.ssh_user}@#{gitlab_shell.ssh_host}"
+      user = "#{gitlab_shell.ssh_user}@" unless gitlab_shell.ssh_user.empty?
+      user_host = "#{user}#{gitlab_shell.ssh_host}"
 
       if gitlab_shell.ssh_port != 22
         "ssh://#{user_host}:#{gitlab_shell.ssh_port}/"
@@ -61,6 +64,12 @@ class Settings < Settingslogic
 
     def build_gitlab_url
       (base_url(gitlab) + [gitlab.relative_url_root]).join('')
+    end
+
+    def build_gitlab_go_url
+      # "Go package paths are not URLs, and do not include port numbers"
+      # https://github.com/golang/go/issues/38213#issuecomment-607851460
+      "#{gitlab.host}#{gitlab.relative_url_root}"
     end
 
     def kerberos_protocol
@@ -143,6 +152,10 @@ class Settings < Settingslogic
       Gitlab::Application.secrets.db_key_base
     end
 
+    def load_dynamic_cron_schedules!
+      cron_jobs['gitlab_usage_ping_worker']['cron'] ||= cron_for_usage_ping
+    end
+
     private
 
     def base_url(config)
@@ -171,14 +184,15 @@ class Settings < Settingslogic
       URI.parse(url_without_path).host
     end
 
-    # Runs at a random time of day on a consistent day of the week based on
+    # Runs at a consistent random time of day on a day of the week based on
     # the instance UUID. This is to balance the load on the service receiving
     # these pings. The sidekiq job handles temporary http failures.
     def cron_for_usage_ping
-      hour = rand(24)
-      minute = rand(60)
       # Set a default UUID for the case when the UUID hasn't been initialized.
       uuid = Gitlab::CurrentSettings.uuid || 'uuid-not-set'
+
+      minute = Digest::MD5.hexdigest(uuid + 'minute').to_i(16) % 60
+      hour = Digest::MD5.hexdigest(uuid + 'hour').to_i(16) % 24
       day_of_week = Digest::MD5.hexdigest(uuid).to_i(16) % 7
 
       "#{minute} #{hour} * * #{day_of_week}"

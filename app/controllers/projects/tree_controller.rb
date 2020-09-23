@@ -16,20 +16,13 @@ class Projects::TreeController < Projects::ApplicationController
   before_action :authorize_edit_tree!, only: [:create_dir]
 
   def show
-    return render_404 unless @repository.commit(@ref)
+    return render_404 unless @commit
 
     if tree.entries.empty?
       if @repository.blob_at(@commit.id, @path)
-        return redirect_to project_blob_path(@project, File.join(@ref, @path))
+        redirect_to project_blob_path(@project, File.join(@ref, @path))
       elsif @path.present?
-        return redirect_to_tree_root_for_missing_path(@project, @ref, @path)
-      end
-    end
-
-    respond_to do |format|
-      format.html do
-        lfs_blob_ids
-        @last_commit = @repository.last_commit_for_path(@commit.id, @tree.path) || @commit
+        redirect_to_tree_root_for_missing_path(@project, @ref, @path)
       end
     end
   end

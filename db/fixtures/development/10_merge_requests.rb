@@ -1,10 +1,16 @@
-require './spec/support/sidekiq'
+require './spec/support/sidekiq_middleware'
 
 Gitlab::Seeder.quiet do
   # Limit the number of merge requests per project to avoid long seeds
   MAX_NUM_MERGE_REQUESTS = 10
 
-  Project.non_archived.with_merge_requests_enabled.reject(&:empty_repo?).each do |project|
+  projects = Project
+    .non_archived
+    .with_merge_requests_enabled
+    .not_mass_generated
+    .reject(&:empty_repo?)
+
+  projects.each do |project|
     branches = project.repository.branch_names.sample(MAX_NUM_MERGE_REQUESTS * 2)
 
     branches.each do |branch_name|
@@ -13,7 +19,7 @@ Gitlab::Seeder.quiet do
       target_branch = branches.pop
 
       label_ids = project.labels.pluck(:id).sample(3)
-      label_ids += project.group.labels.sample(3) if project.group
+      label_ids += project.group.labels.sample(3).pluck(:id) if project.group
 
       params = {
         source_branch: source_branch,
@@ -41,7 +47,7 @@ Gitlab::Seeder.quiet do
 
   project = Project.find_by_full_path('gitlab-org/gitlab-test')
 
-  next if project.empty_repo? # We don't have repository on CI
+  next if !project || project.empty_repo? # We don't have repository on CI
 
   params = {
     source_branch: 'feature',

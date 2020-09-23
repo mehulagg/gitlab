@@ -13,19 +13,19 @@ module QA
           project.initialize_with_readme = true
         end
       end
+
       let(:branch_name) { 'protected-branch' }
 
       before do
         project.add_member(approver, Resource::Members::AccessLevel::DEVELOPER)
         project.add_member(non_approver, Resource::Members::AccessLevel::DEVELOPER)
 
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         project.visit!
       end
 
-      it 'merge request assigns code owners as approvers' do
+      it 'merge request assigns code owners as approvers', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/605' do
         # Commit CODEOWNERS to master
         Resource::Repository::Commit.fabricate_via_api! do |commit|
           commit.project = project
@@ -74,6 +74,7 @@ module QA
           show.edit!
           approvers = show.approvers
 
+          expect(approvers.size).to eq(1)
           expect(approvers).to include(approver.name)
           expect(approvers).not_to include(non_approver.name)
         end

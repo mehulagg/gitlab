@@ -1,10 +1,10 @@
 <script>
-import DependencyListAlert from './dependency_list_alert.vue';
+import { GlAlert } from '@gitlab/ui';
 
 export default {
   name: 'DependencyListIncompleteAlert',
   components: {
-    DependencyListAlert,
+    GlAlert,
   },
   data() {
     return {
@@ -23,9 +23,9 @@ export default {
 </script>
 
 <template>
-  <dependency-list-alert
-    type="warning"
-    :header-text="s__('Dependencies|Unsupported file(s) detected')"
+  <gl-alert
+    variant="warning"
+    :title="s__('Dependencies|Unsupported file(s) detected')"
     v-on="$listeners"
   >
     <p>
@@ -35,8 +35,8 @@ export default {
         )
       }}
     </p>
-    <ul>
+    <ul class="mb-0">
       <li v-for="file in dependencyFiles" :key="file">{{ file }}</li>
     </ul>
-  </dependency-list-alert>
+  </gl-alert>
 </template>

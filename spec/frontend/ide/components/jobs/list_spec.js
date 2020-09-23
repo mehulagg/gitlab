@@ -44,7 +44,6 @@ describe('IDE stages list', () => {
       },
       localVue,
       store,
-      sync: false,
     });
   };
 
@@ -93,7 +92,6 @@ describe('IDE stages list', () => {
       wrapper = mount(StageList, {
         propsData: { ...defaultProps, stages },
         store,
-        sync: false,
         localVue,
       });
     });
@@ -101,11 +99,7 @@ describe('IDE stages list', () => {
     it('calls toggleStageCollapsed when clicking stage header', () => {
       findCardHeader().trigger('click');
 
-      expect(storeActions.toggleStageCollapsed).toHaveBeenCalledWith(
-        expect.any(Object),
-        0,
-        undefined,
-      );
+      expect(storeActions.toggleStageCollapsed).toHaveBeenCalledWith(expect.any(Object), 0);
     });
 
     it('calls fetchJobs when stage is mounted', () => {

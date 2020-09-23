@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Repositories API
 
 ## List repository tree
@@ -7,7 +14,7 @@ be accessed without authentication if the repository is publicly accessible.
 
 This command provides essentially the same functionality as the `git ls-tree` command. For more information, see the section _Tree Objects_ in the [Git internals documentation](https://git-scm.com/book/en/v2/Git-Internals-Git-Objects/#_tree_objects).
 
-```
+```plaintext
 GET /projects/:id/repository/tree
 ```
 
@@ -17,7 +24,8 @@ Parameters:
 - `path` (optional) - The path inside repository. Used to get content of subdirectories
 - `ref` (optional) - The name of a repository branch or tag or if not given the default branch
 - `recursive` (optional) - Boolean value used to get a recursive tree (false by default)
-- `per_page` (optional) - Number of results to show per page. If not specified, defaults to `20`
+- `per_page` (optional) - Number of results to show per page. If not specified, defaults to `20`.
+  Read more on [pagination](README.md#pagination).
 
 ```json
 [
@@ -79,7 +87,7 @@ Allows you to receive information about blob in repository like size and
 content. Note that blob content is Base64 encoded. This endpoint can be accessed
 without authentication if the repository is publicly accessible.
 
-```
+```plaintext
 GET /projects/:id/repository/blobs/:sha
 ```
 
@@ -93,7 +101,7 @@ Parameters:
 Get the raw file contents for a blob by blob SHA. This endpoint can be accessed
 without authentication if the repository is publicly accessible.
 
-```
+```plaintext
 GET /projects/:id/repository/blobs/:sha/raw
 ```
 
@@ -107,7 +115,9 @@ Parameters:
 Get an archive of the repository. This endpoint can be accessed without
 authentication if the repository is publicly accessible.
 
-```
+This endpoint has a rate limit threshold of 5 requests per minute.
+
+```plaintext
 GET /projects/:id/repository/archive[.format]
 ```
 
@@ -121,16 +131,16 @@ Parameters:
 - `id` (required) - The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user
 - `sha` (optional) - The commit SHA to download. A tag, branch reference, or SHA can be used. This defaults to the tip of the default branch if not specified. For example:
 
-```sh
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.com/api/v4/projects/<project_id>/repository/archive?sha=<commit_sha>
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.com/api/v4/projects/<project_id>/repository/archive?sha=<commit_sha>"
 ```
 
 ## Compare branches, tags or commits
 
 This endpoint can be accessed without authentication if the repository is
-publicly accessible.
+publicly accessible. Note that diffs could have an empty diff string if [diff limits](../development/diffs.md#diff-limits) are reached.
 
-```
+```plaintext
 GET /projects/:id/repository/compare
 ```
 
@@ -141,7 +151,7 @@ Parameters:
 - `to` (required) - the commit SHA or branch name
 - `straight` (optional) - comparison method, `true` for direct comparison between `from` and `to` (`from`..`to`), `false` to compare using merge base (`from`...`to`)'. Default is `false`.
 
-```
+```plaintext
 GET /projects/:id/repository/compare?from=master&to=feature
 ```
 
@@ -154,16 +164,16 @@ Response:
     "id": "12d65c8dd2b2676fa3ac47d955accc085a37a9c1",
     "short_id": "12d65c8dd2b",
     "title": "JS fix",
-    "author_name": "Dmitriy Zaporozhets",
-    "author_email": "dmitriy.zaporozhets@gmail.com",
+    "author_name": "Example User",
+    "author_email": "user@example.com",
     "created_at": "2014-02-27T10:27:00+02:00"
   },
   "commits": [{
     "id": "12d65c8dd2b2676fa3ac47d955accc085a37a9c1",
     "short_id": "12d65c8dd2b",
     "title": "JS fix",
-    "author_name": "Dmitriy Zaporozhets",
-    "author_email": "dmitriy.zaporozhets@gmail.com",
+    "author_name": "Example User",
+    "author_email": "user@example.com",
     "created_at": "2014-02-27T10:27:00+02:00"
   }],
   "diffs": [{
@@ -186,9 +196,12 @@ Response:
 Get repository contributors list. This endpoint can be accessed without
 authentication if the repository is publicly accessible.
 
-```
+```plaintext
 GET /projects/:id/repository/contributors
 ```
+
+CAUTION: **Deprecation:**
+The `additions` and `deletions` attributes are deprecated [as of GitLab 13.4](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/39653) because they [always return `0`](https://gitlab.com/gitlab-org/gitlab/-/issues/233119).
 
 Parameters:
 
@@ -198,19 +211,19 @@ Parameters:
 
 Response:
 
-```
+```json
 [{
-  "name": "Dmitriy Zaporozhets",
-  "email": "dmitriy.zaporozhets@gmail.com",
+  "name": "Example User",
+  "email": "example@example.com",
   "commits": 117,
-  "additions": 2097,
-  "deletions": 517
+  "additions": 0,
+  "deletions": 0
 }, {
-  "name": "Jacob Vosmaer",
-  "email": "contact@jacobvosmaer.nl",
+  "name": "Sample User",
+  "email": "sample@example.com",
   "commits": 33,
-  "additions": 338,
-  "deletions": 244
+  "additions": 0,
+  "deletions": 0
 }]
 ```
 
@@ -218,7 +231,7 @@ Response:
 
 Get the common ancestor for 2 or more refs (commit SHAs, branch names or tags).
 
-```
+```plaintext
 GET /projects/:id/repository/merge_base
 ```
 
@@ -227,7 +240,7 @@ GET /projects/:id/repository/merge_base
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 | `refs` | array | yes | The refs to find the common ancestor of, multiple refs can be passed |
 
-```bash
+```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/merge_base?refs[]=304d257dcb821665ab5110318fc58a007bd104ed&refs[]=0031876facac3f2b2702a0e53a26e89939a42209"
 ```
 
@@ -241,11 +254,11 @@ Example response:
   "created_at": "2014-02-27T08:03:18.000Z",
   "parent_ids": [],
   "message": "Initial commit\n",
-  "author_name": "Dmitriy Zaporozhets",
-  "author_email": "dmitriy.zaporozhets@gmail.com",
+  "author_name": "Example User",
+  "author_email": "user@example.com",
   "authored_date": "2014-02-27T08:03:18.000Z",
-  "committer_name": "Dmitriy Zaporozhets",
-  "committer_email": "dmitriy.zaporozhets@gmail.com",
+  "committer_name": "Example User",
+  "committer_email": "user@example.com",
   "committed_date": "2014-02-27T08:03:18.000Z"
 }
 ```

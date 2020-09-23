@@ -1,11 +1,10 @@
-- current_plan       = subscription_plan_info(plans_data, namespace.actual_plan_name)
 - support_link_start = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: EE::CUSTOMER_SUPPORT_URL }
 - support_link_end   = '</a>'.html_safe
 
 - if current_plan
   = render 'shared/billings/billing_plan_header', namespace: namespace, plan: current_plan
 
-- unless namespace.gold_plan?
+- if show_plans?(namespace)
   .billing-plans.mt-5.row
     - plans_data.each do |plan|
       = render 'shared/billings/billing_plan', namespace: namespace, plan: plan, current_plan: current_plan

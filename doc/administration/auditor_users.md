@@ -1,6 +1,6 @@
 # Auditor users **(PREMIUM ONLY)**
 
->[Introduced][ee-998] in [GitLab Premium][eep] 8.17.
+>[Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/998) in [GitLab Premium](https://about.gitlab.com/pricing/) 8.17.
 
 Auditor users are given read-only access to all projects, groups, and other
 resources on the GitLab instance.
@@ -9,10 +9,10 @@ resources on the GitLab instance.
 
 Auditor users can have full access to their own resources (projects, groups,
 snippets, etc.), and read-only access to **all** other resources, except the
-Admin area. To put another way, they are just regular users (who can be added
+Admin Area. To put another way, they are just regular users (who can be added
 to projects, create personal snippets, create milestones on their groups, etc.)
 who also happen to have read-only access to all projects on the system that
-they haven't been explicitly [given access][permissions] to.
+they haven't been explicitly [given access](../user/permissions.md) to.
 
 The Auditor role is _not_ a read-only version of the Admin role. Auditor users
 will not be able to access the project/group settings pages, or the Admin Area.
@@ -25,10 +25,10 @@ To sum up, assuming you have logged-in as an Auditor user:
 - For a project the Auditor owns, the Auditor should have full access to
   everything.
 - For a project the Auditor has been added to as a member, the Auditor should
-  have the same access as the [permissions] they were given to. For example, if
+  have the same access as the [permissions](../user/permissions.md) they were given to. For example, if
   they were added as a Developer, they could then push commits or comment on
   issues.
-- The Auditor cannot view the Admin area, or perform any admin actions.
+- The Auditor cannot view the Admin Area, or perform any admin actions.
 
 For more information about what an Auditor can or can't do, see the
 [Permissions and restrictions of an Auditor user](#permissions-and-restrictions-of-an-auditor-user)
@@ -73,7 +73,7 @@ instance, with the following permissions/restrictions:
 - Can read issues / MRs
 - Can read project snippets
 - Cannot be Admin and Auditor at the same time
-- Cannot access the Admin area
+- Cannot access the Admin Area
 - In a group / project they're not a member of:
   - Cannot access project settings
   - Cannot access group settings
@@ -82,7 +82,3 @@ instance, with the following permissions/restrictions:
   - Cannot create/modify files from the Web UI
   - Cannot merge a merge request
   - Cannot create project snippets
-
-[ee-998]: https://gitlab.com/gitlab-org/gitlab/merge_requests/998
-[eep]: https://about.gitlab.com/pricing/
-[permissions]: ../user/permissions.md

@@ -1,9 +1,15 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Enabling emails on push
 
 By enabling this service, you will receive email notifications for every change
 that is pushed to your project.
 
-From the [Integrations page](project_services.md#accessing-the-project-services)
+From the [Integrations page](overview.md#accessing-integrations)
 select **Emails on push** service to activate and configure it.
 
 In the _Recipients_ area, provide a list of emails separated by spaces or newlines.

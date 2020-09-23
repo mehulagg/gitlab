@@ -1,21 +1,24 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Verify', :docker do
+  RSpec.describe 'Verify', :runner do
     describe 'Runner registration' do
       let(:executor) { "qa-runner-#{Time.now.to_i}" }
-
-      after do
-        Service::DockerRun::GitlabRunner.new(executor).remove!
-      end
-
-      it 'user registers a new specific runner' do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
-
+      let!(:runner) do
         Resource::Runner.fabricate! do |runner|
           runner.name = executor
-        end.project.visit!
+          runner.tags = ['e2e-test']
+        end
+      end
+
+      after do
+        runner.remove_via_api!
+      end
+
+      it 'user registers a new specific runner', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/392' do
+        Flow::Login.sign_in
+
+        runner.project.visit!
 
         Page::Project::Menu.perform(&:go_to_ci_cd_settings)
         Page::Project::Settings::CICD.perform do |settings|

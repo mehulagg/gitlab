@@ -4,6 +4,8 @@ module Gitlab
   module Metrics
     module Samplers
       class PumaSampler < BaseSampler
+        SAMPLING_INTERVAL_SECONDS = 5
+
         def metrics
           @metrics ||= init_metrics
         end
@@ -26,7 +28,7 @@ module Gitlab
           json_stats = puma_stats
           return unless json_stats
 
-          stats = JSON.parse(json_stats)
+          stats = Gitlab::Json.parse(json_stats)
 
           if cluster?(stats)
             sample_cluster(stats)
@@ -40,7 +42,7 @@ module Gitlab
         def puma_stats
           Puma.stats
         rescue NoMethodError
-          Rails.logger.info "PumaSampler: stats are not available yet, waiting for Puma to boot" # rubocop:disable Gitlab/RailsLogger
+          Gitlab::AppLogger.info "PumaSampler: stats are not available yet, waiting for Puma to boot"
           nil
         end
 

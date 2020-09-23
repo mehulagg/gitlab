@@ -3,8 +3,6 @@
 class List < ApplicationRecord
   include Importable
 
-  prepend_if_ee('::EE::List') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
   belongs_to :board
   belongs_to :label
   has_many :list_user_preferences
@@ -21,7 +19,7 @@ class List < ApplicationRecord
   scope :destroyable, -> { where(list_type: list_types.slice(*destroyable_types).values) }
   scope :movable, -> { where(list_type: list_types.slice(*movable_types).values) }
 
-  scope :preload_associations, -> { preload(:board, label: :priorities) }
+  scope :preload_associated_models, -> { preload(:board, label: :priorities) }
 
   scope :ordered, -> { order(:list_type, :position) }
 
@@ -74,14 +72,18 @@ class List < ApplicationRecord
     label? ? label.name : list_type.humanize
   end
 
+  def collapsed?(user)
+    preferences = preferences_for(user)
+
+    preferences.collapsed?
+  end
+
   def as_json(options = {})
     super(options).tap do |json|
       json[:collapsed] = false
 
       if options.key?(:collapsed)
-        preferences = preferences_for(options[:current_user])
-
-        json[:collapsed] = preferences.collapsed?
+        json[:collapsed] = collapsed?(options[:current_user])
       end
 
       if options.key?(:label)
@@ -97,6 +99,8 @@ class List < ApplicationRecord
   private
 
   def can_be_destroyed
-    throw(:abort) unless destroyable?
+    throw(:abort) unless destroyable? # rubocop:disable Cop/BanCatchThrow
   end
 end
+
+List.prepend_if_ee('::EE::List')

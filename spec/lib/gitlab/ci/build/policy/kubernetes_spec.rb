@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Build::Policy::Kubernetes do
+RSpec.describe Gitlab::Ci::Build::Policy::Kubernetes do
   let(:pipeline) { create(:ci_pipeline, project: project) }
 
   context 'when kubernetes service is active' do
@@ -18,7 +18,7 @@ describe Gitlab::Ci::Build::Policy::Kubernetes do
   end
 
   context 'when kubernetes service is inactive' do
-    set(:project) { create(:project) }
+    let_it_be(:project) { create(:project) }
 
     it 'is not satisfied by a pipeline without kubernetes available' do
       expect(described_class.new('active'))

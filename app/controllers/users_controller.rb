@@ -3,6 +3,7 @@
 class UsersController < ApplicationController
   include RoutableActions
   include RendersMemberAccess
+  include RendersProjectsList
   include ControllerWithCrossProjectAccessCheck
   include Gitlab::NoteableMetadata
 
@@ -128,6 +129,10 @@ class UsersController < ApplicationController
     @user ||= find_routable!(User, params[:username])
   end
 
+  def personal_projects
+    PersonalProjectsFinder.new(user).execute(current_user)
+  end
+
   def contributed_projects
     ContributedProjectsFinder.new(user).execute(current_user)
   end
@@ -147,8 +152,7 @@ class UsersController < ApplicationController
   end
 
   def load_projects
-    @projects =
-      PersonalProjectsFinder.new(user).execute(current_user)
+    @projects = personal_projects
       .page(params[:page])
       .per(params[:limit])
 

@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "required" : [
+    "total_traffic",
+    "anomalous_traffic",
+    "history",
+    "interval",
+    "from",
+    "to",
+    "status"
+  ],
+  "properties" : {
+    "total_traffic": { "type": "integer" },
+    "anomalous_traffic": { "type": "integer" },
+    "history": {
+      "nominal": { "type": ["array"] },
+      "anomalous": { "type": ["array"] }
+    },
+    "interval": { "type": "string" },
+    "from": { "type": "date" },
+    "to": { "type": "date" },
+    "status": { "type": "string", "enum": ["success", "failure"] }
+  },
+  "additionalProperties": false
+}

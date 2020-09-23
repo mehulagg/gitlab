@@ -8,8 +8,9 @@ module Banzai
       include Gitlab::Utils::StrongMemoize
 
       METRICS_CSS_CLASS = '.js-render-metrics'
-      URL = Gitlab::Metrics::Dashboard::Url
+      EMBED_LIMIT = 100
 
+      Route = Struct.new(:regex, :permission)
       Embed = Struct.new(:project_path, :permission)
 
       # Finds all embeds based on the css class the FE
@@ -35,9 +36,16 @@ module Banzai
       # Returns all nodes which the FE will identify as
       # a metrics embed placeholder element
       #
+      # Removes any nodes beyond the first 100
+      #
       # @return [Nokogiri::XML::NodeSet]
       def nodes
-        @nodes ||= doc.css(METRICS_CSS_CLASS)
+        strong_memoize(:nodes) do
+          nodes = doc.css(METRICS_CSS_CLASS)
+          nodes.drop(EMBED_LIMIT).each(&:remove)
+
+          nodes
+        end
       end
 
       # Maps a node to key properties of an embed.
@@ -51,12 +59,34 @@ module Banzai
             embed = Embed.new
             url = node.attribute('data-dashboard-url').to_s
 
-            set_path_and_permission(embed, url, URL.regex, :read_environment)
-            set_path_and_permission(embed, url, URL.grafana_regex, :read_project) unless embed.permission
+            permissions_by_route.each do |route|
+              set_path_and_permission(embed, url, route.regex, route.permission) unless embed.permission
+            end
 
             embeds[node] = embed if embed.permission
           end
         end
+      end
+
+      def permissions_by_route
+        [
+          Route.new(
+            ::Gitlab::Metrics::Dashboard::Url.metrics_regex,
+            :read_environment
+          ),
+          Route.new(
+            ::Gitlab::Metrics::Dashboard::Url.grafana_regex,
+            :read_project
+          ),
+          Route.new(
+            ::Gitlab::Metrics::Dashboard::Url.clusters_regex,
+            :read_cluster
+          ),
+          Route.new(
+            ::Gitlab::Metrics::Dashboard::Url.alert_regex,
+            :read_prometheus_alerts
+          )
+        ]
       end
 
       # Attempts to determine the path and permission attributes

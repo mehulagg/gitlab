@@ -3,21 +3,11 @@
 class IssuePresenter < Gitlab::View::Presenter::Delegated
   presents :issue
 
-  def web_url
-    url_builder.url
-  end
-
   def issue_path
-    url_builder.issue_path(issue)
+    url_builder.build(issue, only_path: true)
   end
 
   def subscribed?
     issue.subscribed?(current_user, issue.project)
-  end
-
-  private
-
-  def url_builder
-    @url_builder ||= Gitlab::UrlBuilder.new(issue)
   end
 end

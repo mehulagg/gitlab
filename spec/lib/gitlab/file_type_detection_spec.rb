@@ -1,7 +1,36 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::FileTypeDetection do
+RSpec.describe Gitlab::FileTypeDetection do
+  describe '.extension_match?' do
+    let(:extensions) { %w[foo bar] }
+
+    it 'returns false when filename is blank' do
+      expect(described_class.extension_match?(nil, extensions)).to eq(false)
+      expect(described_class.extension_match?('', extensions)).to eq(false)
+    end
+
+    it 'returns true when filename matches extensions' do
+      expect(described_class.extension_match?('file.foo', extensions)).to eq(true)
+      expect(described_class.extension_match?('file.bar', extensions)).to eq(true)
+    end
+
+    it 'returns false when filename does not match extensions' do
+      expect(described_class.extension_match?('file.baz', extensions)).to eq(false)
+    end
+
+    it 'can match case insensitive filenames' do
+      expect(described_class.extension_match?('file.FOO', extensions)).to eq(true)
+    end
+
+    it 'can match filenames with periods' do
+      expect(described_class.extension_match?('my.file.foo', extensions)).to eq(true)
+    end
+
+    it 'can match filenames with directories' do
+      expect(described_class.extension_match?('my/file.foo', extensions)).to eq(true)
+    end
+  end
   context 'when class is an uploader' do
     let(:uploader) do
       example_uploader = Class.new(CarrierWave::Uploader::Base) do
@@ -160,6 +189,20 @@ describe Gitlab::FileTypeDetection do
         allow(uploader).to receive(:filename).and_return(nil)
 
         expect(uploader).not_to be_embeddable
+      end
+    end
+
+    describe '#image_safe_for_scaling?' do
+      it 'returns true for allowed image formats' do
+        uploader.store!(upload_fixture('rails_sample.jpg'))
+
+        expect(uploader).to be_image_safe_for_scaling
+      end
+
+      it 'returns false for other files' do
+        uploader.store!(upload_fixture('unsanitized.svg'))
+
+        expect(uploader).not_to be_image_safe_for_scaling
       end
     end
 
@@ -345,6 +388,31 @@ describe Gitlab::FileTypeDetection do
         allow(custom_class).to receive(:filename).and_return(nil)
 
         expect(custom_class).not_to be_image
+      end
+    end
+
+    describe '#image_safe_for_scaling?' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:filename, :expectation) do
+        'img.jpg'  | true
+        'img.jpeg' | true
+        'img.png'  | true
+        'img.svg'  | false
+      end
+
+      with_them do
+        it "returns expected result" do
+          allow(custom_class).to receive(:filename).and_return(filename)
+
+          expect(custom_class.image_safe_for_scaling?).to be(expectation)
+        end
+      end
+
+      it 'returns false if filename is blank' do
+        allow(custom_class).to receive(:filename).and_return(nil)
+
+        expect(custom_class).not_to be_image_safe_for_scaling
       end
     end
 

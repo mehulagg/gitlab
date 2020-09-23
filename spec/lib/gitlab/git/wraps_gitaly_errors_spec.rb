@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Git::WrapsGitalyErrors do
+RSpec.describe Gitlab::Git::WrapsGitalyErrors do
   subject(:wrapper) do
     klazz = Class.new { include Gitlab::Git::WrapsGitalyErrors }
     klazz.new

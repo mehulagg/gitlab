@@ -10,19 +10,18 @@ class Projects::PagesController < Projects::ApplicationController
 
   # rubocop: disable CodeReuse/ActiveRecord
   def show
-    @domains = @project.pages_domains.order(:domain)
+    @domains = @project.pages_domains.order(:domain).present(current_user: current_user)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
   def destroy
-    project.remove_pages
-    project.pages_domains.destroy_all # rubocop: disable DestroyAll
+    ::Pages::DeleteService.new(@project, current_user).execute
 
     respond_to do |format|
       format.html do
         redirect_to project_pages_path(@project),
-                    status: 302,
-                    notice: 'Pages were removed'
+                    status: :found,
+                    notice: 'Pages were scheduled for removal'
       end
     end
   end
@@ -35,7 +34,7 @@ class Projects::PagesController < Projects::ApplicationController
         if result[:status] == :success
           flash[:notice] = 'Your changes have been saved'
         else
-          flash[:alert] = 'Something went wrong on our end'
+          flash[:alert] = result[:message]
         end
 
         redirect_to project_pages_path(@project)
@@ -46,6 +45,12 @@ class Projects::PagesController < Projects::ApplicationController
   private
 
   def project_params
-    params.require(:project).permit(:pages_https_only)
+    params.require(:project).permit(project_params_attributes)
+  end
+
+  def project_params_attributes
+    %i[pages_https_only]
   end
 end
+
+Projects::PagesController.prepend_if_ee('EE::Projects::PagesController')

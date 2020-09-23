@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::DiscussionsDiff::HighlightCache, :clean_gitlab_redis_cache do
+RSpec.describe Gitlab::DiscussionsDiff::HighlightCache, :clean_gitlab_redis_cache do
   def fake_file(offset)
     {
       text: 'foo',
@@ -33,9 +33,9 @@ describe Gitlab::DiscussionsDiff::HighlightCache, :clean_gitlab_redis_cache do
 
       mapping.each do |key, value|
         full_key = described_class.cache_key_for(key)
-        found = Gitlab::Redis::Cache.with { |r| r.get(full_key) }
+        found_key = Gitlab::Redis::Cache.with { |r| r.get(full_key) }
 
-        expect(found).to eq(value.to_json)
+        expect(described_class.gzip_decompress(found_key)).to eq(value.to_json)
       end
     end
   end
@@ -61,6 +61,15 @@ describe Gitlab::DiscussionsDiff::HighlightCache, :clean_gitlab_redis_cache do
       expect(found.first).to eq(nil)
       expect(found.second.size).to eq(2)
       expect(found.second).to all(be_a(Gitlab::Diff::Line))
+    end
+
+    it 'returns lines which rich_text are HTML-safe' do
+      described_class.write_multiple(mapping)
+
+      found = described_class.read_multiple(mapping.keys)
+      rich_texts = found.flatten.map(&:rich_text)
+
+      expect(rich_texts).to all(be_html_safe)
     end
   end
 

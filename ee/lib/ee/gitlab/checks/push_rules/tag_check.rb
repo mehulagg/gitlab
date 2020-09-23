@@ -10,7 +10,7 @@ module EE
 
             logger.log_timed("Checking if you are allowed to delete a tag...") do
               if tag_deletion_denied_by_push_rule?
-                raise ::Gitlab::GitAccess::UnauthorizedError, 'You cannot delete a tag'
+                raise ::Gitlab::GitAccess::ForbiddenError, 'You cannot delete a tag'
               end
             end
           end

@@ -12,6 +12,8 @@ module QA
   module Git
     class Repository
       include Scenario::Actable
+      include Support::Repeater
+
       RepositoryCommandError = Class.new(StandardError)
 
       attr_writer :use_lfs, :gpg_key_id
@@ -57,9 +59,13 @@ module QA
         self.username, self.password = default_credentials
       end
 
+      def use_default_identity
+        configure_identity('GitLab QA', 'root@gitlab.com')
+      end
+
       def clone(opts = '')
-        clone_result = run("git clone #{opts} #{uri} ./")
-        return clone_result.response unless clone_result.success
+        clone_result = run("git clone #{opts} #{uri} ./", max_attempts: 3)
+        return clone_result.response unless clone_result.success?
 
         enable_lfs_result = enable_lfs if use_lfs?
 
@@ -92,7 +98,7 @@ module QA
 
         if use_lfs?
           git_lfs_track_result = run(%Q{git lfs track #{name} --lockable})
-          return git_lfs_track_result.response unless git_lfs_track_result.success
+          return git_lfs_track_result.response unless git_lfs_track_result.success?
         end
 
         git_add_result = run(%Q{git add #{name}})
@@ -100,24 +106,52 @@ module QA
         git_lfs_track_result.to_s + git_add_result.to_s
       end
 
+      def add_tag(tag_name)
+        run("git tag #{tag_name}").to_s
+      end
+
       def delete_tag(tag_name)
-        run(%Q{git push origin --delete #{tag_name}}).to_s
+        run(%Q{git push origin --delete #{tag_name}}, max_attempts: 3).to_s
       end
 
       def commit(message)
-        run(%Q{git commit -m "#{message}"}).to_s
+        run(%Q{git commit -m "#{message}"}, max_attempts: 3).to_s
       end
 
       def commit_with_gpg(message)
-        run(%Q{git config user.signingkey #{@gpg_key_id} && git config gpg.program $(which gpg) && git commit -S -m "#{message}"}).to_s
+        run(%Q{git config user.signingkey #{@gpg_key_id} && git config gpg.program $(command -v gpg) && git commit -S -m "#{message}"}).to_s
       end
 
-      def push_changes(branch = 'master')
-        run("git push #{uri} #{branch}").to_s
+      def current_branch
+        run("git rev-parse --abbrev-ref HEAD").to_s
+      end
+
+      def push_changes(branch = 'master', push_options: nil)
+        cmd = ['git push']
+        cmd << push_options_hash_to_string(push_options)
+        cmd << uri
+        cmd << branch
+        run(cmd.compact.join(' '), max_attempts: 3).to_s
+      end
+
+      def push_all_branches
+        run("git push --all").to_s
+      end
+
+      def push_tags_and_branches(branches)
+        run("git push --tags origin #{branches.join(' ')}").to_s
       end
 
       def merge(branch)
         run("git merge #{branch}")
+      end
+
+      def init_repository
+        run("git init")
+      end
+
+      def pull(repository = nil, branch = nil)
+        run(['git', 'pull', repository, branch].compact.join(' '))
       end
 
       def commits
@@ -164,8 +198,8 @@ module QA
       def fetch_supported_git_protocol
         # ls-remote is one command known to respond to Git protocol v2 so we use
         # it to get output including the version reported via Git tracing
-        output = run("git ls-remote #{uri}", "GIT_TRACE_PACKET=1")
-        output[/git< version (\d+)/, 1] || 'unknown'
+        result = run("git ls-remote #{uri}", env: "GIT_TRACE_PACKET=1", max_attempts: 3)
+        result.response[/git< version (\d+)/, 1] || 'unknown'
       end
 
       def try_add_credentials_to_netrc
@@ -175,6 +209,10 @@ module QA
         save_netrc_content
       end
 
+      def file_content(file)
+        run("cat #{file}").to_s
+      end
+
       private
 
       attr_reader :uri, :username, :password, :known_hosts_file,
@@ -182,9 +220,12 @@ module QA
 
       alias_method :use_lfs?, :use_lfs
 
-      Result = Struct.new(:success, :response) do
-        alias_method :success?, :success
+      Result = Struct.new(:command, :exitstatus, :response) do
         alias_method :to_s, :response
+
+        def success?
+          exitstatus == 0
+        end
       end
 
       def add_credentials?
@@ -209,19 +250,26 @@ module QA
         touch_gitconfig_result.to_s + git_lfs_install_result.to_s
       end
 
-      def run(command_str, *extra_env)
-        command = [env_vars, *extra_env, command_str, '2>&1'].compact.join(' ')
-        Runtime::Logger.debug "Git: pwd=[#{Dir.pwd}], command=[#{command}]"
+      def run(command_str, env: [], max_attempts: 1)
+        command = [env_vars, *env, command_str, '2>&1'].compact.join(' ')
+        result = nil
 
-        output, status = Open3.capture2e(command)
-        output.chomp!
-        Runtime::Logger.debug "Git: output=[#{output}], exitstatus=[#{status.exitstatus}]"
+        repeat_until(max_attempts: max_attempts, raise_on_failure: false) do
+          Runtime::Logger.debug "Git: pwd=[#{Dir.pwd}], command=[#{command}]"
+          output, status = Open3.capture2e(command)
+          output.chomp!
+          Runtime::Logger.debug "Git: output=[#{output}], exitstatus=[#{status.exitstatus}]"
 
-        unless status.success?
-          raise RepositoryCommandError, "The command #{command} failed (#{status.exitstatus}) with the following output:\n#{output}"
+          result = Result.new(command, status.exitstatus, output)
+
+          result.success?
         end
 
-        Result.new(status.exitstatus == 0, output)
+        unless result.success?
+          raise RepositoryCommandError, "The command #{result.command} failed (#{result.exitstatus}) with the following output:\n#{result.response}"
+        end
+
+        result
       end
 
       def default_credentials
@@ -251,6 +299,23 @@ module QA
 
       def tmp_home_dir
         @tmp_home_dir ||= File.join(Dir.tmpdir, "qa-netrc-credentials", $$.to_s)
+      end
+
+      def push_options_hash_to_string(opts)
+        return if opts.nil?
+
+        prefix = "-o merge_request"
+        opts.each_with_object([]) do |(key, value), options|
+          if value.is_a?(Array)
+            value.each do |item|
+              options << "#{prefix}.#{key}=\"#{item}\""
+            end
+          elsif value == true
+            options << "#{prefix}.#{key}"
+          else
+            options << "#{prefix}.#{key}=\"#{value}\""
+          end
+        end.join(' ')
       end
 
       def netrc_file_path

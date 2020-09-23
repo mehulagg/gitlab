@@ -2,19 +2,15 @@
 
 require 'spec_helper'
 
-describe 'Slack slash commands' do
-  let(:user) { create(:user) }
-  let(:project) { create(:project) }
-  let(:service) { project.create_slack_slash_commands_service }
+RSpec.describe 'Slack slash commands', :js do
+  include_context 'project service activation'
 
   before do
-    project.add_maintainer(user)
-    sign_in(user)
-    visit edit_project_service_path(project, service)
+    visit_project_integration('Slack slash commands')
   end
 
   it 'shows a token placeholder' do
-    token_placeholder = find_field('service_token')['placeholder']
+    token_placeholder = find_field('Token')['placeholder']
 
     expect(token_placeholder).to eq('XXxxXXxxXXxxXXxxXXxxXXxx')
   end
@@ -24,20 +20,20 @@ describe 'Slack slash commands' do
   end
 
   it 'redirects to the integrations page after saving but not activating' do
-    fill_in 'service_token', with: 'token'
+    fill_in 'Token', with: 'token'
+    click_active_checkbox
     click_on 'Save'
 
-    expect(current_path).to eq(project_settings_integrations_path(project))
-    expect(page).to have_content('Slack slash commands settings saved, but not activated.')
+    expect(current_path).to eq(edit_project_service_path(project, :slack_slash_commands))
+    expect(page).to have_content('Slack slash commands settings saved, but not active.')
   end
 
   it 'redirects to the integrations page after activating' do
-    fill_in 'service_token', with: 'token'
-    check 'service_active'
+    fill_in 'Token', with: 'token'
     click_on 'Save'
 
-    expect(current_path).to eq(project_settings_integrations_path(project))
-    expect(page).to have_content('Slack slash commands activated.')
+    expect(current_path).to eq(edit_project_service_path(project, :slack_slash_commands))
+    expect(page).to have_content('Slack slash commands settings saved and active.')
   end
 
   it 'shows the correct trigger url' do

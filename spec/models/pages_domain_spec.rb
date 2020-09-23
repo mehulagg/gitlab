@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe PagesDomain do
+RSpec.describe PagesDomain do
   using RSpec::Parameterized::TableSyntax
 
   subject(:pages_domain) { described_class.new }
 
   describe 'associations' do
     it { is_expected.to belong_to(:project) }
+    it { is_expected.to have_many(:serverless_domain_clusters) }
   end
 
   describe 'validate domain' do
@@ -96,13 +97,21 @@ describe PagesDomain do
     it 'saves validity time' do
       domain.save
 
-      expect(domain.certificate_valid_not_before).to be_like_time(Time.parse("2016-02-12 14:32:00 UTC"))
-      expect(domain.certificate_valid_not_after).to be_like_time(Time.parse("2020-04-12 14:32:00 UTC"))
+      expect(domain.certificate_valid_not_before).to be_like_time(Time.zone.parse("2020-03-16 14:20:34 UTC"))
+      expect(domain.certificate_valid_not_after).to be_like_time(Time.zone.parse("2220-01-28 14:20:34 UTC"))
     end
   end
 
   describe 'validate certificate' do
     subject { domain }
+
+    context 'serverless domain' do
+      it 'requires certificate and key to be present' do
+        expect(build(:pages_domain, :without_certificate, :without_key, usage: :serverless)).not_to be_valid
+        expect(build(:pages_domain, :without_certificate, usage: :serverless)).not_to be_valid
+        expect(build(:pages_domain, :without_key, usage: :serverless)).not_to be_valid
+      end
+    end
 
     context 'with matching key' do
       let(:domain) { build(:pages_domain) }
@@ -173,6 +182,20 @@ describe PagesDomain do
 
   describe 'validations' do
     it { is_expected.to validate_presence_of(:verification_code) }
+  end
+
+  describe 'default values' do
+    it 'defaults wildcard to false' do
+      expect(subject.wildcard).to eq(false)
+    end
+
+    it 'defaults scope to project' do
+      expect(subject.scope).to eq('project')
+    end
+
+    it 'defaults usage to pages' do
+      expect(subject.usage).to eq('pages')
+    end
   end
 
   describe '#verification_code' do
@@ -305,6 +328,16 @@ describe PagesDomain do
   end
 
   describe '#update_daemon' do
+    let_it_be(:project) { create(:project).tap(&:mark_pages_as_deployed) }
+
+    context 'when usage is serverless' do
+      it 'does not call the UpdatePagesConfigurationService' do
+        expect(PagesUpdateConfigurationWorker).not_to receive(:perform_async)
+
+        create(:pages_domain, usage: :serverless)
+      end
+    end
+
     it 'runs when the domain is created' do
       domain = build(:pages_domain)
 
@@ -321,21 +354,29 @@ describe PagesDomain do
       domain.destroy!
     end
 
-    it 'delegates to Projects::UpdatePagesConfigurationService' do
-      service = instance_double('Projects::UpdatePagesConfigurationService')
-      expect(Projects::UpdatePagesConfigurationService).to receive(:new) { service }
-      expect(service).to receive(:execute)
+    it "schedules a PagesUpdateConfigurationWorker" do
+      expect(PagesUpdateConfigurationWorker).to receive(:perform_async).with(project.id)
 
-      create(:pages_domain)
+      create(:pages_domain, project: project)
+    end
+
+    context "when the pages aren't deployed" do
+      let_it_be(:project) { create(:project).tap(&:mark_pages_as_not_deployed) }
+
+      it "does not schedule a PagesUpdateConfigurationWorker" do
+        expect(PagesUpdateConfigurationWorker).not_to receive(:perform_async).with(project.id)
+
+        create(:pages_domain, project: project)
+      end
     end
 
     context 'configuration updates when attributes change' do
-      set(:project1) { create(:project) }
-      set(:project2) { create(:project) }
-      set(:domain) { create(:pages_domain) }
+      let_it_be(:project1) { create(:project) }
+      let_it_be(:project2) { create(:project) }
+      let_it_be(:domain) { create(:pages_domain) }
 
       where(:attribute, :old_value, :new_value, :update_expected) do
-        now = Time.now
+        now = Time.current
         future = now + 1.day
 
         :project | nil       | :project1 | true
@@ -380,8 +421,8 @@ describe PagesDomain do
       end
 
       context 'TLS configuration' do
-        set(:domain_without_tls) { create(:pages_domain, :without_certificate, :without_key) }
-        set(:domain) { create(:pages_domain) }
+        let_it_be(:domain_without_tls) { create(:pages_domain, :without_certificate, :without_key) }
+        let_it_be(:domain) { create(:pages_domain) }
 
         let(:cert1) { domain.certificate }
         let(:cert2) { cert1 + ' ' }
@@ -505,6 +546,24 @@ describe PagesDomain do
                      'user_provided', 'gitlab_provided')
   end
 
+  describe '#save' do
+    context 'when we failed to obtain ssl certificate' do
+      let(:domain) { create(:pages_domain, auto_ssl_enabled: true, auto_ssl_failed: true) }
+
+      it 'clears failure if auto ssl is disabled' do
+        expect do
+          domain.update!(auto_ssl_enabled: false)
+        end.to change { domain.auto_ssl_failed }.from(true).to(false)
+      end
+
+      it 'does not clear failure on unrelated updates' do
+        expect do
+          domain.update!(verified_at: Time.current)
+        end.not_to change { domain.auto_ssl_failed }.from(true)
+      end
+    end
+  end
+
   describe '.for_removal' do
     subject { described_class.for_removal }
 
@@ -533,6 +592,28 @@ describe PagesDomain do
     end
   end
 
+  describe '.instance_serverless' do
+    subject { described_class.instance_serverless }
+
+    before do
+      create(:pages_domain, wildcard: true)
+      create(:pages_domain, :instance_serverless)
+      create(:pages_domain, scope: :instance)
+      create(:pages_domain, :instance_serverless)
+      create(:pages_domain, usage: :serverless)
+    end
+
+    it 'returns domains that are wildcard, instance-level, and serverless' do
+      expect(subject.length).to eq(2)
+
+      subject.each do |domain|
+        expect(domain.wildcard).to eq(true)
+        expect(domain.usage).to eq('serverless')
+        expect(domain.scope).to eq('instance')
+      end
+    end
+  end
+
   describe '.need_auto_ssl_renewal' do
     subject { described_class.need_auto_ssl_renewal }
 
@@ -540,6 +621,7 @@ describe PagesDomain do
     let!(:domain_with_expired_user_provided_certificate) do
       create(:pages_domain, :with_expired_certificate)
     end
+
     let!(:domain_with_user_provided_certificate_and_auto_ssl) do
       create(:pages_domain, auto_ssl_enabled: true)
     end
@@ -549,7 +631,11 @@ describe PagesDomain do
       create(:pages_domain, :letsencrypt, :with_expired_certificate)
     end
 
-    it 'contains only domains needing verification' do
+    let!(:domain_with_failed_auto_ssl) do
+      create(:pages_domain, auto_ssl_enabled: true, auto_ssl_failed: true)
+    end
+
+    it 'contains only domains needing ssl renewal' do
       is_expected.to(
         contain_exactly(
           domain_with_user_provided_certificate_and_auto_ssl,
@@ -588,6 +674,14 @@ describe PagesDomain do
           project.reload.pages_metadatum&.deployed
         }.from(nil).to(true)
       end
+    end
+  end
+
+  describe '.find_by_domain_case_insensitive' do
+    it 'lookup is case-insensitive' do
+      pages_domain = create(:pages_domain, domain: "Pages.IO")
+
+      expect(PagesDomain.find_by_domain_case_insensitive('pages.io')).to eq(pages_domain)
     end
   end
 end

@@ -13,5 +13,5 @@ class DashboardEnvironmentsProjectEntity < Grape::Entity
   end
 
   expose :namespace, using: API::Entities::NamespaceBasic
-  expose :unfoldered_environments, as: :environments, using: DashboardEnvironmentEntity
+  expose :environments_for_dashboard, as: :environments, using: DashboardEnvironmentEntity
 end

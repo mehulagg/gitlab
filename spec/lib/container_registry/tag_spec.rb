@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ContainerRegistry::Tag do
+RSpec.describe ContainerRegistry::Tag do
   let(:group) { create(:group, name: 'group') }
   let(:project) { create(:project, path: 'test', group: group) }
 
@@ -70,30 +70,53 @@ describe ContainerRegistry::Tag do
             headers: { 'Content-Type' => 'application/vnd.docker.distribution.manifest.v1+prettyjws' })
       end
 
-      context '#layers' do
+      describe '#layers' do
         subject { tag.layers }
 
         it { expect(subject.length).to eq(1) }
       end
 
-      context '#total_size' do
+      describe '#total_size' do
         subject { tag.total_size }
 
         it { is_expected.to be_nil }
       end
 
       context 'config processing' do
-        context '#config' do
+        describe '#config' do
           subject { tag.config }
 
           it { is_expected.to be_nil }
         end
 
-        context '#created_at' do
+        describe '#created_at' do
           subject { tag.created_at }
 
           it { is_expected.to be_nil }
         end
+      end
+    end
+
+    context 'image is a helm chart' do
+      before do
+        stub_request(:get, 'http://registry.gitlab/v2/group/test/manifests/tag')
+          .with(headers: headers)
+          .to_return(
+            status: 200,
+            body: File.read(Rails.root + 'spec/fixtures/container_registry/tag_manifest_helm.json'),
+            headers: { 'Content-Type' => 'application/vnd.docker.distribution.manifest.v2+json' })
+
+        stub_request(:get, 'http://registry.gitlab/v2/group/test/blobs/sha256:65a07b841ece031e6d0ec5eb948eacb17aa6d7294cdeb01d5348e86242951487')
+          .with(headers: { 'Accept' => 'application/vnd.cncf.helm.config.v1+json' })
+          .to_return(
+            status: 200,
+            body: File.read(Rails.root + 'spec/fixtures/container_registry/config_blob_helm.json'))
+      end
+
+      describe '#created_at' do
+        subject { tag.created_at }
+
+        it { is_expected.to be_nil }
       end
     end
 
@@ -107,13 +130,13 @@ describe ContainerRegistry::Tag do
             headers: { 'Content-Type' => 'application/vnd.docker.distribution.manifest.v2+json' })
       end
 
-      context '#layers' do
+      describe '#layers' do
         subject { tag.layers }
 
         it { expect(subject.length).to eq(1) }
       end
 
-      context '#total_size' do
+      describe '#total_size' do
         subject { tag.total_size }
 
         it { is_expected.to eq(2319870) }
@@ -121,13 +144,13 @@ describe ContainerRegistry::Tag do
 
       context 'config processing' do
         shared_examples 'a processable' do
-          context '#config' do
+          describe '#config' do
             subject { tag.config }
 
             it { is_expected.not_to be_nil }
           end
 
-          context '#created_at' do
+          describe '#created_at' do
             subject { tag.created_at }
 
             it { is_expected.not_to be_nil }

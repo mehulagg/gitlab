@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Identity do
+RSpec.describe Identity do
   describe 'relations' do
     it { is_expected.to belong_to(:user) }
   end
@@ -13,7 +13,7 @@ describe Identity do
   end
 
   describe 'validations' do
-    set(:user) { create(:user) }
+    let_it_be(:user) { create(:user) }
 
     context 'with existing user and provider' do
       before do

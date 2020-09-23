@@ -9,7 +9,9 @@ module EE
         prepended do
           params :optional_issue_params_ee do
             optional :weight, type: Integer, desc: 'The weight of the issue'
-            optional :epic_iid, type: Integer, desc: 'The IID of an epic to associate the issue with'
+            optional :epic_id, type: Integer, desc: 'The ID of an epic to associate the issue with'
+            optional :epic_iid, type: Integer, desc: 'The IID of an epic to associate the issue with (deprecated)'
+            mutually_exclusive :epic_id, :epic_iid
           end
 
           params :optional_issues_params_ee do
@@ -22,7 +24,7 @@ module EE
 
           override :update_params_at_least_one_of
           def update_params_at_least_one_of
-            [*super, :weight, :epic_iid]
+            [*super, :weight, :epic_id, :epic_iid]
           end
 
           override :sort_options

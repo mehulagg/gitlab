@@ -17,8 +17,11 @@ would be `process_something`. If you're not sure what queue a worker uses,
 you can find it using `SomeWorker.queue`. There is almost never a reason to
 manually override the queue name using `sidekiq_options queue: :some_queue`.
 
-You must always add any new queues to `app/workers/all_queues.yml` or `ee/app/workers/all_queues.yml`
-otherwise your worker will not run.
+After adding a new queue, run `bin/rake
+gitlab:sidekiq:all_queues_yml:generate` to regenerate
+`app/workers/all_queues.yml` or `ee/app/workers/all_queues.yml` so that
+it can be picked up by
+[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md).
 
 ## Queue Namespaces
 
@@ -61,7 +64,181 @@ the extra jobs will take resources away from jobs from workers that were already
 there, if the resources available to the Sidekiq process handling the namespace
 are not adjusted appropriately.
 
-## Latency Sensitive Jobs
+## Versioning
+
+Version can be specified on each Sidekiq worker class.
+This is then sent along when the job is created.
+
+```ruby
+class FooWorker
+  include ApplicationWorker
+
+  version 2
+
+  def perform(*args)
+    if job_version == 2
+      foo = args.first['foo']
+    else
+      foo = args.first
+    end
+  end
+end
+```
+
+Under this schema, any worker is expected to be able to handle any job that was
+enqueued by an older version of that worker. This means that when changing the
+arguments a worker takes, you must increment the `version` (or set `version 1`
+if this is the first time a worker's arguments are changing), but also make sure
+that the worker is still able to handle jobs that were queued with any earlier
+version of the arguments. From the worker's `perform` method, you can read
+`self.job_version` if you want to specifically branch on job version, or you
+can read the number or type of provided arguments.
+
+## Idempotent Jobs
+
+It's known that a job can fail for multiple reasons. For example, network outages or bugs.
+In order to address this, Sidekiq has a built-in retry mechanism that is
+used by default by most workers within GitLab.
+
+It's expected that a job can run again after a failure without major side-effects for the
+application or users, which is why Sidekiq encourages
+jobs to be [idempotent and transactional](https://github.com/mperham/sidekiq/wiki/Best-Practices#2-make-your-job-idempotent-and-transactional).
+
+As a general rule, a worker can be considered idempotent if:
+
+- It can safely run multiple times with the same arguments.
+- Application side-effects are expected to happen only once
+  (or side-effects of a second run do not have an effect).
+
+A good example of that would be a cache expiration worker.
+
+NOTE: **Note:**
+A job scheduled for an idempotent worker will automatically be
+[deduplicated](#deduplication) when an unstarted job with the same
+arguments is already in the queue.
+
+### Ensuring a worker is idempotent
+
+Make sure the worker tests pass using the following shared example:
+
+```ruby
+include_examples 'an idempotent worker' do
+  it 'marks the MR as merged' do
+    # Using subject inside this block will process the job multiple times
+    subject
+
+    expect(merge_request.state).to eq('merged')
+  end
+end
+```
+
+Use the `perform_multiple` method directly instead of `job.perform` (this
+helper method is automatically included for workers).
+
+### Declaring a worker as idempotent
+
+```ruby
+class IdempotentWorker
+  include ApplicationWorker
+
+  # Declares a worker is idempotent and can
+  # safely run multiple times.
+  idempotent!
+
+  # ...
+end
+```
+
+It's encouraged to only have the `idempotent!` call in the top-most worker class, even if
+the `perform` method is defined in another class or module.
+
+NOTE: **Note:**
+If the worker class is not marked as idempotent, a cop will fail.
+Consider skipping the cop if you're not confident your job can safely
+run multiple times.
+
+### Deduplication
+
+When a job for an idempotent worker is enqueued while another
+unstarted job is already in the queue, GitLab drops the second
+job. The work is skipped because the same work would be
+done by the job that was scheduled first; by the time the second
+job executed, the first job would do nothing.
+
+For example, `AuthorizedProjectsWorker` takes a user ID. When the
+worker runs, it recalculates a user's authorizations. GitLab schedules
+this job each time an action potentially changes a user's
+authorizations. If the same user is added to two projects at the
+same time, the second job can be skipped if the first job hasn't
+begun, because when the first job runs, it creates the
+authorizations for both projects.
+
+GitLab doesn't skip jobs scheduled in the future, as we assume that
+the state will have changed by the time the job is scheduled to
+execute. If you do want to deduplicate jobs scheduled in the future
+this can be specified on the worker as follows:
+
+```ruby
+module AuthorizedProjectUpdate
+  class UserRefreshOverUserRangeWorker
+    include ApplicationWorker
+
+    deduplicate :until_executing, including_scheduled: true
+    idempotent!
+
+    # ...
+  end
+end
+```
+
+This strategy is called `until_executing`. More [deduplication
+strategies have been
+suggested](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/195). If
+you are implementing a worker that could benefit from a different
+strategy, please comment in the issue.
+
+If the automatic deduplication were to cause issues in certain
+queues. This can be temporarily disabled by enabling a feature flag
+named `disable_<queue name>_deduplication`. For example to disable
+deduplication for the `AuthorizedProjectsWorker`, we would enable the
+feature flag `disable_authorized_projects_deduplication`.
+
+From ChatOps:
+
+```shell
+/chatops run feature set disable_authorized_projects_deduplication true
+```
+
+From the rails console:
+
+```ruby
+Feature.enable!(:disable_authorized_projects_deduplication)
+```
+
+## Job urgency
+
+Jobs can have an `urgency` attribute set, which can be `:high`,
+`:low`, or `:throttled`. These have the below targets:
+
+| **Urgency**  | **Queue Scheduling Target** | **Execution Latency Requirement**  |
+|--------------|-----------------------------|------------------------------------|
+| `:high`      | 10 seconds                  | p50 of 1 second, p99 of 10 seconds |
+| `:low`       | 1 minute                    | Maximum run time of 5 minutes      |
+| `:throttled` | None                        | Maximum run time of 5 minutes      |
+
+To set a job's urgency, use the `urgency` class method:
+
+```ruby
+class HighUrgencyWorker
+  include ApplicationWorker
+
+  urgency :high
+
+  # ...
+end
+```
+
+### Latency sensitive jobs
 
 If a large number of background jobs get scheduled at once, queueing of jobs may
 occur while jobs wait for a worker node to be become available. This is normal
@@ -80,7 +257,7 @@ of these jobs include:
 When these jobs are delayed, the user may perceive the delay as a bug: for
 example, they may push a branch and then attempt to create a merge request for
 that branch, but be told in the UI that the branch does not exist. We deem these
-jobs to be `latency_sensitive`.
+jobs to be `urgency :high`.
 
 Extra effort is made to ensure that these jobs are started within a very short
 period of time after being scheduled. However, in order to ensure throughput,
@@ -90,35 +267,56 @@ these jobs also have very strict execution duration requirements:
 1. 99% of jobs should complete within 10 seconds.
 
 If a worker cannot meet these expectations, then it cannot be treated as a
-`latency_sensitive` worker: consider redesigning the worker, or splitting the
-work between two different workers, one with `latency_sensitive` code that
-executes quickly, and the other with non-`latency_sensitive`, which has no
+`urgency :high` worker: consider redesigning the worker, or splitting the
+work between two different workers, one with `urgency :high` code that
+executes quickly, and the other with `urgency :low`, which has no
 execution latency requirements (but also has lower scheduling targets).
 
-This can be summed up in the following table:
+### Changing a queue's urgency
 
-| **Latency Sensitivity** | **Queue Scheduling Target** | **Execution Latency Requirement**   |
-|-------------------------|-----------------------------|-------------------------------------|
-| Not `latency_sensitive` | 1 minute                    | Maximum run time of 1 hour          |
-| `latency_sensitive`     | 100 milliseconds            | p50 of 1 second, p99 of 10 seconds  |
+On GitLab.com, we run Sidekiq in several
+[shards](https://dashboards.gitlab.net/d/sidekiq-shard-detail/sidekiq-shard-detail),
+each of which represents a particular type of workload.
 
-To mark a worker as being `latency_sensitive`, use the
-`latency_sensitive_worker!` attribute, as shown in this example:
+When changing a queue's urgency, or adding a new queue, we need to take
+into account the expected workload on the new shard. Note that, if we're
+changing an existing queue, there is also an effect on the old shard,
+but that will always be a reduction in work.
+
+To do this, we want to calculate the expected increase in total execution time
+and RPS (throughput) for the new shard. We can get these values from:
+
+- The [Queue Detail
+  dashboard](https://dashboards.gitlab.net/d/sidekiq-queue-detail/sidekiq-queue-detail)
+  has values for the queue itself. For a new queue, we can look for
+  queues that have similar patterns or are scheduled in similar
+  circumstances.
+- The [Shard Detail
+  dashboard](https://dashboards.gitlab.net/d/sidekiq-shard-detail/sidekiq-shard-detail)
+  has Total Execution Time and Throughput (RPS). The Shard Utilization
+  panel will show if there is currently any excess capacity for this
+  shard.
+
+We can then calculate the RPS * average runtime (estimated for new jobs)
+for the queue we're changing to see what the relative increase in RPS and
+execution time we expect for the new shard:
 
 ```ruby
-class LatencySensitiveWorker
-  include ApplicationWorker
+new_queue_consumption = queue_rps * queue_duration_avg
+shard_consumption = shard_rps * shard_duration_avg
 
-  latency_sensitive_worker!
-
-  # ...
-end
+(new_queue_consumption / shard_consumption) * 100
 ```
+
+If we expect an increase of **less than 5%**, then no further action is needed.
+
+Otherwise, please ping `@gitlab-org/scalability` on the merge request and ask
+for a review.
 
 ## Jobs with External Dependencies
 
 Most background jobs in the GitLab application communicate with other GitLab
-services, eg Postgres, Redis, Gitaly and Object Storage. These are considered
+services. For example, PostgreSQL, Redis, Gitaly, and Object Storage. These are considered
 to be "internal" dependencies for a job.
 
 However, some jobs will be dependent on external services in order to complete
@@ -134,7 +332,7 @@ the background processing cluster in several ways:
    therefore we cannot guarantee the execution latencies on these jobs. Since we
    cannot guarantee execution latency, we cannot ensure throughput and
    therefore, in high-traffic environments, we need to ensure that jobs with
-   external dependencies are separated from `latency_sensitive` jobs, to ensure
+   external dependencies are separated from high urgency jobs, to ensure
    throughput on those queues.
 1. Errors in jobs with external dependencies have higher alerting thresholds as
    there is a likelihood that the cause of the error is external.
@@ -152,7 +350,8 @@ class ExternalDependencyWorker
 end
 ```
 
-NOTE: **Note:** Note that a job cannot be both latency sensitive and have
+NOTE: **Note:**
+Note that a job cannot be both high urgency and have
 external dependencies.
 
 ## CPU-bound and Memory-bound Workers
@@ -161,11 +360,11 @@ Workers that are constrained by CPU or memory resource limitations should be
 annotated with the `worker_resource_boundary` method.
 
 Most workers tend to spend most of their time blocked, wait on network responses
-from other services such as Redis, Postgres and Gitaly. Since Sidekiq is a
-multithreaded environment, these jobs can be scheduled with high concurrency.
+from other services such as Redis, PostgreSQL, and Gitaly. Since Sidekiq is a
+multi-threaded environment, these jobs can be scheduled with high concurrency.
 
-Some workers, however, spend large amounts of time _on-cpu_ running logic in
-Ruby. Ruby MRI does not support true multithreading - it relies on the
+Some workers, however, spend large amounts of time _on-CPU_ running logic in
+Ruby. Ruby MRI does not support true multi-threading - it relies on the
 [GIL](https://thoughtbot.com/blog/untangling-ruby-threads#the-global-interpreter-lock)
 to greatly simplify application development by only allowing one section of Ruby
 code in a process to run at a time, no matter how many cores the machine
@@ -184,12 +383,16 @@ performance.
 Likewise, if a worker uses large amounts of memory, we can run these on a
 bespoke low concurrency, high memory fleet.
 
-Note that Memory-bound workers create heavy GC workloads, with pauses of
+Note that memory-bound workers create heavy GC workloads, with pauses of
 10-50ms. This will have an impact on the latency requirements for the
-worker. For this reason, `memory` bound, `latency_sensitive` jobs are not
+worker. For this reason, `memory` bound, `urgency :high` jobs are not
 permitted and will fail CI. In general, `memory` bound workers are
 discouraged, and alternative approaches to processing the work should be
 considered.
+
+If a worker needs large amounts of both memory and CPU time, it should
+be marked as memory-bound, due to the above restriction on high urgency
+memory-bound workers.
 
 ## Declaring a Job as CPU-bound
 
@@ -211,7 +414,7 @@ end
 
 We use the following approach to determine whether a worker is CPU-bound:
 
-- In the sidekiq structured JSON logs, aggregate the worker `duration` and
+- In the Sidekiq structured JSON logs, aggregate the worker `duration` and
   `cpu_s` fields.
 - `duration` refers to the total job execution duration, in seconds
 - `cpu_s` is derived from the
@@ -223,53 +426,169 @@ We use the following approach to determine whether a worker is CPU-bound:
 - Note that these values should not be used over small sample sizes, but
   rather over fairly large aggregates.
 
-## Feature Categorization
+## Feature category
 
-Each Sidekiq worker, or one of its ancestor classes, must declare a
-`feature_category` attribute. This attribute maps each worker to a feature
-category. This is done for error budgeting, alert routing, and team attribution
-for Sidekiq workers.
+All Sidekiq workers must define a known [feature
+category](feature_categorization/index.md#sidekiq-workers).
 
-The declaration uses the `feature_category` class method, as shown below.
+## Job weights
+
+Some jobs have a weight declared. This is only used when running Sidekiq
+in the default execution mode - using
+[`sidekiq-cluster`](../administration/operations/extra_sidekiq_processes.md)
+does not account for weights.
+
+As we are [moving towards using `sidekiq-cluster` in
+Core](https://gitlab.com/gitlab-org/gitlab/-/issues/34396), newly-added
+workers do not need to have weights specified. They can simply use the
+default weight, which is 1.
+
+## Worker context
+
+> - [Introduced](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/9) in GitLab 12.8.
+
+To have some more information about workers in the logs, we add
+[metadata to the jobs in the form of an
+`ApplicationContext`](logging.md#logging-context-metadata-through-rails-or-grape-requests).
+In most cases, when scheduling a job from a request, this context will
+already be deducted from the request and added to the scheduled
+job.
+
+When a job runs, the context that was active when it was scheduled
+will be restored. This causes the context to be propagated to any job
+scheduled from within the running job.
+
+All this means that in most cases, to add context to jobs, we don't
+need to do anything.
+
+There are however some instances when there would be no context
+present when the job is scheduled, or the context that is present is
+likely to be incorrect. For these instances, we've added Rubocop rules
+to draw attention and avoid incorrect metadata in our logs.
+
+As with most our cops, there are perfectly valid reasons for disabling
+them. In this case it could be that the context from the request is
+correct. Or maybe you've specified a context already in a way that
+isn't picked up by the cops. In any case, leave a code comment
+pointing to which context will be used when disabling the cops.
+
+When you do provide objects to the context, make sure that the
+route for namespaces and projects is pre-loaded. This can be done by using
+the `.with_route` scope defined on all `Routable`s.
+
+### Cron workers
+
+The context is automatically cleared for workers in the Cronjob queue
+(`include CronjobQueue`), even when scheduling them from
+requests. We do this to avoid incorrect metadata when other jobs are
+scheduled from the cron worker.
+
+Cron workers themselves run instance wide, so they aren't scoped to
+users, namespaces, projects, or other resources that should be added to
+the context.
+
+However, they often schedule other jobs that _do_ require context.
+
+That is why there needs to be an indication of context somewhere in
+the worker. This can be done by using one of the following methods
+somewhere within the worker:
+
+1. Wrap the code that schedules jobs in the `with_context` helper:
+
+   ```ruby
+     def perform
+       deletion_cutoff = Gitlab::CurrentSettings
+                           .deletion_adjourned_period.days.ago.to_date
+       projects = Project.with_route.with_namespace
+                    .aimed_for_deletion(deletion_cutoff)
+
+       projects.find_each(batch_size: 100).with_index do |project, index|
+         delay = index * INTERVAL
+
+         with_context(project: project) do
+           AdjournedProjectDeletionWorker.perform_in(delay, project.id)
+         end
+       end
+     end
+   ```
+
+1. Use the a batch scheduling method that provides context:
+
+   ```ruby
+     def schedule_projects_in_batch(projects)
+       ProjectImportScheduleWorker.bulk_perform_async_with_contexts(
+         projects,
+         arguments_proc: -> (project) { project.id },
+         context_proc: -> (project) { { project: project } }
+       )
+     end
+   ```
+
+   Or, when scheduling with delays:
+
+   ```ruby
+     diffs.each_batch(of: BATCH_SIZE) do |diffs, index|
+       DeleteDiffFilesWorker
+         .bulk_perform_in_with_contexts(index *  5.minutes,
+                                        diffs,
+                                        arguments_proc: -> (diff) { diff.id },
+                                        context_proc: -> (diff) { { project: diff.merge_request.target_project } })
+     end
+   ```
+
+### Jobs scheduled in bulk
+
+Often, when scheduling jobs in bulk, these jobs should have a separate
+context rather than the overarching context.
+
+If that is the case, `bulk_perform_async` can be replaced by the
+`bulk_perform_async_with_context` helper, and instead of
+`bulk_perform_in` use `bulk_perform_in_with_context`.
+
+For example:
 
 ```ruby
-class SomeScheduledTaskWorker
-  include ApplicationWorker
-
-  # Declares that this worker is part of the
-  # `continuous_integration` feature category
-  feature_category :continuous_integration
-
-  # ...
-end
+    ProjectImportScheduleWorker.bulk_perform_async_with_contexts(
+      projects,
+      arguments_proc: -> (project) { project.id },
+      context_proc: -> (project) { { project: project } }
+    )
 ```
 
-The list of value values can be found in the file `config/feature_categories.yml`.
-This file is, in turn generated from the [`stages.yml` from the GitLab Company Handbook
-source](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/stages.yml).
+Each object from the enumerable in the first argument is yielded into 2
+blocks:
 
-### Updating `config/feature_categories.yml`
+- The `arguments_proc` which needs to return the list of arguments the
+  job needs to be scheduled with.
 
-Occasionally new features will be added to GitLab stages. When this occurs, you
-can automatically update `config/feature_categories.yml` by running
-`scripts/update-feature-categories`. This script will fetch and parse
-[`stages.yml`](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/stages.yml)
-and generate a new version of the file, which needs to be checked into source control.
+- The `context_proc` which needs to return a hash with the context
+  information for the job.
 
-### Excluding Sidekiq workers from feature categorization
+## Arguments logging
 
-A few Sidekiq workers, that are used across all features, cannot be mapped to a
-single category. These should be declared as such using the `feature_category_not_owned!`
- declaration, as shown below:
+When [`SIDEKIQ_LOG_ARGUMENTS`](../administration/troubleshooting/sidekiq.md#log-arguments-to-sidekiq-jobs)
+is enabled, Sidekiq job arguments will be logged.
+
+By default, the only arguments logged are numeric arguments, because
+arguments of other types could contain sensitive information. To
+override this, use `loggable_arguments` inside a worker with the indexes
+of the arguments to be logged. (Numeric arguments do not need to be
+specified here.)
+
+For example:
 
 ```ruby
-class SomeCrossCuttingConcernWorker
+class MyWorker
   include ApplicationWorker
 
-  # Declares that this worker does not map to a feature category
-  feature_category_not_owned!
+  loggable_arguments 1, 3
 
-  # ...
+  # object_id will be logged as it's numeric
+  # string_a will be logged due to the loggable_arguments call
+  # string_b will be filtered from logs
+  # string_c will be logged due to the loggable_arguments call
+  def perform(object_id, string_a, string_b, string_c)
+  end
 end
 ```
 
@@ -292,18 +611,94 @@ possible situations:
 
 ### Changing the arguments for a worker
 
-Jobs need to be backwards- and forwards-compatible between consecutive versions
-of the application.
+Jobs need to be backward and forward compatible between consecutive versions
+of the application. Adding or removing an argument may cause problems
+during deployment before all Rails and Sidekiq nodes have the updated code.
 
-This can be done by following this process:
+#### Deprecate and remove an argument
 
-1. **Do not remove arguments from the `perform` function.**. Instead, use the
-   following approach
-   1. Provide a default value (usually `nil`) and use a comment to mark the
-      argument as deprecated
-   1. Stop using the argument in `perform_async`.
-   1. Ignore the value in the worker class, but do not remove it until the next
-      major release.
+**Before you remove arguments from the `perform_async` and `perform` methods.**, deprecate them. The 
+following example deprecates and then removes `arg2` from the `perform_async` method:
+
+1. Provide a default value (usually `nil`) and use a comment to mark the
+   argument as deprecated in the coming minor release. (Release M)
+
+    ```ruby
+    class ExampleWorker
+      # Keep arg2 parameter for backwards compatibility.
+      def perform(object_id, arg1, arg2 = nil)
+        # ...
+      end
+    end
+    ```
+
+1. One minor release later, stop using the argument in `perform_async`. (Release M+1)
+
+    ```ruby
+    ExampleWorker.perform_async(object_id, arg1)
+    ```
+
+1. At the next major release, remove the value from the worker class. (Next major release)
+
+    ```ruby
+    class ExampleWorker
+      def perform(object_id, arg1)
+        # ...
+      end
+    end
+    ```
+
+#### Add an argument
+
+There are two options for safely adding new arguments to Sidekiq workers:
+
+1. Set up a [multi-step deployment](#multi-step-deployment) in which the new argument is first added to the worker.
+1. Use a [parameter hash](#parameter-hash) for additional arguments. This is perhaps the most flexible option.
+
+##### Multi-step deployment
+
+This approach requires multiple releases.
+
+1. Add the argument to the worker with a default value (Release M).
+
+    ```ruby
+    class ExampleWorker
+      def perform(object_id, new_arg = nil)
+        # ...
+      end
+    end
+    ```
+
+1. Add the new argument to all the invocations of the worker (Release M+1).
+
+    ```ruby
+    ExampleWorker.perform_async(object_id, new_arg)
+    ```
+
+1. Remove the default value (Release M+2).
+
+    ```ruby
+    class ExampleWorker
+      def perform(object_id, new_arg)
+        # ...
+      end
+    end
+    ```
+
+##### Parameter hash
+
+This approach will not require multiple releases if an existing worker already
+utilizes a parameter hash.
+
+1. Use a parameter hash in the worker to allow future flexibility.
+
+    ```ruby
+    class ExampleWorker
+      def perform(object_id, params = {})
+        # ...
+      end
+    end
+    ```
 
 ### Removing workers
 

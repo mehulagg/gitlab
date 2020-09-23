@@ -2,27 +2,37 @@
 
 require 'spec_helper'
 
-describe Gitlab::Metrics::Dashboard::Processor do
+RSpec.describe Gitlab::Metrics::Dashboard::Processor do
+  include MetricsDashboardHelpers
+
   let(:project) { build(:project) }
   let(:environment) { create(:environment, project: project) }
-  let(:dashboard_yml) { YAML.load_file('spec/fixtures/lib/gitlab/metrics/dashboard/sample_dashboard.yml') }
+  let(:dashboard_yml) { load_sample_dashboard }
 
   describe 'process' do
     let(:sequence) do
       [
         Gitlab::Metrics::Dashboard::Stages::CommonMetricsInserter,
-        Gitlab::Metrics::Dashboard::Stages::ProjectMetricsInserter,
-        Gitlab::Metrics::Dashboard::Stages::EndpointInserter,
-        Gitlab::Metrics::Dashboard::Stages::Sorter
+        Gitlab::Metrics::Dashboard::Stages::CustomMetricsInserter,
+        Gitlab::Metrics::Dashboard::Stages::CustomMetricsDetailsInserter,
+        Gitlab::Metrics::Dashboard::Stages::MetricEndpointInserter,
+        Gitlab::Metrics::Dashboard::Stages::AlertsInserter,
+        Gitlab::Metrics::Dashboard::Stages::PanelIdsInserter,
+        Gitlab::Metrics::Dashboard::Stages::UrlValidator
       ]
     end
+
     let(:process_params) { [project, dashboard_yml, sequence, { environment: environment }] }
     let(:dashboard) { described_class.new(*process_params).process }
 
-    it 'includes a path for the prometheus endpoint with each metric' do
-      expect(all_metrics).to satisfy_all do |metric|
-        metric[:prometheus_endpoint_path] == prometheus_path(metric[:query_range])
+    it 'includes an id for each dashboard panel' do
+      expect(all_panels).to satisfy_all do |panel|
+        panel[:id].present?
       end
+    end
+
+    it 'includes boolean to indicate if panel group has custom metrics' do
+      expect(dashboard[:panel_groups]).to all(include( { has_custom_metrics: boolean } ))
     end
 
     context 'when the dashboard is not present' do
@@ -55,28 +65,38 @@ describe Gitlab::Metrics::Dashboard::Processor do
         expect(all_metrics).to include get_metric_details(project_business_metric)
       end
 
-      it 'orders groups by priority and panels by weight' do
+      it 'display groups and panels in the order they are defined' do
         expected_metrics_order = [
-          'metric_b', # group priority 10, panel weight 1
-          'metric_a2', # group priority 1, panel weight 2
-          'metric_a1', # group priority 1, panel weight 1
-          project_business_metric.id, # group priority 0, panel weight nil (0)
-          project_response_metric.id, # group priority -5, panel weight nil (0)
-          project_system_metric.id, # group priority -10, panel weight nil (0)
+          'metric_b',
+          'metric_a2',
+          'metric_a1',
+          project_business_metric.id,
+          project_response_metric.id,
+          project_system_metric.id
         ]
         actual_metrics_order = all_metrics.map { |m| m[:id] || m[:metric_id] }
 
         expect(actual_metrics_order).to eq expected_metrics_order
       end
 
+      context 'when the project has multiple metrics in the same group' do
+        let!(:project_response_metric) { create(:prometheus_metric, project: project, group: :response) }
+        let!(:project_response_metric_2) { create(:prometheus_metric, project: project, group: :response) }
+
+        it 'includes multiple metrics' do
+          expect(all_metrics).to include get_metric_details(project_response_metric)
+          expect(all_metrics).to include get_metric_details(project_response_metric_2)
+        end
+      end
+
       context 'when the dashboard should not include project metrics' do
         let(:sequence) do
           [
             Gitlab::Metrics::Dashboard::Stages::CommonMetricsInserter,
-            Gitlab::Metrics::Dashboard::Stages::EndpointInserter,
-            Gitlab::Metrics::Dashboard::Stages::Sorter
+            Gitlab::Metrics::Dashboard::Stages::MetricEndpointInserter
           ]
         end
+
         let(:dashboard) { described_class.new(*process_params).process }
 
         it 'includes only dashboard metrics' do
@@ -85,6 +105,64 @@ describe Gitlab::Metrics::Dashboard::Processor do
           expect(metrics.length).to be(3)
           expect(metrics).to eq %w(metric_b metric_a2 metric_a1)
         end
+      end
+
+      context 'when sample_metrics are requested' do
+        let(:process_params) { [project, dashboard_yml, sequence, { environment: environment, sample_metrics: true }] }
+
+        it 'includes a sample metrics path for the prometheus endpoint with each metric' do
+          expect(all_metrics).to satisfy_all do |metric|
+            metric[:prometheus_endpoint_path] == sample_metrics_path(metric[:id])
+          end
+        end
+      end
+    end
+
+    context 'when the dashboard references persisted metrics with alerts' do
+      let!(:alert) do
+        create(
+          :prometheus_alert,
+          environment: environment,
+          project: project,
+          prometheus_metric: persisted_metric
+        )
+      end
+
+      shared_examples_for 'has saved alerts' do
+        it 'includes an alert path' do
+          target_metric = all_metrics.find { |metric| metric[:metric_id] == persisted_metric.id }
+
+          expect(target_metric).to be_a Hash
+          expect(target_metric).to include(:alert_path)
+          expect(target_metric[:alert_path]).to include(
+            project.path,
+            persisted_metric.id.to_s,
+            environment.id.to_s
+          )
+        end
+      end
+
+      context 'that are shared across projects' do
+        let!(:persisted_metric) { create(:prometheus_metric, :common, identifier: 'metric_a1') }
+
+        it_behaves_like 'has saved alerts'
+      end
+
+      context 'when the project has associated metrics' do
+        let!(:persisted_metric) { create(:prometheus_metric, project: project, group: :business) }
+
+        it_behaves_like 'has saved alerts'
+      end
+    end
+
+    context 'when there are no alerts' do
+      let!(:persisted_metric) { create(:prometheus_metric, :common, identifier: 'metric_a1') }
+
+      it 'does not insert an alert_path' do
+        target_metric = all_metrics.find { |metric| metric[:metric_id] == persisted_metric.id }
+
+        expect(target_metric).to be_a Hash
+        expect(target_metric).not_to include(:alert_path)
       end
     end
 
@@ -124,9 +202,11 @@ describe Gitlab::Metrics::Dashboard::Processor do
   private
 
   def all_metrics
-    dashboard[:panel_groups].flat_map do |group|
-      group[:panels].flat_map { |panel| panel[:metrics] }
-    end
+    all_panels.flat_map { |panel| panel[:metrics] }
+  end
+
+  def all_panels
+    dashboard[:panel_groups].flat_map { |group| group[:panels] }
   end
 
   def get_metric_details(metric)
@@ -135,7 +215,8 @@ describe Gitlab::Metrics::Dashboard::Processor do
       unit: metric.unit,
       label: metric.legend,
       metric_id: metric.id,
-      prometheus_endpoint_path: prometheus_path(metric.query)
+      prometheus_endpoint_path: prometheus_path(metric.query),
+      edit_path: edit_metric_path(metric)
     }
   end
 
@@ -145,6 +226,21 @@ describe Gitlab::Metrics::Dashboard::Processor do
       environment,
       proxy_path: :query_range,
       query: query
+    )
+  end
+
+  def sample_metrics_path(metric)
+    Gitlab::Routing.url_helpers.sample_metrics_project_environment_path(
+      project,
+      environment,
+      identifier: metric
+    )
+  end
+
+  def edit_metric_path(metric)
+    Gitlab::Routing.url_helpers.edit_project_prometheus_metric_path(
+      project,
+      metric.id
     )
   end
 end

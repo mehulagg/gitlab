@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Autocomplete::ProjectInvitedGroupsFinder do
+RSpec.describe Autocomplete::ProjectInvitedGroupsFinder do
   let(:user) { create(:user) }
 
   describe '#execute' do

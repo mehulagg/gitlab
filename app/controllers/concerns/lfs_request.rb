@@ -56,7 +56,7 @@ module LfsRequest
         documentation_url: help_url
       },
       content_type: CONTENT_TYPE,
-      status: 403
+      status: :forbidden
     )
   end
 
@@ -67,7 +67,7 @@ module LfsRequest
         documentation_url: help_url
       },
       content_type: CONTENT_TYPE,
-      status: 404
+      status: :not_found
     )
   end
 
@@ -112,12 +112,12 @@ module LfsRequest
     has_authentication_ability?(:build_download_code) && can?(user, :build_download_code, project)
   end
 
-  def storage_project
-    @storage_project ||= project.lfs_storage_project
-  end
-
   def objects
     @objects ||= (params[:objects] || []).to_a
+  end
+
+  def objects_oids
+    objects.map { |o| o['oid'].to_s }
   end
 
   def has_authentication_ability?(capability)

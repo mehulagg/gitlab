@@ -1,10 +1,17 @@
+---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: reference, api
+---
+
 # Project-level Variables API
 
 ## List project variables
 
 Get list of a project's variables.
 
-```
+```plaintext
 GET /projects/:id/variables
 ```
 
@@ -12,7 +19,7 @@ GET /projects/:id/variables
 |-----------|---------|----------|---------------------|
 | `id`      | integer/string | yes      | The ID of a project or [urlencoded NAMESPACE/PROJECT_NAME of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 
-```
+```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/variables"
 ```
 
@@ -35,7 +42,7 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/a
 
 Get the details of a project's specific variable.
 
-```
+```plaintext
 GET /projects/:id/variables/:key
 ```
 
@@ -43,8 +50,9 @@ GET /projects/:id/variables/:key
 |-----------|---------|----------|-----------------------|
 | `id`      | integer/string | yes      | The ID of a project or [urlencoded NAMESPACE/PROJECT_NAME of the project](README.md#namespaced-path-encoding) owned by the authenticated user   |
 | `key`     | string  | yes      | The `key` of a variable |
+| `filter`  | hash    | no       | Available filters: `[environment_scope]`. See the [`filter` parameter details](#the-filter-parameter). |
 
-```
+```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/variables/TEST_VARIABLE_1"
 ```
 
@@ -62,7 +70,7 @@ curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/a
 
 Create a new variable.
 
-```
+```plaintext
 POST /projects/:id/variables
 ```
 
@@ -76,7 +84,7 @@ POST /projects/:id/variables
 | `masked`            | boolean | no       | Whether the variable is masked |
 | `environment_scope` | string  | no       | The `environment_scope` of the variable |
 
-```
+```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/variables" --form "key=NEW_VARIABLE" --form "value=new value"
 ```
 
@@ -86,7 +94,6 @@ curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitla
     "value": "new value",
     "protected": false,
     "variable_type": "env_var",
-    "protected": false,
     "masked": false,
     "environment_scope": "*"
 }
@@ -96,7 +103,7 @@ curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitla
 
 Update a project's variable.
 
-```
+```plaintext
 PUT /projects/:id/variables/:key
 ```
 
@@ -109,8 +116,9 @@ PUT /projects/:id/variables/:key
 | `protected`         | boolean | no       | Whether the variable is protected |
 | `masked`            | boolean | no       | Whether the variable is masked |
 | `environment_scope` | string  | no       | The `environment_scope` of the variable |
+| `filter`            | hash    | no       | Available filters: `[environment_scope]`. See the [`filter` parameter details](#the-filter-parameter). |
 
-```
+```shell
 curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/variables/NEW_VARIABLE" --form "value=updated value"
 ```
 
@@ -129,7 +137,7 @@ curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab
 
 Remove a project's variable.
 
-```
+```plaintext
 DELETE /projects/:id/variables/:key
 ```
 
@@ -137,7 +145,21 @@ DELETE /projects/:id/variables/:key
 |-----------|---------|----------|-------------------------|
 | `id`      | integer/string | yes      | The ID of a project or [urlencoded NAMESPACE/PROJECT_NAME of the project](README.md#namespaced-path-encoding) owned by the authenticated user     |
 | `key`     | string  | yes      | The `key` of a variable |
+| `filter`  | hash    | no       | Available filters: `[environment_scope]`. See the [`filter` parameter details](#the-filter-parameter). |
 
-```
+```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/variables/VARIABLE_1"
+```
+
+## The `filter` parameter
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/34490) in GitLab 13.2.
+> - [Feature flag removed](https://gitlab.com/gitlab-org/gitlab/-/issues/227052) in GitLab 13.4.
+
+This parameter is used for filtering by attributes, such as `environment_scope`.
+
+Example usage:
+
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/variables/VARIABLE_1?filter[environment_scope]=production"
 ```

@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import { isString } from 'lodash';
 import { mapState, mapActions, mapGetters } from 'vuex';
 import PodBox from './pod_box.vue';
 import Url from './url.vue';
@@ -23,14 +23,6 @@ export default {
       required: false,
       default: false,
     },
-    clustersPath: {
-      type: String,
-      required: true,
-    },
-    helpPath: {
-      type: String,
-      required: true,
-    },
   },
   data() {
     return {
@@ -42,7 +34,7 @@ export default {
       return this.func.name;
     },
     description() {
-      return _.isString(this.func.description) ? this.func.description : '';
+      return isString(this.func.description) ? this.func.description : '';
     },
     funcUrl() {
       return this.func.url;
@@ -71,7 +63,7 @@ export default {
 <template>
   <section id="serverless-function-details">
     <h3 class="serverless-function-name">{{ name }}</h3>
-    <div class="append-bottom-default serverless-function-description">
+    <div class="gl-mb-3 serverless-function-description">
       <div v-for="(line, index) in description.split('\n')" :key="index">{{ line }}</div>
     </div>
     <url :uri="funcUrl" />
@@ -96,8 +88,6 @@ export default {
     <area-chart v-if="hasPrometheusData" :graph-data="graphData" :container-width="elWidth" />
     <missing-prometheus
       v-if="!hasPrometheus || hasPrometheusMissingData"
-      :help-path="helpPath"
-      :clusters-path="clustersPath"
       :missing-data="hasPrometheusMissingData"
     />
   </section>

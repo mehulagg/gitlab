@@ -18,7 +18,6 @@ module Gitlab
               report = super
 
               if report.is_a?(Array)
-                puts self.class
                 report = {
                   "version" => self.class::DEPRECATED_REPORT_VERSION,
                   "vulnerabilities" => report

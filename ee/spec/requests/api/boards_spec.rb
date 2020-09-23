@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe API::Boards do
-  set(:user) { create(:user) }
-  set(:board_parent) { create(:project, :public, creator_id: user.id, namespace: user.namespace ) }
-  set(:milestone) { create(:milestone, project: board_parent) }
-  set(:board) { create(:board, project: board_parent, milestone: milestone, assignee: user) }
+RSpec.describe API::Boards do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:board_parent) { create(:project, :public, creator_id: user.id, namespace: user.namespace ) }
+  let_it_be(:milestone) { create(:milestone, project: board_parent) }
+  let_it_be(:board) { create(:board, project: board_parent, milestone: milestone, assignee: user) }
 
   it_behaves_like 'multiple and scoped issue boards', "/projects/:id/boards"
 
@@ -43,24 +43,50 @@ describe API::Boards do
     let!(:list) { create(:list, board: board) }
 
     context 'with WIP limits license' do
-      it 'includes max_issue_count' do
-        stub_licensed_features(wip_limits: true)
-
+      before do
         get api(url, user)
+      end
 
-        expect(json_response).not_to be_empty
-        expect(json_response.all? { |list_response| list_response.include?('max_issue_count') }).to be_truthy
+      it 'includes max_issue_count' do
+        all_lists_in_response(include: 'max_issue_count')
+      end
+
+      it 'includes max_issue_weight' do
+        all_lists_in_response(include: 'max_issue_weight')
+      end
+
+      it 'includes limit_metric' do
+        all_lists_in_response(include: 'limit_metric')
       end
     end
 
     context 'without WIP limits license' do
-      it 'does not include max_issue_count' do
-        stub_licensed_features(wip_limits: false)
+      before do
+        stub_feature_flags(wip_limits: false)
 
         get api(url, user)
+      end
 
-        expect(json_response).not_to be_empty
-        expect(json_response.none? { |list_response| list_response.include?('max_issue_count') }).to be_truthy
+      it 'does not include max_issue_weight' do
+        all_lists_in_response(do_not_include: 'max_issue_weight')
+      end
+
+      it 'does not include max_issue_count' do
+        all_lists_in_response(do_not_include: 'max_issue_count')
+      end
+
+      it 'does not include limit_metric' do
+        all_lists_in_response(do_not_include: 'limit_metric')
+      end
+    end
+
+    def all_lists_in_response(params)
+      expect(json_response).not_to be_empty
+
+      if params.key?(:include)
+        expect(json_response).to all(include(params[:include]))
+      elsif params.key?(:do_not_include)
+        expect(json_response.none? { |list_response| list_response.include?(params[:do_not_include]) }).to be_truthy
       end
     end
   end

@@ -9,7 +9,7 @@ module EE
 
       override :noteable_types
       def noteable_types
-        super + %w(Epic)
+        super + %w[Epic Vulnerability]
       end
     end
   end

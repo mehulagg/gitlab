@@ -13,16 +13,15 @@ class ClusterablePresenter < Gitlab::View::Presenter::Delegated
   end
 
   def can_add_cluster?
-    can?(current_user, :add_cluster, clusterable) &&
-      (has_no_clusters? || multiple_clusters_available?)
+    can?(current_user, :add_cluster, clusterable)
   end
 
   def can_create_cluster?
     can?(current_user, :create_cluster, clusterable)
   end
 
-  def index_path
-    polymorphic_path([clusterable, :clusters])
+  def index_path(options = {})
+    polymorphic_path([clusterable, :clusters], options)
   end
 
   def new_path(options = {})
@@ -41,6 +40,10 @@ class ClusterablePresenter < Gitlab::View::Presenter::Delegated
     polymorphic_path([clusterable, :clusters], action: :create_gcp)
   end
 
+  def create_aws_clusters_path
+    polymorphic_path([clusterable, :clusters], action: :create_aws)
+  end
+
   def cluster_status_cluster_path(cluster, params = {})
     raise NotImplementedError
   end
@@ -53,11 +56,19 @@ class ClusterablePresenter < Gitlab::View::Presenter::Delegated
     raise NotImplementedError
   end
 
+  def clear_cluster_cache_path(cluster)
+    raise NotImplementedError
+  end
+
   def cluster_path(cluster, params = {})
     raise NotImplementedError
   end
 
-  # Will be overidden in EE
+  def metrics_dashboard_path(cluster)
+    raise NotImplementedError
+  end
+
+  # Will be overridden in EE
   def environments_cluster_path(cluster)
     nil
   end
@@ -72,17 +83,6 @@ class ClusterablePresenter < Gitlab::View::Presenter::Delegated
 
   def learn_more_link
     raise NotImplementedError
-  end
-
-  private
-
-  # Overridden on EE module
-  def multiple_clusters_available?
-    false
-  end
-
-  def has_no_clusters?
-    clusterable.clusters.empty?
   end
 end
 

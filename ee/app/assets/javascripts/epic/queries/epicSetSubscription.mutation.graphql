@@ -1,0 +1,6 @@
+mutation epicSetSubscription($epicSetSubscriptionInput: EpicSetSubscriptionInput!) {
+  epicSetSubscription(input: $epicSetSubscriptionInput) {
+    clientMutationId
+    errors
+  }
+}

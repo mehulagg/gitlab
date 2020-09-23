@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project mirror', :js do
+RSpec.describe 'Project mirror', :js do
   include ReactiveCachingHelpers
 
   let(:project) { create(:project, :repository, creator: user, name: 'Victorialand') }
@@ -15,39 +15,82 @@ describe 'Project mirror', :js do
       sign_in user
     end
 
+    context 'when mirror was updated successfully' do
+      before do
+        import_state.update!(last_successful_update_at: 5.minutes.ago)
+      end
+
+      it 'shows the last successful at timestamp' do
+        visit project_mirror_path(project)
+
+        page.within('.js-mirrors-table-body tr:nth-child(1) td:nth-child(4)') do
+          expect(page).to have_content('5 minutes ago')
+        end
+      end
+    end
+
+    context 'when mirror was never updated successfully' do
+      before do
+        import_state.update!(last_successful_update_at: nil)
+      end
+
+      it 'shows that mirror has never been updated' do
+        visit project_mirror_path(project)
+
+        page.within('.js-mirrors-table-body tr:nth-child(1) td:nth-child(4)') do
+          expect(page).to have_content('Never')
+        end
+      end
+    end
+
     context 'with Update now button' do
       let(:timestamp) { Time.now }
 
       before do
-        import_state.update(next_execution_timestamp: timestamp + 10.minutes)
+        import_state.update!(last_update_at: 6.minutes.ago, next_execution_timestamp: timestamp + 10.minutes)
       end
 
       context 'when able to force update' do
         it 'forces import' do
-          import_state.update(last_update_at: timestamp - 8.minutes)
-
-          expect_any_instance_of(EE::ProjectImportState).to receive(:force_import_job!)
-
           Timecop.freeze(timestamp) do
             visit project_mirror_path(project)
           end
 
-          Sidekiq::Testing.fake! { find('.js-force-update-mirror').click }
+          Sidekiq::Testing.fake! do
+            expect { find('.js-force-update-mirror').click }
+              .to change { UpdateAllMirrorsWorker.jobs.size }
+              .by(1)
+          end
         end
       end
 
       context 'when unable to force update' do
-        it 'does not force import' do
-          import_state.update(last_update_at: timestamp - 3.minutes)
+        before do
+          import_state.update!(next_execution_timestamp: timestamp - 1.minute)
+        end
 
-          expect_any_instance_of(EE::ProjectImportState).not_to receive(:force_import_job!)
+        let(:disabled_updating_button) { '[data-qa-selector="updating_button"].disabled' }
 
+        it 'disables Update now button' do
           Timecop.freeze(timestamp) do
             visit project_mirror_path(project)
           end
 
-          expect(page).to have_selector('.js-force-update-mirror')
-          expect(page).to have_selector('.btn.disabled')
+          expect(page).to have_selector(disabled_updating_button)
+        end
+      end
+
+      context 'when the project is archived' do
+        let(:disabled_update_now_button) { '[data-qa-selector="update_now_button"].disabled' }
+
+        before do
+          project.update!(archived: true)
+        end
+
+        it 'disables Update now button' do
+          visit project_mirror_path(project)
+
+          expect(page).to have_selector(disabled_update_now_button)
         end
       end
     end

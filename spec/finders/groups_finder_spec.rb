@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupsFinder do
+RSpec.describe GroupsFinder do
   describe '#execute' do
     let(:user) { create(:user) }
 
@@ -74,6 +74,12 @@ describe GroupsFinder do
       let!(:internal_subgroup) { create(:group, :internal, parent: parent_group) }
       let!(:private_subgroup) { create(:group, :private, parent: parent_group) }
 
+      context 'with [nil] parent' do
+        it 'returns only top-level groups' do
+          expect(described_class.new(user, parent: [nil]).execute).to contain_exactly(parent_group)
+        end
+      end
+
       context 'without a user' do
         it 'only returns parent and public subgroups' do
           expect(described_class.new(nil).execute).to contain_exactly(parent_group, public_subgroup)
@@ -111,6 +117,7 @@ describe GroupsFinder do
           context 'authorized to private project' do
             context 'project one level deep' do
               let!(:subproject) { create(:project, :private, namespace: private_subgroup) }
+
               before do
                 subproject.add_guest(user)
               end
@@ -129,6 +136,7 @@ describe GroupsFinder do
             context 'project two levels deep' do
               let!(:private_subsubgroup) { create(:group, :private, parent: private_subgroup) }
               let!(:subsubproject) { create(:project, :private, namespace: private_subsubgroup) }
+
               before do
                 subsubproject.add_guest(user)
               end
@@ -140,6 +148,14 @@ describe GroupsFinder do
               it 'returns the groups for a given parent' do
                 expect(described_class.new(user, parent: parent_group).execute).to include(private_subgroup)
               end
+            end
+          end
+
+          context 'being minimal access member of parent group' do
+            it 'do not return group with minimal_access access' do
+              create(:group_member, :minimal_access, user: user, source: parent_group)
+
+              is_expected.to contain_exactly(public_subgroup, internal_subgroup)
             end
           end
         end

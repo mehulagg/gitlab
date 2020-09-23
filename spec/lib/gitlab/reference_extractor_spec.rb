@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Gitlab::ReferenceExtractor do
-  let(:project) { create(:project) }
+RSpec.describe Gitlab::ReferenceExtractor do
+  let_it_be(:project) { create(:project) }
 
   before do
     project.add_developer(project.creator)
@@ -130,7 +130,7 @@ describe Gitlab::ReferenceExtractor do
     @i0 = create(:issue, project: project)
     @i1 = create(:issue, project: project)
 
-    subject.analyze("#{@i0.to_reference}, #{@i1.to_reference}, and #{Issue.reference_prefix}999.")
+    subject.analyze("#{@i0.to_reference}, #{@i1.to_reference}, and #{Issue.reference_prefix}#{non_existing_record_iid}.")
 
     expect(subject.issues).to match_array([@i0, @i1])
   end
@@ -139,7 +139,7 @@ describe Gitlab::ReferenceExtractor do
     @m0 = create(:merge_request, source_project: project, target_project: project, source_branch: 'markdown')
     @m1 = create(:merge_request, source_project: project, target_project: project, source_branch: 'feature_conflict')
 
-    subject.analyze("!999, !#{@m1.iid}, and !#{@m0.iid}.")
+    subject.analyze("!#{non_existing_record_iid}, !#{@m1.iid}, and !#{@m0.iid}.")
 
     expect(subject.merge_requests).to match_array([@m1, @m0])
   end
@@ -149,7 +149,7 @@ describe Gitlab::ReferenceExtractor do
     @l1 = create(:label, title: 'two', project: project)
     @l2 = create(:label)
 
-    subject.analyze("~#{@l0.id}, ~999, ~#{@l2.id}, ~#{@l1.id}")
+    subject.analyze("~#{@l0.id}, ~#{non_existing_record_id}, ~#{@l2.id}, ~#{@l1.id}")
 
     expect(subject.labels).to match_array([@l0, @l1])
   end
@@ -159,7 +159,7 @@ describe Gitlab::ReferenceExtractor do
     @s1 = create(:project_snippet, project: project)
     @s2 = create(:project_snippet)
 
-    subject.analyze("$#{@s0.id}, $999, $#{@s2.id}, $#{@s1.id}")
+    subject.analyze("$#{@s0.id}, $#{non_existing_record_id}, $#{@s2.id}, $#{@s1.id}")
 
     expect(subject.snippets).to match_array([@s0, @s1])
   end
@@ -204,8 +204,8 @@ describe Gitlab::ReferenceExtractor do
                                       issue]
       end
 
-      it 'returns only Jira issues if the internal one does not exists' do
-        subject.analyze("JIRA-123 and FOOBAR-4567 and #999")
+      it 'returns only Jira issues if the internal one does not exist' do
+        subject.analyze("JIRA-123 and FOOBAR-4567 and ##{non_existing_record_iid}")
         expect(subject.issues).to eq [ExternalIssue.new('JIRA-123', project),
                                       ExternalIssue.new('FOOBAR-4567', project)]
       end
@@ -221,6 +221,24 @@ describe Gitlab::ReferenceExtractor do
         subject.analyze("JIRA-123 and FOOBAR-4567 and #{issue.to_reference}")
         expect(subject.issues).to eq [ExternalIssue.new('JIRA-123', project),
                                       ExternalIssue.new('FOOBAR-4567', project)]
+      end
+    end
+  end
+
+  context 'with an inactive external issue tracker' do
+    let(:project) { create(:project) }
+    let!(:jira_service) { create(:jira_service, project: project, active: false) }
+    let(:issue)   { create(:issue, project: project) }
+
+    context 'when GitLab issues are enabled' do
+      it 'returns only internal issue' do
+        subject.analyze("JIRA-123 and FOOBAR-4567 and #{issue.to_reference}")
+        expect(subject.issues).to eq([issue])
+      end
+
+      it 'does not return any issue if the internal one does not exist' do
+        subject.analyze("JIRA-123 and FOOBAR-4567 and #999")
+        expect(subject.issues).to be_empty
       end
     end
   end
@@ -278,7 +296,7 @@ describe Gitlab::ReferenceExtractor do
     end
 
     it 'returns all supported prefixes' do
-      expect(prefixes.keys.uniq).to match_array(%w(@ # ~ % ! $ &))
+      expect(prefixes.keys.uniq).to match_array(%w(@ # ~ % ! $ & *iteration:))
     end
 
     it 'does not allow one prefix for multiple referables if not allowed specificly' do
@@ -291,6 +309,36 @@ describe Gitlab::ReferenceExtractor do
         expected_count = multiple_allowed[prefix] || 1
         expect(referables.count).to eq(expected_count)
       end
+    end
+  end
+
+  describe '#references' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:issue) { create(:issue, project: project) }
+    let(:text) { "Ref. #{issue.to_reference}" }
+
+    subject { described_class.new(project, user) }
+
+    before do
+      subject.analyze(text)
+    end
+
+    context 'when references are visible' do
+      before do
+        project.add_developer(user)
+      end
+
+      it 'returns visible references of given type' do
+        expect(subject.references(:issue)).to eq([issue])
+      end
+
+      it 'does not increase stateful_not_visible_counter' do
+        expect { subject.references(:issue) }.not_to change { subject.stateful_not_visible_counter }
+      end
+    end
+
+    it 'increases stateful_not_visible_counter' do
+      expect { subject.references(:issue) }.to change { subject.stateful_not_visible_counter }.by(1)
     end
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :clusters_applications_helm, class: Clusters::Applications::Helm do
+  factory :clusters_applications_helm, class: 'Clusters::Applications::Helm' do
     cluster factory: %i(cluster provided_by_gcp)
 
     before(:create) do
@@ -65,41 +65,120 @@ FactoryBot.define do
       status_reason { 'something went wrong' }
     end
 
+    trait :uninstalled do
+      status { 10 }
+    end
+
     trait :timed_out do
       installing
       updated_at { ClusterWaitForAppInstallationWorker::TIMEOUT.ago }
     end
 
-    factory :clusters_applications_ingress, class: Clusters::Applications::Ingress do
+    factory :clusters_applications_ingress, class: 'Clusters::Applications::Ingress' do
+      modsecurity_enabled { false }
       cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
+
+      trait :modsecurity_blocking do
+        modsecurity_enabled { true }
+        modsecurity_mode { :blocking }
+      end
+
+      trait :modsecurity_logging do
+        modsecurity_enabled { true }
+        modsecurity_mode { :logging }
+      end
+
+      trait :modsecurity_disabled do
+        modsecurity_enabled { false }
+      end
+
+      trait :modsecurity_not_installed do
+        modsecurity_enabled { nil }
+      end
     end
 
-    factory :clusters_applications_cert_manager, class: Clusters::Applications::CertManager do
+    factory :clusters_applications_cert_manager, class: 'Clusters::Applications::CertManager' do
       email { 'admin@example.com' }
       cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
     end
 
-    factory :clusters_applications_elastic_stack, class: Clusters::Applications::ElasticStack do
+    factory :clusters_applications_elastic_stack, class: 'Clusters::Applications::ElasticStack' do
       cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
     end
 
-    factory :clusters_applications_prometheus, class: Clusters::Applications::Prometheus do
+    factory :clusters_applications_crossplane, class: 'Clusters::Applications::Crossplane' do
+      stack { 'gcp' }
       cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
     end
 
-    factory :clusters_applications_runner, class: Clusters::Applications::Runner do
+    factory :clusters_applications_prometheus, class: 'Clusters::Applications::Prometheus' do
+      cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
+    end
+
+    factory :clusters_applications_runner, class: 'Clusters::Applications::Runner' do
       runner factory: %i(ci_runner)
       cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
     end
 
-    factory :clusters_applications_knative, class: Clusters::Applications::Knative do
+    factory :clusters_applications_knative, class: 'Clusters::Applications::Knative' do
       hostname { 'example.com' }
       cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
     end
 
-    factory :clusters_applications_jupyter, class: Clusters::Applications::Jupyter do
+    factory :clusters_applications_jupyter, class: 'Clusters::Applications::Jupyter' do
       oauth_application factory: :oauth_application
       cluster factory: %i(cluster with_installed_helm provided_by_gcp project)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
+    end
+
+    factory :clusters_applications_fluentd, class: 'Clusters::Applications::Fluentd' do
+      host { 'example.com' }
+      waf_log_enabled { true }
+      cilium_log_enabled { true }
+      cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
+    end
+
+    factory :clusters_applications_cilium, class: 'Clusters::Applications::Cilium' do
+      cluster factory: %i(cluster with_installed_helm provided_by_gcp)
+
+      trait :no_helm_installed do
+        cluster factory: %i(cluster provided_by_gcp)
+      end
     end
   end
 end

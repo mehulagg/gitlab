@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Update of user activity' do
+RSpec.describe 'Update of user activity' do
   let(:user) { create(:user, last_activity_on: nil) }
 
   before do
@@ -24,10 +24,10 @@ describe 'Update of user activity' do
     '/dashboard/snippets',
     '/dashboard/groups',
     '/dashboard/todos',
-    '/group/project/issues',
-    '/group/project/issues/10',
-    '/group/project/merge_requests',
-    '/group/project/merge_requests/15'
+    '/group/project/-/issues',
+    '/group/project/-/issues/10',
+    '/group/project/-/merge_requests',
+    '/group/project/-/merge_requests/15'
   ]
 
   context 'without an authenticated user' do

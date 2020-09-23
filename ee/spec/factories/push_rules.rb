@@ -20,5 +20,9 @@ FactoryBot.define do
     factory :push_rule_sample do
       is_sample { true }
     end
+
+    factory :push_rule_without_project do
+      project { nil }
+    end
   end
 end

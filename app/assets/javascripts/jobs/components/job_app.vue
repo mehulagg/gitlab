@@ -1,14 +1,13 @@
 <script>
-import _ from 'underscore';
+/* eslint-disable vue/no-v-html */
+import { throttle, isEmpty } from 'lodash';
 import { mapGetters, mapState, mapActions } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import { isScrolledToBottom } from '~/lib/utils/scroll_utils';
 import { polyfillSticky } from '~/lib/utils/sticky';
-import bp from '~/breakpoints';
 import CiHeader from '~/vue_shared/components/header_ci_component.vue';
 import Callout from '~/vue_shared/components/callout.vue';
-import Icon from '~/vue_shared/components/icon.vue';
-import createStore from '../store';
 import EmptyState from './empty_state.vue';
 import EnvironmentsBlock from './environments_block.vue';
 import ErasedBlock from './erased_block.vue';
@@ -18,19 +17,18 @@ import UnmetPrerequisitesBlock from './unmet_prerequisites_block.vue';
 import Sidebar from './sidebar.vue';
 import { sprintf } from '~/locale';
 import delayedJobMixin from '../mixins/delayed_job_mixin';
-import { isNewJobLogActive } from '../store/utils';
+import Log from './log/log.vue';
 
 export default {
   name: 'JobPageApp',
-  store: createStore(),
   components: {
     CiHeader,
     Callout,
     EmptyState,
     EnvironmentsBlock,
     ErasedBlock,
-    Icon,
-    Log: () => (isNewJobLogActive() ? import('./log/log.vue') : import('./job_log.vue')),
+    GlIcon,
+    Log,
     LogTopBar,
     StuckBlock,
     UnmetPrerequisitesBlock,
@@ -40,6 +38,11 @@ export default {
   },
   mixins: [delayedJobMixin],
   props: {
+    artifactHelpUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
     runnerSettingsUrl: {
       type: String,
       required: false,
@@ -60,24 +63,12 @@ export default {
       required: false,
       default: null,
     },
-    endpoint: {
-      type: String,
-      required: true,
-    },
     terminalPath: {
       type: String,
       required: false,
       default: null,
     },
-    pagePath: {
-      type: String,
-      required: true,
-    },
     projectPath: {
-      type: String,
-      required: true,
-    },
-    logState: {
       type: String,
       required: true,
     },
@@ -139,7 +130,7 @@ export default {
     // Once the job log is loaded,
     // fetch the stages for the dropdown on the sidebar
     job(newVal, oldVal) {
-      if (_.isEmpty(oldVal) && !_.isEmpty(newVal.pipeline)) {
+      if (isEmpty(oldVal) && !isEmpty(newVal.pipeline)) {
         const stages = this.job.pipeline.details.stages || [];
 
         const defaultStage = stages.find(stage => stage && stage.name === this.selectedStage);
@@ -159,16 +150,7 @@ export default {
     },
   },
   created() {
-    this.throttled = _.throttle(this.toggleScrollButtons, 100);
-
-    this.setJobEndpoint(this.endpoint);
-    this.setTraceOptions({
-      logState: this.logState,
-      pagePath: this.pagePath,
-    });
-
-    this.fetchJob();
-    this.fetchTrace();
+    this.throttled = throttle(this.toggleScrollButtons, 100);
 
     window.addEventListener('resize', this.onResize);
     window.addEventListener('scroll', this.updateScroll);
@@ -176,22 +158,22 @@ export default {
   mounted() {
     this.updateSidebar();
   },
-  destroyed() {
+  beforeDestroy() {
+    this.stopPollingTrace();
+    this.stopPolling();
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('scroll', this.updateScroll);
   },
   methods: {
     ...mapActions([
-      'setJobEndpoint',
-      'setTraceOptions',
-      'fetchJob',
       'fetchJobsForStage',
       'hideSidebar',
       'showSidebar',
       'toggleSidebar',
-      'fetchTrace',
       'scrollBottom',
       'scrollTop',
+      'stopPollingTrace',
+      'stopPolling',
       'toggleScrollButtons',
       'toggleScrollAnimation',
     ]),
@@ -200,7 +182,8 @@ export default {
       this.updateScroll();
     },
     updateSidebar() {
-      if (bp.getBreakpointSize() === 'xs') {
+      const breakpoint = bp.getBreakpointSize();
+      if (breakpoint === 'xs' || breakpoint === 'sm') {
         this.hideSidebar();
       } else if (!this.isSidebarOpen) {
         this.showSidebar();
@@ -220,17 +203,13 @@ export default {
 </script>
 <template>
   <div>
-    <gl-loading-icon
-      v-if="isLoading"
-      :size="2"
-      class="js-job-loading qa-loading-animation prepend-top-20"
-    />
+    <gl-loading-icon v-if="isLoading" size="lg" class="qa-loading-animation prepend-top-20" />
 
     <template v-else-if="shouldRenderContent">
-      <div class="js-job-content build-page">
+      <div class="build-page" data-testid="job-content">
         <!-- Header Section -->
         <header>
-          <div class="js-build-header build-header top-area">
+          <div class="build-header top-area">
             <ci-header
               :status="job.status"
               :item-id="job.id"
@@ -252,7 +231,6 @@ export default {
         <!-- Body Section -->
         <stuck-block
           v-if="job.stuck"
-          class="js-job-stuck"
           :has-no-runners-for-project="hasRunnersForProject"
           :tags="job.tags"
           :runners-path="runnerSettingsUrl"
@@ -260,13 +238,11 @@ export default {
 
         <unmet-prerequisites-block
           v-if="hasUnmetPrerequisitesFailure"
-          class="js-job-failed"
           :help-path="deploymentHelpUrl"
         />
 
         <shared-runner
           v-if="shouldRenderSharedRunnerLimitWarning"
-          class="js-shared-runner-limit"
           :quota-used="job.runners.quota.used"
           :quota-limit="job.runners.quota.limit"
           :runners-path="runnerHelpUrl"
@@ -276,14 +252,14 @@ export default {
 
         <environments-block
           v-if="hasEnvironment"
-          class="js-job-environment"
           :deployment-status="job.deployment_status"
+          :deployment-cluster="job.deployment_cluster"
           :icon-status="job.status"
         />
 
         <erased-block
           v-if="job.erased_at"
-          class="js-job-erased-block"
+          data-testid="job-erased-block"
           :user="job.erased_by"
           :erased-at="job.erased_at"
         />
@@ -291,17 +267,18 @@ export default {
         <div
           v-if="job.archived"
           ref="sticky"
-          class="js-archived-job prepend-top-default archived-job"
+          class="gl-mt-3 archived-job"
           :class="{ 'sticky-top border-bottom-0': hasTrace }"
+          data-testid="archived-job"
         >
-          <icon name="lock" class="align-text-bottom" />
+          <gl-icon name="lock" class="align-text-bottom" />
           {{ __('This job is archived. Only the complete pipeline can be retried.') }}
         </div>
         <!-- job log -->
         <div
           v-if="hasTrace"
           class="build-trace-container position-relative"
-          :class="{ 'prepend-top-default': !job.archived }"
+          :class="{ 'gl-mt-3': !job.archived }"
         >
           <log-top-bar
             :class="{
@@ -326,7 +303,6 @@ export default {
         <!-- empty state -->
         <empty-state
           v-if="!hasTrace"
-          class="js-job-empty-state"
           :illustration-path="emptyStateIllustration.image"
           :illustration-size-class="emptyStateIllustration.size"
           :title="emptyStateTitle"
@@ -344,12 +320,13 @@ export default {
 
     <sidebar
       v-if="shouldRenderContent"
-      class="js-job-sidebar"
       :class="{
         'right-sidebar-expanded': isSidebarOpen,
         'right-sidebar-collapsed': !isSidebarOpen,
       }"
+      :artifact-help-url="artifactHelpUrl"
       :runner-help-url="runnerHelpUrl"
+      data-testid="job-sidebar"
     />
   </div>
 </template>

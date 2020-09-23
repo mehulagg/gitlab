@@ -1,36 +1,25 @@
 function retry() {
-    if eval "$@"; then
-        return 0
-    fi
+  if eval "$@"; then
+    return 0
+  fi
 
-    for i in 2 1; do
-        sleep 3s
-        echo "Retrying $i..."
-        if eval "$@"; then
-            return 0
-        fi
-    done
-    return 1
+  for i in 2 1; do
+    sleep 3s
+    echo "Retrying $i..."
+    if eval "$@"; then
+      return 0
+    fi
+  done
+  return 1
 }
 
 function setup_db_user_only() {
-    if [ "$GITLAB_DATABASE" = "postgresql" ]; then
-        source scripts/create_postgres_user.sh
-    else
-        source scripts/create_mysql_user.sh
-    fi
+  source scripts/create_postgres_user.sh
 }
 
 function setup_db() {
-    setup_db_user_only
-
-    bundle exec rake db:drop db:create db:schema:load db:migrate
-
-    if [ "$GITLAB_DATABASE" = "mysql" ]; then
-        bundle exec rake add_limits_mysql
-    fi
-
-    bundle exec rake gitlab:db:setup_ee
+  run_timed_command "setup_db_user_only"
+  run_timed_command "bundle exec rake db:drop db:create db:structure:load db:migrate gitlab:db:setup_ee"
 }
 
 function install_api_client_dependencies_with_apk() {
@@ -42,7 +31,30 @@ function install_api_client_dependencies_with_apt() {
 }
 
 function install_gitlab_gem() {
-  gem install gitlab --no-document
+  gem install httparty --no-document --version 0.17.3
+  gem install gitlab --no-document --version 4.13.0
+}
+
+function install_tff_gem() {
+  gem install test_file_finder --version 0.1.0
+}
+
+function run_timed_command() {
+  local cmd="${1}"
+  local start=$(date +%s)
+  echosuccess "\$ ${cmd}"
+  eval "${cmd}"
+  local ret=$?
+  local end=$(date +%s)
+  local runtime=$((end-start))
+
+  if [[ $ret -eq 0 ]]; then
+    echosuccess "==> '${cmd}' succeeded in ${runtime} seconds."
+    return 0
+  else
+    echoerr "==> '${cmd}' failed (${ret}) in ${runtime} seconds."
+    return $ret
+  fi
 }
 
 function echoerr() {
@@ -62,6 +74,16 @@ function echoinfo() {
     printf "\n\033[0;33m** %s **\n\033[0m" "${1}" >&2;
   else
     printf "\033[0;33m%s\n\033[0m" "${1}" >&2;
+  fi
+}
+
+function echosuccess() {
+  local header="${2}"
+
+  if [ -n "${header}" ]; then
+    printf "\n\033[0;32m** %s **\n\033[0m" "${1}" >&2;
+  else
+    printf "\033[0;32m%s\n\033[0m" "${1}" >&2;
   fi
 }
 
@@ -88,7 +110,7 @@ function get_job_id() {
     let "page++"
   done
 
-  if [[ "${job_id}" == "" ]]; then
+  if [[ "${job_id}" == "null" ]]; then # jq prints "null" for non-existent attribute
     echoerr "The '${job_name}' job ID couldn't be retrieved!"
   else
     echoinfo "The '${job_name}' job ID is ${job_id}"
@@ -116,45 +138,14 @@ function play_job() {
   echoinfo "Manual job '${job_name}' started at: ${job_url}"
 }
 
-function wait_for_job_to_be_done() {
-  local job_name="${1}"
-  local query_string="${2}"
-  local job_id
-  job_id=$(get_job_id "${job_name}" "${query_string}")
-  if [ -z "${job_id}" ]; then return; fi
+function fail_pipeline_early() {
+  local dont_interrupt_me_job_id
+  dont_interrupt_me_job_id=$(get_job_id 'dont-interrupt-me' 'scope=success')
 
-  local api_token="${API_TOKEN-${GITLAB_BOT_MULTI_PROJECT_PIPELINE_POLLING_TOKEN}}"
-  if [ -z "${api_token}" ]; then
-    echoerr "Please provide an API token with \$API_TOKEN or \$GITLAB_BOT_MULTI_PROJECT_PIPELINE_POLLING_TOKEN."
-    return
-  fi
-
-  echoinfo "Waiting for the '${job_name}' job to finish..."
-
-  local url="https://gitlab.com/api/v4/projects/${CI_PROJECT_ID}/jobs/${job_id}"
-  echoinfo "GET ${url}"
-
-  # In case the job hasn't finished yet. Keep trying until the job times out.
-  local interval=30
-  local elapsed_seconds=0
-  while true; do
-    local job_status
-    job_status=$(curl --silent --show-error --header "PRIVATE-TOKEN: ${api_token}" "${url}" | jq ".status" | sed -e s/\"//g)
-    [[ "${job_status}" == "pending" || "${job_status}" == "running" ]] || break
-
-    printf "."
-    let "elapsed_seconds+=interval"
-    sleep ${interval}
-  done
-
-  local elapsed_minutes=$((elapsed_seconds / 60))
-  echoinfo "Waited '${job_name}' for ${elapsed_minutes} minutes."
-
-  if [[ "${job_status}" == "failed" ]]; then
-    echoerr "The '${job_name}' failed."
-  elif [[ "${job_status}" == "manual" ]]; then
-    echoinfo "The '${job_name}' is manual."
+  if [[ -n "${dont_interrupt_me_job_id}" ]]; then
+    echoinfo "This pipeline cannot be interrupted due to \`dont-interrupt-me\` job ${dont_interrupt_me_job_id}"
   else
-    echoinfo "The '${job_name}' passed."
+    echoinfo "Failing pipeline early for fast feedback due to test failures in rspec fail-fast."
+    curl --request POST --header "PRIVATE-TOKEN: ${GITLAB_BOT_MULTI_PROJECT_PIPELINE_POLLING_TOKEN}" "https://${CI_SERVER_HOST}/api/v4/projects/${CI_PROJECT_ID}/pipelines/${CI_PIPELINE_ID}/cancel"
   fi
 }

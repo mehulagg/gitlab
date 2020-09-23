@@ -14,7 +14,7 @@ $status-box-line-height: 26px;
     border: 0;
     padding: $gl-padding-top $gl-padding;
     border-radius: $border-radius-default;
-    background-color: $white-light;
+    background-color: $white;
 
     &:not(:last-child) {
       margin-bottom: $gl-padding-4;
@@ -59,9 +59,15 @@ $status-box-line-height: 26px;
   }
 
   .issuable-row {
-    span a {
-      color: $gl-text-color;
-      word-wrap: break-word;
+    span {
+      a {
+        color: $gl-text-color;
+        word-wrap: break-word;
+      }
+
+      .gl-label-link {
+        color: inherit;
+      }
     }
   }
 
@@ -172,7 +178,6 @@ $status-box-line-height: 26px;
 
 .milestone-detail {
   border-bottom: 1px solid $border-color;
-  padding: 20px 0;
 }
 
 @include media-breakpoint-down(xs) {
@@ -228,7 +233,7 @@ $status-box-line-height: 26px;
 }
 
 .issuable-row {
-  background-color: $white-light;
+  background-color: $white;
 }
 
 .milestone-popover-instructions-list {

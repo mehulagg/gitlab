@@ -4,7 +4,7 @@ This document covers using the [OAuth2](https://oauth.net/2/) protocol to allow
 other services to access GitLab resources on user's behalf.
 
 If you want GitLab to be an OAuth authentication service provider to sign into
-other services, see the [OAuth2 provider](../integration/oauth_provider.md)
+other services, see the [OAuth2 authentication service provider](../integration/oauth_provider.md)
 documentation. This functionality is based on the
 [doorkeeper Ruby gem](https://github.com/doorkeeper-gem/doorkeeper).
 
@@ -32,7 +32,7 @@ CAUTION: **Important:**
 OAuth specification advises sending the `state` parameter with each request to
 `/oauth/authorize`. We highly recommended sending a unique value with each request
 and validate it against the one in the redirect request. This is important in
-order to prevent [CSRF attacks](https://www.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)).
+order to prevent [CSRF attacks](https://wiki.owasp.org/index.php/Cross-Site_Request_Forgery_(CSRF)).
 The `state` parameter really should have been a requirement in the standard!
 
 In the following sections you will find detailed instructions on how to obtain
@@ -49,7 +49,7 @@ The web application flow is:
 1. Request authorization code. To do that, you should redirect the user to the
    `/oauth/authorize` endpoint with the following GET parameters:
 
-   ```
+   ```plaintext
    https://gitlab.example.com/oauth/authorize?client_id=APP_ID&redirect_uri=REDIRECT_URI&response_type=code&state=YOUR_UNIQUE_STATE_HASH&scope=REQUESTED_SCOPES
    ```
 
@@ -60,8 +60,8 @@ The web application flow is:
    would request `read_user` and `profile` scopes). The redirect will
    include the GET `code` parameter, for example:
 
-   ```
-   http://myapp.com/oauth/redirect?code=1234567890&state=YOUR_UNIQUE_STATE_HASH
+   ```plaintext
+   https://example.com/oauth/redirect?code=1234567890&state=YOUR_UNIQUE_STATE_HASH
    ```
 
    You should then use `code` to request an access token.
@@ -72,7 +72,7 @@ The web application flow is:
 
    ```ruby
    parameters = 'client_id=APP_ID&client_secret=APP_SECRET&code=RETURNED_CODE&grant_type=authorization_code&redirect_uri=REDIRECT_URI'
-   RestClient.post 'http://gitlab.example.com/oauth/token', parameters
+   RestClient.post 'https://gitlab.example.com/oauth/token', parameters
    ```
 
    Example response:
@@ -102,7 +102,7 @@ CAUTION: **Important:**
 Avoid using this flow for applications that store data outside of the GitLab
 instance. If you do, make sure to verify `application id` associated with the
 access token before granting access to the data
-(see [`/oauth/token/info`](https://github.com/doorkeeper-gem/doorkeeper/wiki/API-endpoint-descriptions-and-examples#get----oauthtokeninfo)).
+(see [`/oauth/token/info`](#retrieving-the-token-information)).
 
 Unlike the web flow, the client receives an `access token` immediately as a
 result of the authorization request. The flow does not use the client secret
@@ -112,7 +112,7 @@ easily accessible, therefore secrets can leak easily.
 To request the access token, you should redirect the user to the
 `/oauth/authorize` endpoint using `token` response type:
 
-```
+```plaintext
 https://gitlab.example.com/oauth/authorize?client_id=APP_ID&redirect_uri=REDIRECT_URI&response_type=token&state=YOUR_UNIQUE_STATE_HASH&scope=REQUESTED_SCOPES
 ```
 
@@ -124,8 +124,8 @@ would request `read_user` and `profile` scopes). The redirect
 will include a fragment with `access_token` as well as token details in GET
 parameters, for example:
 
-```
-http://myapp.com/oauth/redirect#access_token=ABCDExyz123&state=YOUR_UNIQUE_STATE_HASH&token_type=bearer&expires_in=3600
+```plaintext
+https://example.com/oauth/redirect#access_token=ABCDExyz123&state=YOUR_UNIQUE_STATE_HASH&token_type=bearer&expires_in=3600
 ```
 
 ### Resource owner password credentials flow
@@ -173,16 +173,19 @@ the following parameters:
 }
 ```
 
+Also you must use HTTP Basic authentication using the `client_id` and`client_secret`
+values to authenticate the client that performs a request.
+
 Example cURL request:
 
-```sh
+```shell
 echo 'grant_type=password&username=<your_username>&password=<your_password>' > auth.txt
-curl --data "@auth.txt" --request POST https://gitlab.example.com/oauth/token
+curl --data "@auth.txt" --user client_id:client_secret --request POST "https://gitlab.example.com/oauth/token"
 ```
 
 Then, you'll receive the access token back in the response:
 
-```
+```json
 {
   "access_token": "1f0af717251950dbd4d73154fdf0a474a5c5119adad999683f5b450c460726aa",
   "token_type": "bearer",
@@ -190,10 +193,12 @@ Then, you'll receive the access token back in the response:
 }
 ```
 
+By default, the scope of the access token is `api`, which provides complete read/write access.
+
 For testing, you can use the `oauth2` Ruby gem:
 
-```
-client = OAuth2::Client.new('the_client_id', 'the_client_secret', :site => "http://example.com")
+```ruby
+client = OAuth2::Client.new('the_client_id', 'the_client_secret', :site => "https://example.com")
 access_token = client.password.get_token('user@example.com', 'secret')
 puts access_token.token
 ```
@@ -203,12 +208,52 @@ puts access_token.token
 The `access token` allows you to make requests to the API on behalf of a user.
 You can pass the token either as GET parameter:
 
-```
+```plaintext
 GET https://gitlab.example.com/api/v4/user?access_token=OAUTH-TOKEN
 ```
 
 or you can put the token to the Authorization header:
 
+```shell
+curl --header "Authorization: Bearer OAUTH-TOKEN" "https://gitlab.example.com/api/v4/user"
 ```
-curl --header "Authorization: Bearer OAUTH-TOKEN" https://gitlab.example.com/api/v4/user
+
+## Retrieving the token information
+
+To verify the details of a token, use the `token/info` endpoint provided by the Doorkeeper gem.
+For more information, see [`/oauth/token/info`](https://github.com/doorkeeper-gem/doorkeeper/wiki/API-endpoint-descriptions-and-examples#get----oauthtokeninfo).
+
+You must supply the access token, either:
+
+- As a parameter:
+
+   ```plaintext
+   GET https://gitlab.example.com/oauth/token/info?access_token=<OAUTH-TOKEN>
+   ```
+
+- In the Authorization header:
+
+   ```shell
+   curl --header "Authorization: Bearer <OAUTH-TOKEN>" "https://gitlab.example.com/oauth/token/info"
+   ```
+
+The following is an example response:
+
+```json
+{
+    "resource_owner_id": 1,
+    "scope": ["api"],
+    "expires_in": null,
+    "application": {"uid": "1cb242f495280beb4291e64bee2a17f330902e499882fe8e1e2aa875519cab33"},
+    "created_at": 1575890427
+}
 ```
+
+### Deprecated fields
+
+The fields `scopes` and `expires_in_seconds` are included in the response.
+
+These are aliases for `scope` and `expires_in` respectively, and have been included to
+prevent breaking changes introduced in [doorkeeper 5.0.2](https://github.com/doorkeeper-gem/doorkeeper/wiki/Migration-from-old-versions#from-4x-to-5x).
+
+Don't rely on these fields as they will be removed in a later release.

@@ -22,7 +22,7 @@ module GoogleApi
 
     def get_token(code)
       ret = client.auth_code.get_token(code, redirect_uri: redirect_uri)
-      return ret.token, ret.expires_at
+      [ret.token, ret.expires_at]
     end
 
     protected
@@ -37,6 +37,10 @@ module GoogleApi
       Gitlab::Auth::OAuth::Provider.config_for('google_oauth2')
     end
 
+    def client_options
+      config.args.client_options.deep_symbolize_keys
+    end
+
     def client
       return @client if defined?(@client)
 
@@ -49,7 +53,8 @@ module GoogleApi
         config.app_secret,
         site: 'https://accounts.google.com',
         token_url: '/o/oauth2/token',
-        authorize_url: '/o/oauth2/auth'
+        authorize_url: '/o/oauth2/auth',
+        **client_options
       )
     end
   end

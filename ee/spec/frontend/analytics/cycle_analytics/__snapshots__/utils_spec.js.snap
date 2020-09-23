@@ -1,0 +1,28 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Cycle analytics utils transformRawStages retains all the stage properties 1`] = `
+Array [
+  Object {
+    "custom": false,
+    "description": "Time before an issue gets scheduled",
+    "hidden": false,
+    "id": 1,
+    "legend": "",
+    "name": "Issue",
+    "slug": 1,
+    "title": "Issue",
+  },
+  Object {
+    "custom": true,
+    "description": "",
+    "endEventIdentifier": "issue_first_added_to_board",
+    "hidden": false,
+    "id": 18,
+    "legend": "",
+    "name": "Coolest beans stage",
+    "slug": 18,
+    "startEventIdentifier": "issue_first_mentioned_in_commit",
+    "title": "Coolest beans stage",
+  },
+]
+`;

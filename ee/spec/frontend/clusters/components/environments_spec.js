@@ -1,13 +1,9 @@
-import { createLocalVue, mount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import Environments from 'ee/clusters/components/environments.vue';
-import { GlTable, GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlTable, GlEmptyState, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import environments from './mock_data';
 
-const localVue = createLocalVue();
-
 describe('Environments', () => {
-  const Component = localVue.extend(Environments);
   let wrapper;
   let propsData;
 
@@ -20,9 +16,8 @@ describe('Environments', () => {
       isFetching: false,
     };
 
-    wrapper = mount(Component, {
+    wrapper = mount(Environments, {
       propsData,
-      localVue,
     });
   });
 
@@ -32,22 +27,22 @@ describe('Environments', () => {
 
   it('renders an empty state if no deployments are found', () => {
     const emptyState = wrapper.find(GlEmptyState);
-    const emptyStateText =
-      'No deployments found Ensure your environment is part of the deploy stage of your CI pipeline to track deployments to your cluster. Learn more about deploying to a cluster';
+    const emptyStateText = emptyState.text();
 
     expect(emptyState.exists()).toBe(true);
-    expect(emptyState.text()).toEqual(emptyStateText);
+    expect(emptyStateText).toContain(
+      'No deployments found Ensure your environment is part of the deploy stage of your CI pipeline to track deployments to your cluster.',
+    );
+    expect(emptyStateText).toContain('Learn more about deploying to a cluster');
   });
 
   describe('environments table', () => {
     let table;
 
     beforeAll(() => {
-      wrapper = mount(Component, {
+      wrapper = mount(Environments, {
         propsData: { ...propsData, environments },
-        localVue,
-        stubs: { deploymentInstance: '<div class="js-deployment-instance"></div>' },
-        sync: false,
+        stubs: { deploymentInstance: { template: '<div class="js-deployment-instance"></div>' } },
       });
 
       table = wrapper.find(GlTable);
@@ -61,9 +56,13 @@ describe('Environments', () => {
       const tableHeaders = ['Project', 'Environment', 'Job', `Pods in use 2`, 'Last updated'];
       const headers = table.findAll('th');
 
-      expect(headers.length).toBe(tableHeaders.length);
+      expect(headers).toHaveLength(tableHeaders.length);
 
       tableHeaders.forEach((headerText, i) => expect(headers.at(i).text()).toEqual(headerText));
+    });
+
+    it('should stack on smaller devices', () => {
+      expect(table.classes()).toContain('b-table-stacked-md');
     });
 
     describe('deployment instances', () => {
@@ -89,7 +88,7 @@ describe('Environments', () => {
         environments.forEach((environment, i) => {
           const { instances } = environment.rolloutStatus;
 
-          expect(tableRows.at(i).findAll('.js-deployment-instance').length).toBe(instances.length);
+          expect(tableRows.at(i).findAll('.js-deployment-instance')).toHaveLength(instances.length);
         });
       });
 
@@ -102,7 +101,7 @@ describe('Environments', () => {
 
           if (status !== 'loading' && instances.length === 0) {
             const emptyState = tableRows.at(i).find('.deployments-empty');
-            const emptyStateIcon = emptyState.find(Icon);
+            const emptyStateIcon = emptyState.find(GlIcon);
 
             expect(emptyState.exists()).toBe(true);
             expect(emptyStateIcon.exists()).toBe(true);

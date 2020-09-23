@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe ResourceEvents::ChangeLabelsService do
-  set(:project)  { create(:project) }
-  set(:author)   { create(:user) }
+RSpec.describe ResourceEvents::ChangeLabelsService do
+  let_it_be(:project) { create(:project) }
+  let_it_be(:author)  { create(:user) }
   let(:resource) { create(:issue, project: project) }
 
   describe '.change_labels' do

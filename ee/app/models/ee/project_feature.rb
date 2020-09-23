@@ -5,10 +5,9 @@ module EE
     extend ActiveSupport::Concern
 
     prepended do
+      # Ensure changes to project visibility settings go to elasticsearch
       after_commit on: :update do
-        if project.use_elasticsearch?
-          ElasticIndexerWorker.perform_async(:update, 'Project', project_id, project.es_id)
-        end
+        project.maintain_elasticsearch_update if project.maintaining_elasticsearch?
       end
     end
   end

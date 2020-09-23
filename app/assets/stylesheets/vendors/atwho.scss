@@ -23,16 +23,16 @@
   }
 
   .has-warning {
-    .name,
     .description {
-      color: $orange-700;
+      color: $gray-900;
+      background-color: $orange-50;
     }
   }
 
   .cur {
     .avatar {
       @include disable-all-animation;
-      border: 1px solid $white-light;
+      border: 1px solid $white;
     }
   }
 
@@ -58,8 +58,7 @@
         }
 
         &.has-warning {
-          color: $orange-700;
-          background-color: $orange-100;
+          color: $orange-500;
         }
       }
 

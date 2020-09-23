@@ -1,5 +1,6 @@
 import * as types from './mutation_types';
-import { mapToScopesViewModel } from '../helpers';
+import { mapToScopesViewModel, mapStrategiesToViewModel } from '../helpers';
+import { LEGACY_FLAG } from '../../../constants';
 
 export default {
   [types.SET_ENDPOINT](state, endpoint) {
@@ -18,7 +19,10 @@ export default {
     state.name = response.name;
     state.description = response.description;
     state.iid = response.iid;
+    state.active = response.active;
     state.scopes = mapToScopesViewModel(response.scopes);
+    state.strategies = mapStrategiesToViewModel(response.strategies);
+    state.version = response.version || LEGACY_FLAG;
   },
   [types.RECEIVE_FEATURE_FLAG_ERROR](state) {
     state.isLoading = false;
@@ -34,5 +38,8 @@ export default {
   [types.RECEIVE_UPDATE_FEATURE_FLAG_ERROR](state, error) {
     state.isSendingRequest = false;
     state.error = error.message || [];
+  },
+  [types.TOGGLE_ACTIVE](state, active) {
+    state.active = active;
   },
 };

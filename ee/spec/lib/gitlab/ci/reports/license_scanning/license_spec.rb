@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::LicenseScanning::License do
+RSpec.describe Gitlab::Ci::Reports::LicenseScanning::License do
   describe 'equality' do
     let(:blank) { described_class.new(id: nil, name: nil, url: nil) }
     let(:v1_mit) { described_class.new(id: nil, name: 'MIT', url: '') }
@@ -45,6 +45,45 @@ describe Gitlab::Ci::Reports::LicenseScanning::License do
       subject { described_class.new(id: nil, name: 'MIT License', url: nil) }
 
       it { expect(subject.canonical_id).to eql(subject.name.downcase) }
+    end
+
+    context 'when the name matches a known legacy software license name' do
+      where(:name, :spdx_id) do
+        [
+          ['AGPL-1.0', 'AGPL-1.0'],
+          ['AGPL-3.0', 'AGPL-3.0'],
+          ['Apache 2.0', 'Apache-2.0'],
+          ['Artistic-2.0', 'Artistic-2.0'],
+          ['BSD', 'BSD-4-Clause'],
+          ['CC0 1.0 Universal', 'CC0-1.0'],
+          ['CDDL-1.0', 'CDDL-1.0'],
+          ['CDDL-1.1', 'CDDL-1.1'],
+          ['EPL-1.0', 'EPL-1.0'],
+          ['EPL-2.0', 'EPL-2.0'],
+          ['GPLv2', 'GPL-2.0'],
+          ['GPLv3', 'GPL-3.0'],
+          %w[ISC ISC],
+          ['LGPL', 'LGPL-3.0-only'],
+          ['LGPL-2.1', 'LGPL-2.1'],
+          %w[MIT MIT],
+          ['Mozilla Public License 2.0', 'MPL-2.0'],
+          %w[MS-PL MS-PL],
+          %w[MS-RL MS-RL],
+          ['New BSD', 'BSD-3-Clause'],
+          ['Python Software Foundation License', 'Python-2.0'],
+          %w[ruby Ruby],
+          ['Simplified BSD', 'BSD-2-Clause'],
+          %w[WTFPL WTFPL],
+          %w[Zlib Zlib]
+        ]
+      end
+
+      with_them do
+        subject { described_class.new(id: nil, name: name, url: nil) }
+
+        it { expect(subject.id).to eql(spdx_id) }
+        it { expect(subject.canonical_id).to eql(spdx_id) }
+      end
     end
 
     context 'when the license was produced from a v2 report' do

@@ -2,12 +2,18 @@
 
 require 'spec_helper'
 
-describe Gitlab::Analytics::CycleAnalytics::BaseQueryBuilder do
+RSpec.describe Gitlab::Analytics::CycleAnalytics::BaseQueryBuilder do
   let_it_be(:group) { create(:group) }
   let_it_be(:subgroup) { create(:group, parent: group) }
   let_it_be(:project_in_group) { create(:project, :repository, group: group) }
   let_it_be(:project_in_subgroup) { create(:project, :repository, group: subgroup) }
   let_it_be(:project_outside_group) { create(:project, :repository, group: create(:group)) }
+  let_it_be(:user) { create(:user) }
+
+  before do
+    group.add_maintainer(user)
+    project_outside_group.add_maintainer(user)
+  end
 
   context 'when the subject is `Issue`' do
     let(:issue_in_project) { create(:issue, project: project_in_group, created_at: 5.days.ago) }
@@ -27,7 +33,7 @@ describe Gitlab::Analytics::CycleAnalytics::BaseQueryBuilder do
         group: group
       })
 
-      result = described_class.new(stage: stage).build
+      result = described_class.new(stage: stage, params: { current_user: user }).build
 
       expect(result).to contain_exactly(issue_in_project, issue_in_subgroup_project)
     end
@@ -51,7 +57,7 @@ describe Gitlab::Analytics::CycleAnalytics::BaseQueryBuilder do
         group: group
       })
 
-      result = described_class.new(stage: stage).build
+      result = described_class.new(stage: stage, params: { current_user: user }).build
 
       expect(result).to contain_exactly(mr_in_project, mr_in_subgroup_project)
     end

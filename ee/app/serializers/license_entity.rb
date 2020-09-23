@@ -6,7 +6,12 @@ class LicenseEntity < Grape::Entity
     expose :path, as: :blob_path
   end
 
+  expose :id
   expose :name
-  expose :url
+  expose :url do |license|
+    license.url.presence
+  end
+  expose :spdx_identifier
+  expose :classification
   expose :dependencies, using: ComponentEntity, as: :components
 end

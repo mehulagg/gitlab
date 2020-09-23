@@ -5,7 +5,7 @@ as an admin.
 
 ## Retrieve information about the current license
 
-```
+```plaintext
 GET /license
 ```
 
@@ -34,7 +34,7 @@ GET /license
 
 ## Retrieve information about all licenses
 
-```
+```plaintext
 GET /licenses
 ```
 
@@ -93,7 +93,7 @@ Returns:
 
 ## Add a new license
 
-```
+```plaintext
 POST /license
 ```
 
@@ -101,7 +101,7 @@ POST /license
 | --------- | ---- | -------- | ----------- |
 | `license` | string | yes | The license string |
 
-```bash
+```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/license?license=eyJkYXRhIjoiMHM5Q...S01Udz09XG4ifQ=="
 ```
 
@@ -137,7 +137,7 @@ Returns:
 
 ## Delete a license
 
-```
+```plaintext
 DELETE /license/:id
 ```
 
@@ -145,7 +145,7 @@ DELETE /license/:id
 | --------- | ---- | -------- | ----------- |
 | `id` | integer | yes | ID of the GitLab license. |
 
-```bash
+```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/license/:id"
 ```
 

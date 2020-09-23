@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Notify < BaseMailer
+class Notify < ApplicationMailer
   include ActionDispatch::Routing::PolymorphicRoutes
   include GitlabRoutingHelper
   include EmailsHelper
@@ -17,8 +17,11 @@ class Notify < BaseMailer
   include Emails::AutoDevops
   include Emails::RemoteMirrors
   include Emails::Releases
+  include Emails::Groups
+  include Emails::Reviews
+  include Emails::ServiceDesk
 
-  helper MilestonesHelper
+  helper TimeboxesHelper
   helper MergeRequestsHelper
   helper DiffHelper
   helper BlobHelper
@@ -59,11 +62,11 @@ class Notify < BaseMailer
 
   # Return an email address that displays the name of the sender.
   # Only the displayed name changes; the actual email address is always the same.
-  def sender(sender_id, send_from_user_email = false)
+  def sender(sender_id, send_from_user_email: false, sender_name: nil)
     return unless sender = User.find(sender_id)
 
     address = default_sender_address
-    address.display_name = sender.name
+    address.display_name = sender_name.presence || sender.name
 
     if send_from_user_email && can_send_from_user_email?(sender)
       address.address = sender.email

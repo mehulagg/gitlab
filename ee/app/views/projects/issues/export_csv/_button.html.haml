@@ -1,4 +1,0 @@
-- if (current_user && @project.feature_available?(:export_issues)) || show_promotions?
-  %button.csv_download_link.btn.has-tooltip{ title: _('Export as CSV'),
-    data: { toggle: 'modal', target: '.issues-export-modal' } }
-    = sprite_icon('export')

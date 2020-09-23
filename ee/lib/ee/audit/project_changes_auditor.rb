@@ -11,8 +11,13 @@ module EE
         audit_changes(:repository_size_limit, as: 'repository_size_limit', model: model)
         audit_changes(:packages_enabled, as: 'packages_enabled', model: model)
 
+        audit_changes(:merge_requests_author_approval, as: 'prevent merge request approval from authors', model: model)
+        audit_changes(:merge_requests_disable_committers_approval, as: 'prevent merge request approval from reviewers', model: model)
+
         audit_project_feature_changes
       end
+
+      private
 
       def audit_project_feature_changes
         ::EE::Audit::ProjectFeatureChangesAuditor.new(@current_user, model.project_feature, model).execute
@@ -39,6 +44,11 @@ module EE
           {
             from: model.old_path_with_namespace,
             to: model.full_path
+          }
+        when :merge_requests_author_approval
+          {
+            from: !model.previous_changes[column].first,
+            to: !model.previous_changes[column].last
           }
         else
           {

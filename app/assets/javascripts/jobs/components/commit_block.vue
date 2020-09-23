@@ -1,5 +1,5 @@
 <script>
-/* eslint-disable @gitlab/vue-i18n/no-bare-strings */
+/* eslint-disable @gitlab/vue-require-i18n-strings */
 import { GlLink } from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
 
@@ -32,7 +32,7 @@ export default {
       block: !isLastBlock,
     }"
   >
-    <p class="append-bottom-5">
+    <p class="gl-mb-2">
       <span class="font-weight-bold">{{ __('Commit') }}</span>
 
       <gl-link :href="commit.commit_path" class="js-commit-sha commit-sha link-commit">
@@ -53,6 +53,6 @@ export default {
       </span>
     </p>
 
-    <p class="append-bottom-0">{{ commit.title }}</p>
+    <p class="gl-mb-0">{{ commit.title }}</p>
   </div>
 </template>

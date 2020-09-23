@@ -37,7 +37,7 @@ module Gitlab
             reverts_for_type('project') do |path_before_rename, current_path|
               matches_path = MigrationClasses::Route.arel_table[:path].matches(current_path)
               project = MigrationClasses::Project.joins(:route)
-                          .where(matches_path).first
+                          .find_by(matches_path)
 
               if project
                 perform_rename(project, current_path, path_before_rename)
@@ -56,7 +56,7 @@ module Gitlab
             unless gitlab_shell.mv_repository(project.repository_storage,
                                               old_path,
                                               new_path)
-              Rails.logger.error "Error moving #{old_path} to #{new_path}" # rubocop:disable Gitlab/RailsLogger
+              Gitlab::AppLogger.error "Error moving #{old_path} to #{new_path}"
             end
           end
 

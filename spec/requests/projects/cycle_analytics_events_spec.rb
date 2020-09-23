@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe 'cycle analytics events' do
+RSpec.describe 'value stream analytics events' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, public_builds: false) }
   let(:issue) { create(:issue, project: project, created_at: 2.days.ago) }
 
-  describe 'GET /:namespace/:project/cycle_analytics/events/issues' do
+  describe 'GET /:namespace/:project/value_stream_analytics/events/issues' do
     before do
       project.add_developer(user)
 
@@ -71,15 +71,6 @@ describe 'cycle analytics events' do
 
       expect(json_response['events']).not_to be_empty
       expect(json_response['events'].first['date']).not_to be_empty
-    end
-
-    it 'lists the production events', :sidekiq_might_not_need_inline do
-      get project_cycle_analytics_production_path(project, format: :json)
-
-      first_issue_iid = project.issues.sort_by_attribute(:created_desc).pluck(:iid).first.to_s
-
-      expect(json_response['events']).not_to be_empty
-      expect(json_response['events'].first['iid']).to eq(first_issue_iid)
     end
 
     context 'specific branch' do

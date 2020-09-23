@@ -4,12 +4,14 @@ textarea {
 
 input {
   border-radius: $border-radius-base;
+  color: $gl-text-color;
+  background-color: $input-bg;
 }
 
 input[type='text'].danger {
   background: $input-danger-bg !important;
   border-color: $red-400;
-  text-shadow: 0 1px 1px $white-light;
+  text-shadow: 0 1px 1px $white;
 }
 
 .datetime-controls {
@@ -81,7 +83,7 @@ label {
 
   .form-control {
     height: 29px;
-    background: $white-light;
+    background: $white;
     font-family: $monospace-font;
   }
 
@@ -124,10 +126,6 @@ label {
 
 .form-control-inline {
   display: inline;
-}
-
-.wiki-content {
-  margin-top: 35px;
 }
 
 .form-control::placeholder {
@@ -229,7 +227,7 @@ label {
   right: 0.8em;
   top: 50%;
   transform: translateY(-50%);
-  color: $gray-600;
+  color: $gray-400;
 }
 
 .input-md {

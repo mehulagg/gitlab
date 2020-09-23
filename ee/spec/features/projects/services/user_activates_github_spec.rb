@@ -2,18 +2,12 @@
 
 require 'spec_helper'
 
-describe 'User activates GitHub Service' do
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
-
-  before do
-    project.add_maintainer(user)
-    sign_in(user)
-  end
+RSpec.describe 'User activates GitHub Service' do
+  include_context 'project service activation'
 
   context 'without a license' do
     it "is excluded from the integrations index" do
-      visit project_settings_integrations_path(project)
+      visit_project_integrations
 
       expect(page).not_to have_link('GitHub')
     end
@@ -21,22 +15,20 @@ describe 'User activates GitHub Service' do
     it 'renders 404 when trying to access service settings directly' do
       visit edit_project_service_path(project, :github)
 
-      expect(page).to have_gitlab_http_status(404)
+      expect(page).to have_gitlab_http_status(:not_found)
     end
   end
 
-  context 'with valid license' do
+  context 'with valid license', :js do
     before do
       stub_licensed_features(github_project_service_integration: true)
 
-      visit project_settings_integrations_path(project)
+      visit_project_integration('GitHub')
 
-      click_link('GitHub')
       fill_in_details
     end
 
     def fill_in_details
-      check('Active')
       fill_in "Token", with: "aaaaaaaaaa"
       fill_in "Repository URL", with: 'https://github.com/h5bp/html5-boilerplate'
     end
@@ -44,7 +36,11 @@ describe 'User activates GitHub Service' do
     it 'activates service' do
       click_button('Save')
 
-      expect(page).to have_content('GitHub activated.')
+      expect(page).to have_content('GitHub settings saved and active.')
+    end
+
+    it 'renders a token field of type `password` for masking input' do
+      expect(find('#service_token')['type']).to eq('password')
     end
 
     context 'with pipelines', :js do
@@ -57,10 +53,9 @@ describe 'User activates GitHub Service' do
           headers: { 'Content-Type' => 'application/json' }
         )
 
-        click_button 'Test settings and save changes'
-        wait_for_requests
+        click_test_then_save_integration(expect_test_to_fail: false)
 
-        expect(page).to have_content('GitHub activated.')
+        expect(page).to have_content('GitHub settings saved and active.')
       end
     end
   end

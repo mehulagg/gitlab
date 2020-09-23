@@ -17,19 +17,15 @@ module EE
                 super
 
                 @limit = Pipeline::Quota::Size
-                  .new(project.namespace, pipeline)
+                  .new(project.namespace, pipeline, command)
               end
 
               override :perform!
               def perform!
                 return unless limit.exceeded?
 
-                if command.save_incompleted
-                  pipeline.drop!(:size_limit_exceeded)
-                end
-
-                limit.log_error!(project_id: project.id, plan: project.namespace.actual_plan_name)
-                error(limit.message)
+                limit.log_error!(project_id: project.id, plan: project.actual_plan_name)
+                error(limit.message, drop_reason: :size_limit_exceeded)
               end
 
               override :break?

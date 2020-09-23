@@ -11,11 +11,16 @@ module EE
     STORE_COLUMN = :file_store
 
     prepended do
-      include ObjectStorable
-
       after_destroy :log_geo_deleted_event
 
       scope :project_id_in, ->(ids) { joins(:projects).merge(::Project.id_in(ids)) }
+    end
+
+    class_methods do
+      def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
+        local_storage_only = !node&.sync_object_storage
+        local_storage_only ? node.lfs_objects.with_files_stored_locally : node.lfs_objects
+      end
     end
 
     def log_geo_deleted_event

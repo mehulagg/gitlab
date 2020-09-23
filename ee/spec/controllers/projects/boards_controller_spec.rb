@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::BoardsController do
+RSpec.describe Projects::BoardsController do
   let(:project) { create(:project) }
   let(:user)    { create(:user) }
 
@@ -25,6 +25,11 @@ describe Projects::BoardsController do
     end
 
     it_behaves_like 'redirects to last visited board'
+
+    it_behaves_like 'pushes wip limits to frontend' do
+      let(:parent) { project }
+      let(:params) { { namespace_id: parent.namespace, project_id: parent } }
+    end
   end
 
   describe 'GET recent' do
@@ -38,7 +43,7 @@ describe Projects::BoardsController do
 
         list_boards(recent: true)
 
-        expect(response).to have_gitlab_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
       end
     end
   end
@@ -67,7 +72,7 @@ describe Projects::BoardsController do
         it 'returns a successful 200 response' do
           create_board create_params
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it 'returns the created board' do
@@ -91,12 +96,13 @@ describe Projects::BoardsController do
         it 'returns an unprocessable entity 422 response' do
           create_board name: nil
 
-          expect(response).to have_gitlab_http_status(422)
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
         end
       end
 
       context 'with unauthorized user' do
         before do
+          expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
           allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
           allow(Ability).to receive(:allowed?).with(user, :admin_board, project).and_return(false)
         end
@@ -105,7 +111,7 @@ describe Projects::BoardsController do
           create_board name: 'Backend'
 
           expect(response.content_type).to eq 'application/json'
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -138,7 +144,7 @@ describe Projects::BoardsController do
       it 'returns a successful 200 response' do
         update_board board, update_params
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'returns the updated board' do
@@ -159,20 +165,21 @@ describe Projects::BoardsController do
       it 'returns an unprocessable entity 422 response' do
         update_board board, name: nil
 
-        expect(response).to have_gitlab_http_status(422)
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
     end
 
     context 'with invalid board id' do
       it 'returns a not found 404 response' do
-        update_board 999, name: nil
+        update_board non_existing_record_id, name: nil
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
     context 'with unauthorized user' do
       before do
+        expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
         allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
         allow(Ability).to receive(:allowed?).with(user, :admin_board, project).and_return(false)
       end
@@ -181,7 +188,7 @@ describe Projects::BoardsController do
         update_board board, update_params
 
         expect(response.content_type).to eq 'application/json'
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -214,14 +221,15 @@ describe Projects::BoardsController do
 
     context 'with invalid board id' do
       it 'returns a not found 404 response' do
-        remove_board board: 999
+        remove_board board: non_existing_record_id
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
     context 'with unauthorized user' do
       before do
+        expect(Ability).to receive(:allowed?).with(user, :log_in, :global).and_call_original
         allow(Ability).to receive(:allowed?).with(user, :read_project, project).and_return(true)
         allow(Ability).to receive(:allowed?).with(user, :admin_board, project).and_return(false)
       end
@@ -229,7 +237,7 @@ describe Projects::BoardsController do
       it 'returns a not found 404 response' do
         remove_board board: board
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::DatabaseTasks do
+RSpec.describe Gitlab::Geo::DatabaseTasks do
   let(:schema_file) { Rails.root.join('tmp', 'tests', 'geo_schema.rb').to_s }
 
   subject { described_class }

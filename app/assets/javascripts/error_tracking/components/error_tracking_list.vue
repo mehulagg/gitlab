@@ -1,38 +1,91 @@
 <script>
-import { mapActions, mapState, mapGetters } from 'vuex';
+import { mapActions, mapState } from 'vuex';
 import {
   GlEmptyState,
   GlButton,
+  GlIcon,
   GlLink,
   GlLoadingIcon,
   GlTable,
-  GlSearchBoxByType,
+  GlFormInput,
+  GlDeprecatedDropdown,
+  GlDeprecatedDropdownItem,
+  GlDeprecatedDropdownDivider,
+  GlTooltipDirective,
+  GlPagination,
 } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { isEmpty } from 'lodash';
+import AccessorUtils from '~/lib/utils/accessor';
 import TimeAgo from '~/vue_shared/components/time_ago_tooltip.vue';
 import { __ } from '~/locale';
-import TrackEventDirective from '~/vue_shared/directives/track_event';
-import { trackViewInSentryOptions, trackClickErrorLinkToSentryOptions } from '../utils';
+import ErrorTrackingActions from './error_tracking_actions.vue';
+import Tracking from '~/tracking';
+import { trackErrorListViewsOptions, trackErrorStatusUpdateOptions } from '../utils';
+
+export const tableDataClass = 'table-col d-flex d-md-table-cell align-items-center';
 
 export default {
+  FIRST_PAGE: 1,
+  PREV_PAGE: 1,
+  NEXT_PAGE: 2,
   fields: [
-    { key: 'error', label: __('Open errors'), thClass: 'w-70p' },
-    { key: 'events', label: __('Events') },
-    { key: 'users', label: __('Users') },
-    { key: 'lastSeen', label: __('Last seen'), thClass: 'w-15p' },
+    {
+      key: 'error',
+      label: __('Error'),
+      thClass: 'w-60p',
+      tdClass: `${tableDataClass} px-3 rounded-top`,
+    },
+    {
+      key: 'events',
+      label: __('Events'),
+      thClass: 'text-right',
+      tdClass: `${tableDataClass}`,
+    },
+    {
+      key: 'users',
+      label: __('Users'),
+      thClass: 'text-right',
+      tdClass: `${tableDataClass}`,
+    },
+    {
+      key: 'lastSeen',
+      label: __('Last seen'),
+      thClass: 'w-15p',
+      tdClass: `${tableDataClass}`,
+    },
+    {
+      key: 'status',
+      label: '',
+      tdClass: `${tableDataClass}`,
+    },
   ],
+  statusFilters: {
+    unresolved: __('Unresolved'),
+    ignored: __('Ignored'),
+    resolved: __('Resolved'),
+  },
+  sortFields: {
+    last_seen: __('Last Seen'),
+    first_seen: __('First Seen'),
+    frequency: __('Frequency'),
+  },
   components: {
     GlEmptyState,
     GlButton,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownItem,
+    GlDeprecatedDropdownDivider,
+    GlIcon,
     GlLink,
     GlLoadingIcon,
     GlTable,
-    GlSearchBoxByType,
-    Icon,
+    GlFormInput,
+    GlPagination,
     TimeAgo,
+    ErrorTrackingActions,
   },
   directives: {
-    TrackEvent: TrackEventDirective,
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     indexPath: {
@@ -55,113 +108,292 @@ export default {
       type: Boolean,
       required: true,
     },
+    projectPath: {
+      type: String,
+      required: true,
+    },
+    listPath: {
+      type: String,
+      required: true,
+    },
   },
+  hasLocalStorage: AccessorUtils.isLocalStorageAccessSafe(),
   data() {
     return {
       errorSearchQuery: '',
+      pageValue: this.$options.FIRST_PAGE,
     };
   },
   computed: {
-    ...mapState(['errors', 'externalUrl', 'loading']),
-    ...mapGetters(['filterErrorsByTitle']),
-    filteredErrors() {
-      return this.errorSearchQuery ? this.filterErrorsByTitle(this.errorSearchQuery) : this.errors;
+    ...mapState('list', [
+      'errors',
+      'loading',
+      'searchQuery',
+      'sortField',
+      'recentSearches',
+      'pagination',
+      'statusFilter',
+      'cursor',
+    ]),
+    paginationRequired() {
+      return !isEmpty(this.pagination);
+    },
+  },
+  watch: {
+    pagination() {
+      if (typeof this.pagination.previous === 'undefined') {
+        this.pageValue = this.$options.FIRST_PAGE;
+      }
     },
   },
   created() {
     if (this.errorTrackingEnabled) {
-      this.startPolling(this.indexPath);
+      this.setEndpoint(this.indexPath);
+      this.startPolling();
     }
   },
+  mounted() {
+    this.trackPageViews();
+  },
   methods: {
-    ...mapActions(['startPolling', 'restartPolling']),
-    trackViewInSentryOptions,
-    trackClickErrorLinkToSentryOptions,
+    ...mapActions('list', [
+      'startPolling',
+      'restartPolling',
+      'setEndpoint',
+      'searchByQuery',
+      'sortByField',
+      'addRecentSearch',
+      'clearRecentSearches',
+      'loadRecentSearches',
+      'setIndexPath',
+      'fetchPaginatedResults',
+      'updateStatus',
+      'removeIgnoredResolvedErrors',
+      'filterByStatus',
+    ]),
+    setSearchText(text) {
+      this.errorSearchQuery = text;
+      this.searchByQuery(text);
+    },
+    getDetailsLink(errorId) {
+      return `error_tracking/${errorId}/details`;
+    },
+    goToNextPage() {
+      this.pageValue = this.$options.NEXT_PAGE;
+      this.fetchPaginatedResults(this.pagination.next.cursor);
+    },
+    goToPrevPage() {
+      this.fetchPaginatedResults(this.pagination.previous.cursor);
+    },
+    goToPage(page) {
+      window.scrollTo(0, 0);
+      return page === this.$options.PREV_PAGE ? this.goToPrevPage() : this.goToNextPage();
+    },
+    isCurrentSortField(field) {
+      return field === this.sortField;
+    },
+    isCurrentStatusFilter(filter) {
+      return filter === this.statusFilter;
+    },
+    getIssueUpdatePath(errorId) {
+      return `/${this.projectPath}/-/error_tracking/${errorId}.json`;
+    },
+    filterErrors(status, label) {
+      this.filterValue = label;
+      return this.filterByStatus(status);
+    },
+    updateErrosStatus({ errorId, status }) {
+      // eslint-disable-next-line promise/catch-or-return
+      this.updateStatus({
+        endpoint: this.getIssueUpdatePath(errorId),
+        status,
+      }).then(() => {
+        this.trackStatusUpdate(status);
+      });
+
+      this.removeIgnoredResolvedErrors(errorId);
+    },
+    trackPageViews() {
+      const { category, action } = trackErrorListViewsOptions;
+      Tracking.event(category, action);
+    },
+    trackStatusUpdate(status) {
+      const { category, action } = trackErrorStatusUpdateOptions(status);
+      Tracking.event(category, action);
+    },
   },
 };
 </script>
 
 <template>
-  <div>
+  <div class="error-list">
     <div v-if="errorTrackingEnabled">
-      <div v-if="loading" class="py-3">
-        <gl-loading-icon :size="3" />
-      </div>
-      <div v-else>
-        <div class="d-flex flex-row justify-content-around bg-secondary border">
-          <gl-search-box-by-type
-            v-model="errorSearchQuery"
-            class="col-lg-10 m-3 p-0"
-            :placeholder="__('Search or filter results...')"
-            type="search"
-            autofocus
-          />
-          <gl-button
-            v-track-event="trackViewInSentryOptions(externalUrl)"
-            class="m-3"
-            variant="primary"
-            :href="externalUrl"
-            target="_blank"
-          >
-            {{ __('View in Sentry') }}
-            <icon name="external-link" class="flex-shrink-0" />
-          </gl-button>
+      <div
+        class="row flex-column flex-md-row align-items-md-center m-0 mt-sm-2 p-3 p-sm-3 bg-secondary border"
+      >
+        <div class="search-box flex-fill mb-1 mb-md-0">
+          <div class="filtered-search-box mb-0">
+            <gl-deprecated-dropdown
+              :text="__('Recent searches')"
+              class="filtered-search-history-dropdown-wrapper"
+              toggle-class="filtered-search-history-dropdown-toggle-button"
+              :disabled="loading"
+            >
+              <div v-if="!$options.hasLocalStorage" class="px-3">
+                {{ __('This feature requires local storage to be enabled') }}
+              </div>
+              <template v-else-if="recentSearches.length > 0">
+                <gl-deprecated-dropdown-item
+                  v-for="searchQuery in recentSearches"
+                  :key="searchQuery"
+                  @click="setSearchText(searchQuery)"
+                  >{{ searchQuery }}
+                </gl-deprecated-dropdown-item>
+                <gl-deprecated-dropdown-divider />
+                <gl-deprecated-dropdown-item ref="clearRecentSearches" @click="clearRecentSearches"
+                  >{{ __('Clear recent searches') }}
+                </gl-deprecated-dropdown-item>
+              </template>
+              <div v-else class="px-3">{{ __("You don't have any recent searches") }}</div>
+            </gl-deprecated-dropdown>
+            <div class="filtered-search-input-container flex-fill">
+              <gl-form-input
+                v-model="errorSearchQuery"
+                class="pl-2 filtered-search"
+                :disabled="loading"
+                :placeholder="__('Search or filter results…')"
+                autofocus
+                @keyup.enter.native="searchByQuery(errorSearchQuery)"
+              />
+            </div>
+            <div class="gl-search-box-by-type-right-icons">
+              <gl-button
+                v-if="errorSearchQuery.length > 0"
+                v-gl-tooltip.hover
+                :title="__('Clear')"
+                class="clear-search text-secondary"
+                name="clear"
+                icon="close"
+                @click="errorSearchQuery = ''"
+              />
+            </div>
+          </div>
         </div>
 
+        <gl-deprecated-dropdown
+          :text="$options.statusFilters[statusFilter]"
+          class="status-dropdown mx-md-1 mb-1 mb-md-0"
+          menu-class="dropdown"
+          :disabled="loading"
+        >
+          <gl-deprecated-dropdown-item
+            v-for="(label, status) in $options.statusFilters"
+            :key="status"
+            @click="filterErrors(status, label)"
+          >
+            <span class="d-flex">
+              <gl-icon
+                class="flex-shrink-0 append-right-4"
+                :class="{ invisible: !isCurrentStatusFilter(status) }"
+                name="mobile-issue-close"
+              />
+              {{ label }}
+            </span>
+          </gl-deprecated-dropdown-item>
+        </gl-deprecated-dropdown>
+
+        <gl-deprecated-dropdown
+          :text="$options.sortFields[sortField]"
+          left
+          :disabled="loading"
+          menu-class="dropdown"
+        >
+          <gl-deprecated-dropdown-item
+            v-for="(label, field) in $options.sortFields"
+            :key="field"
+            @click="sortByField(field)"
+          >
+            <span class="d-flex">
+              <gl-icon
+                class="flex-shrink-0 append-right-4"
+                :class="{ invisible: !isCurrentSortField(field) }"
+                name="mobile-issue-close"
+              />
+              {{ label }}
+            </span>
+          </gl-deprecated-dropdown-item>
+        </gl-deprecated-dropdown>
+      </div>
+
+      <div v-if="loading" class="py-3">
+        <gl-loading-icon size="md" />
+      </div>
+
+      <template v-else>
+        <h4 class="d-block d-md-none my-3">{{ __('Open errors') }}</h4>
+
         <gl-table
-          class="mt-3"
-          :items="filteredErrors"
+          class="error-list-table mt-3"
+          :items="errors"
           :fields="$options.fields"
           :show-empty="true"
           fixed
-          stacked="sm"
+          stacked="md"
+          tbody-tr-class="table-row mb-4"
         >
-          <template slot="HEAD_events" slot-scope="data">
+          <template #head(error)>
+            <div class="d-none d-md-block">{{ __('Open errors') }}</div>
+          </template>
+          <template #head(events)="data">
             <div class="text-md-right">{{ data.label }}</div>
           </template>
-          <template slot="HEAD_users" slot-scope="data">
+          <template #head(users)="data">
             <div class="text-md-right">{{ data.label }}</div>
           </template>
-          <template slot="error" slot-scope="errors">
+
+          <template #cell(error)="errors">
             <div class="d-flex flex-column">
-              <gl-link
-                v-track-event="trackClickErrorLinkToSentryOptions(errors.item.externalUrl)"
-                :href="errors.item.externalUrl"
-                class="d-flex text-dark"
-                target="_blank"
-              >
+              <gl-link class="d-flex mw-100 text-dark" :href="getDetailsLink(errors.item.id)">
                 <strong class="text-truncate">{{ errors.item.title.trim() }}</strong>
-                <icon name="external-link" class="ml-1 flex-shrink-0" />
               </gl-link>
-              <span class="text-secondary text-truncate">
+              <span class="text-secondary text-truncate mw-100">
                 {{ errors.item.culprit }}
               </span>
             </div>
           </template>
-
-          <template slot="events" slot-scope="errors">
-            <div class="text-md-right">{{ errors.item.count }}</div>
+          <template #cell(events)="errors">
+            <div class="text-right">{{ errors.item.count }}</div>
           </template>
 
-          <template slot="users" slot-scope="errors">
-            <div class="text-md-right">{{ errors.item.userCount }}</div>
+          <template #cell(users)="errors">
+            <div class="text-right">{{ errors.item.userCount }}</div>
           </template>
 
-          <template slot="lastSeen" slot-scope="errors">
-            <div class="d-flex align-items-center">
+          <template #cell(lastSeen)="errors">
+            <div class="text-lg-left text-right">
               <time-ago :time="errors.item.lastSeen" class="text-secondary" />
             </div>
           </template>
-          <template slot="empty">
-            <div ref="empty">
-              {{ __('No errors to display.') }}
-              <gl-link class="js-try-again" @click="restartPolling">
-                {{ __('Check again') }}
-              </gl-link>
-            </div>
+          <template #cell(status)="errors">
+            <error-tracking-actions :error="errors.item" @update-issue-status="updateErrosStatus" />
+          </template>
+          <template #empty>
+            {{ __('No errors to display.') }}
+            <gl-link class="js-try-again" @click="restartPolling">
+              {{ __('Check again') }}
+            </gl-link>
           </template>
         </gl-table>
-      </div>
+        <gl-pagination
+          v-show="!loading"
+          v-if="paginationRequired"
+          :prev-page="$options.PREV_PAGE"
+          :next-page="$options.NEXT_PAGE"
+          :value="pageValue"
+          align="center"
+          @input="goToPage"
+        />
+      </template>
     </div>
     <div v-else-if="userCanEnableErrorTracking">
       <gl-empty-state
@@ -177,9 +409,9 @@ export default {
         <template #description>
           <div>
             <span>{{ __('Monitor your errors by integrating with Sentry.') }}</span>
-            <a href="/help/user/project/operations/error_tracking.html">
-              {{ __('More information') }}
-            </a>
+            <gl-link target="_blank" href="/help/user/project/operations/error_tracking.html">{{
+              __('More information')
+            }}</gl-link>
           </div>
         </template>
       </gl-empty-state>

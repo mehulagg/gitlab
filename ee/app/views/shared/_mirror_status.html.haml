@@ -3,7 +3,7 @@
 
 - case @project.import_state.last_update_status
 - when :success
-  Updated #{time_ago_with_tooltip(last_successful_update_at)}.
+  Pull mirroring updated #{time_ago_with_tooltip(last_successful_update_at)}.
 - when :failed
   = render_mirror_failed_message(raw_message: raw_message)
 

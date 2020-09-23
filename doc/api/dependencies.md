@@ -16,7 +16,7 @@ Get a list of project dependencies. This API partially mirroring
 This list can be generated only for [languages and package managers](../user/application_security/dependency_scanning/index.md#supported-languages-and-package-managers)
 supported by Gemnasium.
 
-```
+```plaintext
 GET /projects/:id/dependencies
 GET /projects/:id/dependencies?package_manager=maven
 GET /projects/:id/dependencies?package_manager=yarn,bundler
@@ -27,8 +27,8 @@ GET /projects/:id/dependencies?package_manager=yarn,bundler
 | `id`          | integer/string | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding).                                                            |
 | `package_manager` | string array   | no       | Returns dependencies belonging to specified package manager. Valid values: `bundler`, `composer`, `maven`, `npm`, `pip` or `yarn`.                                   |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/4/dependencies
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/4/dependencies"
 ```
 
 Example response:

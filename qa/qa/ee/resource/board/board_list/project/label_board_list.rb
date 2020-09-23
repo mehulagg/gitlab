@@ -15,10 +15,9 @@ module QA
               end
 
               def api_post_body
-                {
-                  board_id: board.id,
+                super.merge({
                   label_id: label.id
-                }
+                })
               end
             end
           end

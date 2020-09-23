@@ -2,14 +2,22 @@ inherit_gem:
   gitlab-styles:
     - rubocop-default.yml
 
-inherit_from: .rubocop_todo.yml
 require:
   - ./rubocop/rubocop
   - rubocop-rspec
 
+inherit_from:
+  - .rubocop_todo.yml
+  - ./rubocop/rubocop-migrations.yml
+  - ./rubocop/rubocop-usage-data.yml
+
+inherit_mode:
+  merge:
+    - Include
+
 AllCops:
   TargetRubyVersion: 2.6
-  TargetRailsVersion: 5.0
+  TargetRailsVersion: 6.0
   Exclude:
     - 'vendor/**/*'
     - 'node_modules/**/*'
@@ -21,7 +29,21 @@ AllCops:
     - 'generator_templates/**/*'
     - 'builds/**/*'
     - 'plugins/**/*'
+    - 'file_hooks/**/*'
   CacheRootDirectory: tmp
+  MaxFilesInCache: 18000
+
+Cop/AvoidKeywordArgumentsInSidekiqWorkers:
+  Enabled: true
+  Include:
+    - 'app/workers/**/*'
+    - 'ee/app/workers/**/*'
+
+Cop/StaticTranslationDefinition:
+  Enabled: true
+  Exclude:
+    - 'spec/**/*'
+    - 'ee/spec/**/*'
 
 # This cop checks whether some constant value isn't a
 # mutable literal (e.g. array or hash).
@@ -37,6 +59,9 @@ Style/MutableConstant:
 # TODO: Move this to gitlab-styles
 Style/SafeNavigation:
   Enabled: false
+
+Style/AccessModifierDeclarations:
+  AllowModifiersOnSymbols: true
 
 # Frozen String Literal
 Style/FrozenStringLiteralComment:
@@ -56,7 +81,6 @@ Style/FrozenStringLiteralComment:
     - 'qa/**/*'
     - 'rubocop/**/*'
     - 'scripts/**/*'
-    - 'spec/lib/gitlab/**/*'
 
 RSpec/FilePath:
   Exclude:
@@ -156,12 +180,30 @@ Rails/ApplicationRecord:
     # as they need to be as decoupled from application code as possible
     - db/**/*.rb
     - lib/gitlab/background_migration/**/*.rb
+    - ee/lib/ee/gitlab/background_migration/**/*.rb
     - lib/gitlab/database/**/*.rb
     - spec/**/*.rb
     - ee/db/**/*.rb
-    - ee/lib/gitlab/background_migration/**/*.rb
-    - ee/lib/ee/gitlab/background_migration/**/*.rb
     - ee/spec/**/*.rb
+
+Cop/DefaultScope:
+  Enabled: true
+
+Rails/FindBy:
+  Enabled: true
+  Include:
+    - 'ee/app/**/*.rb'
+    - 'ee/lib/**/*.rb'
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+
+# This is currently exiting with a rubocop exception error and should be
+# resolved hopefully a future update
+# An error occurred while Rails/UniqueValidationWithoutIndex cop was inspecting
+# app/models/abuse_report.rb:15:2.
+# To see the complete backtrace run rubocop -d.
+Rails/UniqueValidationWithoutIndex:
+  Enabled: false
 
 # GitLab ###################################################################
 
@@ -183,9 +225,31 @@ Gitlab/ConstGetInheritFalse:
   Exclude:
     - 'qa/bin/*'
 
+Gitlab/ChangeTimezone:
+  Enabled: true
+  Exclude:
+    - config/initializers/time_zone.rb
+
 Gitlab/HTTParty:
   Enabled: true
   Exclude:
+    - 'spec/**/*'
+    - 'ee/spec/**/*'
+
+Gitlab/Json:
+  Enabled: true
+  Exclude:
+    - 'db/**/*'
+    - 'qa/**/*'
+    - 'scripts/**/*'
+    - 'lib/rspec_flaky/**/*'
+    - 'lib/quality/**/*'
+    - 'lib/gitlab/danger/**/*'
+
+Gitlab/AvoidUploadedFileFromParams:
+  Enabled: true
+  Exclude:
+    - 'lib/gitlab/middleware/multipart.rb'
     - 'spec/**/*'
     - 'ee/spec/**/*'
 
@@ -202,6 +266,9 @@ GitlabSecurity/PublicSend:
     - 'ee/lib/**/*.rake'
     - 'ee/spec/**/*'
 
+Gitlab/DuplicateSpecLocation:
+  Enabled: true
+
 Cop/InjectEnterpriseEditionModule:
   Enabled: true
   Exclude:
@@ -216,11 +283,22 @@ Style/ReturnNil:
 Performance/RegexpMatch:
   Enabled: false
 
-ActiveRecordAssociationReload:
+Cop/ActiveRecordAssociationReload:
   Enabled: true
   Exclude:
     - 'spec/**/*'
     - 'ee/spec/**/*'
+
+Gitlab/AvoidFeatureGet:
+  Enabled: true
+
+RSpec/TimecopFreeze:
+  Enabled: false
+  AutoCorrect: true
+  Include:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+    - 'qa/spec/**/*.rb'
 
 Naming/PredicateName:
   Enabled: true
@@ -234,13 +312,8 @@ RSpec/FactoriesInMigrationSpecs:
     - 'spec/migrations/**/*.rb'
     - 'ee/spec/migrations/**/*.rb'
     - 'spec/lib/gitlab/background_migration/**/*.rb'
-    - 'ee/spec/lib/gitlab/background_migration/**/*.rb'
-
-Cop/IncludeActionViewContext:
-  Enabled: true
-  Exclude:
-    - 'spec/**/*'
-    - 'ee/spec/**/*'
+    - 'spec/lib/ee/gitlab/background_migration/**/*.rb'
+    - 'ee/spec/lib/ee/gitlab/background_migration/**/*.rb'
 
 Cop/IncludeSidekiqWorker:
   Enabled: true
@@ -254,6 +327,18 @@ Gitlab/Union:
     - 'spec/**/*'
     - 'ee/spec/**/*'
 
+API/GrapeAPIInstance:
+  Enabled: true
+  Include:
+    - 'lib/**/api/**/*.rb'
+    - 'ee/**/api/**/*.rb'
+
+API/GrapeArrayMissingCoerce:
+  Enabled: true
+  Include:
+    - 'lib/**/api/**/*.rb'
+    - 'ee/**/api/**/*.rb'
+
 Cop/SidekiqOptionsQueue:
   Enabled: true
   Exclude:
@@ -262,6 +347,18 @@ Cop/SidekiqOptionsQueue:
 
 Graphql/AuthorizeTypes:
   Enabled: true
+  Include:
+    - 'app/graphql/types/**/*'
+    - 'ee/app/graphql/types/**/*'
+  Exclude:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+
+Graphql/JSONType:
+  Enabled: true
+  Include:
+    - 'app/graphql/**/*'
+    - 'ee/app/graphql/**/*'
   Exclude:
     - 'spec/**/*.rb'
     - 'ee/spec/**/*.rb'
@@ -300,3 +397,154 @@ Graphql/Descriptions:
 
 RSpec/AnyInstanceOf:
   Enabled: false
+
+# Cops for upgrade to gitlab-styles 3.1.0
+RSpec/ImplicitSubject:
+  Enabled: false
+
+# WIP See https://gitlab.com/gitlab-org/gitlab/-/issues/211580
+RSpec/LeakyConstantDeclaration:
+  Enabled: true
+  Exclude:
+    - 'spec/db/schema_spec.rb'
+    - 'spec/lib/feature_spec.rb'
+    - 'spec/lib/gitlab/config/entry/simplifiable_spec.rb'
+    - 'spec/lib/gitlab/quick_actions/dsl_spec.rb'
+    - 'spec/lib/marginalia_spec.rb'
+    - 'spec/mailers/notify_spec.rb'
+    - 'spec/models/concerns/batch_destroy_dependent_associations_spec.rb'
+    - 'spec/models/concerns/bulk_insert_safe_spec.rb'
+    - 'spec/models/concerns/bulk_insertable_associations_spec.rb'
+    - 'spec/models/concerns/triggerable_hooks_spec.rb'
+    - 'spec/models/repository_spec.rb'
+    - 'spec/services/clusters/applications/check_installation_progress_service_spec.rb'
+    - 'spec/support/shared_examples/quick_actions/issuable/issuable_quick_actions_shared_examples.rb'
+
+RSpec/EmptyLineAfterHook:
+  Enabled: false
+
+RSpec/HooksBeforeExamples:
+  Enabled: false
+
+RSpec/EmptyLineAfterExample:
+  Enabled: false
+
+RSpec/Be:
+  Enabled: false
+
+RSpec/DescribedClass:
+  Enabled: false
+
+RSpec/SharedExamples:
+  Enabled: false
+
+RSpec/EmptyLineAfterExampleGroup:
+  Enabled: false
+
+RSpec/ReceiveNever:
+  Enabled: false
+
+RSpec/MissingExampleGroupArgument:
+  Enabled: false
+
+RSpec/UnspecifiedException:
+  Enabled: false
+
+RSpec/HaveGitlabHttpStatus:
+  Enabled: true
+  Exclude:
+    - 'spec/support/matchers/have_gitlab_http_status.rb'
+  Include:
+    - 'spec/**/*'
+    - 'ee/spec/**/*'
+
+Style/MultilineWhenThen:
+  Enabled: false
+
+# We use EnforcedStyle of comparison here due to it being better
+# performing code as seen in https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36221#note_375659681
+Style/NumericPredicate:
+  EnforcedStyle: comparison
+
+Style/FloatDivision:
+  Enabled: false
+
+Cop/BanCatchThrow:
+  Enabled: true
+
+Performance/ReadlinesEach:
+  Enabled: true
+
+Performance/ChainArrayAllocation:
+  Enabled: true
+  Include:
+    - 'lib/gitlab/import_export/**/*'
+    - 'ee/lib/gitlab/import_export/**/*'
+    - 'ee/lib/ee/gitlab/import_export/**/*'
+
+Rails/TimeZone:
+  Enabled: true
+  EnforcedStyle: 'flexible'
+  Include:
+    - 'app/controllers/**/*'
+    - 'app/services/**/*'
+    - 'lib/**/*'
+    - 'spec/controllers/**/*'
+    - 'spec/services/**/*'
+    - 'spec/lib/**/*'
+    - 'ee/app/controllers/**/*'
+    - 'ee/app/services/**/*'
+    - 'ee/spec/controllers/**/*'
+    - 'ee/spec/services/**/*'
+    - 'app/models/**/*'
+    - 'spec/models/**/*'
+    - 'ee/app/models/**/*'
+    - 'ee/spec/models/**/*'
+    - 'app/workers/**/*'
+    - 'spec/workers/**/*'
+    - 'ee/app/workers/**/*'
+    - 'ee/spec/workers/**/*'
+    - 'ee/lib/**/*'
+    - 'ee/spec/lib/**/*'
+
+# WIP: See https://gitlab.com/gitlab-org/gitlab/-/issues/220040
+Rails/SaveBang:
+  Enabled: true
+  AllowImplicitReturn: false
+  AllowedReceivers: ['ActionDispatch::TestRequest']
+  Include:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'
+    - 'qa/spec/**/*.rb'
+    - 'qa/qa/specs/**/*.rb'
+
+Cop/PutProjectRoutesUnderScope:
+  Include:
+    - 'config/routes/project.rb'
+    - 'ee/config/routes/project.rb'
+
+Cop/PutGroupRoutesUnderScope:
+  Include:
+    - 'config/routes/group.rb'
+    - 'ee/config/routes/group.rb'
+
+Migration/ComplexIndexesRequireName:
+  Exclude:
+    - !ruby/regexp /\Adb\/(post_)?migrate\/201.*\.rb\z/
+    - !ruby/regexp /\Adb\/(post_)?migrate\/20200[1-7].*\.rb\z/
+
+Migration/ReferToIndexByName:
+  Exclude:
+    - !ruby/regexp /\Adb\/(post_)?migrate\/201.*\.rb\z/
+    - !ruby/regexp /\Adb\/(post_)?migrate\/20200[1-7].*\.rb\z/
+    - !ruby/regexp /\Aee\/db\/geo\/(post_)?migrate\/201.*\.rb\z/
+
+Migration/CreateTableWithForeignKeys:
+  # Disable this cop for all the existing migrations
+  Exclude:
+    - !ruby/regexp /\Adb\/(?:post_)?migrate\/(?:201[0-9]\d+|20200[0-8][0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9])_.+\.rb\z/
+
+Gitlab/RailsLogger:
+  Exclude:
+    - 'spec/**/*.rb'
+    - 'ee/spec/**/*.rb'

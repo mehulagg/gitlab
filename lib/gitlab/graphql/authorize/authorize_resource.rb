@@ -6,6 +6,8 @@ module Gitlab
       module AuthorizeResource
         extend ActiveSupport::Concern
 
+        RESOURCE_ACCESS_ERROR = "The resource that you are attempting to access does not exist or you don't have permission to perform this action"
+
         class_methods do
           def required_permissions
             # If the `#authorize` call is used on multiple classes, we add the
@@ -28,8 +30,7 @@ module Gitlab
         end
 
         def authorized_find!(*args)
-          object = find_object(*args)
-          object = object.sync if object.respond_to?(:sync)
+          object = Graphql::Lazy.force(find_object(*args))
 
           authorize!(object)
 
@@ -38,8 +39,7 @@ module Gitlab
 
         def authorize!(object)
           unless authorized_resource?(object)
-            raise Gitlab::Graphql::Errors::ResourceNotAvailable,
-                  "The resource that you are attempting to access does not exist or you don't have permission to perform this action"
+            raise_resource_not_available_error!
           end
         end
 
@@ -60,6 +60,10 @@ module Gitlab
             # caching in `DeclarativePolicy`.
             Ability.allowed?(current_user, ability, object, scope: :user)
           end
+        end
+
+        def raise_resource_not_available_error!
+          raise Gitlab::Graphql::Errors::ResourceNotAvailable, RESOURCE_ACCESS_ERROR
         end
       end
     end

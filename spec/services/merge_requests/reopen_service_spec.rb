@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::ReopenService do
+RSpec.describe MergeRequests::ReopenService do
   let(:user) { create(:user) }
   let(:user2) { create(:user) }
   let(:guest) { create(:user) }
@@ -43,9 +43,11 @@ describe MergeRequests::ReopenService do
         expect(email.subject).to include(merge_request.title)
       end
 
-      it 'creates system note about merge_request reopen' do
-        note = merge_request.notes.last
-        expect(note.note).to include 'reopened'
+      context 'note creation' do
+        it 'creates resource state event about merge_request reopen' do
+          event = merge_request.resource_state_events.last
+          expect(event.state).to eq('reopened')
+        end
       end
     end
 

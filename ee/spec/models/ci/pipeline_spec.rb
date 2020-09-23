@@ -2,18 +2,20 @@
 
 require 'spec_helper'
 
-describe Ci::Pipeline do
+RSpec.describe Ci::Pipeline do
+  using RSpec::Parameterized::TableSyntax
+
   let(:user) { create(:user) }
-  set(:project) { create(:project) }
+  let_it_be(:project) { create(:project) }
 
   let(:pipeline) do
     create(:ci_empty_pipeline, status: :created, project: project)
   end
 
+  it { is_expected.to have_many(:security_scans).through(:builds).class_name('Security::Scan') }
   it { is_expected.to have_many(:downstream_bridges) }
-  it { is_expected.to have_many(:job_artifacts).through(:builds) }
-  it { is_expected.to have_many(:vulnerability_findings).through(:vulnerabilities_occurrence_pipelines).class_name('Vulnerabilities::Occurrence') }
-  it { is_expected.to have_many(:vulnerabilities_occurrence_pipelines).class_name('Vulnerabilities::OccurrencePipeline') }
+  it { is_expected.to have_many(:vulnerability_findings).through(:vulnerabilities_finding_pipelines).class_name('Vulnerabilities::Finding') }
+  it { is_expected.to have_many(:vulnerabilities_finding_pipelines).class_name('Vulnerabilities::FindingPipeline') }
 
   describe '.failure_reasons' do
     it 'contains failure reasons about exceeded limits' do
@@ -23,13 +25,13 @@ describe Ci::Pipeline do
   end
 
   describe '#with_vulnerabilities scope' do
-    let!(:pipeline_1) { create(:ci_pipeline_without_jobs, project: project) }
-    let!(:pipeline_2) { create(:ci_pipeline_without_jobs, project: project) }
-    let!(:pipeline_3) { create(:ci_pipeline_without_jobs, project: project) }
+    let!(:pipeline_1) { create(:ci_pipeline, project: project) }
+    let!(:pipeline_2) { create(:ci_pipeline, project: project) }
+    let!(:pipeline_3) { create(:ci_pipeline, project: project) }
 
     before do
-      create(:vulnerabilities_occurrence, pipelines: [pipeline_1], project: pipeline.project)
-      create(:vulnerabilities_occurrence, pipelines: [pipeline_2], project: pipeline.project)
+      create(:vulnerabilities_finding, pipelines: [pipeline_1], project: pipeline.project)
+      create(:vulnerabilities_finding, pipelines: [pipeline_2], project: pipeline.project)
     end
 
     it "returns pipeline with vulnerabilities" do
@@ -37,88 +39,66 @@ describe Ci::Pipeline do
     end
   end
 
-  shared_examples 'unlicensed report type' do
-    context 'when there is no licensed feature for artifact file type' do
-      it 'returns the artifact' do
-        expect(subject).to eq(expected)
-      end
-    end
-  end
-
-  shared_examples 'licensed report type' do |feature|
-    context 'when licensed features is NOT available' do
-      it 'returns nil' do
-        allow(pipeline.project).to receive(:feature_available?)
-          .with(feature).and_return(false)
-
-        expect(subject).to be_nil
-      end
-    end
-
-    context 'when licensed feature is available' do
-      it 'returns the artifact' do
-        allow(pipeline.project).to receive(:feature_available?)
-          .with(feature).and_return(true)
-
-        expect(subject).to eq(expected)
-      end
-    end
-  end
-
-  shared_examples 'multi-licensed report type' do |features|
-    context 'when NONE of the licensed features are available' do
-      it 'returns nil' do
-        features.each do |feature|
-          allow(pipeline.project).to receive(:feature_available?)
-            .with(feature).and_return(false)
+  describe '#batch_lookup_report_artifact_for_file_type' do
+    shared_examples '#batch_lookup_report_artifact_for_file_type' do |file_type, license|
+      context 'when feature is available' do
+        before do
+          stub_licensed_features("#{license}": true)
         end
 
-        expect(subject).to be_nil
+        it "returns the #{file_type} artifact" do
+          expect(pipeline.batch_lookup_report_artifact_for_file_type(file_type)).to eq(pipeline.job_artifacts.sample)
+        end
       end
-    end
 
-    context 'when at least one licensed feature is available' do
-      features.each do |feature|
-        it 'returns the artifact' do
-          allow(pipeline.project).to receive(:feature_available?)
-              .with(feature).and_return(true)
+      context 'when feature is not available' do
+        before do
+          stub_licensed_features("#{license}": false)
+        end
 
-          features.reject { |f| f == feature }.each do |disabled_feature|
-            allow(pipeline.project).to receive(:feature_available?)
-              .with(disabled_feature).and_return(true)
-          end
-
-          expect(subject).to eq(expected)
+        it "doesn't return the #{file_type} artifact" do
+          expect(pipeline.batch_lookup_report_artifact_for_file_type(file_type)).to be_nil
         end
       end
     end
-  end
 
-  describe '#report_artifact_for_file_type' do
-    let!(:build) { create(:ci_build, pipeline: pipeline) }
+    context 'with security report artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_dependency_scanning_report, project: project) }
 
-    let!(:artifact) do
-      create(:ci_job_artifact,
-        job: build,
-        file_type: file_type,
-        file_format: ::Ci::JobArtifact::TYPE_AND_FORMAT_PAIRS[file_type])
+      include_examples '#batch_lookup_report_artifact_for_file_type', :dependency_scanning, :dependency_scanning
     end
 
-    subject { pipeline.report_artifact_for_file_type(file_type) }
+    context 'with license scanning artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_license_scanning_report, project: project) }
 
-    described_class::REPORT_LICENSED_FEATURES.each do |file_type, licensed_features|
-      context "for file_type: #{file_type}" do
-        let(:file_type) { file_type }
-        let(:expected) { artifact }
+      include_examples '#batch_lookup_report_artifact_for_file_type', :license_scanning, :license_scanning
+    end
 
-        if licensed_features.nil?
-          it_behaves_like 'unlicensed report type'
-        elsif licensed_features.size == 1
-          it_behaves_like 'licensed report type', licensed_features.first
-        else
-          it_behaves_like 'multi-licensed report type', licensed_features
-        end
-      end
+    context 'with browser performance artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_browser_performance_report, project: project) }
+
+      include_examples '#batch_lookup_report_artifact_for_file_type', :browser_performance, :merge_request_performance_metrics
+    end
+
+    context 'with load performance artifact' do
+      let_it_be(:pipeline, reload: true) { create(:ee_ci_pipeline, :with_load_performance_report, project: project) }
+
+      include_examples '#batch_lookup_report_artifact_for_file_type', :load_performance, :merge_request_performance_metrics
+    end
+  end
+
+  describe '#expose_license_scanning_data?' do
+    subject { pipeline.expose_license_scanning_data? }
+
+    before do
+      stub_licensed_features(license_scanning: true)
+      stub_feature_flags(drop_license_management_artifact: false)
+    end
+
+    [:license_scanning, :license_management].each do |artifact_type|
+      let!(:build) { create(:ee_ci_build, artifact_type, pipeline: pipeline) }
+
+      it { is_expected.to be_truthy }
     end
   end
 
@@ -136,37 +116,42 @@ describe Ci::Pipeline do
       let(:build_ds_2) { create(:ci_build, :success, name: 'ds_2', pipeline: pipeline, project: project) }
       let(:build_cs_1) { create(:ci_build, :success, name: 'cs_1', pipeline: pipeline, project: project) }
       let(:build_cs_2) { create(:ci_build, :success, name: 'cs_2', pipeline: pipeline, project: project) }
+      let!(:sast1_artifact) { create(:ee_ci_job_artifact, :sast, job: build_sast_1, project: project) }
+      let!(:sast2_artifact) { create(:ee_ci_job_artifact, :sast, job: build_sast_2, project: project) }
+      let!(:ds1_artifact) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds_1, project: project) }
+      let!(:ds2_artifact) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds_2, project: project) }
+      let!(:cs1_artifact) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs_1, project: project) }
+      let!(:cs2_artifact) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs_2, project: project) }
 
-      before do
-        create(:ee_ci_job_artifact, :sast, job: build_sast_1, project: project)
-        create(:ee_ci_job_artifact, :sast, job: build_sast_2, project: project)
-        create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds_1, project: project)
-        create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds_2, project: project)
-        create(:ee_ci_job_artifact, :container_scanning, job: build_cs_1, project: project)
-        create(:ee_ci_job_artifact, :container_scanning, job: build_cs_2, project: project)
-      end
-
-      it 'assigns pipeline commit_sha to the reports' do
-        expect(subject.commit_sha).to eq(pipeline.sha)
-        expect(subject.reports.values.map(&:commit_sha).uniq).to contain_exactly(pipeline.sha)
+      it 'assigns pipeline to the reports' do
+        expect(subject.pipeline).to eq(pipeline)
+        expect(subject.reports.values.map(&:pipeline).uniq).to contain_exactly(pipeline)
       end
 
       it 'returns security reports with collected data grouped as expected' do
         expect(subject.reports.keys).to contain_exactly('sast', 'dependency_scanning', 'container_scanning')
 
         # for each of report categories, we have merged 2 reports with the same data (fixture)
-        expect(subject.get_report('sast').occurrences.size).to eq(33)
-        expect(subject.get_report('dependency_scanning').occurrences.size).to eq(4)
-        expect(subject.get_report('container_scanning').occurrences.size).to eq(8)
+        expect(subject.get_report('sast', sast1_artifact).findings.size).to eq(33)
+        expect(subject.get_report('dependency_scanning', ds1_artifact).findings.size).to eq(4)
+        expect(subject.get_report('container_scanning', cs1_artifact).findings.size).to eq(8)
       end
 
       context 'when builds are retried' do
         let(:build_sast_1) { create(:ci_build, :retried, name: 'sast_1', pipeline: pipeline, project: project) }
 
         it 'does not take retried builds into account' do
-          expect(subject.get_report('sast').occurrences.size).to eq(33)
-          expect(subject.get_report('dependency_scanning').occurrences.size).to eq(4)
-          expect(subject.get_report('container_scanning').occurrences.size).to eq(8)
+          expect(subject.get_report('sast', sast1_artifact).findings.size).to eq(33)
+          expect(subject.get_report('dependency_scanning', ds1_artifact).findings.size).to eq(4)
+          expect(subject.get_report('container_scanning', cs1_artifact).findings.size).to eq(8)
+        end
+      end
+
+      context 'when the `report_types` parameter is provided' do
+        subject(:filtered_report_types) { pipeline.security_reports(report_types: %w(sast)).reports.values.map(&:type).uniq }
+
+        it 'returns only the reports which are requested' do
+          expect(filtered_report_types).to eq(%w(sast))
         end
       end
     end
@@ -239,17 +224,12 @@ describe Ci::Pipeline do
     subject { pipeline.license_scanning_report }
 
     before do
-      stub_licensed_features(license_management: true)
+      stub_licensed_features(license_scanning: true)
     end
 
-    context 'when pipeline has multiple builds with license management reports' do
-      let!(:build_1) { create(:ci_build, :success, name: 'license_management', pipeline: pipeline, project: project) }
-      let!(:build_2) { create(:ci_build, :success, name: 'license_management2', pipeline: pipeline, project: project) }
-
-      before do
-        create(:ee_ci_job_artifact, :license_management, job: build_1, project: project)
-        create(:ee_ci_job_artifact, :license_management_feature_branch, job: build_2, project: project)
-      end
+    context 'when pipeline has multiple builds with license scanning reports' do
+      let!(:build_1) { create(:ee_ci_build, :success, :license_scanning, pipeline: pipeline, project: project) }
+      let!(:build_2) { create(:ee_ci_build, :success, :license_scanning_feature_branch, pipeline: pipeline, project: project) }
 
       it 'returns a license scanning report with collected data' do
         expect(subject.licenses.count).to eq(5)
@@ -257,8 +237,10 @@ describe Ci::Pipeline do
       end
 
       context 'when builds are retried' do
-        let!(:build_1) { create(:ci_build, :retried, :success, name: 'license_management', pipeline: pipeline, project: project) }
-        let!(:build_2) { create(:ci_build, :retried, :success, name: 'license_management2', pipeline: pipeline, project: project) }
+        before do
+          build_1.update(retried: true)
+          build_2.update(retried: true)
+        end
 
         it 'does not take retried builds into account' do
           expect(subject.licenses).to be_empty
@@ -266,7 +248,7 @@ describe Ci::Pipeline do
       end
     end
 
-    context 'when pipeline does not have any builds with license management reports' do
+    context 'when pipeline does not have any builds with license scanning reports' do
       it 'returns an empty license scanning report' do
         expect(subject.licenses).to be_empty
       end
@@ -277,24 +259,27 @@ describe Ci::Pipeline do
     subject { pipeline.dependency_list_report }
 
     before do
-      stub_licensed_features(dependency_list: true)
+      stub_licensed_features(dependency_scanning: true)
     end
 
     context 'when pipeline has a build with dependency list reports' do
-      let!(:build) { create(:ci_build, :success, name: 'dependency_list', pipeline: pipeline, project: project) }
-      let!(:artifact) { create(:ee_ci_job_artifact, :dependency_list, job: build, project: project) }
-      let!(:build2) { create(:ci_build, :success, name: 'license_management', pipeline: pipeline, project: project) }
-      let!(:artifact2) { create(:ee_ci_job_artifact, :license_management, job: build, project: project) }
+      let!(:build) { create(:ee_ci_build, :success, :dependency_list, pipeline: pipeline, project: project) }
+      let!(:build1) { create(:ee_ci_build, :success, :dependency_scanning, pipeline: pipeline, project: project) }
+      let!(:build2) { create(:ee_ci_build, :success, :license_scanning, pipeline: pipeline, project: project) }
 
       it 'returns a dependency list report with collected data' do
-        expect(subject.dependencies.count).to eq(21)
-        expect(subject.dependencies[0][:name]).to eq('mini_portile2')
-        expect(subject.dependencies[0][:licenses]).not_to be_empty
+        mini_portile2 = subject.dependencies.find { |x| x[:name] == 'mini_portile2' }
+
+        expect(subject.dependencies.count).to eq(24)
+        expect(mini_portile2[:name]).not_to be_empty
+        expect(mini_portile2[:licenses]).not_to be_empty
       end
 
       context 'when builds are retried' do
-        let!(:build) { create(:ci_build, :retried, :success, name: 'dependency_list', pipeline: pipeline, project: project) }
-        let!(:artifact) { create(:ee_ci_job_artifact, :dependency_list, job: build, project: project) }
+        before do
+          build.update(retried: true)
+          build1.update(retried: true)
+        end
 
         it 'does not take retried builds into account' do
           expect(subject.dependencies).to be_empty
@@ -343,84 +328,6 @@ describe Ci::Pipeline do
     end
   end
 
-  describe 'upstream status interactions' do
-    context 'when a pipeline has an upstream status' do
-      context 'when an upstream status is a bridge' do
-        let(:bridge) { create(:ci_bridge, status: :pending) }
-
-        before do
-          create(:ci_sources_pipeline, pipeline: pipeline, source_job: bridge)
-        end
-
-        describe '#bridge_triggered?' do
-          it 'is a pipeline triggered by a bridge' do
-            expect(pipeline).to be_bridge_triggered
-          end
-        end
-
-        describe '#source_job' do
-          it 'has a correct source job' do
-            expect(pipeline.source_job).to eq bridge
-          end
-        end
-
-        describe '#source_bridge' do
-          it 'has a correct bridge source' do
-            expect(pipeline.source_bridge).to eq bridge
-          end
-        end
-
-        describe '#update_bridge_status!' do
-          it 'can update bridge status if it is running' do
-            pipeline.update_bridge_status!
-
-            expect(bridge.reload).to be_success
-          end
-
-          it 'can not update bridge status if is not active' do
-            bridge.success!
-
-            expect { pipeline.update_bridge_status! }
-              .to raise_error EE::Ci::Pipeline::BridgeStatusError
-          end
-        end
-      end
-
-      context 'when an upstream status is a build' do
-        let(:build) { create(:ci_build) }
-
-        before do
-          create(:ci_sources_pipeline, pipeline: pipeline, source_job: build)
-        end
-
-        describe '#bridge_triggered?' do
-          it 'is a pipeline that has not been triggered by a bridge' do
-            expect(pipeline).not_to be_bridge_triggered
-          end
-        end
-
-        describe '#source_job' do
-          it 'has a correct source job' do
-            expect(pipeline.source_job).to eq build
-          end
-        end
-
-        describe '#source_bridge' do
-          it 'does not have a bridge source' do
-            expect(pipeline.source_bridge).to be_nil
-          end
-        end
-
-        describe '#update_bridge_status!' do
-          it 'can not update upstream job status' do
-            expect { pipeline.update_bridge_status! }
-              .to raise_error ArgumentError
-          end
-        end
-      end
-    end
-  end
-
   describe 'state machine transitions' do
     context 'when pipeline has downstream bridges' do
       before do
@@ -444,50 +351,53 @@ describe Ci::Pipeline do
       end
     end
 
-    context 'when pipeline is bridge triggered' do
+    context 'when pipeline is web terminal triggered' do
       before do
-        pipeline.source_bridge = create(:ci_bridge)
+        pipeline.source = 'webide'
       end
 
-      context 'when source bridge is dependent on pipeline status' do
-        before do
-          allow(pipeline.source_bridge).to receive(:dependent?).and_return(true)
-        end
+      it 'does not schedule the pipeline cache worker' do
+        expect(ExpirePipelineCacheWorker).not_to receive(:perform_async)
 
-        it 'schedules the pipeline bridge worker' do
-          expect(::Ci::PipelineBridgeStatusWorker).to receive(:perform_async)
-
-          pipeline.succeed!
-        end
-      end
-
-      context 'when source bridge is not dependent on pipeline status' do
-        it 'does not schedule the pipeline bridge worker' do
-          expect(::Ci::PipelineBridgeStatusWorker).not_to receive(:perform_async)
-
-          pipeline.succeed!
-        end
+        pipeline.cancel!
       end
     end
-  end
 
-  describe '#ci_yaml_file_path' do
-    subject { pipeline.ci_yaml_file_path }
-
-    context 'the source is the repository' do
-      let(:implied_yml) { Gitlab::Template::GitlabCiYmlTemplate.find('Auto-DevOps').content }
+    context 'when pipeline project has downstream subscriptions' do
+      let(:pipeline) { create(:ci_empty_pipeline, project: create(:project, :public)) }
 
       before do
-        pipeline.repository_source!
+        pipeline.project.downstream_projects << create(:project)
       end
 
-      it 'returns the configuration if found' do
-        allow(pipeline.project.repository).to receive(:gitlab_ci_yml_for)
-          .and_return('config')
+      context 'when pipeline runs on a tag' do
+        before do
+          pipeline.update(tag: true)
+        end
 
-        expect(pipeline.ci_yaml_file).to be_a(String)
-        expect(pipeline.ci_yaml_file).not_to eq(implied_yml)
-        expect(pipeline.yaml_errors).to be_nil
+        context 'when feature is not available' do
+          before do
+            stub_feature_flags(ci_project_subscriptions: false)
+          end
+
+          it 'does not schedule the trigger downstream subscriptions worker' do
+            expect(::Ci::TriggerDownstreamSubscriptionsWorker).not_to receive(:perform_async)
+
+            pipeline.succeed!
+          end
+        end
+
+        context 'when feature is available' do
+          before do
+            stub_licensed_features(ci_project_subscriptions: true)
+          end
+
+          it 'schedules the trigger downstream subscriptions worker' do
+            expect(::Ci::TriggerDownstreamSubscriptionsWorker).to receive(:perform_async)
+
+            pipeline.succeed!
+          end
+        end
       end
     end
   end
@@ -540,6 +450,49 @@ describe Ci::Pipeline do
       let(:merge_request) { create(:merge_request, :on_train, :with_merge_train_pipeline) }
 
       it { is_expected.to be false }
+    end
+  end
+
+  describe '#merge_train_pipeline?' do
+    subject { pipeline.merge_train_pipeline? }
+
+    let!(:pipeline) do
+      create(:ci_pipeline, source: :merge_request_event, merge_request: merge_request, ref: ref, target_sha: 'xxx')
+    end
+
+    let(:merge_request) { create(:merge_request) }
+    let(:ref) { 'refs/merge-requests/1/train' }
+
+    it { is_expected.to be_truthy }
+
+    context 'when ref is merge ref' do
+      let(:ref) { 'refs/merge-requests/1/merge' }
+
+      it { is_expected.to be_falsy }
+    end
+  end
+
+  describe '#merge_request_event_type' do
+    subject { pipeline.merge_request_event_type }
+
+    let(:pipeline) { merge_request.all_pipelines.last }
+
+    context 'when pipeline is merge train pipeline' do
+      let(:merge_request) { create(:merge_request, :with_merge_train_pipeline) }
+
+      it { is_expected.to eq(:merge_train) }
+    end
+
+    context 'when pipeline is merge request pipeline' do
+      let(:merge_request) { create(:merge_request, :with_merge_request_pipeline) }
+
+      it { is_expected.to eq(:merged_result) }
+    end
+
+    context 'when pipeline is detached merge request pipeline' do
+      let(:merge_request) { create(:merge_request, :with_detached_merge_request_pipeline) }
+
+      it { is_expected.to eq(:detached) }
     end
   end
 end

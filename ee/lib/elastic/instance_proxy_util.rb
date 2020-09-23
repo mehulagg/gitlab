@@ -22,7 +22,7 @@ module Elastic
     end
 
     def version_namespace
-      real_class.parent
+      real_class.module_parent
     end
 
     class_methods do
@@ -41,10 +41,21 @@ module Elastic
     # them to raise exceptions. When this happens, we still want the remainder
     # of the object to be saved, so silently swallow the errors
     def safely_read_attribute_for_elasticsearch(attr_name)
-      target.send(attr_name) # rubocop:disable GitlabSecurity/PublicSend
+      result = target.send(attr_name) # rubocop:disable GitlabSecurity/PublicSend
+      apply_field_limit(result)
     rescue => err
       target.logger.warn("Elasticsearch failed to read #{attr_name} for #{target.class} #{target.id}: #{err}")
       nil
+    end
+
+    def apply_field_limit(result)
+      return result unless result.is_a? String
+
+      limit = Gitlab::CurrentSettings.elasticsearch_indexed_field_length_limit
+
+      return result unless limit > 0
+
+      result[0, limit]
     end
   end
 end

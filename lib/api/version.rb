@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
 module API
-  class Version < Grape::API
+  class Version < Grape::API::Instance
     helpers ::API::Helpers::GraphqlHelpers
+    include APIGuard
+
+    allow_access_with_scope :read_user, if: -> (request) { request.get? }
 
     before { authenticate! }
 

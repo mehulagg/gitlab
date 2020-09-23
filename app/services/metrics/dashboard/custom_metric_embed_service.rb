@@ -18,7 +18,7 @@ module Metrics
         # custom metrics from the DB.
         def valid_params?(params)
           [
-            params[:embedded],
+            embedded?(params[:embedded]),
             valid_dashboard?(params[:dashboard_path]),
             valid_group_title?(params[:group]),
             params[:title].present?,
@@ -31,7 +31,7 @@ module Metrics
         # A group title is valid if it is one of the limited
         # options the user can select in the UI.
         def valid_group_title?(group)
-          PrometheusMetricEnums
+          Enums::PrometheusMetric
             .custom_group_details
             .map { |_, details| details[:group_title] }
             .include?(group)
@@ -40,7 +40,7 @@ module Metrics
         # All custom metrics are displayed on the system dashboard.
         # Nil is acceptable as we'll default to the system dashboard.
         def valid_dashboard?(dashboard)
-          dashboard.nil? || ::Metrics::Dashboard::SystemDashboardService.system_dashboard?(dashboard)
+          dashboard.nil? || ::Metrics::Dashboard::SystemDashboardService.matching_dashboard?(dashboard)
         end
       end
 
@@ -57,7 +57,7 @@ module Metrics
       # @return [Hash]
       override :raw_dashboard
       def raw_dashboard
-        panels_not_found!(identifiers) if panels.empty?
+        panels_not_found!(identifiers) if metrics.empty?
 
         { 'panel_groups' => [{ 'panels' => panels }] }
       end
@@ -66,57 +66,50 @@ module Metrics
 
       # Generated dashboard panels for each metric which
       # matches the provided input.
+      #
+      # As the panel is generated
+      # on the fly, we're using default values for info
+      # not represented in the DB.
+      #
       # @return [Array<Hash>]
       def panels
-        strong_memoize(:panels) do
-          metrics.map { |metric| panel_for_metric(metric) }
-        end
+        [{
+          type: DEFAULT_PANEL_TYPE,
+          title: title,
+          y_label: y_label,
+          metrics: metrics.map(&:to_metric_hash)
+        }]
       end
 
       # Metrics which match the provided inputs.
       # There may be multiple metrics, but they should be
       # displayed in a single panel/chart.
       # @return [ActiveRecord::AssociationRelation<PromtheusMetric>]
-      # rubocop: disable CodeReuse/ActiveRecord
       def metrics
-        project.prometheus_metrics.where(
-          group: group_key,
-          title: title,
-          y_label: y_label
-        )
+        strong_memoize(:metrics) do
+          PrometheusMetricsFinder.new(
+            project: project,
+            group: group_key,
+            title: title,
+            y_label: y_label
+          ).execute
+        end
       end
-      # rubocop: enable CodeReuse/ActiveRecord
 
       # Returns a symbol representing the group that
       # the dashboard's group title belongs to.
       # It will be one of the keys found under
-      # PrometheusMetricEnums.custom_groups.
+      # Enums::PrometheusMetric.custom_groups.
       #
       # @return [String]
       def group_key
         strong_memoize(:group_key) do
-          PrometheusMetricEnums
+          Enums::PrometheusMetric
             .group_details
             .find { |_, details| details[:group_title] == group }
             .first
             .to_s
         end
-      end
-
-      # Returns a representation of a PromtheusMetric
-      # as a dashboard panel. As the panel is generated
-      # on the fly, we're using default values for info
-      # not represented in the DB.
-      #
-      # @return [Hash]
-      def panel_for_metric(metric)
-        {
-          type: DEFAULT_PANEL_TYPE,
-          weight: DEFAULT_PANEL_WEIGHT,
-          title: metric.title,
-          y_label: metric.y_label,
-          metrics: [metric.to_metric_hash]
-        }
       end
     end
   end

@@ -19,31 +19,9 @@ class IssueTrackerService < Service
   # overridden patterns. See ReferenceRegexes.external_pattern
   def self.reference_pattern(only_long: false)
     if only_long
-      /(\b[A-Z][A-Z0-9_]*-)(?<issue>\d+)/
+      /(\b[A-Z][A-Z0-9_]*-)#{Gitlab::Regex.issue}/
     else
-      /(\b[A-Z][A-Z0-9_]*-|#{Issue.reference_prefix})(?<issue>\d+)/
-    end
-  end
-
-  # this  will be removed as part of https://gitlab.com/gitlab-org/gitlab/issues/29404
-  def title
-    if title_attribute = read_attribute(:title)
-      title_attribute
-    elsif self.properties && self.properties['title'].present?
-      self.properties['title']
-    else
-      default_title
-    end
-  end
-
-  # this  will be removed as part of https://gitlab.com/gitlab-org/gitlab/issues/29404
-  def description
-    if description_attribute = read_attribute(:description)
-      description_attribute
-    elsif self.properties && self.properties['description'].present?
-      self.properties['description']
-    else
-      default_description
+      /(\b[A-Z][A-Z0-9_]*-|#{Issue.reference_prefix})#{Gitlab::Regex.issue}/
     end
   end
 
@@ -54,13 +32,6 @@ class IssueTrackerService < Service
 
     @legacy_properties_data = properties.dup
     data_values = properties.slice!('title', 'description')
-    properties.each do |key, _|
-      current_value = self.properties.delete(key)
-      value = attribute_changed?(key) ? attribute_change(key).last : current_value
-
-      write_attribute(key, value)
-    end
-
     data_values.reject! { |key| data_fields.changed.include?(key) }
     data_values.slice!(*data_fields.attributes.keys)
     data_fields.assign_attributes(data_values) if data_values.present?
@@ -102,7 +73,6 @@ class IssueTrackerService < Service
 
   def fields
     [
-      { type: 'text', name: 'description', placeholder: description },
       { type: 'text', name: 'project_url', placeholder: 'Project url', required: true },
       { type: 'text', name: 'issues_url', placeholder: 'Issue url', required: true },
       { type: 'text', name: 'new_issue_url', placeholder: 'New Issue url', required: true }
@@ -116,8 +86,6 @@ class IssueTrackerService < Service
   # Initialize with default properties values
   def set_default_data
     return unless issues_tracker.present?
-
-    self.title ||= issues_tracker['title']
 
     # we don't want to override if we have set something
     return if project_url || issues_url || new_issue_url
@@ -151,6 +119,14 @@ class IssueTrackerService < Service
     result
   end
 
+  def support_close_issue?
+    false
+  end
+
+  def support_cross_reference?
+    false
+  end
+
   private
 
   def enabled_in_gitlab_config
@@ -164,11 +140,11 @@ class IssueTrackerService < Service
   end
 
   def one_issue_tracker
-    return if template?
+    return if template? || instance?
     return if project.blank?
 
     if project.services.external_issue_trackers.where.not(id: id).any?
-      errors.add(:base, 'Another issue tracker is already in use. Only one issue tracker service can be active at a time')
+      errors.add(:base, _('Another issue tracker is already in use. Only one issue tracker service can be active at a time'))
     end
   end
 end

@@ -1,7 +1,8 @@
-import * as types from './mutation_types';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
+
+import * as types from './mutation_types';
 
 export const requestConfig = ({ commit }) => commit(types.REQUEST_CONFIG);
 export const receiveConfigSuccess = ({ commit }, data) =>
@@ -38,7 +39,12 @@ export const receiveChartDataError = ({ commit }, { chart, error }) =>
 export const fetchChartData = ({ dispatch }, { endpoint, chart }) =>
   axios
     .post(endpoint, chart)
-    .then(({ data }) => dispatch('receiveChartDataSuccess', { chart, data }))
+    .then(({ data }) =>
+      dispatch('receiveChartDataSuccess', {
+        chart,
+        data,
+      }),
+    )
     .catch(error => {
       let message = `${__('There was an error gathering the chart data')}`;
 
@@ -64,8 +70,4 @@ export const setActiveTab = ({ commit, state }, key) => {
   }
 };
 
-export const initChartData = ({ commit }, store) => commit(types.INIT_CHART_DATA, store);
-export const setPageLoading = ({ commit }, pageLoading) =>
-  commit(types.SET_PAGE_LOADING, pageLoading);
-
-export default () => {};
+export const initChartData = ({ commit }, keys) => commit(types.INIT_CHART_DATA, keys);

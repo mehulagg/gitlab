@@ -1,5 +1,0 @@
----
-title: Fix Dependency List is empty if last pipeline is retried
-merge_request: 19241
-author:
-type: fixed

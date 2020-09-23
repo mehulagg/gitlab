@@ -1,8 +1,8 @@
 <script>
 import $ from 'jquery';
 import { mapActions, mapState } from 'vuex';
-import DropdownButton from '~/vue_shared/components/dropdown/dropdown_button.vue';
 import { GlLoadingIcon } from '@gitlab/ui';
+import DropdownButton from '~/vue_shared/components/dropdown/dropdown_button.vue';
 
 export default {
   components: {
@@ -88,7 +88,7 @@ export default {
         <i aria-hidden="true" class="fa fa-search dropdown-input-search"></i>
       </div>
       <div class="dropdown-content">
-        <gl-loading-icon v-if="showLoading" :size="2" />
+        <gl-loading-icon v-if="showLoading" size="lg" />
         <ul v-else>
           <li v-for="(item, index) in outputData" :key="index">
             <button type="button" @click="clickItem(item)">{{ item.name }}</button>

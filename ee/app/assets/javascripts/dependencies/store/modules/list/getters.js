@@ -5,8 +5,8 @@ export const generatedAtTimeAgo = ({ reportInfo: { generatedAt } }) =>
   generatedAt ? getTimeago().format(generatedAt) : '';
 
 export const isJobNotSetUp = state => state.reportInfo.status === REPORT_STATUS.jobNotSetUp;
-export const isJobFailed = state =>
-  [REPORT_STATUS.jobFailed, REPORT_STATUS.noDependencies].includes(state.reportInfo.status);
+export const isJobFailed = state => state.reportInfo.status === REPORT_STATUS.jobFailed;
 export const isIncomplete = state => state.reportInfo.status === REPORT_STATUS.incomplete;
+export const hasNoDependencies = state => state.reportInfo.status === REPORT_STATUS.noDependencies;
 
-export const downloadEndpoint = ({ endpoint }) => `${endpoint}.json`;
+export const downloadEndpoint = ({ endpoint }) => endpoint;

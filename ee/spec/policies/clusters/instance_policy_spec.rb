@@ -2,9 +2,11 @@
 
 require 'spec_helper'
 
-describe Clusters::InstancePolicy do
-  let(:user) { create(:admin) }
-  subject { described_class.new(user, Clusters::Instance.new) }
+RSpec.describe Clusters::InstancePolicy, :enable_admin_mode do
+  let(:user) { build(:admin) }
+  let(:instance) { Clusters::Instance.new }
+
+  subject { described_class.new(user, instance) }
 
   context 'when cluster deployments is available' do
     before do
@@ -14,7 +16,7 @@ describe Clusters::InstancePolicy do
     it { is_expected.to be_allowed(:read_cluster_environments) }
   end
 
-  context 'when cluster deployments is not available' do
+  context 'when cluster deployments is unavailable' do
     before do
       stub_licensed_features(cluster_deployments: false)
     end

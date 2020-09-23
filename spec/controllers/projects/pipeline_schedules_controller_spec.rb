@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::PipelineSchedulesController do
+RSpec.describe Projects::PipelineSchedulesController do
   include AccessMatchersForController
 
   let_it_be(:user) { create(:user) }
@@ -127,7 +127,12 @@ describe Projects::PipelineSchedulesController do
     describe 'security' do
       let(:schedule) { attributes_for(:ci_pipeline_schedule) }
 
-      it { expect { go }.to be_allowed_for(:admin) }
+      it 'is allowed for admin when admin mode enabled', :enable_admin_mode do
+        expect { go }.to be_allowed_for(:admin)
+      end
+      it 'is denied for admin when admin mode disabled' do
+        expect { go }.to be_denied_for(:admin)
+      end
       it { expect { go }.to be_allowed_for(:owner).of(project) }
       it { expect { go }.to be_allowed_for(:maintainer).of(project) }
       it { expect { go }.to be_allowed_for(:developer).of(project) }
@@ -279,7 +284,12 @@ describe Projects::PipelineSchedulesController do
     describe 'security' do
       let(:schedule) { { description: 'updated_desc' } }
 
-      it { expect { go }.to be_allowed_for(:admin) }
+      it 'is allowed for admin when admin mode enabled', :enable_admin_mode do
+        expect { go }.to be_allowed_for(:admin)
+      end
+      it 'is denied for admin when admin mode disabled' do
+        expect { go }.to be_denied_for(:admin)
+      end
       it { expect { go }.to be_allowed_for(:owner).of(project) }
       it { expect { go }.to be_allowed_for(:maintainer).of(project) }
       it { expect { go }.to be_allowed_for(:developer).of(project).own(pipeline_schedule) }
@@ -343,7 +353,12 @@ describe Projects::PipelineSchedulesController do
     end
 
     describe 'security' do
-      it { expect { go }.to be_allowed_for(:admin) }
+      it 'is allowed for admin when admin mode enabled', :enable_admin_mode do
+        expect { go }.to be_allowed_for(:admin)
+      end
+      it 'is denied for admin when admin mode disabled' do
+        expect { go }.to be_denied_for(:admin)
+      end
       it { expect { go }.to be_allowed_for(:owner).of(project) }
       it { expect { go }.to be_allowed_for(:maintainer).of(project) }
       it { expect { go }.to be_allowed_for(:developer).of(project).own(pipeline_schedule) }
@@ -361,7 +376,12 @@ describe Projects::PipelineSchedulesController do
 
   describe 'GET #take_ownership' do
     describe 'security' do
-      it { expect { go }.to be_allowed_for(:admin) }
+      it 'is allowed for admin when admin mode enabled', :enable_admin_mode do
+        expect { go }.to be_allowed_for(:admin)
+      end
+      it 'is denied for admin when admin mode disabled' do
+        expect { go }.to be_denied_for(:admin)
+      end
       it { expect { go }.to be_allowed_for(:owner).of(project) }
       it { expect { go }.to be_allowed_for(:maintainer).of(project) }
       it { expect { go }.to be_allowed_for(:developer).of(project).own(pipeline_schedule) }
@@ -396,7 +416,7 @@ describe Projects::PipelineSchedulesController do
 
         post :play, params: { namespace_id: project.namespace.to_param, project_id: project, id: pipeline_schedule.id }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -407,7 +427,7 @@ describe Projects::PipelineSchedulesController do
         post :play, params: { namespace_id: project.namespace.to_param, project_id: project, id: pipeline_schedule.id }
 
         expect(flash[:notice]).to start_with 'Successfully scheduled a pipeline to run'
-        expect(response).to have_gitlab_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
       end
 
       it 'prevents users from scheduling the same pipeline repeatedly' do
@@ -416,8 +436,8 @@ describe Projects::PipelineSchedulesController do
         end
 
         expect(flash.to_a.size).to eq(2)
-        expect(flash[:alert]).to eq 'You cannot play this scheduled pipeline at the moment. Please wait a minute.'
-        expect(response).to have_gitlab_http_status(302)
+        expect(flash[:alert]).to eq _('You cannot play this scheduled pipeline at the moment. Please wait a minute.')
+        expect(response).to have_gitlab_http_status(:found)
       end
     end
 
@@ -430,7 +450,7 @@ describe Projects::PipelineSchedulesController do
 
         post :play, params: { namespace_id: project.namespace.to_param, project_id: project, id: protected_schedule.id }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -460,7 +480,7 @@ describe Projects::PipelineSchedulesController do
           delete :destroy, params: { namespace_id: project.namespace.to_param, project_id: project, id: pipeline_schedule.id }
         end.to change { project.pipeline_schedules.count }.by(-1)
 
-        expect(response).to have_gitlab_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
       end
     end
   end

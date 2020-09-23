@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Deployment do
+RSpec.describe Deployment do
   subject { build(:deployment) }
 
   it { is_expected.to belong_to(:project).required }
@@ -10,6 +10,7 @@ describe Deployment do
   it { is_expected.to belong_to(:cluster).class_name('Clusters::Cluster') }
   it { is_expected.to belong_to(:user) }
   it { is_expected.to belong_to(:deployable) }
+  it { is_expected.to have_one(:deployment_cluster) }
   it { is_expected.to have_many(:deployment_merge_requests) }
   it { is_expected.to have_many(:merge_requests).through(:deployment_merge_requests) }
 
@@ -17,6 +18,7 @@ describe Deployment do
   it { is_expected.to delegate_method(:commit).to(:project) }
   it { is_expected.to delegate_method(:commit_title).to(:commit).as(:try) }
   it { is_expected.to delegate_method(:manual_actions).to(:deployable).as(:try) }
+  it { is_expected.to delegate_method(:kubernetes_namespace).to(:deployment_cluster).as(:kubernetes_namespace) }
 
   it { is_expected.to validate_presence_of(:ref) }
   it { is_expected.to validate_presence_of(:sha) }
@@ -32,8 +34,9 @@ describe Deployment do
     let(:deployment) { create(:deployment, deployable: build) }
 
     it 'delegates to other_scheduled_actions' do
-      expect_any_instance_of(Ci::Build)
-        .to receive(:other_scheduled_actions)
+      expect_next_instance_of(Ci::Build) do |instance|
+        expect(instance).to receive(:other_scheduled_actions)
+      end
 
       subject
     end
@@ -41,11 +44,31 @@ describe Deployment do
 
   describe 'modules' do
     it_behaves_like 'AtomicInternalId' do
+      let_it_be(:project) { create(:project, :repository) }
+      let_it_be(:deployable) { create(:ci_build, project: project) }
+      let_it_be(:environment) { create(:environment, project: project) }
+
       let(:internal_id_attribute) { :iid }
-      let(:instance) { build(:deployment) }
+      let(:instance) { build(:deployment, deployable: deployable, environment: environment) }
       let(:scope) { :project }
-      let(:scope_attrs) { { project: instance.project } }
+      let(:scope_attrs) { { project: project } }
       let(:usage) { :deployments }
+    end
+  end
+
+  describe '.stoppable' do
+    subject { described_class.stoppable }
+
+    context 'when deployment is stoppable' do
+      let!(:deployment) { create(:deployment, :success, on_stop: 'stop-review') }
+
+      it { is_expected.to eq([deployment]) }
+    end
+
+    context 'when deployment is not stoppable' do
+      let!(:deployment) { create(:deployment, :failed) }
+
+      it { is_expected.to be_empty }
     end
   end
 
@@ -80,7 +103,7 @@ describe Deployment do
       end
 
       it 'starts running' do
-        Timecop.freeze do
+        freeze_time do
           expect(deployment).to be_running
           expect(deployment.finished_at).to be_nil
         end
@@ -91,11 +114,11 @@ describe Deployment do
       let(:deployment) { create(:deployment, :running) }
 
       it 'has correct status' do
-        Timecop.freeze do
+        freeze_time do
           deployment.succeed!
 
           expect(deployment).to be_success
-          expect(deployment.finished_at).to be_like_time(Time.now)
+          expect(deployment.finished_at).to be_like_time(Time.current)
         end
       end
 
@@ -118,11 +141,11 @@ describe Deployment do
       let(:deployment) { create(:deployment, :running) }
 
       it 'has correct status' do
-        Timecop.freeze do
+        freeze_time do
           deployment.drop!
 
           expect(deployment).to be_failed
-          expect(deployment.finished_at).to be_like_time(Time.now)
+          expect(deployment.finished_at).to be_like_time(Time.current)
         end
       end
 
@@ -138,11 +161,11 @@ describe Deployment do
       let(:deployment) { create(:deployment, :running) }
 
       it 'has correct status' do
-        Timecop.freeze do
+        freeze_time do
           deployment.cancel!
 
           expect(deployment).to be_canceled
-          expect(deployment.finished_at).to be_like_time(Time.now)
+          expect(deployment.finished_at).to be_like_time(Time.current)
         end
       end
 
@@ -260,6 +283,45 @@ describe Deployment do
 
         expect(last_deployments.size).to eq(2)
         expect(last_deployments).to match_array(deployments.last(2))
+      end
+    end
+
+    describe 'active' do
+      subject { described_class.active }
+
+      it 'retrieves the active deployments' do
+        deployment1 = create(:deployment, status: :created )
+        deployment2 = create(:deployment, status: :running )
+        create(:deployment, status: :failed )
+        create(:deployment, status: :canceled )
+
+        is_expected.to contain_exactly(deployment1, deployment2)
+      end
+    end
+
+    describe 'older_than' do
+      let(:deployment) { create(:deployment) }
+
+      subject { described_class.older_than(deployment) }
+
+      it 'retrives the correct older deployments' do
+        older_deployment1 = create(:deployment)
+        older_deployment2 = create(:deployment)
+        deployment
+        create(:deployment)
+
+        is_expected.to contain_exactly(older_deployment1, older_deployment2)
+      end
+    end
+
+    describe 'with_deployable' do
+      subject { described_class.with_deployable }
+
+      it 'retrieves deployments with deployable builds' do
+        with_deployable = create(:deployment)
+        create(:deployment, deployable: nil)
+
+        is_expected.to contain_exactly(with_deployable)
       end
     end
   end
@@ -398,47 +460,193 @@ describe Deployment do
 
       expect(deploy.merge_requests).to include(mr1, mr2)
     end
+
+    it 'ignores already linked merge requests' do
+      deploy = create(:deployment)
+      mr1 = create(
+        :merge_request,
+        :merged,
+        target_project: deploy.project,
+        source_project: deploy.project
+      )
+
+      deploy.link_merge_requests(deploy.project.merge_requests)
+
+      mr2 = create(
+        :merge_request,
+        :merged,
+        target_project: deploy.project,
+        source_project: deploy.project
+      )
+
+      deploy.link_merge_requests(deploy.project.merge_requests)
+
+      expect(deploy.merge_requests).to include(mr1, mr2)
+    end
   end
 
   describe '#previous_environment_deployment' do
     it 'returns the previous deployment of the same environment' do
-      deploy1 = create(:deployment, :success, ref: 'v1.0.0')
+      deploy1 = create(:deployment, :success)
       deploy2 = create(
         :deployment,
         :success,
         project: deploy1.project,
-        environment: deploy1.environment,
-        ref: 'v1.0.1'
+        environment: deploy1.environment
       )
 
       expect(deploy2.previous_environment_deployment).to eq(deploy1)
     end
 
     it 'ignores deployments that were not successful' do
-      deploy1 = create(:deployment, :failed, ref: 'v1.0.0')
+      deploy1 = create(:deployment, :failed)
       deploy2 = create(
         :deployment,
         :success,
         project: deploy1.project,
-        environment: deploy1.environment,
-        ref: 'v1.0.1'
+        environment: deploy1.environment
       )
 
       expect(deploy2.previous_environment_deployment).to be_nil
     end
 
     it 'ignores deployments for different environments' do
-      deploy1 = create(:deployment, :success, ref: 'v1.0.0')
+      deploy1 = create(:deployment, :success)
       preprod = create(:environment, project: deploy1.project, name: 'preprod')
       deploy2 = create(
         :deployment,
         :success,
         project: deploy1.project,
-        environment: preprod,
-        ref: 'v1.0.1'
+        environment: preprod
       )
 
       expect(deploy2.previous_environment_deployment).to be_nil
+    end
+  end
+
+  describe '#create_ref' do
+    let(:deployment) { build(:deployment) }
+
+    subject { deployment.create_ref }
+
+    it 'creates a ref using the sha' do
+      expect(deployment.project.repository).to receive(:create_ref).with(
+        deployment.sha,
+        "refs/environments/#{deployment.environment.name}/deployments/#{deployment.iid}"
+      )
+
+      subject
+    end
+  end
+
+  describe '#playable_build' do
+    subject { deployment.playable_build }
+
+    context 'when there is a deployable build' do
+      let(:deployment) { create(:deployment, deployable: build) }
+
+      context 'when the deployable build is playable' do
+        let(:build) { create(:ci_build, :playable) }
+
+        it 'returns that build' do
+          is_expected.to eq(build)
+        end
+      end
+
+      context 'when the deployable build is not playable' do
+        let(:build) { create(:ci_build) }
+
+        it 'returns nil' do
+          is_expected.to be_nil
+        end
+      end
+    end
+
+    context 'when there is no deployable build' do
+      let(:deployment) { create(:deployment) }
+
+      it 'returns nil' do
+        is_expected.to be_nil
+      end
+    end
+  end
+
+  describe '#update_status' do
+    let(:deploy) { create(:deployment, status: :running) }
+
+    it 'changes the status' do
+      deploy.update_status('success')
+
+      expect(deploy).to be_success
+    end
+
+    it 'schedules SuccessWorker and FinishedWorker when finishing a deploy' do
+      expect(Deployments::SuccessWorker).to receive(:perform_async)
+      expect(Deployments::FinishedWorker).to receive(:perform_async)
+
+      deploy.update_status('success')
+    end
+
+    it 'updates finished_at when transitioning to a finished status' do
+      freeze_time do
+        deploy.update_status('success')
+
+        expect(deploy.read_attribute(:finished_at)).to eq(Time.current)
+      end
+    end
+  end
+
+  describe '#valid_sha' do
+    it 'does not add errors for a valid SHA' do
+      project = create(:project, :repository)
+      deploy = build(:deployment, project: project)
+
+      expect(deploy).to be_valid
+    end
+
+    it 'adds an error for an invalid SHA' do
+      deploy = build(:deployment, sha: 'foo')
+
+      expect(deploy).not_to be_valid
+      expect(deploy.errors[:sha]).not_to be_empty
+    end
+  end
+
+  describe '#valid_ref' do
+    it 'does not add errors for a valid ref' do
+      project = create(:project, :repository)
+      deploy = build(:deployment, project: project)
+
+      expect(deploy).to be_valid
+    end
+
+    it 'adds an error for an invalid ref' do
+      deploy = build(:deployment, ref: 'does-not-exist')
+
+      expect(deploy).not_to be_valid
+      expect(deploy.errors[:ref]).not_to be_empty
+    end
+  end
+
+  describe '.fast_destroy_all' do
+    it 'cleans path_refs for destroyed environments' do
+      project = create(:project, :repository)
+      environment = create(:environment, project: project)
+
+      destroyed_deployments = create_list(:deployment, 2, :success, environment: environment, project: project)
+      other_deployments = create_list(:deployment, 2, :success, environment: environment, project: project)
+
+      (destroyed_deployments + other_deployments).each(&:create_ref)
+
+      described_class.where(id: destroyed_deployments.map(&:id)).fast_destroy_all
+
+      destroyed_deployments.each do |deployment|
+        expect(project.commit(deployment.ref_path)).to be_nil
+      end
+
+      other_deployments.each do |deployment|
+        expect(project.commit(deployment.ref_path)).not_to be_nil
+      end
     end
   end
 end

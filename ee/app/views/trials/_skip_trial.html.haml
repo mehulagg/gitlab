@@ -1,4 +1,9 @@
 .my-5
-  = link_to _('Skip Trial (Continue with Free Account)'), dashboard_projects_path, class: 'block center py-2'
-  .label
-    = _("You won't get a free trial right now but you can always resume this process by clicking on your avatar and choosing 'Start a free trial'.")
+  - if params[:glm_source] == 'gitlab.com'
+    = link_to s_('Trials|Go back to GitLab'), dashboard_projects_path, class: 'block center py-2'
+    .label
+      = s_("Trials|You can always resume this process by selecting your avatar and choosing 'Start a Gold trial'")
+  - else
+    = link_to s_('Trials|Skip Trial (Continue with Free Account)'), dashboard_projects_path, class: 'block center py-2'
+    .label
+      = s_("Trials|You won't get a free trial right now but you can always resume this process by clicking on your avatar and choosing 'Start a free trial'")

@@ -2,28 +2,23 @@
 
 require 'spec_helper'
 
-describe 'User activates Pushover' do
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
+RSpec.describe 'User activates Pushover' do
+  include_context 'project service activation'
 
   before do
-    project.add_maintainer(user)
-    sign_in(user)
-
-    visit(project_settings_integrations_path(project))
-
-    click_link('Pushover')
+    stub_request(:post, /.*api.pushover.net.*/)
   end
 
-  it 'activates service' do
-    check('Active')
+  it 'activates service', :js do
+    visit_project_integration('Pushover')
     fill_in('Api key', with: 'verySecret')
     fill_in('User key', with: 'verySecret')
     fill_in('Device', with: 'myDevice')
     select('High Priority', from: 'Priority')
     select('Bike', from: 'Sound')
-    click_button('Save')
 
-    expect(page).to have_content('Pushover activated.')
+    click_test_then_save_integration(expect_test_to_fail: false)
+
+    expect(page).to have_content('Pushover settings saved and active.')
   end
 end

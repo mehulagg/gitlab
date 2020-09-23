@@ -3,52 +3,47 @@
 module Projects
   module ContainerRepository
     class DeleteTagsService < BaseService
+      LOG_DATA_BASE = { service_class: self.to_s }.freeze
+
       def execute(container_repository)
+        @container_repository = container_repository
         return error('access denied') unless can?(current_user, :destroy_container_image, project)
 
-        tag_names = params[:tags]
-        return error('not tags specified') if tag_names.blank?
+        @tag_names = params[:tags]
+        return error('not tags specified') if @tag_names.blank?
 
-        smart_delete(container_repository, tag_names)
+        delete_tags
       end
 
       private
 
-      # Replace a tag on the registry with a dummy tag.
-      # This is a hack as the registry doesn't support deleting individual
-      # tags. This code effectively pushes a dummy image and assigns the tag to it.
-      # This way when the tag is deleted only the dummy image is affected.
-      # See https://gitlab.com/gitlab-org/gitlab/issues/15737 for a discussion
-      def smart_delete(container_repository, tag_names)
-        # generates the blobs for the dummy image
-        dummy_manifest = container_repository.client.generate_empty_manifest(container_repository.path)
-        return error('could not generate manifest') if dummy_manifest.nil?
+      def delete_tags
+        delete_service.execute
+                      .tap(&method(:log_response))
+      end
 
-        # update the manifests of the tags with the new dummy image
-        deleted_tags = []
-        tag_digests = []
+      def delete_service
+        fast_delete_enabled = Feature.enabled?(:container_registry_fast_tag_delete, default_enabled: true)
 
-        tag_names.each do |name|
-          digest = container_repository.client.put_tag(container_repository.path, name, dummy_manifest)
-          next unless digest
-
-          deleted_tags << name
-          tag_digests << digest
-        end
-
-        # make sure the digests are the same (it should always be)
-        tag_digests.uniq!
-
-        # rubocop: disable CodeReuse/ActiveRecord
-        Gitlab::Sentry.track_exception(ArgumentError.new('multiple tag digests')) if tag_digests.many?
-
-        # Deletes the dummy image
-        # All created tag digests are the same since they all have the same dummy image.
-        # a single delete is sufficient to remove all tags with it
-        if tag_digests.any? && container_repository.delete_tag_by_digest(tag_digests.first)
-          success(deleted: deleted_tags)
+        if fast_delete_enabled && @container_repository.client.supports_tag_delete?
+          ::Projects::ContainerRepository::Gitlab::DeleteTagsService.new(@container_repository, @tag_names)
         else
-          error('could not delete tags')
+          ::Projects::ContainerRepository::ThirdParty::DeleteTagsService.new(@container_repository, @tag_names)
+        end
+      end
+
+      def log_response(response)
+        log_data = LOG_DATA_BASE.merge(
+          container_repository_id: @container_repository.id,
+          message: 'deleted tags'
+        )
+
+        if response[:status] == :success
+          log_data[:deleted_tags_count] = response[:deleted].size
+          log_info(log_data)
+        else
+          log_data[:message] = response[:message]
+          log_error(log_data)
         end
       end
     end

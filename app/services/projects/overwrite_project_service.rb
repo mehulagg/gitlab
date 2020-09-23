@@ -7,7 +7,9 @@ module Projects
 
       Project.transaction do
         move_before_destroy_relationships(source_project)
-        destroy_old_project(source_project)
+        # Reset is required in order to get the proper
+        # uncached fork network method calls value.
+        destroy_old_project(source_project.reset)
         rename_project(source_project.name, source_project.path)
 
         @project
@@ -53,13 +55,13 @@ module Projects
     end
 
     def attempt_restore_repositories(project)
-      ::Projects::DestroyService.new(project, @current_user).attempt_repositories_rollback
+      ::Projects::DestroyRollbackService.new(project, @current_user).execute
     end
 
     def add_source_project_to_fork_network(source_project)
       return unless @project.fork_network
 
-      # Because he have moved all references in the fork network from the source_project
+      # Because they have moved all references in the fork network from the source_project
       # we won't be able to query the database (only through its cached data),
       # for its former relationships. That's why we're adding it to the network
       # as a fork of the target project

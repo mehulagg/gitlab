@@ -2,10 +2,20 @@
 
 module Projects
   class UpdateMirrorService < BaseService
+    include Gitlab::Utils::StrongMemoize
+
     Error = Class.new(StandardError)
     UpdateError = Class.new(Error)
 
     def execute
+      if project.import_url && Gitlab::UrlBlocker.blocked_url?(normalized_url(project.import_url))
+        return error("The import URL is invalid.")
+      end
+
+      unless can?(current_user, :access_git)
+        return error('The mirror user is not allowed to perform any git operations.')
+      end
+
       unless project.mirror?
         return success
       end
@@ -20,12 +30,17 @@ module Projects
         return error("The mirror user is not allowed to push code to all branches on this project.")
       end
 
+      checksum_before = project.repository.checksum
+
       update_tags do
         project.fetch_mirror(forced: true)
       end
 
       update_branches
-      update_lfs_objects
+
+      # Updating LFS objects is expensive since it requires scanning for blobs with pointers.
+      # Let's skip this if the repository hasn't changed.
+      update_lfs_objects if project.repository.checksum != checksum_before
 
       success
     rescue Gitlab::Shell::Error, Gitlab::Git::BaseError, UpdateError => e
@@ -33,6 +48,12 @@ module Projects
     end
 
     private
+
+    def normalized_url(url)
+      strong_memoize(:normalized_url) do
+        CGI.unescape(Gitlab::UrlSanitizer.sanitize(url))
+      end
+    end
 
     def update_branches
       local_branches = repository.branches.each_with_object({}) { |branch, branches| branches[branch.name] = branch }
@@ -47,7 +68,7 @@ module Projects
         local_branch = local_branches[name]
 
         if local_branch.nil?
-          result = CreateBranchService.new(project, current_user).execute(name, upstream_branch.dereferenced_target.sha, create_master_if_empty: false)
+          result = ::Branches::CreateService.new(project, current_user).execute(name, upstream_branch.dereferenced_target.sha, create_master_if_empty: false)
           if result[:status] == :error
             errors << result[:message]
           end

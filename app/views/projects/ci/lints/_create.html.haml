@@ -1,8 +1,10 @@
-- if @status
-  %p
-    %b= _("Status:")
-    = _("syntax is correct")
-    %i.fa.fa-ok.correct-syntax
+- if @result.valid?
+  .bs-callout.bs-callout-success
+    %p
+      %b= _("Status:")
+      = _("syntax is correct")
+
+  = render "projects/ci/lints/lint_warnings", warnings: @result.warnings
 
   .table-holder
     %table.table.table-bordered
@@ -11,38 +13,39 @@
           %th= _("Parameter")
           %th= _("Value")
       %tbody
-        - @stages.each do |stage|
-          - @builds.select { |build| build[:stage] == stage }.each do |build|
-            - job = @jobs[build[:name].to_sym]
-            %tr
-              %td #{stage.capitalize} Job - #{build[:name]}
-              %td
-                %pre= job[:before_script].to_a.join('\n')
-                %pre= job[:script].to_a.join('\n')
-                %pre= job[:after_script].to_a.join('\n')
-
-                %br
-                %b= _("Tag list:")
-                = build[:tag_list].to_a.join(", ")
+        - @result.jobs.each do |job|
+          %tr
+            %td #{job[:stage].capitalize} Job - #{job[:name]}
+            %td
+              %pre= job[:before_script].to_a.join('\n')
+              %pre= job[:script].to_a.join('\n')
+              %pre= job[:after_script].to_a.join('\n')
+              %br
+              %b= _("Tag list:")
+              = job[:tag_list].to_a.join(", ")
+              - unless @dry_run
                 %br
                 %b= _("Only policy:")
                 = job[:only].to_a.join(", ")
                 %br
                 %b= _("Except policy:")
                 = job[:except].to_a.join(", ")
-                %br
-                %b= _("Environment:")
-                = build[:environment]
-                %br
-                %b= _("When:")
-                = build[:when]
-                - if build[:allow_failure]
-                  %b= _("Allowed to fail")
+              %br
+              %b= _("Environment:")
+              = job[:environment]
+              %br
+              %b= _("When:")
+              = job[:when]
+              - if job[:allow_failure]
+                %b= _("Allowed to fail")
 
 - else
-  %p
-    %b= _("Status:")
-    = _("syntax is incorrect")
-    %i.fa.fa-remove.incorrect-syntax
-  %b= _("Error:")
-  = @error
+  .bs-callout.bs-callout-danger
+    %p
+      %b= _("Status:")
+      = _("syntax is incorrect")
+  %pre
+    - @result.errors.each do |message|
+      %p= message
+
+  = render "projects/ci/lints/lint_warnings", warnings: @result.warnings

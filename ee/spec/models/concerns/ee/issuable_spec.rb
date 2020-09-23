@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Issuable do
+RSpec.describe EE::Issuable do
   describe "Validation" do
     context 'general validations' do
       subject { build(:epic) }
@@ -22,59 +22,61 @@ describe EE::Issuable do
     end
   end
 
-  describe '.labels_hash' do
-    let(:feature_label) { create(:label, title: 'Feature') }
-    let(:second_label) { create(:label, title: 'Second Label') }
-    let!(:issues) { create_list(:labeled_issue, 3, labels: [feature_label, second_label]) }
-    let(:issue_id) { issues.first.id }
-
-    it 'maps issue ids to labels titles' do
-      expect(Issue.labels_hash[issue_id]).to include('Feature')
-    end
-
-    it 'works on relations filtered by multiple labels' do
-      relation = Issue.with_label(['Feature', 'Second Label'])
-
-      expect(relation.labels_hash[issue_id]).to include('Feature', 'Second Label')
-    end
-  end
-
-  describe '#milestone_available?' do
-    context 'with Epic' do
-      let(:epic) { create(:epic) }
-
-      it 'returns true' do
-        expect(epic.milestone_available?).to be_truthy
-      end
-    end
-
-    context 'no Epic' do
-      let(:issue) { create(:issue) }
-
-      it 'returns false' do
-        expect(issue.milestone_available?).to be_falsy
-      end
-    end
-  end
-
-  describe '#supports_milestone?' do
-    let(:group)   { create(:group) }
-    let(:project) { create(:project, group: group) }
-
-    context "for epics" do
-      let(:epic) { build(:epic) }
-
-      it 'returns false' do
-        expect(epic.supports_milestone?).to be_falsy
-      end
-    end
-  end
-
   describe '#matches_cross_reference_regex?' do
     context "epic description with long path string" do
       let(:mentionable) { build(:epic, description: "/a" * 50000) }
 
       it_behaves_like 'matches_cross_reference_regex? fails fast'
+    end
+  end
+
+  describe '#supports_epic?' do
+    let(:group) { build_stubbed(:group) }
+    let(:project_with_group) { build_stubbed(:project, group: group) }
+    let(:project_without_group) { build_stubbed(:project) }
+
+    where(:issuable_type, :project, :supports_epic) do
+      [
+        [:issue, :project_with_group, true],
+        [:issue, :project_without_group, false],
+        [:incident, :project_with_group, false],
+        [:incident, :project_without_group, false],
+        [:merge_request, :project_with_group, false],
+        [:merge_request, :project_without_group, false]
+      ]
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type, project: send(project)) }
+
+      subject { issuable.supports_epic? }
+
+      it { is_expected.to eq(supports_epic) }
+    end
+  end
+
+  describe '#weight_available?' do
+    let(:group) { build_stubbed(:group) }
+    let(:project_with_group) { build_stubbed(:project, group: group) }
+    let(:project_without_group) { build_stubbed(:project) }
+
+    where(:issuable_type, :project, :weight_available) do
+      [
+        [:issue, :project_with_group, true],
+        [:issue, :project_without_group, true],
+        [:incident, :project_with_group, false],
+        [:incident, :project_without_group, false],
+        [:merge_request, :project_with_group, false],
+        [:merge_request, :project_without_group, false]
+      ]
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type, project: send(project)) }
+
+      subject { issuable.weight_available? }
+
+      it { is_expected.to eq(weight_available) }
     end
   end
 end

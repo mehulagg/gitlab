@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Graphql::Loaders::BatchModelLoader do
+RSpec.describe Gitlab::Graphql::Loaders::BatchModelLoader do
   describe '#find' do
     let(:issue) { create(:issue) }
     let(:user) { create(:user) }

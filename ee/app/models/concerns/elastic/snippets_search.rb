@@ -11,11 +11,5 @@ module Elastic
       # see https://gitlab.com/gitlab-org/gitlab/issues/11850
       ::Gitlab::CurrentSettings.elasticsearch_indexing?
     end
-
-    included do
-      class << self
-        delegate :elastic_search_code, to: :__elasticsearch__
-      end
-    end
   end
 end

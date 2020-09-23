@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :ci_reports_security_locations_sast, class: ::Gitlab::Ci::Reports::Security::Locations::Sast do
+  factory :ci_reports_security_locations_sast, class: '::Gitlab::Ci::Reports::Security::Locations::Sast' do
     file_path { 'maven/src/main/java/com/gitlab/security_products/tests/App.java' }
     start_line { 29 }
     end_line { 31 }

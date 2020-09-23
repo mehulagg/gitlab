@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::BoardsController do
+RSpec.describe Groups::BoardsController do
   let(:group) { create(:group) }
   let(:user) { create(:user) }
 
@@ -37,13 +37,18 @@ describe Groups::BoardsController do
         it 'returns a not found 404 response' do
           list_boards format: :json
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
           expect(response.content_type).to eq 'application/json'
         end
       end
     end
 
     it_behaves_like 'redirects to last visited board' do
+      let(:parent) { group }
+    end
+
+    it_behaves_like 'pushes wip limits to frontend' do
+      let(:params) { { group_id: group } }
       let(:parent) { group }
     end
 
@@ -63,7 +68,7 @@ describe Groups::BoardsController do
 
         list_boards(recent: true)
 
-        expect(response).to have_gitlab_http_status(401)
+        expect(response).to have_gitlab_http_status(:unauthorized)
       end
     end
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::BuildPresenter do
+RSpec.describe Ci::BuildPresenter do
   let(:project) { create(:project) }
   let(:pipeline) { create(:ci_pipeline, project: project) }
   let(:build) { create(:ci_build, pipeline: pipeline) }
@@ -228,7 +228,7 @@ describe Ci::BuildPresenter do
         let(:build) { create(:ci_build, :scheduled) }
 
         it 'returns execution time' do
-          Timecop.freeze do
+          freeze_time do
             is_expected.to be_like_time(60.0)
           end
         end
@@ -238,7 +238,7 @@ describe Ci::BuildPresenter do
         let(:build) { create(:ci_build, :expired_scheduled) }
 
         it 'returns execution time' do
-          Timecop.freeze do
+          freeze_time do
             is_expected.to eq(0)
           end
         end
@@ -249,7 +249,7 @@ describe Ci::BuildPresenter do
       let(:build) { create(:ci_build) }
 
       it 'does not return execution time' do
-        Timecop.freeze do
+        freeze_time do
           is_expected.to be_falsy
         end
       end
@@ -262,32 +262,6 @@ describe Ci::BuildPresenter do
     it 'returns a verbose failure reason' do
       description = subject.callout_failure_message
       expect(description).to eq('There has been an API failure, please try again')
-    end
-  end
-
-  describe '#recoverable?' do
-    let(:build) { create(:ci_build, :failed, :script_failure) }
-
-    context 'when is a script or missing dependency failure' do
-      let(:failure_reasons) { %w(script_failure missing_dependency_failure archived_failure scheduler_failure data_integrity_failure) }
-
-      it 'returns false' do
-        failure_reasons.each do |failure_reason|
-          build.update_attribute(:failure_reason, failure_reason)
-          expect(presenter.recoverable?).to be_falsy
-        end
-      end
-    end
-
-    context 'when is any other failure type' do
-      let(:failure_reasons) { %w(unknown_failure api_failure stuck_or_timeout_failure runner_system_failure) }
-
-      it 'returns true' do
-        failure_reasons.each do |failure_reason|
-          build.update_attribute(:failure_reason, failure_reason)
-          expect(presenter.recoverable?).to be_truthy
-        end
-      end
     end
   end
 end

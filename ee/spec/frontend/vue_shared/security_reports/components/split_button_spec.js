@@ -1,67 +1,87 @@
-import Vue from 'vue';
-import component from 'ee/vue_shared/security_reports/components/split_button.vue';
-import mountComponent from 'helpers/vue_mount_component_helper';
+import { shallowMount } from '@vue/test-utils';
+import { GlDeprecatedDropdown, GlDeprecatedDropdownItem, GlIcon } from '@gitlab/ui';
+import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
+
+const buttons = [
+  {
+    name: 'button one',
+    tagline: "button one's tagline",
+    isLoading: false,
+    action: 'button1Action',
+  },
+  {
+    name: 'button two',
+    tagline: "button two's tagline",
+    isLoading: false,
+    action: 'button2Action',
+  },
+];
 
 describe('Split Button', () => {
-  const Component = Vue.extend(component);
-  const buttons = [
-    {
-      name: 'button one',
-      tagline: "button one's tagline",
-      isLoading: false,
-      action: 'button1Action',
-    },
-    {
-      name: 'button two',
-      tagline: "button two's tagline",
-      isLoading: false,
-      action: 'button2Action',
-    },
-    {
-      name: 'button three',
-      tagline: "button three's tagline",
-      isLoading: true,
-      action: 'button3Action',
-    },
-  ];
-  let props;
-  let vm;
+  let wrapper;
+
+  const findDropdown = () => wrapper.find(GlDeprecatedDropdown);
+  const findDropdownItems = () => wrapper.findAll(GlDeprecatedDropdownItem);
+
+  const createComponent = props => {
+    wrapper = shallowMount(SplitButton, {
+      propsData: {
+        ...props,
+      },
+    });
+  };
 
   afterEach(() => {
-    vm.$destroy();
+    wrapper.destroy();
+    wrapper = null;
   });
 
-  describe('with two buttons', () => {
-    beforeEach(() => {
-      props = { buttons: buttons.slice(0, 2) };
-      vm = mountComponent(Component, props);
+  it('does not render dropdown if buttons array is empty', () => {
+    createComponent({
+      buttons: [],
     });
 
-    it('renders two dropdown items', () => {
-      expect(vm.$el.querySelectorAll('.dropdown-item')).toHaveLength(2);
-    });
-
-    it('displays the first button initially', () => {
-      expect(vm.$el.querySelector('.btn').textContent.trim()).toBe(buttons[0].name);
-    });
-
-    it('emits the correct event when the button is pressed', () => {
-      jest.spyOn(vm, '$emit');
-
-      vm.$el.querySelector('.btn').click();
-
-      expect(vm.$emit).toHaveBeenCalledWith(buttons[0].action);
-    });
+    expect(findDropdown().exists()).toBe(false);
   });
 
-  describe('with three buttons', () => {
-    beforeEach(() => {
-      props = { buttons };
-      vm = mountComponent(Component, props);
+  it('renders disabled dropdown if disabled prop is true', () => {
+    createComponent({
+      buttons: buttons.slice(0),
+      disabled: true,
     });
 
-    it('renders three dropdown items', () => {
-      expect(vm.$el.querySelectorAll('.dropdown-item')).toHaveLength(3);
+    expect(findDropdown().attributes().disabled).toBe('true');
+  });
+
+  it('emits correct action on dropdown click', () => {
+    createComponent({
+      buttons: buttons.slice(0),
     });
+
+    findDropdown().vm.$emit('click');
+
+    expect(wrapper.emitted('button1Action')).toBeDefined();
+    expect(wrapper.emitted('button1Action')).toHaveLength(1);
+  });
+
+  it('renders a correct amount of dropdown items', () => {
+    createComponent({
+      buttons,
+    });
+
+    expect(findDropdownItems()).toHaveLength(2);
+  });
+
+  it('renders an icon if dropdown item is selected', () => {
+    createComponent({
+      buttons: buttons.slice(0),
+    });
+
+    expect(
+      findDropdownItems()
+        .at(0)
+        .find(GlIcon)
+        .exists(),
+    ).toBe(true);
   });
 });

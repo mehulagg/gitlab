@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::Replication::FileRetriever, :geo do
+RSpec.describe Gitlab::Geo::Replication::FileRetriever, :geo do
   shared_examples_for 'returns necessary params for sending a file from an API endpoint' do
     subject { @subject ||= retriever.execute }
 
     context 'when the upload exists' do
-      let(:retriever) { described_class.new(upload.id, message) }
+      let(:retriever) { described_class.new(upload.id, extra_params) }
 
       context 'when the upload has a file' do
         before do
@@ -15,8 +15,8 @@ describe Gitlab::Geo::Replication::FileRetriever, :geo do
           FileUtils.touch(upload.absolute_path) unless File.exist?(upload.absolute_path)
         end
 
-        context 'when the message parameters match the upload' do
-          let(:message) { { id: upload.model_id, type: upload.model_type, checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' } }
+        context 'when the extra_params parameters match the upload' do
+          let(:extra_params) { { id: upload.model_id, type: upload.model_type, checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' } }
 
           it 'returns the file in a success hash' do
             expect(subject).to include(code: :ok, message: 'Success')
@@ -24,33 +24,33 @@ describe Gitlab::Geo::Replication::FileRetriever, :geo do
           end
         end
 
-        context 'when the message id does not match the upload model_id' do
-          let(:message) { { id: 10000, type: upload.model_type, checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' } }
+        context 'when the extra_params id does not match the upload model_id' do
+          let(:extra_params) { { id: 10000, type: upload.model_type, checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' } }
 
           it 'returns an error hash' do
-            expect(subject).to include(code: :not_found, message: "Upload not found")
+            expect(subject).to include(code: :not_found, message: 'Invalid request')
           end
         end
 
-        context 'when the message type does not match the upload model_type' do
-          let(:message) { { id: upload.model_id, type: 'bad_type', checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' } }
+        context 'when the extra_params type does not match the upload model_type' do
+          let(:extra_params) { { id: upload.model_id, type: 'bad_type', checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' } }
 
           it 'returns an error hash' do
-            expect(subject).to include(code: :not_found, message: "Upload not found")
+            expect(subject).to include(code: :not_found, message: 'Invalid request')
           end
         end
 
-        context 'when the message checksum does not match the upload checksum' do
-          let(:message) { { id: upload.model_id, type: upload.model_type, checksum: 'doesnotmatch' } }
+        context 'when the extra_params checksum does not match the upload checksum' do
+          let(:extra_params) { { id: upload.model_id, type: upload.model_type, checksum: 'doesnotmatch' } }
 
           it 'returns an error hash' do
-            expect(subject).to include(code: :not_found, message: "Upload not found")
+            expect(subject).to include(code: :not_found, message: 'Checksum mismatch')
           end
         end
       end
 
       context 'when the upload does not have a file' do
-        let(:message) { { id: upload.model_id, type: upload.model_type, checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' } }
+        let(:extra_params) { { id: upload.model_id, type: upload.model_type, checksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855' } }
 
         it 'returns an error hash' do
           expect(subject).to include(code: :not_found, geo_code: 'FILE_NOT_FOUND', message: match(/Upload #\d+ file not found/))
@@ -62,7 +62,7 @@ describe Gitlab::Geo::Replication::FileRetriever, :geo do
       it 'returns an error hash' do
         result = described_class.new(10000, {}).execute
 
-        expect(result).to eq(code: :not_found, message: "Upload not found")
+        expect(result).to eq(code: :not_found, message: 'Upload not found')
       end
     end
   end

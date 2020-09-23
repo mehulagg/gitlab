@@ -25,14 +25,14 @@ export default {
 </script>
 
 <template>
-  <div class="title hide-collapsed align-items-center append-bottom-10">
+  <div class="title hide-collapsed align-items-center gl-mb-3">
     <div class="flex-grow-1">
       <span :class="{ 'align-text-top': isLoading }">{{ blockTitle }}</span>
       <gl-loading-icon v-show="isLoading" inline />
     </div>
     <template v-if="canEdit">
       <gl-link
-        class="btn btn-blank float-right sidebar-dropdown-toggle"
+        class="edit-link float-right sidebar-dropdown-toggle"
         @click="$emit('onClickEdit', $event)"
         >{{ __('Edit') }}</gl-link
       >

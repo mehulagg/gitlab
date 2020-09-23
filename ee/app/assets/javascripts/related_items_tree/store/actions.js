@@ -1,19 +1,18 @@
-import flash from '~/flash';
-import { s__ } from '~/locale';
 import Api from 'ee/api';
+import {
+  issuableTypesMap,
+  itemAddFailureTypesMap,
+  pathIndeterminateErrorMap,
+  relatedIssuesRemoveErrorMap,
+} from '~/related_issues/constants';
+import { deprecatedCreateFlash as flash } from '~/flash';
+import { s__, __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
 import httpStatusCodes from '~/lib/utils/http_status';
 import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
-import {
-  addRelatedIssueErrorMap,
-  issuableTypesMap,
-  pathIndeterminateErrorMap,
-  relatedIssuesRemoveErrorMap,
-} from 'ee/related_issues/constants';
-
 import { processQueryResponse, formatChildItem, gqClient } from '../utils/epic_utils';
-import { ChildType, ChildState } from '../constants';
+import { ChildType, ChildState, idProp, relativePositions } from '../constants';
 
 import epicChildren from '../queries/epicChildren.query.graphql';
 import epicChildReorder from '../queries/epicChildReorder.mutation.graphql';
@@ -25,20 +24,26 @@ export const setInitialConfig = ({ commit }, data) => commit(types.SET_INITIAL_C
 export const setInitialParentItem = ({ commit }, data) =>
   commit(types.SET_INITIAL_PARENT_ITEM, data);
 
-export const setChildrenCount = ({ commit, state }, { children, isRemoved = false }) => {
-  const [epicsCount, issuesCount] = children.reduce(
-    (acc, item) => {
-      if (item.type === ChildType.Epic) {
-        acc[0] += isRemoved ? -1 : 1;
-      } else {
-        acc[1] += isRemoved ? -1 : 1;
-      }
-      return acc;
-    },
-    [state.epicsCount || 0, state.issuesCount || 0],
-  );
+export const setChildrenCount = ({ commit, state }, data) =>
+  commit(types.SET_CHILDREN_COUNT, { ...state.descendantCounts, ...data });
 
-  commit(types.SET_CHILDREN_COUNT, { epicsCount, issuesCount });
+export const setHealthStatus = ({ commit, state }, data) =>
+  commit(types.SET_HEALTH_STATUS, { ...state.healthStatus, ...data });
+
+export const updateChildrenCount = ({ state, dispatch }, { item, isRemoved = false }) => {
+  const descendantCounts = {};
+
+  if (item.type === ChildType.Epic) {
+    descendantCounts[`${item.state}Epics`] = isRemoved
+      ? state.descendantCounts[`${item.state}Epics`] - 1
+      : state.descendantCounts[`${item.state}Epics`] + 1;
+  } else {
+    descendantCounts[`${item.state}Issues`] = isRemoved
+      ? state.descendantCounts[`${item.state}Issues`] - 1
+      : state.descendantCounts[`${item.state}Issues`] + 1;
+  }
+
+  dispatch('setChildrenCount', descendantCounts);
 };
 
 export const expandItem = ({ commit }, data) => commit(types.EXPAND_ITEM, data);
@@ -54,8 +59,6 @@ export const setItemChildren = (
     isSubItem,
     append,
   });
-
-  dispatch('setChildrenCount', { children });
 
   if (isSubItem) {
     dispatch('expandItem', {
@@ -117,6 +120,11 @@ export const fetchItems = ({ dispatch }, { parentItem, isSubItem = false }) => {
         parentItem,
         pageInfo: data.group.epic.issues.pageInfo,
       });
+
+      if (!isSubItem) {
+        dispatch('setChildrenCount', data.group.epic.descendantCounts);
+        dispatch('setHealthStatus', data.group.epic.healthStatus);
+      }
     })
     .catch(() => {
       dispatch('receiveItemsFailure', {
@@ -189,7 +197,7 @@ export const fetchNextPageItems = ({ dispatch, state }, { parentItem, isSubItem 
     });
 };
 
-export const toggleItem = ({ state, dispatch }, { parentItem }) => {
+export const toggleItem = ({ state, dispatch }, { parentItem, isDragging = false }) => {
   if (!state.childrenFlags[parentItem.reference].itemExpanded) {
     if (!state.children[parentItem.reference]) {
       dispatch('fetchItems', {
@@ -201,7 +209,7 @@ export const toggleItem = ({ state, dispatch }, { parentItem }) => {
         parentItem,
       });
     }
-  } else {
+  } else if (!isDragging) {
     dispatch('collapseItem', {
       parentItem,
     });
@@ -235,7 +243,7 @@ export const removeItem = ({ dispatch }, { parentItem, item }) => {
         item,
       });
 
-      dispatch('setChildrenCount', { children: [item], isRemoved: true });
+      dispatch('updateChildrenCount', { item, isRemoved: true });
     })
     .catch(({ status }) => {
       dispatch('receiveRemoveItemFailure', {
@@ -248,6 +256,8 @@ export const removeItem = ({ dispatch }, { parentItem, item }) => {
 export const toggleAddItemForm = ({ commit }, data) => commit(types.TOGGLE_ADD_ITEM_FORM, data);
 export const toggleCreateEpicForm = ({ commit }, data) =>
   commit(types.TOGGLE_CREATE_EPIC_FORM, data);
+export const toggleCreateIssueForm = ({ commit }, data) =>
+  commit(types.TOGGLE_CREATE_ISSUE_FORM, data);
 
 export const setPendingReferences = ({ commit }, data) =>
   commit(types.SET_PENDING_REFERENCES, data);
@@ -290,7 +300,9 @@ export const receiveAddItemSuccess = ({ dispatch, commit, getters }, { rawItems 
     items,
   });
 
-  dispatch('setChildrenCount', { children: items });
+  items.forEach(item => {
+    dispatch('updateChildrenCount', { item });
+  });
 
   dispatch('setItemChildrenFlags', {
     children: items,
@@ -301,14 +313,11 @@ export const receiveAddItemSuccess = ({ dispatch, commit, getters }, { rawItems 
   dispatch('setItemInputValue', '');
   dispatch('toggleAddItemForm', { toggleState: false });
 };
-export const receiveAddItemFailure = ({ commit, state }, data = {}) => {
-  commit(types.RECEIVE_ADD_ITEM_FAILURE);
-
-  let errorMessage = addRelatedIssueErrorMap[state.issuableType];
-  if (data.message) {
-    errorMessage = data.message;
-  }
-  flash(errorMessage);
+export const receiveAddItemFailure = (
+  { commit },
+  { itemAddFailureType, itemAddFailureMessage = '' } = {},
+) => {
+  commit(types.RECEIVE_ADD_ITEM_FAILURE, { itemAddFailureType, itemAddFailureMessage });
 };
 export const addItem = ({ state, dispatch, getters }) => {
   dispatch('requestAddItem');
@@ -323,8 +332,25 @@ export const addItem = ({ state, dispatch, getters }) => {
         rawItems: data.issuables.slice(0, state.pendingReferences.length),
       });
     })
-    .catch(({ data }) => {
-      dispatch('receiveAddItemFailure', data);
+    .catch(data => {
+      const { response } = data;
+      if (response.status === httpStatusCodes.NOT_FOUND) {
+        dispatch('receiveAddItemFailure', { itemAddFailureType: itemAddFailureTypesMap.NOT_FOUND });
+      }
+      // Ignore 409 conflict when the issue or epic is already attached to epic
+      /* eslint-disable @gitlab/require-i18n-strings */
+      else if (
+        response.status === httpStatusCodes.CONFLICT &&
+        response.data.message === 'Epic hierarchy level too deep'
+      ) {
+        dispatch('receiveAddItemFailure', {
+          itemAddFailureType: itemAddFailureTypesMap.MAX_NUMBER_OF_CHILD_EPICS,
+        });
+      } else {
+        dispatch('receiveAddItemFailure', {
+          itemAddFailureMessage: response.data.message,
+        });
+      }
     });
 };
 
@@ -346,7 +372,7 @@ export const receiveCreateItemSuccess = ({ state, commit, dispatch, getters }, {
     item,
   });
 
-  dispatch('setChildrenCount', { children: [item] });
+  dispatch('updateChildrenCount', { item });
 
   dispatch('setItemChildrenFlags', {
     children: [item],
@@ -363,6 +389,7 @@ export const createItem = ({ state, dispatch }, { itemTitle }) => {
   dispatch('requestCreateItem');
 
   Api.createChildEpic({
+    confidential: state.parentItem.confidential,
     groupId: state.parentItem.fullPath,
     parentEpicIid: state.parentItem.iid,
     title: itemTitle,
@@ -428,5 +455,138 @@ export const reorderItem = (
     });
 };
 
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};
+export const receiveMoveItemFailure = ({ commit }, data) => {
+  commit(types.MOVE_ITEM_FAILURE, data);
+  flash(s__('Epics|Something went wrong while moving item.'));
+};
+
+export const moveItem = (
+  { dispatch, commit, state },
+  { oldParentItem, newParentItem, targetItem, oldIndex, newIndex },
+) => {
+  let adjacentItem;
+  let adjacentReferenceId;
+  let relativePosition = relativePositions.After;
+
+  let isFirstChild = false;
+  const newParentChildren = state.children[newParentItem.parentReference];
+
+  if (newParentChildren?.length > 0) {
+    adjacentItem = newParentChildren[newIndex];
+    if (!adjacentItem) {
+      adjacentItem = newParentChildren[newParentChildren.length - 1];
+      relativePosition = relativePositions.Before;
+    }
+    adjacentReferenceId = adjacentItem[idProp[adjacentItem.type]];
+  } else {
+    isFirstChild = true;
+    relativePosition = relativePositions.Before;
+  }
+
+  commit(types.MOVE_ITEM, {
+    oldParentItem,
+    newParentItem,
+    targetItem,
+    oldIndex,
+    newIndex,
+    isFirstChild,
+  });
+
+  return gqClient
+    .mutate({
+      mutation: epicChildReorder,
+      variables: {
+        epicTreeReorderInput: {
+          baseEpicId: oldParentItem.id,
+          moved: {
+            id: targetItem[idProp[targetItem.type]],
+            adjacentReferenceId,
+            relativePosition,
+            newParentId: newParentItem.parentId,
+          },
+        },
+      },
+    })
+    .then(({ data }) => {
+      // Mutation was unsuccessful;
+      // revert to original order and show flash error
+      if (data.epicTreeReorder.errors.length) {
+        dispatch('receiveMoveItemFailure', {
+          oldParentItem,
+          newParentItem,
+          targetItem,
+          newIndex,
+          oldIndex,
+        });
+      }
+    })
+    .catch(() => {
+      // Mutation was unsuccessful;
+      // revert to original order and show flash error
+      dispatch('receiveMoveItemFailure', {
+        oldParentItem,
+        newParentItem,
+        targetItem,
+        newIndex,
+        oldIndex,
+      });
+    });
+};
+
+export const receiveCreateIssueSuccess = ({ commit }) =>
+  commit(types.RECEIVE_CREATE_ITEM_SUCCESS, { insertAt: 0, items: [] });
+export const receiveCreateIssueFailure = ({ commit }) => {
+  commit(types.RECEIVE_CREATE_ITEM_FAILURE);
+  flash(s__('Epics|Something went wrong while creating issue.'));
+};
+export const createNewIssue = ({ state, dispatch }, { issuesEndpoint, title }) => {
+  const { parentItem } = state;
+
+  // necessary because parentItem comes from GraphQL and we are using REST API here
+  const epicId = parseInt(parentItem.id.replace(/^gid:\/\/gitlab\/Epic\//, ''), 10);
+
+  dispatch('requestCreateItem');
+  return axios
+    .post(issuesEndpoint, { epic_id: epicId, title })
+    .then(({ data }) => {
+      dispatch('receiveCreateIssueSuccess', data);
+      dispatch('fetchItems', {
+        parentItem,
+      });
+    })
+    .catch(e => {
+      dispatch('receiveCreateIssueFailure');
+      throw e;
+    });
+};
+
+export const requestProjects = ({ commit }) => commit(types.REQUEST_PROJECTS);
+export const receiveProjectsSuccess = ({ commit }, data) =>
+  commit(types.RECIEVE_PROJECTS_SUCCESS, data);
+export const receiveProjectsFailure = ({ commit }) => {
+  commit(types.RECIEVE_PROJECTS_FAILURE);
+  flash(__('Something went wrong while fetching projects.'));
+};
+export const fetchProjects = ({ state, dispatch }, searchKey = '') => {
+  const params = {
+    include_subgroups: true,
+    order_by: 'last_activity_at',
+    with_issues_enabled: true,
+    with_shared: false,
+    search_namespaces: true,
+  };
+
+  if (searchKey) {
+    params.search = searchKey;
+  }
+
+  dispatch('requestProjects');
+  axios
+    .get(state.projectsEndpoint, {
+      params,
+    })
+    .then(({ data }) => {
+      dispatch('receiveProjectsSuccess', data);
+    })
+    .catch(() => dispatch('receiveProjectsFailure'));
+};

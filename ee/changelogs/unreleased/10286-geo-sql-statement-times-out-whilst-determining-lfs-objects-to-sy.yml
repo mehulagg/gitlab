@@ -1,6 +1,0 @@
----
-title: Geo - Improve query performance to determine LFS objects to sync when selective
-  sync is enabled
-merge_request: 19051
-author:
-type: performance

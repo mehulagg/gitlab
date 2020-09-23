@@ -11,6 +11,10 @@ class UsersSecurityDashboardProject < ApplicationRecord
   validates :project_id, uniqueness: { scope: [:user_id] }
   validate :per_user_projects_limit
 
+  def self.delete_by_project_id(project_id)
+    where(project_id: project_id).delete_all
+  end
+
   private
 
   def per_user_projects_limit

@@ -1,56 +1,43 @@
 # frozen_string_literal: true
 
 # Fetches the system metrics dashboard and formats the output.
-# Use Gitlab::Metrics::Dashboard::Finder to retrive dashboards.
+# Use Gitlab::Metrics::Dashboard::Finder to retrieve dashboards.
 module Metrics
   module Dashboard
-    class SystemDashboardService < ::Metrics::Dashboard::BaseService
-      SYSTEM_DASHBOARD_PATH = 'config/prometheus/common_metrics.yml'
-      SYSTEM_DASHBOARD_NAME = 'Default'
+    class SystemDashboardService < ::Metrics::Dashboard::PredefinedDashboardService
+      DASHBOARD_PATH = 'config/prometheus/common_metrics.yml'
+      DASHBOARD_NAME = N_('Overview')
+
+      # SHA256 hash of dashboard content
+      DASHBOARD_VERSION = 'ce9ae27d2913f637de851d61099bc4151583eae68b1386a2176339ef6e653223'
 
       SEQUENCE = [
         STAGES::CommonMetricsInserter,
-        STAGES::ProjectMetricsInserter,
-        STAGES::EndpointInserter,
-        STAGES::Sorter
+        STAGES::CustomMetricsInserter,
+        STAGES::CustomMetricsDetailsInserter,
+        STAGES::MetricEndpointInserter,
+        STAGES::VariableEndpointInserter,
+        STAGES::PanelIdsInserter,
+        STAGES::AlertsInserter
       ].freeze
 
       class << self
         def all_dashboard_paths(_project)
           [{
-            path: SYSTEM_DASHBOARD_PATH,
-            display_name: SYSTEM_DASHBOARD_NAME,
-            default: true
+            path: DASHBOARD_PATH,
+            display_name: _(DASHBOARD_NAME),
+            default: true,
+            system_dashboard: true,
+            out_of_the_box_dashboard: out_of_the_box_dashboard?
           }]
-        end
-
-        def system_dashboard?(filepath)
-          filepath == SYSTEM_DASHBOARD_PATH
         end
       end
 
       private
 
-      def cache_key
-        "metrics_dashboard_#{dashboard_path}"
-      end
-
-      def dashboard_path
-        SYSTEM_DASHBOARD_PATH
-      end
-
-      # Returns the base metrics shipped with every GitLab service.
-      def get_raw_dashboard
-        yml = File.read(Rails.root.join(dashboard_path))
-
-        YAML.safe_load(yml)
-      end
-
-      def sequence
-        SEQUENCE
+      def dashboard_version
+        DASHBOARD_VERSION
       end
     end
   end
 end
-
-Metrics::Dashboard::SystemDashboardService.prepend_if_ee('EE::Metrics::Dashboard::SystemDashboardService')

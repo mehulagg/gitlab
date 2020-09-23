@@ -2,14 +2,13 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User creates image diff notes', :js do
+RSpec.describe 'Merge request > User creates image diff notes', :js do
   include NoteInteractionHelpers
 
   let(:project) { create(:project, :public, :repository) }
   let(:user) { project.creator }
 
   before do
-    stub_feature_flags(single_mr_diff_view: false)
     sign_in(user)
 
     # Stub helper to return any blob file as image from public app folder.
@@ -17,8 +16,6 @@ describe 'Merge request > User creates image diff notes', :js do
     allow_any_instance_of(DiffHelper).to receive(:diff_file_blob_raw_url).and_return('/apple-touch-icon.png')
     allow_any_instance_of(DiffHelper).to receive(:diff_file_old_blob_raw_url).and_return('/favicon.png')
   end
-
-  it_behaves_like 'rendering a single diff version'
 
   context 'create commit diff notes' do
     commit_id = '2f63565e7aac07bcdadb654e253078b727143ec4'
@@ -51,29 +48,11 @@ describe 'Merge request > User creates image diff notes', :js do
       let(:commit) { project.commit('2f63565e7aac07bcdadb654e253078b727143ec4') }
 
       let(:note1_position) do
-        Gitlab::Diff::Position.new(
-          old_path: path,
-          new_path: path,
-          width: 100,
-          height: 100,
-          x: 10,
-          y: 10,
-          position_type: "image",
-          diff_refs: commit.diff_refs
-        )
+        build(:image_diff_position, file: path, diff_refs: commit.diff_refs)
       end
 
       let(:note2_position) do
-        Gitlab::Diff::Position.new(
-          old_path: path,
-          new_path: path,
-          width: 100,
-          height: 100,
-          x: 20,
-          y: 20,
-          position_type: "image",
-          diff_refs: commit.diff_refs
-        )
+        build(:image_diff_position, file: path, diff_refs: commit.diff_refs)
       end
 
       let!(:note1) { create(:diff_note_on_commit, commit_id: commit.id, project: project, position: note1_position, note: 'my note 1') }
@@ -96,16 +75,7 @@ describe 'Merge request > User creates image diff notes', :js do
   %w(inline parallel).each do |view|
     context "#{view} view" do
       let(:position) do
-        Gitlab::Diff::Position.new(
-          old_path: path,
-          new_path: path,
-          width: 100,
-          height: 100,
-          x: 1,
-          y: 1,
-          position_type: "image",
-          diff_refs: merge_request.diff_refs
-        )
+        build(:image_diff_position, file: path, diff_refs: merge_request.diff_refs)
       end
 
       let!(:note) { create(:diff_note_on_merge_request, project: project, noteable: merge_request, position: position) }
@@ -118,7 +88,7 @@ describe 'Merge request > User creates image diff notes', :js do
           create_image_diff_note
         end
 
-        it 'shows indicator and avatar badges, and allows collapsing/expanding the discussion notes', :quarantine do
+        it 'shows indicator and avatar badges, and allows collapsing/expanding the discussion notes', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/27950' do
           indicator = find('.js-image-badge', match: :first)
           badge = find('.user-avatar-link .badge', match: :first)
 
@@ -170,16 +140,7 @@ describe 'Merge request > User creates image diff notes', :js do
     let(:path)          { "files/images/ee_repo_logo.png" }
 
     let(:position) do
-      Gitlab::Diff::Position.new(
-        old_path: path,
-        new_path: path,
-        width: 100,
-        height: 100,
-        x: 50,
-        y: 50,
-        position_type: "image",
-        diff_refs: merge_request.diff_refs
-      )
+      build(:image_diff_position, file: path, diff_refs: merge_request.diff_refs)
     end
 
     before do
@@ -269,7 +230,7 @@ describe 'Merge request > User creates image diff notes', :js do
       it_behaves_like 'onion skin'
     end
 
-    describe 'swipe view' do
+    describe 'swipe view', quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/209999' do
       before do
         switch_to_swipe_view
       end

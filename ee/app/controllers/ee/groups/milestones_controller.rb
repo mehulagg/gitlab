@@ -5,9 +5,9 @@ module EE
     module MilestonesController
       extend ::Gitlab::Utils::Override
 
-      override :legacy_milestones
-      def legacy_milestones
-        params[:only_group_milestones] ? [] : super
+      override :search_params
+      def search_params
+        params[:only_group_milestones].present? ? super.merge(project_ids: []) : super
       end
     end
   end

@@ -31,15 +31,15 @@ module PrometheusHelpers
     "https://prometheus.example.com/api/v1/query?#{query}"
   end
 
-  def prometheus_query_range_url(prometheus_query, start: 8.hours.ago, stop: Time.now, step: nil)
-    start = start.to_f
-    stop = stop.to_f
-    step ||= Gitlab::PrometheusClient.compute_step(start, stop)
+  def prometheus_query_range_url(prometheus_query, start_time: 8.hours.ago, end_time: Time.now, step: nil)
+    start_time = start_time.to_f
+    end_time = end_time.to_f
+    step ||= Gitlab::PrometheusClient.compute_step(start_time, end_time)
 
     query = {
       query: prometheus_query,
-      start: start,
-      end: stop,
+      start: start_time,
+      end: end_time,
       step: step
     }.to_query
 
@@ -50,11 +50,11 @@ module PrometheusHelpers
     "https://prometheus.example.com/api/v1/label/#{name}/values"
   end
 
-  def prometheus_series_url(*matches, start: 8.hours.ago, stop: Time.now)
+  def prometheus_series_url(*matches, start_time: 8.hours.ago, end_time: Time.now)
     query = {
       match: matches,
-      start: start.to_f,
-      end: stop.to_f
+      start: start_time.to_f,
+      end: end_time.to_f
     }.to_query
     "https://prometheus.example.com/api/v1/series?#{query}"
   end
@@ -65,6 +65,21 @@ module PrometheusHelpers
         status: status,
         headers: { 'Content-Type' => 'application/json' }.merge(headers),
         body: body.to_json
+      })
+  end
+
+  def stub_prometheus_query_error(url, error_message = 'error', body: {}, headers: {})
+    response = {
+      status: 'error',
+      errorType: 'bad_data',
+      error: error_message
+    }.merge(body)
+
+    WebMock.stub_request(:get, url)
+      .to_return({
+        status: 400,
+        headers: { 'Content-Type' => 'application/json' }.merge(headers),
+        body: response.to_json
       })
   end
 
@@ -219,6 +234,53 @@ module PrometheusHelpers
           'job': 'kubernetes-nodes'
         }
       ]
+    }
+  end
+
+  def prometheus_alert_payload(firing: [], resolved: [])
+    status = firing.any? ? 'firing' : 'resolved'
+    alerts = firing + resolved
+    alert_name = alerts.first&.title || ''
+    prometheus_metric_id = alerts.first&.prometheus_metric_id&.to_s
+
+    alerts_map = \
+      firing.map { |alert| prometheus_map_alert_payload('firing', alert) } +
+      resolved.map { |alert| prometheus_map_alert_payload('resolved', alert) }
+
+    # See https://prometheus.io/docs/alerting/configuration/#%3Cwebhook_config%3E
+    {
+      'version' => '4',
+      'receiver' => 'gitlab',
+      'status' => status,
+      'alerts' => alerts_map,
+      'groupLabels' => {
+        'alertname' => alert_name
+      },
+      'commonLabels' => {
+        'alertname' => alert_name,
+        'gitlab' => 'hook',
+        'gitlab_alert_id' => prometheus_metric_id
+      },
+      'commonAnnotations' => {},
+      'externalURL' => '',
+      'groupKey' => "{}:{alertname=\'#{alert_name}\'}"
+    }
+  end
+
+  private
+
+  def prometheus_map_alert_payload(status, alert)
+    {
+      'status' => status,
+      'labels' => {
+        'alertname' => alert.title,
+        'gitlab' => 'hook',
+        'gitlab_alert_id' => alert.prometheus_metric_id.to_s
+      },
+      'annotations' => {},
+      'startsAt' => '2018-09-24T08:57:31.095725221Z',
+      'endsAt' => '0001-01-01T00:00:00Z',
+      'generatorURL' => 'http://prometheus-prometheus-server-URL'
     }
   end
 end

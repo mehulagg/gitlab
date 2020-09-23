@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::PatchService do
+RSpec.describe Clusters::Applications::PatchService do
   describe '#execute' do
     let(:application) { create(:clusters_applications_knative, :scheduled) }
     let!(:update_command) { application.update_command }
     let(:service) { described_class.new(application) }
-    let(:helm_client) { instance_double(Gitlab::Kubernetes::Helm::Api) }
+    let(:helm_client) { instance_double(Gitlab::Kubernetes::Helm::API) }
 
     before do
       allow(service).to receive(:update_command).and_return(update_command)
@@ -51,7 +51,7 @@ describe Clusters::Applications::PatchService do
         service.execute
 
         expect(application).to be_update_errored
-        expect(application.status_reason).to match('Kubernetes error: 500')
+        expect(application.status_reason).to eq(_('Kubernetes error: %{error_code}') % { error_code: 500 })
       end
     end
 
@@ -73,7 +73,7 @@ describe Clusters::Applications::PatchService do
         service.execute
 
         expect(application).to be_update_errored
-        expect(application.status_reason).to eq('Failed to update.')
+        expect(application.status_reason).to eq(_('Failed to update.'))
       end
     end
   end

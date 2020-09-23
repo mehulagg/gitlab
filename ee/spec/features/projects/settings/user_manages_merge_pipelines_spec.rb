@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User manages merge pipelines option', :js do
+RSpec.describe 'User manages merge pipelines option', :js do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 
@@ -23,7 +23,7 @@ describe 'User manages merge pipelines option', :js do
     before do
       visit edit_project_path(project)
 
-      check('Merge pipelines will try to validate the post-merge result prior to merging')
+      check('Enable merge trains and pipelines for merged results')
     end
 
     it 'sees enabled merge pipeline checkbox' do

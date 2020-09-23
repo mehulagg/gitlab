@@ -1,8 +1,8 @@
-/* eslint-disable no-useless-escape, no-var, no-underscore-dangle, func-names, no-return-assign, one-var, consistent-return, class-methods-use-this */
+/* eslint-disable no-useless-escape, no-underscore-dangle, func-names, no-return-assign, consistent-return, class-methods-use-this */
 
 import $ from 'jquery';
 import 'cropper';
-import _ from 'underscore';
+import { isString } from 'lodash';
 
 (() => {
   // Matches everything but the file name
@@ -29,7 +29,7 @@ import _ from 'underscore';
       this.onModalShow = this.onModalShow.bind(this);
       this.onPickImageClick = this.onPickImageClick.bind(this);
       this.fileInput = $(input);
-      this.modalCropImg = _.isString(this.modalCropImg) ? $(this.modalCropImg) : this.modalCropImg;
+      this.modalCropImg = isString(this.modalCropImg) ? $(this.modalCropImg) : this.modalCropImg;
       this.fileInput
         .attr('name', `${this.fileInput.attr('name')}-trigger`)
         .attr('id', `${this.fileInput.attr('id')}-trigger`);
@@ -47,9 +47,9 @@ import _ from 'underscore';
       this.filename = this.getElement(filename);
       this.previewImage = this.getElement(previewImage);
       this.pickImageEl = this.getElement(pickImageEl);
-      this.modalCrop = _.isString(modalCrop) ? $(modalCrop) : modalCrop;
-      this.uploadImageBtn = _.isString(uploadImageBtn) ? $(uploadImageBtn) : uploadImageBtn;
-      this.modalCropImg = _.isString(modalCropImg) ? $(modalCropImg) : modalCropImg;
+      this.modalCrop = isString(modalCrop) ? $(modalCrop) : modalCrop;
+      this.uploadImageBtn = isString(uploadImageBtn) ? $(uploadImageBtn) : uploadImageBtn;
+      this.modalCropImg = isString(modalCropImg) ? $(modalCropImg) : modalCropImg;
       this.cropActionsBtn = this.modalCrop.find('[data-method]');
       this.bindEvents();
     }
@@ -59,8 +59,7 @@ import _ from 'underscore';
     }
 
     bindEvents() {
-      var _this;
-      _this = this;
+      const _this = this;
       this.fileInput.on('change', function(e) {
         _this.onFileInputChange(e, this);
         this.value = null;
@@ -70,8 +69,7 @@ import _ from 'underscore';
       this.modalCrop.on('hidden.bs.modal', this.onModalHide);
       this.uploadImageBtn.on('click', this.onUploadImageBtnClick);
       this.cropActionsBtn.on('click', function() {
-        var btn;
-        btn = this;
+        const btn = this;
         return _this.onActionBtnClick(btn);
       });
       return (this.croppedImageBlob = null);
@@ -82,8 +80,7 @@ import _ from 'underscore';
     }
 
     onModalShow() {
-      var _this;
-      _this = this;
+      const _this = this;
       return this.modalCropImg.cropper({
         viewMode: 1,
         center: false,
@@ -128,8 +125,7 @@ import _ from 'underscore';
     }
 
     onActionBtnClick(btn) {
-      var data;
-      data = $(btn).data();
+      const data = $(btn).data();
       if (this.modalCropImg.data('cropper') && data.method) {
         return this.modalCropImg.cropper(data.method, data.option);
       }
@@ -140,9 +136,8 @@ import _ from 'underscore';
     }
 
     readFile(input) {
-      var _this, reader;
-      _this = this;
-      reader = new FileReader();
+      const _this = this;
+      const reader = new FileReader();
       reader.onload = () => {
         _this.modalCropImg.attr('src', reader.result);
         return _this.modalCrop.modal('show');
@@ -151,9 +146,10 @@ import _ from 'underscore';
     }
 
     dataURLtoBlob(dataURL) {
-      var array, binary, i, len;
-      binary = atob(dataURL.split(',')[1]);
-      array = [];
+      let i = 0;
+      let len = 0;
+      const binary = atob(dataURL.split(',')[1]);
+      const array = [];
 
       for (i = 0, len = binary.length; i < len; i += 1) {
         array.push(binary.charCodeAt(i));
@@ -164,9 +160,8 @@ import _ from 'underscore';
     }
 
     setPreview() {
-      var filename;
+      const filename = this.fileInput.val().replace(FILENAMEREGEX, '');
       this.previewImage.attr('src', this.dataURL);
-      filename = this.fileInput.val().replace(FILENAMEREGEX, '');
       return this.filename.text(filename);
     }
 

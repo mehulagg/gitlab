@@ -29,7 +29,8 @@ module EE
             approval_rule_attributes,
             :approvals_before_merge,
             :approver_group_ids,
-            :approver_ids
+            :approver_ids,
+            :reset_approval_rules_to_defaults
           )
 
           attrs
@@ -62,7 +63,7 @@ module EE
           target_project = if @merge_request # rubocop:disable Gitlab/ModuleWithInstanceVariables
                              @merge_request.target_project # rubocop:disable Gitlab/ModuleWithInstanceVariables
                            elsif project.forked? && project.id.to_s != mr_params[:target_project_id]
-                             project.forked_from_project
+                             project.fork_network_projects.find(mr_params[:target_project_id])
                            else
                              project
                            end

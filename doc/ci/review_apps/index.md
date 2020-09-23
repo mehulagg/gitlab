@@ -1,10 +1,13 @@
 ---
+stage: Release
+group: Progressive Delivery
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 ---
 
 # Review Apps
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/21971) in GitLab 8.12. Further additions were made in GitLab 8.13 and 8.14.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/21971) in GitLab 8.12. Further additions were made in GitLab 8.13 and 8.14.
 > - Inspired by [Heroku's Review Apps](https://devcenter.heroku.com/articles/github-integration-review-apps), which itself was inspired by [Fourchette](https://github.com/rainforestapp/fourchette).
 
 Review Apps is a collaboration tool that takes the hard work out of providing an environment to showcase product changes.
@@ -29,7 +32,7 @@ In the above example:
 
 ## How Review Apps work
 
-A Review App is a mapping of a branch with an [environment](../environments.md).
+A Review App is a mapping of a branch with an [environment](../environments/index.md).
 Access to the Review App is made available as a link on the [merge request](../../user/project/merge_requests.md) relevant to the branch.
 
 The following is an example of a merge request with an environment set dynamically.
@@ -43,20 +46,47 @@ In this example, a branch was:
 
 After adding Review Apps to your workflow, you follow the branched Git flow. That is:
 
-1. Push a branch and let the Runner deploy the Review App based on the `script` definition of the dynamic environment job.
-1. Wait for the Runner to build and deploy your web application.
+1. Push a branch and let the runner deploy the Review App based on the `script` definition of the dynamic environment job.
+1. Wait for the runner to build and deploy your web application.
 1. Click on the link provided in the merge request related to the branch to see the changes live.
 
 ## Configuring Review Apps
 
-Review Apps are built on [dynamic environments](../environments.md#configuring-dynamic-environments), which allow you to dynamically create a new environment for each branch.
+Review Apps are built on [dynamic environments](../environments/index.md#configuring-dynamic-environments), which allow you to dynamically create a new environment for each branch.
 
 The process of configuring Review Apps is as follows:
 
 1. Set up the infrastructure to host and deploy the Review Apps (check the [examples](#review-apps-examples) below).
-1. [Install](https://docs.gitlab.com/runner/install/) and [configure](https://docs.gitlab.com/runner/commands/) a Runner to do deployment.
-1. Set up a job in `.gitlab-ci.yml` that uses the [predefined CI environment variable](../variables/README.md) `${CI_COMMIT_REF_NAME}` to create dynamic environments and restrict it to run only on branches.
-1. Optionally, set a job that [manually stops](../environments.md#stopping-an-environment) the Review Apps.
+1. [Install](https://docs.gitlab.com/runner/install/) and [configure](https://docs.gitlab.com/runner/commands/) a runner to do deployment.
+1. Set up a job in `.gitlab-ci.yml` that uses the [predefined CI environment variable](../variables/README.md) `${CI_COMMIT_REF_NAME}`
+   to create dynamic environments and restrict it to run only on branches.
+   Alternatively, you can get a YML template for this job by [enabling review apps](#enable-review-apps-button) for your project.
+1. Optionally, set a job that [manually stops](../environments/index.md#stopping-an-environment) the Review Apps.
+
+### Enable Review Apps button
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/118844) in GitLab 12.8.
+
+When configuring Review Apps for a project, you need to add a new job to `.gitlab-ci.yml`,
+as mentioned above. To facilitate this and if you are using Kubernetes, you can click
+the **Enable Review Apps** button and GitLab will prompt you with a template code block that
+you can copy and paste into `.gitlab-ci.yml` as a starting point. To do so:
+
+1. Go to the project your want to create a Review App job for.
+1. From the left nav, go to **Operations** > **Environments**.
+1. Click on the **Enable Review Apps** button. It is available to you
+   if you have Developer or higher [permissions](../../user/permissions.md) to that project.
+1. Copy the provided code snippet and paste it into your
+   `.gitlab-ci.yml` file:
+
+   ![Enable Review Apps modal](img/enable_review_app_v12_8.png)
+
+1. Feel free to tune this template to your own needs.
+
+## Review Apps auto-stop
+
+See how to [configure Review Apps environments to expire and auto-stop](../environments/index.md#environments-auto-stop)
+after a given period of time.
 
 ## Review Apps examples
 
@@ -65,15 +95,18 @@ The following are example projects that demonstrate Review App configuration:
 - [NGINX](https://gitlab.com/gitlab-examples/review-apps-nginx).
 - [OpenShift](https://gitlab.com/gitlab-examples/review-apps-openshift).
 
-<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
-See also the video [Demo: Cloud Native Development with GitLab](https://www.youtube.com/watch?v=jfIyQEwrocw), which includes a Review Apps example.
+Other examples of Review Apps:
+
+- <i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+[Cloud Native Development with GitLab](https://www.youtube.com/watch?v=jfIyQEwrocw).
+- [Review Apps for Android](https://about.gitlab.com/blog/2020/05/06/how-to-create-review-apps-for-android-with-gitlab-fastlane-and-appetize-dot-io/).
 
 ## Route Maps
 
 > Introduced in GitLab 8.17. In GitLab 11.5, the file links are available in the merge request widget.
 
 Route Maps allows you to go directly from source files
-to public pages on the [environment](../environments.md) defined for
+to public pages on the [environment](../environments/index.md) defined for
 Review Apps.
 
 Once set up, the review app link in the merge request
@@ -85,7 +118,7 @@ in your repository map to paths of pages on your website using a Route Map.
 Once set, GitLab will display **View on ...** buttons, which will take you
 to the pages changed directly from merge requests.
 
-To set up a route map, add a a file inside the repository at `.gitlab/route-map.yml`,
+To set up a route map, add a file inside the repository at `.gitlab/route-map.yml`,
 which contains a YAML array that maps `source` paths (in the repository) to `public`
 paths (on the website).
 
@@ -97,20 +130,20 @@ deployed from its [project on GitLab.com](https://gitlab.com/gitlab-com/www-gitl
 
 ```yaml
 # Team data
-- source: 'data/team.yml' # data/team.yml
-  public: 'team/' # team/
+- source: 'data/team.yml'  # data/team.yml
+  public: 'team/'  # team/
 
 # Blogposts
-- source: /source\/posts\/([0-9]{4})-([0-9]{2})-([0-9]{2})-(.+?)\..*/ # source/posts/2017-01-30-around-the-world-in-6-releases.html.md.erb
-  public: '\1/\2/\3/\4/' # 2017/01/30/around-the-world-in-6-releases/
+- source: /source\/posts\/([0-9]{4})-([0-9]{2})-([0-9]{2})-(.+?)\..*/  # source/posts/2017-01-30-around-the-world-in-6-releases.html.md.erb
+  public: '\1/\2/\3/\4/'  # 2017/01/30/around-the-world-in-6-releases/
 
 # HTML files
-- source: /source\/(.+?\.html).*/ # source/index.html.haml
-  public: '\1' # index.html
+- source: /source\/(.+?\.html).*/  # source/index.html.haml
+  public: '\1'  # index.html
 
 # Other files
-- source: /source\/(.*)/ # source/images/blogimages/around-the-world-in-6-releases-cover.png
-  public: '\1' # images/blogimages/around-the-world-in-6-releases-cover.png
+- source: /source\/(.*)/  # source/images/blogimages/around-the-world-in-6-releases-cover.png
+  public: '\1'  # images/blogimages/around-the-world-in-6-releases-cover.png
 ```
 
 Mappings are defined as entries in the root YAML array, and are identified by a `-` prefix. Within an entry, there is a hash map with two keys:
@@ -155,7 +188,7 @@ Once you have the route mapping set up, it will take effect in the following loc
 
 ## Visual Reviews **(STARTER)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/10761) in GitLab Starter 12.0.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10761) in GitLab Starter 12.0.
 
 With Visual Reviews, you can provide a feedback form to your Review Apps so
 that reviewers can post comments directly from the app back to the merge request
@@ -163,14 +196,22 @@ that spawned the Review App.
 
 ### Configuring Visual Reviews
 
+Ensure that the `anonymous_visual_review_feedback` feature flag is enabled.
+Administrators can enable with a Rails console as follows:
+
+```ruby
+Feature.enable(:anonymous_visual_review_feedback)
+```
+
 The feedback form is served through a script you add to pages in your Review App.
 If you have [Developer permissions](../../user/permissions.md) to the project,
 you can access it by clicking the **Review** button in the **Pipeline** section
-of the merge request.
+of the merge request. The form modal will also show a dropdown for changed pages
+if [route maps](#route-maps) are configured in the project.
 
 ![review button](img/review_button.png)
 
-The provided script should be added to the `<head>` of you application and
+The provided script should be added to the `<head>` of your application and
 consists of some project and merge request specific values. Here's what it
 looks like:
 
@@ -180,6 +221,7 @@ looks like:
   data-merge-request-id='1'
   data-mr-url='https://gitlab.example.com'
   data-project-path='sarah/review-app-tester'
+  data-require-auth='true'
   id='review-app-toolbar-script'
   src='https://gitlab.example.com/assets/webpack/visual_review_toolbar.js'>
 </script>
@@ -197,6 +239,7 @@ to replace those values at runtime when each review app is created:
 - `data-mr-url` is the URL of the GitLab instance and will be the same for all
   review apps.
 - `data-project-path` is the project's path, which can be found by `CI_PROJECT_PATH`.
+- `data-require-auth` is optional for public projects but required for [private and internal ones](#visual-reviews-in-private-or-internal-projects). If this is set to `true`, the user will be required to enter their [personal access token](../../user/profile/personal_access_tokens.md) instead of their name and email.
 - `id` is always `review-app-toolbar-script`, you don't need to change that.
 - `src` is the source of the review toolbar script, which resides in the
   respective GitLab instance and will be the same for all review apps.
@@ -217,9 +260,27 @@ For example, in a Ruby application, you would need to have this script:
 Then, when your app is deployed via GitLab CI/CD, those variables should get
 replaced with their real values.
 
-NOTE: **Note:**
-Future enhancements [are planned](https://gitlab.com/gitlab-org/gitlab/issues/11322)
-to make this process even easier.
+### Determining merge request ID
+
+The visual review tools retrieve the merge request ID from the `data-merge-request-id`
+data attribute included in the `script` HTML tag used to add the visual review tools
+to your review app.
+
+​After determining the ID for the merge request to link to a visual review app, you
+can supply the ID by either:​​
+
+- Hard-coding it in the script tag via the data attribute `data-merge-request-id` of the app.
+- Dynamically adding the `data-merge-request-id` value during the build of the app.
+- Supplying it manually through the visual review form in the app.
+
+### Visual Reviews in private or internal projects
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/42750#note_317271120) in GitLab 12.10.
+
+To enable visual reviews for private and internal projects, set the
+[`data-require-auth` variable](#configuring-visual-reviews) to `true`. When enabled,
+the user must enter a [personal access token](../../user/profile/personal_access_tokens.md)
+with `api` scope before submitting feedback.
 
 ### Using Visual Reviews
 
@@ -231,25 +292,15 @@ the bottom-right corner.
 
 To use the feedback form:
 
-1. Create a [personal access token](../../user/profile/personal_access_tokens.md)
-   with the API scope selected.
-1. Paste the token into the feedback box when prompted. If you select **Remember me**,
-   your browser stores the token so that future visits to Review Apps at the same URL
-   will not require you to re-enter the token. To clear the token, click **Log out**.
 1. Make a comment on the visual review. You can make use of all the
    [Markdown annotations](../../user/markdown.md) that are also available in
    merge request comments.
+1. If `data-require-auth` is `true`, you must enter your [personal access token](../../user/profile/personal_access_tokens.md). Otherwise, you must enter your name, and optionally, your email.
 1. Finally, click **Send feedback**.
 
 After you make and submit a comment in the visual review box, it will appear
 automatically in the respective merge request.
 
-TIP: **Tip:**
-Because tokens must be entered on a per-domain basis and they can only be accessed
-once, different review apps will not remember your token. You can save the token
-to your password manager specifically for the purpose of Visual Reviews. This way,
-you will not need to create additional tokens for each merge request.
-
 ## Limitations
 
-Review App limitations are the same as [environments limitations](../environments.md#limitations).
+Review App limitations are the same as [environments limitations](../environments/index.md#limitations).

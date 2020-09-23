@@ -25,8 +25,9 @@ class Projects::BranchesController < Projects::ApplicationController
 
         @refs_pipelines = @project.ci_pipelines.latest_successful_for_refs(@branches.map(&:name))
         @merged_branch_names = repository.merged_branch_names(@branches.map(&:name))
+        @branch_pipeline_statuses = branch_pipeline_statuses
 
-        # https://gitlab.com/gitlab-org/gitlab-foss/issues/48097
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/22851
         Gitlab::GitalyClient.allow_n_plus_1_calls do
           render
         end
@@ -46,7 +47,7 @@ class Projects::BranchesController < Projects::ApplicationController
   def diverging_commit_counts
     respond_to do |format|
       format.json do
-        service = Branches::DivergingCommitCountsService.new(repository)
+        service = ::Branches::DivergingCommitCountsService.new(repository)
         branches = BranchesFinder.new(repository, params.permit(names: [])).execute
 
         Gitlab::GitalyClient.allow_n_plus_1_calls do
@@ -63,7 +64,7 @@ class Projects::BranchesController < Projects::ApplicationController
 
     redirect_to_autodeploy = project.empty_repo? && project.deployment_platform.present?
 
-    result = CreateBranchService.new(project, current_user)
+    result = ::Branches::CreateService.new(project, current_user)
         .execute(branch_name, ref)
 
     success = (result[:status] == :success)
@@ -102,7 +103,7 @@ class Projects::BranchesController < Projects::ApplicationController
 
   def destroy
     @branch_name = Addressable::URI.unescape(params[:id])
-    result = DeleteBranchService.new(project, current_user).execute(@branch_name)
+    result = ::Branches::DeleteService.new(project, current_user).execute(@branch_name)
 
     respond_to do |format|
       format.html do
@@ -118,7 +119,7 @@ class Projects::BranchesController < Projects::ApplicationController
   end
 
   def destroy_all_merged
-    DeleteMergedBranchesService.new(@project, current_user).async_execute
+    ::Branches::DeleteMergedService.new(@project, current_user).async_execute
 
     redirect_to project_branches_path(@project),
       notice: _('Merged branches are being deleted. This can take some time depending on the number of branches. Please refresh the page to see changes.')
@@ -133,8 +134,6 @@ class Projects::BranchesController < Projects::ApplicationController
   # frontend could omit this set. To prevent excessive I/O, we require
   # that a list of names be specified.
   def limit_diverging_commit_counts!
-    return unless Feature.enabled?(:limit_diverging_commit_counts, default_enabled: true)
-
     limit = Kaminari.config.default_per_page
 
     # If we don't have many branches in the repository, then go ahead.
@@ -188,7 +187,6 @@ class Projects::BranchesController < Projects::ApplicationController
   end
 
   def confidential_issue_project
-    return unless helpers.create_confidential_merge_request_enabled?
     return if params[:confidential_issue_project_id].blank?
 
     confidential_issue_project = Project.find(params[:confidential_issue_project_id])
@@ -196,5 +194,16 @@ class Projects::BranchesController < Projects::ApplicationController
     return unless can?(current_user, :update_issue, confidential_issue_project)
 
     confidential_issue_project
+  end
+
+  def branch_pipeline_statuses
+    latest_commits = @branches.map do |branch|
+      [branch.name, repository.commit(branch.dereferenced_target).sha]
+    end.to_h
+
+    latest_pipelines = project.ci_pipelines.latest_pipeline_per_commit(latest_commits.values)
+    latest_commits.transform_values do |commit_sha|
+      latest_pipelines[commit_sha]&.detailed_status(current_user)
+    end.compact
   end
 end

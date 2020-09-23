@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LicensesTable component given a list of licenses (loaded) renders the table headers 1`] = `
+<div
+  class="gl-responsive-table-row table-row-header text-2 bg-secondary-50 px-2"
+  role="row"
+>
+  <div
+    class="table-section section-30"
+    role="rowheader"
+  >
+    
+      Name
+    
+  </div>
+  <div
+    class="table-section section-70"
+    role="rowheader"
+  >
+    
+      Component
+    
+  </div>
+</div>
+`;
+
+exports[`LicensesTable component given a list of licenses (loading) renders the table headers 1`] = `
+<div
+  class="gl-responsive-table-row table-row-header text-2 bg-secondary-50 px-2"
+  role="row"
+>
+  <div
+    class="table-section section-30"
+    role="rowheader"
+  >
+    
+      Name
+    
+  </div>
+  <div
+    class="table-section section-70"
+    role="rowheader"
+  >
+    
+      Component
+    
+  </div>
+</div>
+`;
+
+exports[`LicensesTable component given an empty list of licenses renders the table headers 1`] = `
+<div
+  class="gl-responsive-table-row table-row-header text-2 bg-secondary-50 px-2"
+  role="row"
+>
+  <div
+    class="table-section section-30"
+    role="rowheader"
+  >
+    
+      Name
+    
+  </div>
+  <div
+    class="table-section section-70"
+    role="rowheader"
+  >
+    
+      Component
+    
+  </div>
+</div>
+`;

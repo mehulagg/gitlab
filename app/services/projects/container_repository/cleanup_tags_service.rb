@@ -5,70 +5,53 @@ module Projects
     class CleanupTagsService < BaseService
       def execute(container_repository)
         return error('feature disabled') unless can_use?
-        return error('access denied') unless can_admin?
+        return error('access denied') unless can_destroy?
+        return error('invalid regex') unless valid_regex?
 
         tags = container_repository.tags
-        tags_by_digest = group_by_digest(tags)
-
         tags = without_latest(tags)
         tags = filter_by_name(tags)
-        tags = with_manifest(tags)
-        tags = order_by_date(tags)
         tags = filter_keep_n(tags)
         tags = filter_by_older_than(tags)
 
-        deleted_tags = delete_tags(tags, tags_by_digest)
-
-        success(deleted: deleted_tags.map(&:name))
+        delete_tags(container_repository, tags)
       end
 
       private
 
-      def delete_tags(tags_to_delete, tags_by_digest)
-        deleted_digests = group_by_digest(tags_to_delete).select do |digest, tags|
-          delete_tag_digest(digest, tags, tags_by_digest[digest])
-        end
+      def delete_tags(container_repository, tags)
+        return success(deleted: []) unless tags.any?
 
-        deleted_digests.values.flatten
-      end
+        tag_names = tags.map(&:name)
 
-      def delete_tag_digest(digest, tags, other_tags)
-        # Issue: https://gitlab.com/gitlab-org/gitlab-foss/issues/21405
-        # we have to remove all tags due
-        # to Docker Distribution bug unable
-        # to delete single tag
-        return unless tags.count == other_tags.count
-
-        # delete all tags
-        tags.map(&:unsafe_delete)
-      end
-
-      def group_by_digest(tags)
-        tags.group_by(&:digest)
+        Projects::ContainerRepository::DeleteTagsService
+          .new(container_repository.project, current_user, tags: tag_names)
+          .execute(container_repository)
       end
 
       def without_latest(tags)
         tags.reject(&:latest?)
       end
 
-      def with_manifest(tags)
-        tags.select(&:valid?)
-      end
-
       def order_by_date(tags)
-        now = DateTime.now
+        now = DateTime.current
         tags.sort_by { |tag| tag.created_at || now }.reverse
       end
 
       def filter_by_name(tags)
-        regex = Gitlab::UntrustedRegexp.new("\\A#{params['name_regex']}\\z")
+        regex_delete = ::Gitlab::UntrustedRegexp.new("\\A#{params['name_regex_delete'] || params['name_regex']}\\z")
+        regex_retain = ::Gitlab::UntrustedRegexp.new("\\A#{params['name_regex_keep']}\\z")
 
         tags.select do |tag|
-          regex.scan(tag.name).any?
+          # regex_retain will override any overlapping matches by regex_delete
+          regex_delete.match?(tag.name) && !regex_retain.match?(tag.name)
         end
       end
 
       def filter_keep_n(tags)
+        return tags unless params['keep_n']
+
+        tags = order_by_date(tags)
         tags.drop(params['keep_n'].to_i)
       end
 
@@ -82,12 +65,25 @@ module Projects
         end
       end
 
-      def can_admin?
-        can?(current_user, :admin_container_image, project)
+      def can_destroy?
+        return true if params['container_expiration_policy']
+
+        can?(current_user, :destroy_container_image, project)
       end
 
       def can_use?
         Feature.enabled?(:container_registry_cleanup, project, default_enabled: true)
+      end
+
+      def valid_regex?
+        %w(name_regex_delete name_regex name_regex_keep).each do |param_name|
+          regex = params[param_name]
+          ::Gitlab::UntrustedRegexp.new(regex) unless regex.blank?
+        end
+        true
+      rescue RegexpError => e
+        ::Gitlab::ErrorTracking.log_exception(e, project_id: project.id)
+        false
       end
     end
   end

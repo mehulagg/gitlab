@@ -2,57 +2,71 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Ci::Pipeline::Quota::Size do
-  set(:namespace) { create(:namespace) }
-  set(:gold_plan) { create(:gold_plan) }
-  set(:project) { create(:project, :repository, namespace: namespace) }
+RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::Size do
+  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:gold_plan, reload: true) { create(:gold_plan) }
+  let_it_be(:project, reload: true) { create(:project, :repository, namespace: namespace) }
+  let_it_be(:plan_limits) { create(:plan_limits, plan: gold_plan) }
+  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan) }
 
   let(:pipeline) { build_stubbed(:ci_pipeline, project: project) }
-  let(:limit) { described_class.new(namespace, pipeline) }
 
-  before do
-    create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+  let(:command) do
+    double(:command,
+      stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
   end
 
+  subject { described_class.new(namespace, pipeline, command) }
+
   shared_context 'pipeline size limit exceeded' do
-    let(:pipeline) do
-      config = { rspec: { script: 'rspec' },
-                 spinach: { script: 'spinach' } }
-
-      build(:ci_pipeline, project: project, config: config)
-    end
-
     before do
-      gold_plan.update_column(:pipeline_size_limit, 1)
+      config = YAML.dump({
+        rspec: { script: 'rspec' },
+        spinach: { script: 'spinach' }
+      })
+      stub_ci_pipeline_yaml_file(config)
+      plan_limits.update!(ci_pipeline_size: 1)
     end
   end
 
   shared_context 'pipeline size limit not exceeded' do
-    let(:pipeline) { build(:ci_pipeline_with_one_job, project: project) }
-
     before do
-      gold_plan.update_column(:pipeline_size_limit, 2)
+      config = YAML.dump({
+        rspec: { script: 'rspec' }
+      })
+      stub_ci_pipeline_yaml_file(config)
+      plan_limits.update!(ci_pipeline_size: 2)
     end
   end
 
   describe '#enabled?' do
     context 'when limit is enabled in plan' do
       before do
-        gold_plan.update_column(:pipeline_size_limit, 10)
+        plan_limits.update!(ci_pipeline_size: 10)
       end
 
       it 'is enabled' do
-        expect(limit).to be_enabled
+        expect(subject).to be_enabled
       end
     end
 
     context 'when limit is not enabled' do
       before do
-        gold_plan.update_column(:pipeline_size_limit, 0)
+        plan_limits.update!(ci_pipeline_size: 0)
       end
 
       it 'is not enabled' do
-        expect(limit).not_to be_enabled
+        expect(subject).not_to be_enabled
+      end
+    end
+
+    context 'when limit does not exist' do
+      before do
+        allow(namespace).to receive(:actual_plan) { create(:default_plan) }
+      end
+
+      it 'is not enabled' do
+        expect(subject).not_to be_enabled
       end
     end
   end
@@ -62,7 +76,7 @@ describe EE::Gitlab::Ci::Pipeline::Quota::Size do
       include_context 'pipeline size limit exceeded'
 
       it 'is exceeded' do
-        expect(limit).to be_exceeded
+        expect(subject).to be_exceeded
       end
     end
 
@@ -70,7 +84,7 @@ describe EE::Gitlab::Ci::Pipeline::Quota::Size do
       include_context 'pipeline size limit not exceeded'
 
       it 'is not exceeded' do
-        expect(limit).not_to be_exceeded
+        expect(subject).not_to be_exceeded
       end
     end
   end
@@ -80,7 +94,7 @@ describe EE::Gitlab::Ci::Pipeline::Quota::Size do
       include_context 'pipeline size limit exceeded'
 
       it 'returns infor about pipeline size limit exceeded' do
-        expect(limit.message)
+        expect(subject.message)
           .to eq "Pipeline size limit exceeded by 1 job!"
       end
     end

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'fast_spec_helper'
-require 'support/shared_examples/malicious_regexp_shared_examples'
+require 'support/shared_examples/lib/gitlab/malicious_regexp_shared_examples'
 
-describe Gitlab::UntrustedRegexp do
+RSpec.describe Gitlab::UntrustedRegexp do
   describe '#initialize' do
     subject { described_class.new(pattern) }
 

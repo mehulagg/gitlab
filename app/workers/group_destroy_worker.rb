@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-class GroupDestroyWorker
+class GroupDestroyWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include ExceptionBacktrace
 
-  feature_category :groups
+  feature_category :subgroups
 
   def perform(group_id, user_id)
     begin

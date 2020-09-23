@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'SCIM Token handling', :js do
+RSpec.describe 'SCIM Token handling', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
 

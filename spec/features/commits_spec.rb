@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe 'Commits' do
-  let(:project) { create(:project, :repository) }
-  let(:user) { create(:user) }
+RSpec.describe 'Commits' do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
 
   describe 'CI' do
     before do
@@ -112,7 +112,7 @@ describe 'Commits' do
         describe 'Cancel build' do
           it 'cancels build', :js, :sidekiq_might_not_need_inline do
             visit pipeline_path(pipeline)
-            find('.js-btn-cancel-pipeline').click
+            find('[data-testid="cancelPipeline"]').click
             expect(page).to have_content 'canceled'
           end
         end
@@ -157,39 +157,6 @@ describe 'Commits' do
         end
       end
     end
-
-    describe '.gitlab-ci.yml not found warning' do
-      before do
-        project.add_reporter(user)
-      end
-
-      context 'ci builds enabled' do
-        it 'does not show warning' do
-          visit pipeline_path(pipeline)
-
-          expect(page).not_to have_content '.gitlab-ci.yml not found in this commit'
-        end
-
-        it 'shows warning' do
-          stub_ci_pipeline_yaml_file(nil)
-
-          visit pipeline_path(pipeline)
-
-          expect(page).to have_content '.gitlab-ci.yml not found in this commit'
-        end
-      end
-
-      context 'ci builds disabled' do
-        it 'does not show warning' do
-          stub_ci_builds_disabled
-          stub_ci_pipeline_yaml_file(nil)
-
-          visit pipeline_path(pipeline)
-
-          expect(page).not_to have_content '.gitlab-ci.yml not found in this commit'
-        end
-      end
-    end
   end
 
   context 'viewing commits for a branch' do
@@ -214,6 +181,43 @@ describe 'Commits' do
       visit project_commits_path(project, branch_name)
 
       expect(find('.js-project-refs-dropdown')).to have_content branch_name
+    end
+  end
+
+  context 'viewing commits for an author' do
+    let(:author_commit) { project.repository.commits(nil, limit: 1).first }
+    let(:commits) { project.repository.commits(nil, author: author, limit: 40) }
+
+    before do
+      project.add_maintainer(user)
+      sign_in(user)
+      visit project_commits_path(project, nil, author: author)
+    end
+
+    shared_examples 'show commits by author' do
+      it "includes the author's commits" do
+        commits.each do |commit|
+          expect(page).to have_content("#{author_commit.author_name} authored #{commit.authored_date.strftime("%b %d, %Y")}")
+        end
+      end
+    end
+
+    context 'author is complete' do
+      let(:author) { "#{author_commit.author_name} <#{author_commit.author_email}>" }
+
+      it_behaves_like 'show commits by author'
+    end
+
+    context 'author is just a name' do
+      let(:author) { "#{author_commit.author_name}" }
+
+      it_behaves_like 'show commits by author'
+    end
+
+    context 'author is just an email' do
+      let(:author) { "#{author_commit.author_email}" }
+
+      it_behaves_like 'show commits by author'
     end
   end
 end

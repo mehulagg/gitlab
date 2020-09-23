@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Epic in issue sidebar', :js do
+RSpec.describe 'Epic in issue sidebar', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group, :public) }
   let(:epic1) { create(:epic, group: group, title: 'Foo') }
@@ -46,7 +46,9 @@ describe 'Epic in issue sidebar', :js do
 
           page.find('.dropdown-input-field').send_keys('Foo')
 
-          expect(page.all('.dropdown-content li a').length).to eq(2) # `No Epic` + 1 matching epic
+          wait_for_requests
+
+          expect(page).to have_selector('.dropdown-content li a', count: 2) # `No Epic` + 1 matching epic
         end
       end
 
@@ -82,8 +84,6 @@ describe 'Epic in issue sidebar', :js do
       stub_licensed_features(epics: true)
 
       sign_in(user)
-      visit project_issue_path(project, issue)
-      wait_for_requests
     end
 
     it_behaves_like 'epic in issue sidebar'

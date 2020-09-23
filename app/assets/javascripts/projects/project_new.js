@@ -1,14 +1,50 @@
 import $ from 'jquery';
+import DEFAULT_PROJECT_TEMPLATES from 'ee_else_ce/projects/default_project_templates';
 import { addSelectOnFocusBehaviour } from '../lib/utils/common_utils';
-import { slugify } from '../lib/utils/text_utility';
-import { s__ } from '~/locale';
+import {
+  convertToTitleCase,
+  humanize,
+  slugify,
+  convertUnicodeToAscii,
+} from '../lib/utils/text_utility';
 
 let hasUserDefinedProjectPath = false;
+let hasUserDefinedProjectName = false;
+
+const onProjectNameChange = ($projectNameInput, $projectPathInput) => {
+  const slug = slugify(convertUnicodeToAscii($projectNameInput.val()));
+  $projectPathInput.val(slug);
+};
+
+const onProjectPathChange = ($projectNameInput, $projectPathInput, hasExistingProjectName) => {
+  const slug = $projectPathInput.val();
+
+  if (!hasExistingProjectName) {
+    $projectNameInput.val(convertToTitleCase(humanize(slug, '[-_]')));
+  }
+};
+
+const setProjectNamePathHandlers = ($projectNameInput, $projectPathInput) => {
+  $projectNameInput.off('keyup change').on('keyup change', () => {
+    onProjectNameChange($projectNameInput, $projectPathInput);
+    hasUserDefinedProjectName = $projectNameInput.val().trim().length > 0;
+    hasUserDefinedProjectPath = $projectPathInput.val().trim().length > 0;
+  });
+
+  $projectPathInput.off('keyup change').on('keyup change', () => {
+    onProjectPathChange($projectNameInput, $projectPathInput, hasUserDefinedProjectName);
+    hasUserDefinedProjectPath = $projectPathInput.val().trim().length > 0;
+  });
+};
 
 const deriveProjectPathFromUrl = $projectImportUrl => {
+  const $currentProjectName = $projectImportUrl
+    .parents('.toggle-import-form')
+    .find('#project_name');
   const $currentProjectPath = $projectImportUrl
     .parents('.toggle-import-form')
     .find('#project_path');
+
   if (hasUserDefinedProjectPath) {
     return;
   }
@@ -30,12 +66,8 @@ const deriveProjectPathFromUrl = $projectImportUrl => {
   const pathMatch = /\/([^/]+)$/.exec(importUrl);
   if (pathMatch) {
     $currentProjectPath.val(pathMatch[1]);
+    onProjectPathChange($currentProjectName, $currentProjectPath, false);
   }
-};
-
-const onProjectNameChange = ($projectNameInput, $projectPathInput) => {
-  const slug = slugify($projectNameInput.val());
-  $projectPathInput.val(slug);
 };
 
 const bindEvents = () => {
@@ -113,78 +145,8 @@ const bindEvents = () => {
     $projectFieldsForm.addClass('selected');
     $selectedIcon.empty();
     const value = $(this).val();
-    const templates = {
-      rails: {
-        text: s__('ProjectTemplates|Ruby on Rails'),
-        icon: '.template-option .icon-rails',
-      },
-      express: {
-        text: s__('ProjectTemplates|NodeJS Express'),
-        icon: '.template-option .icon-express',
-      },
-      spring: {
-        text: s__('ProjectTemplates|Spring'),
-        icon: '.template-option .icon-spring',
-      },
-      iosswift: {
-        text: s__('ProjectTemplates|iOS (Swift)'),
-        icon: '.template-option svg.icon-gitlab',
-      },
-      dotnetcore: {
-        text: s__('ProjectTemplates|.NET Core'),
-        icon: '.template-option .icon-dotnet',
-      },
-      android: {
-        text: s__('ProjectTemplates|Android'),
-        icon: '.template-option svg.icon-android',
-      },
-      gomicro: {
-        text: s__('ProjectTemplates|Go Micro'),
-        icon: '.template-option .icon-gomicro',
-      },
-      hugo: {
-        text: s__('ProjectTemplates|Pages/Hugo'),
-        icon: '.template-option .icon-hugo',
-      },
-      jekyll: {
-        text: s__('ProjectTemplates|Pages/Jekyll'),
-        icon: '.template-option .icon-jekyll',
-      },
-      plainhtml: {
-        text: s__('ProjectTemplates|Pages/Plain HTML'),
-        icon: '.template-option .icon-plainhtml',
-      },
-      gitbook: {
-        text: s__('ProjectTemplates|Pages/GitBook'),
-        icon: '.template-option .icon-gitbook',
-      },
-      hexo: {
-        text: s__('ProjectTemplates|Pages/Hexo'),
-        icon: '.template-option .icon-hexo',
-      },
-      nfhugo: {
-        text: s__('ProjectTemplates|Netlify/Hugo'),
-        icon: '.template-option .icon-netlify',
-      },
-      nfjekyll: {
-        text: s__('ProjectTemplates|Netlify/Jekyll'),
-        icon: '.template-option .icon-netlify',
-      },
-      nfplainhtml: {
-        text: s__('ProjectTemplates|Netlify/Plain HTML'),
-        icon: '.template-option .icon-netlify',
-      },
-      nfgitbook: {
-        text: s__('ProjectTemplates|Netlify/GitBook'),
-        icon: '.template-option .icon-netlify',
-      },
-      nfhexo: {
-        text: s__('ProjectTemplates|Netlify/Hexo'),
-        icon: '.template-option .icon-netlify',
-      },
-    };
 
-    const selectedTemplate = templates[value];
+    const selectedTemplate = DEFAULT_PROJECT_TEMPLATES[value];
     $selectedTemplateText.text(selectedTemplate.text);
     $(selectedTemplate.icon)
       .clone()
@@ -194,10 +156,7 @@ const bindEvents = () => {
     const $activeTabProjectName = $('.tab-pane.active #project_name');
     const $activeTabProjectPath = $('.tab-pane.active #project_path');
     $activeTabProjectName.focus();
-    $activeTabProjectName.keyup(() => {
-      onProjectNameChange($activeTabProjectName, $activeTabProjectPath);
-      hasUserDefinedProjectPath = $activeTabProjectPath.val().trim().length > 0;
-    });
+    setProjectNamePathHandlers($activeTabProjectName, $activeTabProjectPath);
   }
 
   $useTemplateBtn.on('change', chooseTemplate);
@@ -212,26 +171,24 @@ const bindEvents = () => {
     $projectPath.val($projectPath.val().trim());
   });
 
-  $projectPath.on('keyup', () => {
-    hasUserDefinedProjectPath = $projectPath.val().trim().length > 0;
-  });
-
   $projectImportUrl.keyup(() => deriveProjectPathFromUrl($projectImportUrl));
 
   $('.js-import-git-toggle-button').on('click', () => {
     const $projectMirror = $('#project_mirror');
 
     $projectMirror.attr('disabled', !$projectMirror.attr('disabled'));
+    setProjectNamePathHandlers(
+      $('.tab-pane.active #project_name'),
+      $('.tab-pane.active #project_path'),
+    );
   });
 
-  $projectName.on('keyup change', () => {
-    onProjectNameChange($projectName, $projectPath);
-    hasUserDefinedProjectPath = $projectPath.val().trim().length > 0;
-  });
+  setProjectNamePathHandlers($projectName, $projectPath);
 };
 
 export default {
   bindEvents,
   deriveProjectPathFromUrl,
   onProjectNameChange,
+  onProjectPathChange,
 };

@@ -11,7 +11,7 @@ Gets issues count statistics on all issues the authenticated user has access to.
 returns only issues created by the current user. To get all issues,
 use parameter `scope=all`.
 
-```
+```plaintext
 GET /issues_statistics
 GET /issues_statistics?labels=foo
 GET /issues_statistics?labels=foo,bar
@@ -34,7 +34,7 @@ GET /issues_statistics?confidential=true
 | `author_id`         | integer          | no         | Return issues created by the given user `id`. Mutually exclusive with `author_username`. Combine with `scope=all` or `scope=assigned_to_me`. |
 | `author_username`   | string           | no         | Return issues created by the given `username`. Similar to `author_id` and mutually exclusive with `author_id`. |
 | `assignee_id`       | integer          | no         | Return issues assigned to the given user `id`. Mutually exclusive with `assignee_username`. `None` returns unassigned issues. `Any` returns issues with an assignee. |
-| `assignee_username` | string array     | no         | Return issues assigned to the given `username`. Similar to `assignee_id` and mutually exclusive with `assignee_id`. In CE version `assignee_username` array should only contain a single value or an invalid param error will be returned otherwise. |
+| `assignee_username` | string array     | no         | Return issues assigned to the given `username`. Similar to `assignee_id` and mutually exclusive with `assignee_id`. In GitLab CE `assignee_username` array should only contain a single value or an invalid parameter error will be returned otherwise. |
 | `my_reaction_emoji` | string           | no         | Return issues reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. |
 | `iids[]`            | integer array    | no         | Return only the issues having the given `iid`                                                                                                       |
 | `search`            | string           | no         | Search issues against their `title` and `description`                                                                                               |
@@ -43,10 +43,10 @@ GET /issues_statistics?confidential=true
 | `created_before`    | datetime         | no         | Return issues created on or before the given time                                                                                                   |
 | `updated_after`     | datetime         | no         | Return issues updated on or after the given time                                                                                                    |
 | `updated_before`    | datetime         | no         | Return issues updated on or before the given time                                                                                                   |
-| `confidential`     | Boolean          | no         | Filter confidential or public issues.                                                                                                               |
+| `confidential`     | boolean          | no         | Filter confidential or public issues.                                                                                                               |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/issues_statistics
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/issues_statistics"
 ```
 
 Example response:
@@ -67,7 +67,7 @@ Example response:
 
 Gets issues count statistics for given group.
 
-```
+```plaintext
 GET /groups/:id/issues_statistics
 GET /groups/:id/issues_statistics?labels=foo
 GET /groups/:id/issues_statistics?labels=foo,bar
@@ -92,17 +92,17 @@ GET /groups/:id/issues_statistics?confidential=true
 | `author_id`         | integer          | no         | Return issues created by the given user `id`. Mutually exclusive with `author_username`. Combine with `scope=all` or `scope=assigned_to_me`. |
 | `author_username`   | string           | no         | Return issues created by the given `username`. Similar to `author_id` and mutually exclusive with `author_id`. |
 | `assignee_id`       | integer          | no         | Return issues assigned to the given user `id`. Mutually exclusive with `assignee_username`. `None` returns unassigned issues. `Any` returns issues with an assignee. |
-| `assignee_username` | string array     | no         | Return issues assigned to the given `username`. Similar to `assignee_id` and mutually exclusive with `assignee_id`. In CE version `assignee_username` array should only contain a single value or an invalid param error will be returned otherwise. |
+| `assignee_username` | string array     | no         | Return issues assigned to the given `username`. Similar to `assignee_id` and mutually exclusive with `assignee_id`. In GitLab CE `assignee_username` array should only contain a single value or an invalid parameter error will be returned otherwise. |
 | `my_reaction_emoji` | string           | no         | Return issues reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. |
 | `search`            | string           | no         | Search group issues against their `title` and `description`                                                                   |
 | `created_after`     | datetime         | no         | Return issues created on or after the given time                                                                              |
 | `created_before`    | datetime         | no         | Return issues created on or before the given time                                                                             |
 | `updated_after`     | datetime         | no         | Return issues updated on or after the given time                                                                              |
 | `updated_before`    | datetime         | no         | Return issues updated on or before the given time                                                                             |
-| `confidential`     | Boolean          | no         | Filter confidential or public issues.                                                                                         |
+| `confidential`     | boolean          | no         | Filter confidential or public issues.                                                                                         |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/4/issues_statistics
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/4/issues_statistics"
 ```
 
 Example response:
@@ -123,7 +123,7 @@ Example response:
 
 Gets issues count statistics for given project.
 
-```
+```plaintext
 GET /projects/:id/issues_statistics
 GET /projects/:id/issues_statistics?labels=foo
 GET /projects/:id/issues_statistics?labels=foo,bar
@@ -148,17 +148,17 @@ GET /projects/:id/issues_statistics?confidential=true
 | `author_id`         | integer          | no         | Return issues created by the given user `id`. Mutually exclusive with `author_username`. Combine with `scope=all` or `scope=assigned_to_me`. |
 | `author_username`   | string           | no         | Return issues created by the given `username`. Similar to `author_id` and mutually exclusive with `author_id`. |
 | `assignee_id`       | integer          | no         | Return issues assigned to the given user `id`. Mutually exclusive with `assignee_username`. `None` returns unassigned issues. `Any` returns issues with an assignee. |
-| `assignee_username` | string array     | no         | Return issues assigned to the given `username`. Similar to `assignee_id` and mutually exclusive with `assignee_id`. In CE version `assignee_username` array should only contain a single value or an invalid param error will be returned otherwise. |
+| `assignee_username` | string array     | no         | Return issues assigned to the given `username`. Similar to `assignee_id` and mutually exclusive with `assignee_id`. In GitLab CE `assignee_username` array should only contain a single value or an invalid parameter error will be returned otherwise. |
 | `my_reaction_emoji` | string           | no         | Return issues reacted by the authenticated user by the given `emoji`. `None` returns issues not given a reaction. `Any` returns issues given at least one reaction. |
 | `search`            | string           | no         | Search project issues against their `title` and `description`                                                                 |
 | `created_after`     | datetime         | no         | Return issues created on or after the given time                                                                              |
 | `created_before`    | datetime         | no         | Return issues created on or before the given time                                                                             |
 | `updated_after`     | datetime         | no         | Return issues updated on or after the given time                                                                              |
 | `updated_before`    | datetime         | no         | Return issues updated on or before the given time                                                                             |
-| `confidential`     | Boolean          | no         | Filter confidential or public issues.                                                                                         |
+| `confidential`     | boolean          | no         | Filter confidential or public issues.                                                                                         |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/4/issues_statistics
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/4/issues_statistics"
 ```
 
 Example response:

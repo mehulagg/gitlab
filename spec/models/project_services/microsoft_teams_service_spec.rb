@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MicrosoftTeamsService do
+RSpec.describe MicrosoftTeamsService do
   let(:chat_service) { described_class.new }
   let(:webhook_url) { 'https://example.gitlab.com/' }
 
@@ -37,8 +37,9 @@ describe MicrosoftTeamsService do
   end
 
   describe "#execute" do
-    let(:user)    { create(:user) }
-    set(:project) { create(:project, :repository, :wiki_repo) }
+    let(:user) { create(:user) }
+
+    let_it_be(:project) { create(:project, :repository, :wiki_repo) }
 
     before do
       allow(chat_service).to receive_messages(
@@ -120,7 +121,8 @@ describe MicrosoftTeamsService do
           message: "user created page: Awesome wiki_page"
         }
       end
-      let(:wiki_page) { create(:wiki_page, wiki: project.wiki, attrs: opts) }
+
+      let(:wiki_page) { create(:wiki_page, wiki: project.wiki, **opts) }
       let(:wiki_page_sample_data) { Gitlab::DataBuilder::WikiPage.build(wiki_page, user, 'create') }
 
       it "calls Microsoft Teams API" do

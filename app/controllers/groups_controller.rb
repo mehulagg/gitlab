@@ -6,18 +6,21 @@ class GroupsController < Groups::ApplicationController
   include ParamsBackwardCompatibility
   include PreviewMarkdown
   include RecordUserLastActivity
+  include SendFileUpload
+  include FiltersEvents
   extend ::Gitlab::Utils::Override
 
   respond_to :html
 
   prepend_before_action(only: [:show, :issues]) { authenticate_sessionless_user!(:rss) }
   prepend_before_action(only: [:issues_calendar]) { authenticate_sessionless_user!(:ics) }
+  prepend_before_action :ensure_export_enabled, only: [:export, :download_export]
 
   before_action :authenticate_user!, only: [:new, :create]
   before_action :group, except: [:index, :new, :create]
 
   # Authorize
-  before_action :authorize_admin_group!, only: [:edit, :update, :destroy, :projects, :transfer]
+  before_action :authorize_admin_group!, only: [:edit, :update, :destroy, :projects, :transfer, :export, :download_export]
   before_action :authorize_create_group!, only: [:new]
 
   before_action :group_projects, only: [:projects, :activity, :issues, :merge_requests]
@@ -28,6 +31,12 @@ class GroupsController < Groups::ApplicationController
   before_action do
     push_frontend_feature_flag(:vue_issuables_list, @group)
   end
+
+  before_action do
+    set_not_query_feature_flag(@group)
+  end
+
+  before_action :export_rate_limit, only: [:export, :download_export]
 
   skip_cross_project_access_check :index, :new, :create, :edit, :update,
                                   :destroy, :projects
@@ -49,6 +58,8 @@ class GroupsController < Groups::ApplicationController
     @group = Groups::CreateService.new(current_user, group_params).execute
 
     if @group.persisted?
+      track_experiment_event(:onboarding_issues, 'created_namespace')
+
       notice = if @group.chat_team.present?
                  "Group '#{@group.name}' and its Mattermost team were successfully created."
                else
@@ -64,7 +75,11 @@ class GroupsController < Groups::ApplicationController
   def show
     respond_to do |format|
       format.html do
-        render_show_html
+        if @group.import_state&.in_progress?
+          redirect_to group_import_path(@group)
+        else
+          render_show_html
+        end
       end
 
       format.atom do
@@ -91,13 +106,13 @@ class GroupsController < Groups::ApplicationController
 
       format.json do
         load_events
-        pager_json("events/_events", @events.count)
+        pager_json("events/_events", @events.count { |event| event.visible_to_user?(current_user) })
       end
     end
   end
 
   def edit
-    @badge_api_endpoint = expose_url(api_v4_groups_badges_path(id: @group.id))
+    @badge_api_endpoint = expose_path(api_v4_groups_badges_path(id: @group.id))
   end
 
   def projects
@@ -108,7 +123,7 @@ class GroupsController < Groups::ApplicationController
     if Groups::UpdateService.new(@group, current_user, group_params).execute
       redirect_to edit_group_path(@group, anchor: params[:update_section]), notice: "Group '#{@group.name}' was successfully updated."
     else
-      @group.path = @group.path_before_last_save || @group.path_was
+      @group.reset
       render action: "edit"
     end
   end
@@ -116,7 +131,7 @@ class GroupsController < Groups::ApplicationController
   def destroy
     Groups::DestroyService.new(@group, current_user).async_execute
 
-    redirect_to root_path, status: 302, alert: "Group '#{@group.name}' was scheduled for deletion."
+    redirect_to root_path, status: :found, alert: "Group '#{@group.name}' was scheduled for deletion."
   end
 
   # rubocop: disable CodeReuse/ActiveRecord
@@ -133,6 +148,25 @@ class GroupsController < Groups::ApplicationController
     end
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def export
+    export_service = Groups::ImportExport::ExportService.new(group: @group, user: current_user)
+
+    if export_service.async_execute
+      redirect_to edit_group_path(@group), notice: _('Group export started. A download link will be sent by email and made available on this page.')
+    else
+      redirect_to edit_group_path(@group), alert: _('Group export could not be started.')
+    end
+  end
+
+  def download_export
+    if @group.export_file_exists?
+      send_upload(@group.export_file, attachment: @group.export_file.filename)
+    else
+      redirect_to edit_group_path(@group),
+        alert: _('Group export link has expired. Please generate a new export from your group settings.')
+    end
+  end
 
   protected
 
@@ -181,6 +215,7 @@ class GroupsController < Groups::ApplicationController
       :avatar,
       :description,
       :emails_disabled,
+      :mentions_disabled,
       :lfs_enabled,
       :name,
       :path,
@@ -194,7 +229,8 @@ class GroupsController < Groups::ApplicationController
       :require_two_factor_authentication,
       :two_factor_grace_period,
       :project_creation_level,
-      :subgroup_creation_level
+      :subgroup_creation_level,
+      :default_branch_protection
     ]
   end
 
@@ -208,8 +244,9 @@ class GroupsController < Groups::ApplicationController
                  .includes(:namespace)
 
     @events = EventCollection
-                .new(projects, offset: params[:offset].to_i, filter: event_filter, groups: groups)
-                .to_a
+      .new(projects, offset: params[:offset].to_i, filter: event_filter, groups: groups)
+      .to_a
+      .map(&:present)
 
     Events::RenderService
       .new(current_user)
@@ -229,6 +266,22 @@ class GroupsController < Groups::ApplicationController
     params[:id] = group.to_param
 
     url_for(safe_params)
+  end
+
+  def export_rate_limit
+    prefixed_action = "group_#{params[:action]}".to_sym
+
+    scope = params[:action] == :download_export ? @group : nil
+
+    if Gitlab::ApplicationRateLimiter.throttled?(prefixed_action, scope: [current_user, scope].compact)
+      Gitlab::ApplicationRateLimiter.log_request(request, "#{prefixed_action}_request_limit".to_sym, current_user)
+
+      render plain: _('This endpoint has been requested too many times. Try again later.'), status: :too_many_requests
+    end
+  end
+
+  def ensure_export_enabled
+    render_404 unless Feature.enabled?(:group_import_export, @group, default_enabled: true)
   end
 
   private

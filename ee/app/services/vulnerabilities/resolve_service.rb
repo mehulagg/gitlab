@@ -1,19 +1,12 @@
 # frozen_string_literal: true
 
 module Vulnerabilities
-  class ResolveService
-    include Gitlab::Allowable
-
-    def initialize(user, vulnerability)
-      @user = user
-      @vulnerability = vulnerability
-    end
-
+  class ResolveService < BaseService
     def execute
-      raise Gitlab::Access::AccessDeniedError unless can?(@user, :resolve_vulnerability, @vulnerability.project)
+      raise Gitlab::Access::AccessDeniedError unless authorized?
 
       @vulnerability.tap do |vulnerability|
-        vulnerability.update(state: :closed, closed_by: @user, closed_at: Time.zone.now)
+        update_with_note(vulnerability, state: Vulnerability.states[:resolved], resolved_by: @user, resolved_at: Time.current)
       end
     end
   end

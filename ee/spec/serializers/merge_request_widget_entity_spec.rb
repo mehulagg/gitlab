@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe MergeRequestWidgetEntity do
+RSpec.describe MergeRequestWidgetEntity do
   include ProjectForksHelper
 
-  set(:user) { create(:user) }
-  set(:project) { create :project, :repository }
-  set(:merge_request) { create(:merge_request, source_project: project, target_project: project) }
-  set(:pipeline) { create(:ci_empty_pipeline, project: project) }
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project, reload: true) { create :project, :repository }
+  let_it_be(:merge_request, reload: true) { create(:merge_request, source_project: project, target_project: project) }
+  let_it_be(:pipeline, reload: true) { create(:ci_empty_pipeline, project: project) }
   let(:request) { double('request', current_user: user) }
 
   before do
@@ -20,19 +20,8 @@ describe MergeRequestWidgetEntity do
     described_class.new(merge_request, current_user: user, request: request)
   end
 
-  it 'has blob path data' do
-    allow(merge_request).to receive_messages(
-      base_pipeline: pipeline,
-      head_pipeline: pipeline
-    )
-
-    expect(subject.as_json).to include(:blob_path)
-    expect(subject.as_json[:blob_path]).to include(:base_path)
-    expect(subject.as_json[:blob_path]).to include(:head_path)
-  end
-
   def create_all_artifacts
-    artifacts = %i(codequality sast dependency_scanning container_scanning dast license_management performance)
+    artifacts = %i(codequality performance browser_performance load_performance)
 
     artifacts.each do |artifact_type|
       create(:ee_ci_build, artifact_type, :success, pipeline: pipeline, project: pipeline.project)
@@ -62,14 +51,11 @@ describe MergeRequestWidgetEntity do
   describe 'test report artifacts', :request_store do
     using RSpec::Parameterized::TableSyntax
 
-    where(:json_entry, :artifact_type) do
-      :codeclimate         | :codequality
-      :sast                | :sast
-      :dependency_scanning | :dependency_scanning
-      :sast_container      | :container_scanning
-      :dast                | :dast
-      :license_management  | :license_management
-      :performance         | :performance
+    where(:json_entry, :artifact_type, :exposures) do
+      :codeclimate         | :codequality         | []
+      :browser_performance | :browser_performance | [:degradation_threshold, :head_path, :base_path]
+      :browser_performance | :performance         | [:degradation_threshold, :head_path, :base_path]
+      :load_performance    | :load_performance    | [:head_path, :base_path]
     end
 
     with_them do
@@ -92,6 +78,9 @@ describe MergeRequestWidgetEntity do
 
           it "has data entry" do
             expect(subject.as_json).to include(json_entry)
+            exposures.each do |exposure|
+              expect(subject.as_json[json_entry]).to include(exposure)
+            end
           end
         end
 
@@ -104,44 +93,104 @@ describe MergeRequestWidgetEntity do
     end
   end
 
-  describe '#license_management', :request_store do
+  describe 'degradation_threshold' do
+    let!(:head_pipeline) { create(:ci_empty_pipeline, project: project) }
+
     before do
       allow(merge_request).to receive_messages(
-        head_pipeline: pipeline, target_project: project)
-      stub_licensed_features(license_management: true)
+        base_pipeline: pipeline,
+        head_pipeline: head_pipeline
+      )
+
+      allow(head_pipeline).to receive(:available_licensed_report_type?).and_return(true)
+    end
+
+    shared_examples 'degradation_threshold' do
+      context "when head pipeline's browser performance build has the threshold variable defined" do
+        let(:yaml_variables) do
+          [
+            { key: 'FOO', value: 'BAR' },
+            { key: 'DEGRADATION_THRESHOLD', value: '5' }
+          ]
+        end
+
+        it "returns the value of the variable" do
+          expect(subject.as_json[:browser_performance][:degradation_threshold]).to eq(5)
+        end
+      end
+
+      context "when head pipeline's browser performance build has no threshold variable defined" do
+        let(:yaml_variables) do
+          [
+            { key: 'FOO', value: 'BAR' }
+          ]
+        end
+
+        it "returns nil" do
+          expect(subject.as_json[:browser_performance][:degradation_threshold]).to be_nil
+        end
+      end
+    end
+
+    context 'with browser_performance artifact' do
+      before do
+        create(
+          :ee_ci_build,
+          :browser_performance,
+          pipeline: head_pipeline,
+          yaml_variables: yaml_variables
+        )
+      end
+
+      include_examples 'degradation_threshold'
+    end
+
+    context 'with performance artifact' do
+      before do
+        create(
+          :ee_ci_build,
+          :performance,
+          pipeline: head_pipeline,
+          yaml_variables: yaml_variables
+        )
+      end
+
+      include_examples 'degradation_threshold'
+    end
+  end
+
+  describe '#license_scanning', :request_store do
+    before do
+      allow(merge_request).to receive_messages(head_pipeline: pipeline, target_project: project)
+      stub_licensed_features(license_scanning: true)
     end
 
     it 'is not included, if missing artifacts' do
-      expect(subject.as_json).not_to include(:license_management)
+      expect(subject.as_json).not_to include(:license_scanning)
     end
 
     context 'when report artifact is defined' do
       before do
-        create(:ee_ci_build, :license_management, pipeline: pipeline)
+        create(:ee_ci_build, :license_scanning, pipeline: pipeline)
       end
 
       it 'is included' do
-        expect(subject.as_json).to include(:license_management)
-        expect(subject.as_json[:license_management]).to include(:head_path)
-        expect(subject.as_json[:license_management]).to include(:base_path)
-        expect(subject.as_json[:license_management]).to include(:managed_licenses_path)
-        expect(subject.as_json[:license_management]).to include(:can_manage_licenses)
-        expect(subject.as_json[:license_management]).to include(:license_management_full_report_path)
-        expect(subject.as_json[:license_management][:head_path]).to include('proxy=true')
+        expect(subject.as_json[:license_scanning]).to include(:can_manage_licenses)
+        expect(subject.as_json[:license_scanning]).to include(:full_report_path)
+      end
+
+      it '#settings_path should not be included for developers' do
+        expect(subject.as_json[:license_scanning]).not_to include(:settings_path)
       end
 
       context 'when feature is not licensed' do
         before do
-          stub_licensed_features(license_management: false)
+          stub_licensed_features(license_scanning: false)
         end
 
         it 'is not included' do
-          expect(subject.as_json).not_to include(:license_management)
+          expect(subject.as_json).not_to include(:license_scanning)
         end
-      end
-
-      it '#license_management_settings_path should not be included for developers' do
-        expect(subject.as_json[:license_management]).not_to include(:license_management_settings_path)
       end
 
       context 'when user is maintainer' do
@@ -149,8 +198,8 @@ describe MergeRequestWidgetEntity do
           project.add_maintainer(user)
         end
 
-        it '#license_management_settings_path should be included for maintainers' do
-          expect(subject.as_json[:license_management]).to include(:license_management_settings_path)
+        it '#settings_path should be included for maintainers' do
+          expect(subject.as_json[:license_scanning]).to include(:settings_path)
         end
       end
     end
@@ -159,11 +208,11 @@ describe MergeRequestWidgetEntity do
       let(:managed_licenses_path) { expose_path(api_v4_projects_managed_licenses_path(id: project.id)) }
 
       before do
-        create(:ee_ci_build, :license_management, pipeline: pipeline)
+        create(:ee_ci_build, :license_scanning, pipeline: pipeline)
       end
 
       it 'is a path for target project' do
-        expect(subject.as_json[:license_management][:managed_licenses_path]).to eq(managed_licenses_path)
+        expect(subject.as_json[:license_scanning][:managed_licenses_path]).to eq(managed_licenses_path)
       end
 
       context 'with fork' do
@@ -173,11 +222,11 @@ describe MergeRequestWidgetEntity do
 
         before do
           allow(fork_merge_request).to receive_messages(head_pipeline: pipeline)
-          stub_licensed_features(license_management: true)
+          stub_licensed_features(license_scanning: true)
         end
 
         it 'is a path for target project' do
-          expect(subject_json[:license_management][:managed_licenses_path]).to eq(managed_licenses_path)
+          expect(subject_json[:license_scanning][:managed_licenses_path]).to eq(managed_licenses_path)
         end
       end
     end
@@ -185,11 +234,37 @@ describe MergeRequestWidgetEntity do
 
   it 'has vulnerability feedback paths' do
     expect(subject.as_json[:vulnerability_feedback_path]).to eq(
-      "/#{merge_request.project.full_path}/vulnerability_feedback"
+      "/#{merge_request.project.full_path}/-/vulnerability_feedback"
     )
     expect(subject.as_json).to include(:create_vulnerability_feedback_issue_path)
     expect(subject.as_json).to include(:create_vulnerability_feedback_merge_request_path)
     expect(subject.as_json).to include(:create_vulnerability_feedback_dismissal_path)
+  end
+
+  describe '#can_read_vulnerability_feedback' do
+    context 'when user has permissions to read vulnerability feedback' do
+      before do
+        project.add_developer(user)
+      end
+
+      it 'is set to true' do
+        expect(subject.as_json[:can_read_vulnerability_feedback]).to eq(true)
+      end
+    end
+
+    context 'when user has no permissions to read vulnerability feedback' do
+      before do
+        project.add_guest(user)
+      end
+
+      it 'is set to false' do
+        expect(subject.as_json[:can_read_vulnerability_feedback]).to eq(false)
+      end
+    end
+  end
+
+  it 'has can_read_vulnerability_feedback property' do
+    expect(subject.as_json).to include(:can_read_vulnerability_feedback)
   end
 
   it 'has pipeline id' do
@@ -198,40 +273,8 @@ describe MergeRequestWidgetEntity do
     expect(subject.as_json).to include(:pipeline_id)
   end
 
-  describe 'Merge Trains' do
-    let!(:merge_train) { create(:merge_train, merge_request: merge_request) }
-
-    before do
-      stub_licensed_features(merge_pipelines: true, merge_trains: true)
-      project.update!(merge_pipelines_enabled: true)
-    end
-
-    it 'has merge train entity' do
-      expect(subject.as_json).to include(:merge_trains_count)
-      expect(subject.as_json).to include(:merge_train_index)
-    end
-
-    context 'when the merge train feature is disabled' do
-      before do
-        stub_feature_flags(merge_trains_enabled: false)
-      end
-
-      it 'does not have merge trains count' do
-        expect(subject.as_json).not_to include(:merge_trains_count)
-      end
-    end
-
-    context 'when the merge request is not on a merge train' do
-      let!(:merge_train) { }
-
-      it 'does not have merge train index' do
-        expect(subject.as_json).not_to include(:merge_train_index)
-      end
-    end
-  end
-
   describe 'blocking merge requests' do
-    set(:merge_request_block) { create(:merge_request_block, blocked_merge_request: merge_request) }
+    let_it_be(:merge_request_block) { create(:merge_request_block, blocked_merge_request: merge_request) }
 
     let(:blocking_mr) { merge_request_block.blocking_merge_request }
 

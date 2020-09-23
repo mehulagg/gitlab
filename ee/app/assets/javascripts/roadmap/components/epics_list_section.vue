@@ -1,17 +1,25 @@
 <script>
+import { mapState, mapActions } from 'vuex';
+import VirtualList from 'vue-virtual-scroll-list';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
+
 import eventHub from '../event_hub';
+import { generateKey } from '../utils/epic_utils';
 
-import SectionMixin from '../mixins/section_mixin';
+import { EPIC_DETAILS_CELL_WIDTH, TIMELINE_CELL_MIN_WIDTH, EPIC_ITEM_HEIGHT } from '../constants';
 
-import { TIMELINE_CELL_MIN_WIDTH, EPIC_ITEM_HEIGHT } from '../constants';
-
-import epicItem from './epic_item.vue';
+import EpicItem from './epic_item.vue';
+import CurrentDayIndicator from './current_day_indicator.vue';
 
 export default {
+  EpicItem,
+  epicItemHeight: EPIC_ITEM_HEIGHT,
   components: {
-    epicItem,
+    VirtualList,
+    EpicItem,
+    CurrentDayIndicator,
   },
-  mixins: [SectionMixin],
+  mixins: [glFeatureFlagsMixin()],
   props: {
     presetType: {
       type: String,
@@ -29,33 +37,28 @@ export default {
       type: Number,
       required: true,
     },
-    shellWidth: {
-      type: Number,
-      required: true,
-    },
-    listScrollable: {
+    hasFiltersApplied: {
       type: Boolean,
       required: true,
     },
   },
   data() {
     return {
-      shellHeight: 0,
-      emptyRowHeight: 0,
-      showEmptyRow: false,
+      clientWidth: 0,
       offsetLeft: 0,
+      emptyRowContainerStyles: {},
       showBottomShadow: false,
+      roadmapShellEl: null,
     };
   },
   computed: {
-    emptyRowContainerStyles() {
-      return {
-        height: `${this.emptyRowHeight}px`,
-      };
+    ...mapState(['bufferSize', 'epicIid', 'childrenEpics', 'childrenFlags', 'epicIds']),
+    emptyRowContainerVisible() {
+      return this.displayedEpics.length < this.bufferSize;
     },
-    emptyRowCellStyles() {
+    sectionContainerStyles() {
       return {
-        width: `${this.sectionItemWidth}px`,
+        width: `${EPIC_DETAILS_CELL_WIDTH + TIMELINE_CELL_MIN_WIDTH * this.timeframe.length}px`,
       };
     },
     shadowCellStyles() {
@@ -63,136 +66,147 @@ export default {
         left: `${this.offsetLeft}px`,
       };
     },
-  },
-  watch: {
-    shellWidth: function shellWidth() {
-      // Scroll view to today indicator only when shellWidth is updated.
-      this.scrollToTodayIndicator();
-      // Initialize offsetLeft when shellWidth is updated
-      this.offsetLeft = this.$el.parentElement.offsetLeft;
+    epicsWithAssociatedParents() {
+      return this.epics.filter(
+        epic => !epic.hasParent || (epic.hasParent && this.epicIds.indexOf(epic.parent.id) < 0),
+      );
+    },
+    displayedEpics() {
+      // If roadmap is accessed from epic, return all epics
+      if (this.epicIid) {
+        return this.epics;
+      }
+
+      // Return epics with correct parent associations.
+      return this.epicsWithAssociatedParents;
     },
   },
   mounted() {
     eventHub.$on('epicsListScrolled', this.handleEpicsListScroll);
-    eventHub.$on('refreshTimeline', this.handleTimelineRefresh);
-    this.$nextTick(() => {
-      this.initMounted();
-    });
+    eventHub.$on('toggleIsEpicExpanded', this.toggleIsEpicExpanded);
+    window.addEventListener('resize', this.syncClientWidth);
+    this.initMounted();
   },
   beforeDestroy() {
     eventHub.$off('epicsListScrolled', this.handleEpicsListScroll);
-    eventHub.$off('refreshTimeline', this.handleTimelineRefresh);
+    eventHub.$off('toggleIsEpicExpanded', this.toggleIsEpicExpanded);
+    window.removeEventListener('resize', this.syncClientWidth);
   },
   methods: {
+    ...mapActions(['setBufferSize', 'toggleEpic']),
     initMounted() {
-      // Get available shell height based on viewport height
-      this.shellHeight = window.innerHeight - this.$el.offsetTop;
+      this.roadmapShellEl = this.$root.$el && this.$root.$el.querySelector('.js-roadmap-shell');
+      this.setBufferSize(Math.ceil((window.innerHeight - this.$el.offsetTop) / EPIC_ITEM_HEIGHT));
 
-      // In case there are epics present, initialize empty row
-      if (this.epics.length) {
-        this.initEmptyRow();
-      }
+      // Wait for component render to complete
+      this.$nextTick(() => {
+        this.offsetLeft = (this.$el.parentElement && this.$el.parentElement.offsetLeft) || 0;
 
-      eventHub.$emit('epicsListRendered', {
-        width: this.$el.clientWidth,
-        height: this.shellHeight,
-      });
-    },
-    /**
-     * In case number of epics in the list are not sufficient
-     * to fill in full page height, we need to show an empty row
-     * at the bottom with fixed absolute height such that the
-     * column rulers expand to full page height
-     *
-     * This method calculates absolute height for empty column in pixels
-     * based on height of available list items and sets it to component
-     * props.
-     */
-    initEmptyRow() {
-      const children = this.$children;
-      let approxChildrenHeight = children[0].$el.clientHeight * this.epics.length;
-
-      // Check if approximate height is greater than shell height
-      if (approxChildrenHeight < this.shellHeight) {
-        // reset approximate height and recalculate actual height
-        approxChildrenHeight = 0;
-        children.forEach(child => {
-          // accumulate children height
-          // compensate for bottom border
-          approxChildrenHeight += child.$el.clientHeight;
+        // We cannot scroll to the indicator immediately
+        // on render as it will trigger scroll event leading
+        // to timeline expand, so we wait for another render
+        // cycle to complete.
+        this.$nextTick(() => {
+          this.scrollToTodayIndicator();
         });
 
-        // set height and show empty row reducing horizontal scrollbar size
-        this.emptyRowHeight = this.shellHeight - approxChildrenHeight;
-        this.showEmptyRow = true;
-      } else {
-        this.showBottomShadow = true;
+        if (!Object.keys(this.emptyRowContainerStyles).length) {
+          this.emptyRowContainerStyles = this.getEmptyRowContainerStyles();
+        }
+      });
+
+      this.syncClientWidth();
+    },
+    syncClientWidth() {
+      this.clientWidth = this.$root.$el?.clientWidth || 0;
+    },
+    getEmptyRowContainerStyles() {
+      if (this.$refs.epicItems && this.$refs.epicItems.length) {
+        return {
+          height: `${this.$el.clientHeight -
+            this.displayedEpics.length * this.$refs.epicItems[0].$el.clientHeight}px`,
+        };
       }
+      return {};
     },
     /**
      * Scroll timeframe to the right of the timeline
      * by half the column size
      */
     scrollToTodayIndicator() {
-      this.$el.parentElement.scrollBy(TIMELINE_CELL_MIN_WIDTH / 2, 0);
-    },
-    /**
-     * Method to update list section when refreshTimeline event
-     * is emitted on eventHub
-     *
-     * This method ensures that empty row is toggled
-     * based on whether list has enough epics to make
-     * list vertically scrollable.
-     */
-    handleTimelineRefresh({ initialRender = false }) {
-      // Initialize emptyRow only once.
-      if (initialRender) {
-        this.initEmptyRow();
-      }
-
-      // Check if container height is less than total height of all Epic
-      // items combined (AKA list is scrollable).
-      const offsetHeight = this.$el.parentElement
-        ? this.$el.parentElement.offsetHeight
-        : this.$el.offsetHeight;
-      const isListVertScrollable = offsetHeight < EPIC_ITEM_HEIGHT * (this.epics.length + 1);
-
-      // Toggle empty row.
-      this.showEmptyRow = !isListVertScrollable;
+      if (this.$el.parentElement) this.$el.parentElement.scrollBy(TIMELINE_CELL_MIN_WIDTH / 2, 0);
     },
     handleEpicsListScroll({ scrollTop, clientHeight, scrollHeight }) {
       this.showBottomShadow = Math.ceil(scrollTop) + clientHeight < scrollHeight;
     },
+    getEpicItemProps(index) {
+      return {
+        key: generateKey(this.displayedEpics[index]),
+        props: {
+          epic: this.displayedEpics[index],
+          presetType: this.presetType,
+          timeframe: this.timeframe,
+          currentGroupId: this.currentGroupId,
+          clientWidth: this.clientWidth,
+          childLevel: 0,
+          childrenEpics: this.childrenEpics,
+          childrenFlags: this.childrenFlags,
+          hasFiltersApplied: this.hasFiltersApplied,
+        },
+      };
+    },
+    toggleIsEpicExpanded(epic) {
+      this.toggleEpic({ parentItem: epic });
+    },
+    generateKey,
   },
 };
 </script>
 
 <template>
   <div :style="sectionContainerStyles" class="epics-list-section">
-    <epic-item
-      v-for="(epic, index) in epics"
-      :key="index"
-      :preset-type="presetType"
-      :epic="epic"
-      :timeframe="timeframe"
-      :current-group-id="currentGroupId"
-      :shell-width="sectionShellWidth"
-      :item-width="sectionItemWidth"
-    />
+    <template v-if="glFeatures.roadmapBufferedRendering && !emptyRowContainerVisible">
+      <virtual-list
+        v-if="displayedEpics.length"
+        :size="$options.epicItemHeight"
+        :remain="bufferSize"
+        :bench="bufferSize"
+        :scrollelement="roadmapShellEl"
+        :item="$options.EpicItem"
+        :itemcount="displayedEpics.length"
+        :itemprops="getEpicItemProps"
+      />
+    </template>
+    <template v-else>
+      <epic-item
+        v-for="epic in displayedEpics"
+        ref="epicItems"
+        :key="generateKey(epic)"
+        :preset-type="presetType"
+        :epic="epic"
+        :timeframe="timeframe"
+        :current-group-id="currentGroupId"
+        :client-width="clientWidth"
+        :child-level="0"
+        :children-epics="childrenEpics"
+        :children-flags="childrenFlags"
+        :has-filters-applied="hasFiltersApplied"
+      />
+    </template>
     <div
-      v-if="showEmptyRow"
+      v-if="emptyRowContainerVisible"
       :style="emptyRowContainerStyles"
       class="epics-list-item epics-list-item-empty clearfix"
     >
       <span class="epic-details-cell"></span>
-      <span
-        v-for="(timeframeItem, index) in timeframe"
-        :key="index"
-        :style="emptyRowCellStyles"
-        class="epic-timeline-cell"
-      >
+      <span v-for="(timeframeItem, index) in timeframe" :key="index" class="epic-timeline-cell">
+        <current-day-indicator :preset-type="presetType" :timeframe-item="timeframeItem" />
       </span>
     </div>
-    <div v-if="showBottomShadow" :style="shadowCellStyles" class="scroll-bottom-shadow"></div>
+    <div
+      v-show="showBottomShadow"
+      :style="shadowCellStyles"
+      class="epic-scroll-bottom-shadow"
+    ></div>
   </div>
 </template>

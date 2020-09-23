@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'Merge request > User sees deployment widget', :js do
+RSpec.describe 'Merge request > User sees deployment widget', :js do
   describe 'when merge request has associated environments' do
     let(:user) { create(:user) }
     let(:project) { create(:project, :repository) }
@@ -10,7 +10,7 @@ describe 'Merge request > User sees deployment widget', :js do
     let(:role) { :developer }
     let(:ref) { merge_request.target_branch }
     let(:sha) { project.commit(ref).id }
-    let(:pipeline) { create(:ci_pipeline_without_jobs, sha: sha, project: project, ref: ref) }
+    let(:pipeline) { create(:ci_pipeline, sha: sha, project: project, ref: ref) }
     let!(:manual) { }
 
     before do

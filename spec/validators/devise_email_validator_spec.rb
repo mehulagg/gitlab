@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe DeviseEmailValidator do
+RSpec.describe DeviseEmailValidator do
   let!(:user) { build(:user, public_email: 'test@example.com') }
+
   subject { validator.validate(user) }
 
   describe 'validations' do

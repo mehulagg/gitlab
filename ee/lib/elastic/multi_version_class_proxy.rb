@@ -19,6 +19,8 @@ module Elastic
       end
     end
 
+    private
+
     def proxy_class_name
       "#{@data_class.name}ClassProxy"
     end

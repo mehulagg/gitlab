@@ -4,13 +4,13 @@ exports[`Repository last commit component renders commit widget 1`] = `
 <div
   class="info-well d-none d-sm-flex project-last-commit commit p-3"
 >
-  <useravatarlink-stub
+  <user-avatar-link-stub
     class="avatar-cell"
     imgalt=""
     imgcssclasses=""
     imgsize="40"
     imgsrc="https://test.com"
-    linkhref="https://test.com/test"
+    linkhref="/test"
     tooltipplacement="top"
     tooltiptext=""
     username=""
@@ -22,32 +22,30 @@ exports[`Repository last commit component renders commit widget 1`] = `
     <div
       class="commit-content qa-commit-content"
     >
-      <gllink-stub
+      <gl-link-stub
         class="commit-row-message item-title"
-        href="https://test.com/commit/123"
+        href="/commit/123"
       >
-        
-          Commit title
-        
-      </gllink-stub>
+        Commit title
+      </gl-link-stub>
        
       <!---->
        
       <div
         class="committer"
       >
-        <gllink-stub
+        <gl-link-stub
           class="commit-author-link js-user-link"
-          href="https://test.com/test"
+          href="/test"
         >
           
             Test
           
-        </gllink-stub>
+        </gl-link-stub>
         
           authored
           
-        <timeagotooltip-stub
+        <timeago-tooltip-stub
           cssclass=""
           time="2019-01-01"
           tooltipplacement="bottom"
@@ -65,19 +63,18 @@ exports[`Repository last commit component renders commit widget 1`] = `
       <div
         class="ci-status-link"
       >
-        <gllink-stub
+        <gl-link-stub
           class="js-commit-pipeline"
-          data-original-title="Commit: failed"
           href="https://test.com/pipeline"
-          title=""
+          title="Pipeline: failed"
         >
-          <ciicon-stub
-            aria-label="Commit: failed"
+          <ci-icon-stub
+            aria-label="Pipeline: failed"
             cssclasses=""
             size="24"
             status="[object Object]"
           />
-        </gllink-stub>
+        </gl-link-stub>
       </div>
        
       <div
@@ -91,7 +88,7 @@ exports[`Repository last commit component renders commit widget 1`] = `
           
         </div>
          
-        <clipboardbutton-stub
+        <clipboard-button-stub
           cssclass="btn-default"
           text="123456789"
           title="Copy commit SHA"
@@ -107,13 +104,13 @@ exports[`Repository last commit component renders the signature HTML as returned
 <div
   class="info-well d-none d-sm-flex project-last-commit commit p-3"
 >
-  <useravatarlink-stub
+  <user-avatar-link-stub
     class="avatar-cell"
     imgalt=""
     imgcssclasses=""
     imgsize="40"
     imgsrc="https://test.com"
-    linkhref="https://test.com/test"
+    linkhref="/test"
     tooltipplacement="top"
     tooltiptext=""
     username=""
@@ -125,32 +122,30 @@ exports[`Repository last commit component renders the signature HTML as returned
     <div
       class="commit-content qa-commit-content"
     >
-      <gllink-stub
+      <gl-link-stub
         class="commit-row-message item-title"
-        href="https://test.com/commit/123"
+        href="/commit/123"
       >
-        
-          Commit title
-        
-      </gllink-stub>
+        Commit title
+      </gl-link-stub>
        
       <!---->
        
       <div
         class="committer"
       >
-        <gllink-stub
+        <gl-link-stub
           class="commit-author-link js-user-link"
-          href="https://test.com/test"
+          href="/test"
         >
           
             Test
           
-        </gllink-stub>
+        </gl-link-stub>
         
           authored
           
-        <timeagotooltip-stub
+        <timeago-tooltip-stub
           cssclass=""
           time="2019-01-01"
           tooltipplacement="bottom"
@@ -172,19 +167,18 @@ exports[`Repository last commit component renders the signature HTML as returned
       <div
         class="ci-status-link"
       >
-        <gllink-stub
+        <gl-link-stub
           class="js-commit-pipeline"
-          data-original-title="Commit: failed"
           href="https://test.com/pipeline"
-          title=""
+          title="Pipeline: failed"
         >
-          <ciicon-stub
-            aria-label="Commit: failed"
+          <ci-icon-stub
+            aria-label="Pipeline: failed"
             cssclasses=""
             size="24"
             status="[object Object]"
           />
-        </gllink-stub>
+        </gl-link-stub>
       </div>
        
       <div
@@ -198,7 +192,7 @@ exports[`Repository last commit component renders the signature HTML as returned
           
         </div>
          
-        <clipboardbutton-stub
+        <clipboard-button-stub
           cssclass="btn-default"
           text="123456789"
           title="Copy commit SHA"

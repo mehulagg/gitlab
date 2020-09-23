@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Badges < Grape::API
+  class Badges < Grape::API::Instance
     include PaginationParams
 
     before { authenticate_non_get! }
@@ -33,7 +33,11 @@ module API
         get ":id/badges" do
           source = find_source(source_type, params[:id])
 
-          present_badges(source, paginate(source.badges))
+          badges = source.badges
+          name = params[:name]
+          badges = badges.with_name(name) if name
+
+          present_badges(source, paginate(badges))
         end
 
         desc "Preview a badge from a #{source_type}." do
@@ -80,6 +84,7 @@ module API
         params do
           requires :link_url, type: String, desc: 'URL of the badge link'
           requires :image_url, type: String, desc: 'URL of the badge image'
+          optional :name, type: String, desc: 'Name for the badge'
         end
         post ":id/badges" do
           source = find_source_if_admin(source_type)
@@ -100,12 +105,14 @@ module API
         params do
           optional :link_url, type: String, desc: 'URL of the badge link'
           optional :image_url, type: String, desc: 'URL of the badge image'
+          optional :name, type: String, desc: 'Name for the badge'
         end
         put ":id/badges/:badge_id" do
           source = find_source_if_admin(source_type)
+          badge = find_badge(source)
 
           badge = ::Badges::UpdateService.new(declared_params(include_missing: false))
-                                         .execute(find_badge(source))
+                                         .execute(badge)
 
           if badge.valid?
             present_badges(source, badge)
@@ -124,12 +131,7 @@ module API
           source = find_source_if_admin(source_type)
           badge = find_badge(source)
 
-          if badge.is_a?(GroupBadge) && source.is_a?(Project)
-            error!('To delete a Group badge please use the Group endpoint', 403)
-          end
-
           destroy_conditionally!(badge)
-          body false
         end
       end
     end

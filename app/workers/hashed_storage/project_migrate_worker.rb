@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
 module HashedStorage
-  class ProjectMigrateWorker < BaseWorker
+  class ProjectMigrateWorker < BaseWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
 
     queue_namespace :hashed_storage
+    loggable_arguments 1
 
     attr_reader :project_id
 
@@ -14,9 +15,9 @@ module HashedStorage
 
       try_obtain_lease do
         project = Project.without_deleted.find_by(id: project_id)
-        break unless project
+        break unless project && project.storage_upgradable?
 
-        old_disk_path ||= project.disk_path
+        old_disk_path ||= Storage::LegacyProject.new(project).disk_path
 
         ::Projects::HashedStorage::MigrationService.new(project, old_disk_path, logger: logger).execute
       end

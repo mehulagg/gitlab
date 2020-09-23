@@ -4,7 +4,7 @@ require 'spec_helper'
 
 # Based on ee/spec/requests/api/epics_spec.rb
 # Should follow closely in order to ensure all situations are covered
-describe 'Epics through GroupQuery' do
+RSpec.describe 'Epics through GroupQuery' do
   include GraphqlHelpers
 
   let(:user)       { create(:user) }
@@ -24,6 +24,8 @@ describe 'Epics through GroupQuery' do
           id
           iid
           title
+          upvotes
+          downvotes
           userPermissions {
             adminEpic
           }
@@ -48,9 +50,9 @@ describe 'Epics through GroupQuery' do
       it_behaves_like 'a working graphql query'
 
       it 'returns epics successfully' do
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(graphql_errors).to be_nil
-        expect(node_array('id').first).to eq epic.to_global_id.to_s
+        expect(epic_node_array('id').first).to eq epic.to_global_id.to_s
         expect(graphql_data['group']['epicsEnabled']).to be_truthy
       end
     end
@@ -70,12 +72,24 @@ describe 'Epics through GroupQuery' do
         expect_array_response([epic2.to_global_id.to_s, epic.to_global_id.to_s])
       end
 
+      it 'has upvote/downvote information' do
+        create(:award_emoji, name: 'thumbsup', awardable: epic, user: user )
+        create(:award_emoji, name: 'thumbsdown', awardable: epic2, user: user )
+
+        post_graphql(query, current_user: user)
+
+        expect(epic_node_array).to contain_exactly(
+          a_hash_including('upvotes' => 1, 'downvotes' => 0),
+          a_hash_including('upvotes' => 0, 'downvotes' => 1)
+        )
+      end
+
       describe 'can admin epics' do
         context 'when permission is absent' do
           it 'returns false for adminEpic' do
             post_graphql(query, current_user: user)
 
-            expect(node_array('userPermissions')).to all(include('adminEpic' => false))
+            expect(epic_node_array('userPermissions')).to all(include('adminEpic' => false))
           end
         end
 
@@ -87,7 +101,7 @@ describe 'Epics through GroupQuery' do
           it 'returns true for adminEpic' do
             post_graphql(query, current_user: user)
 
-            expect(node_array('userPermissions')).to all(include('adminEpic' => true))
+            expect(epic_node_array('userPermissions')).to all(include('adminEpic' => true))
           end
         end
       end
@@ -149,6 +163,7 @@ describe 'Epics through GroupQuery' do
         expect(graphql_errors).to be_nil
         expect(epic_data['id']).to eq epic.to_global_id.to_s
         expect(graphql_data['group']['epicsEnabled']).to be_truthy
+        expect(epic_data['confidential']).to be_falsey
       end
     end
   end
@@ -156,12 +171,10 @@ describe 'Epics through GroupQuery' do
   def expect_array_response(items)
     expect(response).to have_gitlab_http_status(:success)
     expect(epics_data).to be_an Array
-    expect(node_array('id')).to eq(Array(items))
+    expect(epic_node_array('id')).to eq(Array(items))
   end
 
-  def node_array(extract_attribute = nil)
-    epics_data.map do |item|
-      extract_attribute ? item['node'][extract_attribute] : item['node']
-    end
+  def epic_node_array(extract_attribute = nil)
+    node_array(epics_data, extract_attribute)
   end
 end

@@ -3,7 +3,9 @@
 module API
   module Support
     class GitAccessActor
-      attr_reader :user
+      extend ::Gitlab::Identifier
+
+      attr_reader :user, :key
 
       def initialize(user: nil, key: nil)
         @user = user
@@ -19,6 +21,10 @@ module API
           new(user: UserFinder.new(params[:user_id]).find_by_id)
         elsif params[:username]
           new(user: UserFinder.new(params[:username]).find_by_username)
+        elsif params[:identifier]
+          new(user: identify(params[:identifier]))
+        else
+          new
         end
       end
 
@@ -34,9 +40,14 @@ module API
         key&.update_last_used_at
       end
 
-      private
+      def key_details
+        return {} unless key
 
-      attr_reader :key
+        {
+          gl_key_type: key.model_name.singular,
+          gl_key_id: key.id
+        }
+      end
     end
   end
 end

@@ -1,31 +1,37 @@
 <script>
-import _ from 'underscore';
+import { escape } from 'lodash';
 import { mapActions, mapGetters } from 'vuex';
-import { polyfillSticky, stickyMonitor } from '~/lib/utils/sticky';
+import {
+  GlDeprecatedButton,
+  GlTooltipDirective,
+  GlSafeHtmlDirective,
+  GlLoadingIcon,
+  GlIcon,
+  GlButton,
+} from '@gitlab/ui';
 import ClipboardButton from '~/vue_shared/components/clipboard_button.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import FileIcon from '~/vue_shared/components/file_icon.vue';
-import { GlButton, GlTooltipDirective, GlTooltip, GlLoadingIcon } from '@gitlab/ui';
 import { truncateSha } from '~/lib/utils/text_utility';
 import { __, s__, sprintf } from '~/locale';
 import { diffViewerModes } from '~/ide/constants';
 import EditButton from './edit_button.vue';
 import DiffStats from './diff_stats.vue';
-import { scrollToElement, contentTop } from '~/lib/utils/common_utils';
+import { scrollToElement } from '~/lib/utils/common_utils';
 
 export default {
   components: {
-    GlTooltip,
     GlLoadingIcon,
-    GlButton,
+    GlDeprecatedButton,
     ClipboardButton,
     EditButton,
-    Icon,
+    GlIcon,
     FileIcon,
     DiffStats,
+    GlButton,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
+    SafeHtml: GlSafeHtmlDirective,
   },
   props: {
     discussionPath: {
@@ -56,6 +62,16 @@ export default {
       type: Boolean,
       required: true,
     },
+    viewDiffsFileByFile: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+  },
+  data() {
+    return {
+      hasDropdownOpen: false,
+    };
   },
   computed: {
     ...mapGetters('diffs', ['diffHasExpandedDiscussions', 'diffHasDiscussions']),
@@ -73,6 +89,21 @@ export default {
       }
 
       return this.discussionPath;
+    },
+    submoduleDiffCompareLinkText() {
+      if (this.diffFile.submodule_compare) {
+        const truncatedOldSha = escape(truncateSha(this.diffFile.submodule_compare.old_sha));
+        const truncatedNewSha = escape(truncateSha(this.diffFile.submodule_compare.new_sha));
+        return sprintf(
+          s__('Compare %{oldCommitId}...%{newCommitId}'),
+          {
+            oldCommitId: `<span class="commit-sha">${truncatedOldSha}</span>`,
+            newCommitId: `<span class="commit-sha">${truncatedNewSha}</span>`,
+          },
+          false,
+        );
+      }
+      return null;
     },
     filePath() {
       if (this.diffFile.submodule) {
@@ -92,7 +123,7 @@ export default {
       return this.expanded ? 'chevron-down' : 'chevron-right';
     },
     viewFileButtonText() {
-      const truncatedContentSha = _.escape(truncateSha(this.diffFile.content_sha));
+      const truncatedContentSha = escape(truncateSha(this.diffFile.content_sha));
       return sprintf(
         s__('MergeRequests|View file @ %{commitId}'),
         { commitId: truncatedContentSha },
@@ -100,7 +131,7 @@ export default {
       );
     },
     viewReplacedFileButtonText() {
-      const truncatedBaseSha = _.escape(truncateSha(this.diffFile.diff_refs.base_sha));
+      const truncatedBaseSha = escape(truncateSha(this.diffFile.diff_refs.base_sha));
       return sprintf(
         s__('MergeRequests|View replaced file @ %{commitId}'),
         {
@@ -125,16 +156,12 @@ export default {
       return s__('MRDiff|Show full file');
     },
   },
-  mounted() {
-    polyfillSticky(this.$refs.header);
-    const fileHeaderHeight = this.$refs.header.clientHeight;
-    stickyMonitor(this.$refs.header, contentTop() - fileHeaderHeight - 1, false);
-  },
   methods: {
     ...mapActions('diffs', [
       'toggleFileDiscussions',
       'toggleFileDiscussionWrappers',
       'toggleFullDiff',
+      'toggleActiveFileByHash',
     ]),
     handleToggleFile() {
       this.$emit('toggleFile');
@@ -151,7 +178,13 @@ export default {
         const selector = this.diffContentIDSelector;
         scrollToElement(document.querySelector(selector));
         window.location.hash = selector;
+        if (!this.viewDiffsFileByFile) {
+          this.toggleActiveFileByHash(this.diffFile.file_hash);
+        }
       }
+    },
+    setDropdownOpen(val) {
+      this.hasDropdownOpen = val;
     },
   },
 };
@@ -161,45 +194,40 @@ export default {
   <div
     ref="header"
     class="js-file-title file-title file-title-flex-parent"
+    :class="{ 'gl-z-dropdown-menu!': hasDropdownOpen }"
     @click.self="handleToggleFile"
   >
     <div class="file-header-content">
-      <icon
+      <gl-icon
         v-if="collapsible"
         ref="collapseIcon"
         :name="collapseIcon"
         :size="16"
         aria-hidden="true"
-        class="diff-toggle-caret append-right-5"
+        class="diff-toggle-caret gl-mr-2"
         @click.stop="handleToggleFile"
       />
       <a
-        v-once
-        id="diffFile.file_path"
         ref="titleWrapper"
-        class="append-right-4"
+        :v-once="!viewDiffsFileByFile"
+        class="gl-mr-2"
         :href="titleLink"
         @click="handleFileNameClick"
       >
-        <file-icon
-          :file-name="filePath"
-          :size="18"
-          aria-hidden="true"
-          css-classes="append-right-5"
-        />
+        <file-icon :file-name="filePath" :size="18" aria-hidden="true" css-classes="gl-mr-2" />
         <span v-if="isFileRenamed">
           <strong
             v-gl-tooltip
+            v-safe-html="diffFile.old_path_html"
             :title="diffFile.old_path"
             class="file-title-name"
-            v-html="diffFile.old_path_html"
           ></strong>
           →
           <strong
             v-gl-tooltip
+            v-safe-html="diffFile.new_path_html"
             :title="diffFile.new_path"
             class="file-title-name"
-            v-html="diffFile.new_path_html"
           ></strong>
         </span>
 
@@ -213,75 +241,93 @@ export default {
         :text="diffFile.file_path"
         :gfm="gfmCopyText"
         css-class="btn-default btn-transparent btn-clipboard"
+        data-track-event="click_copy_file_button"
+        data-track-label="diff_copy_file_path_button"
+        data-track-property="diff_copy_file"
       />
 
       <small v-if="isModeChanged" ref="fileMode" class="mr-1">
         {{ diffFile.a_mode }} → {{ diffFile.b_mode }}
       </small>
 
-      <span v-if="isUsingLfs" class="label label-lfs append-right-5"> {{ __('LFS') }} </span>
+      <span v-if="isUsingLfs" class="label label-lfs gl-mr-2"> {{ __('LFS') }} </span>
     </div>
 
     <div
       v-if="!diffFile.submodule && addMergeRequestButtons"
-      class="file-actions d-none d-sm-block"
+      class="file-actions d-none d-sm-flex align-items-center flex-wrap"
     >
       <diff-stats :added-lines="diffFile.added_lines" :removed-lines="diffFile.removed_lines" />
       <div class="btn-group" role="group">
         <template v-if="diffFile.blob && diffFile.blob.readable_text">
           <span v-gl-tooltip.hover :title="s__('MergeRequests|Toggle comments for this file')">
-            <gl-button
+            <gl-deprecated-button
               ref="toggleDiscussionsButton"
               :disabled="!diffHasDiscussions(diffFile)"
               :class="{ active: diffHasExpandedDiscussions(diffFile) }"
               class="js-btn-vue-toggle-comments btn"
               data-qa-selector="toggle_comments_button"
+              data-track-event="click_toggle_comments_button"
+              data-track-label="diff_toggle_comments_button"
+              data-track-property="diff_toggle_comments"
               type="button"
               @click="toggleFileDiscussionWrappers(diffFile)"
             >
-              <icon name="comment" />
-            </gl-button>
+              <gl-icon name="comment" />
+            </gl-deprecated-button>
           </span>
 
           <edit-button
             v-if="!diffFile.deleted_file"
             :can-current-user-fork="canCurrentUserFork"
             :edit-path="diffFile.edit_path"
+            :ide-edit-path="diffFile.ide_edit_path"
             :can-modify-blob="diffFile.can_modify_blob"
+            data-track-event="click_toggle_edit_button"
+            data-track-label="diff_toggle_edit_button"
+            data-track-property="diff_toggle_edit"
             @showForkMessage="showForkMessage"
+            @open="setDropdownOpen(true)"
+            @close="setDropdownOpen(false)"
           />
         </template>
 
         <a
           v-if="diffFile.replaced_view_path"
           ref="replacedFileButton"
+          v-safe-html="viewReplacedFileButtonText"
           :href="diffFile.replaced_view_path"
           class="btn view-file"
-          v-html="viewReplacedFileButtonText"
         >
         </a>
-        <gl-button
+        <gl-deprecated-button
           v-if="!diffFile.is_fully_expanded"
           ref="expandDiffToFullFileButton"
           v-gl-tooltip.hover
           :title="expandDiffToFullFileTitle"
           class="expand-file"
+          data-track-event="click_toggle_view_full_button"
+          data-track-label="diff_toggle_view_full_button"
+          data-track-property="diff_toggle_view_full"
           @click="toggleFullDiff(diffFile.file_path)"
         >
           <gl-loading-icon v-if="diffFile.isLoadingFullFile" color="dark" inline />
-          <icon v-else-if="diffFile.isShowingFullFile" name="doc-changes" />
-          <icon v-else name="doc-expand" />
-        </gl-button>
-        <gl-button
+          <gl-icon v-else-if="diffFile.isShowingFullFile" name="doc-changes" />
+          <gl-icon v-else name="doc-expand" />
+        </gl-deprecated-button>
+        <gl-deprecated-button
           ref="viewButton"
           v-gl-tooltip.hover
           :href="diffFile.view_path"
-          target="blank"
+          target="_blank"
           class="view-file"
+          data-track-event="click_toggle_view_sha_button"
+          data-track-label="diff_toggle_view_sha_button"
+          data-track-property="diff_toggle_view_sha"
           :title="viewFileButtonText"
         >
-          <icon name="doc-text" />
-        </gl-button>
+          <gl-icon name="doc-text" />
+        </gl-deprecated-button>
 
         <a
           v-if="diffFile.external_url"
@@ -291,11 +337,27 @@ export default {
           :title="`View on ${diffFile.formatted_external_url}`"
           target="_blank"
           rel="noopener noreferrer"
+          data-track-event="click_toggle_external_button"
+          data-track-label="diff_toggle_external_button"
+          data-track-property="diff_toggle_external"
           class="btn btn-file-option"
         >
-          <icon name="external-link" />
+          <gl-icon name="external-link" />
         </a>
       </div>
+    </div>
+
+    <div
+      v-if="diffFile.submodule_compare"
+      class="file-actions d-none d-sm-flex align-items-center flex-wrap"
+    >
+      <gl-button
+        v-gl-tooltip.hover
+        v-safe-html="submoduleDiffCompareLinkText"
+        class="submodule-compare"
+        :title="s__('Compare submodule commit revisions')"
+        :href="diffFile.submodule_compare.url"
+      />
     </div>
   </div>
 </template>

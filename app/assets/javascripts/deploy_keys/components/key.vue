@@ -1,7 +1,7 @@
 <script>
-import _ from 'underscore';
+import { head, tail } from 'lodash';
+import { GlIcon } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
-import icon from '~/vue_shared/components/icon.vue';
 import tooltip from '~/vue_shared/directives/tooltip';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 
@@ -10,7 +10,7 @@ import actionBtn from './action_btn.vue';
 export default {
   components: {
     actionBtn,
-    icon,
+    GlIcon,
   },
   directives: {
     tooltip,
@@ -48,8 +48,7 @@ export default {
       const projects = [...this.deployKey.deploy_keys_projects];
 
       if (this.projectId !== null) {
-        const indexOfCurrentProject = _.findIndex(
-          projects,
+        const indexOfCurrentProject = projects.findIndex(
           project =>
             project &&
             project.project &&
@@ -66,10 +65,10 @@ export default {
       return projects;
     },
     firstProject() {
-      return _.head(this.projects);
+      return head(this.projects);
     },
     restProjects() {
-      return _.tail(this.projects);
+      return tail(this.projects);
     },
     restProjectsTooltip() {
       return sprintf(s__('DeployKeys|Expand %{count} other projects'), {
@@ -115,7 +114,10 @@ export default {
       <div role="rowheader" class="table-mobile-header">{{ s__('DeployKeys|Deploy key') }}</div>
       <div class="table-mobile-content qa-key">
         <strong class="title qa-key-title"> {{ deployKey.title }} </strong>
-        <div class="fingerprint qa-key-fingerprint">{{ deployKey.fingerprint }}</div>
+        <div class="fingerprint" data-qa-selector="key_md5_fingerprint">
+          {{ __('MD5') }}:{{ deployKey.fingerprint }}
+        </div>
+        <div class="fingerprint">{{ __('SHA256') }}:{{ deployKey.fingerprint_sha256 }}</div>
       </div>
     </div>
     <div class="table-section section-30 section-wrap">
@@ -128,7 +130,7 @@ export default {
             class="label deploy-project-label"
           >
             <span> {{ firstProject.project.full_name }} </span>
-            <icon :name="firstProject.can_push ? 'lock-open' : 'lock'" />
+            <gl-icon :name="firstProject.can_push ? 'lock-open' : 'lock'" />
           </a>
           <a
             v-if="isExpandable"
@@ -149,7 +151,7 @@ export default {
             class="label deploy-project-label"
           >
             <span> {{ deployKeysProject.project.full_name }} </span>
-            <icon :name="deployKeysProject.can_push ? 'lock-open' : 'lock'" />
+            <gl-icon :name="deployKeysProject.can_push ? 'lock-open' : 'lock'" />
           </a>
         </template>
         <span v-else class="text-secondary">{{ __('None') }}</span>
@@ -159,7 +161,7 @@ export default {
       <div role="rowheader" class="table-mobile-header">{{ __('Created') }}</div>
       <div class="table-mobile-content text-secondary key-created-at">
         <span v-tooltip :title="tooltipTitle(deployKey.created_at)">
-          <icon name="calendar" /> <span>{{ timeFormated(deployKey.created_at) }}</span>
+          <gl-icon name="calendar" /> <span>{{ timeFormatted(deployKey.created_at) }}</span>
         </span>
       </div>
     </div>
@@ -176,7 +178,7 @@ export default {
           class="btn btn-default text-secondary"
           data-container="body"
         >
-          <icon name="pencil" />
+          <gl-icon name="pencil" />
         </a>
         <action-btn
           v-if="isRemovable"
@@ -187,7 +189,7 @@ export default {
           type="remove"
           data-container="body"
         >
-          <icon name="remove" />
+          <gl-icon name="remove" />
         </action-btn>
         <action-btn
           v-else-if="isEnabled"
@@ -198,7 +200,7 @@ export default {
           type="disable"
           data-container="body"
         >
-          <icon name="cancel" />
+          <gl-icon name="cancel" />
         </action-btn>
       </div>
     </div>

@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
-require 'lib/gitlab/cycle_analytics/shared_event_spec'
 
-describe Gitlab::CycleAnalytics::PlanEventFetcher do
+RSpec.describe Gitlab::CycleAnalytics::PlanEventFetcher do
   let(:stage_name) { :plan }
 
   it_behaves_like 'default query config' do

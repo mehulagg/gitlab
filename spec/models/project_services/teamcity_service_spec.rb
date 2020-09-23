@@ -2,15 +2,16 @@
 
 require 'spec_helper'
 
-describe TeamcityService, :use_clean_rails_memory_store_caching do
+RSpec.describe TeamcityService, :use_clean_rails_memory_store_caching do
   include ReactiveCachingHelpers
   include StubRequests
 
   let(:teamcity_url) { 'http://gitlab.com/teamcity' }
+  let(:teamcity_full_url) { 'http://gitlab.com/teamcity/httpAuth/app/rest/builds/branch:unspecified:any,revision:123' }
   let(:project) { create(:project) }
 
   subject(:service) do
-    described_class.create(
+    described_class.create!(
       project: project,
       properties: {
         teamcity_url: teamcity_url,
@@ -84,7 +85,7 @@ describe TeamcityService, :use_clean_rails_memory_store_caching do
           teamcity_service = service
 
           teamcity_service.teamcity_url = 'http://gitlab1.com'
-          teamcity_service.save
+          teamcity_service.save!
 
           expect(teamcity_service.password).to be_nil
         end
@@ -93,7 +94,7 @@ describe TeamcityService, :use_clean_rails_memory_store_caching do
           teamcity_service = service
 
           teamcity_service.username = 'some_name'
-          teamcity_service.save
+          teamcity_service.save!
 
           expect(teamcity_service.password).to eq('password')
         end
@@ -103,7 +104,7 @@ describe TeamcityService, :use_clean_rails_memory_store_caching do
 
           teamcity_service.teamcity_url = 'http://gitlab_edited.com'
           teamcity_service.password = 'password'
-          teamcity_service.save
+          teamcity_service.save!
 
           expect(teamcity_service.password).to eq('password')
           expect(teamcity_service.teamcity_url).to eq('http://gitlab_edited.com')
@@ -116,7 +117,7 @@ describe TeamcityService, :use_clean_rails_memory_store_caching do
 
         teamcity_service.teamcity_url = 'http://gitlab_edited.com'
         teamcity_service.password = 'password'
-        teamcity_service.save
+        teamcity_service.save!
 
         expect(teamcity_service.password).to eq('password')
         expect(teamcity_service.teamcity_url).to eq('http://gitlab_edited.com')
@@ -165,6 +166,16 @@ describe TeamcityService, :use_clean_rails_memory_store_caching do
           is_expected.to eq('http://gitlab.com/teamcity/viewLog.html?buildId=666&buildTypeId=foo')
         end
       end
+
+      it 'returns the teamcity_url when teamcity is unreachable' do
+        stub_full_request(teamcity_full_url).to_raise(Errno::ECONNREFUSED)
+
+        expect(Gitlab::ErrorTracking)
+          .to receive(:log_exception)
+          .with(instance_of(Errno::ECONNREFUSED), project_id: project.id)
+
+        is_expected.to eq(teamcity_url)
+      end
     end
 
     context 'commit_status' do
@@ -202,6 +213,16 @@ describe TeamcityService, :use_clean_rails_memory_store_caching do
 
       it 'sets commit status to :error when build status is unknown' do
         stub_request(build_status: 'FOO BAR!')
+
+        is_expected.to eq(:error)
+      end
+
+      it 'sets commit status to :error when teamcity is unreachable' do
+        stub_full_request(teamcity_full_url).to_raise(Errno::ECONNREFUSED)
+
+        expect(Gitlab::ErrorTracking)
+          .to receive(:log_exception)
+          .with(instance_of(Errno::ECONNREFUSED), project_id: project.id)
 
         is_expected.to eq(:error)
       end
@@ -300,7 +321,6 @@ describe TeamcityService, :use_clean_rails_memory_store_caching do
   end
 
   def stub_request(status: 200, body: nil, build_status: 'success')
-    teamcity_full_url = 'http://gitlab.com/teamcity/httpAuth/app/rest/builds/branch:unspecified:any,revision:123'
     auth = %w(mic password)
 
     body ||= %Q({"build":{"status":"#{build_status}","id":"666"}})

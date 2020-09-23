@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::UserProjectAccessChangedService do
+RSpec.describe EE::UserProjectAccessChangedService do
   let(:service) { UserProjectAccessChangedService.new([1, 2]) }
 
   describe '#execute' do

@@ -1,38 +1,33 @@
 .review-docs:
   extends:
-    - .default-tags
     - .default-retry
-    - .only:variables-canonical-dot-com
-    - .only:changes-docs
-  only:
-    refs:
-      - merge_requests
+    - .docs:rules:review-docs
   image: ruby:2.6-alpine
   stage: review
   dependencies: []
   variables:
-    GIT_STRATEGY: none
+    # We're cloning the repo instead of downloading the script for now
+    # because some repos are private and CI_JOB_TOKEN cannot access files.
+    # See https://gitlab.com/gitlab-org/gitlab/issues/191273
+    GIT_DEPTH: 1
   environment:
     name: review-docs/$DOCS_GITLAB_REPO_SUFFIX-$CI_MERGE_REQUEST_IID
     # DOCS_REVIEW_APPS_DOMAIN and DOCS_GITLAB_REPO_SUFFIX are CI variables
     # Discussion: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/14236/diffs#note_40140693
+    auto_stop_in: 2 weeks
     url: http://docs-preview-$DOCS_GITLAB_REPO_SUFFIX-$CI_MERGE_REQUEST_IID.$DOCS_REVIEW_APPS_DOMAIN/$DOCS_GITLAB_REPO_SUFFIX
     on_stop: review-docs-cleanup
   before_script:
-    # We don't clone the repo by using GIT_STRATEGY: none and only download the
-    # single script we need here so it's much faster than cloning.
     - apk add --update openssl
-    - wget $CI_PROJECT_URL/raw/$CI_COMMIT_SHA/scripts/trigger-build-docs
-    - chmod 755 trigger-build-docs
-    - gem install gitlab --no-document
+    - gem install httparty --no-document --version 0.17.3
+    - gem install gitlab --no-document --version 4.13.0
 
 # Always trigger a docs build in gitlab-docs only on docs-only branches.
 # Useful to preview the docs changes live.
 review-docs-deploy:
   extends: .review-docs
   script:
-    - ./trigger-build-docs deploy
-  when: manual
+    - ./scripts/trigger-build docs deploy
 
 # Cleanup remote environment of gitlab-docs
 review-docs-cleanup:
@@ -41,24 +36,21 @@ review-docs-cleanup:
     name: review-docs/$DOCS_GITLAB_REPO_SUFFIX-$CI_MERGE_REQUEST_IID
     action: stop
   script:
-    - ./trigger-build-docs cleanup
-  when: manual
+    - ./scripts/trigger-build docs cleanup
 
 docs lint:
   extends:
-    - .default-tags
     - .default-retry
-    - .default-only
-    - .only:changes-docs
-  image: "registry.gitlab.com/gitlab-org/gitlab-build-images:gitlab-docs-lint"
+    - .docs:rules:docs-lint
+  image: "registry.gitlab.com/gitlab-org/gitlab-docs/lint:vale-2.3.4-markdownlint-0.23.2"
   stage: test
-  dependencies: []
+  needs: []
   script:
     - scripts/lint-doc.sh
-    # Lint Markdown
-    - markdownlint --config .markdownlint.json 'doc/**/*.md'
     # Prepare docs for build
-    - mv doc/ /tmp/gitlab-docs/content/$DOCS_GITLAB_REPO_SUFFIX
+    # The path must be 'ee/' because we have hardcoded links relying on it
+    # https://gitlab.com/gitlab-org/gitlab-docs/-/blob/887850752fc0e72856da6632db132f005ba77f16/content/index.erb#L44-63
+    - mv doc/ /tmp/gitlab-docs/content/ee
     - cd /tmp/gitlab-docs
     # Build HTML from Markdown
     - bundle exec nanoc
@@ -67,16 +59,22 @@ docs lint:
     # Check the internal anchor links
     - bundle exec nanoc check internal_anchors
 
+ui-docs-links lint:
+  extends:
+    - .docs:rules:docs-lint
+    - .static-analysis-base
+  stage: test
+  needs: []
+  script:
+    - bundle exec haml-lint -i DocumentationLinks
+
 graphql-reference-verify:
   extends:
-    - .only-ee
-    - .default-tags
     - .default-retry
-    - .default-cache
-    - .default-only
+    - .rails-cache
     - .default-before_script
-    - .only:changes-code-backstage-qa
-    - .use-pg9
+    - .docs:rules:graphql-reference-verify
+    - .use-pg11
   stage: test
   needs: ["setup-test-env"]
   script:

@@ -8,6 +8,7 @@ class Appearance < ApplicationRecord
 
   cache_markdown_field :description
   cache_markdown_field :new_project_guidelines
+  cache_markdown_field :profile_image_guidelines
   cache_markdown_field :header_message, pipeline: :broadcast_message
   cache_markdown_field :footer_message, pipeline: :broadcast_message
 
@@ -15,9 +16,16 @@ class Appearance < ApplicationRecord
   validates :header_logo, file_size: { maximum: 1.megabyte }
   validates :message_background_color, allow_blank: true, color: true
   validates :message_font_color, allow_blank: true, color: true
+  validates :profile_image_guidelines, length: { maximum: 4096 }
 
   validate :single_appearance_row, on: :create
 
+  default_value_for :title, ''
+  default_value_for :description, ''
+  default_value_for :new_project_guidelines, ''
+  default_value_for :profile_image_guidelines, ''
+  default_value_for :header_message, ''
+  default_value_for :footer_message, ''
   default_value_for :message_background_color, '#E75E40'
   default_value_for :message_font_color, '#FFFFFF'
   default_value_for :email_header_and_footer_enabled, false
@@ -33,7 +41,7 @@ class Appearance < ApplicationRecord
 
   def single_appearance_row
     if self.class.any?
-      errors.add(:single_appearance_row, 'Only 1 appearances row can exist')
+      errors.add(:base, _('Only 1 appearances row can exist'))
     end
   end
 

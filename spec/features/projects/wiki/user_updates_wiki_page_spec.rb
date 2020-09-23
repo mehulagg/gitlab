@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe 'User updates wiki page' do
+RSpec.describe 'User updates wiki page' do
+  include WikiHelpers
+
   let(:user) { create(:user) }
 
   before do
@@ -11,8 +13,11 @@ describe 'User updates wiki page' do
   end
 
   context 'when wiki is empty' do
-    before do
+    before do |example|
       visit(project_wikis_path(project))
+
+      wait_for_svg_to_be_loaded(example)
+
       click_link "Create your first page"
     end
 
@@ -24,7 +29,7 @@ describe 'User updates wiki page' do
           click_on('Cancel')
         end
 
-        expect(current_path).to eq project_wiki_path(project, :home)
+        expect(current_path).to eq wiki_path(project.wiki)
       end
 
       it 'updates a page that has a path', :js do
@@ -59,7 +64,7 @@ describe 'User updates wiki page' do
 
   context 'when wiki is not empty' do
     let(:project_wiki) { create(:project_wiki, project: project, user: project.creator) }
-    let!(:wiki_page) { create(:wiki_page, wiki: project_wiki, attrs: { title: 'home', content: 'Home page' }) }
+    let!(:wiki_page) { create(:wiki_page, wiki: project_wiki, title: 'home', content: 'Home page') }
 
     before do
       visit(project_wikis_path(project))
@@ -83,15 +88,15 @@ describe 'User updates wiki page' do
       end
 
       it 'updates the commit message as the title is changed', :js do
+        fill_in(:wiki_title, with: '& < > \ \ { } &')
+
+        expect(page).to have_field('wiki[message]', with: 'Update & < > \ \ { } &')
+      end
+
+      it 'correctly escapes the commit message entities', :js do
         fill_in(:wiki_title, with: 'Wiki title')
 
         expect(page).to have_field('wiki[message]', with: 'Update Wiki title')
-      end
-
-      it 'does not allow XSS', :js do
-        fill_in(:wiki_title, with: '<script>')
-
-        expect(page).to have_field('wiki[message]', with: 'Update &lt;script&gt;')
       end
 
       it 'shows a validation error message' do
@@ -163,7 +168,7 @@ describe 'User updates wiki page' do
     let(:project_wiki) { create(:project_wiki, project: project, user: project.creator) }
     let(:page_name) { 'page_name' }
     let(:page_dir) { "foo/bar/#{page_name}" }
-    let!(:wiki_page) { create(:wiki_page, wiki: project_wiki, attrs: { title: page_dir, content: 'Home page' }) }
+    let!(:wiki_page) { create(:wiki_page, wiki: project_wiki, title: page_dir, content: 'Home page') }
 
     before do
       visit(project_wiki_edit_path(project, wiki_page))
@@ -228,5 +233,31 @@ describe 'User updates wiki page' do
     end
 
     it_behaves_like 'wiki file attachments'
+  end
+
+  context 'when an existing page exceeds the content size limit' do
+    let_it_be(:project) { create(:project, :wiki_repo) }
+    let!(:wiki_page) { create(:wiki_page, wiki: project.wiki, content: "one\ntwo\nthree") }
+
+    before do
+      stub_application_setting(wiki_page_max_content_bytes: 10)
+
+      visit wiki_page_path(wiki_page.wiki, wiki_page, action: :edit)
+    end
+
+    it 'allows changing the title if the content does not change' do
+      fill_in 'Title', with: 'new title'
+      click_on 'Save changes'
+
+      expect(page).to have_content('Wiki was successfully updated.')
+    end
+
+    it 'shows a validation error when trying to change the content' do
+      fill_in 'Content', with: 'new content'
+      click_on 'Save changes'
+
+      expect(page).to have_content('The form contains the following error:')
+      expect(page).to have_content('Content is too long (11 Bytes). The maximum size is 10 Bytes.')
+    end
   end
 end

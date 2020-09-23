@@ -2,14 +2,20 @@
 
 require 'spec_helper'
 
-describe Gitlab::Checks::DiffCheck do
+RSpec.describe Gitlab::Checks::DiffCheck do
   include FakeBlobHelpers
 
   include_context 'push rules checks context'
 
   describe '#validate!' do
+    shared_examples_for "returns codeowners validation message" do
+      it "returns an error message" do
+        expect(validation_result).to include("Pushes to protected branches")
+      end
+    end
+
     context 'no push rules active' do
-      set(:push_rule) { create(:push_rule) }
+      let_it_be(:push_rule) { create(:push_rule) }
 
       it "does not attempt to check commits" do
         expect(subject).not_to receive(:process_commits)
@@ -21,7 +27,7 @@ describe Gitlab::Checks::DiffCheck do
     describe "#validate_code_owners" do
       let!(:code_owner) { create(:user, username: "owner-1") }
       let(:project) { create(:project, :repository) }
-      let(:codeowner_content) { "*.rb @#{code_owner.username}\ndocs/CODEOWNERS @owner-1" }
+      let(:codeowner_content) { "*.rb @#{code_owner.username}\ndocs/CODEOWNERS @owner-1\n*.js.coffee @owner-1" }
       let(:codeowner_blob) { fake_blob(path: "CODEOWNERS", data: codeowner_content) }
       let(:codeowner_blob_ref) { fake_blob(path: "CODEOWNERS", data: codeowner_content) }
       let(:codeowner_lookup_ref) { merge_request.target_branch }
@@ -36,21 +42,48 @@ describe Gitlab::Checks::DiffCheck do
       end
 
       before do
-        project.add_developer(code_owner)
         allow(project.repository).to receive(:code_owners_blob)
           .with(ref: codeowner_lookup_ref)
           .and_return(codeowner_blob)
       end
 
-      context "the MR contains a matching file path" do
-        it "return an error message" do
-          expect(subject.send(:validate_code_owners)
-            .call(["docs/CODEOWNERS", "README"])).not_to be_nil
+      context 'the MR contains a renamed file matching a file path' do
+        let(:diff_check) { described_class.new(change_access) }
+        let(:protected_branch) { build(:protected_branch, name: 'master', project: project) }
+
+        before do
+          expect(project).to receive(:branch_requires_code_owner_approval?)
+            .at_least(:once).and_return(true)
+
+          # This particular commit renames a file:
+          allow(project.repository).to receive(:new_commits).and_return(
+            [project.repository.commit('6907208d755b60ebeacb2e9dfea74c92c3449a1f')]
+          )
+        end
+
+        it "returns an error message" do
+          expect { diff_check.validate! }.to raise_error do |error|
+            expect(error).to be_a(Gitlab::GitAccess::ForbiddenError)
+            expect(error.message).to include("CODEOWNERS` were matched:\n- *.js.coffee")
+          end
         end
       end
 
+      context "the MR contains a matching file path" do
+        let(:validation_result) do
+          subject.send(:validate_code_owners).call(["docs/CODEOWNERS", "README"])
+        end
+
+        before do
+          expect(project).to receive(:branch_requires_code_owner_approval?)
+            .at_least(:once).and_return(true)
+        end
+
+        it_behaves_like "returns codeowners validation message"
+      end
+
       context "the MR doesn't contain a matching file path" do
-        it "doesn't raise an exception" do
+        it "returns nil" do
           expect(subject.send(:validate_code_owners)
             .call(["docs/SAFE_FILE_NAME", "README"])).to be_nil
         end
@@ -90,7 +123,6 @@ describe Gitlab::Checks::DiffCheck do
         context "updated_from_web? == true" do
           before do
             expect(subject).to receive(:updated_from_web?).and_return(true)
-            expect(project).not_to receive(:branch_requires_code_owner_approval?)
           end
 
           it "returns an empty array" do
@@ -108,13 +140,13 @@ describe Gitlab::Checks::DiffCheck do
         it_behaves_like 'check ignored when push rule unlicensed'
 
         it "returns an error if a new or renamed filed doesn't match the file name regex" do
-          expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "File name README was blacklisted by the pattern READ*.")
+          expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "File name README was blacklisted by the pattern READ*.")
         end
 
         it 'returns an error if the regex is invalid' do
           push_rule.file_name_regex = '+'
 
-          expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, /\ARegular expression '\+' is invalid/)
+          expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /\ARegular expression '\+' is invalid/)
         end
       end
 
@@ -164,20 +196,68 @@ describe Gitlab::Checks::DiffCheck do
               project.repository.commits_between(old_rev, new_rev)
             )
 
-            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, /File name #{file_path} was blacklisted by the pattern/)
+            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /File name #{file_path} was blacklisted by the pattern/)
           end
         end
       end
     end
 
     context 'file lock rules' do
-      let(:project) { create(:project, :repository) }
+      let_it_be(:push_rule) { create(:push_rule) }
+      let_it_be(:owner) { create(:user) }
       let(:path_lock) { create(:path_lock, path: 'README', project: project) }
 
-      it 'returns an error if the changes update a path locked by another user' do
-        path_lock
+      before do
+        project.add_developer(owner)
+      end
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "The path 'README' is locked by #{path_lock.user.name}")
+      shared_examples 'a locked file' do
+        let!(:path_lock) { create(:path_lock, path: filename, project: project, user: owner) }
+
+        before do
+          allow(project.repository).to receive(:new_commits).and_return(
+            [project.repository.commit(sha)]
+          )
+        end
+
+        context 'and path is locked by another user' do
+          it 'returns an error' do
+            path_lock
+
+            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "The path '#{filename}' is locked by #{path_lock.user.name}")
+          end
+        end
+
+        context 'and path is locked by current user' do
+          let(:user) { owner }
+
+          it 'is allows changes' do
+            path_lock
+
+            expect { subject.validate! }.not_to raise_error
+          end
+        end
+      end
+
+      context 'when file has changes' do
+        let_it_be(:filename) { 'files/ruby/popen.rb' }
+        let_it_be(:sha) { '570e7b2abdd848b95f2f578043fc23bd6f6fd24d' }
+
+        it_behaves_like 'a locked file'
+      end
+
+      context 'when file is renamed' do
+        let_it_be(:filename) { 'files/js/commit.js.coffee' }
+        let_it_be(:sha) { '6907208d755b60ebeacb2e9dfea74c92c3449a1f' }
+
+        it_behaves_like 'a locked file'
+      end
+
+      context 'when file is deleted' do
+        let_it_be(:filename) { 'files/js/commit.js.coffee' }
+        let_it_be(:sha) { 'd59c60028b053793cecfb4022de34602e1a9218e' }
+
+        it_behaves_like 'a locked file'
       end
 
       it 'memoizes the validate_path_locks? call' do

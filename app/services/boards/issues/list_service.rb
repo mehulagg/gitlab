@@ -5,8 +5,14 @@ module Boards
     class ListService < Boards::BaseService
       include Gitlab::Utils::StrongMemoize
 
+      def self.valid_params
+        IssuesFinder.valid_params
+      end
+
       def execute
-        fetch_issues.order_by_position_and_priority
+        return fetch_issues.order_closed_date_desc if list&.closed?
+
+        fetch_issues.order_by_position_and_priority(with_cte: params[:search].present?)
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
@@ -39,6 +45,12 @@ module Boards
       # rubocop: enable CodeReuse/ActiveRecord
 
       def filter(issues)
+        # when grouping board issues by epics (used in board swimlanes)
+        # we need to get all issues in the board
+        # TODO: ignore hidden columns -
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/233870
+        return issues if params[:all_lists]
+
         issues = without_board_labels(issues) unless list&.movable? || list&.closed?
         issues = with_list_label(issues) if list&.label?
         issues
@@ -49,9 +61,17 @@ module Boards
       end
 
       def list
-        return @list if defined?(@list)
+        return unless params.key?(:id)
 
-        @list = board.lists.find(params[:id]) if params.key?(:id)
+        strong_memoize(:list) do
+          id = params[:id]
+
+          if board.lists.loaded?
+            board.lists.find { |l| l.id == id }
+          else
+            board.lists.find(id)
+          end
+        end
       end
 
       def filter_params
@@ -59,6 +79,7 @@ module Boards
         set_state
         set_scope
         set_non_archived
+        set_attempt_search_optimizations
 
         params
       end
@@ -72,6 +93,8 @@ module Boards
       end
 
       def set_state
+        return if params[:all_lists]
+
         params[:state] = list && list.closed? ? 'closed' : 'opened'
       end
 
@@ -81,6 +104,16 @@ module Boards
 
       def set_non_archived
         params[:non_archived] = parent.is_a?(Group)
+      end
+
+      def set_attempt_search_optimizations
+        return unless params[:search].present?
+
+        if board.group_board?
+          params[:attempt_group_search_optimizations] = true
+        else
+          params[:attempt_project_search_optimizations] = true
+        end
       end
 
       # rubocop: disable CodeReuse/ActiveRecord
@@ -109,6 +142,10 @@ module Boards
                                             .where("label_links.label_id = ?", list.label_id).limit(1))
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      def board_group
+        board.group_board? ? parent : parent.group
+      end
     end
   end
 end

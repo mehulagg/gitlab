@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Multi-file editor new file', :js do
+RSpec.describe 'Multi-file editor new file', :js do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
 
@@ -36,7 +36,12 @@ describe 'Multi-file editor new file', :js do
 
     find('.js-ide-commit-mode').click
 
-    click_button 'Stage'
+    # Compact mode depends on the size of window. If it is shorter than MAX_WINDOW_HEIGHT_COMPACT,
+    # (as it is with CHROME_HEADLESS=0), this initial commit button will exist. Otherwise, if it is
+    # taller (as it is by default with chrome headless) then the button will not exist.
+    if page.has_css?('.qa-begin-commit-button')
+      find('.qa-begin-commit-button').click
+    end
 
     fill_in('commit-message', with: 'commit message ide')
 

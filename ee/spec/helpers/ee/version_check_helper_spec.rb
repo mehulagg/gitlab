@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::VersionCheckHelper do
+RSpec.describe EE::VersionCheckHelper do
   include StubVersion
 
   describe '#link_to_version' do
@@ -12,7 +12,7 @@ describe EE::VersionCheckHelper do
       end
 
       it 'links to an ee-commit' do
-        expect(helper.link_to_version).to include('https://gitlab.com/gitlab-org/gitlab/commits/deadbeef')
+        expect(helper.link_to_version).to include('https://gitlab.com/gitlab-org/gitlab/-/commits/deadbeef')
       end
     end
 

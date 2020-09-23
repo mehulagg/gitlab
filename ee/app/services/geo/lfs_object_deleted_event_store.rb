@@ -26,16 +26,14 @@ module Geo
       lfs_object.file.relative_path if lfs_object.file.present?
     end
 
-    # This is called by ProjectLogHelpers to build json log with context info
+    # This is called by LogHelpers to build json log with context info
     #
-    # @see ::Gitlab::Geo::ProjectLogHelpers
-    def base_log_data(message)
+    # @see ::Gitlab::Geo::LogHelpers
+    def extra_log_data
       {
-        class: self.class.name,
         lfs_object_id: lfs_object.id,
-        file_path: lfs_object.file.path,
-        message: message
-      }
+        file_path: lfs_object.file.path
+      }.compact
     end
   end
 end

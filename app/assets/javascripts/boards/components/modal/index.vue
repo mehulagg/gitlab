@@ -1,12 +1,13 @@
 <script>
 /* global ListIssue */
+import { GlLoadingIcon } from '@gitlab/ui';
 import { urlParamsToObject } from '~/lib/utils/common_utils';
+import boardsStore from '~/boards/stores/boards_store';
 import ModalHeader from './header.vue';
 import ModalList from './list.vue';
 import ModalFooter from './footer.vue';
 import EmptyState from './empty_state.vue';
 import ModalStore from '../../stores/modal_store';
-import { GlLoadingIcon } from '@gitlab/ui';
 
 export default {
   components: {
@@ -25,20 +26,8 @@ export default {
       type: String,
       required: true,
     },
-    issueLinkBase: {
-      type: String,
-      required: true,
-    },
-    rootPath: {
-      type: String,
-      required: true,
-    },
     projectId: {
       type: Number,
-      required: true,
-    },
-    milestonePath: {
-      type: String,
       required: true,
     },
     labelPath: {
@@ -109,7 +98,7 @@ export default {
     loadIssues(clearIssues = false) {
       if (!this.showAddIssuesModal) return false;
 
-      return gl.boardService
+      return boardsStore
         .getBacklog({
           ...urlParamsToObject(this.filter.path),
           page: this.page,
@@ -148,17 +137,8 @@ export default {
     class="add-issues-modal d-flex position-fixed position-top-0 position-bottom-0 position-left-0 position-right-0 h-100"
   >
     <div class="add-issues-container d-flex flex-column m-auto rounded">
-      <modal-header
-        :project-id="projectId"
-        :milestone-path="milestonePath"
-        :label-path="labelPath"
-      />
-      <modal-list
-        v-if="!loading && showList && !filterLoading"
-        :issue-link-base="issueLinkBase"
-        :root-path="rootPath"
-        :empty-state-svg="emptyStateSvg"
-      />
+      <modal-header :project-id="projectId" :label-path="labelPath" />
+      <modal-list v-if="!loading && showList && !filterLoading" :empty-state-svg="emptyStateSvg" />
       <empty-state
         v-if="showEmptyState"
         :new-issue-path="newIssuePath"

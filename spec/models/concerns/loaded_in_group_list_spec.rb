@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe LoadedInGroupList do
+RSpec.describe LoadedInGroupList do
   let(:parent) { create(:group) }
+
   subject(:found_group) { Group.with_selects_for_list.find_by(id: parent.id) }
 
   describe '.with_selects_for_list' do

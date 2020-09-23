@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ContainerRegistry::Registry do
+RSpec.describe ContainerRegistry::Registry do
   let(:path) { nil }
   let(:registry) { described_class.new('http://example.com', path: path) }
 
@@ -14,7 +14,7 @@ describe ContainerRegistry::Registry do
 
   it { expect(subject).not_to be_nil }
 
-  context '#path' do
+  describe '#path' do
     subject { registry.path }
 
     context 'path from URL' do

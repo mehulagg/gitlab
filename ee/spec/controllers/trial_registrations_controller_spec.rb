@@ -2,52 +2,58 @@
 
 require 'spec_helper'
 
-describe TrialRegistrationsController do
+RSpec.describe TrialRegistrationsController do
+  let(:dev_env_or_com) { true }
+
+  before do
+    allow(Gitlab).to receive(:dev_env_or_com?).and_return(dev_env_or_com)
+  end
+
+  shared_examples 'a dot-com only feature' do
+    let(:success_status) { :ok }
+
+    context 'when not on gitlab.com and not in development environment' do
+      let(:dev_env_or_com) { false }
+
+      it { is_expected.to have_gitlab_http_status(:not_found) }
+    end
+
+    context 'when on gitlab.com or in dev environment' do
+      it { is_expected.to have_gitlab_http_status(success_status) }
+    end
+  end
+
   describe '#new' do
-    let(:user) { create(:user) }
+    let(:logged_in_user) { nil }
+    let(:get_params) { {} }
 
     before do
-      allow(Gitlab).to receive(:com?).and_return(true)
+      sign_in(logged_in_user) if logged_in_user.present?
+      get :new, params: get_params
     end
 
-    context 'when feature is turned off' do
-      before do
-        stub_feature_flags(improved_trial_signup: false)
-      end
+    subject { response }
 
-      it 'redirects to subscription portal trial url' do
-        get :new
-
-        expect(response).to redirect_to("#{EE::SUBSCRIPTIONS_URL}/trials/new?gl_com=true")
-      end
-    end
+    it_behaves_like 'a dot-com only feature'
 
     context 'when customer is authenticated' do
-      before do
-        sign_in(user)
-      end
+      let_it_be(:logged_in_user) { create(:user) }
 
-      it 'redirects to the new trial page' do
-        get :new
+      it { is_expected.to redirect_to(new_trial_url) }
 
-        expect(response).to redirect_to(new_trial_url)
+      context 'when there are additional query params' do
+        let(:get_params) { { glm_source: 'some_source', glm_content: 'some_content' } }
+
+        it { is_expected.to redirect_to(new_trial_url(get_params)) }
       end
     end
 
     context 'when customer is not authenticated' do
-      it 'renders the regular template' do
-        get :new
-
-        expect(response).to render_template(:new)
-      end
+      it { is_expected.to render_template(:new) }
     end
   end
 
   describe '#create' do
-    before do
-      stub_application_setting(send_user_confirmation_email: true)
-    end
-
     let(:user_params) do
       {
         first_name: 'John',
@@ -58,64 +64,23 @@ describe TrialRegistrationsController do
       }
     end
 
-    context 'when invalid - instance is not GL.com' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(false)
-      end
-
-      it 'returns 404 not found' do
-        post :create, params: { user: user_params }
-
-        expect(response.status).to eq(404)
-      end
+    before do
+      stub_application_setting(send_user_confirmation_email: true)
+      post :create, params: { user: user_params }
     end
 
-    context 'when feature is turned off' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(true)
-        stub_feature_flags(improved_trial_signup: false)
-      end
-
-      it 'returns not found' do
-        post :create, params: { user: user_params }
-
-        expect(response).to redirect_to("#{EE::SUBSCRIPTIONS_URL}/trials/new?gl_com=true")
-      end
+    it_behaves_like 'a dot-com only feature' do
+      let(:success_status) { :found }
+      subject { response }
     end
 
-    context 'when valid' do
-      before do
-        allow(Gitlab).to receive(:com?).and_return(true)
-      end
+    it 'marks the account as unconfirmed' do
+      expect(User.last).not_to be_confirmed
+    end
 
-      it 'marks the account as confirmed' do
-        post :create, params: { user: user_params }
-
-        expect(User.last).to be_confirmed
-      end
-
-      context 'derivation of name' do
-        it 'sets name from first and last name' do
-          post :create, params: { user: user_params }
-
-          expect(User.last.name).to eq("#{user_params[:first_name]} #{user_params[:last_name]}")
-        end
-      end
-
-      context 'system hook' do
-        it 'triggers user_create event on trial sign up' do
-          expect_any_instance_of(SystemHooksService).to receive(:execute_hooks_for).with(an_instance_of(User), :create)
-
-          post :create, params: { user: user_params }
-        end
-
-        it 'does not trigger user_create event when data is invalid' do
-          user_params[:email] = ''
-
-          expect_any_instance_of(SystemHooksService).not_to receive(:execute_hooks_for).with(an_instance_of(User), :create)
-
-          post :create, params: { user: user_params }
-        end
+    context 'derivation of name' do
+      it 'sets name from first and last name' do
+        expect(User.last.name).to eq("#{user_params[:first_name]} #{user_params[:last_name]}")
       end
     end
   end

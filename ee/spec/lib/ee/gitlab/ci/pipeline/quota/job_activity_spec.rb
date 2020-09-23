@@ -2,37 +2,51 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
-  let_it_be(:namespace, refind: true) { create(:namespace) }
-  let_it_be(:project, refind: true) { create(:project, namespace: namespace) }
-  let(:gold_plan) { create(:gold_plan, active_jobs_limit: active_jobs_limit) }
+RSpec.describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
+  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:project, reload: true) { create(:project, namespace: namespace) }
+  let_it_be(:gold_plan, reload: true) { create(:gold_plan) }
+  let_it_be(:plan_limits, reload: true) { create(:plan_limits, plan: gold_plan) }
+  let!(:subscription) { create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan) }
 
-  let(:limit) { described_class.new(namespace, project) }
-
-  before do
-    create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
-  end
+  subject { described_class.new(namespace, project) }
 
   describe '#enabled?' do
     context 'when limit is enabled in plan' do
-      let(:active_jobs_limit) { 10 }
+      before do
+        plan_limits.update!(ci_active_jobs: 10)
+      end
 
       it 'is enabled' do
-        expect(limit).to be_enabled
+        expect(subject).to be_enabled
       end
     end
 
     context 'when limit is not enabled' do
-      let(:active_jobs_limit) { 0 }
+      before do
+        plan_limits.update!(ci_active_jobs: 0)
+      end
 
       it 'is not enabled' do
-        expect(limit).not_to be_enabled
+        expect(subject).not_to be_enabled
+      end
+    end
+
+    context 'when limit does not exist' do
+      before do
+        allow(namespace).to receive(:actual_plan) { create(:default_plan) }
+      end
+
+      it 'is not enabled' do
+        expect(subject).not_to be_enabled
       end
     end
   end
 
   describe '#exceeded?' do
-    let(:active_jobs_limit) { 2 }
+    before do
+      plan_limits.update!(ci_active_jobs: 2)
+    end
 
     context 'when pipelines created recently' do
       context 'and pipelines are running' do
@@ -46,7 +60,7 @@ describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
 
         context 'when count of jobs in alive pipelines is below the limit' do
           it 'is not exceeded' do
-            expect(limit).not_to be_exceeded
+            expect(subject).not_to be_exceeded
           end
         end
 
@@ -56,7 +70,7 @@ describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
           end
 
           it 'is exceeded' do
-            expect(limit).to be_exceeded
+            expect(subject).to be_exceeded
           end
         end
       end
@@ -71,7 +85,7 @@ describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
         end
 
         it 'is not exceeded' do
-          expect(limit).not_to be_exceeded
+          expect(subject).not_to be_exceeded
         end
       end
     end
@@ -86,16 +100,16 @@ describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
       end
 
       it 'is not exceeded' do
-        expect(limit).not_to be_exceeded
+        expect(subject).not_to be_exceeded
       end
     end
   end
 
   describe '#message' do
     context 'when limit is exceeded' do
-      let(:active_jobs_limit) { 1 }
-
       before do
+        plan_limits.update!(ci_active_jobs: 1)
+
         create(:ci_pipeline, project: project, status: 'created', created_at: Time.now).tap do |pipeline|
           create(:ci_build, pipeline: pipeline)
           create(:ci_build, pipeline: pipeline)
@@ -104,7 +118,7 @@ describe EE::Gitlab::Ci::Pipeline::Quota::JobActivity do
       end
 
       it 'returns info about pipeline activity limit exceeded' do
-        expect(limit.message)
+        expect(subject.message)
           .to eq "Active jobs limit exceeded by 2 jobs in the past 24 hours!"
       end
     end

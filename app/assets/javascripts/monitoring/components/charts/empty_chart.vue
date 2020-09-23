@@ -1,14 +1,9 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import chartEmptyStateIllustration from '@gitlab/svgs/dist/illustrations/chart-empty-state.svg';
 import { chartHeight } from '../../constants';
 
 export default {
-  props: {
-    graphTitle: {
-      type: String,
-      required: true,
-    },
-  },
   data() {
     return {
       height: chartHeight,
@@ -27,15 +22,12 @@ export default {
 };
 </script>
 <template>
-  <div class="prometheus-graph d-flex flex-column justify-content-center">
-    <div class="prometheus-graph-header">
-      <h5 ref="graphTitle" class="prometheus-graph-title">{{ graphTitle }}</h5>
-    </div>
+  <div class="d-flex flex-column justify-content-center">
     <div
-      class="prepend-top-8 svg-w-100 d-flex align-items-center"
+      class="gl-mt-3 svg-w-100 d-flex align-items-center"
       :style="svgContainerStyle"
       v-html="chartEmptyStateIllustration"
     ></div>
-    <h5 class="text-center prepend-top-8">{{ __('No data to display') }}</h5>
+    <h5 class="text-center gl-mt-3">{{ __('No data to display') }}</h5>
   </div>
 </template>

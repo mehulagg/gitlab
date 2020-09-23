@@ -8,6 +8,7 @@ module Ci
     include ChronicDurationAttribute
     include FromUnion
     include TokenAuthenticatable
+    include IgnorableColumns
 
     add_authentication_token_field :token, encrypted: -> { Feature.enabled?(:ci_runners_tokens_optional_encryption, default_enabled: true) ? :optional : :required }
 
@@ -22,10 +23,17 @@ module Ci
       project_type: 3
     }
 
-    ONLINE_CONTACT_TIMEOUT = 1.hour
+    # This `ONLINE_CONTACT_TIMEOUT` needs to be larger than
+    #   `RUNNER_QUEUE_EXPIRY_TIME+UPDATE_CONTACT_COLUMN_EVERY`
+    #
+    ONLINE_CONTACT_TIMEOUT = 2.hours
+
+    # The `RUNNER_QUEUE_EXPIRY_TIME` indicates the longest interval that
+    #   Runner request needs to be refreshed by Rails instead of being handled
+    #   by Workhorse
     RUNNER_QUEUE_EXPIRY_TIME = 1.hour
 
-    # This needs to be less than `ONLINE_CONTACT_TIMEOUT`
+    # The `UPDATE_CONTACT_COLUMN_EVERY` defines how often the Runner DB entry can be updated
     UPDATE_CONTACT_COLUMN_EVERY = (40.minutes..55.minutes).freeze
 
     AVAILABLE_TYPES_LEGACY = %w[specific shared].freeze
@@ -34,8 +42,9 @@ module Ci
     AVAILABLE_SCOPES = (AVAILABLE_TYPES_LEGACY + AVAILABLE_TYPES + AVAILABLE_STATUSES).freeze
 
     FORM_EDITABLE = %i[description tag_list active run_untagged locked access_level maximum_timeout_human_readable].freeze
+    MINUTES_COST_FACTOR_FIELDS = %i[public_projects_minutes_cost_factor private_projects_minutes_cost_factor].freeze
 
-    self.ignored_columns += %i[is_shared]
+    ignore_column :is_shared, remove_after: '2019-12-15', remove_with: '12.6'
 
     has_many :builds
     has_many :runner_projects, inverse_of: :runner, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
@@ -43,7 +52,7 @@ module Ci
     has_many :runner_namespaces, inverse_of: :runner
     has_many :groups, through: :runner_namespaces
 
-    has_one :last_build, ->() { order('id DESC') }, class_name: 'Ci::Build'
+    has_one :last_build, -> { order('id DESC') }, class_name: 'Ci::Build'
 
     before_save :ensure_token
 
@@ -67,6 +76,27 @@ module Ci
 
     scope :belonging_to_project, -> (project_id) {
       joins(:runner_projects).where(ci_runner_projects: { project_id: project_id })
+    }
+
+    scope :belonging_to_group, -> (group_id, include_ancestors: false) {
+      groups = ::Group.where(id: group_id)
+
+      if include_ancestors
+        groups = Gitlab::ObjectHierarchy.new(groups).base_and_ancestors
+      end
+
+      joins(:runner_namespaces).where(ci_runner_namespaces: { namespace_id: groups })
+    }
+
+    scope :belonging_to_group_or_project, -> (group_id, project_id) {
+      groups = ::Group.where(id: group_id)
+
+      group_runners = joins(:runner_namespaces).where(ci_runner_namespaces: { namespace_id: groups })
+      project_runners = joins(:runner_projects).where(ci_runner_projects: { project_id: project_id })
+
+      union_sql = ::Gitlab::SQL::Union.new([group_runners, project_runners]).to_sql
+
+      from("(#{union_sql}) #{table_name}")
     }
 
     scope :belonging_to_parent_group_of_project, -> (project_id) {
@@ -126,16 +156,21 @@ module Ci
                                 numericality: { greater_than_or_equal_to: 600,
                                                 message: 'needs to be at least 10 minutes' }
 
+    validates :public_projects_minutes_cost_factor, :private_projects_minutes_cost_factor,
+      allow_nil: false,
+      numericality: { greater_than_or_equal_to: 0.0,
+                      message: 'needs to be non-negative' }
+
     # Searches for runners matching the given query.
     #
-    # This method uses ILIKE on PostgreSQL and LIKE on MySQL.
+    # This method uses ILIKE on PostgreSQL.
     #
     # This method performs a *partial* match on tokens, thus a query for "a"
     # will match any runner where the token contains the letter "a". As a result
     # you should *not* use this method for non-admin purposes as otherwise users
     # might be able to query a list of all runners.
     #
-    # query - The search query as a String
+    # query - The search query as a String.
     #
     # Returns an ActiveRecord::Relation.
     def self.search(query)
@@ -204,6 +239,10 @@ module Ci
       runner_projects.count == 1
     end
 
+    def belongs_to_more_than_one_project?
+      self.projects.limit(2).count(:all) > 1
+    end
+
     def assigned_to_group?
       runner_namespaces.any?
     end
@@ -254,9 +293,9 @@ module Ci
       ensure_runner_queue_value == value if value.present?
     end
 
-    def update_cached_info(values)
+    def heartbeat(values)
       values = values&.slice(:version, :revision, :platform, :architecture, :ip_address) || {}
-      values[:contacted_at] = Time.now
+      values[:contacted_at] = Time.current
 
       cache_attributes(values)
 
@@ -292,7 +331,7 @@ module Ci
 
       real_contacted_at = read_attribute(:contacted_at)
       real_contacted_at.nil? ||
-        (Time.now - real_contacted_at) >= contacted_at_max_age
+        (Time.current - real_contacted_at) >= contacted_at_max_age
     end
 
     def tag_constraints

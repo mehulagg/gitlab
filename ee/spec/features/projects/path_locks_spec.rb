@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Path Locks', :js do
+RSpec.describe 'Path Locks', :js do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
   let(:tree_path) { project_tree_path(project, project.repository.root_ref) }
@@ -22,7 +22,8 @@ describe 'Path Locks', :js do
     within '.tree-content-holder' do
       click_link "encoding"
     end
-    click_link "Lock"
+
+    find('.js-path-lock').click
 
     expect(page).to have_link('Unlock')
   end
@@ -67,7 +68,7 @@ describe 'Path Locks', :js do
     within '.locks' do
       expect(page).to have_content('encoding')
 
-      accept_confirm { find('.btn-remove').click }
+      accept_confirm { click_link "Unlock" }
 
       expect(page).not_to have_content('encoding')
     end

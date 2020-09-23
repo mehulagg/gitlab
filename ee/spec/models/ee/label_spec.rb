@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Label do
+RSpec.describe Label do
   describe '#scoped_label?' do
     context 'with scoped_labels available' do
       before do
@@ -19,17 +19,25 @@ describe Label do
     end
   end
 
-  describe '#scoped_label_key' do
-    it 'returns key for scoped labels' do
-      mappings = {
-        'key1::key 2::some value' => 'key1::key 2::',
-        'key1::some value' => 'key1::',
-        '::some value' => '::',
-        'some value' => nil
-      }
+  describe 'splitting scoped labels' do
+    using RSpec::Parameterized::TableSyntax
 
-      mappings.each do |title, expected_key|
-        expect(build(:label, title: title).scoped_label_key).to eq(expected_key)
+    where(:title, :key, :value) do
+      'key1::key 2::some value' | 'key1::key 2' | 'some value'
+      'key1::some value'        | 'key1'        | 'some value'
+      '::some value'            | ''            | 'some value'
+      'some value'              | nil           | 'some value'
+    end
+
+    with_them do
+      let(:label) { build(:label, title: title) }
+
+      it '#scoped_label_key returns key for scoped labels' do
+        expect(label.scoped_label_key).to eq(key)
+      end
+
+      it '#scoped_label_value returns title without the key' do
+        expect(label.scoped_label_value).to eq(value)
       end
     end
   end

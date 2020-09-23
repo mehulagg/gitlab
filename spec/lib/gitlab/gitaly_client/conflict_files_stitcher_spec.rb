@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GitalyClient::ConflictFilesStitcher do
+RSpec.describe Gitlab::GitalyClient::ConflictFilesStitcher do
   describe 'enumeration' do
     it 'combines segregated ConflictFile messages together' do
       target_project = create(:project, :repository)

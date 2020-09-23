@@ -2,16 +2,20 @@
   @include media-breakpoint-up(sm) {
     padding-left: $gl-sidebar-padding;
   }
+
+  .issue-title {
+    max-width: px-to-rem($issuable-title-max-width);
+  }
+
+  .milestone-title {
+    max-width: px-to-rem($milestone-title-max-width);
+  }
 }
 
 .issues-analytics-chart {
   .chart-title {
     margin: $gl-padding-24 0 $gl-padding-32;
   }
-}
-
-.issues-analytics-loading {
-  padding-top: $header-height * 2;
 }
 
 .issues-analytics-legend {

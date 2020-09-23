@@ -4,11 +4,11 @@ module Projects
   module Settings
     class OperationsController < Projects::ApplicationController
       before_action :authorize_admin_operations!
+      before_action :authorize_read_prometheus_alerts!, only: [:reset_alerting_token]
+
+      respond_to :json, only: [:reset_alerting_token, :reset_pagerduty_token]
 
       helper_method :error_tracking_setting
-
-      def show
-      end
 
       def update
         result = ::Projects::Operations::UpdateService.new(project, current_user, update_params).execute
@@ -19,16 +19,68 @@ module Projects
 
       # overridden in EE
       def track_events(result)
+        if result[:status] == :success
+          ::Gitlab::Tracking::IncidentManagement.track_from_params(
+            update_params[:incident_management_setting_attributes]
+          )
+        end
+      end
+
+      def reset_alerting_token
+        result = ::Projects::Operations::UpdateService
+          .new(project, current_user, alerting_params)
+          .execute
+
+        if result[:status] == :success
+          render json: { token: project.alerting_setting.token }
+        else
+          render json: {}, status: :unprocessable_entity
+        end
+      end
+
+      def reset_pagerduty_token
+        result = ::Projects::Operations::UpdateService
+          .new(project, current_user, pagerduty_token_params)
+          .execute
+
+        if result[:status] == :success
+          pagerduty_token = project.incident_management_setting&.pagerduty_token
+          webhook_url = project_incidents_integrations_pagerduty_url(project, token: pagerduty_token)
+
+          render json: { pagerduty_webhook_url: webhook_url, pagerduty_token: pagerduty_token }
+        else
+          render json: {}, status: :unprocessable_entity
+        end
       end
 
       private
 
-      # overridden in EE
+      def alerting_params
+        { alerting_setting_attributes: { regenerate_token: true } }
+      end
+
+      def pagerduty_token_params
+        { incident_management_setting_attributes: { regenerate_token: true } }
+      end
+
       def render_update_response(result)
         respond_to do |format|
+          format.html do
+            render_update_html_response(result)
+          end
+
           format.json do
             render_update_json_response(result)
           end
+        end
+      end
+
+      def render_update_html_response(result)
+        if result[:status] == :success
+          flash[:notice] = _('Your changes have been saved')
+          redirect_to project_settings_operations_path(@project)
+        else
+          render 'show'
         end
       end
 
@@ -60,8 +112,10 @@ module Projects
 
       # overridden in EE
       def permitted_project_params
-        {
-          metrics_setting_attributes: [:external_dashboard_url],
+        project_params = {
+          incident_management_setting_attributes: ::Gitlab::Tracking::IncidentManagement.tracking_keys.keys,
+
+          metrics_setting_attributes: [:external_dashboard_url, :dashboard_timezone],
 
           error_tracking_setting_attributes: [
             :enabled,
@@ -72,6 +126,12 @@ module Projects
 
           grafana_integration_attributes: [:token, :grafana_url, :enabled]
         }
+
+        if Feature.enabled?(:settings_operations_prometheus_service, project)
+          project_params[:prometheus_integration_attributes] = [:manual_configuration, :api_url]
+        end
+
+        project_params
       end
     end
   end

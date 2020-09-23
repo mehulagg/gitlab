@@ -3,7 +3,7 @@
 module EE
   module Audit
     class BaseChangesAuditor
-      include Changes
+      include ::Audit::Changes
 
       def initialize(current_user, model)
         @model = model

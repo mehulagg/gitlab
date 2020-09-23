@@ -88,7 +88,7 @@
     font-family: inherit;
     left: $left;
     height: 100%;
-    border-right: 1px solid mix($input-border, $white-light);
+    border-right: 1px solid mix($input-border, $white);
     position: absolute;
     z-index: 1;
   }
@@ -127,11 +127,11 @@
 
 .text-expander {
   display: inline-flex;
-  background: $white-light;
+  background: $white;
   color: $gl-text-color-secondary;
   padding: 1px $gl-padding-4;
   cursor: pointer;
-  border: 1px solid $border-gray-dark;
+  border: 1px solid $border-white-normal;
   border-radius: $border-radius-default;
   margin-left: 5px;
   font-size: 12px;
@@ -208,6 +208,18 @@
   }
 }
 
+.commit-nav-buttons {
+  a.btn,
+  button {
+    // See: https://gitlab.com/gitlab-org/gitlab-ui/-/issues/730
+    &:last-child > svg {
+      margin-left: 0.25rem;
+      margin-right: 0;
+    }
+  }
+}
+
+
 .clipboard-group,
 .commit-sha-group {
   display: inline-flex;
@@ -260,7 +272,7 @@
     color: $gl-text-color;
 
     &.autodevops-badge {
-      color: $white-light;
+      color: $white;
     }
   }
 
@@ -321,6 +333,16 @@
   }
 }
 
+.gpg-popover-certificate-details {
+  ul {
+    padding-left: $gl-padding;
+  }
+
+  li.unstyled {
+    list-style-type: none;
+  }
+}
+
 .gpg-popover-status {
   display: flex;
   align-items: center;
@@ -365,4 +387,10 @@
 .commit .gpg-popover-help-link {
   display: block;
   color: $link-color;
+}
+
+.add-review-item {
+  .gl-tab-nav-item {
+    height: 100%;
+  }
 }

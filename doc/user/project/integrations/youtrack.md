@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # YouTrack Service
 
 JetBrains [YouTrack](https://www.jetbrains.com/help/youtrack/standalone/YouTrack-Documentation.html) is a web-based issue tracking and project management platform.
@@ -8,14 +14,13 @@ You can configure YouTrack as an [External Issue Tracker](../../../integration/e
 
 To enable YouTrack integration in a project:
 
-1. Navigate to the project's **Settings > [Integrations](project_services.md#accessing-the-project-services)** page.
+1. Navigate to the project's **Settings > [Integrations](overview.md#accessing-integrations)** page.
 1. Click the **YouTrack** service, ensure it's active, and enter the required details on the page as described in the table below.
 
     | Field           | Description                                                                                                                                                                                                 |
     |:----------------|:------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-    | **Description** | Name for the issue tracker (to differentiate between instances, for example).                                                                                                                               |
-    | **Project url** | URL to the project in YouTrack which is being linked to this GitLab project.                                                                                                                                |
-    | **Issues url**  | URL to the issue in YouTrack project that is linked to this GitLab project. Note that the **Issues url** requires `:id` in the URL. This ID is used by GitLab as a placeholder to replace the issue number. |
+    | **Project URL** | URL to the project in YouTrack which is being linked to this GitLab project.                                                                                                                                |
+    | **Issues URL**  | URL to the issue in YouTrack project that is linked to this GitLab project. Note that the **Issues URL** requires `:id` in the URL. This ID is used by GitLab as a placeholder to replace the issue number. |
 
 1. Click the **Save changes** button.
 

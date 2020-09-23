@@ -1,36 +1,59 @@
 <script>
 import Vue from 'vue';
-import _ from 'underscore';
-import { GlButton, GlBadge, GlTooltip, GlTooltipDirective } from '@gitlab/ui';
-import { s__, sprintf } from '~/locale';
+import { memoize, isString, cloneDeep, isNumber, uniqueId } from 'lodash';
+import {
+  GlButton,
+  GlDeprecatedBadge as GlBadge,
+  GlTooltip,
+  GlTooltipDirective,
+  GlFormTextarea,
+  GlFormCheckbox,
+  GlSprintf,
+  GlIcon,
+} from '@gitlab/ui';
+import Api from 'ee/api';
+import RelatedIssuesRoot from '~/related_issues/components/related_issues_root.vue';
+import { s__ } from '~/locale';
+import { deprecatedCreateFlash as flash, FLASH_TYPES } from '~/flash';
 import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import ToggleButton from '~/vue_shared/components/toggle_button.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 import EnvironmentsDropdown from './environments_dropdown.vue';
+import Strategy from './strategy.vue';
 import {
   ROLLOUT_STRATEGY_ALL_USERS,
   ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
+  ROLLOUT_STRATEGY_USER_ID,
   ALL_ENVIRONMENTS_NAME,
   INTERNAL_ID_PREFIX,
+  NEW_VERSION_FLAG,
+  LEGACY_FLAG,
 } from '../constants';
 import { createNewEnvironmentScope } from '../store/modules/helpers';
-import UserWithId from './strategies/user_with_id.vue';
 
 export default {
   components: {
     GlButton,
     GlBadge,
+    GlFormTextarea,
+    GlFormCheckbox,
     GlTooltip,
+    GlSprintf,
+    GlIcon,
     ToggleButton,
-    Icon,
     EnvironmentsDropdown,
-    UserWithId,
+    Strategy,
+    RelatedIssuesRoot,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
   },
   mixins: [featureFlagsMixin()],
   props: {
+    active: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
     name: {
       type: String,
       required: false,
@@ -40,6 +63,10 @@ export default {
       type: String,
       required: false,
       default: '',
+    },
+    projectId: {
+      type: String,
+      required: true,
     },
     scopes: {
       type: Array,
@@ -58,25 +85,38 @@ export default {
       type: String,
       required: true,
     },
+    featureFlagIssuesEndpoint: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    strategies: {
+      type: Array,
+      required: false,
+      default: () => [],
+    },
+    version: {
+      type: String,
+      required: false,
+      default: LEGACY_FLAG,
+    },
   },
+  translations: {
+    allEnvironmentsText: s__('FeatureFlags|* (All Environments)'),
 
-  allEnvironmentsText: s__('FeatureFlags|* (All Environments)'),
-
-  helpText: sprintf(
-    s__(
+    helpText: s__(
       'FeatureFlags|Feature Flag behavior is built up by creating a set of rules to define the status of target environments. A default wildcard rule %{codeStart}*%{codeEnd} for %{boldStart}All Environments%{boldEnd} is set, and you are able to add as many rules as you need by choosing environment specs below. You can toggle the behavior for each of your rules to set them %{boldStart}Active%{boldEnd} or %{boldStart}Inactive%{boldEnd}.',
     ),
-    {
-      codeStart: '<code>',
-      codeEnd: '</code>',
-      boldStart: '<b>',
-      boldEnd: '</b>',
-    },
-    false,
-  ),
+
+    newHelpText: s__(
+      'FeatureFlags|Enable features for specific users and environments by configuring feature flag strategies.',
+    ),
+    noStrategiesText: s__('FeatureFlags|Feature Flag has no strategies'),
+  },
 
   ROLLOUT_STRATEGY_ALL_USERS,
   ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
+  ROLLOUT_STRATEGY_USER_ID,
 
   // Matches numbers 0 through 100
   rolloutPercentageRegex: /^[0-9]$|^[1-9][0-9]$|^100$/,
@@ -88,13 +128,18 @@ export default {
 
       // operate on a clone to avoid mutating props
       formScopes: this.scopes.map(s => ({ ...s })),
+      formStrategies: cloneDeep(this.strategies),
 
       newScope: '',
+      userLists: [],
     };
   },
   computed: {
     filteredScopes() {
       return this.formScopes.filter(scope => !scope.shouldBeDestroyed);
+    },
+    filteredStrategies() {
+      return this.formStrategies.filter(s => !s.shouldBeDestroyed);
     },
     canUpdateFlag() {
       return !this.permissionsFlag || (this.formScopes || []).every(scope => scope.canUpdate);
@@ -102,13 +147,53 @@ export default {
     permissionsFlag() {
       return this.glFeatures.featureFlagPermissions;
     },
-
-    userIds() {
-      const scope = this.formScopes.find(s => Array.isArray(s.rolloutUserIds)) || {};
-      return scope.rolloutUserIds || [];
+    supportsStrategies() {
+      return this.glFeatures.featureFlagsNewVersion && this.version === NEW_VERSION_FLAG;
+    },
+    showRelatedIssues() {
+      return this.featureFlagIssuesEndpoint.length > 0;
+    },
+    readOnly() {
+      return (
+        this.glFeatures.featureFlagsNewVersion &&
+        this.glFeatures.featureFlagsLegacyReadOnly &&
+        !this.glFeatures.featureFlagsLegacyReadOnlyOverride &&
+        this.version === LEGACY_FLAG
+      );
     },
   },
+  mounted() {
+    if (this.supportsStrategies) {
+      Api.fetchFeatureFlagUserLists(this.projectId)
+        .then(({ data }) => {
+          this.userLists = data;
+        })
+        .catch(() => {
+          flash(s__('FeatureFlags|There was an error retrieving user lists'), FLASH_TYPES.WARNING);
+        });
+    }
+  },
   methods: {
+    keyFor(strategy) {
+      if (strategy.id) {
+        return strategy.id;
+      }
+
+      return uniqueId('strategy_');
+    },
+
+    addStrategy() {
+      this.formStrategies.push({ name: ROLLOUT_STRATEGY_ALL_USERS, parameters: {}, scopes: [] });
+    },
+
+    deleteStrategy(s) {
+      if (isNumber(s.id)) {
+        Vue.set(s, 'shouldBeDestroyed', true);
+      } else {
+        this.formStrategies = this.formStrategies.filter(strategy => strategy !== s);
+      }
+    },
+
     isAllEnvironment(name) {
       return name === ALL_ENVIRONMENTS_NAME;
     },
@@ -125,7 +210,7 @@ export default {
      * @param {Object} scope
      */
     removeScope(scope) {
-      if (_.isString(scope.id) && scope.id.startsWith(INTERNAL_ID_PREFIX)) {
+      if (isString(scope.id) && scope.id.startsWith(INTERNAL_ID_PREFIX)) {
         this.formScopes = this.formScopes.filter(s => s !== scope);
       } else {
         Vue.set(scope, 'shouldBeDestroyed', true);
@@ -148,25 +233,27 @@ export default {
      * it triggers an event with the form data
      */
     handleSubmit() {
-      this.$emit('handleSubmit', {
+      const flag = {
         name: this.formName,
         description: this.formDescription,
-        scopes: this.formScopes,
-      });
-    },
+        active: this.active,
+        version: this.version,
+      };
 
-    updateUserIds(userIds) {
-      this.formScopes = this.formScopes.map(s => ({
-        ...s,
-        rolloutUserIds: userIds,
-      }));
+      if (this.version === LEGACY_FLAG) {
+        flag.scopes = this.formScopes;
+      } else {
+        flag.strategies = this.formStrategies;
+      }
+
+      this.$emit('handleSubmit', flag);
     },
 
     canUpdateScope(scope) {
       return !this.permissionsFlag || scope.canUpdate;
     },
 
-    isRolloutPercentageInvalid: _.memoize(function isRolloutPercentageInvalid(percentage) {
+    isRolloutPercentageInvalid: memoize(function isRolloutPercentageInvalid(percentage) {
       return !this.$options.rolloutPercentageRegex.test(percentage);
     }),
 
@@ -186,6 +273,27 @@ export default {
      */
     rolloutPercentageId(index) {
       return `rollout-percentage-${index}`;
+    },
+    rolloutUserId(index) {
+      return `rollout-user-id-${index}`;
+    },
+
+    shouldDisplayIncludeUserIds(scope) {
+      return ![ROLLOUT_STRATEGY_ALL_USERS, ROLLOUT_STRATEGY_USER_ID].includes(
+        scope.rolloutStrategy,
+      );
+    },
+    shouldDisplayUserIds(scope) {
+      return scope.rolloutStrategy === ROLLOUT_STRATEGY_USER_ID || scope.shouldIncludeUserIds;
+    },
+    onStrategyChange(index) {
+      const scope = this.filteredScopes[index];
+      scope.shouldIncludeUserIds =
+        scope.rolloutUserIds.length > 0 &&
+        scope.rolloutStrategy === ROLLOUT_STRATEGY_PERCENT_ROLLOUT;
+    },
+    onFormStrategyChange(strategy, index) {
+      Object.assign(this.filteredStrategies[index], strategy);
     },
   },
 };
@@ -220,12 +328,55 @@ export default {
         </div>
       </div>
 
-      <div class="row">
+      <related-issues-root
+        v-if="showRelatedIssues"
+        :endpoint="featureFlagIssuesEndpoint"
+        :can-admin="true"
+        :show-categorized-issues="false"
+      />
+
+      <template v-if="supportsStrategies">
+        <div class="row">
+          <div class="col-md-12">
+            <h4>{{ s__('FeatureFlags|Strategies') }}</h4>
+            <div class="flex align-items-baseline justify-content-between">
+              <p class="mr-3">{{ $options.translations.newHelpText }}</p>
+              <gl-button variant="success" category="secondary" @click="addStrategy">
+                {{ s__('FeatureFlags|Add strategy') }}
+              </gl-button>
+            </div>
+          </div>
+        </div>
+        <div v-if="filteredStrategies.length > 0" data-testid="feature-flag-strategies">
+          <strategy
+            v-for="(strategy, index) in filteredStrategies"
+            :key="keyFor(strategy)"
+            :strategy="strategy"
+            :index="index"
+            :endpoint="environmentsEndpoint"
+            :user-lists="userLists"
+            @change="onFormStrategyChange($event, index)"
+            @delete="deleteStrategy(strategy)"
+          />
+        </div>
+        <div v-else class="flex justify-content-center border-top py-4 w-100">
+          <span>{{ $options.translations.noStrategiesText }}</span>
+        </div>
+      </template>
+
+      <div v-else class="row">
         <div class="form-group col-md-12">
           <h4>{{ s__('FeatureFlags|Target environments') }}</h4>
-          <div v-html="$options.helpText"></div>
+          <gl-sprintf :message="$options.translations.helpText">
+            <template #code="{ content }">
+              <code>{{ content }}</code>
+            </template>
+            <template #bold="{ content }">
+              <b>{{ content }}</b>
+            </template>
+          </gl-sprintf>
 
-          <div class="js-scopes-table prepend-top-default">
+          <div class="js-scopes-table gl-mt-3">
             <div class="gl-responsive-table-row table-row-header" role="row">
               <div class="table-section section-30" role="columnheader">
                 {{ s__('FeatureFlags|Environment Spec') }}
@@ -241,6 +392,7 @@ export default {
             <div
               v-for="(scope, index) in filteredScopes"
               :key="scope.id"
+              ref="scopeRow"
               class="gl-responsive-table-row"
               role="row"
             >
@@ -252,7 +404,7 @@ export default {
                   class="table-mobile-content js-feature-flag-status d-flex align-items-center justify-content-start"
                 >
                   <p v-if="isAllEnvironment(scope.environmentScope)" class="js-scope-all pl-3">
-                    {{ $options.allEnvironmentsText }}
+                    {{ $options.translations.allEnvironmentsText }}
                   </p>
 
                   <environments-dropdown
@@ -260,15 +412,15 @@ export default {
                     class="col-12"
                     :value="scope.environmentScope"
                     :endpoint="environmentsEndpoint"
-                    :disabled="!canUpdateScope(scope)"
+                    :disabled="!canUpdateScope(scope) || scope.environmentScope !== ''"
                     @selectEnvironment="env => (scope.environmentScope = env)"
                     @createClicked="env => (scope.environmentScope = env)"
                     @clearInput="env => (scope.environmentScope = '')"
                   />
 
-                  <gl-badge v-if="permissionsFlag && scope.protected" variant="success">{{
-                    s__('FeatureFlags|Protected')
-                  }}</gl-badge>
+                  <gl-badge v-if="permissionsFlag && scope.protected" variant="success">
+                    {{ s__('FeatureFlags|Protected') }}
+                  </gl-badge>
                 </div>
               </div>
 
@@ -279,7 +431,7 @@ export default {
                 <div class="table-mobile-content js-feature-flag-status">
                   <toggle-button
                     :value="scope.active"
-                    :disabled-input="!canUpdateScope(scope)"
+                    :disabled-input="!active || !canUpdateScope(scope)"
                     @change="status => (scope.active = status)"
                   />
                 </div>
@@ -299,15 +451,23 @@ export default {
                       v-model="scope.rolloutStrategy"
                       :disabled="!scope.active"
                       class="form-control select-control w-100 js-rollout-strategy"
+                      @change="onStrategyChange(index)"
                     >
-                      <option :value="$options.ROLLOUT_STRATEGY_ALL_USERS">{{
-                        s__('FeatureFlags|All users')
-                      }}</option>
-                      <option :value="$options.ROLLOUT_STRATEGY_PERCENT_ROLLOUT">{{
-                        s__('FeatureFlags|Percent rollout (logged in users)')
-                      }}</option>
+                      <option :value="$options.ROLLOUT_STRATEGY_ALL_USERS">
+                        {{ s__('FeatureFlags|All users') }}
+                      </option>
+                      <option :value="$options.ROLLOUT_STRATEGY_PERCENT_ROLLOUT">
+                        {{ s__('FeatureFlags|Percent rollout (logged in users)') }}
+                      </option>
+                      <option :value="$options.ROLLOUT_STRATEGY_USER_ID">
+                        {{ s__('FeatureFlags|User IDs') }}
+                      </option>
                     </select>
-                    <i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"></i>
+                    <gl-icon
+                      name="chevron-down"
+                      class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
+                      :size="16"
+                    />
                   </div>
 
                   <div
@@ -342,6 +502,23 @@ export default {
                     </gl-tooltip>
                     <span class="ml-1">%</span>
                   </div>
+                  <div class="d-flex flex-column align-items-start mt-2 w-100">
+                    <gl-form-checkbox
+                      v-if="shouldDisplayIncludeUserIds(scope)"
+                      v-model="scope.shouldIncludeUserIds"
+                      >{{ s__('FeatureFlags|Include additional user IDs') }}</gl-form-checkbox
+                    >
+                    <template v-if="shouldDisplayUserIds(scope)">
+                      <label :for="rolloutUserId(index)" class="mb-2">
+                        {{ s__('FeatureFlags|User IDs') }}
+                      </label>
+                      <gl-form-textarea
+                        :id="rolloutUserId(index)"
+                        v-model="scope.rolloutUserIds"
+                        class="w-100"
+                      />
+                    </template>
+                  </div>
                 </div>
               </div>
 
@@ -355,10 +532,9 @@ export default {
                     v-gl-tooltip
                     :title="s__('FeatureFlags|Remove')"
                     class="js-delete-scope btn-transparent pr-3 pl-3"
+                    icon="clear"
                     @click="removeScope(scope)"
-                  >
-                    <icon name="clear" />
-                  </gl-button>
+                  />
                 </div>
               </div>
             </div>
@@ -384,7 +560,11 @@ export default {
                   {{ s__('FeatureFlags|Status') }}
                 </div>
                 <div class="table-mobile-content js-feature-flag-status">
-                  <toggle-button :value="false" @change="createNewScope({ active: true })" />
+                  <toggle-button
+                    :disabled-input="!active"
+                    :value="false"
+                    @change="createNewScope({ active: true })"
+                  />
                 </div>
               </div>
 
@@ -393,9 +573,9 @@ export default {
                   {{ s__('FeatureFlags|Rollout Strategy') }}
                 </div>
                 <div class="table-mobile-content js-rollout-strategy form-inline">
-                  <label class="sr-only" for="new-rollout-strategy-placeholder">
-                    {{ s__('FeatureFlags|Rollout Strategy') }}
-                  </label>
+                  <label class="sr-only" for="new-rollout-strategy-placeholder">{{
+                    s__('FeatureFlags|Rollout Strategy')
+                  }}</label>
                   <div class="select-wrapper col-12 col-md-8 p-0">
                     <select
                       id="new-rollout-strategy-placeholder"
@@ -404,7 +584,11 @@ export default {
                     >
                       <option>{{ s__('FeatureFlags|All users') }}</option>
                     </select>
-                    <i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"></i>
+                    <gl-icon
+                      name="chevron-down"
+                      class="gl-absolute gl-top-3 gl-right-3 gl-text-gray-500"
+                      :size="16"
+                    />
                   </div>
                 </div>
               </div>
@@ -413,19 +597,18 @@ export default {
         </div>
       </div>
     </fieldset>
-    <user-with-id :value="userIds" @input="updateUserIds" />
 
     <div class="form-actions">
       <gl-button
         ref="submitButton"
+        :disabled="readOnly"
         type="button"
         variant="success"
         class="js-ff-submit col-xs-12"
         @click="handleSubmit"
+        >{{ submitText }}</gl-button
       >
-        {{ submitText }}
-      </gl-button>
-      <gl-button :href="cancelPath" variant="secondary" class="js-ff-cancel col-xs-12 float-right">
+      <gl-button :href="cancelPath" class="js-ff-cancel col-xs-12 float-right">
         {{ __('Cancel') }}
       </gl-button>
     </div>

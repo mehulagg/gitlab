@@ -1,13 +1,9 @@
-import { shallowMount, createLocalVue } from '@vue/test-utils';
-import { GlLink, GlBadge } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
-import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
+import { shallowMount, mount } from '@vue/test-utils';
+import { GlLink, GlDeprecatedBadge as GlBadge, GlIcon } from '@gitlab/ui';
 import component from 'ee/environments_dashboard/components/dashboard/environment_header.vue';
-
-const localVue = createLocalVue();
+import ReviewAppLink from '~/vue_merge_request_widget/components/review_app_link.vue';
 
 describe('Environment Header', () => {
-  const Component = localVue.extend(component);
   let wrapper;
   let propsData;
 
@@ -27,9 +23,8 @@ describe('Environment Header', () => {
 
   describe('renders name and link to app', () => {
     beforeEach(() => {
-      wrapper = shallowMount(Component, {
+      wrapper = mount(component, {
         propsData,
-        localVue,
       });
     });
 
@@ -46,7 +41,7 @@ describe('Environment Header', () => {
     });
 
     it('renders a link to the external app', () => {
-      expect(wrapper.find(ReviewAppLink).attributes('link')).toBe(
+      expect(wrapper.find(ReviewAppLink).attributes('href')).toBe(
         propsData.environment.external_url,
       );
     });
@@ -62,9 +57,8 @@ describe('Environment Header', () => {
       propsData.environment.within_folder = true;
       propsData.environment.name = 'review/testing';
 
-      wrapper = shallowMount(Component, {
+      wrapper = shallowMount(component, {
         propsData,
-        localVue,
       });
     });
 
@@ -74,10 +68,8 @@ describe('Environment Header', () => {
     });
 
     it('shows an icon stating the environment is one of many in a folder', () => {
-      expect(wrapper.find(Icon).attributes('name')).toBe('information');
-      expect(wrapper.find(Icon).attributes('data-original-title')).toMatch(
-        /last updated environment/,
-      );
+      expect(wrapper.find(GlIcon).attributes('name')).toBe('information');
+      expect(wrapper.find(GlIcon).attributes('title')).toMatch(/last updated environment/);
     });
 
     it('matches the snapshot', () => {
@@ -89,9 +81,8 @@ describe('Environment Header', () => {
     beforeEach(() => {
       propsData.hasErrors = true;
 
-      wrapper = shallowMount(Component, {
+      wrapper = shallowMount(component, {
         propsData,
-        localVue,
       });
     });
 
@@ -104,9 +95,8 @@ describe('Environment Header', () => {
     beforeEach(() => {
       propsData.hasPipelineFailed = true;
 
-      wrapper = shallowMount(Component, {
+      wrapper = shallowMount(component, {
         propsData,
-        localVue,
       });
     });
 

@@ -2,11 +2,21 @@
 
 require 'spec_helper'
 
-describe Gitlab::Config::Loader::Yaml do
+RSpec.describe Gitlab::Config::Loader::Yaml do
   let(:loader) { described_class.new(yml) }
 
+  let(:yml) do
+    <<~YAML
+    image: 'ruby:2.7'
+    texts:
+      nested_key: 'value1'
+      more_text:
+        more_nested_key: 'value2'
+    YAML
+  end
+
   context 'when yaml syntax is correct' do
-    let(:yml) { 'image: ruby:2.2' }
+    let(:yml) { 'image: ruby:2.7' }
 
     describe '#valid?' do
       it 'returns true' do
@@ -16,7 +26,7 @@ describe Gitlab::Config::Loader::Yaml do
 
     describe '#load!' do
       it 'returns a valid hash' do
-        expect(loader.load!).to eq(image: 'ruby:2.2')
+        expect(loader.load!).to eq(image: 'ruby:2.7')
       end
     end
   end
@@ -59,6 +69,15 @@ describe Gitlab::Config::Loader::Yaml do
     describe '#valid?' do
       it 'returns false' do
         expect(loader).not_to be_valid
+      end
+    end
+
+    describe '#load_raw!' do
+      it 'raises error' do
+        expect { loader.load_raw! }.to raise_error(
+          Gitlab::Config::Loader::FormatError,
+          'Invalid configuration format'
+        )
       end
     end
   end
@@ -121,6 +140,34 @@ describe Gitlab::Config::Loader::Yaml do
       it 'raises FormatError' do
         expect { loader.load! }.to raise_error(Gitlab::Config::Loader::FormatError, 'The parsed YAML is too big')
       end
+    end
+  end
+
+  describe '#load_raw!' do
+    it 'loads keys as strings' do
+      expect(loader.load_raw!).to eq(
+        'image' => 'ruby:2.7',
+        'texts' => {
+          'nested_key' => 'value1',
+          'more_text' => {
+            'more_nested_key' => 'value2'
+          }
+        }
+      )
+    end
+  end
+
+  describe '#load!' do
+    it 'symbolizes keys' do
+      expect(loader.load!).to eq(
+        image: 'ruby:2.7',
+        texts: {
+          nested_key: 'value1',
+          more_text: {
+            more_nested_key: 'value2'
+          }
+        }
+      )
     end
   end
 end

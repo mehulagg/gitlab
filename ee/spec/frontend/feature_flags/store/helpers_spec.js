@@ -1,8 +1,10 @@
-import _ from 'underscore';
+import { uniqueId } from 'lodash';
 import {
   mapToScopesViewModel,
   mapFromScopesViewModel,
   createNewEnvironmentScope,
+  mapStrategiesToViewModel,
+  mapStrategiesToRails,
 } from 'ee/feature_flags/store/modules/helpers';
 import {
   ROLLOUT_STRATEGY_ALL_USERS,
@@ -11,6 +13,8 @@ import {
   PERCENT_ROLLOUT_GROUP_ID,
   INTERNAL_ID_PREFIX,
   DEFAULT_PERCENT_ROLLOUT,
+  LEGACY_FLAG,
+  NEW_VERSION_FLAG,
 } from 'ee/feature_flags/constants';
 
 describe('feature flags helpers spec', () => {
@@ -43,7 +47,7 @@ describe('feature flags helpers spec', () => {
       ];
 
       const expected = [
-        {
+        expect.objectContaining({
           id: 3,
           environmentScope: 'environment_scope',
           active: true,
@@ -51,9 +55,9 @@ describe('feature flags helpers spec', () => {
           protected: true,
           rolloutStrategy: ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
           rolloutPercentage: '56',
-          rolloutUserIds: ['123', '234'],
+          rolloutUserIds: '123, 234',
           shouldBeDestroyed: true,
-        },
+        }),
       ];
 
       const actual = mapToScopesViewModel(input);
@@ -85,6 +89,66 @@ describe('feature flags helpers spec', () => {
       expect(mapToScopesViewModel(null)).toEqual([]);
       expect(mapToScopesViewModel(undefined)).toEqual([]);
     });
+
+    describe('with user IDs per environment', () => {
+      let oldGon;
+
+      beforeEach(() => {
+        oldGon = window.gon;
+        window.gon = { features: { featureFlagsUsersPerEnvironment: true } };
+      });
+
+      afterEach(() => {
+        window.gon = oldGon;
+      });
+
+      it('sets the user IDs as a comma separated string', () => {
+        const input = [
+          {
+            id: 3,
+            environment_scope: 'environment_scope',
+            active: true,
+            can_update: true,
+            protected: true,
+            strategies: [
+              {
+                name: ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
+                parameters: {
+                  percentage: '56',
+                },
+              },
+              {
+                name: ROLLOUT_STRATEGY_USER_ID,
+                parameters: {
+                  userIds: '123,234',
+                },
+              },
+            ],
+
+            _destroy: true,
+          },
+        ];
+
+        const expected = [
+          {
+            id: 3,
+            environmentScope: 'environment_scope',
+            active: true,
+            canUpdate: true,
+            protected: true,
+            rolloutStrategy: ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
+            rolloutPercentage: '56',
+            rolloutUserIds: '123, 234',
+            shouldBeDestroyed: true,
+            shouldIncludeUserIds: true,
+          },
+        ];
+
+        const actual = mapToScopesViewModel(input);
+
+        expect(actual).toEqual(expected);
+      });
+    });
   });
 
   describe('mapFromScopesViewModel', () => {
@@ -92,6 +156,7 @@ describe('feature flags helpers spec', () => {
       const input = {
         name: 'name',
         description: 'description',
+        active: true,
         scopes: [
           {
             id: 4,
@@ -100,9 +165,10 @@ describe('feature flags helpers spec', () => {
             canUpdate: true,
             protected: true,
             shouldBeDestroyed: true,
+            shouldIncludeUserIds: true,
             rolloutStrategy: ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
             rolloutPercentage: '48',
-            rolloutUserIds: ['123', '234'],
+            rolloutUserIds: '123, 234',
           },
         ],
       };
@@ -111,6 +177,8 @@ describe('feature flags helpers spec', () => {
         operations_feature_flag: {
           name: 'name',
           description: 'description',
+          active: true,
+          version: LEGACY_FLAG,
           scopes_attributes: [
             {
               id: 4,
@@ -146,7 +214,7 @@ describe('feature flags helpers spec', () => {
 
     it('should strip out internal IDs', () => {
       const input = {
-        scopes: [{ id: 3 }, { id: _.uniqueId(INTERNAL_ID_PREFIX) }],
+        scopes: [{ id: 3 }, { id: uniqueId(INTERNAL_ID_PREFIX) }],
       };
 
       const result = mapFromScopesViewModel(input);
@@ -169,6 +237,67 @@ describe('feature flags helpers spec', () => {
 
       expect(actualScopes).toEqual([]);
     });
+    describe('with user IDs per environment', () => {
+      it('sets the user IDs as a comma separated string', () => {
+        const input = {
+          name: 'name',
+          description: 'description',
+          active: true,
+          scopes: [
+            {
+              id: 4,
+              environmentScope: 'environmentScope',
+              active: true,
+              canUpdate: true,
+              protected: true,
+              shouldBeDestroyed: true,
+              rolloutStrategy: ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
+              rolloutPercentage: '48',
+              rolloutUserIds: '123, 234',
+              shouldIncludeUserIds: true,
+            },
+          ],
+        };
+
+        const expected = {
+          operations_feature_flag: {
+            name: 'name',
+            description: 'description',
+            version: LEGACY_FLAG,
+            active: true,
+            scopes_attributes: [
+              {
+                id: 4,
+                environment_scope: 'environmentScope',
+                active: true,
+                can_update: true,
+                protected: true,
+                _destroy: true,
+                strategies: [
+                  {
+                    name: ROLLOUT_STRATEGY_PERCENT_ROLLOUT,
+                    parameters: {
+                      groupId: PERCENT_ROLLOUT_GROUP_ID,
+                      percentage: '48',
+                    },
+                  },
+                  {
+                    name: ROLLOUT_STRATEGY_USER_ID,
+                    parameters: {
+                      userIds: '123,234',
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        };
+
+        const actual = mapFromScopesViewModel(input);
+
+        expect(actual).toEqual(expected);
+      });
+    });
   });
 
   describe('createNewEnvironmentScope', () => {
@@ -179,7 +308,7 @@ describe('feature flags helpers spec', () => {
         id: expect.stringContaining(INTERNAL_ID_PREFIX),
         rolloutStrategy: ROLLOUT_STRATEGY_ALL_USERS,
         rolloutPercentage: DEFAULT_PERCENT_ROLLOUT,
-        rolloutUserIds: [],
+        rolloutUserIds: '',
       };
 
       const actual = createNewEnvironmentScope();
@@ -199,7 +328,7 @@ describe('feature flags helpers spec', () => {
         id: expect.stringContaining(INTERNAL_ID_PREFIX),
         rolloutStrategy: ROLLOUT_STRATEGY_ALL_USERS,
         rolloutPercentage: DEFAULT_PERCENT_ROLLOUT,
-        rolloutUserIds: [],
+        rolloutUserIds: '',
       };
 
       const actual = createNewEnvironmentScope(overrides);
@@ -214,6 +343,172 @@ describe('feature flags helpers spec', () => {
           protected: false,
         }),
       );
+    });
+  });
+
+  describe('mapStrategiesToViewModel', () => {
+    it('should map rails casing to view model casing', () => {
+      expect(
+        mapStrategiesToViewModel([
+          {
+            id: '1',
+            name: 'default',
+            parameters: {},
+            scopes: [
+              {
+                environment_scope: '*',
+                id: '1',
+              },
+            ],
+          },
+        ]),
+      ).toEqual([
+        {
+          id: '1',
+          name: 'default',
+          parameters: {},
+          shouldBeDestroyed: false,
+          scopes: [
+            {
+              shouldBeDestroyed: false,
+              environmentScope: '*',
+              id: '1',
+            },
+          ],
+        },
+      ]);
+    });
+
+    it('inserts spaces between user ids', () => {
+      const strategy = mapStrategiesToViewModel([
+        {
+          id: '1',
+          name: 'userWithId',
+          parameters: { userIds: 'user1,user2,user3' },
+          scopes: [],
+        },
+      ])[0];
+
+      expect(strategy.parameters).toEqual({ userIds: 'user1, user2, user3' });
+    });
+  });
+
+  describe('mapStrategiesToRails', () => {
+    it('should map rails casing to view model casing', () => {
+      expect(
+        mapStrategiesToRails({
+          name: 'test',
+          description: 'test description',
+          version: NEW_VERSION_FLAG,
+          active: true,
+          strategies: [
+            {
+              id: '1',
+              name: 'default',
+              parameters: {},
+              shouldBeDestroyed: true,
+              scopes: [
+                {
+                  environmentScope: '*',
+                  id: '1',
+                  shouldBeDestroyed: true,
+                },
+              ],
+            },
+          ],
+        }),
+      ).toEqual({
+        operations_feature_flag: {
+          name: 'test',
+          description: 'test description',
+          version: NEW_VERSION_FLAG,
+          active: true,
+          strategies_attributes: [
+            {
+              id: '1',
+              name: 'default',
+              parameters: {},
+              _destroy: true,
+              scopes_attributes: [
+                {
+                  environment_scope: '*',
+                  id: '1',
+                  _destroy: true,
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    it('should insert a default * scope if there are none', () => {
+      expect(
+        mapStrategiesToRails({
+          name: 'test',
+          description: 'test description',
+          version: NEW_VERSION_FLAG,
+          active: true,
+          strategies: [
+            {
+              id: '1',
+              name: 'default',
+              parameters: {},
+              scopes: [],
+            },
+          ],
+        }),
+      ).toEqual({
+        operations_feature_flag: {
+          name: 'test',
+          description: 'test description',
+          version: NEW_VERSION_FLAG,
+          active: true,
+          strategies_attributes: [
+            {
+              id: '1',
+              name: 'default',
+              parameters: {},
+              scopes_attributes: [
+                {
+                  environment_scope: '*',
+                },
+              ],
+            },
+          ],
+        },
+      });
+    });
+
+    it('removes white space between user ids', () => {
+      const result = mapStrategiesToRails({
+        name: 'test',
+        version: NEW_VERSION_FLAG,
+        active: true,
+        strategies: [
+          {
+            id: '1',
+            name: 'userWithId',
+            parameters: { userIds: 'user1, user2, user3' },
+            scopes: [],
+          },
+        ],
+      });
+
+      const strategyAttrs = result.operations_feature_flag.strategies_attributes[0];
+
+      expect(strategyAttrs.parameters).toEqual({ userIds: 'user1,user2,user3' });
+    });
+
+    it('preserves the value of active', () => {
+      const result = mapStrategiesToRails({
+        name: 'test',
+        version: NEW_VERSION_FLAG,
+        active: false,
+        strategies: [],
+      });
+
+      expect(result.operations_feature_flag.active).toBe(false);
     });
   });
 });

@@ -5,26 +5,9 @@ module EE
     module BaseService
       extend ::Gitlab::Utils::Override
 
-      override :execute_hooks
-      def execute_hooks(merge_request, action = 'open', old_rev: nil, old_associations: {})
-        super
-
-        return unless jira_subscription_exists?
-
-        if Atlassian::JiraIssueKeyExtractor.has_keys?(merge_request.title, merge_request.description)
-          JiraConnect::SyncMergeRequestWorker.perform_async(merge_request.id)
-        end
-      end
-
       private
 
       attr_accessor :blocking_merge_requests_params
-
-      def jira_subscription_exists?
-        ::Feature.enabled?(:jira_connect_app) &&
-          project.feature_available?(:jira_dev_panel_integration) &&
-          JiraConnectSubscription.for_project(project).exists?
-      end
 
       override :filter_params
       def filter_params(merge_request)
@@ -40,6 +23,28 @@ module EE
           ::MergeRequests::UpdateBlocksService.extract_params!(params)
 
         super
+      end
+
+      def reset_approvals?(merge_request, _newrev)
+        merge_request.target_project.reset_approvals_on_push
+      end
+
+      def reset_approvals(merge_request, newrev = nil)
+        return unless reset_approvals?(merge_request, newrev)
+
+        merge_request.approvals.delete_all
+        create_new_approval_todos_for_all_approvers(merge_request)
+      end
+
+      def all_approvers(merge_request)
+        merge_request.overall_approvers(exclude_code_owners: true)
+      end
+
+      def create_new_approval_todos_for_all_approvers(merge_request)
+        return unless ::Feature.enabled?(:create_approval_todos_on_mr_update, merge_request.project, default_enabled: true)
+        return if merge_request.closed?
+
+        todo_service.add_merge_request_approvers(merge_request, all_approvers(merge_request))
       end
     end
   end

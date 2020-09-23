@@ -15,13 +15,22 @@
 #
 # Uncomment the following lines to make the configuration take effect.
 
+# Make sure to run `make -C tooling/overcommit`
+gemfile: 'tooling/overcommit/Gemfile'
+
+PostCheckout:
+  BundleInstall:
+    enabled: true
+
 PreCommit:
   AuthorName:
     enabled: false
   EsLint:
     enabled: true
     # https://github.com/sds/overcommit/issues/338
-    command: './node_modules/eslint/bin/eslint.js'
+    required_executable: 'yarn'
+    command: ['yarn', 'eslint']
+    flags: []
   HamlLint:
     enabled: true
   MergeConflicts:
@@ -35,6 +44,35 @@ PreCommit:
 #    on_warn: fail # Treat all warnings as failures
   ScssLint:
     enabled: true
+  MarkdownLint:
+    enabled: true
+    description: 'Lint documentation for Markdown errors'
+    required_executable: 'node_modules/.bin/markdownlint'
+    flags: ['--config', '.markdownlint.json', 'doc/**/*.md']
+    install_command: 'yarn install'
+    include:
+      - 'doc/**/*.md'
+  Vale:
+    enabled: true
+    description: 'Lint documentation for grammatical and formatting errors'
+    required_executable: 'vale'
+    flags: ['--config', '.vale.ini', '--minAlertLevel', 'error', 'doc']
+    install_command: 'brew install vale # (or use another package manager)'
+    include:
+      - 'doc/**/*.md'
+
+CommitMsg:
+  TextWidth:
+    enabled: true
+    min_subject_width: 8 # three 2-letter words with 2 spaces
+    max_subject_width: 72
+    quiet: false
+
+  EmptyMessage:
+    enabled: true
+    required: true
+    description: 'Checking for empty commit message'
+
 #PostCheckout:
 #  ALL: # Special hook name that customizes all hooks of this type
 #    quiet: true # Change all post-checkout hooks to only display output on failure

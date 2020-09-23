@@ -1,3 +1,10 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: howto
+---
+
 # Docker Registry for a secondary node **(PREMIUM ONLY)**
 
 You can set up a [Docker Registry](https://docs.docker.com/registry/) on your
@@ -5,19 +12,19 @@ You can set up a [Docker Registry](https://docs.docker.com/registry/) on your
 
 ## Storage support
 
-Docker Registry currently supports a few types of storages. If you choose a
+Docker Registry currently supports a few types of storage. If you choose a
 distributed storage (`azure`, `gcs`, `s3`, `swift`, or `oss`) for your Docker
 Registry on the **primary** node, you can use the same storage for a **secondary**
 Docker Registry as well. For more information, read the
 [Load balancing considerations](https://docs.docker.com/registry/deploying/#load-balancing-considerations)
 when deploying the Registry, and how to set up the storage driver for GitLab's
-integrated [Container Registry](../../packages/container_registry.md#container-registry-storage-driver).
+integrated [Container Registry](../../packages/container_registry.md#use-object-storage).
 
 ## Replicating Docker Registry
 
 You can enable a storage-agnostic replication so it
-can be used for cloud or local storages. Whenever a new image is pushed to the
-primary node, each **secondary** node will pull it to its own container
+can be used for cloud or local storage. Whenever a new image is pushed to the
+**primary** node, each **secondary** node will pull it to its own container
 repository.
 
 To configure Docker Registry replication:
@@ -36,7 +43,7 @@ We need to make Docker Registry send notification events to the
 
 1. SSH into your GitLab **primary** server and login as root:
 
-   ```sh
+   ```shell
    sudo -i
    ```
 
@@ -58,8 +65,12 @@ We need to make Docker Registry send notification events to the
    ```
 
    NOTE: **Note:**
+   Replace `<replace_with_a_secret_token>` with a case sensitive alphanumeric string
+   that starts with a letter. You can generate one with `< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c 32 | sed "s/^[0-9]*//"; echo`
+
+   NOTE: **Note:**
    If you use an external Registry (not the one integrated with GitLab), you must add
-   these settings to its configuration. In this case, you will also have to specify
+   these settings to its configuration yourself. In this case, you will also have to specify
    notification secret in `registry.notification_secret` section of
    `/etc/gitlab/gitlab.rb` file.
 
@@ -70,7 +81,7 @@ We need to make Docker Registry send notification events to the
 
 1. Reconfigure the **primary** node for the change to take effect:
 
-   ```sh
+   ```shell
    gitlab-ctl reconfigure
    ```
 
@@ -90,7 +101,7 @@ generate a short-lived JWT that is pull-only-capable to access the
 
 1. SSH into the **secondary** node and login as the `root` user:
 
-   ```sh
+   ```shell
    sudo -i
    ```
 
@@ -100,17 +111,18 @@ generate a short-lived JWT that is pull-only-capable to access the
 
    ```ruby
    gitlab_rails['geo_registry_replication_enabled'] = true
-   gitlab_rails['geo_registry_replication_primary_api_url'] = 'http://primary.example.com:5000/' # internal address to the primary registry, will be used by GitLab to directly communicate with primary registry API
+   gitlab_rails['geo_registry_replication_primary_api_url'] = 'https://primary.example.com:5050/' # Primary registry address, it will be used by the secondary node to directly communicate to primary registry
    ```
 
 1. Reconfigure the **secondary** node for the change to take effect:
 
-   ```sh
+   ```shell
    gitlab-ctl reconfigure
    ```
 
 ### Verify replication
 
-To verify Container Registry replication is working, go to **Admin Area > Geo** (`/admin/geo/nodes`) on the **secondary** node.
+To verify Container Registry replication is working, go to **Admin Area > Geo**
+(`/admin/geo/nodes`) on the **secondary** node.
 The initial replication, or "backfill", will probably still be in progress.
 You can monitor the synchronization process on each Geo node from the **primary** node's **Geo Nodes** dashboard in your browser.

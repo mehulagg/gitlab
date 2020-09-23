@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "required": ["incidents"],
+  "properties": {
+    "incidents": {
+      "type": "array",
+      "items": { "$ref": "basic_incident.json" }
+    }
+  },
+  "additionalProperties": false
+}

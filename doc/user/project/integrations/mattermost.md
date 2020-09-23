@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Mattermost Notifications Service
 
 The Mattermost Notifications Service allows your GitLab project to send events (e.g., `issue created`) to your existing Mattermost team as notifications. This requires configurations in both Mattermost and GitLab.
@@ -27,7 +33,7 @@ Display name override is not enabled by default, you need to ask your admin to e
 
 After you set up Mattermost, it's time to set up GitLab.
 
-Navigate to the [Integrations page](project_services.md#accessing-the-project-services)
+Navigate to the [Integrations page](overview.md#accessing-integrations)
 and select the **Mattermost notifications** service to configure it.
 There, you will see a checkbox with the following events that can be triggered:
 

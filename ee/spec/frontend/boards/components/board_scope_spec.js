@@ -1,4 +1,4 @@
-import { createLocalVue, mount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import BoardScope from 'ee/boards/components/board_scope.vue';
 import { TEST_HOST } from 'helpers/test_constants';
 
@@ -7,8 +7,6 @@ describe('BoardScope', () => {
   let vm;
 
   beforeEach(() => {
-    const localVue = createLocalVue();
-
     const propsData = {
       collapseScope: false,
       canAdminBoard: false,
@@ -16,14 +14,12 @@ describe('BoardScope', () => {
         labels: [],
         assignee: {},
       },
-      milestonePath: `${TEST_HOST}/milestones`,
       labelsPath: `${TEST_HOST}/labels`,
+      labelsWebUrl: `${TEST_HOST}/-/labels`,
     };
 
     wrapper = mount(BoardScope, {
       propsData,
-      localVue,
-      sync: false,
     });
 
     ({ vm } = wrapper);
@@ -47,13 +43,13 @@ describe('BoardScope', () => {
         vm.handleLabelClick(labelIsAny);
 
         expect(Array.isArray(vm.board.labels)).toBe(true);
-        expect(vm.board.labels.length).toBe(0);
+        expect(vm.board.labels).toHaveLength(0);
       });
 
       it('adds provided `label` to board.labels', () => {
         vm.handleLabelClick(label);
 
-        expect(vm.board.labels.length).toBe(1);
+        expect(vm.board.labels).toHaveLength(1);
         expect(vm.board.labels[0].id).toBe(label.id);
         vm.handleLabelClick(label);
       });

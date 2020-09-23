@@ -2,13 +2,14 @@
 /* global Flash */
 
 import $ from 'jquery';
+import 'vendor/jquery.scrollTo';
+import { GlLoadingIcon } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import DeprecatedModal from '~/vue_shared/components/deprecated_modal.vue';
 import { HIDDEN_CLASS } from '~/lib/utils/constants';
 import { getParameterByName } from '~/lib/utils/common_utils';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 
-import { GlLoadingIcon } from '@gitlab/ui';
 import eventHub from '../event_hub';
 import { COMMON_STR, CONTENT_LIST_CLASS } from '../constants';
 import groupsComponent from './groups.vue';
@@ -111,8 +112,8 @@ export default {
       const filterGroupsBy = getParameterByName('filter') || null;
 
       this.isLoading = true;
-      // eslint-disable-next-line promise/catch-or-return
-      this.fetchGroups({
+
+      return this.fetchGroups({
         page,
         filterGroupsBy,
         sortBy,
@@ -126,8 +127,7 @@ export default {
     fetchPage(page, filterGroupsBy, sortBy, archived) {
       this.isLoading = true;
 
-      // eslint-disable-next-line promise/catch-or-return
-      this.fetchGroups({
+      return this.fetchGroups({
         page,
         filterGroupsBy,
         sortBy,

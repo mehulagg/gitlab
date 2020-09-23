@@ -21,7 +21,7 @@ class IssuableSidebarBasicEntity < Grape::Entity
   expose :labels, using: LabelEntity
 
   expose :current_user, if: lambda { |_issuable| current_user } do
-    expose :current_user, merge: true, using: API::Entities::UserBasic
+    expose :current_user, merge: true, using: ::API::Entities::UserBasic
 
     expose :todo, using: IssuableSidebarTodoEntity do |issuable|
       current_user.pending_todo_for(issuable)
@@ -102,6 +102,10 @@ class IssuableSidebarBasicEntity < Grape::Entity
   expose :project_emails_disabled do |issuable|
     issuable.project.emails_disabled?
   end
+
+  expose :supports_time_tracking?, as: :supports_time_tracking
+  expose :supports_milestone?, as: :supports_milestone
+  expose :supports_severity?, as: :supports_severity
 
   private
 

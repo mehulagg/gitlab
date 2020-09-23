@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe FormHelper do
+RSpec.describe FormHelper do
   describe 'form_errors' do
     it 'returns nil when model has no errors' do
       model = double(errors: [])
@@ -35,6 +35,25 @@ describe FormHelper do
       aggregate_failures do
         expect(errors).to include('<li>Error 1</li>')
         expect(errors).to include('<li>Error 2</li>')
+        expect(errors).to include('<li>Error 3</li>')
+      end
+    end
+
+    it 'renders messages truncated if requested' do
+      model = double(errors: errors_stub('Error 1', 'Error 2'))
+      model.errors.add(:title, 'is truncated')
+      model.errors.add(:base, 'Error 3')
+
+      expect(model.class).to receive(:human_attribute_name) do |attribute|
+        attribute.to_s.capitalize
+      end
+
+      errors = helper.form_errors(model, truncate: :title)
+
+      aggregate_failures do
+        expect(errors).to include('<li>Error 1</li>')
+        expect(errors).to include('<li>Error 2</li>')
+        expect(errors).to include('<li><span class="str-truncated-100">Title is truncated</span></li>')
         expect(errors).to include('<li>Error 3</li>')
       end
     end

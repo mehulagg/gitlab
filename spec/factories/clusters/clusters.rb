@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :cluster, class: Clusters::Cluster do
+  factory :cluster, class: 'Clusters::Cluster' do
     user
     name { 'test-cluster' }
     cluster_type { :project_type }
@@ -86,8 +86,48 @@ FactoryBot.define do
       application_helm factory: %i(clusters_applications_helm installed)
     end
 
+    trait :with_installed_prometheus do
+      application_prometheus factory: %i(clusters_applications_prometheus installed)
+    end
+
+    trait :with_all_applications do
+      application_helm factory: %i(clusters_applications_helm installed)
+      application_ingress factory: %i(clusters_applications_ingress installed)
+      application_cert_manager factory: %i(clusters_applications_cert_manager installed)
+      application_crossplane factory: %i(clusters_applications_crossplane installed)
+      application_prometheus factory: %i(clusters_applications_prometheus installed)
+      application_runner factory: %i(clusters_applications_runner installed)
+      application_jupyter factory: %i(clusters_applications_jupyter installed)
+      application_knative factory: %i(clusters_applications_knative installed)
+      application_elastic_stack factory: %i(clusters_applications_elastic_stack installed)
+      application_fluentd factory: %i(clusters_applications_fluentd installed)
+      application_cilium factory: %i(clusters_applications_cilium installed)
+    end
+
     trait :with_domain do
       domain { 'example.com' }
+    end
+
+    trait :with_environments do
+      transient do
+        environments { %i(staging production) }
+      end
+
+      cluster_type { Clusters::Cluster.cluster_types[:project_type] }
+
+      before(:create) do |cluster, evaluator|
+        cluster_project = create(:cluster_project, cluster: cluster)
+
+        evaluator.environments.each do |env_name|
+          environment = create(:environment, name: env_name, project: cluster_project.project)
+
+          cluster.kubernetes_namespaces << create(:cluster_kubernetes_namespace,
+            cluster: cluster,
+            cluster_project: cluster_project,
+            project: cluster_project.project,
+            environment: environment)
+        end
+      end
     end
 
     trait :not_managed do

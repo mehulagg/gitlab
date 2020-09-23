@@ -42,7 +42,7 @@ class DroneCiService < CiService
   def commit_status_path(sha, ref)
     Gitlab::Utils.append_path(
       drone_url,
-      "gitlab/#{project.full_path}/commits/#{sha}?branch=#{URI.encode(ref.to_s)}&access_token=#{token}")
+      "gitlab/#{project.full_path}/commits/#{sha}?branch=#{Addressable::URI.encode_component(ref.to_s)}&access_token=#{token}")
   end
 
   def commit_status(sha, ref)
@@ -50,10 +50,12 @@ class DroneCiService < CiService
   end
 
   def calculate_reactive_cache(sha, ref)
-    response = Gitlab::HTTP.get(commit_status_path(sha, ref), verify: enable_ssl_verification)
+    response = Gitlab::HTTP.try_get(commit_status_path(sha, ref),
+      verify: enable_ssl_verification,
+      extra_log_info: { project_id: project_id })
 
     status =
-      if response.code == 200 && response['status']
+      if response && response.code == 200 && response['status']
         case response['status']
         when 'killed'
           :canceled
@@ -68,14 +70,12 @@ class DroneCiService < CiService
       end
 
     { commit_status: status }
-  rescue *Gitlab::HTTP::HTTP_ERRORS
-    { commit_status: :error }
   end
 
   def build_page(sha, ref)
     Gitlab::Utils.append_path(
       drone_url,
-      "gitlab/#{project.full_path}/redirect/commits/#{sha}?branch=#{URI.encode(ref.to_s)}")
+      "gitlab/#{project.full_path}/redirect/commits/#{sha}?branch=#{Addressable::URI.encode_component(ref.to_s)}")
   end
 
   def title

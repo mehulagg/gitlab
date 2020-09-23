@@ -34,17 +34,6 @@
       }
     }
 
-    &.warning-row {
-      background-color: $orange-100;
-      border-color: $orange-200;
-      color: $orange-700;
-
-      &:hover {
-        background: $orange-100;
-      }
-
-    }
-
     &.smoke { background-color: $gray-light; }
 
     &:last-child {
@@ -101,6 +90,13 @@ ul.unstyled-list > li {
   border-bottom: 0;
 }
 
+ul.list-items-py-2 {
+  > li {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+}
+
 // Generic content list
 ul.content-list {
   @include basic-list;
@@ -125,10 +121,10 @@ ul.content-list {
 
     a {
       color: $gl-text-color;
-    }
 
-    .member-group-link {
-      color: $blue-600;
+      &.inline-link {
+        color: $blue-600;
+      }
     }
 
     .description {
@@ -196,6 +192,11 @@ ul.content-list {
     display: flex;
     align-items: center;
     white-space: nowrap;
+
+    // Override style that allows the flex-row text to wrap.
+    &.allow-wrap {
+      white-space: normal;
+    }
   }
 
   .row-main-content {

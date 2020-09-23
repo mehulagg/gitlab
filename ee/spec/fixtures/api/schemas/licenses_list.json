@@ -10,15 +10,27 @@
       "items": {
         "type": "object",
         "required": [
+          "id",
           "name",
           "url",
+          "spdx_identifier",
+          "classification",
           "components"
         ],
         "properties": {
+          "id": {
+            "type": "integer, null"
+          },
           "name": {
             "type": "string"
           },
           "url": {
+            "type": "string, null"
+          },
+          "spdx_identifier": {
+            "type": "string, null"
+          },
+          "classification": {
             "type": "string"
           },
           "components": {

@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Geo::RepositoryRenamedEventStore do
+RSpec.describe Geo::RepositoryRenamedEventStore do
   include EE::GeoHelpers
 
-  set(:project) { create(:project, path: 'bar') }
-  set(:secondary_node) { create(:geo_node) }
+  let_it_be(:project) { create(:project, path: 'bar') }
+  let_it_be(:secondary_node) { create(:geo_node) }
 
   let(:old_path) { 'foo' }
   let(:old_path_with_namespace) { "#{project.namespace.full_path}/foo" }

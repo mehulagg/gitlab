@@ -3,10 +3,11 @@
 require 'spec_helper'
 require 'gssapi'
 
-describe KerberosSpnegoHelper do
+RSpec.describe KerberosSpnegoHelper do
   describe '#spnego_credentials!' do
     let(:gss) { double('GSSAPI::Simple') }
     let(:gss_service_name) { 'gss_service_name' }
+
     subject { Class.new { include KerberosSpnegoHelper }.new }
 
     before do

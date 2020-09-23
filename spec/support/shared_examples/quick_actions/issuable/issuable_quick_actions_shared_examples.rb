@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples 'issuable quick actions' do
+RSpec.shared_examples 'issuable quick actions' do
   QuickAction = Struct.new(:action_text, :expectation, :before_action, keyword_init: true) do
     # Pass a block as :before_action if
     # issuable state needs to be changed before
@@ -16,6 +16,16 @@ shared_examples 'issuable quick actions' do
         action_text["/shrug"] ||
         action_text["/tableflip"]
     end
+  end
+
+  let(:unlabel_expectation) do
+    ->(noteable, can_use_quick_action) {
+      if can_use_quick_action
+        expect(noteable.labels).to be_empty
+      else
+        expect(noteable.labels).not_to be_empty
+      end
+    }
   end
 
   # Quick actions shared by issues and merge requests
@@ -136,13 +146,11 @@ shared_examples 'issuable quick actions' do
       ),
       QuickAction.new(
         action_text: "/unlabel",
-        expectation: ->(noteable, can_use_quick_action) {
-          if can_use_quick_action
-            expect(noteable.labels).to be_empty
-          else
-            expect(noteable.labels).not_to be_empty
-          end
-        }
+        expectation: unlabel_expectation
+      ),
+      QuickAction.new(
+        action_text: "/remove_label",
+        expectation: unlabel_expectation
       ),
       QuickAction.new(
         action_text: "/award :100:",
@@ -224,7 +232,7 @@ shared_examples 'issuable quick actions' do
   end
 
   context 'when user can update issuable' do
-    set(:developer) { create(:user) }
+    let_it_be(:developer) { create(:user) }
     let(:note_author) { developer }
 
     before do
@@ -251,7 +259,7 @@ shared_examples 'issuable quick actions' do
   end
 
   context 'when user cannot update issuable' do
-    set(:non_member) { create(:user) }
+    let_it_be(:non_member) { create(:user) }
     let(:note_author) { non_member }
 
     it 'applies commands that user can execute' do

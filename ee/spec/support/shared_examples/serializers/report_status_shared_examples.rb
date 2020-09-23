@@ -1,14 +1,15 @@
 # frozen_string_literal: true
 
-shared_examples 'report list' do
+RSpec.shared_examples 'report list' do
   describe '#as_json' do
     let(:entity) do
       described_class.represent(items, build: ci_build, request: request)
     end
 
     let(:request) { double('request') }
-    set(:project) { create(:project, :repository, :private) }
-    set(:developer) { create(:user) }
+
+    let_it_be(:project) { create(:project, :repository, :private) }
+    let_it_be(:developer) { create(:user) }
 
     subject { entity.as_json }
 

@@ -20,11 +20,12 @@
           &middot;
           opened #{time_ago_with_tooltip(merge_request.created_at, placement: 'bottom')}
           by #{link_to_member(@project, merge_request.author, avatar: false)}
+          = render_if_exists 'shared/issuable/gitlab_team_member_badge', {author: merge_request.author}
         - if merge_request.milestone
           %span.issuable-milestone.d-none.d-sm-inline-block
             &nbsp;
             = link_to project_merge_requests_path(merge_request.project, milestone_title: merge_request.milestone.title), data: { html: 'true', toggle: 'tooltip', title: milestone_tooltip_due_date(merge_request.milestone) } do
-              = icon('clock-o')
+              = sprite_icon('clock', css_class: 'gl-vertical-align-text-bottom')
               = merge_request.milestone.title
         - if merge_request.target_project.default_branch != merge_request.target_branch
           %span.project-ref-path.has-tooltip{ title: _('Target branch') }
@@ -35,7 +36,7 @@
         - if merge_request.labels.any?
           &nbsp;
           - presented_labels_sorted_by_title(merge_request.labels, merge_request.project).each do |label|
-            = link_to_label(label, type: :merge_request, css_class: 'label-link')
+            = link_to_label(label, type: :merge_request, small: true)
 
     .issuable-meta
       %ul.controls.d-flex.align-items-end
@@ -44,19 +45,17 @@
             = _('MERGED')
         - elsif merge_request.closed?
           %li.issuable-status.d-none.d-sm-inline-block
-            = icon('ban')
+            = sprite_icon('cancel', css_class: 'gl-vertical-align-text-bottom')
             = _('CLOSED')
-        - if can?(current_user, :read_pipeline, merge_request.head_pipeline)
-          %li.issuable-pipeline-status.d-none.d-sm-flex
-            = render 'ci/status/icon', status: merge_request.head_pipeline.detailed_status(current_user), option_css_classes: 'd-flex'
+        = render 'shared/merge_request_pipeline_status', merge_request: merge_request
         - if merge_request.open? && merge_request.broken?
           %li.issuable-pipeline-broken.d-none.d-sm-flex
             = link_to merge_request_path(merge_request), class: "has-tooltip", title: _('Cannot be merged automatically') do
-              = icon('exclamation-triangle')
+              = sprite_icon('warning-solid')
         - if merge_request.assignees.any?
           %li.d-flex
             = render 'shared/issuable/assignees', project: merge_request.project, issuable: merge_request
-        = render_if_exists 'projects/merge_requests/approvals_count', merge_request: merge_request
+        = render 'projects/merge_requests/approvals_count', merge_request: merge_request
 
         = render 'shared/issuable_meta_data', issuable: merge_request
 

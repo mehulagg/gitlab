@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::IssuesImporter do
+RSpec.describe Gitlab::GithubImport::Importer::IssuesImporter do
   let(:project) { double(:project, id: 4, import_source: 'foo/bar') }
   let(:client) { double(:client) }
   let(:created_at) { Time.new(2017, 1, 1, 12, 00) }

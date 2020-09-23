@@ -1,8 +1,7 @@
-/* eslint-disable no-var, consistent-return, no-return-assign */
+/* eslint-disable consistent-return, no-return-assign */
 
 function notificationGranted(message, opts, onclick) {
-  var notification;
-  notification = new Notification(message, opts);
+  const notification = new Notification(message, opts);
   setTimeout(
     () =>
       // Hide the notification after X amount of seconds
@@ -14,20 +13,19 @@ function notificationGranted(message, opts, onclick) {
 }
 
 function notifyPermissions() {
-  /* eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings */
+  /* eslint-disable-next-line @gitlab/require-i18n-strings */
   if ('Notification' in window) {
     return Notification.requestPermission();
   }
 }
 
 function notifyMe(message, body, icon, onclick) {
-  var opts;
-  opts = {
+  const opts = {
     body,
     icon,
   };
   // Let's check if the browser supports notifications
-  /* eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings */
+  /* eslint-disable-next-line @gitlab/require-i18n-strings */
   if (!('Notification' in window)) {
     // do nothing
   } else if (Notification.permission === 'granted') {

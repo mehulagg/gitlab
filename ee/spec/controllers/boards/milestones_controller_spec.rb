@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::MilestonesController do
+RSpec.describe Boards::MilestonesController do
   let(:project) { create(:project, :private) }
   let(:board) { create(:board, project: project) }
   let(:user)  { create(:user) }
@@ -20,7 +20,7 @@ describe Boards::MilestonesController do
         it 'returns a list of all milestones of board parent' do
           get :index, params: { board_id: board.to_param }, format: :json
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
 
           expect(response.content_type).to eq('application/json')
           expect(json_response).to all(match_schema('entities/milestone', dir: 'ee'))
@@ -54,7 +54,7 @@ describe Boards::MilestonesController do
         it 'returns a forbidden 403 response' do
           get :index, params: { board_id: board.to_param }, format: :json
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
 

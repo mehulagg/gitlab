@@ -1,15 +1,19 @@
+import $ from 'jquery';
+import timezoneMock from 'timezone-mock';
+import { __, s__ } from '~/locale';
+import '~/commons/bootstrap';
 import * as datetimeUtility from '~/lib/utils/datetime_utility';
 
 describe('Date time utils', () => {
   describe('timeFor', () => {
-    it('returns `past due` when in past', () => {
+    it('returns localize `past due` when in past', () => {
       const date = new Date();
       date.setFullYear(date.getFullYear() - 1);
 
-      expect(datetimeUtility.timeFor(date)).toBe('Past due');
+      expect(datetimeUtility.timeFor(date)).toBe(s__('Timeago|Past due'));
     });
 
-    it('returns remaining time when in the future', () => {
+    it('returns localized remaining time when in the future', () => {
       const date = new Date();
       date.setFullYear(date.getFullYear() + 1);
 
@@ -17,51 +21,51 @@ describe('Date time utils', () => {
       // short of a full year, timeFor will return '11 months remaining'
       date.setDate(date.getDate() + 1);
 
-      expect(datetimeUtility.timeFor(date)).toBe('1 year remaining');
+      expect(datetimeUtility.timeFor(date)).toBe(s__('Timeago|1 year remaining'));
     });
   });
 
-  describe('get day name', () => {
+  describe('get localized day name', () => {
     it('should return Sunday', () => {
       const day = datetimeUtility.getDayName(new Date('07/17/2016'));
 
-      expect(day).toBe('Sunday');
+      expect(day).toBe(__('Sunday'));
     });
 
     it('should return Monday', () => {
       const day = datetimeUtility.getDayName(new Date('07/18/2016'));
 
-      expect(day).toBe('Monday');
+      expect(day).toBe(__('Monday'));
     });
 
     it('should return Tuesday', () => {
       const day = datetimeUtility.getDayName(new Date('07/19/2016'));
 
-      expect(day).toBe('Tuesday');
+      expect(day).toBe(__('Tuesday'));
     });
 
     it('should return Wednesday', () => {
       const day = datetimeUtility.getDayName(new Date('07/20/2016'));
 
-      expect(day).toBe('Wednesday');
+      expect(day).toBe(__('Wednesday'));
     });
 
     it('should return Thursday', () => {
       const day = datetimeUtility.getDayName(new Date('07/21/2016'));
 
-      expect(day).toBe('Thursday');
+      expect(day).toBe(__('Thursday'));
     });
 
     it('should return Friday', () => {
       const day = datetimeUtility.getDayName(new Date('07/22/2016'));
 
-      expect(day).toBe('Friday');
+      expect(day).toBe(__('Friday'));
     });
 
     it('should return Saturday', () => {
       const day = datetimeUtility.getDayName(new Date('07/23/2016'));
 
-      expect(day).toBe('Saturday');
+      expect(day).toBe(__('Saturday'));
     });
   });
 
@@ -82,6 +86,31 @@ describe('Date time utils', () => {
       expect(() => {
         datetimeUtility.formatDate('2016-07-23 00:00:00 UTC');
       }).toThrow(new Error('Invalid date'));
+    });
+
+    describe('convert local timezone to UTC with utc parameter', () => {
+      const midnightUTC = '2020-07-09';
+      const format = 'mmm d, yyyy';
+
+      beforeEach(() => {
+        timezoneMock.register('US/Pacific');
+      });
+
+      afterEach(() => {
+        timezoneMock.unregister();
+      });
+
+      it('defaults to false', () => {
+        const formattedDate = datetimeUtility.formatDate(midnightUTC, format);
+
+        expect(formattedDate).toBe('Jul 8, 2020');
+      });
+
+      it('converts local time to UTC if utc flag is true', () => {
+        const formattedDate = datetimeUtility.formatDate(midnightUTC, format, true);
+
+        expect(formattedDate).toBe('Jul 9, 2020');
+      });
     });
   });
 
@@ -114,10 +143,10 @@ describe('Date time utils', () => {
 
 describe('timeIntervalInWords', () => {
   it('should return string with number of minutes and seconds', () => {
-    expect(datetimeUtility.timeIntervalInWords(9.54)).toEqual('9 seconds');
-    expect(datetimeUtility.timeIntervalInWords(1)).toEqual('1 second');
-    expect(datetimeUtility.timeIntervalInWords(200)).toEqual('3 minutes 20 seconds');
-    expect(datetimeUtility.timeIntervalInWords(6008)).toEqual('100 minutes 8 seconds');
+    expect(datetimeUtility.timeIntervalInWords(9.54)).toEqual(s__('Timeago|9 seconds'));
+    expect(datetimeUtility.timeIntervalInWords(1)).toEqual(s__('Timeago|1 second'));
+    expect(datetimeUtility.timeIntervalInWords(200)).toEqual(s__('Timeago|3 minutes 20 seconds'));
+    expect(datetimeUtility.timeIntervalInWords(6008)).toEqual(s__('Timeago|100 minutes 8 seconds'));
   });
 });
 
@@ -125,15 +154,15 @@ describe('dateInWords', () => {
   const date = new Date('07/01/2016');
 
   it('should return date in words', () => {
-    expect(datetimeUtility.dateInWords(date)).toEqual('July 1, 2016');
+    expect(datetimeUtility.dateInWords(date)).toEqual(s__('July 1, 2016'));
   });
 
   it('should return abbreviated month name', () => {
-    expect(datetimeUtility.dateInWords(date, true)).toEqual('Jul 1, 2016');
+    expect(datetimeUtility.dateInWords(date, true)).toEqual(s__('Jul 1, 2016'));
   });
 
   it('should return date in words without year', () => {
-    expect(datetimeUtility.dateInWords(date, true, true)).toEqual('Jul 1');
+    expect(datetimeUtility.dateInWords(date, true, true)).toEqual(s__('Jul 1'));
   });
 });
 
@@ -141,11 +170,11 @@ describe('monthInWords', () => {
   const date = new Date('2017-01-20');
 
   it('returns month name from provided date', () => {
-    expect(datetimeUtility.monthInWords(date)).toBe('January');
+    expect(datetimeUtility.monthInWords(date)).toBe(s__('January'));
   });
 
   it('returns abbreviated month name from provided date', () => {
-    expect(datetimeUtility.monthInWords(date, true)).toBe('Jan');
+    expect(datetimeUtility.monthInWords(date, true)).toBe(s__('Jan'));
   });
 });
 
@@ -340,6 +369,16 @@ describe('prettyTime methods', () => {
 
       assertTimeUnits(twoDays, 3, 48, 0, 0);
     });
+
+    it('should correctly parse values when limitedToDays is true', () => {
+      const sevenDays = datetimeUtility.parseSeconds(648750, {
+        hoursPerDay: 24,
+        daysPerWeek: 7,
+        limitToDays: true,
+      });
+
+      assertTimeUnits(sevenDays, 12, 12, 7, 0);
+    });
   });
 
   describe('stringifyTime', () => {
@@ -444,6 +483,40 @@ describe('getDateInPast', () => {
   });
 });
 
+describe('getDateInFuture', () => {
+  const date = new Date('2019-07-16T00:00:00.000Z');
+  const daysInFuture = 90;
+
+  it('returns the correct date in the future', () => {
+    const dateInFuture = datetimeUtility.getDateInFuture(date, daysInFuture);
+    const expectedDateInFuture = new Date('2019-10-14T00:00:00.000Z');
+
+    expect(dateInFuture).toStrictEqual(expectedDateInFuture);
+  });
+
+  it('does not modifiy the original date', () => {
+    datetimeUtility.getDateInFuture(date, daysInFuture);
+    expect(date).toStrictEqual(new Date('2019-07-16T00:00:00.000Z'));
+  });
+});
+
+describe('isValidDate', () => {
+  it.each`
+    valueToCheck                              | isValid
+    ${new Date()}                             | ${true}
+    ${new Date('December 17, 1995 03:24:00')} | ${true}
+    ${new Date('1995-12-17T03:24:00')}        | ${true}
+    ${new Date('foo')}                        | ${false}
+    ${5}                                      | ${false}
+    ${''}                                     | ${false}
+    ${false}                                  | ${false}
+    ${undefined}                              | ${false}
+    ${null}                                   | ${false}
+  `('returns $expectedReturnValue when called with $dateToCheck', ({ valueToCheck, isValid }) => {
+    expect(datetimeUtility.isValidDate(valueToCheck)).toBe(isValid);
+  });
+});
+
 describe('getDatesInRange', () => {
   it('returns an empty array if 1st or 2nd argument is not a Date object', () => {
     const d1 = new Date('2019-01-01');
@@ -480,5 +553,117 @@ describe('secondsToMilliseconds', () => {
     expect(datetimeUtility.secondsToMilliseconds(0)).toBe(0);
     expect(datetimeUtility.secondsToMilliseconds(60)).toBe(60000);
     expect(datetimeUtility.secondsToMilliseconds(123)).toBe(123000);
+  });
+});
+
+describe('dayAfter', () => {
+  const date = new Date('2019-07-16T00:00:00.000Z');
+
+  it('returns the following date', () => {
+    const nextDay = datetimeUtility.dayAfter(date);
+    const expectedNextDate = new Date('2019-07-17T00:00:00.000Z');
+
+    expect(nextDay).toStrictEqual(expectedNextDate);
+  });
+
+  it('does not modifiy the original date', () => {
+    datetimeUtility.dayAfter(date);
+    expect(date).toStrictEqual(new Date('2019-07-16T00:00:00.000Z'));
+  });
+});
+
+describe('secondsToDays', () => {
+  it('converts seconds to days correctly', () => {
+    expect(datetimeUtility.secondsToDays(0)).toBe(0);
+    expect(datetimeUtility.secondsToDays(90000)).toBe(1);
+    expect(datetimeUtility.secondsToDays(270000)).toBe(3);
+  });
+});
+
+describe('approximateDuration', () => {
+  it.each`
+    seconds
+    ${null}
+    ${{}}
+    ${[]}
+    ${-1}
+  `('returns a blank string for seconds=$seconds', ({ seconds }) => {
+    expect(datetimeUtility.approximateDuration(seconds)).toBe('');
+  });
+
+  it.each`
+    seconds   | approximation
+    ${0}      | ${'less than a minute'}
+    ${25}     | ${'less than a minute'}
+    ${45}     | ${'1 minute'}
+    ${90}     | ${'1 minute'}
+    ${100}    | ${'1 minute'}
+    ${150}    | ${'2 minutes'}
+    ${220}    | ${'3 minutes'}
+    ${3000}   | ${'about 1 hour'}
+    ${30000}  | ${'about 8 hours'}
+    ${100000} | ${'1 day'}
+    ${180000} | ${'2 days'}
+  `('converts $seconds seconds to $approximation', ({ seconds, approximation }) => {
+    expect(datetimeUtility.approximateDuration(seconds)).toBe(approximation);
+  });
+});
+
+describe('localTimeAgo', () => {
+  beforeEach(() => {
+    document.body.innerHTML = `<time title="some time" datetime="2020-02-18T22:22:32Z">1 hour ago</time>`;
+  });
+
+  it.each`
+    timeagoArg | title          | dataOriginalTitle
+    ${false}   | ${'some time'} | ${null}
+    ${true}    | ${''}          | ${'Feb 18, 2020 10:22pm GMT+0000'}
+  `('converts $seconds seconds to $approximation', ({ timeagoArg, title, dataOriginalTitle }) => {
+    const element = document.querySelector('time');
+    datetimeUtility.localTimeAgo($(element), timeagoArg);
+
+    jest.runAllTimers();
+
+    expect(element.getAttribute('data-original-title')).toBe(dataOriginalTitle);
+    expect(element.getAttribute('title')).toBe(title);
+  });
+});
+
+describe('dateFromParams', () => {
+  it('returns the expected date object', () => {
+    const expectedDate = new Date('2019-07-17T00:00:00.000Z');
+    const date = datetimeUtility.dateFromParams(2019, 6, 17);
+
+    expect(date.getYear()).toBe(expectedDate.getYear());
+    expect(date.getMonth()).toBe(expectedDate.getMonth());
+    expect(date.getDate()).toBe(expectedDate.getDate());
+  });
+});
+
+describe('differenceInSeconds', () => {
+  const startDateTime = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    startDate                               | endDate                                 | expected
+    ${startDateTime}                        | ${new Date('2019-07-17T00:00:00.000Z')} | ${0}
+    ${startDateTime}                        | ${new Date('2019-07-17T12:00:00.000Z')} | ${43200}
+    ${startDateTime}                        | ${new Date('2019-07-18T00:00:00.000Z')} | ${86400}
+    ${new Date('2019-07-18T00:00:00.000Z')} | ${startDateTime}                        | ${-86400}
+  `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
+    expect(datetimeUtility.differenceInSeconds(startDate, endDate)).toBe(expected);
+  });
+});
+
+describe('differenceInMilliseconds', () => {
+  const startDateTime = new Date('2019-07-17T00:00:00.000Z');
+
+  it.each`
+    startDate                               | endDate                                           | expected
+    ${startDateTime.getTime()}              | ${new Date('2019-07-17T00:00:00.000Z')}           | ${0}
+    ${startDateTime}                        | ${new Date('2019-07-17T12:00:00.000Z').getTime()} | ${43200000}
+    ${startDateTime}                        | ${new Date('2019-07-18T00:00:00.000Z').getTime()} | ${86400000}
+    ${new Date('2019-07-18T00:00:00.000Z')} | ${startDateTime.getTime()}                        | ${-86400000}
+  `('returns $expected for $endDate - $startDate', ({ startDate, endDate, expected }) => {
+    expect(datetimeUtility.differenceInMilliseconds(startDate, endDate)).toBe(expected);
   });
 });

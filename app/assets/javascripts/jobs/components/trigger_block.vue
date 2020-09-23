@@ -1,12 +1,12 @@
 <script>
+import { GlDeprecatedButton } from '@gitlab/ui';
 import { __ } from '~/locale';
-import { GlButton } from '@gitlab/ui';
 
 const HIDDEN_VALUE = '••••••';
 
 export default {
   components: {
-    GlButton,
+    GlDeprecatedButton,
   },
   props: {
     trigger: {
@@ -46,7 +46,7 @@ export default {
     <p
       v-if="trigger.short_token"
       class="js-short-token"
-      :class="{ 'append-bottom-5': hasVariables, 'append-bottom-0': !hasVariables }"
+      :class="{ 'gl-mb-2': hasVariables, 'gl-mb-0': !hasVariables }"
     >
       <span class="font-weight-bold">{{ __('Trigger token:') }}</span> {{ trigger.short_token }}
     </p>
@@ -55,11 +55,11 @@ export default {
       <p class="trigger-variables-btn-container d-flex">
         <span class="font-weight-bold">{{ __('Trigger variables:') }}</span>
 
-        <gl-button
+        <gl-deprecated-button
           v-if="hasValues"
           class="btn-sm group js-reveal-variables trigger-variables-btn"
           @click="toggleValues"
-          >{{ getToggleButtonText }}</gl-button
+          >{{ getToggleButtonText }}</gl-deprecated-button
         >
       </p>
 

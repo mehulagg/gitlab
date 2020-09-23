@@ -20,38 +20,55 @@ class Groups::GroupMembersController < Groups::ApplicationController
                                   :override
 
   def index
-    can_manage_members = can?(current_user, :admin_group_member, @group)
-
     @sort = params[:sort].presence || sort_value_name
+
     @project = @group.projects.find(params[:project_id]) if params[:project_id]
 
-    @members = GroupMembersFinder.new(@group).execute
+    @members = GroupMembersFinder
+      .new(@group, current_user, params: filter_params)
+      .execute(include_relations: requested_relations)
 
     if can_manage_members
+      @skip_groups = @group.related_group_ids
+
       @invited_members = @members.invite
       @invited_members = @invited_members.search_invite_email(params[:search_invited]) if params[:search_invited].present?
-      @invited_members = present_members(@invited_members.page(params[:invited_members_page]).per(MEMBER_PER_PAGE_LIMIT))
+      @invited_members = present_invited_members(@invited_members)
     end
 
-    @members = @members.non_invite
-    @members = @members.search(params[:search]) if params[:search].present?
-    @members = @members.sort_by_attribute(@sort)
-
-    if can_manage_members && params[:two_factor].present?
-      @members = @members.filter_by_2fa(params[:two_factor])
-    end
-
-    @members = @members.page(params[:page]).per(MEMBER_PER_PAGE_LIMIT)
-    @members = present_members(@members)
+    @members = present_group_members(@members.non_invite)
 
     @requesters = present_members(
-      AccessRequestsFinder.new(@group).execute(current_user))
+      AccessRequestsFinder.new(@group).execute(current_user)
+    )
 
     @group_member = @group.group_members.new
   end
 
   # MembershipActions concern
   alias_method :membershipable, :group
+
+  private
+
+  def can_manage_members
+    can?(current_user, :admin_group_member, @group)
+  end
+
+  def present_invited_members(invited_members)
+    present_members(invited_members
+      .page(params[:invited_members_page])
+      .per(MEMBER_PER_PAGE_LIMIT))
+  end
+
+  def present_group_members(members)
+    present_members(members
+      .page(params[:page])
+      .per(MEMBER_PER_PAGE_LIMIT))
+  end
+
+  def filter_params
+    params.permit(:two_factor, :search).merge(sort: @sort)
+  end
 end
 
 Groups::GroupMembersController.prepend_if_ee('EE::Groups::GroupMembersController')

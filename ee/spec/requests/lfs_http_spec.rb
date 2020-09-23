@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Git LFS API and storage' do
+RSpec.describe 'Git LFS API and storage' do
   include WorkhorseHelpers
 
   let(:user) { create(:user) }
@@ -14,6 +14,7 @@ describe 'Git LFS API and storage' do
       'X-Sendfile-Type' => sendfile
     }.compact
   end
+
   let(:authorization) { }
   let(:sendfile) { }
 
@@ -49,26 +50,34 @@ describe 'Git LFS API and storage' do
 
         context 'and project is above the limit' do
           let(:update_lfs_permissions) do
-            allow_any_instance_of(EE::Project).to receive_messages(
-              repository_and_lfs_size: 100.megabytes,
-              actual_size_limit: 99.megabytes)
+            allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
+              allow(checker).to receive_messages(
+                enabled?: true,
+                current_size: 110.megabytes,
+                limit: 100.megabytes
+              )
+            end
           end
 
           it 'responds with status 406' do
-            expect(response).to have_gitlab_http_status(406)
-            expect(json_response['message']).to eql('Your push has been rejected, because this repository has exceeded its size limit of 99 MB by 1 MB. Please contact your GitLab administrator for more information.')
+            expect(response).to have_gitlab_http_status(:not_acceptable)
+            expect(json_response['message']).to eql('Your push has been rejected, because this repository has exceeded its size limit of 100 MB by 160 MB. Please contact your GitLab administrator for more information.')
           end
         end
 
         context 'and project will go over the limit' do
           let(:update_lfs_permissions) do
-            allow_any_instance_of(EE::Project).to receive_messages(
-              repository_and_lfs_size: 200.megabytes,
-              actual_size_limit: 300.megabytes)
+            allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
+              allow(checker).to receive_messages(
+                enabled?: true,
+                current_size: 200.megabytes,
+                limit: 300.megabytes
+              )
+            end
           end
 
           it 'responds with status 406' do
-            expect(response).to have_gitlab_http_status(406)
+            expect(response).to have_gitlab_http_status(:not_acceptable)
             expect(json_response['documentation_url']).to include('/help')
             expect(json_response['message']).to eql('Your push has been rejected, because this repository has exceeded its size limit of 300 MB by 50 MB. Please contact your GitLab administrator for more information.')
           end
@@ -117,15 +126,15 @@ describe 'Git LFS API and storage' do
 
           context 'and project has limit enabled but will stay under the limit' do
             before do
-              allow_any_instance_of(EE::Project).to receive_messages(
-                actual_size_limit: 200,
-                size_limit_enabled?: true)
+              allow_next_instance_of(Gitlab::RepositorySizeChecker) do |checker|
+                allow(checker).to receive_messages(limit: 200, enabled?: true)
+              end
 
               put_finalize
             end
 
             it 'responds with status 200' do
-              expect(response).to have_gitlab_http_status(200)
+              expect(response).to have_gitlab_http_status(:ok)
             end
           end
         end

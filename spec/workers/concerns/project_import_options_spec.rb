@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectImportOptions do
+RSpec.describe ProjectImportOptions do
   let(:project) { create(:project, :import_started) }
   let(:job) { { 'args' => [project.id, nil, nil], 'jid' => '123' } }
   let(:worker_class) do
@@ -17,7 +17,7 @@ describe ProjectImportOptions do
   end
 
   it 'sets default status expiration' do
-    expect(worker_class.sidekiq_options['status_expiration']).to eq(StuckImportJobsWorker::IMPORT_JOBS_EXPIRATION)
+    expect(worker_class.sidekiq_options['status_expiration']).to eq(Gitlab::Import::StuckImportJob::IMPORT_JOBS_EXPIRATION)
   end
 
   describe '.sidekiq_retries_exhausted' do
@@ -37,6 +37,17 @@ describe ProjectImportOptions do
       worker_class.sidekiq_retries_exhausted_block.call(job)
 
       expect(project.import_state.reload.last_error).to include("import")
+    end
+
+    context 'when project is jira import' do
+      let(:project) { create(:project, import_type: 'jira') }
+      let!(:jira_import) { create(:jira_import_state, project: project) }
+
+      it 'logs the appropriate error message for forked projects' do
+        worker_class.sidekiq_retries_exhausted_block.call(job)
+
+        expect(project.latest_jira_import.reload.status).to eq('failed')
+      end
     end
 
     context 'when project does not have import_state' do

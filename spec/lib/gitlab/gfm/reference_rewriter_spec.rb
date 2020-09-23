@@ -1,12 +1,14 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Gfm::ReferenceRewriter do
-  let(:group) { create(:group) }
-  let(:old_project) { create(:project, name: 'old-project', group: group) }
-  let(:new_project) { create(:project, name: 'new-project', group: group) }
-  let(:user) { create(:user) }
+RSpec.describe Gitlab::Gfm::ReferenceRewriter do
+  let_it_be(:group) { create(:group) }
+  let_it_be(:user) { create(:user) }
 
-  let(:old_project_ref) { old_project.to_reference(new_project) }
+  let(:new_project) { create(:project, name: 'new-project', group: group) }
+  let(:old_project) { create(:project, name: 'old-project', group: group) }
+  let(:old_project_ref) { old_project.to_reference_base(new_project) }
   let(:text) { 'some text' }
 
   before do
@@ -33,7 +35,7 @@ describe Gitlab::Gfm::ReferenceRewriter do
 
       context 'description with ignored elements' do
         let(:text) do
-          "Hi. This references #1, but not `#2`\n" +
+          "Hi. This references #1, but not `#2`\n" \
             '<pre>and not !1</pre>'
         end
 
@@ -52,11 +54,13 @@ describe Gitlab::Gfm::ReferenceRewriter do
 
         context 'code' do
           let(:text) { "#1, but not `[#1]`" }
+
           it { is_expected.to eq "#{issue_first.to_reference(new_project)}, but not `[#1]`" }
         end
 
         context 'code reverse' do
           let(:text) { "not `#1`, but #1" }
+
           it { is_expected.to eq "not `#1`, but #{issue_first.to_reference(new_project)}" }
         end
 
@@ -72,11 +76,13 @@ describe Gitlab::Gfm::ReferenceRewriter do
 
           context 'label referenced by id' do
             let(:text) { '#1 and ~123' }
+
             it { is_expected.to eq %Q{#{old_project_ref}#1 and #{old_project_ref}~123} }
           end
 
           context 'label referenced by text' do
             let(:text) { '#1 and ~"test"' }
+
             it { is_expected.to eq %Q{#{old_project_ref}#1 and #{old_project_ref}~123} }
           end
         end
@@ -91,15 +97,31 @@ describe Gitlab::Gfm::ReferenceRewriter do
 
           context 'label referenced by id' do
             let(:text) { '#1 and ~321' }
+
             it { is_expected.to eq %Q{#{old_project_ref}#1 and #{old_project_ref}~321} }
           end
 
           context 'label referenced by text' do
             let(:text) { '#1 and ~"group label"' }
+
             it { is_expected.to eq %Q{#{old_project_ref}#1 and #{old_project_ref}~321} }
           end
         end
       end
+    end
+
+    context 'when description contains a local reference' do
+      let(:local_issue) { create(:issue, project: old_project) }
+      let(:text) { "See ##{local_issue.iid}" }
+
+      it { is_expected.to eq("See #{old_project.path}##{local_issue.iid}") }
+    end
+
+    context 'when description contains a cross reference' do
+      let(:merge_request) { create(:merge_request) }
+      let(:text) { "See #{merge_request.project.full_path}!#{merge_request.iid}" }
+
+      it { is_expected.to eq(text) }
     end
 
     context 'with a commit' do
@@ -135,6 +157,18 @@ describe Gitlab::Gfm::ReferenceRewriter do
       end
 
       let(:text) { 'milestone %"10.0"' }
+
+      it { is_expected.to eq text }
+    end
+
+    context 'when referring to a group' do
+      let(:text) { "group @#{group.full_path}" }
+
+      it { is_expected.to eq text }
+    end
+
+    context 'when referring to a user' do
+      let(:text) { "user @#{user.full_path}" }
 
       it { is_expected.to eq text }
     end

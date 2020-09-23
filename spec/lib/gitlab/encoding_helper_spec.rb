@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-describe Gitlab::EncodingHelper do
+RSpec.describe Gitlab::EncodingHelper do
   let(:ext_class) { Class.new { extend Gitlab::EncodingHelper } }
   let(:binary_string) { File.read(Rails.root + "spec/fixtures/dk.png") }
 
@@ -128,10 +128,17 @@ describe Gitlab::EncodingHelper do
       expect { ext_class.encode_utf8('') }.not_to raise_error
     end
 
+    it 'replaces invalid and undefined chars with the replace argument' do
+      str = 'hællo'.encode(Encoding::UTF_16LE).force_encoding(Encoding::ASCII_8BIT)
+
+      expect(ext_class.encode_utf8(str, replace: "\u{FFFD}")).to eq("h�llo")
+    end
+
     context 'with strings that can be forcefully encoded into utf8' do
       let(:test_string) do
         "refs/heads/FixSymbolsTitleDropdown".encode("ASCII-8BIT")
       end
+
       let(:expected_string) do
         "refs/heads/FixSymbolsTitleDropdown".encode("UTF-8")
       end

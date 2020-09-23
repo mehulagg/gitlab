@@ -2,8 +2,21 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::CronManager, :geo do
+RSpec.describe Gitlab::Geo::CronManager, :geo do
   include ::EE::GeoHelpers
+
+  jobs = %w[
+    ldap_test
+    repository_check_worker
+    geo_repository_verification_primary_batch_worker
+    geo_repository_sync_worker
+    geo_file_download_dispatch_worker
+    geo_registry_sync_worker
+    geo_container_repository_sync_worker
+    geo_repository_verification_secondary_scheduler_worker
+    geo_metrics_update_worker
+    geo_prune_event_log_worker
+  ].freeze
 
   def job(name)
     Sidekiq::Cron::Job.find(name)
@@ -12,8 +25,30 @@ describe Gitlab::Geo::CronManager, :geo do
   subject(:manager) { described_class.new }
 
   describe '#execute' do
-    set(:primary) { create(:geo_node, :primary) }
-    set(:secondary) { create(:geo_node) }
+    let_it_be(:primary) { create(:geo_node, :primary) }
+    let_it_be(:secondary) { create(:geo_node) }
+
+    let(:common_jobs) { [job('geo_metrics_update_worker'), job('repository_check_worker')] }
+    let(:ldap_test_job) { job('ldap_test') }
+    let(:primary_jobs) { [job('geo_repository_verification_primary_batch_worker')] }
+
+    let(:secondary_jobs) do
+      [
+        job('geo_file_download_dispatch_worker'),
+        job('geo_registry_sync_worker'),
+        job('geo_repository_sync_worker'),
+        job('geo_container_repository_sync_worker'),
+        job('geo_repository_verification_secondary_scheduler_worker')
+      ]
+    end
+
+    before(:all) do
+      jobs.each { |name| init_cron_job(name, name.camelize) }
+    end
+
+    after(:all) do
+      jobs.each { |name| job(name)&.destroy } # rubocop: disable Rails/SaveBang
+    end
 
     def init_cron_job(job_name, class_name)
       job = Sidekiq::Cron::Job.new(
@@ -25,43 +60,8 @@ describe Gitlab::Geo::CronManager, :geo do
       job.enable!
     end
 
-    def count_enabled
-      JOBS.count { |job_name| job(job_name).enabled? }
-    end
-
-    JOBS = %w[
-      ldap_test
-      repository_check_worker
-      geo_repository_verification_primary_batch_worker
-      geo_repository_sync_worker
-      geo_file_download_dispatch_worker
-      geo_container_repository_sync_worker
-      geo_repository_verification_secondary_scheduler_worker
-      geo_metrics_update_worker
-      geo_prune_event_log_worker
-      geo_migrated_local_files_clean_up_worker
-    ].freeze
-
-    before(:all) do
-      JOBS.each { |name| init_cron_job(name, name.camelize) }
-    end
-
-    after(:all) do
-      JOBS.each { |name| job(name)&.destroy }
-    end
-
-    let(:common_jobs) { [job('geo_metrics_update_worker'), job('repository_check_worker')] }
-    let(:ldap_test_job) { job('ldap_test') }
-    let(:primary_jobs) { [job('geo_repository_verification_primary_batch_worker')] }
-
-    let(:secondary_jobs) do
-      [
-        job('geo_file_download_dispatch_worker'),
-        job('geo_repository_sync_worker'),
-        job('geo_container_repository_sync_worker'),
-        job('geo_repository_verification_secondary_scheduler_worker'),
-        job('geo_migrated_local_files_clean_up_worker')
-      ]
+    def count_enabled(jobs)
+      jobs.count { |job_name| job(job_name).enabled? }
     end
 
     context 'on a Geo primary' do
@@ -91,7 +91,7 @@ describe Gitlab::Geo::CronManager, :geo do
         it 'does not change current job configuration' do
           allow(Geo).to receive(:connected?).and_return(false)
 
-          expect { manager.execute }.not_to change { count_enabled }
+          expect { manager.execute }.not_to change { count_enabled(jobs) }
         end
       end
     end

@@ -10,14 +10,14 @@ module EE
         group
       end
 
-      override :elastic_projects
-      def elastic_projects
-        @elastic_projects ||= projects.pluck(:id) # rubocop:disable CodeReuse/ActiveRecord
-      end
-
       override :elastic_global
       def elastic_global
         false
+      end
+
+      override :elastic_projects
+      def elastic_projects
+        @elastic_projects ||= projects.pluck_primary_key
       end
 
       override :execute
@@ -26,12 +26,11 @@ module EE
 
         ::Gitlab::Elastic::GroupSearchResults.new(
           current_user,
-          elastic_projects,
-          projects,
-          group,
           params[:search],
-          elastic_global,
-          default_project_filter: default_project_filter
+          elastic_projects,
+          group: group,
+          public_and_internal_projects: elastic_global,
+          filters: { state: params[:state] }
         )
       end
     end

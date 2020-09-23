@@ -8,10 +8,10 @@ module Vulnerabilities
 
     sha_attribute :fingerprint
 
-    has_many :occurrence_identifiers, class_name: 'Vulnerabilities::OccurrenceIdentifier'
-    has_many :occurrences, through: :occurrence_identifiers, class_name: 'Vulnerabilities::Occurrence'
+    has_many :finding_identifiers, class_name: 'Vulnerabilities::FindingIdentifier', inverse_of: :identifier, foreign_key: 'identifier_id'
+    has_many :findings, through: :finding_identifiers, class_name: 'Vulnerabilities::Finding'
 
-    has_many :primary_occurrences, class_name: 'Vulnerabilities::Occurrence', inverse_of: :primary_identifier
+    has_many :primary_findings, class_name: 'Vulnerabilities::Finding', inverse_of: :primary_identifier, foreign_key: 'primary_identifier_id'
 
     belongs_to :project
 

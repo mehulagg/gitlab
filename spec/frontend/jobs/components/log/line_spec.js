@@ -20,7 +20,6 @@ describe('Job Log Line', () => {
 
   const createComponent = (props = {}) => {
     wrapper = shallowMount(Line, {
-      sync: false,
       propsData: {
         ...props,
       },
@@ -36,7 +35,7 @@ describe('Job Log Line', () => {
   });
 
   it('renders the line number component', () => {
-    expect(wrapper.contains(LineNumber)).toBe(true);
+    expect(wrapper.find(LineNumber).exists()).toBe(true);
   });
 
   it('renders a span the provided text', () => {

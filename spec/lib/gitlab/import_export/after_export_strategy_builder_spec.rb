@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ImportExport::AfterExportStrategyBuilder do
+RSpec.describe Gitlab::ImportExport::AfterExportStrategyBuilder do
   let!(:strategies_namespace) { 'Gitlab::ImportExport::AfterExportStrategies' }
 
   describe '.build!' do

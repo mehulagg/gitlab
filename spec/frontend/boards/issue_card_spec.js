@@ -1,12 +1,13 @@
 /* global ListAssignee, ListLabel, ListIssue */
 import { mount } from '@vue/test-utils';
-import _ from 'underscore';
+import { range } from 'lodash';
 import '~/boards/models/label';
 import '~/boards/models/assignee';
 import '~/boards/models/issue';
 import '~/boards/models/list';
+import { GlLabel } from '@gitlab/ui';
 import IssueCardInner from '~/boards/components/issue_card_inner.vue';
-import { listObj } from '../../javascripts/boards/mock_data';
+import { listObj } from './mock_data';
 import store from '~/boards/stores';
 
 describe('Issue card component', () => {
@@ -20,7 +21,7 @@ describe('Issue card component', () => {
   const label1 = new ListLabel({
     id: 3,
     title: 'testing 123',
-    color: 'blue',
+    color: '#000CFF',
     text_color: 'white',
     description: 'test',
   });
@@ -46,11 +47,15 @@ describe('Issue card component', () => {
       propsData: {
         list,
         issue,
-        issueLinkBase: '/test',
-        rootPath: '/',
       },
       store,
-      sync: false,
+      stubs: {
+        GlLabel: true,
+      },
+      provide: {
+        groupId: null,
+        rootPath: '/',
+      },
     });
   });
 
@@ -67,7 +72,11 @@ describe('Issue card component', () => {
   });
 
   it('does not render confidential icon', () => {
-    expect(wrapper.find('.fa-eye-flash').exists()).toBe(false);
+    expect(wrapper.find('.confidential-icon').exists()).toBe(false);
+  });
+
+  it('does not render blocked icon', () => {
+    expect(wrapper.find('.issue-blocked-icon').exists()).toBe(false);
   });
 
   it('renders confidential icon', done => {
@@ -98,6 +107,9 @@ describe('Issue card component', () => {
           issue: {
             ...wrapper.props('issue'),
             assignees: [user],
+            updateData(newData) {
+              Object.assign(this, newData);
+            },
           },
         });
 
@@ -119,27 +131,52 @@ describe('Issue card component', () => {
       it('renders avatar', () => {
         expect(wrapper.find('.board-card-assignee img').exists()).toBe(true);
       });
+
+      it('renders the avatar using avatar_url property', done => {
+        wrapper.props('issue').updateData({
+          ...wrapper.props('issue'),
+          assignees: [
+            {
+              id: '1',
+              name: 'test',
+              state: 'active',
+              username: 'test_name',
+              avatar_url: 'test_image_from_avatar_url',
+            },
+          ],
+        });
+
+        wrapper.vm.$nextTick(() => {
+          expect(wrapper.find('.board-card-assignee img').attributes('src')).toBe(
+            'test_image_from_avatar_url?width=24',
+          );
+          done();
+        });
+      });
     });
 
     describe('assignee default avatar', () => {
       beforeEach(done => {
+        global.gon.default_avatar_url = 'default_avatar';
+
         wrapper.setProps({
           issue: {
             ...wrapper.props('issue'),
             assignees: [
-              new ListAssignee(
-                {
-                  id: 1,
-                  name: 'testing 123',
-                  username: 'test',
-                },
-                'default_avatar',
-              ),
+              new ListAssignee({
+                id: 1,
+                name: 'testing 123',
+                username: 'test',
+              }),
             ],
           },
         });
 
         wrapper.vm.$nextTick(done);
+      });
+
+      afterEach(() => {
+        global.gon.default_avatar_url = null;
       });
 
       it('displays defaults avatar if users avatar is null', () => {
@@ -223,7 +260,7 @@ describe('Issue card component', () => {
       it('renders 99+ avatar counter', done => {
         const assignees = [
           ...wrapper.props('issue').assignees,
-          ..._.range(5, 103).map(
+          ...range(5, 103).map(
             i =>
               new ListAssignee({
                 id: i,
@@ -262,29 +299,11 @@ describe('Issue card component', () => {
     });
 
     it('does not render list label but renders all other labels', () => {
-      expect(wrapper.findAll('.badge').length).toBe(1);
-    });
-
-    it('renders label', () => {
-      const nodes = wrapper
-        .findAll('.badge')
-        .wrappers.map(label => label.attributes('data-original-title'));
-
-      expect(nodes.includes(label1.description)).toBe(true);
-    });
-
-    it('sets label description as title', () => {
-      expect(wrapper.find('.badge').attributes('data-original-title')).toContain(
-        label1.description,
-      );
-    });
-
-    it('sets background color of button', () => {
-      const nodes = wrapper
-        .findAll('.badge')
-        .wrappers.map(label => label.element.style.backgroundColor);
-
-      expect(nodes.includes(label1.color)).toBe(true);
+      expect(wrapper.findAll(GlLabel).length).toBe(1);
+      const label = wrapper.find(GlLabel);
+      expect(label.props('title')).toEqual(label1.title);
+      expect(label.props('description')).toEqual(label1.description);
+      expect(label.props('backgroundColor')).toEqual(label1.color);
     });
 
     it('does not render label if label does not have an ID', done => {
@@ -297,11 +316,27 @@ describe('Issue card component', () => {
       wrapper.vm
         .$nextTick()
         .then(() => {
-          expect(wrapper.findAll('.badge').length).toBe(1);
+          expect(wrapper.findAll(GlLabel).length).toBe(1);
           expect(wrapper.text()).not.toContain('closed');
           done();
         })
         .catch(done.fail);
+    });
+  });
+
+  describe('blocked', () => {
+    beforeEach(done => {
+      wrapper.setProps({
+        issue: {
+          ...wrapper.props('issue'),
+          blocked: true,
+        },
+      });
+      wrapper.vm.$nextTick(done);
+    });
+
+    it('renders blocked icon if issue is blocked', () => {
+      expect(wrapper.find('.issue-blocked-icon').exists()).toBe(true);
     });
   });
 });

@@ -2,37 +2,56 @@
 
 module Resolvers
   class MergeRequestsResolver < BaseResolver
-    argument :iid, GraphQL::STRING_TYPE,
-              required: false,
-              description: 'The IID of the merge request, e.g., "1"'
+    include ResolvesMergeRequests
+
+    alias_method :project, :synchronized_object
 
     argument :iids, [GraphQL::STRING_TYPE],
               required: false,
-              description: 'The list of IIDs of issues, e.g., [1, 2]'
+              description: 'Array of IIDs of merge requests, for example `[1, 2]`'
 
-    type Types::MergeRequestType, null: true
+    argument :source_branches, [GraphQL::STRING_TYPE],
+             required: false,
+             as: :source_branch,
+             description: 'Array of source branch names. All resolved merge requests will have one of these branches as their source.'
 
-    alias_method :project, :object
+    argument :target_branches, [GraphQL::STRING_TYPE],
+             required: false,
+             as: :target_branch,
+             description: 'Array of target branch names. All resolved merge requests will have one of these branches as their target.'
 
-    def resolve(**args)
-      return unless project.present?
+    argument :state, ::Types::MergeRequestStateEnum,
+             required: false,
+             description: 'A merge request state. If provided, all resolved merge requests will have this state.'
 
-      args[:iids] ||= [args[:iid]].compact
+    argument :labels, [GraphQL::STRING_TYPE],
+             required: false,
+             as: :label_name,
+             description: 'Array of label names. All resolved merge requests will have all of these labels.'
+    argument :merged_after, Types::TimeType,
+             required: false,
+             description: 'Merge requests merged after this date'
+    argument :merged_before, Types::TimeType,
+             required: false,
+             description: 'Merge requests merged before this date'
+    argument :milestone_title, GraphQL::STRING_TYPE,
+             required: false,
+             description: 'Title of the milestone'
+    argument :sort, Types::MergeRequestSortEnum,
+             description: 'Sort merge requests by this criteria',
+             required: false,
+             default_value: 'created_desc'
 
-      args[:iids].map { |iid| batch_load(iid) }
-        .select(&:itself) # .compact doesn't work on BatchLoader
+    def self.single
+      ::Resolvers::MergeRequestResolver
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
-    def batch_load(iid)
-      BatchLoader::GraphQL.for(iid.to_s).batch(key: project) do |iids, loader, args|
-        arg_key = args[:key].respond_to?(:sync) ? args[:key].sync : args[:key]
-
-        arg_key.merge_requests.where(iid: iids).each do |mr|
-          loader.call(mr.iid.to_s, mr)
-        end
-      end
+    def no_results_possible?(args)
+      project.nil? || some_argument_is_empty?(args)
     end
-    # rubocop: enable CodeReuse/ActiveRecord
+
+    def some_argument_is_empty?(args)
+      args.values.any? { |v| v.is_a?(Array) && v.empty? }
+    end
   end
 end

@@ -2,13 +2,7 @@
 
 require 'spec_helper'
 
-describe RepositoryImportWorker do
-  describe 'modules' do
-    it 'includes ProjectImportOptions' do
-      expect(described_class).to include_module(ProjectImportOptions)
-    end
-  end
-
+RSpec.describe RepositoryImportWorker do
   describe '#perform' do
     let(:project) { create(:project, :import_scheduled) }
     let(:import_state) { project.import_state }
@@ -21,8 +15,9 @@ describe RepositoryImportWorker do
 
         allow(subject).to receive(:jid).and_return(jid)
 
-        expect_any_instance_of(Projects::ImportService).to receive(:execute)
-          .and_return({ status: :ok })
+        expect_next_instance_of(Projects::ImportService) do |instance|
+          expect(instance).to receive(:execute).and_return({ status: :ok })
+        end
 
         # Works around https://github.com/rspec/rspec-mocks/issues/910
         expect(Project).to receive(:find).with(started_project.id).and_return(started_project)
@@ -36,8 +31,9 @@ describe RepositoryImportWorker do
 
     context 'when the import was successful' do
       it 'imports a project' do
-        expect_any_instance_of(Projects::ImportService).to receive(:execute)
-          .and_return({ status: :ok })
+        expect_next_instance_of(Projects::ImportService) do |instance|
+          expect(instance).to receive(:execute).and_return({ status: :ok })
+        end
 
         # Works around https://github.com/rspec/rspec-mocks/issues/910
         expect(Project).to receive(:find).with(project.id).and_return(project)
@@ -53,8 +49,10 @@ describe RepositoryImportWorker do
       it 'hide the credentials that were used in the import URL' do
         error = %q{remote: Not Found fatal: repository 'https://user:pass@test.com/root/repoC.git/' not found }
 
-        import_state.update(jid: '123')
-        expect_any_instance_of(Projects::ImportService).to receive(:execute).and_return({ status: :error, message: error })
+        import_state.update!(jid: '123')
+        expect_next_instance_of(Projects::ImportService) do |instance|
+          expect(instance).to receive(:execute).and_return({ status: :error, message: error })
+        end
 
         expect do
           subject.perform(project.id)
@@ -65,9 +63,11 @@ describe RepositoryImportWorker do
       it 'updates the error on Import/Export' do
         error = %q{remote: Not Found fatal: repository 'https://user:pass@test.com/root/repoC.git/' not found }
 
-        project.update(import_type: 'gitlab_project')
-        import_state.update(jid: '123')
-        expect_any_instance_of(Projects::ImportService).to receive(:execute).and_return({ status: :error, message: error })
+        project.update!(import_type: 'gitlab_project')
+        import_state.update!(jid: '123')
+        expect_next_instance_of(Projects::ImportService) do |instance|
+          expect(instance).to receive(:execute).and_return({ status: :error, message: error })
+        end
 
         expect do
           subject.perform(project.id)
@@ -93,8 +93,9 @@ describe RepositoryImportWorker do
           .to receive(:async?)
           .and_return(true)
 
-        expect_any_instance_of(ProjectImportState)
-          .not_to receive(:finish)
+        expect_next_instance_of(ProjectImportState) do |instance|
+          expect(instance).not_to receive(:finish)
+        end
 
         subject.perform(project.id)
       end

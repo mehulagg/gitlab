@@ -3,8 +3,8 @@
  * Render environments table.
  */
 import { GlLoadingIcon } from '@gitlab/ui';
-import _ from 'underscore';
-import environmentTableMixin from 'ee_else_ce/environments/mixins/environments_table_mixin';
+import { flow, reverse, sortBy } from 'lodash/fp';
+import { s__ } from '~/locale';
 import EnvironmentItem from './environment_item.vue';
 
 export default {
@@ -14,8 +14,8 @@ export default {
     DeployBoard: () => import('ee_component/environments/components/deploy_board_component.vue'),
     CanaryDeploymentCallout: () =>
       import('ee_component/environments/components/canary_deployment_callout.vue'),
+    EnvironmentAlert: () => import('ee_component/environments/components/environment_alert.vue'),
   },
-  mixins: [environmentTableMixin],
   props: {
     environments: {
       type: Array,
@@ -32,6 +32,31 @@ export default {
       required: false,
       default: false,
     },
+    canaryDeploymentFeatureId: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    helpCanaryDeploymentsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    lockPromotionSvgPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    showCanaryDeploymentCallout: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
+    userCalloutsPath: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   computed: {
     sortedEnvironments() {
@@ -41,13 +66,54 @@ export default {
           : env,
       );
     },
+    tableData() {
+      return {
+        // percent spacing for cols, should add up to 100
+        name: {
+          title: s__('Environments|Environment'),
+          spacing: 'section-15',
+        },
+        deploy: {
+          title: s__('Environments|Deployment'),
+          spacing: 'section-10',
+        },
+        build: {
+          title: s__('Environments|Job'),
+          spacing: 'section-15',
+        },
+        commit: {
+          title: s__('Environments|Commit'),
+          spacing: 'section-20',
+        },
+        date: {
+          title: s__('Environments|Updated'),
+          spacing: 'section-10',
+        },
+        autoStop: {
+          title: s__('Environments|Auto stop in'),
+          spacing: 'section-5',
+        },
+        actions: {
+          spacing: 'section-25',
+        },
+      };
+    },
   },
   methods: {
     folderUrl(model) {
       return `${window.location.pathname}/folders/${model.folderName}`;
     },
+    shouldRenderDeployBoard(model) {
+      return model.hasDeployBoard && model.isDeployBoardVisible;
+    },
     shouldRenderFolderContent(env) {
       return env.isFolder && env.isOpen && env.children && env.children.length > 0;
+    },
+    shouldShowCanaryCallout(env) {
+      return env.showCanaryCallout && this.showCanaryDeploymentCallout;
+    },
+    shouldRenderAlert(env) {
+      return env?.has_opened_alert;
     },
     sortEnvironments(environments) {
       /*
@@ -65,13 +131,13 @@ export default {
        * 4. Reverse (last deployment descending, name ascending),
        * 5. Put folders first.
        */
-      return _.chain(environments)
-        .sortBy(env => (env.isFolder ? env.folderName : env.name))
-        .reverse()
-        .sortBy(env => (env.last_deployment ? env.last_deployment.created_at : '0000'))
-        .reverse()
-        .sortBy(env => (env.isFolder ? -1 : 1))
-        .value();
+      return flow(
+        sortBy(env => (env.isFolder ? env.folderName : env.name)),
+        reverse,
+        sortBy(env => (env.last_deployment ? env.last_deployment.created_at : '0000')),
+        reverse,
+        sortBy(env => (env.isFolder ? -1 : 1)),
+      )(environments);
     },
   },
 };
@@ -79,20 +145,23 @@ export default {
 <template>
   <div class="ci-table" role="grid">
     <div class="gl-responsive-table-row table-row-header" role="row">
-      <div class="table-section section-15 environments-name" role="columnheader">
-        {{ s__('Environments|Environment') }}
+      <div class="table-section" :class="tableData.name.spacing" role="columnheader">
+        {{ tableData.name.title }}
       </div>
-      <div class="table-section section-10 environments-deploy" role="columnheader">
-        {{ s__('Environments|Deployment') }}
+      <div class="table-section" :class="tableData.deploy.spacing" role="columnheader">
+        {{ tableData.deploy.title }}
       </div>
-      <div class="table-section section-15 environments-build" role="columnheader">
-        {{ s__('Environments|Job') }}
+      <div class="table-section" :class="tableData.build.spacing" role="columnheader">
+        {{ tableData.build.title }}
       </div>
-      <div class="table-section section-20 environments-commit" role="columnheader">
-        {{ s__('Environments|Commit') }}
+      <div class="table-section" :class="tableData.commit.spacing" role="columnheader">
+        {{ tableData.commit.title }}
       </div>
-      <div class="table-section section-10 environments-date" role="columnheader">
-        {{ s__('Environments|Updated') }}
+      <div class="table-section" :class="tableData.date.spacing" role="columnheader">
+        {{ tableData.date.title }}
+      </div>
+      <div class="table-section" :class="tableData.autoStop.spacing" role="columnheader">
+        {{ tableData.autoStop.title }}
       </div>
     </div>
     <template v-for="(model, i) in sortedEnvironments" :model="model">
@@ -101,6 +170,7 @@ export default {
         :key="`environment-item-${i}`"
         :model="model"
         :can-read-environment="canReadEnvironment"
+        :table-data="tableData"
       />
 
       <div
@@ -119,10 +189,15 @@ export default {
           />
         </div>
       </div>
+      <environment-alert
+        v-if="shouldRenderAlert(model)"
+        :key="`alert-row-${i}`"
+        :environment="model"
+      />
 
       <template v-if="shouldRenderFolderContent(model)">
         <div v-if="model.isLoadingFolderContent" :key="`loading-item-${i}`">
-          <gl-loading-icon :size="2" class="prepend-top-16" />
+          <gl-loading-icon size="md" class="gl-mt-5" />
         </div>
 
         <template v-else>
@@ -132,10 +207,11 @@ export default {
             :key="`env-item-${i}-${index}`"
             :model="children"
             :can-read-environment="canReadEnvironment"
+            :table-data="tableData"
           />
 
           <div :key="`sub-div-${i}`">
-            <div class="text-center prepend-top-10">
+            <div class="text-center gl-mt-3">
               <a :href="folderUrl(model)" class="btn btn-default">
                 {{ s__('Environments|Show all') }}
               </a>

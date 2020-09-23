@@ -4,28 +4,32 @@ module Groups
     class RepositoriesController < Groups::ApplicationController
       before_action :verify_container_registry_enabled!
       before_action :authorize_read_container_image!
-      before_action :feature_flag_group_container_registry_browser!
 
       def index
-        track_event(:list_repositories)
-
         respond_to do |format|
           format.html
           format.json do
-            @images = group.container_repositories.with_api_entity_associations
+            @images = ContainerRepositoriesFinder.new(user: current_user, subject: group, params: params.slice(:name))
+                                                 .execute
+                                                 .with_api_entity_associations
 
-            render json: ContainerRepositoriesSerializer
+            track_event(:list_repositories)
+
+            serializer = ContainerRepositoriesSerializer
               .new(current_user: current_user)
+
+            render json: serializer.with_pagination(request, response)
               .represent_read_only(@images)
           end
         end
       end
 
-      private
-
-      def feature_flag_group_container_registry_browser!
-        render_404 unless Feature.enabled?(:group_container_registry_browser, group)
+      # The show action renders index to allow frontend routing to work on page refresh
+      def show
+        render :index
       end
+
+      private
 
       def verify_container_registry_enabled!
         render_404 unless Gitlab.config.registry.enabled

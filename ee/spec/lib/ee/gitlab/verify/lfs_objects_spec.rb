@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Verify::LfsObjects do
+RSpec.describe Gitlab::Verify::LfsObjects do
   before do
     stub_lfs_object_storage
   end

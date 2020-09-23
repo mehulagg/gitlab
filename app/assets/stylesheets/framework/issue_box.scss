@@ -20,7 +20,7 @@
   display: block;
   float: left;
   margin-right: $gl-padding-8;
-  color: $white-light;
+  color: $white;
   font-size: $gl-font-size;
   line-height: $gl-line-height-24;
 
@@ -30,6 +30,7 @@
   }
 
   &.status-box-issue-closed,
+  &.status-box-alert-resolved,
   &.status-box-mr-merged {
     background-color: $blue-500;
   }

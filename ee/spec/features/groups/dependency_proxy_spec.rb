@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Group Dependency Proxy' do
+RSpec.describe 'Group Dependency Proxy' do
   let(:developer) { create(:user) }
   let(:reporter) { create(:user) }
   let(:group) { create(:group) }
@@ -33,6 +33,11 @@ describe 'Group Dependency Proxy' do
         before do
           sign_in(developer)
           visit path
+        end
+
+        it 'sidebar menu is open' do
+          sidebar = find('.nav-sidebar')
+          expect(sidebar).to have_link _('Dependency Proxy')
         end
 
         it 'toggles defaults to enabled' do
@@ -91,7 +96,7 @@ describe 'Group Dependency Proxy' do
 
           visit path
 
-          expect(page).to have_gitlab_http_status(404)
+          expect(page).to have_gitlab_http_status(:not_found)
         end
       end
 
@@ -101,7 +106,7 @@ describe 'Group Dependency Proxy' do
 
           visit path
 
-          expect(page).to have_gitlab_http_status(404)
+          expect(page).to have_gitlab_http_status(:not_found)
         end
       end
     end

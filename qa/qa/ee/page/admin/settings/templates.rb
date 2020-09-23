@@ -10,12 +10,12 @@ module QA
             include ::QA::Page::Component::Select2
 
             view 'ee/app/views/admin/application_settings/_custom_templates_form.html.haml' do
-              element :custom_project_template_section
+              element :custom_project_template_content
               element :save_changes_button
             end
 
             def current_custom_project_template
-              expand_section(:custom_project_template_section)
+              expand_content(:custom_project_template_content)
 
               within_element(:custom_project_template_select) do
                 current_selection
@@ -23,7 +23,7 @@ module QA
             end
 
             def choose_custom_project_template(path)
-              expand_section(:custom_project_template_section)
+              expand_content(:custom_project_template_content)
 
               within_element(:custom_project_template_select) do
                 clear_current_selection_if_present

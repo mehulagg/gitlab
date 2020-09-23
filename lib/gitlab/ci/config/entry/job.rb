@@ -8,59 +8,41 @@ module Gitlab
         # Entry that represents a concrete CI/CD job.
         #
         class Job < ::Gitlab::Config::Entry::Node
-          include ::Gitlab::Config::Entry::Configurable
-          include ::Gitlab::Config::Entry::Attributable
-          include ::Gitlab::Config::Entry::Inheritable
+          include ::Gitlab::Ci::Config::Entry::Processable
 
           ALLOWED_WHEN = %w[on_success on_failure always manual delayed].freeze
-          ALLOWED_KEYS = %i[tags script only except rules type image services
-                            allow_failure type stage when start_in artifacts cache
-                            dependencies before_script needs after_script variables
-                            environment coverage retry parallel extends interruptible timeout].freeze
+          ALLOWED_KEYS = %i[tags script type image services start_in artifacts
+                            cache dependencies before_script after_script
+                            environment coverage retry parallel interruptible timeout
+                            resource_group release secrets].freeze
 
           REQUIRED_BY_NEEDS = %i[stage].freeze
 
           validations do
-            validates :config, type: Hash
-            validates :config, allowed_keys: ALLOWED_KEYS
+            validates :config, allowed_keys: ALLOWED_KEYS + PROCESSABLE_ALLOWED_KEYS
             validates :config, required_keys: REQUIRED_BY_NEEDS, if: :has_needs?
-            validates :config, presence: true
             validates :script, presence: true
-            validates :name, presence: true
-            validates :name, type: Symbol
-            validates :config,
-              disallowed_keys: {
-                in: %i[only except when start_in],
-                message: 'key may not be used with `rules`'
-              },
-              if: :has_rules?
 
             with_options allow_nil: true do
-              validates :tags, array_of_strings: true
               validates :allow_failure, boolean: true
-              validates :parallel, numericality: { only_integer: true,
-                                                   greater_than_or_equal_to: 2,
-                                                   less_than_or_equal_to: 50 }
               validates :when, inclusion: {
                 in: ALLOWED_WHEN,
                 message: "should be one of: #{ALLOWED_WHEN.join(', ')}"
               }
 
-              validates :timeout, duration: { limit: ChronicDuration.output(Project::MAX_BUILD_TIMEOUT) }
-
               validates :dependencies, array_of_strings: true
-              validates :extends, array_of_strings_or_string: true
-              validates :rules, array_of_hashes: true
+              validates :resource_group, type: String
             end
 
-            validates :start_in, duration: { limit: '1 day' }, if: :delayed?
+            validates :start_in, duration: { limit: '1 week' }, if: :delayed?
             validates :start_in, absence: true, if: -> { has_rules? || !delayed? }
 
-            validate do
+            validate on: :composed do
               next unless dependencies.present?
-              next unless needs.present?
+              next unless needs_value.present?
 
-              missing_needs = dependencies - needs
+              missing_needs = dependencies - needs_value[:job].pluck(:name) # rubocop:disable CodeReuse/ActiveRecord (Array#pluck)
+
               if missing_needs.any?
                 errors.add(:dependencies, "the #{missing_needs.join(", ")} should be part of needs")
               end
@@ -73,10 +55,6 @@ module Gitlab
 
           entry :script, Entry::Commands,
             description: 'Commands that will be executed in this job.',
-            inherit: false
-
-          entry :stage, Entry::Stage,
-            description: 'Pipeline stage this job will be executed into.',
             inherit: false
 
           entry :type, Entry::Stage,
@@ -99,34 +77,29 @@ module Gitlab
             description: 'Services that will be used to execute this job.',
             inherit: true
 
-          entry :interruptible, Entry::Boolean,
+          entry :interruptible, ::Gitlab::Config::Entry::Boolean,
             description: 'Set jobs interruptible value.',
             inherit: true
 
-          entry :only, Entry::Policy,
-            description: 'Refs policy this job will be executed for.',
-            default: Entry::Policy::DEFAULT_ONLY,
-            inherit: false
+          entry :timeout, Entry::Timeout,
+            description: 'Timeout duration of this job.',
+            inherit: true
 
-          entry :except, Entry::Policy,
-            description: 'Refs policy this job will be executed for.',
-            inherit: false
+          entry :retry, Entry::Retry,
+            description: 'Retry configuration for this job.',
+            inherit: true
 
-          entry :rules, Entry::Rules,
-            description: 'List of evaluable Rules to determine job inclusion.',
-            inherit: false
-
-          entry :needs, Entry::Needs,
-            description: 'Needs configuration for this job.',
-            metadata: { allowed_needs: %i[job] },
-            inherit: false
-
-          entry :variables, Entry::Variables,
-            description: 'Environment variables available for this job.',
-            inherit: false
+          entry :tags, ::Gitlab::Config::Entry::ArrayOfStrings,
+            description: 'Set the tags.',
+            inherit: true
 
           entry :artifacts, Entry::Artifacts,
             description: 'Artifacts configuration for this job.',
+            inherit: true
+
+          entry :needs, Entry::Needs,
+            description: 'Needs configuration for this job.',
+            metadata: { allowed_needs: %i[job cross_dependency] },
             inherit: false
 
           entry :environment, Entry::Environment,
@@ -137,18 +110,17 @@ module Gitlab
             description: 'Coverage configuration for this job.',
             inherit: false
 
-          entry :retry, Entry::Retry,
-            description: 'Retry configuration for this job.',
+          entry :release, Entry::Release,
+            description: 'This job will produce a release.',
             inherit: false
 
-          helpers :before_script, :script, :stage, :type, :after_script,
-                  :cache, :image, :services, :only, :except, :variables,
-                  :artifacts, :environment, :coverage, :retry, :rules,
-                  :parallel, :needs, :interruptible
+          entry :parallel, Entry::Product::Parallel,
+            description: 'Parallel configuration for this job.',
+            inherit: false
 
           attributes :script, :tags, :allow_failure, :when, :dependencies,
-                     :needs, :retry, :parallel, :extends, :start_in, :rules,
-                     :interruptible, :timeout
+                     :needs, :retry, :parallel, :start_in,
+                     :interruptible, :timeout, :resource_group, :release
 
           def self.matching?(name, config)
             !name.to_s.start_with?('.') &&
@@ -166,22 +138,7 @@ module Gitlab
               end
 
               @entries.delete(:type)
-
-              # This is something of a hack, see issue for details:
-              # https://gitlab.com/gitlab-org/gitlab-foss/issues/67150
-              if !only_defined? && has_rules?
-                @entries.delete(:only)
-                @entries.delete(:except)
-              end
             end
-          end
-
-          def name
-            @metadata[:name]
-          end
-
-          def value
-            @config.merge(to_hash.compact)
           end
 
           def manual_action?
@@ -192,46 +149,41 @@ module Gitlab
             self.when == 'delayed'
           end
 
-          def has_rules?
-            @config.try(:key?, :rules)
-          end
-
           def ignored?
             allow_failure.nil? ? manual_action? : allow_failure
           end
 
-          private
-
-          def overwrite_entry(deps, key, current_entry)
-            deps.default[key] unless current_entry.specified?
-          end
-
-          def to_hash
-            { name: name,
+          def value
+            super.merge(
               before_script: before_script_value,
               script: script_value,
               image: image_value,
               services: services_value,
-              stage: stage_value,
               cache: cache_value,
-              only: only_value,
-              except: except_value,
-              rules: has_rules? ? rules_value : nil,
-              variables: variables_defined? ? variables_value : {},
+              tags: tags_value,
+              when: self.when,
+              start_in: self.start_in,
+              dependencies: dependencies,
               environment: environment_defined? ? environment_value : nil,
               environment_name: environment_defined? ? environment_value[:name] : nil,
               coverage: coverage_defined? ? coverage_value : nil,
               retry: retry_defined? ? retry_value : nil,
-              parallel: parallel_defined? ? parallel_value.to_i : nil,
+              parallel: has_parallel? ? parallel_value : nil,
               interruptible: interruptible_defined? ? interruptible_value : nil,
               timeout: has_timeout? ? ChronicDuration.parse(timeout.to_s) : nil,
               artifacts: artifacts_value,
+              release: release_value,
               after_script: after_script_value,
               ignore: ignored?,
-              needs: needs_defined? ? needs_value : nil }
+              needs: needs_defined? ? needs_value : nil,
+              resource_group: resource_group,
+              scheduling_type: needs_defined? ? :dag : :stage
+            ).compact
           end
         end
       end
     end
   end
 end
+
+::Gitlab::Ci::Config::Entry::Job.prepend_if_ee('::EE::Gitlab::Ci::Config::Entry::Job')

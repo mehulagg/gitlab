@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_mock_admin_mode do
+RSpec.describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_mock_admin_mode do
   include StubENV
   include TermsHelper
-  include MobileHelpers
+  include UsageDataHelpers
 
   let(:admin) { create(:admin) }
 
-  context 'feature flag :user_mode_in_session is enabled' do
+  context 'feature flag :user_mode_in_session is enabled', :request_store do
     before do
       stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
       sign_in(admin)
@@ -17,7 +17,10 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
     end
 
     context 'General page' do
+      let(:gitpod_feature_enabled) { true }
+
       before do
+        stub_feature_flags(gitpod: gitpod_feature_enabled)
         visit general_admin_application_settings_path
       end
 
@@ -102,6 +105,16 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         end
 
         expect(current_settings.gravatar_enabled).to be_falsey
+        expect(page).to have_content "Application settings saved successfully"
+      end
+
+      it 'Change Maximum import size' do
+        page.within('.as-account-limit') do
+          fill_in 'Maximum import size (MB)', with: 15
+          click_button 'Save changes'
+        end
+
+        expect(current_settings.max_import_size).to eq 15
         expect(page).to have_content "Application settings saved successfully"
       end
 
@@ -195,11 +208,37 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(page).to have_content "Application settings saved successfully"
         expect(current_settings.terminal_max_session_time).to eq(15)
       end
+
+      context 'Configure Gitpod' do
+        context 'with feature disabled' do
+          let(:gitpod_feature_enabled) { false }
+
+          it 'do not show settings' do
+            expect(page).not_to have_selector('#js-gitpod-settings')
+          end
+        end
+
+        context 'with feature enabled' do
+          let(:gitpod_feature_enabled) { true }
+
+          it 'changes gitpod settings' do
+            page.within('#js-gitpod-settings') do
+              check 'Enable Gitpod integration'
+              fill_in 'Gitpod URL', with: 'https://gitpod.test/'
+              click_button 'Save changes'
+            end
+
+            expect(page).to have_content 'Application settings saved successfully'
+            expect(current_settings.gitpod_url).to eq('https://gitpod.test/')
+            expect(current_settings.gitpod_enabled).to be(true)
+          end
+        end
+      end
     end
 
     context 'Integrations page' do
       before do
-        visit integrations_admin_application_settings_path
+        visit general_admin_application_settings_path
       end
 
       it 'Enable hiding third party offers' do
@@ -212,35 +251,52 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(current_settings.hide_third_party_offers).to be true
       end
 
-      it 'Change Slack Notifications Service template settings' do
+      it 'Change Slack Notifications Service template settings', :js do
         first(:link, 'Service Templates').click
         click_link 'Slack notifications'
         fill_in 'Webhook', with: 'http://localhost'
         fill_in 'Username', with: 'test_user'
-        fill_in 'service_push_channel', with: '#test_channel'
+        fill_in 'service[push_channel]', with: '#test_channel'
         page.check('Notify only broken pipelines')
         page.select 'All branches', from: 'Branches to be notified'
 
         check_all_events
-        click_on 'Save'
+        click_button 'Save changes'
 
         expect(page).to have_content 'Application settings saved successfully'
 
         click_link 'Slack notifications'
 
-        page.all('input[type=checkbox]').each do |checkbox|
-          expect(checkbox).to be_checked
-        end
+        expect(page.all('input[type=checkbox]')).to all(be_checked)
         expect(find_field('Webhook').value).to eq 'http://localhost'
         expect(find_field('Username').value).to eq 'test_user'
-        expect(find('#service_push_channel').value).to eq '#test_channel'
+        expect(find('[name="service[push_channel]"]').value).to eq '#test_channel'
       end
 
-      it 'defaults Deployment events to false for chat notification template settings' do
+      it 'defaults Deployment events to false for chat notification template settings', :js do
         first(:link, 'Service Templates').click
         click_link 'Slack notifications'
 
         expect(find_field('Deployment')).not_to be_checked
+      end
+    end
+
+    context 'Integration page', :js do
+      before do
+        visit integrations_admin_application_settings_path
+      end
+
+      it 'allows user to dismiss deprecation notice' do
+        expect(page).to have_content('Some settings have moved')
+
+        click_button 'Dismiss'
+        wait_for_requests
+
+        expect(page).not_to have_content('Some settings have moved')
+
+        visit integrations_admin_application_settings_path
+
+        expect(page).not_to have_content('Some settings have moved')
       end
     end
 
@@ -258,6 +314,68 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(current_settings.auto_devops_domain).to eq('domain.com')
         expect(page).to have_content "Application settings saved successfully"
       end
+
+      context 'Container Registry' do
+        context 'delete tags service execution timeout' do
+          let(:feature_flag_enabled) { true }
+          let(:client_support) { true }
+
+          before do
+            stub_container_registry_config(enabled: true)
+            stub_feature_flags(container_registry_expiration_policies_throttling: feature_flag_enabled)
+            allow(ContainerRegistry::Client).to receive(:supports_tag_delete?).and_return(client_support)
+          end
+
+          RSpec.shared_examples 'not having service timeout settings' do
+            it 'lacks the timeout settings' do
+              visit ci_cd_admin_application_settings_path
+
+              expect(page).not_to have_content "Container Registry delete tags service execution timeout"
+            end
+          end
+
+          context 'with feature flag enabled' do
+            context 'with client supporting tag delete' do
+              it 'changes the timeout' do
+                visit ci_cd_admin_application_settings_path
+
+                page.within('.as-registry') do
+                  fill_in 'application_setting_container_registry_delete_tags_service_timeout', with: 400
+                  click_button 'Save changes'
+                end
+
+                expect(current_settings.container_registry_delete_tags_service_timeout).to eq(400)
+                expect(page).to have_content "Application settings saved successfully"
+              end
+            end
+
+            context 'with client not supporting tag delete' do
+              let(:client_support) { false }
+
+              it_behaves_like 'not having service timeout settings'
+            end
+          end
+
+          context 'with feature flag disabled' do
+            let(:feature_flag_enabled) { false }
+
+            it_behaves_like 'not having service timeout settings'
+          end
+        end
+      end
+    end
+
+    context 'Repository page' do
+      it 'Change Repository storage settings' do
+        visit repository_admin_application_settings_path
+
+        page.within('.as-repository-storage') do
+          fill_in 'application_setting_repository_storages_weighted_default', with: 50
+          click_button 'Save changes'
+        end
+
+        expect(current_settings.repository_storages_weighted_default).to be 50
+      end
     end
 
     context 'Reporting page' do
@@ -265,11 +383,13 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         visit reporting_admin_application_settings_path
 
         page.within('.as-spam') do
-          check 'Enable reCAPTCHA'
-          check 'Enable reCAPTCHA for login'
           fill_in 'reCAPTCHA Site Key', with: 'key'
           fill_in 'reCAPTCHA Private Key', with: 'key'
+          check 'Enable reCAPTCHA'
+          check 'Enable reCAPTCHA for login'
           fill_in 'IPs per user', with: 15
+          check 'Enable Spam Check via external API endpoint'
+          fill_in 'URL of the external Spam Check endpoint', with: 'https://www.example.com/spamcheck'
           click_button 'Save changes'
         end
 
@@ -277,22 +397,14 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(current_settings.recaptcha_enabled).to be true
         expect(current_settings.login_recaptcha_protection_enabled).to be true
         expect(current_settings.unique_ips_limit_per_user).to eq(15)
+        expect(current_settings.spam_check_endpoint_enabled).to be true
+        expect(current_settings.spam_check_endpoint_url).to eq 'https://www.example.com/spamcheck'
       end
     end
 
     context 'Metrics and profiling page' do
       before do
         visit metrics_and_profiling_admin_application_settings_path
-      end
-
-      it 'Change Influx settings' do
-        page.within('.as-influx') do
-          check 'Enable InfluxDB Metrics'
-          click_button 'Save changes'
-        end
-
-        expect(current_settings.metrics_enabled?).to be true
-        expect(page).to have_content "Application settings saved successfully"
       end
 
       it 'Change Prometheus settings' do
@@ -329,12 +441,21 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
       end
 
       it 'loads usage ping payload on click', :js do
-        expect(page).to have_button 'Preview payload'
+        stub_usage_data_connections
 
-        find('.js-usage-ping-payload-trigger').click
+        page.within('#js-usage-settings') do
+          expected_payload_content = /(?=.*"uuid")(?=.*"hostname")/m
 
-        expect(page).to have_selector '.js-usage-ping-payload'
-        expect(page).to have_button 'Hide payload'
+          expect(page).not_to have_content expected_payload_content
+
+          click_button('Preview payload')
+
+          wait_for_requests
+
+          expect(page).to have_selector '.js-usage-ping-payload'
+          expect(page).to have_button 'Hide payload'
+          expect(page).to have_content expected_payload_content
+        end
       end
     end
 
@@ -355,6 +476,18 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
         expect(current_settings.allow_local_requests_from_web_hooks_and_services).to be true
         expect(current_settings.allow_local_requests_from_system_hooks).to be false
         expect(current_settings.dns_rebinding_protection_enabled).to be false
+      end
+
+      it 'Changes Issues rate limits settings' do
+        visit network_admin_application_settings_path
+
+        page.within('.as-issue-limits') do
+          fill_in 'Max requests per minute per user', with: 0
+          click_button 'Save changes'
+        end
+
+        expect(page).to have_content "Application settings saved successfully"
+        expect(current_settings.issues_create_limit).to eq(0)
       end
     end
 
@@ -451,86 +584,6 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
           expect(page).to have_link(text: 'Support', href: new_support_url)
         end
       end
-
-      it 'Shows admin dashboard links on bigger screen' do
-        visit root_dashboard_path
-
-        page.within '.navbar' do
-          expect(page).to have_link(text: 'Admin Area', href: admin_root_path, visible: true)
-          expect(page).to have_link(text: 'Leave Admin Mode', href: destroy_admin_session_path, visible: true)
-        end
-      end
-
-      it 'Relocates admin dashboard links to dropdown list on smaller screen', :js do
-        resize_screen_xs
-        visit root_dashboard_path
-
-        page.within '.navbar' do
-          expect(page).not_to have_link(text: 'Admin Area', href: admin_root_path, visible: true)
-          expect(page).not_to have_link(text: 'Leave Admin Mode', href: destroy_admin_session_path, visible: true)
-        end
-
-        find('.header-more').click
-
-        page.within '.navbar' do
-          expect(page).to have_link(text: 'Admin Area', href: admin_root_path, visible: true)
-          expect(page).to have_link(text: 'Leave Admin Mode', href: destroy_admin_session_path, visible: true)
-        end
-      end
-    end
-
-    context 'when in admin_mode' do
-      it 'contains link to leave admin mode' do
-        page.within('.navbar-sub-nav') do
-          expect(page).to have_link(href: destroy_admin_session_path)
-        end
-      end
-
-      it 'can leave admin mode' do
-        page.within('.navbar-sub-nav') do
-          # Select first, link is also included in mobile view list
-          click_on 'Leave Admin Mode', match: :first
-
-          expect(page).to have_link(href: new_admin_session_path)
-        end
-      end
-
-      it 'can open pages not in admin scope' do
-        page.within('.navbar-sub-nav') do
-          find_all('a', text: 'Projects').first.click
-
-          expect(page).to have_current_path(dashboard_projects_path)
-        end
-      end
-    end
-
-    context 'when not in admin mode' do
-      before do
-        page.within('.navbar-sub-nav') do
-          # Select first, link is also included in mobile view list
-          click_on 'Leave Admin Mode', match: :first
-        end
-      end
-
-      it 'has no leave admin mode button' do
-        page.within('.navbar-sub-nav') do
-          expect(page).not_to have_link(href: destroy_admin_session_path)
-        end
-      end
-
-      it 'is necessary to provide credentials again before opening admin settings' do
-        visit admin_application_settings_path # admin logged out because not in admin_mode
-
-        expect(page).to have_current_path(new_admin_session_path)
-      end
-
-      it 'can open pages not in admin scope' do
-        page.within('.navbar-sub-nav') do
-          find_all('a', text: 'Projects').first.click
-        end
-
-        expect(page).to have_current_path(dashboard_projects_path)
-      end
     end
   end
 
@@ -541,18 +594,11 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
       stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
 
       sign_in(admin)
-      visit admin_application_settings_path
+      visit general_admin_application_settings_path
     end
 
     it 'loads admin settings page without redirect for reauthentication' do
-      expect(current_path).to eq admin_application_settings_path
-    end
-
-    it 'shows no admin mode buttons in navbar' do
-      page.within('.navbar-sub-nav') do
-        expect(page).not_to have_link(href: new_admin_session_path)
-        expect(page).not_to have_link(href: destroy_admin_session_path)
-      end
+      expect(current_path).to eq general_admin_application_settings_path
     end
   end
 
@@ -560,13 +606,13 @@ describe 'Admin updates settings', :clean_gitlab_redis_shared_state, :do_not_moc
     page.check('Active')
     page.check('Push')
     page.check('Issue')
-    page.check('Confidential issue')
-    page.check('Merge request')
+    page.check('Confidential Issue')
+    page.check('Merge Request')
     page.check('Note')
-    page.check('Confidential note')
-    page.check('Tag push')
+    page.check('Confidential Note')
+    page.check('Tag Push')
     page.check('Pipeline')
-    page.check('Wiki page')
+    page.check('Wiki Page')
     page.check('Deployment')
   end
 

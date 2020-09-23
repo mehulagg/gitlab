@@ -1,3 +1,9 @@
+---
+stage: Monitor
+group: APM
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitLab Performance Monitoring
 
 GitLab comes with its own application performance measuring system as of GitLab
@@ -8,16 +14,10 @@ Apart from this introduction, you are advised to read through the following
 documents in order to understand and properly configure GitLab Performance Monitoring:
 
 - [GitLab Configuration](gitlab_configuration.md)
-- [InfluxDB Install/Configuration](influxdb_configuration.md)
-- [InfluxDB Schema](influxdb_schema.md)
+- [Prometheus documentation](../prometheus/index.md)
 - [Grafana Install/Configuration](grafana_configuration.md)
 - [Performance bar](performance_bar.md)
 - [Request profiling](request_profiling.md)
-
-NOTE: **Note:**
-Omnibus GitLab 8.16 includes Prometheus as an additional tool to collect
-metrics. It will eventually replace InfluxDB when their metrics collection is
-on par. Read more in the [Prometheus documentation](../prometheus/index.md).
 
 ## Introduction to GitLab Performance Monitoring
 
@@ -30,11 +30,6 @@ including (but not limited to):
 - Ruby object allocations, and retained objects in particular.
 - System statistics such as the process' memory usage and open file descriptors.
 - Ruby garbage collection statistics.
-
-Metrics data is written to [InfluxDB](https://www.influxdata.com/products/influxdb-overview/)
-over [UDP][influxdb-udp]. Stored data can be visualized using [Grafana](https://grafana.com) or any other application that
-supports reading data from InfluxDB. Alternatively data can be queried using the
-InfluxDB CLI.
 
 ## Metric Types
 
@@ -66,5 +61,3 @@ half above the interval. For example, for a user defined interval of 15 seconds
 the actual interval can be anywhere between 7.5 and 22.5. The interval is
 re-generated for every sampling run instead of being generated once and re-used
 for the duration of the process' lifetime.
-
-[influxdb-udp]: https://docs.influxdata.com/influxdb/v0.9/write_protocols/udp/

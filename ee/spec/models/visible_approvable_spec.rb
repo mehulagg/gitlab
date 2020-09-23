@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe VisibleApprovable do
+RSpec.describe VisibleApprovable do
   let(:resource) { create(:merge_request, source_project: project) }
   let!(:project) { create(:project, :repository) }
   let!(:user) { project.creator }
@@ -78,13 +78,13 @@ describe VisibleApprovable do
     subject { resource.authors_can_approve? }
 
     it 'returns false when merge_requests_author_approval flag is off' do
-      is_expected.to be false
+      is_expected.to be_falsey
     end
 
     it 'returns true when merge_requests_author_approval flag is turned on' do
       project.update(merge_requests_author_approval: true)
 
-      is_expected.to be true
+      is_expected.to be_truthy
     end
   end
 end

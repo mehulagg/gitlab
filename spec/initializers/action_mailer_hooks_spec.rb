@@ -2,10 +2,14 @@
 
 require 'spec_helper'
 
-describe 'ActionMailer hooks' do
+RSpec.describe 'ActionMailer hooks' do
   describe 'smime signature interceptor' do
     before do
       class_spy(ActionMailer::Base).as_stubbed_const
+
+      # rspec-rails calls ActionMailer::Base.deliveries.clear after every test
+      # https://github.com/rspec/rspec-rails/commit/71c12388e2bad78aaeea6443a393ede78341a7a3
+      allow(ActionMailer::Base).to receive_message_chain(:deliveries, :clear)
     end
 
     it 'is disabled by default' do
@@ -35,8 +39,11 @@ describe 'ActionMailer hooks' do
           load Rails.root.join('config/initializers/action_mailer_hooks.rb')
 
           if smime_interceptor_enabled
+            # Premailer must be registered before S/MIME or signatures will be mangled
             expect(ActionMailer::Base).to(
-              have_received(:register_interceptor).with(Gitlab::Email::Hook::SmimeSignatureInterceptor))
+              have_received(:register_interceptor).with(::Premailer::Rails::Hook).ordered)
+            expect(ActionMailer::Base).to(
+              have_received(:register_interceptor).with(Gitlab::Email::Hook::SmimeSignatureInterceptor).ordered)
           else
             expect(ActionMailer::Base).not_to(
               have_received(:register_interceptor).with(Gitlab::Email::Hook::SmimeSignatureInterceptor))

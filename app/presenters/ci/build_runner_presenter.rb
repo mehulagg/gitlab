@@ -27,14 +27,13 @@ module Ci
     def git_depth
       if git_depth_variable
         git_depth_variable[:value]
-      elsif Feature.enabled?(:ci_project_git_depth, default_enabled: true)
+      else
         project.ci_default_git_depth
       end.to_i
     end
 
     def refspecs
       specs = []
-      specs << refspec_for_pipeline_ref if merge_request_ref?
       specs << refspec_for_persistent_ref if persistent_ref_exist?
 
       if git_depth > 0
@@ -53,7 +52,7 @@ module Ci
     def create_archive(artifacts)
       return unless artifacts[:untracked] || artifacts[:paths]
 
-      {
+      archive = {
         artifact_type: :archive,
         artifact_format: :zip,
         name: artifacts[:name],
@@ -62,6 +61,12 @@ module Ci
         when: artifacts[:when],
         expire_in: artifacts[:expire_in]
       }
+
+      if artifacts.dig(:exclude).present? && ::Gitlab::Ci::Features.artifacts_exclude_enabled?
+        archive.merge(exclude: artifacts[:exclude])
+      else
+        archive
+      end
     end
 
     def create_reports(reports, expire_in:)
@@ -87,15 +92,18 @@ module Ci
       "+#{Gitlab::Git::TAG_REF_PREFIX}#{ref}:#{RUNNER_REMOTE_TAG_PREFIX}#{ref}"
     end
 
-    def refspec_for_pipeline_ref
-      "+#{ref}:#{ref}"
-    end
-
     def refspec_for_persistent_ref
       "+#{persistent_ref_path}:#{persistent_ref_path}"
     end
 
     def persistent_ref_exist?
+      ##
+      # Persistent refs for pipelines definitely exist from GitLab 12.4,
+      # hence, we don't need to check the ref existence before passing it to runners.
+      # Checking refs pressurizes gitaly node and should be avoided.
+      # Issue: https://gitlab.com/gitlab-com/gl-infra/production/-/issues/2143
+      return true if Feature.enabled?(:ci_skip_persistent_ref_existence_check)
+
       pipeline.persistent_ref.exist?
     end
 
@@ -110,3 +118,5 @@ module Ci
     end
   end
 end
+
+Ci::BuildRunnerPresenter.prepend_if_ee('EE::Ci::BuildRunnerPresenter')

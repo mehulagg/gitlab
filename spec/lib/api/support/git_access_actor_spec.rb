@@ -2,24 +2,33 @@
 
 require 'spec_helper'
 
-describe API::Support::GitAccessActor do
+RSpec.describe API::Support::GitAccessActor do
   let(:user) { nil }
   let(:key) { nil }
 
   subject { described_class.new(user: user, key: key) }
 
   describe '.from_params' do
+    let(:key) { create(:key) }
+
     context 'with params that are valid' do
       it 'returns an instance of API::Support::GitAccessActor' do
-        params = { key_id: create(:key).id }
+        params = { key_id: key.id }
 
         expect(described_class.from_params(params)).to be_instance_of(described_class)
       end
     end
 
     context 'with params that are invalid' do
-      it 'returns nil' do
-        expect(described_class.from_params({})).to be_nil
+      it "returns an instance of #{described_class}" do
+        expect(described_class.from_params({})).to be_instance_of(described_class)
+      end
+    end
+
+    context 'when passing an identifier used gitaly' do
+      it 'finds the user based on an identifier' do
+        expect(described_class).to receive(:identify).and_call_original
+        expect(described_class.from_params(identifier: "key-#{key.id}").user).to eq(key.user)
       end
     end
   end
@@ -27,7 +36,7 @@ describe API::Support::GitAccessActor do
   describe 'attributes' do
     describe '#user' do
       context 'when initialized with a User' do
-        let(:user) { create(:user) }
+        let(:user) { build(:user) }
 
         it 'returns the User' do
           expect(subject.user).to eq(user)
@@ -35,7 +44,7 @@ describe API::Support::GitAccessActor do
       end
 
       context 'when initialized with a Key' do
-        let(:user_for_key) { create(:user) }
+        let(:user_for_key) { build(:user) }
         let(:key) { create(:key, user: user_for_key) }
 
         it 'returns the User associated to the Key' do
@@ -76,7 +85,7 @@ describe API::Support::GitAccessActor do
 
   describe '#username' do
     context 'when initialized with a User' do
-      let(:user) { create(:user) }
+      let(:user) { build(:user) }
 
       it 'returns the username' do
         expect(subject.username).to eq(user.username)
@@ -95,7 +104,7 @@ describe API::Support::GitAccessActor do
       end
 
       context 'that has a User associated' do
-        let(:user_for_key) { create(:user) }
+        let(:user_for_key) { build(:user) }
 
         it 'returns the username of the User associated to the Key' do
           expect(subject.username).to eq(user_for_key.username)
@@ -104,9 +113,47 @@ describe API::Support::GitAccessActor do
     end
   end
 
+  describe '#key_details' do
+    context 'when initialized with a User' do
+      let(:user) { build(:user) }
+
+      it 'returns an empty Hash' do
+        expect(subject.key_details).to eq({})
+      end
+    end
+
+    context 'when initialized with a Key' do
+      let(:key) { create(:key, user: user_for_key) }
+
+      context 'that has no User associated' do
+        let(:user_for_key) { nil }
+
+        it 'returns a Hash' do
+          expect(subject.key_details).to eq({ gl_key_type: 'key', gl_key_id: key.id })
+        end
+      end
+
+      context 'that has a User associated' do
+        let(:user_for_key) { build(:user) }
+
+        it 'returns a Hash' do
+          expect(subject.key_details).to eq({ gl_key_type: 'key', gl_key_id: key.id })
+        end
+      end
+    end
+
+    context 'when initialized with a DeployKey' do
+      let(:key) { create(:deploy_key) }
+
+      it 'returns a Hash' do
+        expect(subject.key_details).to eq({ gl_key_type: 'deploy_key', gl_key_id: key.id })
+      end
+    end
+  end
+
   describe '#update_last_used_at!' do
     context 'when initialized with a User' do
-      let(:user) { create(:user) }
+      let(:user) { build(:user) }
 
       it 'does nothing' do
         expect(user).not_to receive(:update_last_used_at)

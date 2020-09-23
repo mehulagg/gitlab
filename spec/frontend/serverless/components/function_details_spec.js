@@ -1,7 +1,7 @@
 import Vuex from 'vuex';
 
-import functionDetailsComponent from '~/serverless/components/function_details.vue';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
+import functionDetailsComponent from '~/serverless/components/function_details.vue';
 import { createStore } from '~/serverless/store';
 
 describe('functionDetailsComponent', () => {
@@ -13,7 +13,7 @@ describe('functionDetailsComponent', () => {
     localVue = createLocalVue();
     localVue.use(Vuex);
 
-    store = createStore();
+    store = createStore({ clustersPath: '/clusters', helpPath: '/help' });
   });
 
   afterEach(() => {
@@ -38,10 +38,7 @@ describe('functionDetailsComponent', () => {
         propsData: {
           func: serviceStub,
           hasPrometheus: false,
-          clustersPath: '/clusters',
-          helpPath: '/help',
         },
-        sync: false,
       });
 
       expect(
@@ -66,10 +63,7 @@ describe('functionDetailsComponent', () => {
         propsData: {
           func: serviceStub,
           hasPrometheus: false,
-          clustersPath: '/clusters',
-          helpPath: '/help',
         },
-        sync: false,
       });
 
       expect(component.vm.$el.querySelector('p').innerHTML.trim()).toContain('1 pod in use');
@@ -84,10 +78,7 @@ describe('functionDetailsComponent', () => {
         propsData: {
           func: serviceStub,
           hasPrometheus: false,
-          clustersPath: '/clusters',
-          helpPath: '/help',
         },
-        sync: false,
       });
 
       expect(component.vm.$el.querySelector('p').innerHTML.trim()).toContain('3 pods in use');
@@ -102,10 +93,7 @@ describe('functionDetailsComponent', () => {
         propsData: {
           func: serviceStub,
           hasPrometheus: false,
-          clustersPath: '/clusters',
-          helpPath: '/help',
         },
-        sync: false,
       });
 
       expect(

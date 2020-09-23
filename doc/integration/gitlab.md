@@ -15,7 +15,7 @@ GitLab.com will generate an application ID and secret key for you to use.
    - Name: This can be anything. Consider something like `<Organization>'s GitLab` or `<Your Name>'s GitLab` or something else descriptive.
    - Redirect URI:
 
-   ```
+   ```plaintext
    http://your-gitlab.example.com/import/gitlab/callback
    http://your-gitlab.example.com/users/auth/gitlab/callback
    ```
@@ -24,21 +24,20 @@ GitLab.com will generate an application ID and secret key for you to use.
 
 1. Select **Save application**.
 
-1. You should now see a **Application Id** and **Secret** near the top right of the page (see screenshot).
-   Keep this page open as you continue configuration.
-   ![GitLab app](img/gitlab_app.png)
+1. You should now see an **Application ID** and **Secret**. Keep this page open as you continue
+   configuration.
 
 1. On your GitLab server, open the configuration file.
 
    For Omnibus package:
 
-   ```sh
+   ```shell
    sudo editor /etc/gitlab/gitlab.rb
    ```
 
    For installations from source:
 
-   ```sh
+   ```shell
    cd /home/git/gitlab
 
    sudo -u git -H editor config/gitlab.yml
@@ -63,7 +62,7 @@ GitLab.com will generate an application ID and secret key for you to use.
 
    For installations from source:
 
-   ```
+   ```yaml
    - { name: 'gitlab', app_id: 'YOUR_APP_ID',
      app_secret: 'YOUR_APP_SECRET',
      args: { scope: 'api' } }
@@ -75,12 +74,9 @@ GitLab.com will generate an application ID and secret key for you to use.
 
 1. Save the configuration file.
 
-1. [Reconfigure][] or [restart GitLab][] for the changes to take effect if you
+1. [Reconfigure](../administration/restart_gitlab.md#omnibus-gitlab-reconfigure) or [restart GitLab](../administration/restart_gitlab.md#installations-from-source) for the changes to take effect if you
    installed GitLab via Omnibus or from source respectively.
 
 On the sign in page there should now be a GitLab.com icon below the regular sign in form.
 Click the icon to begin the authentication process. GitLab.com will ask the user to sign in and authorize the GitLab application.
 If everything goes well the user will be returned to your GitLab instance and will be signed in.
-
-[reconfigure]: ../administration/restart_gitlab.md#omnibus-gitlab-reconfigure
-[restart GitLab]: ../administration/restart_gitlab.md#installations-from-source

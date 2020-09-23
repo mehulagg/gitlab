@@ -17,6 +17,22 @@ experiences. Several projects were started with different standards and they
 can still have specifics. They will be described in their respective
 `README.md` or `PROCESS.md` files.
 
+## Dependency Management
+
+Go uses a source-based strategy for dependency management. Dependencies are
+downloaded as source from their source repository. This differs from the more
+common artifact-based strategy where dependencies are downloaded as artifacts
+from a package repository that is separate from the dependency's source
+repository.
+
+Go did not have first-class support for version management prior to 1.11. That
+version introduced Go modules and the use of semantic versioning. Go 1.12
+introduced module proxies, which can serve as an intermediate between clients
+and source version control systems, and checksum databases, which can be used to
+verify the integrity of dependency downloads.
+
+See [Dependency Management in Go](dependencies.md) for more details.
+
 ## Code Review
 
 We follow the common principles of
@@ -40,7 +56,7 @@ of possible security breaches in our code:
 - SQL injections
 
 Remember to run
-[SAST](../../user/application_security/sast/index.md)
+[SAST](../../user/application_security/sast/index.md) and [Dependency Scanning](../../user/application_security/dependency_scanning/index.md)
 **(ULTIMATE)** on your project (or at least the [gosec
 analyzer](https://gitlab.com/gitlab-org/security-products/analyzers/gosec)),
 and to follow our [Security
@@ -52,9 +68,9 @@ Web servers can take advantages of middlewares like [Secure](https://github.com/
 
 Many of our projects are too small to have full-time maintainers. That's why we
 have a shared pool of Go reviewers at GitLab. To find a reviewer, use the
-[Engineering Projects](https://about.gitlab.com/handbook/engineering/projects/)
-page in the handbook. "GitLab Community Edition (CE)" and "GitLab Community
-Edition (EE)" both have a "Go" section with its list of reviewers.
+["Go" section](https://about.gitlab.com/handbook/engineering/projects/#gitlab_reviewers_go)
+of the "GitLab" project on the Engineering Projects
+page in the handbook.
 
 To add yourself to this list, add the following to your profile in the
 [team.yml](https://gitlab.com/gitlab-com/www-gitlab-com/blob/master/data/team.yml)
@@ -63,29 +79,49 @@ file and ask your manager to review and merge.
 ```yaml
 projects:
   gitlab: reviewer go
-  gitlab-foss: reviewer go
 ```
 
 ## Code style and format
 
 - Avoid global variables, even in packages. By doing so you will introduce side
   effects if the package is included multiple times.
-- Use `go fmt` before committing ([Gofmt](https://golang.org/cmd/gofmt/) is a
-  tool that automatically formats Go source code).
+- Use `goimports` before committing.
+  [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports)
+  is a tool that automatically formats Go source code using
+  [Gofmt](https://golang.org/cmd/gofmt/), in addition to formatting import lines,
+  adding missing ones and removing unreferenced ones.
+
+  Most editors/IDEs will allow you to run commands before/after saving a file, you can set it
+  up to run `goimports` so that it's applied to every file when saving.
+- Place private methods below the first caller method in the source file.
 
 ### Automatic linting
 
 All Go projects should include these GitLab CI/CD jobs:
 
 ```yaml
-go lint:
-  image: golang:1.11
+lint:
+  image: registry.gitlab.com/gitlab-org/gitlab-build-images:golangci-lint-alpine
+  stage: test
   script:
-    - go get -u golang.org/x/lint/golint
-    - golint -set_exit_status $(go list ./... | grep -v "vendor/")
+    # Use default .golangci.yml file from the image if one is not present in the project root.
+    - '[ -e .golangci.yml ] || cp /golangci/.golangci.yml .'
+    # Write the code coverage report to gl-code-quality-report.json
+    # and print linting issues to stdout in the format: path/to/file:line description
+    # remove `--issues-exit-code 0` or set to non-zero to fail the job if linting issues are detected
+    - golangci-lint run --issues-exit-code 0 --out-format code-climate | tee gl-code-quality-report.json | jq -r '.[] | "\(.location.path):\(.location.lines.begin) \(.description)"'
+  artifacts:
+    reports:
+      codequality: gl-code-quality-report.json
+    paths:
+      - gl-code-quality-report.json
 ```
 
-Once [recursive includes](https://gitlab.com/gitlab-org/gitlab-foss/issues/56836)
+Including a `.golangci.yml` in the root directory of the project allows for
+configuration of `golangci-lint`. All options for `golangci-lint` are listed in
+this [example](https://github.com/golangci/golangci-lint/blob/master/.golangci.example.yml).
+
+Once [recursive includes](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/56836)
 become available, you will be able to share job templates like this
 [analyzer](https://gitlab.com/gitlab-org/security-products/ci-templates/raw/master/includes-dev/analyzer.yml).
 
@@ -94,7 +130,7 @@ become available, you will be able to share job templates like this
 Dependencies should be kept to the minimum. The introduction of a new
 dependency should be argued in the merge request, as per our [Approval
 Guidelines](../code_review.md#approval-guidelines). Both [License
-Management](../../user/application_security/license_compliance/index.md)
+Management](../../user/compliance/license_compliance/index.md)
 **(ULTIMATE)** and [Dependency
 Scanning](../../user/application_security/dependency_scanning/index.md)
 **(ULTIMATE)** should be activated on all projects to ensure new dependencies
@@ -115,23 +151,8 @@ projects, and makes merge requests easier to review.
 In some cases, such as building a Go project for it to act as a dependency of a
 CI run for another project, removing the `vendor/` directory means the code must
 be downloaded repeatedly, which can lead to intermittent problems due to rate
-limiting or network failures. In these circumstances, you should cache the
-downloaded code between runs with a `.gitlab-ci.yml` snippet like this:
-
-```yaml
-.go-cache:
-  variables:
-    GOPATH: $CI_PROJECT_DIR/.go
-  before_script:
-    - mkdir -p .go
-  cache:
-    paths:
-      - .go/pkg/mod/
-
-test:
-  extends: .go-cache
-  # ...
-```
+limiting or network failures. In these circumstances, you should [cache the
+downloaded code between](../../ci/caching/index.md#caching-go-dependencies).
 
 There was a [bug on modules
 checksums](https://github.com/golang/go/issues/29278) in Go < v1.11.4, so make
@@ -174,13 +195,13 @@ code readability and test output.
 ### Better output in tests
 
 When comparing expected and actual values in tests, use
-[testify/require.Equal](https://godoc.org/github.com/stretchr/testify/require#Equal),
-[testify/require.EqualError](https://godoc.org/github.com/stretchr/testify/require#EqualError),
-[testify/require.EqualValues](https://godoc.org/github.com/stretchr/testify/require#EqualValues),
+[`testify/require.Equal`](https://godoc.org/github.com/stretchr/testify/require#Equal),
+[`testify/require.EqualError`](https://godoc.org/github.com/stretchr/testify/require#EqualError),
+[`testify/require.EqualValues`](https://godoc.org/github.com/stretchr/testify/require#EqualValues),
 and others to improve readability when comparing structs, errors,
 large portions of text, or JSON documents:
 
-```go
+```golang
 type TestData struct {
     // ...
 }
@@ -227,7 +248,7 @@ to make the test output easily readable.
 - Ideally, each test case should have a field with a unique identifier
   to use for naming subtests. In the Go standard library, this is commonly the
   `name string` field.
-- Use `want`/`expect`/`actual` when you are specifcing something in the
+- Use `want`/`expect`/`actual` when you are specifying something in the
   test case that will be used for assertion.
 
 #### Variable names
@@ -243,6 +264,59 @@ to make the test output easily readable.
 Programs handling a lot of IO or complex operations should always include
 [benchmarks](https://golang.org/pkg/testing/#hdr-Benchmarks), to ensure
 performance consistency over time.
+
+## Error handling
+
+### Adding context
+
+Adding context before you return the error can be helpful, instead of
+just returning the error. This allows developers to understand what the
+program was trying to do when it entered the error state making it much
+easier to debug.
+
+For example:
+
+```golang
+// Wrap the error
+return nil, fmt.Errorf("get cache %s: %w", f.Name, err)
+
+// Just add context
+return nil, fmt.Errorf("saving cache %s: %v", f.Name, err)
+```
+
+A few things to keep in mind when adding context:
+
+- Decide if you want to expose the underlying error
+  to the caller. If so, use `%w`, if not, you can use `%v`.
+- Don't use words like `failed`, `error`, `didn't`. As it's an error,
+  the user already knows that something failed and this might lead to
+  having strings like `failed xx failed xx failed xx`. Explain _what_
+  failed instead.
+- Error strings should not be capitalized or end with punctuation or a
+  newline. You can use `golint` to check for this.
+
+### Naming
+
+- When using sentinel errors they should always be named like `ErrXxx`.
+- When creating a new error type they should always be named like
+  `XxxError`.
+
+### Checking Error types
+
+- To check error equality don't use `==`. Use
+  [`errors.Is`](https://pkg.go.dev/errors?tab=doc#Is) instead (for Go
+  versions >= 1.13).
+- To check if the error is of a certain type don't use type assertion,
+  use [`errors.As`](https://pkg.go.dev/errors?tab=doc#As) instead (for
+  Go versions >= 1.13).
+
+### References for working with errors
+
+- [Go 1.13 errors](https://blog.golang.org/go1.13-errors).
+- [Programing with
+  errors](https://peter.bourgon.org/blog/2019/09/11/programming-with-errors.html).
+- [Don’t just check errors, handle them
+  gracefully](https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully).
 
 ## CLIs
 
@@ -288,7 +362,7 @@ There are a few guidelines one should follow when using the
   fields in the context of that code path, such as the URI of the request using
   [`WithField`](https://godoc.org/github.com/sirupsen/logrus#WithField) or
   [`WithFields`](https://godoc.org/github.com/sirupsen/logrus#WithFields). For
-  example, `logrus.WithField("file", "/app/go).Info("Opening dir")`. If you
+  example, `logrus.WithField("file", "/app/go").Info("Opening dir")`. If you
   have to log multiple keys, always use `WithFields` instead of calling
   `WithField` more than once.
 
@@ -332,9 +406,92 @@ builds](https://docs.docker.com/develop/develop-images/multistage-build/):
   dependencies.
 - They generate a small, self-contained image, derived from `Scratch`.
 
-Generated docker images should have the program at their `Entrypoint` to create
+Generated Docker images should have the program at their `Entrypoint` to create
 portable commands. That way, anyone can run the image, and without parameters
 it will display its help message (if `cli` has been used).
+
+## Distributing Go binaries
+
+With the exception of [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner),
+which publishes its own binaries, our Go binaries are created by projects
+managed by the [Distribution group](https://about.gitlab.com/handbook/product/product-categories/#distribution-group).
+
+The [Omnibus GitLab](https://gitlab.com/gitlab-org/omnibus-gitlab) project creates a
+single, monolithic operating system package containing all the binaries, while
+the [Cloud-Native GitLab (CNG)](https://gitlab.com/gitlab-org/build/CNG) project
+publishes a set of Docker images and Helm charts to glue them together.
+
+Both approaches use the same version of Go for all projects, so it's important
+to ensure all our Go-using projects have at least one Go version in common in
+their test matrices. You can check the version of Go currently being used by
+[Omnibus](https://gitlab.com/gitlab-org/gitlab-omnibus-builder/blob/master/docker/Dockerfile_debian_10#L59),
+and the version being used for [CNG](https://gitlab.com/gitlab-org/build/cng/blob/master/ci_files/variables.yml#L12).
+
+### Updating Go version
+
+We should always use a [supported version](https://golang.org/doc/devel/release.html#policy)
+of Go, i.e., one of the three most recent minor releases, and should always use
+the most recent patch-level for that version, as it may contain security fixes.
+
+Changing the version affects every project being compiled, so it's important to
+ensure that all projects have been updated to test against the new Go version
+before changing the package builders to use it. Despite [Go's compatibility promise](https://golang.org/doc/go1compat),
+changes between minor versions can expose bugs or cause problems in our projects.
+
+Once you've picked a new Go version to use, the steps to update Omnibus and CNG
+are:
+
+- [Create a merge request in the CNG project](https://gitlab.com/gitlab-org/build/CNG/edit/master/ci_files/variables.yml?branch_name=update-go-version),
+  updating the `GO_VERSION` in `ci_files/variables.yml`.
+- Create a merge request in the [`gitlab-omnibus-builder` project](https://gitlab.com/gitlab-org/gitlab-omnibus-builder),
+  updating every file in the `docker/` directory so the `GO_VERSION` is set
+  appropriately. [Here's an example](https://gitlab.com/gitlab-org/gitlab-omnibus-builder/-/merge_requests/125/diffs).
+- Tag a new release of `gitlab-omnibus-builder` containing the change.
+- [Create a merge request in the `omnibus-gitlab` project](https://gitlab.com/gitlab-org/omnibus-gitlab/edit/master/.gitlab-ci.yml?branch_name=update-gitlab-omnibus-builder-version),
+  updating the `BUILDER_IMAGE_REVISION` to match the newly-created tag.
+
+To reduce unnecessary differences between two distribution methods, Omnibus and
+CNG **should always use the same Go version**.
+
+### Supporting multiple Go versions
+
+Individual Golang-projects need to support multiple Go versions for the following reasons:
+
+1. When a new Go release is out, we should start integrating it into the CI pipelines to verify compatibility with the new compiler.
+1. We must support the [Omnibus official Go version](#updating-go-version), which may be behind the latest minor release.
+1. When Omnibus switches Go version, we still may need to support the old one for security backports.
+
+These 3 requirements may easily be satisfied by keeping support for the 3 latest minor versions of Go.
+
+It's ok to drop support for the oldest Go version and support only 2 latest releases,
+if this is enough to support backports to the last 3 GitLab minor releases.
+
+Example:
+
+In case we want to drop support for `go 1.11` in GitLab `12.10`, we need to verify which Go versions we are using in `12.9`, `12.8`, and `12.7`.
+
+We will not consider the active milestone, `12.10`, because a backport for `12.7` will be required in case of a critical security release.
+
+1. If both [Omnibus and CNG](#updating-go-version) were using Go `1.12` since GitLab `12.7`, then we safely drop support for `1.11`.
+1. If Omnibus or CNG were using `1.11` in GitLab `12.7`, then we still need to keep support for Go `1.11` for easier backporting of security fixes.
+
+## Secure Team standards and style guidelines
+
+The following are some style guidelines that are specific to the Secure Team.
+
+### Code style and format
+
+Use `goimports -local gitlab.com/gitlab-org` before committing.
+[goimports](https://godoc.org/golang.org/x/tools/cmd/goimports)
+is a tool that automatically formats Go source code using
+[Gofmt](https://golang.org/cmd/gofmt/), in addition to formatting import lines,
+adding missing ones and removing unreferenced ones.
+By using the `-local gitlab.com/gitlab-org` option, `goimports` will group locally referenced
+packages separately from external ones. See
+[the imports section](https://github.com/golang/go/wiki/CodeReviewComments#imports)
+of the Code Review Comments page on the Go wiki for more details.
+Most editors/IDEs will allow you to run commands before/after saving a file, you can set it
+up to run `goimports -local gitlab.com/gitlab-org` so that it's applied to every file when saving.
 
 ---
 

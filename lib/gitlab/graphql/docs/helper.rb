@@ -21,6 +21,49 @@ module Gitlab
           MD
         end
 
+        def render_name_and_description(object)
+          content = "### #{object[:name]}\n"
+
+          if object[:description].present?
+            content += "\n#{object[:description]}.\n"
+          end
+
+          content
+        end
+
+        def sorted_by_name(objects)
+          objects.sort_by { |o| o[:name] }
+        end
+
+        def render_field(field)
+          '| %s | %s | %s |' % [
+            render_name(field),
+            render_field_type(field[:type][:info]),
+            render_description(field)
+            ]
+        end
+
+        def render_enum_value(value)
+          '| %s | %s |' % [
+            render_name(value),
+            render_description(value)
+            ]
+        end
+
+        def render_name(object)
+          rendered_name = "`#{object[:name]}`"
+          rendered_name += ' **{warning-solid}**' if object[:is_deprecated]
+          rendered_name
+        end
+
+        # Returns the object description. If the object has been deprecated,
+        # the deprecation reason will be returned in place of the description.
+        def render_description(object)
+          return object[:description] unless object[:is_deprecated]
+
+          "**Deprecated:** #{object[:deprecation_reason]}"
+        end
+
         # Some fields types are arrays of other types and are displayed
         # on docs wrapped in square brackets, for example: [String!].
         # This makes GitLab docs renderer thinks they are links so here
@@ -42,6 +85,13 @@ module Gitlab
             !object_type[:name]["Connection"] &&
               !object_type[:name]["Edge"] &&
               !object_type[:name]["__"]
+          end
+        end
+
+        # We ignore the built-in enum types.
+        def enums
+          graphql_enum_types.select do |enum_type|
+            !enum_type[:name].in?(%w(__DirectiveLocation __TypeKind))
           end
         end
       end

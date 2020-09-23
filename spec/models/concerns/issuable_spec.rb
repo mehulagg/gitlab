@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe Issuable do
+RSpec.describe Issuable do
+  include ProjectForksHelper
+
   let(:issuable_class) { Issue }
   let(:issue) { create(:issue, title: 'An issue', description: 'A description') }
   let(:user) { create(:user) }
@@ -15,6 +17,7 @@ describe Issuable do
     it { is_expected.to have_many(:notes).dependent(:destroy) }
     it { is_expected.to have_many(:todos).dependent(:destroy) }
     it { is_expected.to have_many(:labels) }
+    it { is_expected.to have_many(:note_authors).through(:notes) }
 
     context 'Notes' do
       let!(:note) { create(:note, noteable: issue, project: issue.project) }
@@ -51,48 +54,9 @@ describe Issuable do
       it_behaves_like 'validates description length with custom validation'
       it_behaves_like 'truncates the description to its allowed maximum length on import'
     end
-
-    describe 'milestone' do
-      let(:project) { create(:project) }
-      let(:milestone_id) { create(:milestone, project: project).id }
-      let(:params) do
-        {
-          title: 'something',
-          project: project,
-          author: build(:user),
-          milestone_id: milestone_id
-        }
-      end
-
-      subject { issuable_class.new(params) }
-
-      context 'with correct params' do
-        it { is_expected.to be_valid }
-      end
-
-      context 'with empty string milestone' do
-        let(:milestone_id) { '' }
-
-        it { is_expected.to be_valid }
-      end
-
-      context 'with nil milestone id' do
-        let(:milestone_id) { nil }
-
-        it { is_expected.to be_valid }
-      end
-
-      context 'with a milestone id from another project' do
-        let(:milestone_id) { create(:milestone).id }
-
-        it { is_expected.to be_invalid }
-      end
-    end
   end
 
   describe "Scope" do
-    subject { build(:issue) }
-
     it { expect(issuable_class).to respond_to(:opened) }
     it { expect(issuable_class).to respond_to(:closed) }
     it { expect(issuable_class).to respond_to(:assigned) }
@@ -105,7 +69,7 @@ describe Issuable do
 
     it 'returns nil when author is nil' do
       issue.author_id = nil
-      issue.save(validate: false)
+      issue.save!(validate: false)
 
       expect(issue.author_name).to eq nil
     end
@@ -139,45 +103,19 @@ describe Issuable do
     end
   end
 
-  describe '#milestone_available?' do
-    let(:group) { create(:group) }
-    let(:project) { create(:project, group: group) }
-    let(:issue) { create(:issue, project: project) }
+  describe '.any_label' do
+    let_it_be(:issue_with_label) { create(:labeled_issue, labels: [create(:label)]) }
+    let_it_be(:issue_with_multiple_labels) { create(:labeled_issue, labels: [create(:label), create(:label)]) }
+    let_it_be(:issue_without_label) { create(:issue) }
 
-    def build_issuable(milestone_id)
-      issuable_class.new(project: project, milestone_id: milestone_id)
+    it 'returns an issuable with at least one label' do
+      expect(issuable_class.any_label).to match_array([issue_with_label, issue_with_multiple_labels])
     end
 
-    it 'returns true with a milestone from the issue project' do
-      milestone = create(:milestone, project: project)
-
-      expect(build_issuable(milestone.id).milestone_available?).to be_truthy
-    end
-
-    it 'returns true with a milestone from the issue project group' do
-      milestone = create(:milestone, group: group)
-
-      expect(build_issuable(milestone.id).milestone_available?).to be_truthy
-    end
-
-    it 'returns true with a milestone from the the parent of the issue project group' do
-      parent = create(:group)
-      group.update(parent: parent)
-      milestone = create(:milestone, group: parent)
-
-      expect(build_issuable(milestone.id).milestone_available?).to be_truthy
-    end
-
-    it 'returns false with a milestone from another project' do
-      milestone = create(:milestone)
-
-      expect(build_issuable(milestone.id).milestone_available?).to be_falsey
-    end
-
-    it 'returns false with a milestone from another group' do
-      milestone = create(:milestone, group: create(:group))
-
-      expect(build_issuable(milestone.id).milestone_available?).to be_falsey
+    context 'for custom sorting' do
+      it 'returns an issuable with at least one label' do
+        expect(issuable_class.any_label('created_at')).to eq([issue_with_label, issue_with_multiple_labels])
+      end
     end
   end
 
@@ -212,6 +150,7 @@ describe Issuable do
     let!(:searchable_issue) do
       create(:issue, title: "Searchable awesome issue", description: 'Many cute kittens')
     end
+
     let!(:searchable_issue2) { create(:issue, title: "Aw", description: "Cu") }
 
     it 'returns issues with a matching title' do
@@ -238,8 +177,7 @@ describe Issuable do
     end
 
     it 'returns issues with a partially matching description' do
-      expect(issuable_class.full_search(searchable_issue.description))
-        .to eq([searchable_issue])
+      expect(issuable_class.full_search('cut')).to eq([searchable_issue])
     end
 
     it 'returns issues with a matching description regardless of the casing' do
@@ -357,20 +295,14 @@ describe Issuable do
   end
 
   describe "#new?" do
-    it "returns true when created today and record hasn't been updated" do
-      allow(issue).to receive(:today?).and_return(true)
+    it "returns false when created 30 hours ago" do
+      allow(issue).to receive(:created_at).and_return(Time.current - 30.hours)
+      expect(issue.new?).to be_falsey
+    end
+
+    it "returns true when created 20 hours ago" do
+      allow(issue).to receive(:created_at).and_return(Time.current - 20.hours)
       expect(issue.new?).to be_truthy
-    end
-
-    it "returns false when not created today" do
-      allow(issue).to receive(:today?).and_return(false)
-      expect(issue.new?).to be_falsey
-    end
-
-    it "returns false when record has been updated" do
-      allow(issue).to receive(:today?).and_return(true)
-      issue.update_attribute(:updated_at, 1.hour.ago)
-      expect(issue.new?).to be_falsey
     end
   end
 
@@ -403,7 +335,7 @@ describe Issuable do
 
     context 'when all of the results are level on the sort key' do
       let!(:issues) do
-        10.times { create(:issue, project: project) }
+        create_list(:issue, 10, project: project)
       end
 
       it 'has no duplicates across pages' do
@@ -429,13 +361,13 @@ describe Issuable do
       end
 
       it 'returns true when a subcription exists and subscribed is true' do
-        issue.subscriptions.create(user: user, project: project, subscribed: true)
+        issue.subscriptions.create!(user: user, project: project, subscribed: true)
 
         expect(issue.subscribed?(user, project)).to be_truthy
       end
 
       it 'returns false when a subcription exists and subscribed is false' do
-        issue.subscriptions.create(user: user, project: project, subscribed: false)
+        issue.subscriptions.create!(user: user, project: project, subscribed: false)
 
         expect(issue.subscribed?(user, project)).to be_falsey
       end
@@ -451,13 +383,13 @@ describe Issuable do
       end
 
       it 'returns true when a subcription exists and subscribed is true' do
-        issue.subscriptions.create(user: user, project: project, subscribed: true)
+        issue.subscriptions.create!(user: user, project: project, subscribed: true)
 
         expect(issue.subscribed?(user, project)).to be_truthy
       end
 
       it 'returns false when a subcription exists and subscribed is false' do
-        issue.subscriptions.create(user: user, project: project, subscribed: false)
+        issue.subscriptions.create!(user: user, project: project, subscribed: false)
 
         expect(issue.subscribed?(user, project)).to be_falsey
       end
@@ -480,11 +412,32 @@ describe Issuable do
   describe '#to_hook_data' do
     let(:builder) { double }
 
+    context 'when old_associations is empty' do
+      let(:label) { create(:label) }
+
+      before do
+        issue.update!(labels: [label])
+        issue.assignees << user
+        issue.spend_time(duration: 2, user_id: user.id, spent_at: Time.current)
+        expect(Gitlab::HookData::IssuableBuilder)
+          .to receive(:new).with(issue).and_return(builder)
+      end
+
+      it 'delegates to Gitlab::HookData::IssuableBuilder#build and does not set labels, assignees, nor total_time_spent' do
+        expect(builder).to receive(:build).with(
+          user: user,
+          changes: {})
+
+        # In some cases, old_associations is empty, e.g. on a close event
+        issue.to_hook_data(user)
+      end
+    end
+
     context 'labels are updated' do
       let(:labels) { create_list(:label, 2) }
 
       before do
-        issue.update(labels: [labels[1]])
+        issue.update!(labels: [labels[1]])
         expect(Gitlab::HookData::IssuableBuilder)
           .to receive(:new).with(issue).and_return(builder)
       end
@@ -502,8 +455,8 @@ describe Issuable do
 
     context 'total_time_spent is updated' do
       before do
-        issue.spend_time(duration: 2, user_id: user.id, spent_at: Time.now)
-        issue.save
+        issue.spend_time(duration: 2, user_id: user.id, spent_at: Time.current)
+        issue.save!
         expect(Gitlab::HookData::IssuableBuilder)
           .to receive(:new).with(issue).and_return(builder)
       end
@@ -544,8 +497,8 @@ describe Issuable do
       let(:user2) { create(:user) }
 
       before do
-        merge_request.update(assignees: [user])
-        merge_request.update(assignees: [user, user2])
+        merge_request.update!(assignees: [user])
+        merge_request.update!(assignees: [user, user2])
         expect(Gitlab::HookData::IssuableBuilder)
           .to receive(:new).with(merge_request).and_return(builder)
       end
@@ -573,6 +526,40 @@ describe Issuable do
 
     it 'loads the association and returns it as an array' do
       expect(issue.reload.labels_array).to eq([bug])
+    end
+  end
+
+  describe '.labels_hash' do
+    let(:feature_label) { create(:label, title: 'Feature') }
+    let(:second_label) { create(:label, title: 'Second Label') }
+    let!(:issues) { create_list(:labeled_issue, 3, labels: [feature_label, second_label]) }
+    let(:issue_id) { issues.first.id }
+
+    it 'maps issue ids to labels titles' do
+      expect(Issue.labels_hash[issue_id]).to include('Feature')
+    end
+
+    it 'works on relations filtered by multiple labels' do
+      relation = Issue.with_label(['Feature', 'Second Label'])
+
+      expect(relation.labels_hash[issue_id]).to include('Feature', 'Second Label')
+    end
+
+    # This tests the workaround for the lack of a NOT NULL constraint in
+    # label_links.label_id:
+    # https://gitlab.com/gitlab-org/gitlab/issues/197307
+    context 'with a NULL label ID in the link' do
+      let(:issue) { create(:labeled_issue, labels: [feature_label, second_label]) }
+
+      before do
+        label_link = issue.label_links.find_by(label_id: second_label.id)
+        label_link.label_id = nil
+        label_link.save!(validate: false)
+      end
+
+      it 'filters out bad labels' do
+        expect(Issue.where(id: issue.id).labels_hash[issue.id]).to match_array(['Feature'])
+      end
     end
   end
 
@@ -618,8 +605,8 @@ describe Issuable do
       second_priority = create(:label, project: project, priority: 2)
       no_priority = create(:label, project: project)
 
-      first_milestone = create(:milestone, project: project, due_date: Time.now)
-      second_milestone = create(:milestone, project: project, due_date: Time.now + 1.month)
+      first_milestone = create(:milestone, project: project, due_date: Time.current)
+      second_milestone = create(:milestone, project: project, due_date: Time.current + 1.month)
       third_milestone = create(:milestone, project: project)
 
       # The issues here are ordered by label priority, to ensure that we don't
@@ -807,27 +794,6 @@ describe Issuable do
     end
   end
 
-  describe '#supports_milestone?' do
-    let(:group)   { create(:group) }
-    let(:project) { create(:project, group: group) }
-
-    context "for issues" do
-      let(:issue) { build(:issue, project: project) }
-
-      it 'returns true' do
-        expect(issue.supports_milestone?).to be_truthy
-      end
-    end
-
-    context "for merge requests" do
-      let(:merge_request) { build(:merge_request, target_project: project, source_project: project) }
-
-      it 'returns true' do
-        expect(merge_request.supports_milestone?).to be_truthy
-      end
-    end
-  end
-
   describe '#matches_cross_reference_regex?' do
     context "issue description with long path string" do
       let(:mentionable) { build(:issue, description: "/a" * 50000) }
@@ -850,6 +816,114 @@ describe Issuable do
       end
 
       it_behaves_like 'matches_cross_reference_regex? fails fast'
+    end
+  end
+
+  describe '#supports_time_tracking?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_type, :supports_time_tracking) do
+      :issue         | true
+      :incident      | true
+      :merge_request | true
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type) }
+
+      subject { issuable.supports_time_tracking? }
+
+      it { is_expected.to eq(supports_time_tracking) }
+    end
+  end
+
+  describe '#supports_severity?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_type, :supports_severity) do
+      :issue         | false
+      :incident      | true
+      :merge_request | false
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type) }
+
+      subject { issuable.supports_severity? }
+
+      it { is_expected.to eq(supports_severity) }
+    end
+  end
+
+  describe '#incident?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_type, :incident) do
+      :issue         | false
+      :incident      | true
+      :merge_request | false
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type) }
+
+      subject { issuable.incident? }
+
+      it { is_expected.to eq(incident) }
+    end
+  end
+
+  describe '#supports_issue_type?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:issuable_type, :supports_issue_type) do
+      :issue         | true
+      :merge_request | false
+    end
+
+    with_them do
+      let(:issuable) { build_stubbed(issuable_type) }
+
+      subject { issuable.supports_issue_type? }
+
+      it { is_expected.to eq(supports_issue_type) }
+    end
+  end
+
+  describe '#severity' do
+    subject { issuable.severity }
+
+    context 'when issuable is not an incident' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:issuable_type, :severity) do
+        :issue         | 'unknown'
+        :merge_request | 'unknown'
+      end
+
+      with_them do
+        let(:issuable) { build_stubbed(issuable_type) }
+
+        it { is_expected.to eq(severity) }
+      end
+    end
+
+    context 'when issuable type is an incident' do
+      let!(:issuable) { build_stubbed(:incident) }
+
+      context 'when incident does not have issuable_severity' do
+        it 'returns default serverity' do
+          is_expected.to eq(IssuableSeverity::DEFAULT)
+        end
+      end
+
+      context 'when incident has issuable_severity' do
+        let!(:issuable_severity) { build_stubbed(:issuable_severity, issue: issuable, severity: 'critical') }
+
+        it 'returns issuable serverity' do
+          is_expected.to eq('critical')
+        end
+      end
     end
   end
 end

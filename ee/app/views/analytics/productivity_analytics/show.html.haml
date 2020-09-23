@@ -1,9 +1,0 @@
-- page_title _('Productivity Analytics')
-
-#js-productivity-analytics
-  .row-content-block.second-block.d-flex.flex-column.flex-lg-row
-    .js-group-project-select-container
-    .js-search-bar.filter-container.hide
-      = render 'shared/issuable/search_bar', type: :productivity_analytics
-    .js-timeframe-container{ data: { start_date: ProductivityAnalytics.start_date } }
-  .js-productivity-analytics-app-container{ data: { endpoint: analytics_productivity_analytics_path, empty_state_svg_path: image_path('illustrations/productivity-analytics-empty-state.svg'), no_access_svg_path: image_path('illustrations/analytics/no-access.svg') } }

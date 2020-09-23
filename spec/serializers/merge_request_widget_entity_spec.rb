@@ -2,21 +2,18 @@
 
 require 'spec_helper'
 
-describe MergeRequestWidgetEntity do
+RSpec.describe MergeRequestWidgetEntity do
   include ProjectForksHelper
 
-  let(:project)  { create :project, :repository }
+  let(:project) { create :project, :repository }
   let(:resource) { create(:merge_request, source_project: project, target_project: project) }
-  let(:user)     { create(:user) }
+  let(:pipeline) { create(:ci_empty_pipeline, project: project) }
+  let(:user) { create(:user) }
 
   let(:request) { double('request', current_user: user, project: project) }
 
   subject do
     described_class.new(resource, request: request).as_json
-  end
-
-  it 'has the latest sha of the target branch' do
-    is_expected.to include(:target_branch_sha)
   end
 
   describe 'source_project_full_path' do
@@ -34,6 +31,28 @@ describe MergeRequestWidgetEntity do
     end
   end
 
+  describe 'can_create_pipeline_in_target_project' do
+    context 'when user has permission' do
+      before do
+        project.add_developer(user)
+      end
+
+      it 'includes the correct permission info' do
+        expect(subject[:can_create_pipeline_in_target_project]).to eq(true)
+      end
+    end
+
+    context 'when user does not have permission' do
+      before do
+        project.add_guest(user)
+      end
+
+      it 'includes the correct permission info' do
+        expect(subject[:can_create_pipeline_in_target_project]).to eq(false)
+      end
+    end
+  end
+
   describe 'issues links' do
     it 'includes issues links when requested' do
       data = described_class.new(resource, request: request, issues_links: true).as_json
@@ -47,238 +66,277 @@ describe MergeRequestWidgetEntity do
     end
   end
 
-  describe 'pipeline' do
-    let(:pipeline) { create(:ci_empty_pipeline, project: project, ref: resource.source_branch, sha: resource.source_branch_sha, head_pipeline_of: resource) }
-
-    before do
-      allow_any_instance_of(MergeRequestPresenter).to receive(:can?).and_call_original
-      allow_any_instance_of(MergeRequestPresenter).to receive(:can?).with(user, :read_pipeline, anything).and_return(result)
-    end
-
-    context 'when user has access to pipelines' do
-      let(:result) { true }
-
-      context 'when is up to date' do
-        let(:req) { double('request', current_user: user, project: project) }
-
-        it 'returns pipeline' do
-          pipeline_payload = PipelineDetailsEntity
-            .represent(pipeline, request: req)
-            .as_json
-
-          expect(subject[:pipeline]).to eq(pipeline_payload)
-        end
-      end
-
-      context 'when is not up to date' do
-        it 'returns nil' do
-          pipeline.update(sha: "not up to date")
-
-          expect(subject[:pipeline]).to eq(nil)
-        end
-      end
-    end
-
-    context 'when user does not have access to pipelines' do
-      let(:result) { false }
-
-      it 'does not have pipeline' do
-        expect(subject[:pipeline]).to eq(nil)
-      end
-    end
-  end
-
-  describe 'merge_pipeline' do
-    it 'returns nil' do
-      expect(subject[:merge_pipeline]).to be_nil
-    end
-
-    context 'when is merged' do
-      let(:resource) { create(:merged_merge_request, source_project: project, merge_commit_sha: project.commit.id) }
-      let(:pipeline) { create(:ci_empty_pipeline, project: project, ref: resource.target_branch, sha: resource.merge_commit_sha) }
-
-      before do
-        project.add_maintainer(user)
-      end
-
-      it 'returns merge_pipeline' do
-        pipeline.reload
-        pipeline_payload = PipelineDetailsEntity
-                             .represent(pipeline, request: request)
-                             .as_json
-
-        expect(subject[:merge_pipeline]).to eq(pipeline_payload)
-      end
-
-      context 'when user cannot read pipelines on target project' do
-        before do
-          project.add_guest(user)
-        end
-
-        it 'returns nil' do
-          expect(subject[:merge_pipeline]).to be_nil
-        end
-      end
-    end
-  end
-
-  describe 'metrics' do
-    context 'when metrics record exists with merged data' do
-      before do
-        resource.mark_as_merged!
-        resource.metrics.update!(merged_by: user)
-      end
-
-      it 'matches merge request metrics schema' do
-        expect(subject[:metrics].with_indifferent_access)
-          .to match_schema('entities/merge_request_metrics')
-      end
-
-      it 'returns values from metrics record' do
-        expect(subject.dig(:metrics, :merged_by, :id))
-          .to eq(resource.metrics.merged_by_id)
-      end
-    end
-
-    context 'when metrics record exists with closed data' do
-      before do
-        resource.close!
-        resource.metrics.update!(latest_closed_by: user)
-      end
-
-      it 'matches merge request metrics schema' do
-        expect(subject[:metrics].with_indifferent_access)
-          .to match_schema('entities/merge_request_metrics')
-      end
-
-      it 'returns values from metrics record' do
-        expect(subject.dig(:metrics, :closed_by, :id))
-          .to eq(resource.metrics.latest_closed_by_id)
-      end
-    end
-
-    context 'when metrics does not exists' do
-      before do
-        resource.mark_as_merged!
-        resource.metrics.destroy!
-        resource.reload
-      end
-
-      context 'when events exists' do
-        let!(:closed_event) { create(:event, :closed, project: project, target: resource) }
-        let!(:merge_event) { create(:event, :merged, project: project, target: resource) }
-
-        it 'matches merge request metrics schema' do
-          expect(subject[:metrics].with_indifferent_access)
-            .to match_schema('entities/merge_request_metrics')
-        end
-
-        it 'returns values from events record' do
-          expect(subject.dig(:metrics, :merged_by, :id))
-            .to eq(merge_event.author_id)
-
-          expect(subject.dig(:metrics, :closed_by, :id))
-            .to eq(closed_event.author_id)
-
-          expect(subject.dig(:metrics, :merged_at).to_s)
-            .to eq(merge_event.updated_at.to_s)
-
-          expect(subject.dig(:metrics, :closed_at).to_s)
-            .to eq(closed_event.updated_at.to_s)
-        end
-      end
-
-      context 'when events does not exists' do
-        it 'matches merge request metrics schema' do
-          expect(subject[:metrics].with_indifferent_access)
-            .to match_schema('entities/merge_request_metrics')
-        end
-      end
-    end
-  end
-
   it 'has email_patches_path' do
     expect(subject[:email_patches_path])
-      .to eq("/#{resource.project.full_path}/merge_requests/#{resource.iid}.patch")
+      .to eq("/#{resource.project.full_path}/-/merge_requests/#{resource.iid}.patch")
   end
 
   it 'has plain_diff_path' do
     expect(subject[:plain_diff_path])
-      .to eq("/#{resource.project.full_path}/merge_requests/#{resource.iid}.diff")
+      .to eq("/#{resource.project.full_path}/-/merge_requests/#{resource.iid}.diff")
   end
 
-  it 'has default_merge_commit_message_with_description' do
-    expect(subject[:default_merge_commit_message_with_description])
-      .to eq(resource.default_merge_commit_message(include_description: true))
+  it 'has blob path data' do
+    allow(resource).to receive_messages(
+      base_pipeline: pipeline,
+      head_pipeline: pipeline
+    )
+
+    expect(subject).to include(:blob_path)
+    expect(subject[:blob_path]).to include(:base_path)
+    expect(subject[:blob_path]).to include(:head_path)
   end
 
-  it 'has default_squash_commit_message' do
-    expect(subject[:default_squash_commit_message])
-      .to eq(resource.default_squash_commit_message)
-  end
-
-  describe 'new_blob_path' do
-    context 'when user can push to project' do
-      it 'returns path' do
-        project.add_developer(user)
-
-        expect(subject[:new_blob_path])
-          .to eq("/#{resource.project.full_path}/new/#{resource.source_branch}")
-      end
-    end
-
-    context 'when user cannot push to project' do
-      it 'returns nil' do
-        expect(subject[:new_blob_path]).to be_nil
-      end
-    end
-  end
-
-  describe 'diff_head_sha' do
+  describe 'codequality report artifacts', :request_store do
     before do
-      allow(resource).to receive(:diff_head_sha) { 'sha' }
+      project.add_developer(user)
+
+      allow(resource).to receive_messages(
+        base_pipeline: pipeline,
+        head_pipeline: pipeline
+      )
     end
 
-    context 'when diff head commit is empty' do
-      it 'returns nil' do
-        allow(resource).to receive(:diff_head_sha) { '' }
+    context "with report artifacts" do
+      let(:pipeline) { create(:ci_pipeline, :with_codequality_report, project: project) }
 
-        expect(subject[:diff_head_sha]).to be_nil
+      it "has data entry" do
+        expect(subject).to include(:codeclimate)
       end
     end
 
-    context 'when diff head commit present' do
-      it 'returns diff head commit short id' do
-        expect(subject[:diff_head_sha]).to eq('sha')
+    context "without artifacts" do
+      it "does not have data entry" do
+        expect(subject).not_to include(:codeclimate)
       end
     end
   end
 
-  describe 'diverged_commits_count' do
-    context 'when MR open and its diverging' do
-      it 'returns diverged commits count' do
-        allow(resource).to receive_messages(open?: true, diverged_from_target_branch?: true,
-                                            diverged_commits_count: 10)
+  describe 'merge_request_add_ci_config_path' do
+    let!(:project_auto_devops) { create(:project_auto_devops, :disabled, project: project) }
 
-        expect(subject[:diverged_commits_count]).to eq(10)
+    before do
+      project.add_role(user, role)
+    end
+
+    context 'when there is a standard ci config file in the source project' do
+      let(:role) { :developer }
+
+      before do
+        project.repository.create_file(user, Gitlab::FileDetector::PATTERNS[:gitlab_ci], 'CONTENT', message: 'Add .gitlab-ci.yml', branch_name: 'master')
+      end
+
+      it 'no ci config path' do
+        expect(subject[:merge_request_add_ci_config_path]).to be_nil
       end
     end
 
-    context 'when MR is not open' do
-      it 'returns 0' do
-        allow(resource).to receive_messages(open?: false)
+    context 'when there is no standard ci config file in the source project' do
+      context 'when user has permissions' do
+        let(:role) { :developer }
 
-        expect(subject[:diverged_commits_count]).to be_zero
+        it 'has add ci config path' do
+          expected_path = "/#{resource.project.full_path}/-/new/#{resource.source_branch}"
+
+          expect(subject[:merge_request_add_ci_config_path]).to include(expected_path)
+        end
+
+        it 'has expected params' do
+          expected_params = {
+            commit_message: 'Add .gitlab-ci.yml',
+            file_name: '.gitlab-ci.yml',
+            suggest_gitlab_ci_yml: 'true',
+            mr_path: "/#{resource.project.full_path}/-/merge_requests/#{resource.iid}"
+          }.with_indifferent_access
+
+          uri = Addressable::URI.parse(subject[:merge_request_add_ci_config_path])
+
+          expect(uri.query_values).to match(expected_params)
+        end
+
+        context 'when auto devops is enabled' do
+          before do
+            project_auto_devops.enabled = true
+          end
+
+          it 'returns a blank ci config path' do
+            expect(subject[:merge_request_add_ci_config_path]).to be_nil
+          end
+        end
+
+        context 'when source project is missing' do
+          before do
+            resource.source_project = nil
+          end
+
+          it 'returns a blank ci config path' do
+            expect(subject[:merge_request_add_ci_config_path]).to be_nil
+          end
+        end
+
+        context 'when there are no commits' do
+          before do
+            allow(resource).to receive(:commits_count).and_return(0)
+          end
+
+          it 'returns a blank ci config path' do
+            expect(subject[:merge_request_add_ci_config_path]).to be_nil
+          end
+        end
+
+        context 'when ci_config_path is customized' do
+          it 'has no path if ci_config_path is not set to our default setting' do
+            project.ci_config_path = 'not_default'
+
+            expect(subject[:merge_request_add_ci_config_path]).to be_nil
+          end
+
+          it 'has a path if ci_config_path unset' do
+            expect(subject[:merge_request_add_ci_config_path]).not_to be_nil
+          end
+
+          it 'has a path if ci_config_path is an empty string' do
+            project.ci_config_path = ''
+
+            expect(subject[:merge_request_add_ci_config_path]).not_to be_nil
+          end
+
+          it 'has a path if ci_config_path is set to our default file' do
+            project.ci_config_path = Gitlab::FileDetector::PATTERNS[:gitlab_ci]
+
+            expect(subject[:merge_request_add_ci_config_path]).not_to be_nil
+          end
+        end
+
+        context 'when build feature is disabled' do
+          before do
+            project.project_feature.update!(builds_access_level: ProjectFeature::DISABLED)
+          end
+
+          it 'has no path' do
+            expect(subject[:merge_request_add_ci_config_path]).to be_nil
+          end
+        end
+
+        context 'when creating the pipeline is not allowed' do
+          before do
+            user.state = 'blocked'
+          end
+
+          it 'has no path' do
+            expect(subject[:merge_request_add_ci_config_path]).to be_nil
+          end
+        end
+
+        context 'when merge request is merged' do
+          before do
+            resource.mark_as_merged!
+          end
+
+          it 'returns a blank ci config path' do
+            expect(subject[:merge_request_add_ci_config_path]).to be_nil
+          end
+        end
+
+        context 'when merge request is closed' do
+          before do
+            resource.close!
+          end
+
+          it 'returns a blank ci config path' do
+            expect(subject[:merge_request_add_ci_config_path]).to be_nil
+          end
+        end
+
+        context 'when source branch does not exist' do
+          before do
+            resource.source_project.repository.rm_branch(user, resource.source_branch)
+          end
+
+          it 'returns a blank ci config path' do
+            expect(subject[:merge_request_add_ci_config_path]).to be_nil
+          end
+        end
+      end
+
+      context 'when user does not have permissions' do
+        let(:role) { :reporter }
+
+        it 'has add ci config path' do
+          expect(subject[:merge_request_add_ci_config_path]).to be_nil
+        end
+      end
+    end
+  end
+
+  describe 'user callouts' do
+    context 'when suggest pipeline feature is enabled' do
+      before do
+        stub_feature_flags(suggest_pipeline: true)
+      end
+
+      it 'provides a valid path value for user callout path' do
+        expect(subject[:user_callouts_path]).to eq '/-/user_callouts'
+      end
+
+      it 'provides a valid value for suggest pipeline feature id' do
+        expect(subject[:suggest_pipeline_feature_id]).to eq described_class::SUGGEST_PIPELINE
+      end
+
+      it 'provides a valid value for if it is dismissed' do
+        expect(subject[:is_dismissed_suggest_pipeline]).to be(false)
+      end
+
+      context 'when the suggest pipeline has been dismissed' do
+        before do
+          create(:user_callout, user: user, feature_name: described_class::SUGGEST_PIPELINE)
+        end
+
+        it 'indicates suggest pipeline has been dismissed' do
+          expect(subject[:is_dismissed_suggest_pipeline]).to be(true)
+        end
+      end
+
+      context 'when user is not logged in' do
+        let(:request) { double('request', current_user: nil, project: project) }
+
+        it 'returns a blank is dismissed value' do
+          expect(subject[:is_dismissed_suggest_pipeline]).to be_nil
+        end
       end
     end
 
-    context 'when MR is not diverging' do
-      it 'returns 0' do
-        allow(resource).to receive_messages(open?: true, diverged_from_target_branch?: false)
+    context 'when suggest pipeline feature is not enabled' do
+      before do
+        stub_feature_flags(suggest_pipeline: false)
+      end
 
-        expect(subject[:diverged_commits_count]).to be_zero
+      it 'provides no valid value for user callout path' do
+        expect(subject[:user_callouts_path]).to be_nil
+      end
+
+      it 'provides no valid value for suggest pipeline feature id' do
+        expect(subject[:suggest_pipeline_feature_id]).to be_nil
+      end
+
+      it 'provides no valid value for if it is dismissed' do
+        expect(subject[:is_dismissed_suggest_pipeline]).to be_nil
       end
     end
+  end
+
+  it 'has human access' do
+    project.add_maintainer(user)
+
+    expect(subject[:human_access])
+      .to eq('Maintainer')
+  end
+
+  it 'has new pipeline path for project' do
+    project.add_maintainer(user)
+
+    expect(subject[:new_project_pipeline_path])
+      .to eq("/#{resource.project.full_path}/-/pipelines/new")
   end
 
   describe 'when source project is deleted' do
@@ -288,96 +346,12 @@ describe MergeRequestWidgetEntity do
 
     it 'returns a blank rebase_path' do
       allow(merge_request).to receive(:should_be_rebased?).and_return(true)
-      forked_project.destroy
+      forked_project.destroy!
       merge_request.reload
 
       entity = described_class.new(merge_request, request: request).as_json
 
       expect(entity[:rebase_path]).to be_nil
-    end
-  end
-
-  describe 'commits_without_merge_commits' do
-    def find_matching_commit(short_id)
-      resource.commits.find { |c| c.short_id == short_id }
-    end
-
-    it 'does not include merge commits' do
-      commits_in_widget = subject[:commits_without_merge_commits]
-
-      expect(commits_in_widget.length).to be < resource.commits.length
-      expect(commits_in_widget.length).to eq(resource.commits.without_merge_commits.length)
-      commits_in_widget.each do |c|
-        expect(find_matching_commit(c[:short_id]).merge_commit?).to eq(false)
-      end
-    end
-  end
-
-  describe 'auto merge' do
-    context 'when auto merge is enabled' do
-      let(:resource) { create(:merge_request, :merge_when_pipeline_succeeds) }
-
-      it 'returns auto merge related information' do
-        expect(subject[:auto_merge_enabled]).to be_truthy
-        expect(subject[:auto_merge_strategy]).to eq('merge_when_pipeline_succeeds')
-      end
-    end
-
-    context 'when auto merge is not enabled' do
-      let(:resource) { create(:merge_request) }
-
-      it 'returns auto merge related information' do
-        expect(subject[:auto_merge_enabled]).to be_falsy
-        expect(subject[:auto_merge_strategy]).to be_nil
-      end
-    end
-
-    context 'when head pipeline is running' do
-      before do
-        create(:ci_pipeline, :running, project: project,
-                                       ref: resource.source_branch,
-                                       sha: resource.diff_head_sha)
-        resource.update_head_pipeline
-      end
-
-      it 'returns available auto merge strategies' do
-        expect(subject[:available_auto_merge_strategies]).to eq(%w[merge_when_pipeline_succeeds])
-      end
-    end
-
-    context 'when head pipeline is finished' do
-      before do
-        create(:ci_pipeline, :success, project: project,
-                                       ref: resource.source_branch,
-                                       sha: resource.diff_head_sha)
-        resource.update_head_pipeline
-      end
-
-      it 'returns available auto merge strategies' do
-        expect(subject[:available_auto_merge_strategies]).to be_empty
-      end
-    end
-  end
-
-  describe 'exposed_artifacts_path' do
-    context 'when merge request has exposed artifacts' do
-      before do
-        expect(resource).to receive(:has_exposed_artifacts?).and_return(true)
-      end
-
-      it 'set the path to poll data' do
-        expect(subject[:exposed_artifacts_path]).to be_present
-      end
-    end
-
-    context 'when merge request has no exposed artifacts' do
-      before do
-        expect(resource).to receive(:has_exposed_artifacts?).and_return(false)
-      end
-
-      it 'set the path to poll data' do
-        expect(subject[:exposed_artifacts_path]).to be_nil
-      end
     end
   end
 end

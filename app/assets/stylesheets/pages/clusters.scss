@@ -1,6 +1,6 @@
 .edit-cluster-form {
   .clipboard-addon {
-    background-color: $white-light;
+    background-color: $white;
   }
 }
 
@@ -35,11 +35,11 @@
 }
 
 .cluster-application-logo {
-  border: 3px solid $white-light;
+  border: 3px solid $white;
   box-shadow: 0 0 0 1px $gray-normal;
 
   &.avatar:hover {
-    border-color: $white-light;
+    border-color: $white;
   }
 }
 
@@ -69,7 +69,7 @@
   align-self: flex-start;
   font-weight: 500;
   font-size: 20px;
-  color: $orange-900;
+  color: $orange-500;
   opacity: 1;
   margin: $gl-padding-8 14px 0 0;
 }
@@ -124,7 +124,7 @@
       background-color: none;
       border: 0;
       font-weight: bold;
-      color: $gl-gray-500;
+      color: $gray-500;
     }
   }
 }
@@ -156,10 +156,16 @@
 }
 
 .cluster-deployments-warning {
-  color: $orange-600;
+  color: $orange-500;
 }
 
 .badge.pods-badge {
   color: $black;
   font-weight: $gl-font-weight-bold;
+}
+
+.cluster-status-indicator {
+  &.disabled {
+    background-color: $gray-400;
+  }
 }

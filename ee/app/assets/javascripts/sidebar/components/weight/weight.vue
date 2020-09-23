@@ -1,15 +1,15 @@
 <script>
 import $ from 'jquery';
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import Tracking from '~/tracking';
 import eventHub from '~/sidebar/event_hub';
 import tooltip from '~/vue_shared/directives/tooltip';
-import icon from '~/vue_shared/components/icon.vue';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { MAX_DISPLAY_WEIGHT } from '../../constants';
 
 export default {
   components: {
-    icon,
+    GlIcon,
     GlLoadingIcon,
   },
   directives: {
@@ -56,35 +56,25 @@ export default {
     };
   },
   computed: {
+    tracking() {
+      return {
+        // eslint-disable-next-line no-underscore-dangle
+        category: this.$options._componentTag,
+      };
+    },
     isNoValue() {
       return this.checkIfNoValue(this.weight);
     },
     collapsedWeightLabel() {
-      let label = this.weight;
-      if (this.checkIfNoValue(this.weight)) {
-        label = this.noValueLabel;
-      }
-
-      // Truncate with ellipsis after five digits
-      if (this.weight > 99999) {
-        label = `${this.weight.toString().substr(0, 5)}&hellip;`;
-      }
-
-      return label;
+      return this.checkIfNoValue(this.weight)
+        ? this.noValueLabel
+        : this.weight.toString().substr(0, 5);
     },
     noValueLabel() {
       return s__('Sidebar|None');
     },
-    changeWeightLabel() {
-      return s__('Sidebar|Change weight');
-    },
     dropdownToggleLabel() {
-      let label = this.weight;
-      if (this.checkIfNoValue(this.weight)) {
-        label = s__('Sidebar|Weight');
-      }
-
-      return label;
+      return this.checkIfNoValue(this.weight) ? s__('Sidebar|Weight') : this.weight;
     },
     shouldShowWeight() {
       return !this.fetching && !this.shouldShowEditField;
@@ -118,7 +108,9 @@ export default {
       }
     },
     onCollapsedClick() {
-      this.showEditField(true);
+      if (this.editable) {
+        this.showEditField(true);
+      }
       this.collapsedAfterUpdate = true;
     },
     onSubmit(e) {
@@ -142,6 +134,7 @@ export default {
       eventHub.$emit('updateWeight', '', this.id);
     },
   },
+  maxDisplayWeight: MAX_DISPLAY_WEIGHT,
 };
 </script>
 
@@ -156,19 +149,24 @@ export default {
       data-boundary="viewport"
       @click="onCollapsedClick"
     >
-      <icon :size="16" name="weight" />
+      <gl-icon :size="16" name="weight" />
       <gl-loading-icon v-if="fetching" class="js-weight-collapsed-loading-icon" />
-      <span v-else class="js-weight-collapsed-weight-label" v-html="collapsedWeightLabel"></span>
+      <span v-else class="js-weight-collapsed-weight-label">
+        {{ collapsedWeightLabel
+        }}<template v-if="weight > $options.maxDisplayWeight"
+          >&hellip;</template
+        >
+      </span>
     </div>
     <div class="title hide-collapsed">
       {{ s__('Sidebar|Weight') }}
       <gl-loading-icon v-if="fetching || loading" :inline="true" class="js-weight-loading-icon" />
       <a
         v-if="editable"
-        class="float-right js-weight-edit-link"
+        class="float-right edit-link js-weight-edit-link"
         data-qa-selector="edit_weight_link"
         href="#"
-        @click="onEditClick(!shouldShowEditField)"
+        @click.prevent="onEditClick(!shouldShowEditField)"
         >{{ __('Edit') }}</a
       >
     </div>
@@ -184,7 +182,7 @@ export default {
         @keydown.enter="onSubmit"
       />
       <span v-if="!hasValidInput" class="gl-field-error">
-        <icon :size="24" name="merge-request-close-m" />
+        <gl-icon :size="24" name="merge-request-close-m" />
         {{ s__('Sidebar|Only numeral characters allowed') }}
       </span>
     </div>

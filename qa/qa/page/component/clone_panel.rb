@@ -4,7 +4,11 @@ module QA
   module Page
     module Component
       module ClonePanel
+        extend QA::Page::PageConcern
+
         def self.included(base)
+          super
+
           base.view 'app/views/projects/buttons/_clone.html.haml' do
             element :clone_dropdown
             element :clone_options
@@ -24,7 +28,7 @@ module QA
         private
 
         def repository_clone_location(kind)
-          wait(reload: false) do
+          wait_until(reload: false) do
             click_element :clone_dropdown
 
             within_element :clone_options do

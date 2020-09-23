@@ -1,47 +1,36 @@
 import Vue from 'vue';
+import { escapeFileUrl, joinPaths, webIDEUrl } from '../lib/utils/url_utility';
 import createRouter from './router';
 import App from './components/app.vue';
 import Breadcrumbs from './components/breadcrumbs.vue';
 import LastCommit from './components/last_commit.vue';
 import TreeActionLink from './components/tree_action_link.vue';
+import WebIdeLink from '~/vue_shared/components/web_ide_link.vue';
 import DirectoryDownloadLinks from './components/directory_download_links.vue';
 import apolloProvider from './graphql';
 import { setTitle } from './utils/title';
-import { parseBoolean } from '../lib/utils/common_utils';
-import { webIDEUrl } from '../lib/utils/url_utility';
+import { updateFormAction } from './utils/dom';
+import { convertObjectPropsToCamelCase, parseBoolean } from '../lib/utils/common_utils';
 import { __ } from '../locale';
 
 export default function setupVueRepositoryList() {
   const el = document.getElementById('js-tree-list');
   const { dataset } = el;
-  const { projectPath, projectShortPath, ref, fullName } = dataset;
-  const router = createRouter(projectPath, ref);
-  const hideOnRootEls = document.querySelectorAll('.js-hide-on-root');
+  const { projectPath, projectShortPath, ref, escapedRef, fullName } = dataset;
+  const router = createRouter(projectPath, escapedRef);
 
   apolloProvider.clients.defaultClient.cache.writeData({
     data: {
       projectPath,
       projectShortPath,
       ref,
+      escapedRef,
       commits: [],
     },
   });
 
-  router.afterEach(({ params: { pathMatch } }) => {
-    const isRoot = pathMatch === undefined || pathMatch === '/';
-
-    setTitle(pathMatch, ref, fullName);
-
-    if (!isRoot) {
-      document
-        .querySelectorAll('.js-keep-hidden-on-navigation')
-        .forEach(elem => elem.classList.add('hidden'));
-    }
-
-    document
-      .querySelectorAll('.js-hide-on-navigation')
-      .forEach(elem => elem.classList.toggle('hidden', !isRoot));
-    hideOnRootEls.forEach(elem => elem.classList.toggle('hidden', isRoot));
+  router.afterEach(({ params: { path } }) => {
+    setTitle(path, ref, fullName);
   });
 
   const breadcrumbEl = document.getElementById('js-repo-breadcrumb');
@@ -56,7 +45,14 @@ export default function setupVueRepositoryList() {
       forkNewBlobPath,
       forkNewDirectoryPath,
       forkUploadBlobPath,
+      uploadPath,
+      newDirPath,
     } = breadcrumbEl.dataset;
+
+    router.afterEach(({ params: { path = '/' } }) => {
+      updateFormAction('.js-upload-blob-form', uploadPath, path);
+      updateFormAction('.js-create-dir-form', newDirPath, path);
+    });
 
     // eslint-disable-next-line no-new
     new Vue({
@@ -66,7 +62,7 @@ export default function setupVueRepositoryList() {
       render(h) {
         return h(Breadcrumbs, {
           props: {
-            currentPath: this.$route.params.pathMatch,
+            currentPath: this.$route.params.path,
             canCollaborate: parseBoolean(canCollaborate),
             canEditTree: parseBoolean(canEditTree),
             newBranchPath,
@@ -89,7 +85,7 @@ export default function setupVueRepositoryList() {
     render(h) {
       return h(LastCommit, {
         props: {
-          currentPath: this.$route.params.pathMatch,
+          currentPath: this.$route.params.path,
         },
       });
     },
@@ -105,7 +101,9 @@ export default function setupVueRepositoryList() {
     render(h) {
       return h(TreeActionLink, {
         props: {
-          path: historyLink + (this.$route.params.pathMatch || '/'),
+          path: `${historyLink}/${
+            this.$route.params.path ? escapeFileUrl(this.$route.params.path) : ''
+          }`,
           text: __('History'),
         },
       });
@@ -115,16 +113,23 @@ export default function setupVueRepositoryList() {
   const webIdeLinkEl = document.getElementById('js-tree-web-ide-link');
 
   if (webIdeLinkEl) {
+    const {
+      webIdeUrlData: { path: ideBasePath, isFork: webIdeIsFork },
+      ...options
+    } = convertObjectPropsToCamelCase(JSON.parse(webIdeLinkEl.dataset.options), { deep: true });
+
     // eslint-disable-next-line no-new
     new Vue({
       el: webIdeLinkEl,
       router,
       render(h) {
-        return h(TreeActionLink, {
+        return h(WebIdeLink, {
           props: {
-            path: webIDEUrl(`/${projectPath}/edit/${ref}/-${this.$route.params.pathMatch || '/'}`),
-            text: __('Web IDE'),
-            cssClass: 'qa-web-ide-button',
+            webIdeUrl: webIDEUrl(
+              joinPaths('/', ideBasePath, 'edit', ref, '-', this.$route.params.path || '', '/'),
+            ),
+            webIdeIsFork,
+            ...options,
           },
         });
       },
@@ -139,7 +144,7 @@ export default function setupVueRepositoryList() {
       el: directoryDownloadLinks,
       router,
       render(h) {
-        const currentPath = this.$route.params.pathMatch || '/';
+        const currentPath = this.$route.params.path || '/';
 
         if (currentPath !== '/') {
           return h(DirectoryDownloadLinks, {

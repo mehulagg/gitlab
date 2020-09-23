@@ -1,17 +1,19 @@
 <script>
-import { __ } from '~/locale';
-import _ from 'underscore';
+import { debounce, uniq } from 'lodash';
 import { mapActions, mapState, mapGetters } from 'vuex';
 import { GlLoadingIcon } from '@gitlab/ui';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
+import { __ } from '~/locale';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
 import { getDatesInRange } from '~/lib/utils/datetime_utility';
 import { xAxisLabelFormatter, dateFormatter } from '../utils';
+import ResizableChartContainer from '~/vue_shared/components/resizable_chart/resizable_chart_container.vue';
 
 export default {
   components: {
     GlAreaChart,
     GlLoadingIcon,
+    ResizableChartContainer,
   },
   props: {
     endpoint: {
@@ -64,12 +66,12 @@ export default {
     individualChartsData() {
       const maxNumberOfIndividualContributorsCharts = 100;
 
-      return Object.keys(this.parsedData.byAuthor)
-        .map(name => {
-          const author = this.parsedData.byAuthor[name];
+      return Object.keys(this.parsedData.byAuthorEmail)
+        .map(email => {
+          const author = this.parsedData.byAuthorEmail[email];
           return {
-            name,
-            email: author.email,
+            name: author.name,
+            email,
             commits: author.commits,
             dates: [
               {
@@ -118,7 +120,7 @@ export default {
       return this.xAxisRange[this.xAxisRange.length - 1];
     },
     charts() {
-      return _.uniq(this.individualCharts);
+      return uniq(this.individualCharts);
     },
   },
   mounted() {
@@ -169,7 +171,7 @@ export default {
           });
         })
         .catch(() => {});
-      this.masterChart.on('datazoom', _.debounce(this.setIndividualChartsZoom, 200));
+      this.masterChart.on('datazoom', debounce(this.setIndividualChartsZoom, 200));
     },
     onIndividualChartCreated(chart) {
       this.individualCharts.push(chart);
@@ -195,31 +197,41 @@ export default {
 <template>
   <div>
     <div v-if="loading" class="contributors-loader text-center">
-      <gl-loading-icon :inline="true" :size="4" />
+      <gl-loading-icon :inline="true" size="xl" />
     </div>
 
     <div v-else-if="showChart" class="contributors-charts">
       <h4>{{ __('Commits to') }} {{ branch }}</h4>
       <span>{{ __('Excluding merge commits. Limited to 6,000 commits.') }}</span>
-      <div>
+      <resizable-chart-container>
         <gl-area-chart
+          slot-scope="{ width }"
+          :width="width"
           :data="masterChartData"
           :option="masterChartOptions"
           :height="masterChartHeight"
           @created="onMasterChartCreated"
         />
-      </div>
+      </resizable-chart-container>
 
       <div class="row">
-        <div v-for="contributor in individualChartsData" :key="contributor.name" class="col-6">
+        <div
+          v-for="(contributor, index) in individualChartsData"
+          :key="index"
+          class="col-lg-6 col-12"
+        >
           <h4>{{ contributor.name }}</h4>
           <p>{{ n__('%d commit', '%d commits', contributor.commits) }} ({{ contributor.email }})</p>
-          <gl-area-chart
-            :data="contributor.dates"
-            :option="individualChartOptions"
-            :height="individualChartHeight"
-            @created="onIndividualChartCreated"
-          />
+          <resizable-chart-container>
+            <gl-area-chart
+              slot-scope="{ width }"
+              :width="width"
+              :data="contributor.dates"
+              :option="individualChartOptions"
+              :height="individualChartHeight"
+              @created="onIndividualChartCreated"
+            />
+          </resizable-chart-container>
         </div>
       </div>
     </div>

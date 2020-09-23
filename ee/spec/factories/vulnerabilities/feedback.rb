@@ -7,12 +7,12 @@ FactoryBot.define do
     Digest::SHA1.hexdigest n.to_s
   end
 
-  factory :vulnerability_feedback, class: Vulnerabilities::Feedback do
+  factory :vulnerability_feedback, class: 'Vulnerabilities::Feedback' do
     project
     author
     issue { nil }
     merge_request { nil }
-    association :pipeline, factory: :ci_pipeline
+    pipeline { create(:ci_pipeline, project: project) }
     feedback_type { 'dismissal' }
     category { 'sast' }
     project_fingerprint { generate(:project_fingerprint) }

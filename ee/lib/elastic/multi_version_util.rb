@@ -16,8 +16,6 @@ module Elastic
       version.const_get(proxy_class_name, false).new(data_target)
     end
 
-    private
-
     # TODO: load from db table https://gitlab.com/gitlab-org/gitlab/issues/12555
     def elastic_reading_target
       strong_memoize(:elastic_reading_target) do
@@ -31,6 +29,8 @@ module Elastic
         [elastic_reading_target]
       end
     end
+
+    private
 
     def get_data_class(klass)
       klass < ActiveRecord::Base ? klass.base_class : klass

@@ -4,36 +4,12 @@ module Elastic
   module WikiRepositoriesSearch
     extend ActiveSupport::Concern
 
-    included do
-      include Elasticsearch::Git::Repository
+    include ApplicationVersionedSearch
 
-      index_name [Rails.application.class.parent_name.downcase, Rails.env].join('-')
+    delegate(:delete_index_for_commits_and_blobs, :elastic_search, to: :__elasticsearch__)
 
-      def repository_id
-        "wiki_#{project.id}"
-      end
-
-      def es_type
-        'wiki_blob'
-      end
-
-      delegate :id, to: :project, prefix: true
-
-      def client_for_indexing
-        self.__elasticsearch__.client
-      end
-
-      def index_wiki_blobs(to_sha = nil)
-        ElasticCommitIndexerWorker.perform_async(project.id, nil, to_sha, true)
-      end
-
-      def self.import
-        Project.with_wiki_enabled.find_each do |project|
-          if project.use_elasticsearch? && !project.wiki.empty?
-            project.wiki.index_wiki_blobs
-          end
-        end
-      end
+    def index_wiki_blobs
+      ElasticCommitIndexerWorker.perform_async(project.id, nil, nil, true)
     end
   end
 end

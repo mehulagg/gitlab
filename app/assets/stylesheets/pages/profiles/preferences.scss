@@ -15,10 +15,9 @@
 }
 
 .application-theme {
-  label {
-    margin: 0 $gl-padding-32 $gl-padding 0;
-    text-align: center;
-  }
+  $ui-dark-bg: #2e2e2e;
+  $ui-light-bg: #dfdfdf;
+  $ui-dark-mode-bg: #1f1f1f;
 
   .preview {
     font-size: 0;
@@ -60,11 +59,17 @@
     }
 
     &.ui-dark {
-      background-color: $gray-900;
+      background-color: $ui-dark-bg;
+      border: solid 1px $border-color;
     }
 
     &.ui-light {
-      background-color: $gray-200;
+      background-color: $ui-light-bg;
+    }
+
+    &.gl-dark {
+      background-color: $ui-dark-mode-bg;
+      border: solid 1px $border-color;
     }
   }
 

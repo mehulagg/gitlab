@@ -1,9 +1,8 @@
 <script>
 import eventHub from '../event_hub';
 
-import { PRESET_TYPES } from '../constants';
-
-import SectionMixin from '../mixins/section_mixin';
+import CommonMixin from '../mixins/common_mixin';
+import { EPIC_DETAILS_CELL_WIDTH, TIMELINE_CELL_MIN_WIDTH } from '../constants';
 
 import QuartersHeaderItem from './preset_quarters/quarters_header_item.vue';
 import MonthsHeaderItem from './preset_months/months_header_item.vue';
@@ -15,7 +14,7 @@ export default {
     MonthsHeaderItem,
     WeeksHeaderItem,
   },
-  mixins: [SectionMixin],
+  mixins: [CommonMixin],
   props: {
     presetType: {
       type: String,
@@ -29,14 +28,6 @@ export default {
       type: Array,
       required: true,
     },
-    shellWidth: {
-      type: Number,
-      required: true,
-    },
-    listScrollable: {
-      type: Boolean,
-      required: true,
-    },
   },
   data() {
     return {
@@ -45,14 +36,19 @@ export default {
   },
   computed: {
     headerItemComponentForPreset() {
-      if (this.presetType === PRESET_TYPES.QUARTERS) {
+      if (this.presetTypeQuarters) {
         return 'quarters-header-item';
-      } else if (this.presetType === PRESET_TYPES.MONTHS) {
+      } else if (this.presetTypeMonths) {
         return 'months-header-item';
-      } else if (this.presetType === PRESET_TYPES.WEEKS) {
+      } else if (this.presetTypeWeeks) {
         return 'weeks-header-item';
       }
       return '';
+    },
+    sectionContainerStyles() {
+      return {
+        width: `${EPIC_DETAILS_CELL_WIDTH + TIMELINE_CELL_MIN_WIDTH * this.timeframe.length}px`,
+      };
     },
   },
   mounted() {
@@ -84,7 +80,6 @@ export default {
       :timeframe-index="index"
       :timeframe-item="timeframeItem"
       :timeframe="timeframe"
-      :item-width="sectionItemWidth"
     />
   </div>
 </template>

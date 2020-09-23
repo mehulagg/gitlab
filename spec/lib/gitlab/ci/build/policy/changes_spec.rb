@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Build::Policy::Changes do
-  set(:project) { create(:project) }
+RSpec.describe Gitlab::Ci::Build::Policy::Changes do
+  let_it_be(:project) { create(:project) }
 
   describe '#satisfied_by?' do
     describe 'paths matching' do
@@ -89,7 +89,7 @@ describe Gitlab::Ci::Build::Policy::Changes do
     end
 
     describe 'gitaly integration' do
-      set(:project) { create(:project, :repository) }
+      let_it_be(:project) { create(:project, :repository) }
 
       let(:pipeline) do
         create(:ci_empty_pipeline, project: project,
@@ -119,6 +119,7 @@ describe Gitlab::Ci::Build::Policy::Changes do
     end
 
     context 'when branch is created' do
+      let_it_be(:project) { create(:project, :repository) }
       let(:pipeline) do
         create(:ci_empty_pipeline, project: project,
                                    ref: 'feature',

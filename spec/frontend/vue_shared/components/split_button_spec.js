@@ -1,4 +1,4 @@
-import { GlDropdown, GlDropdownItem } from '@gitlab/ui';
+import { GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
 import { shallowMount } from '@vue/test-utils';
 
 import SplitButton from '~/vue_shared/components/split_button.vue';
@@ -22,14 +22,13 @@ describe('SplitButton', () => {
   const createComponent = propsData => {
     wrapper = shallowMount(SplitButton, {
       propsData,
-      sync: false,
     });
   };
 
-  const findDropdown = () => wrapper.find(GlDropdown);
+  const findDropdown = () => wrapper.find(GlDeprecatedDropdown);
   const findDropdownItem = (index = 0) =>
     findDropdown()
-      .findAll(GlDropdownItem)
+      .findAll(GlDeprecatedDropdownItem)
       .at(index);
   const selectItem = index => {
     findDropdownItem(index).vm.$emit('click');
@@ -75,6 +74,7 @@ describe('SplitButton', () => {
 
   describe('emitted event', () => {
     let eventHandler;
+    let changeEventHandler;
 
     beforeEach(() => {
       createComponent({ actionItems: mockActionItems });
@@ -83,6 +83,11 @@ describe('SplitButton', () => {
     const addEventHandler = ({ eventName }) => {
       eventHandler = jest.fn();
       wrapper.vm.$once(eventName, () => eventHandler());
+    };
+
+    const addChangeEventHandler = () => {
+      changeEventHandler = jest.fn();
+      wrapper.vm.$once('change', item => changeEventHandler(item));
     };
 
     it('defaults to first actionItems event', () => {
@@ -100,5 +105,13 @@ describe('SplitButton', () => {
         .then(() => {
           expect(eventHandler).toHaveBeenCalled();
         }));
+
+    it('change to selected actionItem emits change event', () => {
+      addChangeEventHandler();
+
+      return selectItem(1).then(() => {
+        expect(changeEventHandler).toHaveBeenCalledWith(mockActionItems[1]);
+      });
+    });
   });
 });

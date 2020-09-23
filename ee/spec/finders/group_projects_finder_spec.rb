@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupProjectsFinder do
+RSpec.describe GroupProjectsFinder do
   include_context 'GroupProjectsFinder context'
 
   subject { finder.execute }
@@ -39,13 +39,11 @@ describe GroupProjectsFinder do
     end
 
     context 'when security dashboard is enabled for a group' do
-      let(:group) { create(:group, plan: :gold_plan) } # overriding group from 'GroupProjectsFinder context'
+      let(:group) { create(:group_with_plan, plan: :gold_plan) } # overriding group from 'GroupProjectsFinder context'
 
       before do
         stub_licensed_features(security_dashboard: true)
         enable_namespace_license_check!
-
-        create(:gitlab_subscription, hosted_plan: group.plan, namespace: group)
       end
 
       it { is_expected.to contain_exactly(project_with_reports) }

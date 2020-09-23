@@ -12,6 +12,10 @@ module EpicLinks
     end
 
     def execute
+      unless can?(current_user, :admin_epic_link, epic.group)
+        return error('Epic not found for given params', 404)
+      end
+
       move_epic!
       success
     rescue ActiveRecord::RecordNotFound

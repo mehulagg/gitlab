@@ -4,17 +4,10 @@ module Elastic
   module Latest
     class SnippetClassProxy < ApplicationClassProxy
       def elastic_search(query, options: {})
-        query_hash = basic_query_hash(%w(title file_name), query)
+        query_hash = basic_query_hash(%w(title description), query)
         query_hash = filter(query_hash, options)
 
-        search(query_hash)
-      end
-
-      def elastic_search_code(query, options: {})
-        query_hash = basic_query_hash(%w(content), query)
-        query_hash = filter(query_hash, options)
-
-        search(query_hash)
+        search(query_hash, options)
       end
 
       def es_type
@@ -25,7 +18,7 @@ module Elastic
 
       def filter(query_hash, options)
         user = options[:current_user]
-        return query_hash if user&.full_private_access?
+        return query_hash if user&.can_read_all_resources?
 
         filter_conditions =
           filter_personal_snippets(user, options) +
@@ -76,10 +69,15 @@ module Elastic
 
         # Include all project snippets for authorized projects
         if user
+          project_ids = user
+            .authorized_projects(Gitlab::Access::GUEST)
+            .filter_by_feature_visibility(:snippets, user)
+            .pluck_primary_key
+
           filter_conditions << {
             bool: {
               must: [
-                { terms: { project_id: user.authorized_projects(Gitlab::Access::GUEST).pluck_primary_key } }
+                { terms: { project_id: project_ids } }
               ]
             }
           }

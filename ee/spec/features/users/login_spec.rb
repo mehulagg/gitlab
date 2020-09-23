@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Login' do
+RSpec.describe 'Login' do
   include LdapHelpers
   include UserLoginHelper
   include DeviseHelpers
@@ -15,7 +15,7 @@ describe 'Login' do
     user = create(:user, password: 'not-the-default')
 
     expect { gitlab_sign_in(user) }
-      .to change { SecurityEvent.where(entity_id: -1).count }.from(0).to(1)
+      .to change { AuditEvent.where(entity_id: -1).count }.from(0).to(1)
   end
 
   it 'creates a security event for an invalid OAuth login' do
@@ -29,7 +29,7 @@ describe 'Login' do
     user = create(:omniauth_user, :two_factor, extern_uid: 'my-uid', provider: 'saml')
 
     expect { gitlab_sign_in_via('saml', user, 'wrong-uid') }
-      .to change { SecurityEvent.where(entity_id: -1).count }.from(0).to(1)
+      .to change { AuditEvent.where(entity_id: -1).count }.from(0).to(1)
   end
 
   describe 'smartcard authentication' do
@@ -77,6 +77,45 @@ describe 'Login' do
 
           expect(page).to have_selector('.nav-tabs a[href="#smartcard"]')
         end
+
+        describe 'with two-factor authentication required', :clean_gitlab_redis_shared_state do
+          let_it_be(:user) { create(:user) }
+          let_it_be(:smartcard_identity) { create(:smartcard_identity, user: user) }
+
+          before do
+            stub_application_setting(require_two_factor_authentication: true)
+          end
+
+          context 'with a smartcard session' do
+            let(:openssl_certificate_store) { instance_double(OpenSSL::X509::Store) }
+            let(:openssl_certificate) do
+              instance_double(OpenSSL::X509::Certificate, subject: smartcard_identity.subject, issuer: smartcard_identity.issuer)
+            end
+
+            it 'does not ask for Two-Factor Authentication' do
+              allow(Gitlab::Auth::Smartcard::Certificate).to receive(:store).and_return(openssl_certificate_store)
+              allow(OpenSSL::X509::Certificate).to receive(:new).and_return(openssl_certificate)
+              allow(openssl_certificate_store).to receive(:verify).and_return(true)
+
+              # Loging using smartcard
+              visit verify_certificate_smartcard_path(client_certificate: openssl_certificate)
+
+              visit profile_path
+
+              expect(page).not_to have_content('Two-Factor Authentication')
+            end
+          end
+
+          context 'without a smartcard session' do
+            it 'asks for Two-Factor Authentication' do
+              sign_in(user)
+
+              visit profile_path
+
+              expect(page).to have_content('Two-Factor Authentication')
+            end
+          end
+        end
       end
     end
   end
@@ -99,7 +138,7 @@ describe 'Login' do
       stub_licensed_features(smartcard_auth: true)
       stub_ldap_setting(enabled: true)
       allow(Gitlab.config.smartcard).to receive(:enabled).and_return(true)
-      allow(::Gitlab::Auth::LDAP::Config).to receive_messages(enabled: true, servers: [ldap_server_config])
+      allow(::Gitlab::Auth::Ldap::Config).to receive_messages(enabled: true, servers: [ldap_server_config])
       allow_any_instance_of(ActionDispatch::Routing::RoutesProxy)
         .to receive(:user_ldapmain_omniauth_callback_path)
               .and_return('/users/auth/ldapmain/callback')
@@ -169,6 +208,7 @@ describe 'Login' do
       let(:user) { create(:user, :two_factor_via_u2f) }
 
       before do
+        stub_feature_flags(webauthn: false)
         mock_group_saml(uid: identity.extern_uid)
       end
 
@@ -183,6 +223,71 @@ describe 'Login' do
         fake_successful_u2f_authentication
 
         expect(current_path).to eq root_path
+      end
+    end
+
+    context 'with WebAuthn two factor', :js do
+      let(:user) { create(:user, :two_factor_via_webauthn) }
+
+      before do
+        mock_group_saml(uid: identity.extern_uid)
+      end
+
+      it 'shows WebAuthn prompt after SAML' do
+        visit sso_group_saml_providers_path(group, token: group.saml_discovery_token)
+
+        click_link 'Sign in with Single Sign-On'
+
+        # Mock the webauthn procedure to neither reject or resolve, just do nothing
+        # Using the built-in credentials.get functionality would result in an SecurityError
+        # as these tests are executed using an IP-adress as effective domain
+        page.execute_script <<~JS
+          navigator.credentials.get = function() {
+            return new Promise((resolve) => {
+              window.gl.resolveWebauthn = resolve;
+            });
+          }
+        JS
+
+        click_link('Try again', href: false)
+
+        expect(page).to have_content('Trying to communicate with your device')
+        expect(page).to have_link('Sign in via 2FA code')
+
+        fake_successful_webauthn_authentication
+
+        expect(current_path).to eq root_path
+      end
+    end
+  end
+
+  describe 'restricted visibility levels' do
+    context 'contains public level' do
+      before do
+        stub_application_setting(restricted_visibility_levels: [Gitlab::VisibilityLevel::PUBLIC])
+      end
+
+      it 'hides Explore link' do
+        visit new_user_session_path
+
+        expect(page).to have_no_link("Explore")
+      end
+
+      it 'hides help link' do
+        visit new_user_session_path
+
+        expect(page).to have_no_link("Help")
+      end
+    end
+
+    context 'does not contain public level' do
+      it 'displays Explore and Help links' do
+        visit new_user_session_path
+
+        href = find_link("Help")[:href]
+
+        expect(href).to eq("/help")
+        expect(page).to have_link("Explore")
       end
     end
   end

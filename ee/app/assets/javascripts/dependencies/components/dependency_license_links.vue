@@ -1,8 +1,8 @@
 <script>
-import { uniqueId } from 'underscore';
+import { uniqueId } from 'lodash';
 
-import { sprintf, s__ } from '~/locale';
 import { GlButton, GlLink, GlModal, GlModalDirective, GlIntersperse } from '@gitlab/ui';
+import { sprintf, s__ } from '~/locale';
 
 // If there are more licenses than this count, a counter will be displayed for the remaining licenses
 // eg.: VISIBLE_LICENSE_COUNT = 2; licenses = ['MIT', 'GNU', 'GPL'] -> 'MIT, GNU and 1 more'

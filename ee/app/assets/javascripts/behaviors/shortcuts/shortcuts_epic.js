@@ -21,7 +21,10 @@ export default class ShortcutsEpic extends ShortcutsIssuable {
     if (parseBoolean(Cookies.get('collapsed_gutter'))) {
       document.dispatchEvent(new Event('toggleSidebarRevealLabelsDropdown'));
     } else {
-      $block.find('.js-sidebar-dropdown-toggle').trigger('click');
+      $block
+        .find('.js-sidebar-dropdown-toggle')
+        .get(0)
+        .dispatchEvent(new Event('click'));
     }
   }
 }

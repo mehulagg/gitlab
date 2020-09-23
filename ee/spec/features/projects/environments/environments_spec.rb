@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Environments page', :js do
+RSpec.describe 'Environments page', :js do
   let(:project) { create(:project, :repository) }
   let!(:environment) { create(:environment, name: 'production', project: project) }
   let(:user) { create(:user) }
@@ -46,13 +46,13 @@ describe 'Environments page', :js do
 
       it 'shows an enabled play button' do
         find('.js-environment-actions-dropdown').click
-        play_button = %q{button.js-manual-action-link.no-btn.btn}
+        play_button = %q{button.js-manual-action-link}
 
         expect(page).to have_selector(play_button)
       end
 
       it 'shows a stop button' do
-        stop_button_selector = %q{button[data-original-title="Stop environment"]}
+        stop_button_selector = %q{button[title="Stop environment"]}
 
         expect(page).to have_selector(stop_button_selector)
       end
@@ -92,7 +92,7 @@ describe 'Environments page', :js do
       end
 
       it 'shows re deploy button' do
-        redeploy_button_selector = %q{button[data-original-title="Re-deploy to environment"]}
+        redeploy_button_selector = %q{button[title="Re-deploy to environment"]}
 
         expect(page).to have_selector(redeploy_button_selector)
       end
@@ -130,13 +130,13 @@ describe 'Environments page', :js do
 
       it 'show a disabled play button' do
         find('.js-environment-actions-dropdown').click
-        disabled_play_button = %q{button.js-manual-action-link.no-btn.btn.disabled}
+        disabled_play_button = %q{button.js-manual-action-link.disabled}
 
         expect(page).to have_selector(disabled_play_button)
       end
 
       it 'does not show a stop button' do
-        stop_button_selector = %q{button[data-original-title="Stop environment"]}
+        stop_button_selector = %q{button[title="Stop environment"]}
 
         expect(page).not_to have_selector(stop_button_selector)
       end
@@ -176,9 +176,58 @@ describe 'Environments page', :js do
       end
 
       it 'does not show a re deploy button' do
-        redeploy_button_selector = %q{button[data-original-title="Re-deploy to environment"]}
+        redeploy_button_selector = %q{button[title="Re-deploy to environment"]}
 
         expect(page).not_to have_selector(redeploy_button_selector)
+      end
+    end
+  end
+
+  context 'when environment has an open alert' do
+    let!(:alert) do
+      create(:alert_management_alert, :triggered, :prometheus,
+        title: 'HTTP Error Rate', project: project,
+        environment: environment, prometheus_alert: prometheus_alert)
+    end
+
+    let!(:prometheus_alert) do
+      create(:prometheus_alert, project: project, environment: environment,
+        prometheus_metric: prometheus_metric)
+    end
+
+    let!(:prometheus_metric) do
+      create(:prometheus_metric, project: project, unit: '%')
+    end
+
+    before do
+      stub_licensed_features(environment_alerts: true)
+    end
+
+    it 'shows the open alert for the environment row' do
+      visit project_environments_path(project)
+
+      within(find('div[data-testid="alert"]')) do
+        expect(page).to have_content('Critical')
+        expect(page).to have_content('HTTP Error Rate exceeded 1.0%')
+        expect(page).to have_link('View Details', href: alert.present.details_url)
+      end
+
+      # and it's not shown when the alert is resolved.
+      alert.resolve!
+      visit project_environments_path(project)
+
+      expect(page).not_to have_css('div[data-testid="alert"]')
+    end
+
+    context 'when user does not have a license for the feature' do
+      before do
+        stub_licensed_features(environment_alerts: false)
+      end
+
+      it 'does not show the open alert for the environment row' do
+        visit project_environments_path(project)
+
+        expect(page).not_to have_css('div[data-testid="alert"]')
       end
     end
   end

@@ -2,8 +2,20 @@
 
 require 'spec_helper'
 
-describe Gitlab::Email::Handler::CreateMergeRequestHandler do
+RSpec.describe Gitlab::Email::Handler::CreateMergeRequestHandler do
   include_context :email_shared_context
+  let!(:user) do
+    create(
+      :user,
+      email: 'jake@adventuretime.ooo',
+      incoming_email_token: 'auth_token'
+    )
+  end
+
+  let!(:project)  { create(:project, :public, :repository, namespace: namespace, path: 'gitlabhq') }
+  let(:namespace) { create(:namespace, path: 'gitlabhq') }
+  let(:email_raw) { email_fixture('emails/valid_new_merge_request.eml') }
+
   it_behaves_like :reply_processing_shared_examples
 
   before do
@@ -13,18 +25,6 @@ describe Gitlab::Email::Handler::CreateMergeRequestHandler do
 
   after do
     TestEnv.clean_test_path
-  end
-
-  let(:email_raw) { email_fixture('emails/valid_new_merge_request.eml') }
-  let(:namespace) { create(:namespace, path: 'gitlabhq') }
-
-  let!(:project)  { create(:project, :public, :repository, namespace: namespace, path: 'gitlabhq') }
-  let!(:user) do
-    create(
-      :user,
-      email: 'jake@adventuretime.ooo',
-      incoming_email_token: 'auth_token'
-    )
   end
 
   context "when email key" do
@@ -95,7 +95,9 @@ describe Gitlab::Email::Handler::CreateMergeRequestHandler do
     context "something is wrong" do
       context "when the merge request could not be saved" do
         before do
-          allow_any_instance_of(MergeRequest).to receive(:save).and_return(false)
+          allow_next_instance_of(MergeRequest) do |instance|
+            allow(instance).to receive(:save).and_return(false)
+          end
         end
 
         it "raises an InvalidMergeRequestError" do
@@ -189,6 +191,7 @@ describe Gitlab::Email::Handler::CreateMergeRequestHandler do
   describe '#patch_attachments' do
     let(:email_raw) { email_fixture('emails/merge_request_multiple_patches.eml') }
     let(:mail) { Mail::Message.new(email_raw) }
+
     subject(:handler) { described_class.new(mail, mail_key) }
 
     it 'orders attachments ending in `.patch` by name' do

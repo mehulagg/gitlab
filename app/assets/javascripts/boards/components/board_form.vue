@@ -1,6 +1,6 @@
 <script>
 import { __ } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import DeprecatedModal from '~/vue_shared/components/deprecated_modal.vue';
 import { visitUrl } from '~/lib/utils/url_utility';
 import boardsStore from '~/boards/stores/boards_store';
@@ -25,11 +25,11 @@ export default {
       type: Boolean,
       required: true,
     },
-    milestonePath: {
+    labelsPath: {
       type: String,
       required: true,
     },
-    labelsPath: {
+    labelsWebUrl: {
       type: String,
       required: true,
     },
@@ -57,11 +57,6 @@ export default {
       type: Boolean,
       required: false,
       default: false,
-    },
-    scopedLabelsDocumentationLink: {
-      type: String,
-      required: false,
-      default: '#',
     },
   },
   data() {
@@ -133,7 +128,7 @@ export default {
       if (this.board.name.length === 0) return;
       this.isLoading = true;
       if (this.isDeleteForm) {
-        gl.boardService
+        boardsStore
           .deleteBoard(this.currentBoard)
           .then(() => {
             visitUrl(boardsStore.rootPath);
@@ -143,7 +138,7 @@ export default {
             this.isLoading = false;
           });
       } else {
-        gl.boardService
+        boardsStore
           .createBoard(this.board)
           .then(resp => resp.data)
           .then(data => {
@@ -182,7 +177,7 @@ export default {
     @cancel="cancel"
     @submit="submit"
   >
-    <template slot="body">
+    <template #body>
       <p v-if="isDeleteForm">{{ __('Are you sure you want to delete this board?') }}</p>
       <form v-else class="js-board-config-modal" @submit.prevent>
         <div v-if="!readonly" class="append-bottom-20">
@@ -206,9 +201,8 @@ export default {
           :collapse-scope="isNewForm"
           :board="board"
           :can-admin-board="canAdminBoard"
-          :milestone-path="milestonePath"
           :labels-path="labelsPath"
-          :scoped-labels-documentation-link="scopedLabelsDocumentationLink"
+          :labels-web-url="labelsWebUrl"
           :enable-scoped-labels="enableScopedLabels"
           :project-id="projectId"
           :group-id="groupId"

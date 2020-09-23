@@ -7,11 +7,10 @@ module EE
                    request_access_enabled membership_lock lfs_enabled
                    shared_runners_minutes_limit
                    require_two_factor_authentication
-                   two_factor_grace_period plan_id
+                   two_factor_grace_period
                    project_creation_level).freeze
 
       COLUMN_HUMAN_NAME = {
-        plan_id: 'plan',
         visibility_level: 'visibility'
       }.freeze
 
@@ -36,11 +35,6 @@ module EE
             from: ::Gitlab::Access.project_creation_level_name(old),
             to: ::Gitlab::Access.project_creation_level_name(new)
           }
-        when :plan_id
-          {
-            from: plan_name(old),
-            to: plan_name(new)
-          }
         else
           {
             from: old,
@@ -50,12 +44,6 @@ module EE
       end
 
       private
-
-      def plan_name(plan_id)
-        return 'none' unless plan_id.present?
-
-        Plan.find_by_id(plan_id.to_i)&.name || 'unknown'
-      end
 
       def column_human_name(column)
         COLUMN_HUMAN_NAME.fetch(column, column.to_s)

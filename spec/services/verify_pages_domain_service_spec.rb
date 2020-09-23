@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe VerifyPagesDomainService do
+RSpec.describe VerifyPagesDomainService do
   using RSpec::Parameterized::TableSyntax
   include EmailHelpers
 
@@ -348,7 +348,7 @@ describe VerifyPagesDomainService do
       end
 
       it 'does not shorten any grace period' do
-        grace = Time.now + 1.year
+        grace = Time.current + 1.year
         domain.update!(enabled_until: grace)
         disallow_resolver!
 

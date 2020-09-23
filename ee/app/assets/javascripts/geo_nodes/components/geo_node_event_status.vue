@@ -39,7 +39,7 @@ export default {
 </script>
 
 <template>
-  <div class="node-detail-value">
+  <div class="mt-1 node-detail-value">
     <template v-if="eventTimeStamp">
       <strong> {{ eventString }} </strong>
       <span
@@ -49,7 +49,7 @@ export default {
         class="event-status-timestamp"
         data-placement="bottom"
       >
-        ({{ timeFormated(timeStamp) }})
+        ({{ timeFormatted(timeStamp) }})
       </span>
     </template>
     <strong v-else> {{ __('Not available') }} </strong>

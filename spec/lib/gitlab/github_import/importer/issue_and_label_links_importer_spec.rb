@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Importer::IssueAndLabelLinksImporter do
+RSpec.describe Gitlab::GithubImport::Importer::IssueAndLabelLinksImporter do
   describe '#execute' do
     it 'imports an issue and its labels' do
       issue = double(:issue)

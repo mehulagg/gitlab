@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PushRule do
+RSpec.describe PushRule do
   using RSpec::Parameterized::TableSyntax
 
   let(:global_push_rule) { create(:push_rule_sample) }
@@ -15,7 +15,6 @@ describe PushRule do
   end
 
   describe "Validation" do
-    it { is_expected.to validate_presence_of(:project) }
     it { is_expected.to validate_numericality_of(:max_file_size).is_greater_than_or_equal_to(0).only_integer }
 
     it 'validates RE2 regex syntax' do
@@ -133,7 +132,7 @@ describe PushRule do
     commit_message_blocked?: :commit_message_negative_regex,
     branch_name_allowed?: :branch_name_regex,
     author_email_allowed?: :author_email_regex,
-    filename_blacklisted?: :file_name_regex
+    filename_denylisted?: :file_name_regex
   }
 
   methods_and_regexes.each do |method_name, regex_attr|

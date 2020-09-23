@@ -3,7 +3,7 @@
 All methods require administrator authorization.
 
 The URL endpoint of the system hooks can also be configured using the UI in
-the admin area under **Hooks** (`/admin/hooks`).
+the **Admin Area > System Hooks** (`/admin/hooks`).
 
 Read more about [system hooks](../system_hooks/system_hooks.md).
 
@@ -11,14 +11,14 @@ Read more about [system hooks](../system_hooks/system_hooks.md).
 
 Get a list of all system hooks.
 
-```
+```plaintext
 GET /hooks
 ```
 
 Example request:
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/hooks
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/hooks"
 ```
 
 Example response:
@@ -42,7 +42,7 @@ Example response:
 
 Add a new system hook.
 
-```
+```plaintext
 POST /hooks
 ```
 
@@ -58,7 +58,7 @@ POST /hooks
 
 Example request:
 
-```bash
+```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/hooks?url=https://gitlab.example.com/hook"
 ```
 
@@ -81,7 +81,7 @@ Example response:
 
 ## Test system hook
 
-```
+```plaintext
 GET /hooks/:id
 ```
 
@@ -91,8 +91,8 @@ GET /hooks/:id
 
 Example request:
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/hooks/2
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/hooks/2"
 ```
 
 Example response:
@@ -112,7 +112,7 @@ Example response:
 
 Deletes a system hook.
 
-```
+```plaintext
 DELETE /hooks/:id
 ```
 
@@ -122,6 +122,6 @@ DELETE /hooks/:id
 
 Example request:
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/hooks/2
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/hooks/2"
 ```

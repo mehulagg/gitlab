@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::PhabricatorImport::Conduit::UsersResponse do
+RSpec.describe Gitlab::PhabricatorImport::Conduit::UsersResponse do
   let(:conduit_response) do
     Gitlab::PhabricatorImport::Conduit::Response
-      .new(JSON.parse(fixture_file('phabricator_responses/user.search.json')))
+      .new(Gitlab::Json.parse(fixture_file('phabricator_responses/user.search.json')))
   end
 
   subject(:response) { described_class.new(conduit_response) }

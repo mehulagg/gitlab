@@ -2,14 +2,13 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User resolves conflicts', :js do
+RSpec.describe 'Merge request > User resolves conflicts', :js do
   let(:project) { create(:project, :repository) }
   let(:user) { project.creator }
 
   before do
     # In order to have the diffs collapsed, we need to disable the increase feature
     stub_feature_flags(gitlab_git_diff_size_limit_increase: false)
-    stub_feature_flags(single_mr_diff_view: false)
   end
 
   def create_merge_request(source_branch)
@@ -17,8 +16,6 @@ describe 'Merge request > User resolves conflicts', :js do
       mr.mark_as_unmergeable
     end
   end
-
-  it_behaves_like 'rendering a single diff version'
 
   shared_examples 'conflicts are resolved in Interactive mode' do
     it 'conflicts are resolved in Interactive mode' do
@@ -172,8 +169,8 @@ describe 'Merge request > User resolves conflicts', :js do
 
     context "with malicious branch name" do
       let(:bad_branch_name) { "malicious-branch-{{toString.constructor('alert(/xss/)')()}}" }
-      let(:branch) { project.repository.create_branch(bad_branch_name, 'conflict-resolvable') }
-      let(:merge_request) { create_merge_request(branch.name) }
+      let!(:branch) { project.repository.create_branch(bad_branch_name, 'conflict-resolvable') }
+      let(:merge_request) { create_merge_request(bad_branch_name) }
 
       before do
         visit project_merge_request_path(project, merge_request)
@@ -186,14 +183,14 @@ describe 'Merge request > User resolves conflicts', :js do
     end
   end
 
-  UNRESOLVABLE_CONFLICTS = {
+  unresolvable_conflicts = {
     'conflict-too-large' => 'when the conflicts contain a large file',
     'conflict-binary-file' => 'when the conflicts contain a binary file',
     'conflict-missing-side' => 'when the conflicts contain a file edited in one branch and deleted in another',
     'conflict-non-utf8' => 'when the conflicts contain a non-UTF-8 file'
   }.freeze
 
-  UNRESOLVABLE_CONFLICTS.each do |source_branch, description|
+  unresolvable_conflicts.each do |source_branch, description|
     context description do
       let(:merge_request) { create_merge_request(source_branch) }
 

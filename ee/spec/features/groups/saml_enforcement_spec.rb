@@ -2,8 +2,11 @@
 
 require 'spec_helper'
 
-describe 'SAML access enforcement' do
+RSpec.describe 'SAML access enforcement' do
   let(:group) { create(:group, :private, name: 'The Group Name') }
+  let(:sub_group) { create(:group, :private, name: 'The Subgroup Name', parent: group) }
+  let(:project) { create(:project, :private, name: 'The Project Name', namespace: group) }
+  let(:sub_group_project) { create(:project, name: 'The Subgroup Project Name', group: sub_group) }
   let(:saml_provider) { create(:saml_provider, group: group, enforced_sso: true) }
   let(:identity) { create(:group_saml_identity, saml_provider: saml_provider) }
   let(:user) { identity.user }
@@ -16,27 +19,85 @@ describe 'SAML access enforcement' do
   end
 
   context 'without SAML session' do
-    it 'prevents access to group resources via SSO redirect' do
-      visit group_path(group)
+    shared_examples 'resource access' do
+      before do
+        visit resource_path
+      end
 
-      expect(page).to have_content("SAML SSO Sign in to \"#{group.name}\"")
-      expect(current_url).to match(/groups\/#{group.to_param}\/-\/saml\/sso\?redirect=.+&token=/)
+      it 'prevents access to resource via SSO redirect' do
+        expect(page).to have_content("SAML SSO Sign in to \"#{group.name}\"")
+        expect(current_url).to match(/groups\/#{group.to_param}\/-\/saml\/sso\?redirect=.+&token=/)
+      end
+    end
+
+    context 'group resources' do
+      it_behaves_like 'resource access' do
+        let(:resource_path) { group_path(group) }
+      end
+    end
+
+    context 'subgroup resources' do
+      it_behaves_like 'resource access' do
+        let(:resource_path) { group_path(sub_group) }
+      end
+    end
+
+    context 'project resources' do
+      it_behaves_like 'resource access' do
+        let(:resource_path) { project_path(project) }
+      end
+    end
+
+    context 'subgroup project resources' do
+      it_behaves_like 'resource access' do
+        let(:resource_path) { project_path(sub_group_project) }
+      end
     end
   end
 
   context 'with active SAML login from session' do
-    before do
-      dummy_session = { active_group_sso_sign_ins: { saml_provider.id => DateTime.now } }
-      allow(Gitlab::Session).to receive(:current).and_return(dummy_session)
+    shared_examples 'resource access' do
+      before do
+        dummy_session = { active_group_sso_sign_ins: { saml_provider.id => DateTime.now } }
+        allow(Gitlab::Session).to receive(:current).and_return(dummy_session)
+
+        visit resource_path
+      end
+
+      it 'allows access to resource' do
+        expect(page).not_to have_content('Page Not Found')
+        expect(page).not_to have_content('SAML SSO Sign')
+        expect(page).to have_content(resource_name)
+        expect(current_path).to eq(resource_path)
+      end
     end
 
-    it 'allows access to group resources' do
-      visit group_path(group)
+    context 'group resources' do
+      it_behaves_like 'resource access' do
+        let(:resource_path) { group_path(group) }
+        let(:resource_name) { group.name }
+      end
+    end
 
-      expect(page).not_to have_content('Page Not Found')
-      expect(page).not_to have_content('SAML SSO Sign')
-      expect(page).to have_content(group.name)
-      expect(current_path).to eq(group_path(group))
+    context 'subgroup resources' do
+      it_behaves_like 'resource access' do
+        let(:resource_path) { group_path(sub_group) }
+        let(:resource_name) { sub_group.name }
+      end
+    end
+
+    context 'project resources' do
+      it_behaves_like 'resource access' do
+        let(:resource_path) { project_path(project) }
+        let(:resource_name) { project.name }
+      end
+    end
+
+    context 'subgroup project resources' do
+      it_behaves_like 'resource access' do
+        let(:resource_path) { project_path(sub_group_project) }
+        let(:resource_name) { sub_group_project.name }
+      end
     end
   end
 end

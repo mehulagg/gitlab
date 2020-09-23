@@ -55,54 +55,13 @@ module EE
       }.merge(super)
     end
 
-    override :issuable_sort_icon_suffix
-    def issuable_sort_icon_suffix(sort_value)
+    override :sort_direction_icon
+    def sort_direction_icon(sort_value)
       if sort_value == sort_value_weight
-        'lowest'
+        'sort-lowest'
       else
         super
       end
-    end
-
-    def packages_sort_options_hash
-      {
-        sort_value_recently_created  => sort_title_created_date,
-        sort_value_oldest_created    => sort_title_created_date,
-        sort_value_name              => sort_title_name,
-        sort_value_name_desc         => sort_title_name,
-        sort_value_version_desc      => sort_title_version,
-        sort_value_version_asc       => sort_title_version,
-        sort_value_type_desc         => sort_title_type,
-        sort_value_type_asc          => sort_title_type,
-        sort_value_project_name_desc => sort_title_project_name,
-        sort_value_project_name_asc  => sort_title_project_name
-      }
-    end
-
-    def packages_reverse_sort_order_hash
-      {
-        sort_value_recently_created  => sort_value_oldest_created,
-        sort_value_oldest_created    => sort_value_recently_created,
-        sort_value_name              => sort_value_name_desc,
-        sort_value_name_desc         => sort_value_name,
-        sort_value_version_desc      => sort_value_version_asc,
-        sort_value_version_asc       => sort_value_version_desc,
-        sort_value_type_desc         => sort_value_type_asc,
-        sort_value_type_asc          => sort_value_type_desc,
-        sort_value_project_name_desc => sort_value_project_name_asc,
-        sort_value_project_name_asc  => sort_value_project_name_desc
-      }
-    end
-
-    def packages_sort_option_title(sort_value)
-      packages_sort_options_hash[sort_value] || sort_title_created_date
-    end
-
-    def packages_sort_direction_button(sort_value)
-      reverse_sort = packages_reverse_sort_order_hash[sort_value]
-      url = package_sort_path(sort: reverse_sort)
-
-      sort_direction_button(url, reverse_sort, sort_value)
     end
 
     # Creates a button with the opposite ordering for the current field in UI.
@@ -110,7 +69,7 @@ module EE
       opposite_sorting_param = epics_ordering_options_hash[sort] || epics_ordering_options_hash.key(sort)
       sort_icon = sort.end_with?('desc') ? 'sort-highest' : 'sort-lowest'
 
-      link_to sprite_icon(sort_icon, size: 16),
+      link_to sprite_icon(sort_icon),
               page_filter_path(sort: opposite_sorting_param),
               class: "btn btn-default has-tooltip qa-reverse-sort btn-sort-direction",
               title: _("Sort direction")

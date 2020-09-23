@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Namespaces < Grape::API
+  class Namespaces < Grape::API::Instance
     include PaginationParams
 
     before { authenticate! }
@@ -31,6 +31,8 @@ module API
       end
       get do
         namespaces = current_user.admin ? Namespace.all : current_user.namespaces
+
+        namespaces = namespaces.include_gitlab_subscription if Gitlab.ee?
 
         namespaces = namespaces.search(params[:search]) if params[:search].present?
 

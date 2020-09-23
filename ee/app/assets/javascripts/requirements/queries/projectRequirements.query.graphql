@@ -1,0 +1,55 @@
+query projectRequirementsEE(
+  $projectPath: ID!
+  $state: RequirementState
+  $firstPageSize: Int
+  $lastPageSize: Int
+  $prevPageCursor: String = ""
+  $nextPageCursor: String = ""
+  $authorUsernames: [String!] = []
+  $search: String = ""
+  $sortBy: Sort = created_desc
+) {
+  project(fullPath: $projectPath) {
+    requirements(
+      first: $firstPageSize
+      last: $lastPageSize
+      after: $nextPageCursor
+      before: $prevPageCursor
+      state: $state
+      authorUsername: $authorUsernames
+      search: $search
+      sort: $sortBy
+    ) {
+      nodes {
+        iid
+        title
+        createdAt
+        updatedAt
+        state
+        testReports(first: 1, sort: created_desc) {
+          nodes {
+            id
+            state
+            createdAt
+          }
+        }
+        userPermissions {
+          updateRequirement
+          adminRequirement
+        }
+        author {
+          name
+          username
+          avatarUrl
+          webUrl
+        }
+      }
+      pageInfo {
+        hasPreviousPage
+        hasNextPage
+        startCursor
+        endCursor
+      }
+    }
+  }
+}

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UnsubscribesController do
+RSpec.describe UnsubscribesController do
   let!(:user) { create :user, email: 'me@example.com' }
 
   describe "show" do

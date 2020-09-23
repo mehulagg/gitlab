@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::EE::API::Helpers::ScimPagination do
+RSpec.describe ::EE::API::Helpers::ScimPagination do
   let(:query) { {} }
   let(:pagination_class) { Struct.new(:params).include(described_class) }
 

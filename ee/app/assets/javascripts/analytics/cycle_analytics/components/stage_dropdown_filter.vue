@@ -1,16 +1,13 @@
 <script>
-import { sprintf, s__, n__ } from '~/locale';
-import $ from 'jquery';
-import _ from 'underscore';
-import Icon from '~/vue_shared/components/icon.vue';
-import { GlButton } from '@gitlab/ui';
-import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
+import { GlDropdown, GlDropdownSectionHeader, GlDropdownItem } from '@gitlab/ui';
+import { sprintf, s__ } from '~/locale';
 
 export default {
   name: 'StageDropdownFilter',
   components: {
-    Icon,
-    GlButton,
+    GlDropdown,
+    GlDropdownSectionHeader,
+    GlDropdownItem,
   },
   props: {
     stages: {
@@ -25,77 +22,60 @@ export default {
   },
   data() {
     return {
-      selectedStages: [],
+      selectedStages: this.stages,
     };
   },
   computed: {
     selectedStagesLabel() {
-      return this.selectedStages.length
-        ? sprintf(
-            n__(
-              'CycleAnalytics|%{stageName}',
-              'CycleAnalytics|%d stages selected',
-              this.selectedStages.length,
-            ),
-            { stageName: capitalizeFirstCharacter(this.selectedStages[0].name) },
-          )
-        : s__('CycleAnalytics|All stages');
+      const { stages, selectedStages } = this;
+
+      if (selectedStages.length === 1) {
+        return selectedStages[0].title;
+      } else if (selectedStages.length === stages.length) {
+        return s__('CycleAnalytics|All stages');
+      } else if (selectedStages.length > 1) {
+        return sprintf(s__('CycleAnalytics|%{stageCount} stages selected'), {
+          stageCount: selectedStages.length,
+        });
+      }
+
+      return s__('CycleAnalytics|No stages selected');
     },
   },
-  mounted() {
-    $(this.$refs.stagesDropdown).glDropdown({
-      selectable: true,
-      multiSelect: true,
-      clicked: this.onClick.bind(this),
-      data: this.formatData.bind(this),
-      renderRow: group => this.rowTemplate(group),
-      text: stage => stage.name,
-    });
-  },
+
   methods: {
-    setSelectedStages(selectedObj, isMarking) {
+    isStageSelected(stageId) {
+      return this.selectedStages.some(({ id }) => id === stageId);
+    },
+    onClick({ stage, isMarking }) {
       this.selectedStages = isMarking
-        ? this.selectedStages.concat([selectedObj])
-        : this.selectedStages.filter(stage => stage.name !== selectedObj.name);
-    },
-    onClick({ selectedObj, e, isMarking }) {
-      e.preventDefault();
-      this.setSelectedStages(selectedObj, isMarking);
+        ? this.selectedStages.filter(s => s.id !== stage.id)
+        : this.selectedStages.concat([stage]);
+
       this.$emit('selected', this.selectedStages);
-    },
-    formatData(term, callback) {
-      callback(this.stages);
-    },
-    rowTemplate(stage) {
-      return `
-          <li>
-            <a href='#' class='dropdown-menu-link'>
-              ${_.escape(capitalizeFirstCharacter(stage.name))}
-            </a>
-          </li>
-        `;
     },
   },
 };
 </script>
 
 <template>
-  <div>
-    <div ref="stagesDropdown" class="dropdown dropdown-stages">
-      <gl-button
-        class="dropdown-menu-toggle wide shadow-none bg-white"
-        type="button"
-        data-toggle="dropdown"
-        aria-expanded="false"
-        :aria-label="label"
-      >
-        {{ selectedStagesLabel }}
-        <icon name="chevron-down" />
-      </gl-button>
-      <div class="dropdown-menu dropdown-menu-selectable dropdown-menu-full-width">
-        <div class="dropdown-title text-left">{{ s__('CycleAnalytics|Stages') }}</div>
-        <div class="dropdown-content"></div>
-      </div>
-    </div>
-  </div>
+  <gl-dropdown
+    ref="stagesDropdown"
+    class="js-dropdown-stages"
+    toggle-class="gl-shadow-none"
+    :text="selectedStagesLabel"
+    right
+  >
+    <gl-dropdown-section-header>{{ s__('CycleAnalytics|Stages') }}</gl-dropdown-section-header>
+    <gl-dropdown-item
+      v-for="stage in stages"
+      :key="stage.id"
+      :active="isStageSelected(stage.id)"
+      :is-check-item="true"
+      :is-checked="isStageSelected(stage.id)"
+      @click="onClick({ stage, isMarking: isStageSelected(stage.id) })"
+    >
+      {{ stage.title }}
+    </gl-dropdown-item>
+  </gl-dropdown>
 </template>

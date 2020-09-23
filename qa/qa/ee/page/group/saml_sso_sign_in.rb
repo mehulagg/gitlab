@@ -9,8 +9,11 @@ module QA
             element :saml_sso_signin_button
           end
 
-          def click_signin
-            click_element :saml_sso_signin_button
+          def click_sign_in
+            Support::Retrier.retry_until do
+              click_element :saml_sso_signin_button
+              !has_element?(:saml_sso_signin_button, wait: 0)
+            end
           end
         end
       end

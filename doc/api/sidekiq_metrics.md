@@ -1,6 +1,6 @@
-# Sidekiq Metrics API
+# Sidekiq Metrics API **(CORE ONLY)**
 
->**Note:** This endpoint is only available on GitLab 8.9 and above.
+> Introduced in GitLab 8.9.
 
 This API endpoint allows you to retrieve some information about the current state
 of Sidekiq, its jobs, queues, and processes.
@@ -10,12 +10,12 @@ of Sidekiq, its jobs, queues, and processes.
 List information about all the registered queues, their backlog and their
 latency.
 
-```
+```plaintext
 GET /sidekiq/queue_metrics
 ```
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/sidekiq/queue_metrics
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/sidekiq/queue_metrics"
 ```
 
 Example response:
@@ -35,12 +35,12 @@ Example response:
 
 List information about all the Sidekiq workers registered to process your queues.
 
-```
+```plaintext
 GET /sidekiq/process_metrics
 ```
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/sidekiq/process_metrics
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/sidekiq/process_metrics"
 ```
 
 Example response:
@@ -77,12 +77,12 @@ Example response:
 
 List information about the jobs that Sidekiq has performed.
 
-```
+```plaintext
 GET /sidekiq/job_stats
 ```
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/sidekiq/job_stats
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/sidekiq/job_stats"
 ```
 
 Example response:
@@ -92,7 +92,8 @@ Example response:
   "jobs": {
     "processed": 2,
     "failed": 0,
-    "enqueued": 0
+    "enqueued": 0,
+    "dead": 0
   }
 }
 ```
@@ -101,12 +102,12 @@ Example response:
 
 List all the currently available information about Sidekiq.
 
-```
+```plaintext
 GET /sidekiq/compound_metrics
 ```
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/sidekiq/compound_metrics
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/sidekiq/compound_metrics"
 ```
 
 Example response:
@@ -145,7 +146,8 @@ Example response:
   "jobs": {
     "processed": 2,
     "failed": 0,
-    "enqueued": 0
+    "enqueued": 0,
+    "dead": 0
   }
 }
 ```

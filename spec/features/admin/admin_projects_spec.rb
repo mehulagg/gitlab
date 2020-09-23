@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe "Admin::Projects" do
+RSpec.describe "Admin::Projects" do
   include Select2Helper
 
   let(:user) { create :user }
@@ -73,8 +73,9 @@ describe "Admin::Projects" do
     before do
       create(:group, name: 'Web')
 
-      allow_any_instance_of(Projects::TransferService)
-        .to receive(:move_uploads_to_new_namespace).and_return(true)
+      allow_next_instance_of(Projects::TransferService) do |instance|
+        allow(instance).to receive(:move_uploads_to_new_namespace).and_return(true)
+      end
     end
 
     it 'transfers project to group web', :js do
@@ -97,12 +98,12 @@ describe "Admin::Projects" do
     it 'adds admin a to a project as developer', :js do
       visit project_project_members_path(project)
 
-      page.within '.users-project-form' do
+      page.within '.invite-users-form' do
         select2(current_user.id, from: '#user_ids', multiple: true)
         select 'Developer', from: 'access_level'
       end
 
-      click_button 'Add to project'
+      click_button 'Invite'
 
       page.within '.content-list' do
         expect(page).to have_content(current_user.name)
@@ -125,7 +126,7 @@ describe "Admin::Projects" do
         expect(page).to have_content('Developer')
       end
 
-      find(:css, '.content-list li', text: current_user.name).find(:css, 'a.btn-remove').click
+      find(:css, '.content-list li', text: current_user.name).find(:css, 'a.btn-danger').click
 
       expect(page).not_to have_selector(:css, '.content-list')
     end

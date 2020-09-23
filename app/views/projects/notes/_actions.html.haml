@@ -1,9 +1,10 @@
-- access = note_max_access_for_user(note)
-- if note.has_special_role?(Note::SpecialRole::FIRST_TIME_CONTRIBUTOR)
-  %span.note-role.note-role-special.has-tooltip{ title: _("This is the author's first Merge Request to this project.") }
-    = issuable_first_contribution_icon
-- if access.nonzero?
-  %span.note-role.user-access-role= Gitlab::Access.human_access(access)
+- access = note_human_max_access(note)
+- if note.noteable_author?(@noteable)
+  %span{ class: 'note-role user-access-role has-tooltip d-none d-md-inline-block', title: _("This user is the author of this %{noteable}.") % { noteable: @noteable.human_class_name } }= _("Author")
+- if access
+  %span{ class: 'note-role user-access-role has-tooltip', title: _("This user is a %{access} of the %{name} project.") % { access: access.downcase, name: note.project_name } }= access
+- elsif note.contributor?
+  %span{ class: 'note-role user-access-role has-tooltip', title: _("This user has previously committed to the %{name} project.") % { name: note.project_name } }= _("Contributor")
 
 - if note.resolvable?
   - can_resolve = can?(current_user, :resolve_note, note)
@@ -29,8 +30,7 @@
           ":title" => "buttonText",
           ":ref" => "'button'" }
 
-        = icon('spin spinner', 'v-if' => 'loading', class: 'loading', 'aria-hidden' => 'true', 'aria-label' => 'Loading')
-        %div{ 'v-else' => '' }
+        %div
           %template{ 'v-if' => 'isResolved' }
             = render 'shared/icons/icon_status_success_solid.svg'
           %template{ 'v-else' => '' }
@@ -40,14 +40,13 @@
   - if note.emoji_awardable?
     .note-actions-item
       = button_tag title: 'Add reaction', class: "note-action-button note-emoji-button js-add-award js-note-emoji has-tooltip btn btn-transparent", data: { position: 'right', container: 'body' } do
-        = icon('spinner spin')
         %span{ class: 'link-highlight award-control-icon-neutral' }= sprite_icon('slight-smile')
         %span{ class: 'link-highlight award-control-icon-positive' }= sprite_icon('smiley')
         %span{ class: 'link-highlight award-control-icon-super-positive' }= sprite_icon('smile')
 
   - if note_editable
     .note-actions-item
-      = button_tag title: 'Edit comment', class: 'note-action-button js-note-edit has-tooltip btn btn-transparent', data: { container: 'body' } do
+      = button_tag title: 'Edit comment', class: 'note-action-button js-note-edit has-tooltip btn btn-transparent', data: { container: 'body', qa_selector: 'edit_comment_button' } do
         %span.link-highlight
           = custom_icon('icon_pencil')
 

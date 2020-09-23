@@ -1,16 +1,14 @@
 <script>
 import { GlButton } from '@gitlab/ui';
-import { s__ } from '~/locale';
 import DismissButton from 'ee/vue_shared/security_reports/components/dismiss_button.vue';
-import LoadingButton from '~/vue_shared/components/loading_button.vue';
 import SplitButton from 'ee/vue_shared/security_reports/components/split_button.vue';
+import { s__ } from '~/locale';
 
 export default {
   name: 'ModalFooter',
   components: {
     DismissButton,
     GlButton,
-    LoadingButton,
     SplitButton,
   },
   props: {
@@ -48,6 +46,18 @@ export default {
       required: false,
       default: false,
     },
+    isCreatingIssue: {
+      type: Boolean,
+      required: true,
+    },
+    isDismissingVulnerability: {
+      type: Boolean,
+      required: true,
+    },
+    isCreatingMergeRequest: {
+      type: Boolean,
+      required: true,
+    },
   },
   computed: {
     actionButtons() {
@@ -55,13 +65,13 @@ export default {
       const issueButton = {
         name: s__('ciReport|Create issue'),
         tagline: s__('ciReport|Investigate this vulnerability by creating an issue'),
-        isLoading: this.modal.isCreatingNewIssue,
+        isLoading: this.isCreatingIssue,
         action: 'createNewIssue',
       };
       const MRButton = {
         name: s__('ciReport|Resolve with merge request'),
         tagline: s__('ciReport|Automatically apply the patch in a new branch'),
-        isLoading: this.modal.isCreatingMergeRequest,
+        isLoading: this.isCreatingMergeRequest,
         action: 'createMergeRequest',
       };
       const DownloadButton = {
@@ -96,7 +106,7 @@ export default {
 
     <dismiss-button
       v-if="canDismissVulnerability"
-      :is-dismissing="modal.isDismissingVulnerability"
+      :is-dismissing="isDismissingVulnerability"
       :is-dismissed="isDismissed"
       :disabled="disabled"
       @dismissVulnerability="$emit('dismissVulnerability')"
@@ -115,14 +125,17 @@ export default {
       @downloadPatch="$emit('downloadPatch')"
     />
 
-    <loading-button
+    <gl-button
       v-else-if="actionButtons.length > 0"
       :loading="actionButtons[0].isLoading"
       :disabled="actionButtons[0].isLoading || disabled"
-      :label="actionButtons[0].name"
-      container-class="btn btn-success btn-inverted"
+      variant="success"
+      category="secondary"
       class="js-action-button"
+      data-qa-selector="create_issue_button"
       @click="$emit(actionButtons[0].action)"
-    />
+    >
+      {{ __(actionButtons[0].name) }}
+    </gl-button>
   </div>
 </template>

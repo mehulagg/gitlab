@@ -1,14 +1,23 @@
+---
+stage: Enablement
+group: Geo
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+type: howto
+---
+
 # Disaster Recovery (Geo) **(PREMIUM ONLY)**
 
 Geo replicates your database, your Git repositories, and few other assets.
 We will support and replicate more data in the future, that will enable you to
 failover with minimal effort, in a disaster situation.
 
-See [Geo current limitations][geo-limitations] for more information.
+See [Geo limitations](../index.md#limitations) for more information.
 
 CAUTION: **Warning:**
 Disaster recovery for multi-secondary configurations is in **Alpha**.
-For the latest updates, check the multi-secondary [Disaster Recovery epic][gitlab-org&65].
+For the latest updates, check the [Disaster Recovery epic for complete maturity](https://gitlab.com/groups/gitlab-org/-/epics/590). 
+Multi-secondary configurations require the complete re-synchronization and re-configuration of all non-promoted secondaries and
+will cause downtime.
 
 ## Promoting a **secondary** Geo node in single-secondary configurations
 
@@ -22,7 +31,7 @@ immediately after following these instructions.
 ### Step 1. Allow replication to finish if possible
 
 If the **secondary** node is still replicating data from the **primary** node, follow
-[the planned failover docs][planned-failover] as closely as possible in
+[the planned failover docs](planned_failover.md) as closely as possible in
 order to avoid unnecessary data loss.
 
 ### Step 2. Permanently disable the **primary** node
@@ -39,31 +48,31 @@ must disable the **primary** node.
 
 1. SSH into the **primary** node to stop and disable GitLab, if possible:
 
-   ```sh
+   ```shell
    sudo gitlab-ctl stop
    ```
 
    Prevent GitLab from starting up again if the server unexpectedly reboots:
 
-   ```sh
+   ```shell
    sudo systemctl disable gitlab-runsvdir
    ```
 
    NOTE: **Note:**
    (**CentOS only**) In CentOS 6 or older, there is no easy way to prevent GitLab from being
-   started if the machine reboots isn't available (see [Omnibus GitLab issue #3058](https://gitlab.com/gitlab-org/omnibus-gitlab/issues/3058)).
+   started if the machine reboots isn't available (see [Omnibus GitLab issue #3058](https://gitlab.com/gitlab-org/omnibus-gitlab/-/issues/3058)).
    It may be safest to uninstall the GitLab package completely:
 
-   ```sh
+   ```shell
    yum remove gitlab-ee
    ```
 
    NOTE: **Note:**
    (**Ubuntu 14.04 LTS**) If you are using an older version of Ubuntu
-   or any other distro based on the Upstart init system, you can prevent GitLab
+   or any other distribution based on the Upstart init system, you can prevent GitLab
    from starting if the machine reboots by doing the following:
 
-   ```sh
+   ```shell
    initctl stop gitlab-runsvvdir
    echo 'manual' > /etc/init/gitlab-runsvdir.override
    initctl reload-configuration
@@ -75,7 +84,7 @@ must disable the **primary** node.
    single recommendation. You may need to:
 
    - Reconfigure the load balancers.
-   - Change DNS records (e.g., point the primary DNS record to the **secondary**
+   - Change DNS records (for example, point the primary DNS record to the **secondary**
      node in order to stop usage of the **primary** node).
    - Stop the virtual servers.
    - Block traffic through a firewall.
@@ -87,16 +96,24 @@ must disable the **primary** node.
 
 ### Step 3. Promoting a **secondary** node
 
-NOTE: **Note:**
-A new **secondary** should not be added at this time. If you want to add a new
-**secondary**, do this after you have completed the entire process of promoting
-the **secondary** to the **primary**.
+Note the following when promoting a secondary:
+
+- If replication was paused on the secondary node, for example as a part of upgrading,
+  while you were running a version of GitLab lower than 13.4, you _must_
+  [enable the node via the database](../replication/troubleshooting.md#while-promoting-the-secondary-i-got-an-error-activerecordrecordinvalid)
+  before proceeding.
+- A new **secondary** should not be added at this time. If you want to add a new
+  **secondary**, do this after you have completed the entire process of promoting
+  the **secondary** to the **primary**.
+- If you encounter an `ActiveRecord::RecordInvalid: Validation failed: Name has already been taken`
+  error during this process, please read
+  [the troubleshooting advice](../replication/troubleshooting.md#fixing-errors-during-a-failover-or-when-promoting-a-secondary-to-a-primary-node).
 
 #### Promoting a **secondary** node running on a single machine
 
 1. SSH in to your **secondary** node and login as root:
 
-   ```sh
+   ```shell
    sudo -i
    ```
 
@@ -111,29 +128,45 @@ the **secondary** to the **primary**.
    roles ['geo_secondary_role']
    ```
 
-1. Promote the **secondary** node to the **primary** node. Execute:
+1. Promote the **secondary** node to the **primary** node.
+   
+   To promote the secondary node to primary along with preflight checks:
 
-   ```sh
+   ```shell
    gitlab-ctl promote-to-primary-node
+   ```
+
+   If you have already run the [preflight checks](planned_failover.md#preflight-checks) separately or don't want to run them, you can skip preflight checks with:
+
+   ```shell
+   gitlab-ctl promote-to-primary-node --skip-preflight-check
+   ```
+
+   You can also promote the secondary node to primary **without any further confirmation**, even when preflight checks fail:
+
+   ```shell
+   gitlab-ctl promote-to-primary-node --force
    ```
 
 1. Verify you can connect to the newly promoted **primary** node using the URL used
    previously for the **secondary** node.
 1. If successful, the **secondary** node has now been promoted to the **primary** node.
 
-#### Promoting a **secondary** node with HA
+#### Promoting a **secondary** node with multiple servers
 
 The `gitlab-ctl promote-to-primary-node` command cannot be used yet in
-conjunction with High Availability or with multiple machines, as it can only
+conjunction with multiple servers, as it can only
 perform changes on a **secondary** with only a single machine. Instead, you must
 do this manually.
 
 1. SSH in to the database node in the **secondary** and trigger PostgreSQL to
    promote to read-write:
 
-   ```bash
+   ```shell
    sudo gitlab-pg-ctl promote
    ```
+
+   In GitLab 12.8 and earlier, see [Message: `sudo: gitlab-pg-ctl: command not found`](../replication/troubleshooting.md#message-sudo-gitlab-pg-ctl-command-not-found).
 
 1. Edit `/etc/gitlab/gitlab.rb` on every machine in the **secondary** to
    reflect its new status as **primary** by removing any lines that enabled the
@@ -153,13 +186,73 @@ do this manually.
 1. Promote the **secondary** to **primary**. SSH into a single application
    server and execute:
 
-   ```bash
+   ```shell
    sudo gitlab-rake geo:set_secondary_as_primary
    ```
 
 1. Verify you can connect to the newly promoted **primary** using the URL used
    previously for the **secondary**.
 1. Success! The **secondary** has now been promoted to **primary**.
+
+#### Promoting a **secondary** node with an external PostgreSQL database
+
+The `gitlab-ctl promote-to-primary-node` command cannot be used in conjunction with
+an external PostgreSQL database, as it can only perform changes on a **secondary**
+node with GitLab and the database on the same machine. As a result, a manual process is
+required:
+
+1. Promote the replica database associated with the **secondary** site. This will
+   set the database to read-write:
+   - Amazon RDS - [Promoting a Read Replica to Be a Standalone DB Instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.html#USER_ReadRepl.Promote)
+   - Azure Database for PostgreSQL - [Stop replication](https://docs.microsoft.com/en-us/azure/postgresql/howto-read-replicas-portal#stop-replication)
+   - Other external PostgreSQL databases - save the script below in you secondary node, for example
+     `/tmp/geo_promote.sh`, and modify the connection parameters to match your
+     environment. Then, execute it to promote the replica:
+
+     ```shell
+     #!/bin/bash
+
+     PG_SUPERUSER=postgres
+
+     # The path to your pg_ctl binary. You may need to adjust this path to match
+     # your PostgreSQL installation
+     PG_CTL_BINARY=/usr/lib/postgresql/10/bin/pg_ctl
+
+     # The path to your PostgreSQL data directory. You may need to adjust this
+     # path to match your PostgreSQL installation. You can also run
+     # `SHOW data_directory;` from PostgreSQL to find your data directory
+     PG_DATA_DIRECTORY=/etc/postgresql/10/main
+
+     # Promote the PostgreSQL database and allow read/write operations
+     sudo -u $PG_SUPERUSER $PG_CTL_BINARY -D $PG_DATA_DIRECTORY promote
+     ```
+
+1. Edit `/etc/gitlab/gitlab.rb` on every node in the **secondary** site to
+   reflect its new status as **primary** by removing any lines that enabled the
+   `geo_secondary_role`:
+
+   ```ruby
+   ## In GitLab 11.4 and earlier, remove this line.
+   geo_secondary_role['enable'] = true
+
+   ## In GitLab 11.5 and later, remove this line.
+   roles ['geo_secondary_role']
+   ```
+
+   After making these changes [Reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure)
+   on each node so the changes take effect.
+
+1. Promote the **secondary** to **primary**. SSH into a single secondary application
+   node and execute:
+
+   ```shell
+   sudo gitlab-rake geo:set_secondary_as_primary
+   ```
+
+1. Verify you can connect to the newly promoted **primary** site using the URL used
+   previously for the **secondary** site.
+
+Success! The **secondary** site has now been promoted to **primary**.
 
 ### Step 4. (Optional) Updating the primary domain DNS record
 
@@ -169,7 +262,7 @@ secondary domain, like changing Git remotes and API URLs.
 
 1. SSH into the **secondary** node and login as root:
 
-   ```sh
+   ```shell
    sudo -i
    ```
 
@@ -182,24 +275,43 @@ secondary domain, like changing Git remotes and API URLs.
    external_url 'https://<new_external_url>'
    ```
 
-   NOTE: **Note**
+   NOTE: **Note:**
    Changing `external_url` won't prevent access via the old secondary URL, as
    long as the secondary DNS records are still intact.
 
 1. Reconfigure the **secondary** node for the change to take effect:
 
-   ```sh
+   ```shell
    gitlab-ctl reconfigure
    ```
 
 1. Execute the command below to update the newly promoted **primary** node URL:
 
-   ```sh
+   ```shell
    gitlab-rake geo:update_primary_node_url
    ```
 
    This command will use the changed `external_url` configuration defined
    in `/etc/gitlab/gitlab.rb`.
+
+1. For GitLab 11.11 through 12.7 only, you may need to update the **primary**
+   node's name in the database. This bug has been fixed in GitLab 12.8.
+
+   To determine if you need to do this, search for the
+   `gitlab_rails["geo_node_name"]` setting in your `/etc/gitlab/gitlab.rb`
+   file. If it is commented out with `#` or not found at all, then you will
+   need to update the **primary** node's name in the database. You can search for it
+   like so:
+
+   ```shell
+   grep "geo_node_name" /etc/gitlab/gitlab.rb
+   ```
+
+   To update the **primary** node's name in the database:
+
+   ```shell
+   gitlab-rails runner 'Gitlab::Geo.primary_node.update!(name: GeoNode.current_node_name)'
+   ```
 
 1. Verify you can connect to the newly promoted **primary** using its URL.
    If you updated the DNS records for the primary domain, these changes may
@@ -210,7 +322,7 @@ secondary domain, like changing Git remotes and API URLs.
 Promoting a **secondary** node to **primary** node using the process above does not enable
 Geo on the new **primary** node.
 
-To bring a new **secondary** node online, follow the [Geo setup instructions][setup-geo].
+To bring a new **secondary** node online, follow the [Geo setup instructions](../index.md#setup-instructions).
 
 ### Step 6. (Optional) Removing the secondary's tracking database
 
@@ -219,9 +331,13 @@ Because the **secondary** is already promoted, that data in the tracking databas
 
 The data can be removed with the following command:
 
-```sh
+```shell
 sudo rm -rf /var/opt/gitlab/geo-postgresql
 ```
+
+If you have any `geo_secondary[]` configuration options enabled in your `gitlab.rb`
+file, these can be safely commented out or removed, and then [reconfigure GitLab](../../restart_gitlab.md#omnibus-gitlab-reconfigure)
+for the changes to take effect.
 
 ## Promoting secondary Geo replica in multi-secondary configurations
 
@@ -233,7 +349,7 @@ and after that you also need two extra steps.
 
 1. SSH into the new **primary** node and login as root:
 
-   ```sh
+   ```shell
    sudo -i
    ```
 
@@ -259,18 +375,18 @@ and after that you also need two extra steps.
    gitlab_rails['auto_migrate'] = false
    ```
 
-   (For more details about these settings you can read [Configure the primary server][configure-the-primary-server])
+   (For more details about these settings you can read [Configure the primary server](../setup/database.md#step-1-configure-the-primary-server))
 
 1. Save the file and reconfigure GitLab for the database listen changes and
    the replication slot changes to be applied.
 
-   ```sh
+   ```shell
    gitlab-ctl reconfigure
    ```
 
    Restart PostgreSQL for its changes to take effect:
 
-   ```sh
+   ```shell
    gitlab-ctl restart postgresql
    ```
 
@@ -285,37 +401,16 @@ and after that you also need two extra steps.
 
    Save the file and reconfigure GitLab:
 
-   ```sh
+   ```shell
    gitlab-ctl reconfigure
    ```
 
 ### Step 2. Initiate the replication process
 
 Now we need to make each **secondary** node listen to changes on the new **primary** node. To do that you need
-to [initiate the replication process][initiate-the-replication-process] again but this time
+to [initiate the replication process](../setup/database.md#step-3-initiate-the-replication-process) again but this time
 for another **primary** node. All the old replication settings will be overwritten.
 
 ## Troubleshooting
 
-### I followed the disaster recovery instructions and now two-factor auth is broken
-
-The setup instructions for Geo prior to 10.5 failed to replicate the
-`otp_key_base` secret, which is used to encrypt the two-factor authentication
-secrets stored in the database. If it differs between **primary** and **secondary**
-nodes, users with two-factor authentication enabled won't be able to log in
-after a failover.
-
-If you still have access to the old **primary** node, you can follow the
-instructions in the
-[Upgrading to GitLab 10.5][updating-geo]
-section to resolve the error. Otherwise, the secret is lost and you'll need to
-[reset two-factor authentication for all users][sec-tfa].
-
-[gitlab-org&65]: https://gitlab.com/groups/gitlab-org/-/epics/65
-[geo-limitations]: ../replication/index.md#current-limitations
-[planned-failover]: planned_failover.md
-[setup-geo]: ../replication/index.md#setup-instructions
-[updating-geo]: ../replication/version_specific_updates.md#updating-to-gitlab-105
-[sec-tfa]: ../../../security/two_factor_authentication.md#disabling-2fa-for-everyone
-[initiate-the-replication-process]: ../replication/database.html#step-3-initiate-the-replication-process
-[configure-the-primary-server]: ../replication/database.html#step-1-configure-the-primary-server
+This section was moved to [another location](../replication/troubleshooting.md#fixing-errors-during-a-failover-or-when-promoting-a-secondary-to-a-primary-node).

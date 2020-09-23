@@ -3,18 +3,14 @@
 module Banzai
   module Pipeline
     class SingleLinePipeline < GfmPipeline
-      prepend_if_ee('EE::Banzai::Pipeline::SingleLinePipeline') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
       def self.filters
         @filters ||= FilterArray[
           Filter::HtmlEntityFilter,
           Filter::SanitizationFilter,
           Filter::AssetProxyFilter,
-
           Filter::EmojiFilter,
           Filter::AutolinkFilter,
           Filter::ExternalLinkFilter,
-
           *reference_filters
         ]
       end
@@ -27,7 +23,8 @@ module Banzai
           Filter::MergeRequestReferenceFilter,
           Filter::SnippetReferenceFilter,
           Filter::CommitRangeReferenceFilter,
-          Filter::CommitReferenceFilter
+          Filter::CommitReferenceFilter,
+          Filter::AlertReferenceFilter
         ]
       end
 
@@ -41,3 +38,5 @@ module Banzai
     end
   end
 end
+
+Banzai::Pipeline::SingleLinePipeline.prepend_if_ee('EE::Banzai::Pipeline::SingleLinePipeline')

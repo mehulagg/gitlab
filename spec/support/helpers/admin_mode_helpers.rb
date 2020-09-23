@@ -3,10 +3,13 @@
 # Helper for enabling admin mode in tests
 
 module AdminModeHelper
-  # Users are logged in by default in user mode and have to switch to admin
+  # Administrators are logged in by default in user mode and have to switch to admin
   # mode for accessing any administrative functionality. This helper lets a user
   # be in admin mode without requiring a second authentication step (provided
   # the user is an admin)
+  #
+  # See also tag :enable_admin_mode in spec/spec_helper.rb for a spec-wide
+  # alternative
   def enable_admin_mode!(user)
     fake_user_mode = instance_double(Gitlab::Auth::CurrentUserMode)
 

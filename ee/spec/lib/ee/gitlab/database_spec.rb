@@ -2,7 +2,9 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database do
+RSpec.describe Gitlab::Database do
+  include ::EE::GeoHelpers
+
   describe '.read_only?' do
     context 'with Geo enabled' do
       before do
@@ -62,6 +64,58 @@ describe Gitlab::Database do
       described_class.disable_prepared_statements
 
       expect(config['prepared_statements']).to eq(false)
+    end
+  end
+
+  describe '.geo_uncached_queries' do
+    context 'when no block is given' do
+      it 'raises error' do
+        expect do
+          described_class.geo_uncached_queries
+        end.to raise_error('No block given')
+      end
+    end
+
+    context 'when the current node is a primary' do
+      let!(:primary) { create(:geo_node, :primary) }
+
+      it 'wraps the block in an ActiveRecord::Base.uncached block' do
+        stub_current_geo_node(primary)
+
+        expect(Geo::TrackingBase).not_to receive(:uncached)
+        expect(ActiveRecord::Base).to receive(:uncached).and_call_original
+
+        expect do |b|
+          described_class.geo_uncached_queries(&b)
+        end.to yield_control
+      end
+    end
+
+    context 'when the current node is a secondary' do
+      let!(:primary) { create(:geo_node, :primary) }
+      let!(:secondary) { create(:geo_node) }
+
+      it 'wraps the block in a Geo::TrackingBase.uncached block and an ActiveRecord::Base.uncached block' do
+        stub_current_geo_node(secondary)
+
+        expect(Geo::TrackingBase).to receive(:uncached).and_call_original
+        expect(ActiveRecord::Base).to receive(:uncached).and_call_original
+
+        expect do |b|
+          described_class.geo_uncached_queries(&b)
+        end.to yield_control
+      end
+    end
+
+    context 'when there is no current node' do
+      it 'wraps the block in an ActiveRecord::Base.uncached block' do
+        expect(Geo::TrackingBase).not_to receive(:uncached)
+        expect(ActiveRecord::Base).to receive(:uncached).and_call_original
+
+        expect do |b|
+          described_class.geo_uncached_queries(&b)
+        end.to yield_control
+      end
     end
   end
 end

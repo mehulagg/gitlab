@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe Milestone, :elastic do
+RSpec.describe Milestone, :elastic do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
 
   it_behaves_like 'limited indexing is enabled' do
-    set(:object) { create :milestone, project: project }
-    set(:group) { create(:group) }
+    let_it_be(:object) { create :milestone, project: project }
+    let_it_be(:group) { create(:group) }
     let(:group_object) do
       project = create :project, name: 'test1', group: group
       create :milestone, project: project
@@ -27,7 +27,7 @@ describe Milestone, :elastic do
       # The milestone you have no access to except as an administrator
       create :milestone, title: 'bla-bla term3'
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
     options = { project_ids: [project.id] }

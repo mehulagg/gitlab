@@ -15,7 +15,7 @@ module Vulnerabilities
     attr_accessor :vulnerability_data
 
     enum feedback_type: { dismissal: 0, issue: 1, merge_request: 2 }, _prefix: :for
-    enum category: { sast: 0, dependency_scanning: 1, container_scanning: 2, dast: 3 }
+    enum category: { sast: 0, dependency_scanning: 1, container_scanning: 2, dast: 3, secret_detection: 4, coverage_fuzzing: 5 }
 
     validates :project, presence: true
     validates :author, presence: true
@@ -26,11 +26,19 @@ module Vulnerabilities
     validates :feedback_type, presence: true
     validates :category, presence: true
     validates :project_fingerprint, presence: true, uniqueness: { scope: [:project_id, :category, :feedback_type] }
+    validates :pipeline, same_project_association: true, if: :pipeline_id?
 
     scope :with_associations, -> { includes(:pipeline, :issue, :merge_request, :author, :comment_author) }
 
     scope :all_preloaded, -> do
       preload(:author, :comment_author, :project, :issue, :merge_request, :pipeline)
+    end
+
+    # TODO remove once filtered data has been cleaned
+    def self.only_valid_feedback
+      pipeline = Ci::Pipeline.arel_table
+      feedback = arel_table
+      joins(:pipeline).where(pipeline[:project_id].eq(feedback[:project_id]))
     end
 
     def self.find_or_init_for(feedback_params)
@@ -41,8 +49,8 @@ module Vulnerabilities
       record
     end
 
-    # Rails 5.0 does not properly handle validation of enums in select queries such as find_or_initialize_by.
-    # This method, and calls to it can be removed when we are on Rails 5.2.
+    # Rails does not validate enums in select queries such as `find_or_initialize_by`,
+    # So we raise an ArgumentError early to return a human-readable error
     def self.validate_enums(feedback_params)
       unless feedback_types.include?(feedback_params[:feedback_type])
 
@@ -54,10 +62,26 @@ module Vulnerabilities
       end
     end
 
+    def self.with_category(category)
+      where(category: category)
+    end
+
+    def self.with_feedback_type(feedback_type)
+      where(feedback_type: feedback_type)
+    end
+
     # A hard delete of the comment_author will cause the comment_author to be nil, but the comment
     # will still exist.
     def has_comment?
       comment.present? && comment_author.present?
+    end
+
+    def finding_key
+      {
+        project_id: project_id,
+        category: category,
+        project_fingerprint: project_fingerprint
+      }
     end
   end
 end

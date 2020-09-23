@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::View::Presenter::Base do
+RSpec.describe Gitlab::View::Presenter::Base do
   let(:project) { double(:project) }
   let(:presenter_class) do
     Struct.new(:subject).include(described_class)
@@ -55,6 +55,34 @@ describe Gitlab::View::Presenter::Base do
     it 'returns self' do
       presenter = presenter_class.new(build_stubbed(:project))
       expect(presenter.present).to eq(presenter)
+    end
+  end
+
+  describe '#url_builder' do
+    it 'returns the UrlBuilder instance' do
+      presenter = presenter_class.new(project)
+
+      expect(presenter.url_builder).to eq(Gitlab::UrlBuilder.instance)
+    end
+  end
+
+  describe '#web_url' do
+    it 'delegates to the UrlBuilder' do
+      presenter = presenter_class.new(project)
+
+      expect(presenter.url_builder).to receive(:build).with(project)
+
+      presenter.web_url
+    end
+  end
+
+  describe '#web_path' do
+    it 'delegates to the UrlBuilder' do
+      presenter = presenter_class.new(project)
+
+      expect(presenter.url_builder).to receive(:build).with(project, only_path: true)
+
+      presenter.web_path
     end
   end
 end

@@ -1,11 +1,14 @@
 # frozen_string_literal: true
 
+require 'date'
+
 module QA
   module Page
     module Profile
       class PersonalAccessTokens < Page::Base
-        view 'app/views/shared/_personal_access_tokens_form.html.haml' do
-          element :personal_access_token_name_field
+        view 'app/views/shared/access_tokens/_form.html.haml' do
+          element :expiry_date_field
+          element :access_token_name_field
           element :create_token_button
         end
 
@@ -13,15 +16,15 @@ module QA
           element :api_radio, 'qa-#{scope}-radio' # rubocop:disable QA/ElementWithPattern, Lint/InterpolationCheck
         end
 
-        view 'app/views/shared/_personal_access_tokens_created_container.html.haml' do
-          element :created_personal_access_token
+        view 'app/views/shared/access_tokens/_created_container.html.haml' do
+          element :created_access_token
         end
-        view 'app/views/shared/_personal_access_tokens_table.html.haml' do
+        view 'app/views/shared/access_tokens/_table.html.haml' do
           element :revoke_button
         end
 
         def fill_token_name(name)
-          fill_element(:personal_access_token_name_field, name)
+          fill_element(:access_token_name_field, name)
         end
 
         def check_api
@@ -33,7 +36,14 @@ module QA
         end
 
         def created_access_token
-          find_element(:created_personal_access_token, wait: 30).value
+          find_element(:created_access_token, wait: 30).value
+        end
+
+        def fill_expiry_date(date)
+          date = date.to_s if date.is_a?(Date)
+          Date.strptime(date, '%Y-%m-%d') rescue ArgumentError raise "Expiry date must be in YYYY-MM-DD format"
+
+          fill_element(:expiry_date_field, date)
         end
 
         def has_token_row_for_name?(token_name)

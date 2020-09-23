@@ -1,10 +1,16 @@
 %ul
   - if current_user_menu?(:help)
+    = render_if_exists 'layouts/header/whats_new_dropdown_item'
     %li
       = link_to _("Help"), help_path
     %li
       = link_to _("Support"), support_url
-    = render_if_exists "shared/learn_gitlab_menu_item"
+    %li
+      = render 'shared/help_dropdown_forum_link'
+    %li
+      %button.js-shortcuts-modal-trigger{ type: "button" }
+        = _("Keyboard shortcuts")
+        %span.text-secondary.float-right{ "aria-hidden": true }= '?'.html_safe
     %li.divider
   %li
     = link_to _("Submit feedback"), "https://about.gitlab.com/submit-feedback"

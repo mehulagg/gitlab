@@ -5,6 +5,8 @@ module Clusters
     class BaseService
       InvalidApplicationError = Class.new(StandardError)
 
+      FLUENTD_KNOWN_ATTRS = %i[host protocol port waf_log_enabled cilium_log_enabled].freeze
+
       attr_reader :cluster, :current_user, :params
 
       def initialize(cluster, user, params = {})
@@ -19,16 +21,32 @@ module Clusters
             application.hostname = params[:hostname]
           end
 
-          if application.has_attribute?(:kibana_hostname)
-            application.kibana_hostname = params[:kibana_hostname]
-          end
-
           if application.has_attribute?(:email)
             application.email = params[:email]
           end
 
+          if application.has_attribute?(:stack)
+            application.stack = params[:stack]
+          end
+
+          if application.has_attribute?(:modsecurity_enabled)
+            application.modsecurity_enabled = params[:modsecurity_enabled] || false
+          end
+
+          if application.has_attribute?(:modsecurity_mode)
+            application.modsecurity_mode = params[:modsecurity_mode] || 0
+          end
+
+          apply_fluentd_related_attributes(application)
+
           if application.respond_to?(:oauth_application)
             application.oauth_application = create_oauth_application(application, request)
+          end
+
+          if application.instance_of?(Knative)
+            Serverless::AssociateDomainService
+              .new(application, pages_domain_id: params[:pages_domain_id], creator: current_user)
+              .execute
           end
 
           worker = worker_class(application)
@@ -54,17 +72,13 @@ module Clusters
       end
 
       def instantiate_application
-        raise_invalid_application_error if invalid_application?
+        raise_invalid_application_error if unknown_application?
 
         builder || raise(InvalidApplicationError, "invalid application: #{application_name}")
       end
 
       def raise_invalid_application_error
         raise(InvalidApplicationError, "invalid application: #{application_name}")
-      end
-
-      def invalid_application?
-        unknown_application? || (application_name == Applications::ElasticStack.application_name && !Feature.enabled?(:enable_cluster_application_elastic_stack))
       end
 
       def unknown_application?
@@ -88,6 +102,12 @@ module Clusters
         }
 
         ::Applications::CreateService.new(current_user, oauth_application_params).execute(request)
+      end
+
+      def apply_fluentd_related_attributes(application)
+        FLUENTD_KNOWN_ATTRS.each do |attr|
+          application[attr] = params[attr] if application.has_attribute?(attr)
+        end
       end
     end
   end

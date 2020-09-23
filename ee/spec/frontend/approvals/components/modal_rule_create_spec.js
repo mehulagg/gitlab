@@ -1,94 +1,132 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
-import { createStoreOptions } from 'ee/approvals/stores';
-import projectSettingsModule from 'ee/approvals/stores/modules/project_settings';
 import RuleForm from 'ee/approvals/components/rule_form.vue';
+import ModalRuleCreate from 'ee/approvals/components/modal_rule_create.vue';
+import GlModalVuex from '~/vue_shared/components/gl_modal_vuex.vue';
+
+const TEST_MODAL_ID = 'test-modal-create-id';
+const TEST_RULE = { id: 7 };
+const MODAL_MODULE = 'createModal';
 
 const localVue = createLocalVue();
 localVue.use(Vuex);
 
-describe('RuleForm', () => {
-  const exampleRule = {
-    id: 1,
-    name: 'Example',
-    approvalsRequired: 0,
-    users: [],
-    groups: [],
-  };
+describe('Approvals ModalRuleCreate', () => {
+  let createModalState;
   let wrapper;
-  let store;
+  let modal;
+  let form;
 
-  const findNameInput = () => wrapper.find('input[name=name]');
-  const createStore = () => createStoreOptions(projectSettingsModule(), { projectId: '7' });
-  const createComponent = (vuexStore, props = {}) =>
-    shallowMount(localVue.extend(RuleForm), {
-      propsData: {
-        ...props,
+  const findModal = () => wrapper.find(GlModalVuex);
+  const findForm = () => wrapper.find(RuleForm);
+
+  const factory = (options = {}) => {
+    const store = new Vuex.Store({
+      modules: {
+        [MODAL_MODULE]: {
+          namespaced: true,
+          state: createModalState,
+        },
       },
-      store: new Vuex.Store(vuexStore),
-      localVue,
-      sync: false,
     });
 
+    const propsData = {
+      modalId: TEST_MODAL_ID,
+      ...options.propsData,
+    };
+
+    wrapper = shallowMount(localVue.extend(ModalRuleCreate), {
+      ...options,
+      localVue,
+      store,
+      propsData,
+    });
+  };
+
   beforeEach(() => {
-    store = createStore();
+    createModalState = {};
   });
 
   afterEach(() => {
-    if (wrapper) wrapper.destroy();
+    wrapper.destroy();
   });
 
-  describe('isNameDisabled', () => {
+  describe('without data', () => {
     beforeEach(() => {
-      store.state.settings.allowMultiRule = true;
+      createModalState.data = null;
+      factory();
+      modal = findModal();
+      form = findForm();
     });
 
-    describe('When creating the License-Check rule', () => {
-      beforeEach(() => {
-        wrapper = createComponent(store, {
-          initRule: { ...exampleRule, ...{ id: null, name: 'License-Check' } },
-        });
-      });
-
-      it('does not disable the name text field', () => {
-        expect(findNameInput().attributes('disabled')).toBe(undefined);
-      });
+    it('renders modal', () => {
+      expect(modal.exists()).toBe(true);
+      expect(modal.props('modalModule')).toEqual(MODAL_MODULE);
+      expect(modal.props('modalId')).toEqual(TEST_MODAL_ID);
+      expect(modal.attributes('title')).toEqual('Add approval rule');
+      expect(modal.attributes('ok-title')).toEqual('Add approval rule');
     });
 
-    describe('When creating any other rule', () => {
-      beforeEach(() => {
-        wrapper = createComponent(store, {
-          initRule: { ...exampleRule, ...{ id: null, name: 'QA' } },
-        });
-      });
-
-      it('does not disable the name text field', () => {
-        expect(findNameInput().attributes('disabled')).toBe(undefined);
-      });
+    it('renders form', () => {
+      expect(form.exists()).toBe(true);
+      expect(form.props('initRule')).toEqual(null);
     });
 
-    describe('When editing the License-Check rule', () => {
-      beforeEach(() => {
-        wrapper = createComponent(store, {
-          initRule: { ...exampleRule, ...{ id: 1, name: 'License-Check' } },
-        });
-      });
+    it('when modal emits ok, submits form', () => {
+      form.vm.submit = jest.fn();
+      modal.vm.$emit('ok', new Event('ok'));
 
-      it('disables the name text field', () => {
-        expect(findNameInput().attributes('disabled')).toBe('disabled');
-      });
+      expect(form.vm.submit).toHaveBeenCalled();
+    });
+  });
+
+  describe('with data', () => {
+    beforeEach(() => {
+      createModalState.data = TEST_RULE;
+      factory();
+      modal = findModal();
+      form = findForm();
     });
 
-    describe('When editing any other rule', () => {
-      beforeEach(() => {
-        wrapper = createComponent(store, {
-          initRule: { ...exampleRule, ...{ id: 1, name: 'QA' } },
-        });
-      });
+    it('renders modal', () => {
+      expect(modal.exists()).toBe(true);
+      expect(modal.attributes('title')).toEqual('Update approval rule');
+      expect(modal.attributes('ok-title')).toEqual('Update approval rule');
+    });
 
-      it('does not disable the name text field', () => {
-        expect(findNameInput().attributes('disabled')).toBe(undefined);
+    it('renders form', () => {
+      expect(form.exists()).toBe(true);
+      expect(form.props('initRule')).toEqual(TEST_RULE);
+    });
+  });
+
+  describe('with approvalSuggestions feature flag', () => {
+    beforeEach(() => {
+      createModalState.data = { ...TEST_RULE, defaultRuleName: 'Vulnerability-Check' };
+
+      factory({
+        provide: {
+          glFeatures: { approvalSuggestions: true },
+        },
       });
+      modal = findModal();
+      form = findForm();
+    });
+
+    it('renders add rule modal', () => {
+      expect(modal.exists()).toBe(true);
+      expect(modal.attributes('title')).toEqual('Add approval rule');
+      expect(modal.attributes('ok-title')).toEqual('Add approval rule');
+    });
+
+    it('renders form with defaultRuleName', () => {
+      expect(form.props().defaultRuleName).toBe('Vulnerability-Check');
+      expect(form.exists()).toBe(true);
+    });
+
+    it('renders the form when passing in an existing rule', () => {
+      expect(form.exists()).toBe(true);
+      expect(form.props('initRule')).toEqual(createModalState.data);
     });
   });
 });

@@ -1,18 +1,21 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference, howto
 ---
 
-# Protected Tags
+# Protected tags
 
-> [Introduced][ce-10356] in GitLab 9.1.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10356) in GitLab 9.1.
 
-Protected Tags allow control over who has permission to create tags as well as preventing accidental update or deletion once created. Each rule allows you to match either an individual tag name, or use wildcards to control multiple tags at once.
+Protected tags allow control over who has permission to create tags as well as preventing accidental update or deletion once created. Each rule allows you to match either an individual tag name, or use wildcards to control multiple tags at once.
 
-This feature evolved out of [Protected Branches](protected_branches.md)
+This feature evolved out of [protected branches](protected_branches.md)
 
 ## Overview
 
-Protected tags will prevent anyone from updating or deleting the tag, as and will prevent creation of matching tags based on the permissions you have selected. By default, anyone without Maintainer permission will be prevented from creating tags.
+Protected tags will prevent anyone from updating or deleting the tag, and will prevent creation of matching tags based on the permissions you have selected. By default, anyone without Maintainer permission will be prevented from creating tags.
 
 ## Configuring protected tags
 
@@ -67,5 +70,3 @@ questions that you know someone might ask.
 Each scenario can be a third-level heading, e.g. `### Getting error message X`.
 If you have none to add when creating a doc, leave this section in place
 but commented out to help encourage others to add to it in the future. -->
-
-[ce-10356]: https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/10356 "Protected Tags"

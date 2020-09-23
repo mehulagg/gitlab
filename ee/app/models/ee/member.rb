@@ -33,5 +33,16 @@ module EE
         errors.add(:user, 'is not linked to a SAML account')
       end
     end
+
+    # The method is exposed in the API as is_using_seat
+    # in ee/lib/ee/api/entities.rb
+    #
+    # rubocop: disable Naming/PredicateName
+    def is_using_seat
+      return user.using_gitlab_com_seat?(source) if ::Gitlab.com?
+
+      user.using_license_seat?
+    end
+    # rubocop: enable Naming/PredicateName
   end
 end

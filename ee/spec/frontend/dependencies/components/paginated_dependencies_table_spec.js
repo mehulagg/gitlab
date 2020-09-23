@@ -1,10 +1,10 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import createStore from 'ee/dependencies/store';
 import DependenciesTable from 'ee/dependencies/components/dependencies_table.vue';
 import PaginatedDependenciesTable from 'ee/dependencies/components/paginated_dependencies_table.vue';
 import { DEPENDENCY_LIST_TYPES } from 'ee/dependencies/store/constants';
 import Pagination from '~/vue_shared/components/pagination_links.vue';
-import mockDependenciesResponse from '../store/modules/list/data/mock_dependencies';
+import mockDependenciesResponse from '../store/modules/list/data/mock_dependencies.json';
 
 describe('PaginatedDependenciesTable component', () => {
   let store;
@@ -12,14 +12,10 @@ describe('PaginatedDependenciesTable component', () => {
   const { namespace } = DEPENDENCY_LIST_TYPES.all;
 
   const factory = (props = {}) => {
-    const localVue = createLocalVue();
-
     store = createStore();
 
-    wrapper = shallowMount(localVue.extend(PaginatedDependenciesTable), {
-      localVue,
+    wrapper = shallowMount(PaginatedDependenciesTable, {
       store,
-      sync: false,
       propsData: { ...props },
     });
   };

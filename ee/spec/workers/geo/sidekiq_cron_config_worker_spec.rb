@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::SidekiqCronConfigWorker do
+RSpec.describe Geo::SidekiqCronConfigWorker do
   describe '#perform' do
     it 'runs the cron manager' do
       manager = double('cron_manager')

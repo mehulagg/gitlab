@@ -2,7 +2,8 @@
 
 # Security::JobsFinder
 #
-# Used to find jobs (builds) that are for Secure products, SAST, DAST, Dependency Scanning and Container Scanning.
+# Abstract class encapsulating common logic for finding jobs (builds) that are related to the Secure products
+# SAST, DAST, Dependency Scanning, Container Scanning and License Management, Coverage Fuzzing
 #
 # Arguments:
 #   params:
@@ -13,11 +14,25 @@ module Security
   class JobsFinder
     attr_reader :pipeline
 
-    JOB_TYPES = [:sast, :dast, :dependency_scanning, :container_scanning].freeze
+    def self.allowed_job_types
+      # Example return: [:sast, :dast, :dependency_scanning, :container_scanning, :license_management, :coverage_fuzzing]
+      raise NotImplementedError, 'allowed_job_types must be overwritten to return an array of job types'
+    end
 
-    def initialize(pipeline:, job_types: JOB_TYPES)
+    def initialize(pipeline:, job_types: [])
+      if self.class == Security::JobsFinder
+        raise NotImplementedError, 'This is an abstract class, please instantiate its descendants'
+      end
+
+      if job_types.empty?
+        @job_types = self.class.allowed_job_types
+      elsif valid_job_types?(job_types)
+        @job_types = job_types
+      else
+        raise ArgumentError, "job_types must be from the following: #{self.class.allowed_job_types}"
+      end
+
       @pipeline = pipeline
-      @job_types = job_types
     end
 
     def execute
@@ -47,6 +62,10 @@ module Security
       @job_types.map do |job_type|
         @pipeline.builds.with_secure_reports_from_options(job_type)
       end.reduce(&:or)
+    end
+
+    def valid_job_types?(job_types)
+      (job_types - self.class.allowed_job_types).empty?
     end
   end
 end

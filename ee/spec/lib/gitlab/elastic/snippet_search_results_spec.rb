@@ -2,15 +2,36 @@
 
 require 'spec_helper'
 
-describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_not_need_inline do
-  let(:snippet) { create(:personal_snippet, content: 'foo', file_name: 'foo') }
+RSpec.describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_not_need_inline do
+  let(:snippet) { create(:personal_snippet, title: 'foo', description: 'foo') }
   let(:results) { described_class.new(snippet.author, 'foo', []) }
 
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
 
     perform_enqueued_jobs { snippet }
-    Snippet.__elasticsearch__.refresh_index!
+    ensure_elasticsearch_index!
+  end
+
+  describe 'pagination' do
+    let(:snippet2) { create(:personal_snippet, title: 'foo 2', author: snippet.author) }
+
+    before do
+      perform_enqueued_jobs { snippet2 }
+      ensure_elasticsearch_index!
+    end
+
+    it 'returns the correct page of results' do
+      # `snippet` is more relevant than `snippet2` (hence first in order) due
+      # to having a shorter title that exactly matches the query and also due
+      # to having a description that matches the query.
+      expect(results.objects('snippet_titles', page: 1, per_page: 1)).to eq([snippet])
+      expect(results.objects('snippet_titles', page: 2, per_page: 1)).to eq([snippet2])
+    end
+
+    it 'returns the correct number of results for one page' do
+      expect(results.objects('snippet_titles', page: 1, per_page: 2)).to eq([snippet, snippet2])
+    end
   end
 
   describe '#snippet_titles_count' do
@@ -19,9 +40,10 @@ describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_not_nee
     end
   end
 
-  describe '#snippet_blobs_count' do
-    it 'returns the amount of matched snippet blobs' do
-      expect(results.snippet_blobs_count).to eq(1)
+  describe '#highlight_map' do
+    it 'returns the expected highlight map' do
+      expect(results).to receive(:snippet_titles).and_return([{ _source: { id: 1 }, highlight: 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' }])
+      expect(results.highlight_map('snippet_titles')).to eq({ 1 => 'test <span class="gl-text-black-normal gl-font-weight-bold">highlight</span>' })
     end
   end
 
@@ -30,7 +52,6 @@ describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_not_nee
 
     it 'returns nothing' do
       expect(results.snippet_titles_count).to eq(0)
-      expect(results.snippet_blobs_count).to eq(0)
     end
   end
 
@@ -39,20 +60,18 @@ describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_not_nee
 
     it 'returns nothing' do
       expect(results.snippet_titles_count).to eq(0)
-      expect(results.snippet_blobs_count).to eq(0)
     end
 
     context 'when snippet is public' do
-      let(:snippet) { create(:personal_snippet, :public, content: 'foo', file_name: 'foo') }
+      let(:snippet) { create(:personal_snippet, :public, title: 'foo', description: 'foo') }
 
       it 'returns public snippet' do
         expect(results.snippet_titles_count).to eq(1)
-        expect(results.snippet_blobs_count).to eq(1)
       end
     end
   end
 
-  context 'when user has full_private_access', :do_not_mock_admin_mode do
+  context 'when user has read_all_resources', :do_not_mock_admin_mode do
     include_context 'custom session'
 
     let(:user) { create(:admin) }
@@ -61,29 +80,18 @@ describe Gitlab::Elastic::SnippetSearchResults, :elastic, :sidekiq_might_not_nee
     context 'admin mode disabled' do
       it 'returns nothing' do
         expect(results.snippet_titles_count).to eq(0)
-        expect(results.snippet_blobs_count).to eq(0)
       end
     end
 
     context 'admin mode enabled' do
       before do
+        Gitlab::Auth::CurrentUserMode.new(user).request_admin_mode!
         Gitlab::Auth::CurrentUserMode.new(user).enable_admin_mode!(password: user.password)
       end
 
       it 'returns matched snippets' do
         expect(results.snippet_titles_count).to eq(1)
-        expect(results.snippet_blobs_count).to eq(1)
       end
-    end
-  end
-
-  context 'when content is too long' do
-    let(:content) { "abc" + (" " * Elastic::Latest::SnippetInstanceProxy::MAX_INDEX_SIZE) + "xyz" }
-    let(:snippet) { create(:personal_snippet, :public, content: content) }
-
-    it 'indexes up to a limit' do
-      expect(described_class.new(nil, 'abc', []).snippet_blobs_count).to eq(1)
-      expect(described_class.new(nil, 'xyz', []).snippet_blobs_count).to eq(0)
     end
   end
 end

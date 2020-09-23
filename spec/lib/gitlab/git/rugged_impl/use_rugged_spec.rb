@@ -4,11 +4,10 @@ require 'spec_helper'
 require 'json'
 require 'tempfile'
 
-describe Gitlab::Git::RuggedImpl::UseRugged, :seed_helper do
+RSpec.describe Gitlab::Git::RuggedImpl::UseRugged, :seed_helper do
   let(:project) { create(:project, :repository) }
   let(:repository) { project.repository }
-  let(:feature_flag_name) { 'feature-flag-name' }
-  let(:feature_flag) { Feature.get(feature_flag_name) }
+  let(:feature_flag_name) { wrapper.rugged_feature_keys.first }
   let(:temp_gitaly_metadata_file) { create_temporary_gitaly_metadata_file }
 
   before(:all) do
@@ -31,7 +30,7 @@ describe Gitlab::Git::RuggedImpl::UseRugged, :seed_helper do
     Gitlab::GitalyClient.instance_variable_set(:@can_use_disk, {})
   end
 
-  context '#execute_rugged_call', :request_store do
+  describe '#execute_rugged_call', :request_store do
     let(:args) { ['refs/heads/master', 1] }
 
     before do
@@ -48,54 +47,137 @@ describe Gitlab::Git::RuggedImpl::UseRugged, :seed_helper do
     end
   end
 
-  context 'when feature flag is not persisted' do
-    before do
-      allow(Feature).to receive(:persisted?).with(feature_flag).and_return(false)
+  context 'when feature flag is not persisted', stub_feature_flags: false do
+    context 'when running puma with multiple threads' do
+      before do
+        allow(subject).to receive(:running_puma_with_multiple_threads?).and_return(true)
+      end
+
+      it 'returns false' do
+        expect(subject.use_rugged?(repository, feature_flag_name)).to be false
+      end
     end
 
-    it 'returns true when gitaly matches disk' do
-      expect(subject.use_rugged?(repository, feature_flag_name)).to be true
-    end
+    context 'when not running puma with multiple threads' do
+      before do
+        allow(subject).to receive(:running_puma_with_multiple_threads?).and_return(false)
+      end
 
-    it 'returns false when disk access fails' do
-      allow(Gitlab::GitalyClient).to receive(:storage_metadata_file_path).and_return("/fake/path/doesnt/exist")
+      it 'returns true when gitaly matches disk' do
+        expect(subject.use_rugged?(repository, feature_flag_name)).to be true
+      end
 
-      expect(subject.use_rugged?(repository, feature_flag_name)).to be false
-    end
+      it 'returns false when disk access fails' do
+        allow(Gitlab::GitalyClient).to receive(:storage_metadata_file_path).and_return("/fake/path/doesnt/exist")
 
-    it "returns false when gitaly doesn't match disk" do
-      allow(Gitlab::GitalyClient).to receive(:storage_metadata_file_path).and_return(temp_gitaly_metadata_file)
+        expect(subject.use_rugged?(repository, feature_flag_name)).to be false
+      end
 
-      expect(subject.use_rugged?(repository, feature_flag_name)).to be_falsey
+      it "returns false when gitaly doesn't match disk" do
+        allow(Gitlab::GitalyClient).to receive(:storage_metadata_file_path).and_return(temp_gitaly_metadata_file)
 
-      File.delete(temp_gitaly_metadata_file)
-    end
+        expect(subject.use_rugged?(repository, feature_flag_name)).to be_falsey
 
-    it "doesn't lead to a second rpc call because gitaly client should use the cached value" do
-      expect(subject.use_rugged?(repository, feature_flag_name)).to be true
+        File.delete(temp_gitaly_metadata_file)
+      end
 
-      expect(Gitlab::GitalyClient).not_to receive(:filesystem_id)
+      it "doesn't lead to a second rpc call because gitaly client should use the cached value" do
+        expect(subject.use_rugged?(repository, feature_flag_name)).to be true
 
-      subject.use_rugged?(repository, feature_flag_name)
+        expect(Gitlab::GitalyClient).not_to receive(:filesystem_id)
+
+        subject.use_rugged?(repository, feature_flag_name)
+      end
     end
   end
 
   context 'when feature flag is persisted' do
-    before do
-      allow(Feature).to receive(:persisted?).with(feature_flag).and_return(true)
-    end
-
     it 'returns false when the feature flag is off' do
-      allow(feature_flag).to receive(:enabled?).and_return(false)
+      Feature.disable(feature_flag_name)
 
       expect(subject.use_rugged?(repository, feature_flag_name)).to be_falsey
     end
 
     it "returns true when feature flag is on" do
-      allow(feature_flag).to receive(:enabled?).and_return(true)
+      Feature.enable(feature_flag_name)
+
       allow(Gitlab::GitalyClient).to receive(:can_use_disk?).and_return(false)
 
       expect(subject.use_rugged?(repository, feature_flag_name)).to be true
+    end
+  end
+
+  describe '#running_puma_with_multiple_threads?' do
+    context 'when using Puma' do
+      before do
+        stub_const('::Puma', class_double('Puma'))
+        allow(Gitlab::Runtime).to receive(:puma?).and_return(true)
+      end
+
+      it "returns false when Puma doesn't support the cli_config method" do
+        allow(::Puma).to receive(:respond_to?).with(:cli_config).and_return(false)
+
+        expect(subject.running_puma_with_multiple_threads?).to be_falsey
+      end
+
+      it 'returns false for single thread Puma' do
+        allow(::Puma).to receive_message_chain(:cli_config, :options).and_return(max_threads: 1)
+
+        expect(subject.running_puma_with_multiple_threads?).to be false
+      end
+
+      it 'returns true for multi-threaded Puma' do
+        allow(::Puma).to receive_message_chain(:cli_config, :options).and_return(max_threads: 2)
+
+        expect(subject.running_puma_with_multiple_threads?).to be true
+      end
+    end
+
+    context 'when not using Puma' do
+      before do
+        allow(Gitlab::Runtime).to receive(:puma?).and_return(false)
+      end
+
+      it 'returns false' do
+        expect(subject.running_puma_with_multiple_threads?).to be false
+      end
+    end
+  end
+
+  describe '#rugged_enabled_through_feature_flag?' do
+    subject { wrapper.send(:rugged_enabled_through_feature_flag?) }
+
+    before do
+      allow(Feature).to receive(:enabled?).with(:feature_key_1).and_return(true)
+      allow(Feature).to receive(:enabled?).with(:feature_key_2).and_return(true)
+      allow(Feature).to receive(:enabled?).with(:feature_key_3).and_return(false)
+      allow(Feature).to receive(:enabled?).with(:feature_key_4).and_return(false)
+
+      stub_const('Gitlab::Git::RuggedImpl::Repository::FEATURE_FLAGS', feature_keys)
+    end
+
+    context 'no feature keys given' do
+      let(:feature_keys) { [] }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'all features are enabled' do
+      let(:feature_keys) { [:feature_key_1, :feature_key_2] }
+
+      it { is_expected.to be_truthy}
+    end
+
+    context 'all features are not enabled' do
+      let(:feature_keys) { [:feature_key_3, :feature_key_4] }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'some feature is enabled' do
+      let(:feature_keys) { [:feature_key_4, :feature_key_2] }
+
+      it { is_expected.to be_truthy }
     end
   end
 

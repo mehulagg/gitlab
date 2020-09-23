@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LoadingError component with error code 401 empty state has correct props 1`] = `
+Object {
+  "compact": false,
+  "description": "Security reports can only be accessed by authorized users.",
+  "primaryButtonLink": "/users/sign_in",
+  "primaryButtonText": "Sign in",
+  "secondaryButtonLink": null,
+  "secondaryButtonText": null,
+  "svgPath": "/401.svg",
+  "title": "You must sign in as an authorized user to see this report",
+}
+`;
+
+exports[`LoadingError component with error code 403 empty state has correct props 1`] = `
+Object {
+  "compact": false,
+  "description": "Security reports can only be accessed by authorized users.",
+  "primaryButtonLink": null,
+  "primaryButtonText": null,
+  "secondaryButtonLink": null,
+  "secondaryButtonText": null,
+  "svgPath": "/403.svg",
+  "title": "You do not have sufficient permissions to access this report",
+}
+`;

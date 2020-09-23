@@ -65,7 +65,7 @@
     margin-left: -15px;
     border-radius: 2em;
     background: $gray-darkest;
-    color: $white-light;
+    color: $white;
     z-index: 96;
     text-decoration: none;
 
@@ -130,7 +130,11 @@
   }
 
   .linked-pipeline.build {
-    height: 41px;
+    height: 42px;
+
+    &::before {
+      content: none;
+    }
 
     // apply custom dimensions to connector before and after for triangle arrow
     &.flat-connector-before {
@@ -157,6 +161,10 @@
         width: 88px;
         height: 1px;
       }
+    }
+
+    &.downstream-pipeline {
+      height: 86px;
     }
 
     .linked-pipeline-content {

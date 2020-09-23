@@ -1,5 +1,5 @@
 import Vue from 'vue';
-import { shallowMount, createLocalVue } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 import { TEST_HOST } from 'helpers/test_constants';
 import component from 'ee/approvals/components/approval_check_rule_popover.vue';
 import {
@@ -12,11 +12,8 @@ describe('Approval Check Popover', () => {
   let wrapper;
 
   beforeEach(() => {
-    const localVue = createLocalVue();
     wrapper = shallowMount(component, {
-      localVue,
       propsData: { rule: {} },
-      sync: false,
     });
   });
 

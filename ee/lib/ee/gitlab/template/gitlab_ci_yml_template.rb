@@ -14,12 +14,16 @@ module EE
             super.merge(categories_ee)
           end
 
+          override :additional_excluded_patterns
+          def additional_excluded_patterns
+            []
+          end
+
           private
 
           def categories_ee
             {
-              'Security' => 'Security',
-              'Verify' => 'Verify'
+              'Security' => 'Security'
             }
           end
         end

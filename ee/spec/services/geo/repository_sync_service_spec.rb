@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Geo::RepositorySyncService do
+RSpec.describe Geo::RepositorySyncService, :geo do
   include ::EE::GeoHelpers
   include ExclusiveLeaseHelpers
 
-  set(:primary) { create(:geo_node, :primary) }
-  set(:secondary) { create(:geo_node) }
-  set(:project) { create(:project_empty_repo) }
+  let_it_be(:primary) { create(:geo_node, :primary) }
+  let_it_be(:secondary) { create(:geo_node) }
+  let_it_be(:project) { create(:project_empty_repo) }
 
   let(:repository) { project.repository }
   let(:lease_key) { "geo_sync_service:repository:#{project.id}" }
@@ -149,6 +149,20 @@ describe Geo::RepositorySyncService do
           repository_retry_count: 1
         )
       end
+    end
+
+    it 'marks primary_repository_checksummed as true when repository has been verified on primary' do
+      create(:repository_state, :repository_verified, project: project)
+      registry = create(:geo_project_registry, project: project, primary_repository_checksummed: false)
+
+      expect { subject.execute }.to change { registry.reload.primary_repository_checksummed}.from(false).to(true)
+    end
+
+    it 'marks primary_repository_checksummed as false when repository has not been verified on primary' do
+      create(:repository_state, :repository_failed, project: project)
+      registry = create(:geo_project_registry, project: project, primary_repository_checksummed: true)
+
+      expect { subject.execute }.to change { registry.reload.primary_repository_checksummed}.from(true).to(false)
     end
 
     context 'tracking database' do
@@ -323,9 +337,9 @@ describe Geo::RepositorySyncService do
         create(:geo_project_registry, project: project, repository_retry_count: Geo::ProjectRegistry::RETRIES_BEFORE_REDOWNLOAD + 1)
 
         expect(subject).to receive(:sync_repository).and_call_original
-        expect(subject.gitlab_shell).to receive(:mv_repository).exactly(2).times.and_call_original
+        expect(subject.gitlab_shell).to receive(:mv_repository).twice.and_call_original
 
-        expect(subject.gitlab_shell).to receive(:remove_repository).exactly(2).times.and_call_original
+        expect(subject.gitlab_shell).to receive(:remove_repository).twice.and_call_original
 
         subject.execute
 
@@ -365,7 +379,7 @@ describe Geo::RepositorySyncService do
       end
 
       it 'successfully redownloads the repository even if the retry time exceeds max value' do
-        timestamp = Time.now.utc
+        timestamp = Time.current.utc
         registry = create(
           :geo_project_registry,
           project: project,

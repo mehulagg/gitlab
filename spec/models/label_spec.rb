@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Label do
+RSpec.describe Label do
   describe 'modules' do
     it { is_expected.to include_module(Referable) }
     it { is_expected.to include_module(Subscribable) }
@@ -180,6 +180,31 @@ describe Label do
 
     it 'returns nothing' do
       expect(described_class.subscribed_by(0)).to be_empty
+    end
+  end
+
+  describe '.top_labels_by_target' do
+    let(:label) { create(:label) }
+    let(:popular_label) { create(:label) }
+    let(:merge_request1) { create(:merge_request) }
+    let(:merge_request2) { create(:merge_request) }
+
+    before do
+      merge_request1.labels = [label, popular_label]
+      merge_request2.labels = [popular_label]
+    end
+
+    it 'returns distinct labels, ordered by usage in the given target relation' do
+      top_labels = described_class.top_labels_by_target(MergeRequest.all)
+
+      expect(top_labels).to match_array([popular_label, label])
+    end
+
+    it 'excludes labels that are not assigned to any records in the given target relation' do
+      merge_requests = MergeRequest.where(id: merge_request2.id)
+      top_labels = described_class.top_labels_by_target(merge_requests)
+
+      expect(top_labels).to match_array([popular_label])
     end
   end
 

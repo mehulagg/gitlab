@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Import::FogbugzController do
+RSpec.describe Import::FogbugzController do
   include ImportSpecHelper
 
   let(:user) { create(:user) }
@@ -24,6 +24,35 @@ describe Import::FogbugzController do
       expect(session[:fogbugz_token]).to eq(token)
       expect(session[:fogbugz_uri]).to eq(uri)
       expect(response).to redirect_to(new_user_map_import_fogbugz_path)
+    end
+
+    context 'verify url' do
+      shared_examples 'denies local request' do |reason|
+        it 'does not allow requests' do
+          post :callback, params: { uri: uri, email: 'test@example.com', password: 'mypassword' }
+
+          expect(response).to redirect_to(new_import_fogbugz_url)
+          expect(flash[:alert]).to eq("Specified URL cannot be used: \"#{reason}\"")
+        end
+      end
+
+      context 'when host is localhost' do
+        let(:uri) { 'https://localhost:3000' }
+
+        include_examples 'denies local request', 'Requests to localhost are not allowed'
+      end
+
+      context 'when host is on local network' do
+        let(:uri) { 'http://192.168.0.1/' }
+
+        include_examples 'denies local request', 'Requests to the local network are not allowed'
+      end
+
+      context 'when host is ftp protocol' do
+        let(:uri) { 'ftp://testing' }
+
+        include_examples 'denies local request', 'Only allowed schemes are http, https'
+      end
     end
   end
 
@@ -51,28 +80,20 @@ describe Import::FogbugzController do
 
   describe 'GET status' do
     before do
-      @repo = OpenStruct.new(name: 'vim')
+      @repo = OpenStruct.new(id: 'demo', name: 'vim')
       stub_client(valid?: true)
     end
 
-    it 'assigns variables' do
-      @project = create(:project, import_type: 'fogbugz', creator_id: user.id)
-      stub_client(repos: [@repo])
-
-      get :status
-
-      expect(assigns(:already_added_projects)).to eq([@project])
-      expect(assigns(:repos)).to eq([@repo])
+    it_behaves_like 'import controller status' do
+      let(:repo) { @repo }
+      let(:repo_id) { @repo.id }
+      let(:import_source) { @repo.name }
+      let(:provider_name) { 'fogbugz' }
+      let(:client_repos_field) { :repos }
     end
+  end
 
-    it 'does not show already added project' do
-      @project = create(:project, import_type: 'fogbugz', creator_id: user.id, import_source: 'vim')
-      stub_client(repos: [@repo])
-
-      get :status
-
-      expect(assigns(:already_added_projects)).to eq([@project])
-      expect(assigns(:repos)).to eq([])
-    end
+  describe 'POST create' do
+    it_behaves_like 'project import rate limiter'
   end
 end

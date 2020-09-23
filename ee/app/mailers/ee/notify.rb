@@ -10,10 +10,7 @@ module EE
     # See https://gitlab.com/gitlab-org/gitlab/issues/7846
     prepended do
       include ::Emails::AdminNotification
-      include ::Emails::CsvExport
-      include ::Emails::ServiceDesk
       include ::Emails::Epics
-      include ::Emails::Reviews
     end
 
     attr_reader :group
@@ -25,6 +22,11 @@ module EE
       return super unless model.is_a?(Epic)
 
       group.full_name
+    end
+
+    def add_group_headers
+      headers['X-GitLab-Group-Id'] = group.id
+      headers['X-GitLab-Group-Path'] = group.full_path
     end
   end
 end

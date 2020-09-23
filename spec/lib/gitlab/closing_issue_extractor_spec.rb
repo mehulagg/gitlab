@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ClosingIssueExtractor do
+RSpec.describe Gitlab::ClosingIssueExtractor do
   let(:project) { create(:project) }
   let(:project2) { create(:project) }
   let(:forked_project) { Projects::ForkService.new(project, project2.creator).execute }
@@ -103,7 +103,7 @@ describe Gitlab::ClosingIssueExtractor do
       end
 
       it do
-        message = "Awesome commit (Fixes: #{reference})"
+        message = "Awesome commit (fixes: #{reference})"
         expect(subject.closed_by_message(message)).to eq([issue])
       end
 
@@ -396,7 +396,7 @@ describe Gitlab::ClosingIssueExtractor do
       end
 
       it 'allows mixed comma-separated and non-comma-separated issue numbers in single line message' do
-        message = "Closes #{reference}, #{reference2} and #{reference3}"
+        message = "Closes #{reference}, #{reference2} #{reference3}"
 
         expect(subject.closed_by_message(message))
             .to match_array([issue, other_issue, third_issue])
@@ -436,6 +436,17 @@ describe Gitlab::ClosingIssueExtractor do
 
         expect(subject.closed_by_message(message))
             .to match_array([issue])
+      end
+    end
+
+    context "with autoclose referenced issues disabled" do
+      before do
+        project.update!(autoclose_referenced_issues: false)
+      end
+
+      it do
+        message = "Awesome commit (Closes #{reference})"
+        expect(subject.closed_by_message(message)).to eq([])
       end
     end
   end

@@ -1,20 +1,21 @@
-import createFlash from '~/flash';
-import _ from 'underscore';
+import { memoize, uniqBy, uniqueId, flatten } from 'lodash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __ } from '~/locale';
 import Api from '~/api';
 import axios from '~/lib/utils/axios_utils';
 import * as types from './mutation_types';
+import { RULE_TYPE_ANY_APPROVER } from '../../../constants';
 import { mapMRApprovalSettingsResponse } from '../../../mappers';
 
-const fetchGroupMembers = _.memoize(id => Api.groupMembers(id).then(response => response.data));
+const fetchGroupMembers = memoize(id => Api.groupMembers(id).then(response => response.data));
 
 const fetchApprovers = ({ userRecords, groups }) => {
   const groupUsersAsync = Promise.all(groups.map(fetchGroupMembers));
 
   return groupUsersAsync
-    .then(_.flatten)
+    .then(flatten)
     .then(groupUsers => groupUsers.concat(userRecords))
-    .then(users => _.uniq(users, false, x => x.id));
+    .then(users => uniqBy(users, x => x.id));
 };
 
 const seedApprovers = rule =>
@@ -36,18 +37,24 @@ const seedLocalRule = rule =>
     .then(seedUsers)
     .then(seedGroups);
 
-const seedNewRule = rule => ({
-  ...rule,
-  isNew: true,
-  id: _.uniqueId('new'),
-});
+const seedNewRule = rule => {
+  const name = rule.ruleType === RULE_TYPE_ANY_APPROVER ? '' : rule.name;
+
+  return {
+    ...rule,
+    isNew: true,
+    name,
+    id: uniqueId('new'),
+  };
+};
 
 export const requestRules = ({ commit }) => {
   commit(types.SET_LOADING, true);
 };
 
-export const receiveRulesSuccess = ({ commit }, settings) => {
+export const receiveRulesSuccess = ({ commit }, { resetToDefault, settings }) => {
   commit(types.SET_LOADING, false);
+  commit(types.SET_RESET_TO_DEFAULT, resetToDefault);
   commit(types.SET_APPROVAL_SETTINGS, settings);
 };
 
@@ -55,20 +62,31 @@ export const receiveRulesError = () => {
   createFlash(__('An error occurred fetching the approval rules.'));
 };
 
-export const fetchRules = ({ rootState, dispatch }) => {
+export const fetchRules = (
+  { rootState, dispatch },
+  { targetBranch = '', resetToDefault = false },
+) => {
   dispatch('requestRules');
 
   const { mrSettingsPath, projectSettingsPath } = rootState.settings;
-  const path = mrSettingsPath || projectSettingsPath;
+  const path = resetToDefault ? projectSettingsPath : mrSettingsPath || projectSettingsPath;
+
+  const params = targetBranch
+    ? {
+        params: {
+          target_branch: targetBranch,
+        },
+      }
+    : null;
 
   return axios
-    .get(path)
+    .get(path, params)
     .then(response => mapMRApprovalSettingsResponse(response.data))
     .then(settings => ({
       ...settings,
       rules: settings.rules.map(x => (x.id ? x : seedNewRule(x))),
     }))
-    .then(settings => dispatch('receiveRulesSuccess', settings))
+    .then(settings => dispatch('receiveRulesSuccess', { settings, resetToDefault }))
     .catch(() => dispatch('receiveRulesError'));
 };
 
@@ -113,4 +131,28 @@ export const requestDeleteRule = ({ dispatch }, rule) => {
   dispatch('deleteRule', rule.id);
 };
 
-export default () => {};
+export const postRegularRule = ({ commit, dispatch }, rule) =>
+  seedLocalRule(rule)
+    .then(seedNewRule)
+    .then(newRule => {
+      commit(types.POST_REGULAR_RULE, newRule);
+      commit(types.DELETE_ANY_RULE);
+      dispatch('createModal/close');
+    })
+    .catch(e => {
+      createFlash(__('An error occurred fetching the approvers for the new rule.'));
+      throw e;
+    });
+
+export const setEmptyRule = ({ commit }) => {
+  commit(types.SET_EMPTY_RULE);
+};
+
+export const addEmptyRule = ({ commit }) => {
+  commit(types.ADD_EMPTY_RULE);
+};
+
+export const setTargetBranch = ({ commit }, targetBranch) =>
+  commit(types.SET_TARGET_BRANCH, targetBranch);
+
+export const undoRulesChange = ({ commit }) => commit(types.UNDO_RULES);

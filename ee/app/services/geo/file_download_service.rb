@@ -15,13 +15,14 @@ module Geo
 
     def execute
       try_obtain_lease do
-        start_time = Time.now
+        start_time = Time.current
 
         download_result = downloader.execute
 
         mark_as_synced = download_result.success || download_result.primary_missing_file
 
         log_file_download(mark_as_synced, download_result, start_time)
+
         update_registry(download_result.bytes_downloaded,
                         mark_as_synced: mark_as_synced,
                         missing_on_primary: download_result.primary_missing_file)
@@ -49,8 +50,9 @@ module Geo
         bytes_downloaded: download_result.bytes_downloaded,
         failed_before_transfer: download_result.failed_before_transfer,
         primary_missing_file: download_result.primary_missing_file,
-        download_time_s: (Time.now - start_time).to_f.round(3)
-      }
+        reason: download_result.reason,
+        download_time_s: (Time.current - start_time).to_f.round(3)
+      }.compact
 
       log_info("File download", metadata)
     end

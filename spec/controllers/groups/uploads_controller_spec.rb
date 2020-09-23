@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::UploadsController do
+RSpec.describe Groups::UploadsController do
   include WorkhorseHelpers
 
   let(:model) { create(:group, :public) }
@@ -17,6 +17,22 @@ describe Groups::UploadsController do
 
   it_behaves_like 'handle uploads' do
     let(:uploader_class) { NamespaceFileUploader }
+  end
+
+  context 'with a moved group' do
+    let!(:upload) { create(:upload, :issuable_upload, :with_file, model: model) }
+    let(:group) { model }
+    let(:old_path) { group.to_param + 'old' }
+    let!(:redirect_route) { model.redirect_routes.create(path: old_path) }
+    let(:upload_path) { File.basename(upload.path) }
+
+    it 'redirects to a file with the proper extension' do
+      get :show, params: { group_id: old_path, filename: upload_path, secret: upload.secret }
+
+      expect(response.location).to eq(show_group_uploads_url(group, upload.secret, upload_path))
+      expect(response.location).to end_with(upload.path)
+      expect(response).to have_gitlab_http_status(:redirect)
+    end
   end
 
   def post_authorize(verified: true)

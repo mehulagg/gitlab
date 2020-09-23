@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Git::Conflict::Parser do
+RSpec.describe Gitlab::Git::Conflict::Parser do
   describe '.parse' do
     def parse_text(text)
       described_class.parse(text, our_path: 'README.md', their_path: 'README.md')
@@ -8,91 +10,94 @@ describe Gitlab::Git::Conflict::Parser do
 
     context 'when the file has valid conflicts' do
       let(:text) do
-        <<CONFLICT
-module Gitlab
-  module Regexp
-    extend self
+        <<~CONFLICT
+            module Gitlab
+              module Regexp
+                extend self
 
-    def username_regexp
-      default_regexp
-    end
+                def username_regexp
+                  default_regexp
+                end
 
-<<<<<<< files/ruby/regex.rb
-    def project_name_regexp
-      /\A[a-zA-Z0-9][a-zA-Z0-9_\-\. ]*\z/
-    end
+            <<<<<<< files/ruby/regex.rb
+                def project_name_regexp
+                  /\A[a-zA-Z0-9][a-zA-Z0-9_\-\. ]*\z/
+                end
 
-    def name_regexp
-      /\A[a-zA-Z0-9_\-\. ]*\z/
-=======
-    def project_name_regex
-      %r{\A[a-zA-Z0-9][a-zA-Z0-9_\-\. ]*\z}
-    end
+                def name_regexp
+                  /\A[a-zA-Z0-9_\-\. ]*\z/
+            =======
+                def project_name_regex
+                  %r{\A[a-zA-Z0-9][a-zA-Z0-9_\-\. ]*\z}
+                end
 
-    def name_regex
-      %r{\A[a-zA-Z0-9_\-\. ]*\z}
->>>>>>> files/ruby/regex.rb
-    end
+                def name_regex
+                  %r{\A[a-zA-Z0-9_\-\. ]*\z}
+            >>>>>>> files/ruby/regex.rb
+                end
 
-    def path_regexp
-      default_regexp
-    end
+                def path_regexp
+                  default_regexp
+                end
 
-<<<<<<< files/ruby/regex.rb
-    def archive_formats_regexp
-      /(zip|tar|7z|tar\.gz|tgz|gz|tar\.bz2|tbz|tbz2|tb2|bz2)/
-=======
-    def archive_formats_regex
-      %r{(zip|tar|7z|tar\.gz|tgz|gz|tar\.bz2|tbz|tbz2|tb2|bz2)}
->>>>>>> files/ruby/regex.rb
-    end
+            <<<<<<< files/ruby/regex.rb
+                def archive_formats_regexp
+                  /(zip|tar|7z|tar\.gz|tgz|gz|tar\.bz2|tbz|tbz2|tb2|bz2)/
+            =======
+                def archive_formats_regex
+                  %r{(zip|tar|7z|tar\.gz|tgz|gz|tar\.bz2|tbz|tbz2|tb2|bz2)}
+            >>>>>>> files/ruby/regex.rb
+                end
 
-    def git_reference_regexp
-      # Valid git ref regexp, see:
-      # https://www.kernel.org/pub/software/scm/git/docs/git-check-ref-format.html
-      %r{
-        (?!
-           (?# doesn't begins with)
-           \/|                    (?# rule #6)
-           (?# doesn't contain)
-           .*(?:
-              [\/.]\.|            (?# rule #1,3)
-              \/\/|               (?# rule #6)
-              @\{|                (?# rule #8)
-              \\                  (?# rule #9)
-           )
-        )
-        [^\000-\040\177~^:?*\[]+  (?# rule #4-5)
-        (?# doesn't end with)
-        (?<!\.lock)               (?# rule #1)
-        (?<![\/.])                (?# rule #6-7)
-      }x
-    end
+                def git_reference_regexp
+                  # Valid git ref regexp, see:
+                  # https://www.kernel.org/pub/software/scm/git/docs/git-check-ref-format.html
+                  %r{
+                    (?!
+                       (?# doesn't begins with)
+                       \/|                    (?# rule #6)
+                       (?# doesn't contain)
+                       .*(?:
+                          [\/.]\.|            (?# rule #1,3)
+                          \/\/|               (?# rule #6)
+                          @\{|                (?# rule #8)
+                          \\                  (?# rule #9)
+                       )
+                    )
+                    [^\000-\040\177~^:?*\[]+  (?# rule #4-5)
+                    (?# doesn't end with)
+                    (?<!\.lock)               (?# rule #1)
+                    (?<![\/.])                (?# rule #6-7)
+                  }x
+                end
 
-    protected
+                protected
 
-<<<<<<< files/ruby/regex.rb
-    def default_regexp
-      /\A[.?]?[a-zA-Z0-9][a-zA-Z0-9_\-\.]*(?<!\.git)\z/
-=======
-    def default_regex
-      %r{\A[.?]?[a-zA-Z0-9][a-zA-Z0-9_\-\.]*(?<!\.git)\z}
->>>>>>> files/ruby/regex.rb
-    end
-  end
-end
-CONFLICT
+            <<<<<<< files/ruby/regex.rb
+                def default_regexp
+                  /\A[.?]?[a-zA-Z0-9][a-zA-Z0-9_\-\.]*(?<!\.git)\z/
+            =======
+                def default_regex
+                  %r{\A[.?]?[a-zA-Z0-9][a-zA-Z0-9_\-\.]*(?<!\.git)\z}
+            >>>>>>> files/ruby/regex.rb
+                end
+              end
+            end
+        CONFLICT
       end
 
       let(:lines) do
         described_class.parse(text, our_path: 'files/ruby/regex.rb', their_path: 'files/ruby/regex.rb')
       end
+
       let(:old_line_numbers) do
         lines.select { |line| line[:type] != 'new' }.map { |line| line[:line_old] }
       end
+
       let(:new_line_numbers) do
         lines.select { |line| line[:type] != 'old' }.map { |line| line[:line_new] }
       end
+
       let(:line_indexes) { lines.map { |line| line[:line_obj_index] } }
 
       it 'sets our lines as new lines' do
@@ -208,7 +213,7 @@ CONFLICT
       # these strings.
       context 'when the file contains UTF-8 characters' do
         it 'does not raise' do
-          expect { parse_text("Espa\xC3\xB1a".force_encoding(Encoding::ASCII_8BIT)) }
+          expect { parse_text((+"Espa\xC3\xB1a").force_encoding(Encoding::ASCII_8BIT)) }
             .not_to raise_error
         end
       end

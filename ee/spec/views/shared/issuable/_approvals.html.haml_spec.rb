@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'shared/issuable/_approvals.html.haml' do
+RSpec.describe 'shared/issuable/_approvals.html.haml' do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
   let(:merge_request) { create(:merge_request, source_project: project, target_project: project) }

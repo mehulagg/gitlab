@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Resolvers::MergeRequestPipelinesResolver do
+RSpec.describe Resolvers::MergeRequestPipelinesResolver do
   include GraphqlHelpers
 
-  set(:merge_request) { create(:merge_request) }
-  set(:pipeline) do
+  let_it_be(:merge_request) { create(:merge_request) }
+  let_it_be(:pipeline) do
     create(
       :ci_pipeline,
       project: merge_request.source_project,
@@ -14,8 +14,8 @@ describe Resolvers::MergeRequestPipelinesResolver do
       sha: merge_request.diff_head_sha
     )
   end
-  set(:other_project_pipeline) { create(:ci_pipeline, project: merge_request.source_project) }
-  set(:other_pipeline) { create(:ci_pipeline) }
+  let_it_be(:other_project_pipeline) { create(:ci_pipeline, project: merge_request.source_project, ref: 'other-ref') }
+  let_it_be(:other_pipeline) { create(:ci_pipeline) }
   let(:current_user) { create(:user) }
 
   before do
@@ -28,5 +28,12 @@ describe Resolvers::MergeRequestPipelinesResolver do
 
   it 'resolves only MRs for the passed merge request' do
     expect(resolve_pipelines).to contain_exactly(pipeline)
+  end
+
+  describe 'with archived project' do
+    let(:archived_project) { create(:project, :archived) }
+    let(:merge_request) { create(:merge_request, source_project: archived_project) }
+
+    it { expect(resolve_pipelines).not_to contain_exactly(pipeline) }
   end
 end

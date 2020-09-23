@@ -23,18 +23,26 @@ describe('DismissalCommentBox', () => {
       metaKey: true,
     });
 
-    expect(wrapper.emitted().submit).toBeTruthy();
+    return wrapper.vm.$nextTick(() => {
+      expect(wrapper.emitted().submit).toBeTruthy();
+    });
   });
 
   it('should render the error message', () => {
     const errorMessage = 'You did something wrong';
     wrapper.setProps({ errorMessage });
-    expect(wrapper.find('.js-error').text()).toBe(errorMessage);
+
+    return wrapper.vm.$nextTick(() => {
+      expect(wrapper.find('.js-error').text()).toBe(errorMessage);
+    });
   });
 
   it('should render the placeholder', () => {
     const placeholder = 'Please type into the box';
     wrapper.setProps({ placeholder });
-    expect(wrapper.find(GlFormTextarea).attributes('placeholder')).toBe(placeholder);
+
+    return wrapper.vm.$nextTick(() => {
+      expect(wrapper.find(GlFormTextarea).attributes('placeholder')).toBe(placeholder);
+    });
   });
 });

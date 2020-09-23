@@ -1,0 +1,131 @@
+<script>
+import { GlFormGroup, GlFormSelect, GlFormCheckbox, GlSprintf, GlLink } from '@gitlab/ui';
+import GeoNodeFormNamespaces from './geo_node_form_namespaces.vue';
+import GeoNodeFormShards from './geo_node_form_shards.vue';
+import { SELECTIVE_SYNC_MORE_INFO, OBJECT_STORAGE_MORE_INFO } from '../constants';
+
+export default {
+  name: 'GeoNodeFormSelectiveSync',
+  components: {
+    GlFormGroup,
+    GlFormSelect,
+    GeoNodeFormNamespaces,
+    GeoNodeFormShards,
+    GlFormCheckbox,
+    GlSprintf,
+    GlLink,
+  },
+  props: {
+    nodeData: {
+      type: Object,
+      required: true,
+    },
+    selectiveSyncTypes: {
+      type: Object,
+      required: true,
+    },
+    syncShardsOptions: {
+      type: Array,
+      required: true,
+    },
+  },
+  computed: {
+    selectiveSyncNamespaces() {
+      return this.nodeData.selectiveSyncType === this.selectiveSyncTypes.NAMESPACES.value;
+    },
+    selectiveSyncShards() {
+      return this.nodeData.selectiveSyncType === this.selectiveSyncTypes.SHARDS.value;
+    },
+  },
+  methods: {
+    addSyncOption({ key, value }) {
+      this.$emit('addSyncOption', { key, value });
+    },
+    removeSyncOption({ key, index }) {
+      this.$emit('removeSyncOption', { key, index });
+    },
+  },
+  SELECTIVE_SYNC_MORE_INFO,
+  OBJECT_STORAGE_MORE_INFO,
+};
+</script>
+
+<template>
+  <div ref="geoNodeFormSelectiveSyncContainer">
+    <h2 class="gl-font-size-h2 gl-my-5">{{ __('Selective synchronization') }}</h2>
+    <p class="gl-mb-5">
+      {{
+        __(
+          'Set what should be replicated by choosing specific projects or groups by the secondary node.',
+        )
+      }}
+      <gl-link
+        :href="$options.SELECTIVE_SYNC_MORE_INFO"
+        target="_blank"
+        data-testid="selectiveSyncMoreInfo"
+        >{{ __('More information') }}</gl-link
+      >
+    </p>
+    <gl-form-group
+      :label="__('Selective synchronization')"
+      label-for="node-selective-synchronization-field"
+    >
+      <gl-form-select
+        id="node-selective-synchronization-field"
+        v-model="nodeData.selectiveSyncType"
+        :options="selectiveSyncTypes"
+        value-field="value"
+        text-field="label"
+        class="col-sm-3"
+      />
+    </gl-form-group>
+    <gl-form-group
+      v-if="selectiveSyncNamespaces"
+      :label="__('Groups to synchronize')"
+      label-for="node-synchronization-namespaces-field"
+    >
+      <geo-node-form-namespaces
+        id="node-synchronization-namespaces-field"
+        :selected-namespaces="nodeData.selectiveSyncNamespaceIds"
+        @addSyncOption="addSyncOption"
+        @removeSyncOption="removeSyncOption"
+      />
+    </gl-form-group>
+    <gl-form-group
+      v-if="selectiveSyncShards"
+      :label="__('Shards to synchronize')"
+      label-for="node-synchronization-shards-field"
+    >
+      <geo-node-form-shards
+        id="node-synchronization-shards-field"
+        :selected-shards="nodeData.selectiveSyncShards"
+        :sync-shards-options="syncShardsOptions"
+        @addSyncOption="addSyncOption"
+        @removeSyncOption="removeSyncOption"
+      />
+    </gl-form-group>
+    <gl-form-group :label="__('Object Storage replication')" label-for="node-object-storage-field">
+      <template #description>
+        <gl-sprintf
+          :message="
+            __(
+              'If enabled, GitLab will handle Object Storage replication using Geo. %{linkStart}More information%{linkEnd}',
+            )
+          "
+        >
+          <template #link="{ content }">
+            <gl-link
+              :href="$options.OBJECT_STORAGE_MORE_INFO"
+              data-testid="objectStorageMoreInfo"
+              target="_blank"
+              >{{ content }}</gl-link
+            >
+          </template>
+        </gl-sprintf>
+      </template>
+      <gl-form-checkbox id="node-object-storage-field" v-model="nodeData.syncObjectStorage">{{
+        __('Allow this secondary node to replicate content on Object Storage')
+      }}</gl-form-checkbox>
+    </gl-form-group>
+  </div>
+</template>

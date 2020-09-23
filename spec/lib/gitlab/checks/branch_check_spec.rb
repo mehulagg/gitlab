@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Checks::BranchCheck do
+RSpec.describe Gitlab::Checks::BranchCheck do
   include_context 'change access checks context'
 
   describe '#validate!' do
@@ -15,7 +15,30 @@ describe Gitlab::Checks::BranchCheck do
       let(:ref) { 'refs/heads/master' }
 
       it 'raises an error' do
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'The default branch of a project cannot be deleted.')
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'The default branch of a project cannot be deleted.')
+      end
+    end
+
+    context "prohibited branches check" do
+      it "prohibits 40-character hexadecimal branch names" do
+        allow(subject).to receive(:branch_name).and_return("267208abfe40e546f5e847444276f7d43a39503e")
+
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "You cannot create a branch with a 40-character hexadecimal branch name.")
+      end
+
+      it "doesn't prohibit a nested hexadecimal in a branch name" do
+        allow(subject).to receive(:branch_name).and_return("fix-267208abfe40e546f5e847444276f7d43a39503e")
+
+        expect { subject.validate! }.not_to raise_error
+      end
+
+      context "the feature flag is disabled" do
+        it "doesn't prohibit a 40-character hexadecimal branch name" do
+          stub_feature_flags(prohibit_hexadecimal_branch_names: false)
+          allow(subject).to receive(:branch_name).and_return("267208abfe40e546f5e847444276f7d43a39503e")
+
+          expect { subject.validate! }.not_to raise_error
+        end
       end
     end
 
@@ -28,21 +51,23 @@ describe Gitlab::Checks::BranchCheck do
       it 'raises an error if the user is not allowed to do forced pushes to protected branches' do
         expect(Gitlab::Checks::ForcePush).to receive(:force_push?).and_return(true)
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You are not allowed to force push code to a protected branch on this project.')
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to force push code to a protected branch on this project.')
       end
 
       it 'raises an error if the user is not allowed to merge to protected branches' do
-        expect_any_instance_of(Gitlab::Checks::MatchingMergeRequest).to receive(:match?).and_return(true)
+        expect_next_instance_of(Gitlab::Checks::MatchingMergeRequest) do |instance|
+          expect(instance).to receive(:match?).and_return(true)
+        end
         expect(user_access).to receive(:can_merge_to_branch?).and_return(false)
         expect(user_access).to receive(:can_push_to_branch?).and_return(false)
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You are not allowed to merge code into protected branches on this project.')
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to merge code into protected branches on this project.')
       end
 
       it 'raises an error if the user is not allowed to push to protected branches' do
         expect(user_access).to receive(:can_push_to_branch?).and_return(false)
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You are not allowed to push code to protected branches on this project.')
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to push code to protected branches on this project.')
       end
 
       context 'when project repository is empty' do
@@ -56,7 +81,7 @@ describe Gitlab::Checks::BranchCheck do
           end
 
           it 'raises an error' do
-            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, /Ask a project Owner or Maintainer to create a default branch/)
+            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /Ask a project Owner or Maintainer to create a default branch/)
           end
         end
 
@@ -107,7 +132,7 @@ describe Gitlab::Checks::BranchCheck do
             end
 
             it 'raises an error' do
-              expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You are not allowed to create protected branches on this project.')
+              expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to create protected branches on this project.')
             end
           end
 
@@ -133,7 +158,7 @@ describe Gitlab::Checks::BranchCheck do
               end
 
               it 'raises an error' do
-                expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You can only use an existing protected branch ref as the basis of a new protected branch.')
+                expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You can only use an existing protected branch ref as the basis of a new protected branch.')
               end
             end
 
@@ -155,7 +180,7 @@ describe Gitlab::Checks::BranchCheck do
 
               context 'via SSH' do
                 it 'raises an error' do
-                  expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You can only create protected branches using the web interface and API.')
+                  expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You can only create protected branches using the web interface and API.')
                 end
               end
             end
@@ -169,7 +194,7 @@ describe Gitlab::Checks::BranchCheck do
 
         context 'if the user is not allowed to delete protected branches' do
           it 'raises an error' do
-            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You are not allowed to delete protected branches from this project. Only a project maintainer or owner can delete a protected branch.')
+            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You are not allowed to delete protected branches from this project. Only a project maintainer or owner can delete a protected branch.')
           end
         end
 
@@ -188,7 +213,7 @@ describe Gitlab::Checks::BranchCheck do
 
           context 'over SSH or HTTP' do
             it 'raises an error' do
-              expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You can only delete protected branches using the web interface.')
+              expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You can only delete protected branches using the web interface.')
             end
           end
         end

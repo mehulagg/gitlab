@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Build::Artifacts::Metadata::Entry do
+RSpec.describe Gitlab::Ci::Build::Artifacts::Metadata::Entry do
   let(:entries) do
     { 'path/' => {},
       'path/dir_1/' => {},
@@ -66,7 +66,7 @@ describe Gitlab::Ci::Build::Artifacts::Metadata::Entry do
     describe '#children' do
       subject { |example| path(example).children }
 
-      it { is_expected.to all(be_an_instance_of described_class) }
+      it { is_expected.to all(be_an_instance_of(described_class)) }
       it do
         is_expected.to contain_exactly entry('path/dir_1/file_1'),
                                        entry('path/dir_1/file_b'),
@@ -78,7 +78,7 @@ describe Gitlab::Ci::Build::Artifacts::Metadata::Entry do
       subject { |example| path(example).files }
 
       it { is_expected.to all(be_file) }
-      it { is_expected.to all(be_an_instance_of described_class) }
+      it { is_expected.to all(be_an_instance_of(described_class)) }
       it do
         is_expected.to contain_exactly entry('path/dir_1/file_1'),
                                        entry('path/dir_1/file_b')
@@ -90,7 +90,7 @@ describe Gitlab::Ci::Build::Artifacts::Metadata::Entry do
         subject { |example| path(example).directories }
 
         it { is_expected.to all(be_directory) }
-        it { is_expected.to all(be_an_instance_of described_class) }
+        it { is_expected.to all(be_an_instance_of(described_class)) }
         it { is_expected.to contain_exactly entry('path/dir_1/subdir/') }
       end
 
@@ -98,7 +98,7 @@ describe Gitlab::Ci::Build::Artifacts::Metadata::Entry do
         subject { |example| path(example).directories(parent: true) }
 
         it { is_expected.to all(be_directory) }
-        it { is_expected.to all(be_an_instance_of described_class) }
+        it { is_expected.to all(be_an_instance_of(described_class)) }
         it do
           is_expected.to contain_exactly entry('path/dir_1/subdir/'),
                                          entry('path/')
@@ -152,6 +152,7 @@ describe Gitlab::Ci::Build::Artifacts::Metadata::Entry do
 
     describe '#blob' do
       let(:file_entry) { |example| path(example) }
+
       subject { file_entry.blob }
 
       it 'returns a blob representing the entry data' do

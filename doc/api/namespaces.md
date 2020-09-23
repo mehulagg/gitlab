@@ -12,14 +12,14 @@ For users and groups supported API calls see the [users](users.md) and
 Get a list of the namespaces of the authenticated user. If the user is an
 administrator, a list of all namespaces in the GitLab instance is shown.
 
-```
+```plaintext
 GET /namespaces
 ```
 
 Example request:
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/namespaces
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/namespaces"
 ```
 
 Example response:
@@ -31,7 +31,14 @@ Example response:
     "name": "user1",
     "path": "user1",
     "kind": "user",
-    "full_path": "user1"
+    "full_path": "user1",
+    "parent_id": null,
+    "avatar_url": "https://secure.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon",
+    "web_url": "https://gitlab.example.com/user1",
+    "billable_members_count": 1,
+    "plan": "default",
+    "trial_ends_on": null,
+    "trial": false
   },
   {
     "id": 2,
@@ -40,7 +47,13 @@ Example response:
     "kind": "group",
     "full_path": "group1",
     "parent_id": null,
-    "members_count_with_descendants": 2
+    "avatar_url": null,
+    "web_url": "https://gitlab.example.com/groups/group1",
+    "members_count_with_descendants": 2,
+    "billable_members_count": 2,
+    "plan": "default",
+    "trial_ends_on": null,
+    "trial": false
   },
   {
     "id": 3,
@@ -49,7 +62,13 @@ Example response:
     "kind": "group",
     "full_path": "foo/bar",
     "parent_id": 9,
-    "members_count_with_descendants": 5
+    "avatar_url": null,
+    "web_url": "https://gitlab.example.com/groups/foo/bar",
+    "members_count_with_descendants": 5,
+    "billable_members_count": 5,
+    "plan": "default",
+    "trial_ends_on": null,
+    "trial": false
   }
 ]
 ```
@@ -68,13 +87,14 @@ the `plan` parameter associated with a namespace:
 ]
 ```
 
-NOTE: **Note:** Only group maintainers/owners are presented with `members_count_with_descendants`, as well as `plan` **(BRONZE ONLY)**.
+NOTE: **Note:**
+Only group maintainers/owners are presented with `members_count_with_descendants`, as well as `plan` **(BRONZE ONLY)**.
 
 ## Search for namespace
 
 Get all namespaces that match a string in their name or path.
 
-```
+```plaintext
 GET /namespaces?search=foobar
 ```
 
@@ -84,8 +104,8 @@ GET /namespaces?search=foobar
 
 Example request:
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/namespaces?search=twitter
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/namespaces?search=twitter"
 ```
 
 Example response:
@@ -99,7 +119,13 @@ Example response:
     "kind": "group",
     "full_path": "twitter",
     "parent_id": null,
-    "members_count_with_descendants": 2
+    "avatar_url": null,
+    "web_url": "https://gitlab.example.com/groups/twitter",
+    "members_count_with_descendants": 2,
+    "billable_members_count": 2,
+    "plan": "default",
+    "trial_ends_on": null,
+    "trial": false
   }
 ]
 ```
@@ -108,7 +134,7 @@ Example response:
 
 Get a namespace by ID.
 
-```
+```plaintext
 GET /namespaces/:id
 ```
 
@@ -118,8 +144,8 @@ GET /namespaces/:id
 
 Example request:
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/namespaces/2
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/namespaces/2"
 ```
 
 Example response:
@@ -132,14 +158,20 @@ Example response:
   "kind": "group",
   "full_path": "group1",
   "parent_id": null,
-  "members_count_with_descendants": 2
+  "avatar_url": null,
+  "web_url": "https://gitlab.example.com/groups/group1",
+  "members_count_with_descendants": 2,
+  "billable_members_count": 2,
+  "plan": "default",
+  "trial_ends_on": null,
+  "trial": false
 }
 ```
 
 Example request:
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/namespaces/group1
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/namespaces/group1"
 ```
 
 Example response:
@@ -152,6 +184,12 @@ Example response:
   "kind": "group",
   "full_path": "group1",
   "parent_id": null,
-  "members_count_with_descendants": 2
+  "avatar_url": null,
+  "web_url": "https://gitlab.example.com/groups/group1",
+  "members_count_with_descendants": 2,
+  "billable_members_count": 2,
+  "plan": "default",
+  "trial_ends_on": null,
+  "trial": false
 }
 ```

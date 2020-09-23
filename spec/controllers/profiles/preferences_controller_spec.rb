@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Profiles::PreferencesController do
+RSpec.describe Profiles::PreferencesController do
   let(:user) { create(:user) }
 
   before do
@@ -37,7 +37,7 @@ describe Profiles::PreferencesController do
     context 'on successful update' do
       it 'sets the flash' do
         go
-        expect(flash[:notice]).to eq 'Preferences saved.'
+        expect(flash[:notice]).to eq _('Preferences saved.')
       end
 
       it "changes the user's preferences" do
@@ -46,7 +46,9 @@ describe Profiles::PreferencesController do
           dashboard: 'stars',
           theme_id: '2',
           first_day_of_week: '1',
-          preferred_language: 'jp'
+          preferred_language: 'jp',
+          tab_width: '5',
+          render_whitespace_in_code: 'true'
         }.with_indifferent_access
 
         expect(user).to receive(:assign_attributes).with(ActionController::Parameters.new(prefs).permit!)
@@ -62,7 +64,7 @@ describe Profiles::PreferencesController do
 
         go
 
-        expect(flash[:alert]).to eq('Failed to save preferences.')
+        expect(flash[:alert]).to eq(_('Failed to save preferences.'))
       end
     end
 

@@ -13,10 +13,10 @@ This feature is [also available at the group level](../../group/insights/index.m
 
 ## View your project's Insights
 
-You can access your project's Insights by clicking the **Project > Insights**
+You can access your project's Insights by clicking the **Analytics > Insights**
 link in the left sidebar:
 
-![Insights sidebar link](img/insights_sidebar_link.png)
+![Insights sidebar link](img/insights_sidebar_link_v12_8.png)
 
 ## Configure your Insights
 
@@ -61,6 +61,7 @@ bugsCharts:
   title: "Charts for bugs"
   charts:
     - title: "Monthly bugs created"
+      description: "Open bugs created per month"
       type: bar
       query:
         issuable_type: issue
@@ -77,6 +78,7 @@ For example, here's single chart definition:
 
 ```yaml
 - title: "Monthly bugs created"
+  description: "Open bugs created per month"
   type: bar
   query:
     issuable_type: issue
@@ -96,7 +98,8 @@ The following table lists available parameters for charts:
 | Keyword                                            | Description |
 |:---------------------------------------------------|:------------|
 | [`title`](#title)                                  | The title of the chart. This will displayed on the Insights page. |
-| [`type`](#type)                                    | The type of chart: `bar`, `line`, `stacked-bar`, `pie` etc. |
+| [`description`](#description)                      | A description for the individual chart. This will be displayed above the relevant chart. |
+| [`type`](#type)                                    | The type of chart: `bar`, `line` or `stacked-bar`. |
 | [`query`](#query)                                  | A hash that defines the conditions for issues / merge requests to be part of the chart. |
 
 ## Parameter details
@@ -112,6 +115,17 @@ For example:
 ```yaml
 monthlyBugsCreated:
   title: "Monthly bugs created"
+```
+
+### `description`
+
+The `description` text is displayed above the chart, but below the title. It's used
+to give extra details regarding the chart, for example:
+
+```yaml
+monthlyBugsCreated:
+  title: "Monthly bugs created"
+  description: "Open bugs created per month"
 ```
 
 ### `type`
@@ -132,7 +146,6 @@ Supported values are:
 | ----- | ------- |
 | `bar` | ![Insights example bar chart](img/insights_example_bar_chart.png) |
 | `bar` (time series, i.e. when `group_by` is used) | ![Insights example bar time series chart](img/insights_example_bar_time_series_chart.png) |
-| `pie` | ![Insights example pie chart](img/insights_example_pie_chart.png) |
 | `line` | ![Insights example stacked bar chart](img/insights_example_line_chart.png) |
 | `stacked-bar` | ![Insights example stacked bar chart](img/insights_example_stacked_bar_chart.png) |
 
@@ -146,6 +159,7 @@ Example:
 ```yaml
 monthlyBugsCreated:
   title: "Monthly bugs created"
+  description: "Open bugs created per month"
   type: bar
   query:
     issuable_type: issue
@@ -257,9 +271,30 @@ you defined.
 | `week`           | 4             |
 | `month`          | 12            |
 
+#### `query.period_field`
+
+Define the timestamp field used to group "issuables".
+
+Supported values are:
+
+- `created_at` (default): Group data using the `created_at` field.
+- `closed_at`: Group data using the `closed_at` field (for issues only).
+- `merged_at`: Group data using the `merged_at` field (for merge requests only).
+
+The `period_field` is automatically set to:
+
+- `closed_at` if `query.issuable_state` is `closed`
+- `merged_at` if `query.issuable_state` is `merged`
+- `created_at` otherwise
+
+NOTE: **Note:**
+Until [this bug](https://gitlab.com/gitlab-org/gitlab/-/issues/26911), is resolved, you may see `created_at`
+in place of `merged_at`.
+`created_at` will be used instead.
+
 ### `projects`
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/10904) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.4.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/10904) in [GitLab Ultimate](https://about.gitlab.com/pricing/) 12.4.
 
 You can limit where the "issuables" can be queried from:
 
@@ -284,6 +319,7 @@ a group's insights:
 ```yaml
 monthlyBugsCreated:
   title: "Monthly bugs created"
+  description: "Open bugs created per month"
   type: bar
   query:
     issuable_type: issue
@@ -312,6 +348,7 @@ bugsCharts:
   title: "Charts for bugs"
   charts:
     - title: "Monthly bugs created"
+      description: "Open bugs created per month"
       type: bar
       <<: *projectsOnly
       query:

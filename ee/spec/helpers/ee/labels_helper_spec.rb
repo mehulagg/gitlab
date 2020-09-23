@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LabelsHelper do
+RSpec.describe LabelsHelper do
   let(:project) { create(:project) }
   let(:label) { build_stubbed(:label, project: project).present(issuable_subject: nil) }
   let(:scoped_label) { build_stubbed(:label, name: 'key::value', project: project).present(issuable_subject: nil) }
@@ -13,12 +13,16 @@ describe LabelsHelper do
         stub_licensed_features(scoped_labels: true)
       end
 
-      it 'includes link to scoped labels documentation' do
-        expect(render_label(scoped_label)).to match(%r(<span.+>#{scoped_label.name}</span><a.+>.*question-circle.*</a>))
+      it 'right text span does not have .gl-label-text-dark class if label color is dark' do
+        scoped_label.color = '#D10069'
+
+        expect(render_label(scoped_label)).not_to match(%r(<span.*gl-label-text-dark.*>#{scoped_label.scoped_label_value}</span>)m)
       end
 
-      it 'does not include link to scoped label documentation for common labels' do
-        expect(render_label(label)).to match(%r(<span.+>#{label.name}</span>$))
+      it 'right text span has .gl-label-text-dark class if label color is light' do
+        scoped_label.color = '#FFECDB'
+
+        expect(render_label(scoped_label)).to match(%r(<span.*gl-label-text-dark.*>#{scoped_label.scoped_label_value}</span>)m)
       end
     end
 
@@ -28,7 +32,7 @@ describe LabelsHelper do
       end
 
       it 'does not include link to scoped documentation' do
-        expect(render_label(scoped_label)).to match(%r(<span.+>#{scoped_label.name}</span>$))
+        expect(render_label(scoped_label)).to match(%r(<span.+><span.+>#{scoped_label.name}</span></span>$)m)
       end
     end
   end
@@ -44,14 +48,14 @@ describe LabelsHelper do
         show_no: "true",
         show_any: "true",
         default_label: "Labels",
-        scoped_labels: "false",
-        scoped_labels_documentation_link: "/help/user/project/labels.md#scoped-labels"
+        scoped_labels: "false"
       }
     end
 
     context 'when edit_context is a project' do
       let(:edit_context) { create(:project) }
       let(:label) { create(:label, project: edit_context, title: 'bug') }
+
       before do
         data.merge!({
           project_id: edit_context.id,

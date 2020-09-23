@@ -1,6 +1,5 @@
 <script>
-import { GlButton, GlLink } from '@gitlab/ui';
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlButton, GlLink, GlIcon } from '@gitlab/ui';
 import ProjectAvatar from '~/vue_shared/components/project_avatar/default.vue';
 import { numberToHumanSize, isOdd } from '~/lib/utils/number_utils';
 import { s__ } from '~/locale';
@@ -8,7 +7,7 @@ import StorageRow from './storage_row.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
     GlButton,
     GlLink,
     ProjectAvatar,
@@ -45,7 +44,7 @@ export default {
       return this.isOpen ? 'angle-down' : 'angle-right';
     },
     statistics() {
-      const statisticsCopy = Object.assign({}, this.project.statistics);
+      const statisticsCopy = { ...this.project.statistics };
       delete statisticsCopy.storageSize;
       // eslint-disable-next-line no-underscore-dangle
       delete statisticsCopy.__typename;
@@ -78,6 +77,7 @@ export default {
     buildArtifactsSize: s__('UsageQuota|Artifacts'),
     packagesSize: s__('UsageQuota|Packages'),
     wikiSize: s__('UsageQuota|Wiki'),
+    snippetsSize: s__('UsageQuota|Snippets'),
   },
 };
 </script>
@@ -90,9 +90,10 @@ export default {
           <gl-button
             class="btn-transparent float-left p-0 mr-2"
             :aria-label="__('Toggle project')"
+            category="tertiary"
             @click="toggleProject"
           >
-            <icon :name="iconName" class="folder-icon" />
+            <gl-icon :name="iconName" class="folder-icon" />
           </gl-button>
 
           <project-avatar :project="projectAvatar" :size="20" />

@@ -1,19 +1,18 @@
 <script>
 import $ from 'jquery';
-import { mapActions, mapGetters, mapState } from 'vuex';
-import Icon from '~/vue_shared/components/icon.vue';
+import { mapActions, mapState } from 'vuex';
+import { GlIcon } from '@gitlab/ui';
 import tooltip from '~/vue_shared/directives/tooltip';
-import { activityBarViews } from '../constants';
+import { leftSidebarViews } from '../constants';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
   },
   directives: {
     tooltip,
   },
   computed: {
-    ...mapGetters(['hasChanges']),
     ...mapState(['currentActivityView']),
   },
   methods: {
@@ -23,10 +22,12 @@ export default {
 
       this.updateActivityBarView(view);
 
+      // TODO: We must use JQuery here to interact with the Bootstrap tooltip API
+      // https://gitlab.com/gitlab-org/gitlab/-/issues/217577
       $(e.currentTarget).tooltip('hide');
     },
   },
-  activityBarViews,
+  leftSidebarViews,
 };
 </script>
 
@@ -37,24 +38,25 @@ export default {
         <button
           v-tooltip
           :class="{
-            active: currentActivityView === $options.activityBarViews.edit,
+            active: currentActivityView === $options.leftSidebarViews.edit.name,
           }"
           :title="s__('IDE|Edit')"
           :aria-label="s__('IDE|Edit')"
           data-container="body"
           data-placement="right"
+          data-qa-selector="edit_mode_tab"
           type="button"
           class="ide-sidebar-link js-ide-edit-mode"
-          @click.prevent="changedActivityView($event, $options.activityBarViews.edit)"
+          @click.prevent="changedActivityView($event, $options.leftSidebarViews.edit.name)"
         >
-          <icon name="code" />
+          <gl-icon name="code" />
         </button>
       </li>
       <li>
         <button
           v-tooltip
           :class="{
-            active: currentActivityView === $options.activityBarViews.review,
+            active: currentActivityView === $options.leftSidebarViews.review.name,
           }"
           :title="s__('IDE|Review')"
           :aria-label="s__('IDE|Review')"
@@ -62,26 +64,27 @@ export default {
           data-placement="right"
           type="button"
           class="ide-sidebar-link js-ide-review-mode"
-          @click.prevent="changedActivityView($event, $options.activityBarViews.review)"
+          @click.prevent="changedActivityView($event, $options.leftSidebarViews.review.name)"
         >
-          <icon name="file-modified" />
+          <gl-icon name="file-modified" />
         </button>
       </li>
-      <li v-show="hasChanges">
+      <li>
         <button
           v-tooltip
           :class="{
-            active: currentActivityView === $options.activityBarViews.commit,
+            active: currentActivityView === $options.leftSidebarViews.commit.name,
           }"
           :title="s__('IDE|Commit')"
           :aria-label="s__('IDE|Commit')"
           data-container="body"
           data-placement="right"
+          data-qa-selector="commit_mode_tab"
           type="button"
-          class="ide-sidebar-link js-ide-commit-mode qa-commit-mode-tab"
-          @click.prevent="changedActivityView($event, $options.activityBarViews.commit)"
+          class="ide-sidebar-link js-ide-commit-mode"
+          @click.prevent="changedActivityView($event, $options.leftSidebarViews.commit.name)"
         >
-          <icon name="commit" />
+          <gl-icon name="commit" />
         </button>
       </li>
     </ul>

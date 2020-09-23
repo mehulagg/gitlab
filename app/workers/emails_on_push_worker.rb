@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
-class EmailsOnPushWorker
+class EmailsOnPushWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   attr_reader :email, :skip_premailer
 
   feature_category :source_code_management
-  latency_sensitive_worker!
+  urgency :low
   worker_resource_boundary :cpu
+  weight 2
 
   def perform(project_id, recipients, push_data, options = {})
     options.symbolize_keys!

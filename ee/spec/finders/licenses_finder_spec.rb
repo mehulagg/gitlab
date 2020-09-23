@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 
-describe LicensesFinder do
+RSpec.describe LicensesFinder do
   let(:license) { create(:license) }
-  set(:user) { create(:admin) }
+
+  let_it_be(:user) { create(:admin) }
 
   it 'returns a license by id' do
     expect(described_class.new(user, id: license.id).execute.take).to eq(license)

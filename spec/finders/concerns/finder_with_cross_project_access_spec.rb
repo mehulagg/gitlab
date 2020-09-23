@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe FinderWithCrossProjectAccess do
+RSpec.describe FinderWithCrossProjectAccess do
   let(:finder_class) do
     Class.new do
       prepend FinderWithCrossProjectAccess
@@ -97,7 +97,7 @@ describe FinderWithCrossProjectAccess do
       end
 
       it 're-enables the check after the find failed' do
-        finder.find_by!(id: 9999) rescue ActiveRecord::RecordNotFound
+        finder.find_by!(id: non_existing_record_id) rescue ActiveRecord::RecordNotFound
 
         expect(finder.instance_variable_get(:@should_skip_cross_project_check))
           .to eq(false)
@@ -128,7 +128,7 @@ describe FinderWithCrossProjectAccess do
       end
     end
 
-    context '.finder_model' do
+    describe '.finder_model' do
       it 'is set correctly' do
         expect(finder_class.finder_model).to eq(Project)
       end

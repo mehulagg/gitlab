@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "required": [
+    "name",
+    "deploy_access_levels"
+  ],
+  "properties": {
+    "name": { "type": "string" },
+    "deploy_access_levels": { "type": "array", "items": { "$ref": "protected_ref_access.json" } }
+  },
+  "additionalProperties": false
+}

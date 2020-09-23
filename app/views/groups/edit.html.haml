@@ -1,4 +1,5 @@
 - breadcrumb_title _("General Settings")
+- page_title _("General Settings")
 - @content_class = "limit-container-width" unless fluid_layout
 - expanded = expanded_by_default?
 
@@ -14,7 +15,7 @@
   .settings-content
     = render 'groups/settings/general'
 
-%section.settings.gs-permissions.no-animate#js-permissions-settings{ class: ('expanded' if expanded), data: { qa_selector: 'permission_lfs_2fa_section' } }
+%section.settings.gs-permissions.no-animate#js-permissions-settings{ class: ('expanded' if expanded), data: { qa_selector: 'permission_lfs_2fa_content' } }
   .settings-header
     %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only{ role: 'button' }
       = _('Permissions, LFS, 2FA')
@@ -45,12 +46,14 @@
 %section.settings.gs-advanced.no-animate#js-advanced-settings{ class: ('expanded' if expanded) }
   .settings-header
     %h4.settings-title.js-settings-toggle.js-settings-toggle-trigger-only{ role: 'button' }
-      = _('Path, transfer, remove')
+      = _('Advanced')
     %button.btn.js-settings-toggle{ type: 'button' }
       = expanded ? _('Collapse') : _('Expand')
     %p
-      = _('Perform advanced options such as changing path, transferring, or removing the group.')
+      = _('Perform advanced options such as changing path, transferring, exporting, or removing the group.')
   .settings-content
     = render 'groups/settings/advanced'
+
+= render_if_exists 'shared/groups/max_pages_size_setting'
 
 = render 'shared/confirm_modal', phrase: @group.path

@@ -92,13 +92,15 @@ export default {
         @select-project="updateSelectedProject"
       />
     </div>
-    <gl-button
-      :disabled="settingsLoading"
-      class="js-error-tracking-button"
-      variant="success"
-      @click="handleSubmit"
-    >
-      {{ __('Save changes') }}
-    </gl-button>
+    <div class="gl-display-flex gl-justify-content-end">
+      <gl-button
+        :disabled="settingsLoading"
+        class="js-error-tracking-button"
+        variant="success"
+        @click="handleSubmit"
+      >
+        {{ __('Save changes') }}
+      </gl-button>
+    </div>
   </div>
 </template>

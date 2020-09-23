@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RspecFlaky::FlakyExample, :aggregate_failures do
+RSpec.describe RspecFlaky::FlakyExample, :aggregate_failures do
   let(:flaky_example_attrs) do
     {
       example_id: 'spec/foo/bar_spec.rb:2',
@@ -16,6 +16,7 @@ describe RspecFlaky::FlakyExample, :aggregate_failures do
       flaky_reports: 1
     }
   end
+
   let(:example_attrs) do
     {
       uid: 'abc123',
@@ -28,6 +29,7 @@ describe RspecFlaky::FlakyExample, :aggregate_failures do
       attempts: flaky_example_attrs[:last_attempts_count]
     }
   end
+
   let(:example) { double(example_attrs) }
 
   before do
@@ -77,7 +79,7 @@ describe RspecFlaky::FlakyExample, :aggregate_failures do
 
       it 'updates the first_flaky_at' do
         now = Time.now
-        expected_first_flaky_at = flaky_example.first_flaky_at ? flaky_example.first_flaky_at : now
+        expected_first_flaky_at = flaky_example.first_flaky_at || now
         Timecop.freeze(now) { flaky_example.update_flakiness! }
 
         expect(flaky_example.first_flaky_at).to eq(expected_first_flaky_at)

@@ -1,9 +1,10 @@
 <script>
-import _ from 'underscore';
+/* eslint-disable vue/no-v-html */
+import { escape } from 'lodash';
 import axios from '~/lib/utils/axios_utils';
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import { s__, sprintf } from '~/locale';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 
 export default {
   components: {
@@ -43,10 +44,10 @@ You are going to change the username %{currentUsernameBold} to %{newUsernameBold
 Profile and projects will be redirected to the %{newUsername} namespace but this redirect will expire once the %{currentUsername} namespace is registered by another user or group.
 Please update your Git repository remotes as soon as possible.`),
         {
-          currentUsernameBold: `<strong>${_.escape(this.username)}</strong>`,
-          newUsernameBold: `<strong>${_.escape(this.newUsername)}</strong>`,
-          currentUsername: _.escape(this.username),
-          newUsername: _.escape(this.newUsername),
+          currentUsernameBold: `<strong>${escape(this.username)}</strong>`,
+          newUsernameBold: `<strong>${escape(this.newUsername)}</strong>`,
+          currentUsername: escape(this.username),
+          newUsername: escape(this.newUsername),
         },
         false,
       );

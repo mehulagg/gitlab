@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'gitlab/qa'
+require 'uri'
 
 module QA
   module Runtime
@@ -15,11 +16,57 @@ module QA
       # supports the given feature
       SUPPORTED_FEATURES = {
         git_protocol_v2: 'QA_CAN_TEST_GIT_PROTOCOL_V2',
-        admin: 'QA_CAN_TEST_ADMIN_FEATURES'
+        admin: 'QA_CAN_TEST_ADMIN_FEATURES',
+        praefect: 'QA_CAN_TEST_PRAEFECT'
       }.freeze
 
       def supported_features
         SUPPORTED_FEATURES
+      end
+
+      def address_matches?(*options)
+        return false unless Runtime::Scenario.attributes[:gitlab_address]
+
+        opts = {}
+        opts[:domain] = '.+'
+        opts[:tld] = '.com'
+
+        uri = URI(Runtime::Scenario.gitlab_address)
+
+        if options.any?
+          options.each do |option|
+            opts[:domain] = 'gitlab' if option == :production
+
+            if option.is_a?(Hash) && !option[:subdomain].nil?
+              opts.merge!(option)
+
+              opts[:subdomain] = case option[:subdomain]
+                                 when Array
+                                   "(#{option[:subdomain].join("|")})."
+                                 when Regexp
+                                   option[:subdomain]
+                                 else
+                                   "(#{option[:subdomain]})."
+                                 end
+            end
+          end
+        end
+
+        uri.host.match?(/^#{opts[:subdomain]}#{opts[:domain]}#{opts[:tld]}$/)
+      end
+
+      alias_method :dot_com?, :address_matches?
+
+      def additional_repository_storage
+        ENV['QA_ADDITIONAL_REPOSITORY_STORAGE']
+      end
+
+      def non_cluster_repository_storage
+        ENV['QA_GITALY_NON_CLUSTER_STORAGE'] || 'gitaly'
+      end
+
+      def praefect_repository_storage
+        ENV['QA_PRAEFECT_REPOSITORY_STORAGE']
       end
 
       def admin_password
@@ -32,6 +79,10 @@ module QA
 
       def admin_personal_access_token
         ENV['GITLAB_QA_ADMIN_ACCESS_TOKEN']
+      end
+
+      def ci_project_name
+        ENV['CI_PROJECT_NAME']
       end
 
       def debug?
@@ -58,6 +109,10 @@ module QA
 
       def running_in_ci?
         ENV['CI'] || ENV['CI_SERVER']
+      end
+
+      def cluster_api_url
+        ENV['CLUSTER_API_URL']
       end
 
       def qa_cookies
@@ -177,6 +232,14 @@ module QA
         ENV['GITLAB_QA_PASSWORD_6']
       end
 
+      def gitlab_qa_2fa_owner_username_1
+        ENV['GITLAB_QA_2FA_OWNER_USERNAME_1'] || 'gitlab-qa-2fa-owner-user1'
+      end
+
+      def gitlab_qa_2fa_owner_password_1
+        ENV['GITLAB_QA_2FA_OWNER_PASSWORD_1']
+      end
+
       def gitlab_qa_1p_email
         ENV['GITLAB_QA_1P_EMAIL']
       end
@@ -191,6 +254,22 @@ module QA
 
       def gitlab_qa_1p_github_uuid
         ENV['GITLAB_QA_1P_GITHUB_UUID']
+      end
+
+      def jira_admin_username
+        ENV['JIRA_ADMIN_USERNAME']
+      end
+
+      def jira_admin_password
+        ENV['JIRA_ADMIN_PASSWORD']
+      end
+
+      def jira_hostname
+        ENV['JIRA_HOSTNAME']
+      end
+
+      def cache_namespace_name?
+        enabled?(ENV['CACHE_NAMESPACE_NAME'], default: true)
       end
 
       def knapsack?
@@ -226,7 +305,7 @@ module QA
       end
 
       def gcloud_region
-        ENV.fetch('GCLOUD_REGION')
+        ENV['GCLOUD_REGION']
       end
 
       def gcloud_num_nodes
@@ -248,6 +327,10 @@ module QA
         raise ArgumentError, "Please provide GITHUB_ACCESS_TOKEN"
       end
 
+      def require_admin_access_token!
+        admin_personal_access_token || (raise ArgumentError, "GITLAB_QA_ADMIN_ACCESS_TOKEN is required!")
+      end
+
       # Returns true if there is an environment variable that indicates that
       # the feature is supported in the environment under test.
       # All features are supported by default.
@@ -261,8 +344,37 @@ module QA
         ENV['QA_RUNTIME_SCENARIO_ATTRIBUTES']
       end
 
+      def disable_rspec_retry?
+        enabled?(ENV['QA_DISABLE_RSPEC_RETRY'], default: false)
+      end
+
+      def simulate_slow_connection?
+        enabled?(ENV['QA_SIMULATE_SLOW_CONNECTION'], default: false)
+      end
+
+      def slow_connection_latency
+        ENV.fetch('QA_SLOW_CONNECTION_LATENCY_MS', 2000).to_i
+      end
+
+      def slow_connection_throughput
+        ENV.fetch('QA_SLOW_CONNECTION_THROUGHPUT_KBPS', 32).to_i
+      end
+
       def gitlab_qa_loop_runner_minutes
         ENV.fetch('GITLAB_QA_LOOP_RUNNER_MINUTES', 1).to_i
+      end
+
+      def mailhog_hostname
+        ENV['MAILHOG_HOSTNAME']
+      end
+
+      # Get the version of GitLab currently being tested against
+      # @return String Version
+      # @example
+      #   > Env.deploy_version
+      #   #=> 13.3.4-ee.0
+      def deploy_version
+        ENV['DEPLOY_VERSION']
       end
 
       private

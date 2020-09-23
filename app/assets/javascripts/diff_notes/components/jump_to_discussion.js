@@ -1,7 +1,8 @@
-/* eslint-disable func-names, no-else-return, guard-for-in, no-restricted-syntax, no-lonely-if, no-continue */
+/* eslint-disable func-names, no-continue */
 /* global CommentsStore */
 
 import $ from 'jquery';
+import 'vendor/jquery.scrollTo';
 import Vue from 'vue';
 import { __ } from '~/locale';
 
@@ -24,10 +25,9 @@ const JumpToDiscussion = Vue.extend({
   computed: {
     buttonText() {
       if (this.discussionId) {
-        return __('Jump to next unresolved discussion');
-      } else {
-        return __('Jump to first unresolved discussion');
+        return __('Jump to next unresolved thread');
       }
+      return __('Jump to first unresolved thread');
     },
     allResolved() {
       return this.unresolvedDiscussionCount === 0;
@@ -36,22 +36,20 @@ const JumpToDiscussion = Vue.extend({
       if (this.discussionId) {
         if (this.unresolvedDiscussionCount > 1) {
           return true;
-        } else {
-          return this.discussionId !== this.lastResolvedId;
         }
-      } else {
-        return this.unresolvedDiscussionCount >= 1;
+        return this.discussionId !== this.lastResolvedId;
       }
+      return this.unresolvedDiscussionCount >= 1;
     },
     lastResolvedId() {
       let lastId;
-      for (const discussionId in this.discussions) {
+      Object.keys(this.discussions).forEach(discussionId => {
         const discussion = this.discussions[discussionId];
 
         if (!discussion.isResolved()) {
           lastId = discussion.id;
         }
-      }
+      });
       return lastId;
     },
   },
@@ -98,12 +96,10 @@ const JumpToDiscussion = Vue.extend({
           if (unresolvedDiscussionCount === 1) {
             hasDiscussionsToJumpTo = false;
           }
-        } else {
+        } else if (unresolvedDiscussionCount === 0) {
           // If there are no unresolved discussions on the diffs tab at all,
           // there are no discussions to jump to.
-          if (unresolvedDiscussionCount === 0) {
-            hasDiscussionsToJumpTo = false;
-          }
+          hasDiscussionsToJumpTo = false;
         }
       } else if (activeTab !== 'show') {
         // If we are on the commits or builds tabs,

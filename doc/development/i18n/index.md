@@ -30,7 +30,7 @@ See [Externalization for GitLab](externalization.md).
 ### Translate strings
 
 The translation process is managed at <https://translate.gitlab.com>
-using [Crowdin](https://crowdin.com/).
+using [CrowdIn](https://crowdin.com/).
 You will need to create an account before you can submit translations.
 Once you are signed in, select the language you wish to contribute translations to.
 
@@ -38,10 +38,10 @@ Voting for translations is also valuable, helping to confirm good and flag inacc
 
 See [Translation guidelines](translation.md).
 
-### Proof reading
+### Proofreading
 
-Proof reading helps ensure the accuracy and consistency of translations. All
-translations are proof read before being accepted. If a translations requires
+Proofreading helps ensure the accuracy and consistency of translations. All
+translations are proofread before being accepted. If a translations requires
 changes, you will be notified with a comment explaining why.
 
 See [Proofreading Translations](proofreader.md) for more information on who's
@@ -51,4 +51,4 @@ able to proofread and instructions on becoming a proofreader yourself.
 
 Translations are typically included in the next major or minor release.
 
-See [Merging translations from Crowdin](merging_translations.md).
+See [Merging translations from CrowdIn](merging_translations.md).

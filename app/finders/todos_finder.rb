@@ -10,8 +10,9 @@
 #     action_id: integer
 #     author_id: integer
 #     project_id; integer
+#     target_id; integer
 #     state: 'pending' (default) or 'done'
-#     type: 'Issue' or 'MergeRequest'
+#     type: 'Issue' or 'MergeRequest' or ['Issue', 'MergeRequest']
 #
 
 class TodosFinder
@@ -23,9 +24,15 @@ class TodosFinder
 
   NONE = '0'
 
-  TODO_TYPES = Set.new(%w(Issue MergeRequest Epic)).freeze
+  TODO_TYPES = Set.new(%w(Issue MergeRequest DesignManagement::Design AlertManagement::Alert)).freeze
 
   attr_accessor :current_user, :params
+
+  class << self
+    def todo_types
+      TODO_TYPES
+    end
+  end
 
   def initialize(current_user, params = {})
     @current_user = current_user
@@ -34,13 +41,15 @@ class TodosFinder
 
   def execute
     return Todo.none if current_user.nil?
+    raise ArgumentError, invalid_type_message unless valid_types?
 
     items = current_user.todos
     items = by_action_id(items)
     items = by_action(items)
     items = by_author(items)
     items = by_state(items)
-    items = by_type(items)
+    items = by_target_id(items)
+    items = by_types(items)
     items = by_group(items)
     # Filtering by project HAS TO be the last because we use
     # the project IDs yielded by the todos query thus far
@@ -111,24 +120,22 @@ class TodosFinder
     params[:group_id].present?
   end
 
-  def project
-    strong_memoize(:project) do
-      Project.find_without_deleted(params[:project_id]) if project?
-    end
-  end
-
   def group
     strong_memoize(:group) do
       Group.find(params[:group_id])
     end
   end
 
-  def type?
-    type.present? && TODO_TYPES.include?(type)
+  def types
+    @types ||= Array(params[:type]).reject(&:blank?)
   end
 
-  def type
-    params[:type]
+  def valid_types?
+    types.all? { |type| self.class.todo_types.include?(type) }
+  end
+
+  def invalid_type_message
+    _("Unsupported todo type passed. Supported todo types are: %{todo_types}") % { todo_types: self.class.todo_types.to_a.join(', ') }
   end
 
   def sort(items)
@@ -175,7 +182,7 @@ class TodosFinder
 
   def by_project(items)
     if project?
-      items.for_project(project)
+      items.for_undeleted_projects.for_project(params[:project_id])
     else
       items
     end
@@ -193,11 +200,19 @@ class TodosFinder
     items.with_states(params[:state])
   end
 
-  def by_type(items)
-    if type?
-      items.for_type(type)
+  def by_target_id(items)
+    return items if params[:target_id].blank?
+
+    items.for_target(params[:target_id])
+  end
+
+  def by_types(items)
+    if types.any?
+      items.for_type(types)
     else
       items
     end
   end
 end
+
+TodosFinder.prepend_if_ee('EE::TodosFinder')

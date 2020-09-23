@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'layouts/nav/sidebar/_project' do
+RSpec.describe 'layouts/nav/sidebar/_project' do
   let(:project) { create(:project, :repository) }
 
   before do
@@ -47,6 +47,58 @@ describe 'layouts/nav/sidebar/_project' do
     end
   end
 
+  describe 'Packages' do
+    let(:user) { create(:user) }
+
+    let_it_be(:package_menu_name) { 'Packages & Registries' }
+    let_it_be(:package_entry_name) { 'Package Registry' }
+
+    before do
+      project.team.add_developer(user)
+      sign_in(user)
+      stub_container_registry_config(enabled: true)
+    end
+
+    context 'when packages is enabled' do
+      it 'packages link is visible' do
+        render
+
+        expect(rendered).to have_link(package_menu_name, href: project_packages_path(project))
+      end
+
+      it 'packages list link is visible' do
+        render
+
+        expect(rendered).to have_link(package_entry_name, href: project_packages_path(project))
+      end
+
+      it 'container registry link is visible' do
+        render
+
+        expect(rendered).to have_link('Container Registry', href: project_container_registry_index_path(project))
+      end
+    end
+
+    context 'when container registry is disabled' do
+      before do
+        stub_container_registry_config(enabled: false)
+      end
+
+      it 'packages top level and list link are visible' do
+        render
+
+        expect(rendered).to have_link(package_menu_name, href: project_packages_path(project))
+        expect(rendered).to have_link(package_entry_name, href: project_packages_path(project))
+      end
+
+      it 'container registry link is not visible' do
+        render
+
+        expect(rendered).not_to have_link('Container Registry', href: project_container_registry_index_path(project))
+      end
+    end
+  end
+
   describe 'releases entry' do
     it 'renders releases link' do
       render
@@ -66,7 +118,7 @@ describe 'layouts/nav/sidebar/_project' do
       it 'shows the wiki tab with the wiki internal link' do
         render
 
-        expect(rendered).to have_link('Wiki', href: project_wiki_path(project, :home))
+        expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
       end
     end
 
@@ -76,7 +128,7 @@ describe 'layouts/nav/sidebar/_project' do
       it 'does not show the wiki tab' do
         render
 
-        expect(rendered).not_to have_link('Wiki', href: project_wiki_path(project, :home))
+        expect(rendered).not_to have_link('Wiki')
       end
     end
   end
@@ -104,7 +156,39 @@ describe 'layouts/nav/sidebar/_project' do
       it 'does not show the external wiki tab' do
         render
 
-        expect(rendered).not_to have_link('External Wiki', href: project_wiki_path(project, :home))
+        expect(rendered).not_to have_link('External Wiki')
+      end
+    end
+  end
+
+  describe 'confluence tab' do
+    let!(:service) { create(:confluence_service, project: project, active: active) }
+
+    before do
+      render
+    end
+
+    context 'when the Confluence integration is active' do
+      let(:active) { true }
+
+      it 'shows the Confluence tab' do
+        expect(rendered).to have_link('Confluence', href: project_wikis_confluence_path(project))
+      end
+
+      it 'does not show the GitLab wiki tab' do
+        expect(rendered).not_to have_link('Wiki')
+      end
+    end
+
+    context 'when it is disabled' do
+      let(:active) { false }
+
+      it 'does not show the Confluence tab' do
+        expect(rendered).not_to have_link('Confluence')
+      end
+
+      it 'shows the GitLab wiki tab' do
+        expect(rendered).to have_link('Wiki', href: wiki_path(project.wiki))
       end
     end
   end
@@ -136,27 +220,89 @@ describe 'layouts/nav/sidebar/_project' do
   end
 
   describe 'operations settings tab' do
-    before do
-      project.update!(archived: project_archived)
-    end
+    describe 'archive projects' do
+      before do
+        project.update!(archived: project_archived)
+      end
 
-    context 'when project is archived' do
-      let(:project_archived) { true }
+      context 'when project is archived' do
+        let(:project_archived) { true }
 
-      it 'does not show the operations settings tab' do
-        render
+        it 'does not show the operations settings tab' do
+          render
 
-        expect(rendered).not_to have_link('Operations', href: project_settings_operations_path(project))
+          expect(rendered).not_to have_link('Operations', href: project_settings_operations_path(project))
+        end
+      end
+
+      context 'when project is active' do
+        let(:project_archived) { false }
+
+        it 'shows the operations settings tab' do
+          render
+
+          expect(rendered).to have_link('Operations', href: project_settings_operations_path(project))
+        end
       end
     end
 
-    context 'when project is active' do
-      let(:project_archived) { false }
-
-      it 'shows the operations settings tab' do
+    describe 'Alert Management' do
+      it 'shows the Alerts sidebar entry' do
         render
 
-        expect(rendered).to have_link('Operations', href: project_settings_operations_path(project))
+        expect(rendered).to have_css('a[title="Alerts"]')
+      end
+    end
+  end
+
+  describe 'value stream analytics entry' do
+    let(:read_cycle_analytics) { true }
+
+    before do
+      allow(view).to receive(:can?).with(nil, :read_cycle_analytics, project).and_return(read_cycle_analytics)
+    end
+
+    describe 'when value stream analytics is enabled' do
+      it 'shows the value stream analytics entry' do
+        render
+
+        expect(rendered).to have_link('Value Stream', href: project_cycle_analytics_path(project))
+      end
+    end
+
+    describe 'when value stream analytics is disabled' do
+      let(:read_cycle_analytics) { false }
+
+      it 'does not show the value stream analytics entry' do
+        render
+
+        expect(rendered).not_to have_link('Value Stream', href: project_cycle_analytics_path(project))
+      end
+    end
+  end
+
+  describe 'project access tokens' do
+    context 'self-managed instance' do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(false)
+      end
+
+      it 'displays "Access Tokens" nav item' do
+        render
+
+        expect(rendered).to have_link('Access Tokens', href: project_settings_access_tokens_path(project))
+      end
+    end
+
+    context 'gitlab.com' do
+      before do
+        allow(Gitlab).to receive(:com?).and_return(true)
+      end
+
+      it 'does not display "Access Tokens" nav item' do
+        render
+
+        expect(rendered).not_to have_link('Access Tokens', href: project_settings_access_tokens_path(project))
       end
     end
   end

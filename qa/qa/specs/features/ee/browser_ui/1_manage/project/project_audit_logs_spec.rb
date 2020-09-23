@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Manage' do
-    shared_examples 'project audit event logs' do |expected_events|
+  RSpec.describe 'Manage' do
+    shared_examples 'audit event' do |expected_events|
       it 'logs audit events for UI operations' do
         Page::Project::Menu.perform(&:go_to_audit_events_settings)
         expected_events.each do |expected_event|
@@ -11,10 +11,9 @@ module QA
       end
     end
 
-    describe 'Project audit logs' do
-      before(:all) do
-        sign_in
-        @project = Resource::Project.fabricate_via_browser_ui! do |project|
+    describe 'Project' do
+      let(:project) do
+        Resource::Project.fabricate_via_api! do |project|
           project.name = 'awesome-project'
           project.initialize_with_readme = true
         end
@@ -26,78 +25,92 @@ module QA
 
       let(:user) { Resource::User.fabricate_or_use(Runtime::Env.gitlab_qa_username_1, Runtime::Env.gitlab_qa_password_1) }
 
-      context "Add project" do
+      context "Add project", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/727' do
         before do
-          @project.visit!
+          Resource::Project.fabricate_via_browser_ui! do |project|
+            project.name = 'audit-add-project-via-ui'
+            project.initialize_with_readme = true
+          end.visit!
         end
-        it_behaves_like 'project audit event logs', ["Add project"]
+        it_behaves_like 'audit event', ["Added project"]
       end
 
-      context "Add user access as guest" do
+      context "Add user access as guest", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/729' do
         before do
-          @project.visit!
+          project.visit!
 
-          Page::Project::Menu.perform(&:go_to_members_settings)
-          Page::Project::Settings::Members.perform do |page| # rubocop:disable QA/AmbiguousPageObjectName
-            page.add_member(user.username)
+          Page::Project::Menu.perform(&:click_members)
+          Page::Project::Members.perform do |members|
+            members.add_member(user.username)
           end
         end
 
-        it_behaves_like 'project audit event logs', ["Add user access as guest"]
+        it_behaves_like 'audit event', ["Added user access as Guest"]
       end
 
-      context "Add deploy key" do
+      context "Add deploy key", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/730' do
         before do
           key = Runtime::Key::RSA.new
           deploy_key_title = 'deploy key title'
           deploy_key_value = key.public_key
 
           Resource::DeployKey.fabricate_via_browser_ui! do |resource|
-            resource.project = @project
+            resource.project = project
             resource.title = deploy_key_title
             resource.key = deploy_key_value
           end
         end
 
-        it_behaves_like 'project audit event logs', ["Add deploy key"]
+        it_behaves_like 'audit event', ["Added deploy key"]
       end
 
-      context "Change visibility" do
+      context "Change visibility", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/728' do
         before do
-          @project.visit!
+          project.visit!
 
           Page::Project::Menu.perform(&:go_to_general_settings)
           Page::Project::Settings::Main.perform do |settings|
             # Change visibility from public to internal
             settings.expand_visibility_project_features_permissions do |page|
-              page.set_project_visibility "Internal"
+              page.set_project_visibility "Private"
             end
           end
         end
 
-        it_behaves_like 'project audit event logs', ["Change visibility from public to internal"]
+        it_behaves_like 'audit event', ["Changed visibility from Public to Private"]
       end
 
-      context "Export file download" do
+      context "Export file download", quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/217949', type: :investigating }, testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/743' do
         before do
-          @project.visit!
+          QA::Support::Retrier.retry_until do
+            project = Resource::Project.fabricate_via_api! do |project|
+              project.name = 'project_for_export'
+              project.initialize_with_readme = true
+            end
 
-          Page::Project::Menu.perform(&:go_to_general_settings)
-          Page::Project::Settings::Main.perform do |settings|
-            settings.expand_advanced_settings(&:click_export_project_link)
-            expect(page).to have_text("Project export started")
+            project.visit!
 
             Page::Project::Menu.perform(&:go_to_general_settings)
+            Page::Project::Settings::Main.perform do |settings|
+              settings.expand_advanced_settings(&:click_export_project_link)
+              expect(page).to have_text("Project export started")
+
+              Page::Project::Menu.perform(&:go_to_general_settings)
+              settings.expand_advanced_settings(&:has_download_export_link?)
+            end
+          end
+
+          Page::Project::Settings::Main.perform do |settings|
             settings.expand_advanced_settings(&:click_download_export_link)
           end
         end
 
-        it_behaves_like 'project audit event logs', ["Export file download started"]
+        it_behaves_like 'audit event', ["Export file download started"]
       end
 
-      context "Project archive and unarchive" do
+      context "Project archive and unarchive", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/726' do
         before do
-          @project.visit!
+          project.visit!
 
           # Project archive
           Page::Project::Menu.perform(&:go_to_general_settings)
@@ -112,13 +125,12 @@ module QA
           end
         end
 
-        it_behaves_like 'project audit event logs', ["Project archived", "Project unarchived"]
+        it_behaves_like 'audit event', ["Project archived", "Project unarchived"]
       end
 
       def sign_in
         unless Page::Main::Menu.perform { |p| p.has_personal_area?(wait: 0) }
-          Runtime::Browser.visit(:gitlab, Page::Main::Login)
-          Page::Main::Login.perform(&:sign_in_using_credentials)
+          Flow::Login.sign_in
         end
       end
     end

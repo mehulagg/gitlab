@@ -1,17 +1,17 @@
 # frozen_string_literal: true
 
 require 'gitlab'
-require_relative File.expand_path('../../lib/quality/helm_client.rb', __dir__)
-require_relative File.expand_path('../../lib/quality/kubernetes_client.rb', __dir__)
+require_relative File.expand_path('../../tooling/lib/tooling/helm3_client.rb', __dir__)
+require_relative File.expand_path('../../tooling/lib/tooling/kubernetes_client.rb', __dir__)
 
 class AutomatedCleanup
   attr_reader :project_path, :gitlab_token
 
   DEPLOYMENTS_PER_PAGE = 100
-  HELM_RELEASES_BATCH_SIZE = 5
   IGNORED_HELM_ERRORS = [
     'transport is closing',
-    'error upgrading connection'
+    'error upgrading connection',
+    'not found'
   ].freeze
   IGNORED_KUBERNETES_ERRORS = [
     'NotFound'
@@ -25,7 +25,6 @@ class AutomatedCleanup
   def initialize(project_path: ENV['CI_PROJECT_PATH'], gitlab_token: ENV['GITLAB_BOT_REVIEW_APPS_CLEANUP_TOKEN'])
     @project_path = project_path
     @gitlab_token = gitlab_token
-    ENV['TILLER_NAMESPACE'] ||= review_apps_namespace
   end
 
   def gitlab
@@ -41,19 +40,19 @@ class AutomatedCleanup
   end
 
   def review_apps_namespace
-    self.class.ee? ? 'review-apps-ee' : 'review-apps-ce'
+    'review-apps'
   end
 
   def helm
-    @helm ||= Quality::HelmClient.new(namespace: review_apps_namespace)
+    @helm ||= Tooling::Helm3Client.new(namespace: review_apps_namespace)
   end
 
   def kubernetes
-    @kubernetes ||= Quality::KubernetesClient.new(namespace: review_apps_namespace)
+    @kubernetes ||= Tooling::KubernetesClient.new(namespace: review_apps_namespace)
   end
 
   def perform_gitlab_environment_cleanup!(days_for_stop:, days_for_delete:)
-    puts "Checking for review apps not updated in the last #{days_for_stop} days..."
+    puts "Checking for Review Apps not updated in the last #{days_for_stop} days..."
 
     checked_environments = []
     delete_threshold = threshold_time(days: days_for_delete)
@@ -75,13 +74,18 @@ class AutomatedCleanup
       deployed_at = Time.parse(last_deploy)
 
       if deployed_at < delete_threshold
-        delete_environment(environment, deployment)
-        release = Quality::HelmClient::Release.new(environment.slug, 1, deployed_at.to_s, nil, nil, review_apps_namespace)
-        releases_to_delete << release
-      elsif deployed_at < stop_threshold
-        stop_environment(environment, deployment)
+        deleted_environment = delete_environment(environment, deployment)
+        if deleted_environment
+          release = Tooling::Helm3Client::Release.new(environment.slug, 1, deployed_at.to_s, nil, nil, review_apps_namespace)
+          releases_to_delete << release
+        end
       else
-        print_release_state(subject: 'Review app', release_name: environment.slug, release_date: last_deploy, action: 'leaving')
+        if deployed_at >= stop_threshold
+          print_release_state(subject: 'Review App', release_name: environment.slug, release_date: last_deploy, action: 'leaving')
+        else
+          environment_state = fetch_environment(environment)&.state
+          stop_environment(environment, deployment) if environment_state && environment_state != 'stopped'
+        end
       end
 
       checked_environments << environment.slug
@@ -91,9 +95,9 @@ class AutomatedCleanup
   end
 
   def perform_helm_releases_cleanup!(days:)
-    puts "Checking for Helm releases not updated in the last #{days} days..."
+    puts "Checking for Helm releases that are failed or not updated in the last #{days} days..."
 
-    threshold_day = threshold_time(days: days)
+    threshold = threshold_time(days: days)
 
     releases_to_delete = []
 
@@ -101,7 +105,7 @@ class AutomatedCleanup
       # Prevents deleting `dns-gitlab-review-app` releases or other unrelated releases
       next unless release.name.start_with?('review-')
 
-      if release.status == 'FAILED' || release.last_update < threshold_day
+      if release.status == 'failed' || release.last_update < threshold
         releases_to_delete << release
       else
         print_release_state(subject: 'Release', release_name: release.name, release_date: release.last_update, action: 'leaving')
@@ -113,18 +117,31 @@ class AutomatedCleanup
 
   private
 
+  def fetch_environment(environment)
+    gitlab.environment(project_path, environment.id)
+  rescue Errno::ETIMEDOUT => ex
+    puts "Failed to fetch '#{environment.name}' / '#{environment.slug}' (##{environment.id}):\n#{ex.message}"
+    nil
+  end
+
   def delete_environment(environment, deployment)
     print_release_state(subject: 'Review app', release_name: environment.slug, release_date: deployment.created_at, action: 'deleting')
     gitlab.delete_environment(project_path, environment.id)
+
+  rescue Gitlab::Error::Forbidden
+    puts "Review app '#{environment.name}' / '#{environment.slug}' (##{environment.id}) is forbidden: skipping it"
   end
 
   def stop_environment(environment, deployment)
     print_release_state(subject: 'Review app', release_name: environment.slug, release_date: deployment.created_at, action: 'stopping')
     gitlab.stop_environment(project_path, environment.id)
+
+  rescue Gitlab::Error::Forbidden
+    puts "Review app '#{environment.name}' / '#{environment.slug}' (##{environment.id}) is forbidden: skipping it"
   end
 
   def helm_releases
-    args = ['--all', '--date', "--max #{HELM_RELEASES_BATCH_SIZE}"]
+    args = ['--all', '--date']
 
     helm.releases(args: args)
   end
@@ -140,11 +157,11 @@ class AutomatedCleanup
     helm.delete(release_name: releases_names)
     kubernetes.cleanup(release_name: releases_names, wait: false)
 
-  rescue Quality::HelmClient::CommandFailedError => ex
+  rescue Tooling::Helm3Client::CommandFailedError => ex
     raise ex unless ignore_exception?(ex.message, IGNORED_HELM_ERRORS)
 
     puts "Ignoring the following Helm error:\n#{ex}\n"
-  rescue Quality::KubernetesClient::CommandFailedError => ex
+  rescue Tooling::KubernetesClient::CommandFailedError => ex
     raise ex unless ignore_exception?(ex.message, IGNORED_KUBERNETES_ERRORS)
 
     puts "Ignoring the following Kubernetes error:\n#{ex}\n"
@@ -171,14 +188,14 @@ end
 
 automated_cleanup = AutomatedCleanup.new
 
-timed('Review apps cleanup') do
-  automated_cleanup.perform_gitlab_environment_cleanup!(days_for_stop: 2, days_for_delete: 3)
+timed('Review Apps cleanup') do
+  automated_cleanup.perform_gitlab_environment_cleanup!(days_for_stop: 5, days_for_delete: 6)
 end
 
 puts
 
 timed('Helm releases cleanup') do
-  automated_cleanup.perform_helm_releases_cleanup!(days: 3)
+  automated_cleanup.perform_helm_releases_cleanup!(days: 7)
 end
 
 exit(0)

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::MembersPreloader do
+RSpec.describe EE::MembersPreloader do
   describe '#preload_all' do
     let(:group) { create(:group) }
     let(:saml_provider) { create(:saml_provider, group: group) }

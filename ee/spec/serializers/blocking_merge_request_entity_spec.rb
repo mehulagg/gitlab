@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BlockingMergeRequestEntity do
+RSpec.describe BlockingMergeRequestEntity do
   let(:merge_request) { create(:merge_request) }
   let(:project) { merge_request.target_project }
   let(:user) { create(:user) }

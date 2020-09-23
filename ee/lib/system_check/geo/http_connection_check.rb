@@ -33,11 +33,9 @@ module SystemCheck
       private
 
       def check_gitlab_geo_node(node)
-        response = Net::HTTP.start(node.internal_uri.host, node.internal_uri.port, use_ssl: (node.internal_uri.scheme == 'https')) do |http|
-          http.request(Net::HTTP::Get.new(node.internal_uri))
-        end
+        response = Gitlab::HTTP.get(node.internal_uri, allow_local_requests: true)
 
-        if response.code_type == Net::HTTPFound
+        if response.code_type == Net::HTTPOK
           $stdout.puts 'yes'.color(:green)
         else
           $stdout.puts 'no'.color(:red)

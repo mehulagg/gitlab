@@ -2,43 +2,39 @@
 
 require 'spec_helper'
 
-describe Groups::Security::VulnerabilitiesController do
-  let(:group) { create(:group) }
-  let(:params) { { group_id: group } }
+RSpec.describe Groups::Security::VulnerabilitiesController do
   let(:user) { create(:user) }
+  let(:group) { create(:group) }
 
-  # when new Vulnerability Findings API is enabled this controller is not,
-  # its actions are "moved" Groups::Security::VulnerabilityFindingsController
-
-  it_behaves_like 'VulnerabilityFindingsActions disabled' do
-    let(:vulnerable) { group }
-    let(:vulnerable_params) { params }
+  before do
+    sign_in(user)
   end
 
-  it_behaves_like 'SecurityDashboardsPermissions disabled' do
-    let(:vulnerable) { group }
-    let(:security_dashboard_action) { get :index, params: params, format: :json }
-  end
+  describe 'GET index' do
+    subject { get :index, params: { group_id: group.to_param } }
 
-  it_behaves_like 'disabled group vulnerability findings controller'
+    context 'when security dashboard feature is enabled' do
+      before do
+        stub_licensed_features(security_dashboard: true)
+      end
 
-  context 'when new Vulnerability Findings API is disabled' do
-    before do
-      stub_feature_flags(vulnerability_findings_api: false)
+      context 'and user is allowed to access group security vulnerabilities' do
+        before do
+          group.add_developer(user)
+        end
+
+        it { is_expected.to have_gitlab_http_status(:ok) }
+      end
+
+      context 'when user is not allowed to access group security vulnerabilities' do
+        it { is_expected.to have_gitlab_http_status(:ok) }
+        it { is_expected.to render_template(:unavailable) }
+      end
     end
 
-    # when new Vulnerability Findings API is disabled, we fall back to this controller
-
-    it_behaves_like VulnerabilityFindingsActions do
-      let(:vulnerable) { group }
-      let(:vulnerable_params) { params }
+    context 'when security dashboard feature is disabled' do
+      it { is_expected.to have_gitlab_http_status(:ok) }
+      it { is_expected.to render_template(:unavailable) }
     end
-
-    it_behaves_like SecurityDashboardsPermissions do
-      let(:vulnerable) { group }
-      let(:security_dashboard_action) { get :index, params: params, format: :json }
-    end
-
-    it_behaves_like 'group vulnerability findings controller'
   end
 end

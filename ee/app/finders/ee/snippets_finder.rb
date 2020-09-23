@@ -27,13 +27,14 @@ module EE
     #
     # When current_user is nil it returns only public personal snippets
     def snippets_of_authorized_projects_or_personal
-      queries = [restricted_personal_snippets]
+      queries = []
+      queries << restricted_personal_snippets unless only_project
 
       if current_user && Ability.allowed?(current_user, :read_cross_project)
-        queries << snippets_of_authorized_projects
+        queries << snippets_of_authorized_projects unless only_personal
       end
 
-      find_union(queries, ::Snippet)
+      prepared_union(queries)
     end
 
     def restricted_personal_snippets

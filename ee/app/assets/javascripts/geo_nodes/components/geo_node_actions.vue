@@ -1,12 +1,16 @@
 <script>
+import { GlIcon, GlButton, GlTooltipDirective } from '@gitlab/ui';
 import { __, s__ } from '~/locale';
 import eventHub from '../event_hub';
 import { NODE_ACTIONS } from '../constants';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
+    GlButton,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
   },
   props: {
     node: {
@@ -21,23 +25,23 @@ export default {
       type: Boolean,
       required: true,
     },
+    nodeRemovalAllowed: {
+      type: Boolean,
+      required: true,
+    },
     nodeMissingOauth: {
       type: Boolean,
       required: true,
     },
   },
   computed: {
-    isToggleAllowed() {
-      return !this.node.primary && this.nodeEditAllowed;
-    },
-    nodeToggleLabel() {
-      return this.node.enabled ? __('Pause replication') : __('Resume replication');
-    },
-    nodeToggleIcon() {
-      return this.node.enabled ? 'pause' : 'play';
-    },
     isSecondaryNode() {
       return !this.node.primary;
+    },
+    disabledRemovalTooltip() {
+      return this.nodeRemovalAllowed
+        ? ''
+        : s__('Geo Nodes|Cannot remove a primary node if there is a secondary node');
     },
   },
   methods: {
@@ -45,8 +49,9 @@ export default {
       eventHub.$emit('showNodeActionModal', {
         actionType: NODE_ACTIONS.TOGGLE,
         node: this.node,
-        modalMessage: s__('GeoNodes|Pausing replication stops the sync process.'),
+        modalMessage: s__('GeoNodes|Pausing replication stops the sync process. Are you sure?'),
         modalActionLabel: this.nodeToggleLabel,
+        modalTitle: __('Pause replication'),
       });
     },
     onRemoveSecondaryNode() {
@@ -55,9 +60,10 @@ export default {
         node: this.node,
         modalKind: 'danger',
         modalMessage: s__(
-          'GeoNodes|Removing a secondary node stops the sync process. It is not currently possible to add back the same node without losing some data. We only recommend setting up a new secondary node in this case. Are you sure?',
+          'GeoNodes|Removing a Geo secondary node stops the synchronization to that node. Are you sure?',
         ),
-        modalActionLabel: __('Remove'),
+        modalActionLabel: __('Remove node'),
+        modalTitle: __('Remove secondary node'),
       });
     },
     onRemovePrimaryNode() {
@@ -66,9 +72,10 @@ export default {
         node: this.node,
         modalKind: 'danger',
         modalMessage: s__(
-          'GeoNodes|Removing a primary node stops the sync process for all nodes. Syncing cannot be resumed without losing some data on all secondaries. In this case we would recommend setting up all nodes from scratch. Are you sure?',
+          'GeoNodes|Removing a Geo primary node stops the synchronization to all nodes. Are you sure?',
         ),
-        modalActionLabel: __('Remove'),
+        modalActionLabel: __('Remove node'),
+        modalTitle: __('Remove primary node'),
       });
     },
     onRepairNode() {
@@ -79,52 +86,61 @@ export default {
 </script>
 
 <template>
-  <div class="geo-node-actions">
-    <div v-if="isSecondaryNode" class="node-action-container">
-      <a :href="node.geoProjectsUrl" class="btn btn-sm btn-node-action" target="_blank">
-        <icon v-if="!node.current" name="external-link" /> {{ __('Open projects') }}
-      </a>
-    </div>
+  <div
+    data-testid="nodeActions"
+    class="gl-display-flex gl-align-items-center gl-justify-content-end gl-flex-direction-column gl-sm-flex-direction-row gl-mx-5 gl-sm-mx-0"
+  >
+    <gl-button
+      v-if="isSecondaryNode"
+      :href="node.geoProjectsUrl"
+      class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
+      target="_blank"
+    >
+      <span class="gl-display-flex gl-align-items-center">
+        <gl-icon v-if="!node.current" name="external-link" class="gl-mr-2" />
+        {{ __('Open projects') }}
+      </span>
+    </gl-button>
     <template v-if="nodeActionsAllowed">
-      <div v-if="nodeMissingOauth" class="node-action-container">
-        <button type="button" class="btn btn-default btn-sm btn-node-action" @click="onRepairNode">
-          {{ s__('Repair authentication') }}
-        </button>
-      </div>
-      <div v-if="isToggleAllowed" class="node-action-container">
-        <button
-          :class="{
-            'btn-warning': node.enabled,
-            'btn-success': !node.enabled,
-          }"
-          type="button"
-          class="btn btn-sm btn-node-action"
-          @click="onToggleNode"
-        >
-          <icon :name="nodeToggleIcon" />
-          {{ nodeToggleLabel }}
-        </button>
-      </div>
-      <div v-if="nodeEditAllowed" class="node-action-container">
-        <a :href="node.editPath" class="btn btn-sm btn-node-action"> {{ __('Edit') }} </a>
-      </div>
-      <div class="node-action-container">
-        <button
-          v-if="isSecondaryNode"
-          type="button"
-          class="btn btn-sm btn-node-action btn-danger"
-          @click="onRemoveSecondaryNode"
-        >
-          {{ __('Remove') }}
-        </button>
-        <button
-          v-else
-          type="button"
-          class="btn btn-sm btn-node-action btn-danger"
+      <gl-button
+        v-if="nodeMissingOauth"
+        class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
+        @click="onRepairNode"
+      >
+        {{ s__('Repair authentication') }}
+      </gl-button>
+      <gl-button
+        v-if="nodeEditAllowed"
+        :href="node.editPath"
+        class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
+      >
+        {{ __('Edit') }}
+      </gl-button>
+      <gl-button
+        v-if="isSecondaryNode"
+        data-testid="removeButton"
+        variant="danger"
+        class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
+        :disabled="!nodeRemovalAllowed"
+        @click="onRemoveSecondaryNode"
+      >
+        {{ __('Remove') }}
+      </gl-button>
+      <div
+        v-gl-tooltip.hover
+        name="disabledRemovalTooltip"
+        class="gl-mx-2 gl-mt-5 gl-sm-mt-0 gl-w-full gl-sm-w-auto"
+        :title="disabledRemovalTooltip"
+      >
+        <gl-button
+          v-if="!isSecondaryNode"
+          variant="danger"
+          class="gl-w-full"
+          :disabled="!nodeRemovalAllowed"
           @click="onRemovePrimaryNode"
         >
           {{ __('Remove') }}
-        </button>
+        </gl-button>
       </div>
     </template>
   </div>

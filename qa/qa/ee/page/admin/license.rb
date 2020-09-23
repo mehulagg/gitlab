@@ -10,7 +10,10 @@ module QA
           end
 
           view 'ee/app/views/admin/licenses/show.html.haml' do
-            element :license_upload_link, "link_to 'Upload New License'" # rubocop:disable QA/ElementWithPattern
+            element :license_upload_link
+          end
+
+          view 'ee/app/views/admin/licenses/_info.html.haml' do
             element :remove_license_link
           end
 
@@ -19,7 +22,7 @@ module QA
             element :license_type_placeholder, 'Enter license key' # rubocop:disable QA/ElementWithPattern
             element :license_key_field, 'text_area :data' # rubocop:disable QA/ElementWithPattern
             element :license_key_placeholder, 'label :data, "License key"' # rubocop:disable QA/ElementWithPattern
-            element :license_upload_buttonm, "submit 'Upload license'" # rubocop:disable QA/ElementWithPattern
+            element :license_upload_button, "submit 'Upload License'" # rubocop:disable QA/ElementWithPattern
           end
 
           def license?
@@ -32,7 +35,8 @@ module QA
             click_link 'Upload New License'
             choose 'Enter license key'
             fill_in 'License key', with: key
-            click_button 'Upload license'
+            check 'accept_eula'
+            click_button 'Upload License'
           end
         end
       end

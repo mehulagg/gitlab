@@ -4,10 +4,8 @@ type: reference
 
 # External authorization control **(CORE ONLY)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/4216) in
-> [GitLab Premium](https://about.gitlab.com/pricing/) 10.6.
-> [Moved](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/27056) to
-> [GitLab Core](https://about.gitlab.com/pricing/) in 11.10.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/4216) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.6.
+> - [Moved](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/27056) to [GitLab Core](https://about.gitlab.com/pricing/) in 11.10.
 
 In highly controlled environments, it may be necessary for access policy to be
 controlled by an external service that permits access based on project
@@ -24,23 +22,23 @@ known response, the result is cached for 6 hours.
 If the external authorization is enabled, GitLab will further block pages and
 functionality that render cross-project data. That includes:
 
-- most pages under Dashboard (Activity, Milestones, Snippets, Assigned merge
-  requests, Assigned issues, Todos)
-- under a specific group (Activity, Contribution analytics, Issues, Issue boards,
-  Labels, Milestones, Merge requests)
-- Global and Group search will be disabled
+- Most pages under Dashboard (Activity, Milestones, Snippets, Assigned merge
+  requests, Assigned issues, To-Do List).
+- Under a specific group (Activity, Contribution analytics, Issues, Issue boards,
+  Labels, Milestones, Merge requests).
+- Global and Group search will be disabled.
 
 This is to prevent performing to many requests at once to the external
 authorization service.
 
-Whenever access is granted or denied this is logged in a logfile called
+Whenever access is granted or denied this is logged in a log file called
 `external-policy-access-control.log`.
-Read more about logs GitLab keeps in the [omnibus documentation][omnibus-log-docs].
+Read more about logs GitLab keeps in the [omnibus documentation](https://docs.gitlab.com/omnibus/settings/logs.html).
 
 ## Configuration
 
 The external authorization service can be enabled by an admin on the GitLab's
-admin area under the settings page:
+**Admin Area > Settings > General** page:
 
 ![Enable external authorization service](img/external_authorization_service_settings.png)
 
@@ -62,9 +60,9 @@ The available required properties are:
   requesting authorization if no specific label is defined on the project
 
 When using TLS Authentication with a self signed certificate, the CA certificate
-needs to be trused by the openssl installation. When using GitLab installed using
+needs to be trusted by the OpenSSL installation. When using GitLab installed using
 Omnibus, learn to install a custom CA in the
-[omnibus documentation][omnibus-ssl-docs]. Alternatively learn where to install
+[omnibus documentation](https://docs.gitlab.com/omnibus/settings/ssl.html). Alternatively learn where to install
 custom certificates using `openssl version -d`.
 
 ## How it works
@@ -129,6 +127,3 @@ questions that you know someone might ask.
 Each scenario can be a third-level heading, e.g. `### Getting error message X`.
 If you have none to add when creating a doc, leave this section in place
 but commented out to help encourage others to add to it in the future. -->
-
-[omnibus-ssl-docs]: https://docs.gitlab.com/omnibus/settings/ssl.html
-[omnibus-log-docs]: https://docs.gitlab.com/omnibus/settings/logs.html

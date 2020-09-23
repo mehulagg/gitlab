@@ -1,6 +1,6 @@
 .tree-holder {
   .nav-block {
-    margin: 10px 0;
+    margin: 16px 0;
 
     .btn .fa,
     .btn svg {
@@ -16,10 +16,6 @@
 
       .tree-controls {
         text-align: right;
-
-        .btn-group {
-          margin-left: 10px;
-        }
 
         .control {
           float: left;
@@ -105,7 +101,7 @@
       border-top: 1px solid $white-normal;
 
       &:last-of-type {
-        border-bottom-color: $white-light;
+        border-bottom-color: $white;
       }
 
       td,
@@ -124,6 +120,7 @@
       &:hover:not(.tree-truncated-warning) {
         td {
           background-color: $blue-50;
+          background-clip: padding-box;
           border-top: 1px solid $blue-200;
           border-bottom: 1px solid $blue-200;
           cursor: pointer;
@@ -133,8 +130,8 @@
       &.selected {
         td {
           background: $white-normal;
-          border-top: 1px solid $border-gray-dark;
-          border-bottom: 1px solid $border-gray-dark;
+          border-top: 1px solid $border-white-normal;
+          border-bottom: 1px solid $border-white-normal;
         }
       }
     }
@@ -176,7 +173,7 @@
 
   .tree-truncated-warning {
     color: $orange-600;
-    background-color: $orange-100;
+    background-color: $orange-50;
   }
 
   .tree-time-ago {

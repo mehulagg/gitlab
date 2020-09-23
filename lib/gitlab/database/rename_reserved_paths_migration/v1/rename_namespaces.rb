@@ -45,7 +45,7 @@ module Gitlab
             reverts_for_type('namespace') do |path_before_rename, current_path|
               matches_path = MigrationClasses::Route.arel_table[:path].matches(current_path)
               namespace = MigrationClasses::Namespace.joins(:route)
-                            .where(matches_path).first&.becomes(MigrationClasses::Namespace)
+                            .find_by(matches_path)&.becomes(MigrationClasses::Namespace) # rubocop: disable Cop/AvoidBecomes
 
               if namespace
                 perform_rename(namespace, current_path, path_before_rename)
@@ -66,11 +66,13 @@ module Gitlab
           def move_repositories(namespace, old_full_path, new_full_path)
             repo_shards_for_namespace(namespace).each do |repository_storage|
               # Ensure old directory exists before moving it
-              gitlab_shell.add_namespace(repository_storage, old_full_path)
+              Gitlab::GitalyClient::NamespaceService.allow do
+                gitlab_shell.add_namespace(repository_storage, old_full_path)
 
-              unless gitlab_shell.mv_namespace(repository_storage, old_full_path, new_full_path)
-                message = "Exception moving on shard #{repository_storage} from #{old_full_path} to #{new_full_path}"
-                Rails.logger.error message # rubocop:disable Gitlab/RailsLogger
+                unless gitlab_shell.mv_namespace(repository_storage, old_full_path, new_full_path)
+                  message = "Exception moving on shard #{repository_storage} from #{old_full_path} to #{new_full_path}"
+                  Gitlab::AppLogger.error message
+                end
               end
             end
           end

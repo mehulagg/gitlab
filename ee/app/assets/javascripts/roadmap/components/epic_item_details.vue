@@ -1,11 +1,16 @@
 <script>
-import { s__, sprintf } from '~/locale';
-import { dateInWords } from '~/lib/utils/datetime_utility';
-import tooltip from '~/vue_shared/directives/tooltip';
+import { mapState } from 'vuex';
+import { GlButton, GlIcon, GlLoadingIcon, GlTooltip } from '@gitlab/ui';
+import { __, n__ } from '~/locale';
+import eventHub from '../event_hub';
+import { EPIC_LEVEL_MARGIN } from '../constants';
 
 export default {
-  directives: {
-    tooltip,
+  components: {
+    GlButton,
+    GlIcon,
+    GlLoadingIcon,
+    GlTooltip,
   },
   props: {
     epic: {
@@ -16,84 +21,158 @@ export default {
       type: Number,
       required: true,
     },
+    timeframeString: {
+      type: String,
+      required: true,
+    },
+    childLevel: {
+      type: Number,
+      required: true,
+    },
+    childrenFlags: {
+      type: Object,
+      required: true,
+    },
+    hasFiltersApplied: {
+      type: Boolean,
+      required: true,
+    },
+    isChildrenEmpty: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   computed: {
+    ...mapState(['allowSubEpics']),
+    itemId() {
+      return this.epic.id;
+    },
     isEpicGroupDifferent() {
       return this.currentGroupId !== this.epic.groupId;
     },
-    /**
-     * In case Epic start date is out of range
-     * we need to use original date instead of proxy date
-     */
-    startDate() {
-      if (this.epic.startDateOutOfRange) {
-        return this.epic.originalStartDate;
-      }
-
-      return this.epic.startDate;
+    isExpandIconHidden() {
+      return !this.epic.hasChildren;
     },
-    /**
-     * In case Epic end date is out of range
-     * we need to use original date instead of proxy date
-     */
-    endDate() {
-      if (this.epic.endDateOutOfRange) {
-        return this.epic.originalEndDate;
-      }
-      return this.epic.endDate;
-    },
-    /**
-     * Compose timeframe string to show on UI
-     * based on start and end date availability
-     */
-    timeframeString() {
-      if (this.epic.startDateUndefined) {
-        return sprintf(s__('GroupRoadmap|Until %{dateWord}'), {
-          dateWord: dateInWords(this.endDate, true),
-        });
-      } else if (this.epic.endDateUndefined) {
-        return sprintf(s__('GroupRoadmap|From %{dateWord}'), {
-          dateWord: dateInWords(this.startDate, true),
-        });
-      }
-
-      // In case both start and end date fall in same year
-      // We should hide year from start date
-      const startDateInWords = dateInWords(
-        this.startDate,
-        true,
-        this.startDate.getFullYear() === this.endDate.getFullYear(),
+    isEmptyChildrenWithFilter() {
+      return (
+        this.childrenFlags[this.itemId].itemExpanded &&
+        this.hasFiltersApplied &&
+        this.isChildrenEmpty
       );
-
-      const endDateInWords = dateInWords(this.endDate, true);
-      return sprintf(s__('GroupRoadmap|%{startDateInWords} &ndash; %{endDateInWords}'), {
-        startDateInWords,
-        endDateInWords,
-      });
+    },
+    expandIconName() {
+      if (this.isEmptyChildrenWithFilter) {
+        return 'information-o';
+      }
+      return this.childrenFlags[this.itemId].itemExpanded ? 'chevron-down' : 'chevron-right';
+    },
+    infoSearchLabel() {
+      return __('No child epics match applied filters');
+    },
+    expandIconLabel() {
+      if (this.isEmptyChildrenWithFilter) {
+        return this.infoSearchLabel;
+      }
+      return this.childrenFlags[this.itemId].itemExpanded ? __('Collapse') : __('Expand');
+    },
+    childrenFetchInProgress() {
+      return this.epic.hasChildren && this.childrenFlags[this.itemId].itemChildrenFetchInProgress;
+    },
+    childEpicsCount() {
+      const { openedEpics = 0, closedEpics = 0 } = this.epic.descendantCounts;
+      return openedEpics + closedEpics;
+    },
+    childEpicsCountText() {
+      return Number.isInteger(this.childEpicsCount)
+        ? n__(`%d child epic`, `%d child epics`, this.childEpicsCount)
+        : '';
+    },
+    childEpicsSearchText() {
+      return __('Some child epics may be hidden due to applied filters');
+    },
+    childMarginClassname() {
+      return EPIC_LEVEL_MARGIN[this.childLevel];
+    },
+  },
+  methods: {
+    toggleIsEpicExpanded() {
+      if (!this.isEmptyChildrenWithFilter) {
+        eventHub.$emit('toggleIsEpicExpanded', this.epic);
+      }
     },
   },
 };
 </script>
 
 <template>
-  <span class="epic-details-cell" data-qa-selector="epic_details_cell">
-    <div class="epic-title">
-      <a v-tooltip :href="epic.webUrl" :title="epic.title" data-container="body" class="epic-url">
-        {{ epic.title }}
-      </a>
-    </div>
-    <div class="epic-group-timeframe">
-      <span
-        v-if="isEpicGroupDifferent"
-        v-tooltip
-        :title="epic.groupFullName"
-        class="epic-group"
-        data-placement="right"
-        data-container="body"
-      >
-        {{ epic.groupName }} &middot;
+  <div
+    class="epic-details-cell gl-display-flex gl-flex-direction-column gl-justify-content-center"
+    data-qa-selector="epic_details_cell"
+  >
+    <div
+      class="gl-display-flex align-items-start gl-px-3 gl-mb-1"
+      :class="[epic.isChildEpic ? childMarginClassname : '']"
+    >
+      <span ref="expandCollapseInfo">
+        <gl-button
+          :class="{ invisible: isExpandIconHidden }"
+          variant="link"
+          :aria-label="expandIconLabel"
+          @click="toggleIsEpicExpanded"
+        >
+          <gl-icon
+            v-if="!childrenFetchInProgress"
+            :name="expandIconName"
+            class="text-secondary"
+            aria-hidden="true"
+          />
+          <gl-loading-icon v-if="childrenFetchInProgress" size="sm" />
+        </gl-button>
       </span>
-      <span class="epic-timeframe" v-html="timeframeString"> </span>
+      <gl-tooltip
+        v-if="!isExpandIconHidden"
+        ref="expandIconTooltip"
+        triggers="hover"
+        :target="() => $refs.expandCollapseInfo"
+        boundary="viewport"
+        offset="15"
+        placement="topright"
+      >
+        {{ expandIconLabel }}
+      </gl-tooltip>
+      <div class="overflow-hidden flex-grow-1 mx-2">
+        <a
+          :href="epic.webUrl"
+          :title="epic.title"
+          class="epic-title gl-mt-1 d-block text-body bold"
+        >
+          {{ epic.title }}
+        </a>
+        <div class="epic-group-timeframe d-flex text-secondary">
+          <span
+            v-if="isEpicGroupDifferent && !epic.hasParent"
+            :title="epic.groupFullName"
+            class="epic-group"
+          >
+            {{ epic.groupName }}
+          </span>
+          <span v-if="isEpicGroupDifferent && !epic.hasParent" class="mx-1" aria-hidden="true"
+            >&middot;</span
+          >
+          <span class="epic-timeframe" :title="timeframeString">{{ timeframeString }}</span>
+        </div>
+      </div>
+      <template v-if="allowSubEpics">
+        <div ref="childEpicsCount" class="gl-mt-1 d-flex text-secondary text-nowrap">
+          <gl-icon name="epic" class="align-text-bottom mr-1" aria-hidden="true" />
+          <p class="m-0" :aria-label="childEpicsCountText">{{ childEpicsCount }}</p>
+        </div>
+        <gl-tooltip ref="childEpicsCountTooltip" :target="() => $refs.childEpicsCount">
+          <span :class="{ bold: hasFiltersApplied }">{{ childEpicsCountText }}</span>
+          <span v-if="hasFiltersApplied" class="d-block">{{ childEpicsSearchText }}</span>
+        </gl-tooltip>
+      </template>
     </div>
-  </span>
+  </div>
 </template>

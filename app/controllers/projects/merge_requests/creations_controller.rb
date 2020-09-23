@@ -12,14 +12,10 @@ class Projects::MergeRequests::CreationsController < Projects::MergeRequests::Ap
   before_action :build_merge_request, except: [:create]
 
   def new
-    # n+1: https://gitlab.com/gitlab-org/gitlab-foss/issues/40934
-    Gitlab::GitalyClient.allow_n_plus_1_calls do
-      define_new_vars
-    end
+    define_new_vars
   end
 
   def create
-    @target_branches ||= []
     @merge_request = ::MergeRequests::CreateService.new(project, current_user, merge_request_params).execute
 
     if @merge_request.valid?
@@ -36,13 +32,13 @@ class Projects::MergeRequests::CreationsController < Projects::MergeRequests::Ap
   end
 
   def pipelines
-    @pipelines = @merge_request.all_pipelines
+    @pipelines = Ci::PipelinesForMergeRequestFinder.new(@merge_request, current_user).execute
 
     Gitlab::PollingInterval.set_header(response, interval: 10_000)
 
     render json: {
       pipelines: PipelineSerializer
-      .new(project: @project, current_user: @current_user)
+      .new(project: @project, current_user: current_user)
       .represent(@pipelines)
     }
   end
@@ -52,7 +48,7 @@ class Projects::MergeRequests::CreationsController < Projects::MergeRequests::Ap
 
     @diff_notes_disabled = true
 
-    @environment = @merge_request.environments_for(current_user).last
+    @environment = @merge_request.environments_for(current_user, latest: true).last
 
     render json: { html: view_to_html_string('projects/merge_requests/creations/_diffs', diffs: @diffs, environment: @environment) }
   end
@@ -100,16 +96,15 @@ class Projects::MergeRequests::CreationsController < Projects::MergeRequests::Ap
 
   def define_new_vars
     @noteable = @merge_request
-
-    @target_branches = if @merge_request.target_project
-                         @merge_request.target_project.repository.branch_names
-                       else
-                         []
-                       end
-
     @target_project = @merge_request.target_project
     @source_project = @merge_request.source_project
-    @commits = set_commits_for_rendering(@merge_request.commits)
+
+    @commits =
+      set_commits_for_rendering(
+        @merge_request.recent_commits.with_latest_pipeline(@merge_request.source_branch),
+          commits_count: @merge_request.commits_count
+      )
+
     @commit = @merge_request.diff_head_commit
 
     # FIXME: We have to assign a presenter to another instance variable

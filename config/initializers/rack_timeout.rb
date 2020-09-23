@@ -9,8 +9,8 @@
 # and it's used only as the last resort. In such case this termination is
 # logged and we should fix the potential timeout issue in the code itself.
 
-if defined?(::Puma) && !Rails.env.test?
-  require 'rack/timeout/base'
+if Gitlab::Runtime.puma? && !Rails.env.test?
+  Rack::Timeout::Logger.level = Logger::ERROR
 
   Gitlab::Application.configure do |config|
     config.middleware.insert_before(Rack::Runtime, Rack::Timeout,

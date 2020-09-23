@@ -2,113 +2,158 @@
 
 require 'spec_helper'
 
-describe ClearSharedRunnersMinutesWorker do
+RSpec.describe ClearSharedRunnersMinutesWorker do
   let(:worker) { described_class.new }
 
   describe '#perform' do
-    let(:namespace) { create(:namespace) }
-
-    before do
-      expect_any_instance_of(described_class)
-        .to receive(:try_obtain_lease).and_return(true)
-    end
-
     subject { worker.perform }
 
-    context 'when project statistics are defined' do
-      let(:project) { create(:project, namespace: namespace) }
-      let(:statistics) { project.statistics }
+    context 'when ci_parallel_minutes_reset feature flag is disabled' do
+      let(:namespace) { create(:namespace) }
 
       before do
-        statistics.update(shared_runners_seconds: 100)
+        stub_feature_flags(ci_parallel_minutes_reset: false)
+
+        expect_next_instance_of(described_class) do |instance|
+          expect(instance).to receive(:try_obtain_lease).and_return(true)
+        end
       end
 
-      it 'clears counters' do
-        subject
+      context 'when project statistics are defined' do
+        let(:project) { create(:project, namespace: namespace) }
+        let(:statistics) { project.statistics }
 
-        expect(statistics.reload.shared_runners_seconds).to be_zero
-      end
+        before do
+          statistics.update(shared_runners_seconds: 100)
+        end
 
-      it 'resets timer' do
-        subject
-
-        expect(statistics.reload.shared_runners_seconds_last_reset).to be_like_time(Time.now)
-      end
-    end
-
-    context 'when namespace statistics are defined' do
-      let!(:statistics) { create(:namespace_statistics, namespace: namespace, shared_runners_seconds: 100) }
-
-      it 'clears counters' do
-        subject
-
-        expect(statistics.reload.shared_runners_seconds).to be_zero
-      end
-
-      it 'resets timer' do
-        subject
-
-        expect(statistics.reload.shared_runners_seconds_last_reset).to be_like_time(Time.now)
-      end
-    end
-
-    context 'when namespace has extra shared runner minutes' do
-      let!(:namespace) do
-        create(:namespace, shared_runners_minutes_limit: 100, extra_shared_runners_minutes_limit: 10 )
-      end
-
-      let!(:statistics) do
-        create(:namespace_statistics, namespace: namespace, shared_runners_seconds: minutes_used * 60)
-      end
-
-      let(:minutes_used) { 0 }
-
-      context 'when consumption is below the default quota' do
-        let(:minutes_used) { 50 }
-
-        it 'does not modify the extra minutes quota' do
+        it 'clears counters' do
           subject
 
-          expect(namespace.reload.extra_shared_runners_minutes_limit).to eq(10)
-        end
-      end
-
-      context 'when consumption is above the default quota' do
-        context 'when all extra minutes are used' do
-          let(:minutes_used) { 115 }
-
-          it 'sets extra minutes to 0' do
-            subject
-
-            expect(namespace.reload.extra_shared_runners_minutes_limit).to eq(0)
-          end
+          expect(statistics.reload.shared_runners_seconds).to be_zero
         end
 
-        context 'when some extra minutes are used' do
-          let(:minutes_used) { 105 }
+        it 'resets timer' do
+          subject
 
-          it 'discounts the extra minutes used' do
-            subject
-
-            expect(namespace.reload.extra_shared_runners_minutes_limit).to eq(5)
-          end
+          expect(statistics.reload.shared_runners_seconds_last_reset).to be_like_time(Time.current)
         end
-      end
 
-      [:last_ci_minutes_notification_at, :last_ci_minutes_usage_notification_level].each do |attr|
-        context "when #{attr} is present" do
+        context 'when there are namespaces that were not reset after the reset steps' do
+          let(:namespace_ids) { [namespace.id] }
+
           before do
-            namespace.update_attribute(attr, Time.now)
+            allow(Namespace).to receive(:each_batch).and_yield(Namespace.all)
+            allow(Namespace).to receive(:transaction).and_raise(ActiveRecord::ActiveRecordError)
           end
 
-          it 'nullifies the field' do
-            expect(namespace.send(attr)).to be_present
-
-            subject
-
-            expect(namespace.reload.send(attr)).not_to be_present
+          it 'raises an exception' do
+            expect { worker.perform }.to raise_error(
+              Ci::Minutes::BatchResetService::BatchNotResetError,
+              'Some namespace shared runner minutes were not reset'
+            )
           end
         end
+      end
+
+      context 'when namespace statistics are defined' do
+        let!(:statistics) { create(:namespace_statistics, namespace: namespace, shared_runners_seconds: 100) }
+
+        it 'clears counters' do
+          subject
+
+          expect(statistics.reload.shared_runners_seconds).to be_zero
+        end
+
+        it 'resets timer' do
+          subject
+
+          expect(statistics.reload.shared_runners_seconds_last_reset).to be_like_time(Time.current)
+        end
+      end
+
+      context 'when namespace has extra shared runner minutes' do
+        let!(:namespace) do
+          create(:namespace, shared_runners_minutes_limit: 100, extra_shared_runners_minutes_limit: 10 )
+        end
+
+        let!(:statistics) do
+          create(:namespace_statistics, namespace: namespace, shared_runners_seconds: minutes_used * 60)
+        end
+
+        let(:minutes_used) { 0 }
+
+        context 'when consumption is below the default quota' do
+          let(:minutes_used) { 50 }
+
+          it 'does not modify the extra minutes quota' do
+            subject
+
+            expect(namespace.reload.extra_shared_runners_minutes_limit).to eq(10)
+          end
+        end
+
+        context 'when consumption is above the default quota' do
+          context 'when all extra minutes are used' do
+            let(:minutes_used) { 115 }
+
+            it 'sets extra minutes to 0' do
+              subject
+
+              expect(namespace.reload.extra_shared_runners_minutes_limit).to eq(0)
+            end
+          end
+
+          context 'when some extra minutes are used' do
+            let(:minutes_used) { 105 }
+
+            it 'discounts the extra minutes used' do
+              subject
+
+              expect(namespace.reload.extra_shared_runners_minutes_limit).to eq(5)
+            end
+          end
+        end
+
+        [:last_ci_minutes_notification_at, :last_ci_minutes_usage_notification_level].each do |attr|
+          context "when #{attr} is present" do
+            before do
+              namespace.update_attribute(attr, Time.current)
+            end
+
+            it 'nullifies the field' do
+              expect(namespace.send(attr)).to be_present
+
+              subject
+
+              expect(namespace.reload.send(attr)).not_to be_present
+            end
+          end
+        end
+      end
+    end
+
+    context 'when ci_parallel_minutes_reset feature flag is enabled' do
+      subject { worker.perform }
+
+      before do
+        stub_feature_flags(ci_parallel_minutes_reset: true)
+
+        [2, 3, 4, 5, 7, 8, 10, 14].each do |id|
+          create(:namespace, id: id)
+        end
+
+        stub_const("#{described_class}::BATCH_SIZE", 3)
+      end
+
+      it 'runs a worker per batch' do
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(2, 4)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(5, 7)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(8, 10)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(11, 13)
+        expect(Ci::BatchResetMinutesWorker).to receive(:perform_async).with(14, 16)
+
+        subject
       end
     end
   end

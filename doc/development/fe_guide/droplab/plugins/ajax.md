@@ -6,7 +6,7 @@
 
 Add the `Ajax` object to the plugins array of a `DropLab.prototype.init` or `DropLab.prototype.addHook` call.
 
-`Ajax` requires 2 config values, the `endpoint` and `method`.
+`Ajax` requires 2 configuration values, the `endpoint` and `method`.
 
 - `endpoint` should be a URL to the request endpoint.
 - `method` should be `setData` or `addData`.
@@ -18,7 +18,7 @@ Add the `Ajax` object to the plugins array of a `DropLab.prototype.init` or `Dro
 <ul id="list" data-dropdown><!-- ... --><ul>
 ```
 
-```js
+```javascript
 const droplab = new DropLab();
 
 const trigger = document.getElementById('trigger');
@@ -33,6 +33,6 @@ droplab.addHook(trigger, list, [Ajax], {
 ```
 
 Optionally you can set `loadingTemplate` to a HTML string. This HTML string will
-replace the dropdown list whilst the request is pending.
+replace the dropdown list while the request is pending.
 
 Additionally, you can set `onError` to a function to catch any XHR errors.

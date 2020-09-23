@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "allOf": [
+    { "$ref": "../../../../../../../spec/fixtures/api/schemas/public_api/v4/issue.json" },
+    {
+      "properties" : {
+        "author": {
+          "properties": {
+            "is_gitlab_employee": { "type": "boolean" }
+          },
+          "additionalProperties": false
+        }
+      }
+    }
+  ]
+}

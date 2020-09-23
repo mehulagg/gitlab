@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::PipelinesSettingsController do
+RSpec.describe Projects::PipelinesSettingsController do
   let_it_be(:user) { create(:user) }
   let_it_be(:project_auto_devops) { create(:project_auto_devops) }
   let(:project) { project_auto_devops.project }
@@ -17,7 +17,7 @@ describe Projects::PipelinesSettingsController do
     it 'redirects with 302 status code' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
 
-      expect(response).to have_gitlab_http_status(302)
+      expect(response).to have_gitlab_http_status(:found)
     end
   end
 end

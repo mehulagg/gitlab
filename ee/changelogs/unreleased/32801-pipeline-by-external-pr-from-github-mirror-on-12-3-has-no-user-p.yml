@@ -1,5 +1,0 @@
----
-title: Default current user to mirror user when creating pipelines for GitHub pull requests
-merge_request: 19072
-author:
-type: fixed

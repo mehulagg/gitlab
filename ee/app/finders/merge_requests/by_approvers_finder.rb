@@ -30,11 +30,11 @@ module MergeRequests
     private
 
     def by_no_approvers?
-      includes_custom_label?(IssuableFinder::FILTER_NONE)
+      includes_custom_label?(IssuableFinder::Params::FILTER_NONE)
     end
 
     def by_any_approvers?
-      includes_custom_label?(IssuableFinder::FILTER_ANY)
+      includes_custom_label?(IssuableFinder::Params::FILTER_ANY)
     end
 
     def includes_custom_label?(label)
@@ -80,9 +80,9 @@ module MergeRequests
       users_mrs = yield(items.joins(approval_rules: :users))
       group_users_mrs = yield(items.joins(approval_rules: { groups: :users }))
 
-      mrs_without_overriden_rules = items.left_outer_joins(:approval_rules).where(approval_merge_request_rules: { id: nil })
-      project_users_mrs = yield(mrs_without_overriden_rules.joins(target_project: { approval_rules: :users }))
-      project_group_users_mrs = yield(mrs_without_overriden_rules.joins(target_project: { approval_rules: { groups: :users } }))
+      mrs_without_overridden_rules = items.left_outer_joins(:approval_rules).where(approval_merge_request_rules: { id: nil })
+      project_users_mrs = yield(mrs_without_overridden_rules.joins(target_project: { approval_rules: :users }))
+      project_group_users_mrs = yield(mrs_without_overridden_rules.joins(target_project: { approval_rules: { groups: :users } }))
 
       items.select_from_union([users_mrs, group_users_mrs, project_users_mrs, project_group_users_mrs])
     end

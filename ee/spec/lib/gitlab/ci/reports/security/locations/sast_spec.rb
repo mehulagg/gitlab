@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::Security::Locations::Sast do
+RSpec.describe Gitlab::Ci::Reports::Security::Locations::Sast do
   let(:params) do
     {
       file_path: 'src/main/App.java',

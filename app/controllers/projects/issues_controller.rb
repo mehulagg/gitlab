@@ -10,25 +10,20 @@ class Projects::IssuesController < Projects::ApplicationController
   include SpammableActions
   include RecordUserLastActivity
 
-  def issue_except_actions
-    %i[index calendar new create bulk_update import_csv]
-  end
-
-  def set_issuables_index_only_actions
-    %i[index calendar]
-  end
+  ISSUES_EXCEPT_ACTIONS = %i[index calendar new create bulk_update import_csv export_csv service_desk].freeze
+  SET_ISSUEABLES_INDEX_ONLY_ACTIONS = %i[index calendar service_desk].freeze
 
   prepend_before_action(only: [:index]) { authenticate_sessionless_user!(:rss) }
   prepend_before_action(only: [:calendar]) { authenticate_sessionless_user!(:ics) }
-  prepend_before_action :authenticate_user!, only: [:new]
-  # designs is only applicable to EE, but defining a prepend_before_action in EE code would overwrite this
+  prepend_before_action :authenticate_user!, only: [:new, :export_csv]
   prepend_before_action :store_uri, only: [:new, :show, :designs]
 
   before_action :whitelist_query_limiting, only: [:create, :create_merge_request, :move, :bulk_update]
   before_action :check_issues_available!
-  before_action :issue, unless: ->(c) { c.issue_except_actions.include?(c.action_name.to_sym) }
+  before_action :issue, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
+  after_action :log_issue_show, unless: ->(c) { ISSUES_EXCEPT_ACTIONS.include?(c.action_name.to_sym) }
 
-  before_action :set_issuables_index, if: ->(c) { c.set_issuables_index_only_actions.include?(c.action_name.to_sym) }
+  before_action :set_issuables_index, if: ->(c) { SET_ISSUEABLES_INDEX_ONLY_ACTIONS.include?(c.action_name.to_sym) }
 
   # Allow write(create) issue
   before_action :authorize_create_issue!, only: [:new, :create]
@@ -42,10 +37,29 @@ class Projects::IssuesController < Projects::ApplicationController
   before_action :authorize_import_issues!, only: [:import_csv]
   before_action :authorize_download_code!, only: [:related_branches]
 
+  # Limit the amount of issues created per minute
+  before_action :create_rate_limit, only: [:create]
+
   before_action do
     push_frontend_feature_flag(:vue_issuable_sidebar, project.group)
-    push_frontend_feature_flag(:release_search_filter, project)
+    push_frontend_feature_flag(:tribute_autocomplete, @project)
+    push_frontend_feature_flag(:vue_issuables_list, project)
+    push_frontend_feature_flag(:design_management_todo_button, project, default_enabled: true)
+    push_frontend_feature_flag(:vue_sidebar_labels, @project)
   end
+
+  before_action only: :show do
+    real_time_feature_flag = :real_time_issue_sidebar
+    real_time_enabled = Gitlab::ActionCable::Config.in_app? || Feature.enabled?(real_time_feature_flag, @project)
+
+    gon.push({ features: { real_time_feature_flag.to_s.camelize(:lower) => real_time_enabled } }, true)
+  end
+
+  before_action only: :index do
+    push_frontend_feature_flag(:scoped_labels, @project, type: :licensed)
+  end
+
+  around_action :allow_gitaly_ref_name_caching, only: [:discussions]
 
   respond_to :html
 
@@ -74,13 +88,15 @@ class Projects::IssuesController < Projects::ApplicationController
     params[:issue] ||= ActionController::Parameters.new(
       assignee_ids: ""
     )
-    build_params = issue_params.merge(
+    build_params = issue_create_params.merge(
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
-      discussion_to_resolve: params[:discussion_to_resolve]
+      discussion_to_resolve: params[:discussion_to_resolve],
+      confidential: !!Gitlab::Utils.to_boolean(params[:issue][:confidential])
     )
-    service = Issues::BuildService.new(project, current_user, build_params)
+    service = ::Issues::BuildService.new(project, current_user, build_params)
 
     @issue = @noteable = service.execute
+
     @merge_request_to_resolve_discussions_of = service.merge_request_to_resolve_discussions_of
     @discussion_to_resolve = service.discussions_to_resolve.first if params[:discussion_to_resolve]
 
@@ -92,12 +108,12 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def create
-    create_params = issue_params.merge(spammable_params).merge(
+    create_params = issue_create_params.merge(spammable_params).merge(
       merge_request_to_resolve_discussions_of: params[:merge_request_to_resolve_discussions_of],
       discussion_to_resolve: params[:discussion_to_resolve]
     )
 
-    service = Issues::CreateService.new(project, current_user, create_params)
+    service = ::Issues::CreateService.new(project, current_user, create_params)
     @issue = service.execute
 
     if service.discussions_to_resolve.count(&:resolved?) > 0
@@ -125,7 +141,7 @@ class Projects::IssuesController < Projects::ApplicationController
       new_project = Project.find(params[:move_to_project_id])
       return render_404 unless issue.can_move?(current_user, new_project)
 
-      @issue = Issues::UpdateService.new(project, current_user, target_project: new_project).execute(issue)
+      @issue = ::Issues::UpdateService.new(project, current_user, target_project: new_project).execute(issue)
     end
 
     respond_to do |format|
@@ -139,7 +155,7 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def reorder
-    service = Issues::ReorderService.new(project, current_user, reorder_params)
+    service = ::Issues::ReorderService.new(project, current_user, reorder_params)
 
     if service.execute(issue)
       head :ok
@@ -149,7 +165,10 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def related_branches
-    @related_branches = Issues::RelatedBranchesService.new(project, current_user).execute(issue)
+    @related_branches = ::Issues::RelatedBranchesService
+      .new(project, current_user)
+      .execute(issue)
+      .map { |branch| branch.merge(link: branch_link(branch)) }
 
     respond_to do |format|
       format.json do
@@ -174,19 +193,27 @@ class Projects::IssuesController < Projects::ApplicationController
 
   def create_merge_request
     create_params = params.slice(:branch_name, :ref).merge(issue_iid: issue.iid)
-    create_params[:target_project_id] = params[:target_project_id] if helpers.create_confidential_merge_request_enabled?
+    create_params[:target_project_id] = params[:target_project_id]
     result = ::MergeRequests::CreateFromIssueService.new(project, current_user, create_params).execute
 
     if result[:status] == :success
       render json: MergeRequestCreateSerializer.new.represent(result[:merge_request])
     else
-      render json: result[:messsage], status: :unprocessable_entity
+      render json: result[:message], status: :unprocessable_entity
     end
+  end
+
+  def export_csv
+    ExportCsvWorker.perform_async(current_user.id, project.id, finder_options.to_h) # rubocop:disable CodeReuse/Worker
+
+    index_path = project_issues_path(project)
+    message = _('Your CSV export has started. It will be emailed to %{email} when complete.') % { email: current_user.notification_email }
+    redirect_to(index_path, notice: message)
   end
 
   def import_csv
     if uploader = UploadService.new(project, params[:file]).execute
-      ImportIssuesCsvWorker.perform_async(current_user.id, project.id, uploader.upload.id)
+      ImportIssuesCsvWorker.perform_async(current_user.id, project.id, uploader.upload.id) # rubocop:disable CodeReuse/Worker
 
       flash[:notice] = _("Your issues are being imported. Once finished, you'll get a confirmation email.")
     else
@@ -194,6 +221,11 @@ class Projects::IssuesController < Projects::ApplicationController
     end
 
     redirect_to project_issues_path(project)
+  end
+
+  def service_desk
+    @issues = @issuables # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    @users.push(User.support_bot) # rubocop:disable Gitlab/ModuleWithInstanceVariables
   end
 
   protected
@@ -215,6 +247,13 @@ class Projects::IssuesController < Projects::ApplicationController
     @issue
   end
   # rubocop: enable CodeReuse/ActiveRecord
+
+  def log_issue_show
+    return unless current_user && @issue
+
+    ::Gitlab::Search::RecentIssues.new(user: current_user).log_view(@issue)
+  end
+
   alias_method :subscribable_resource, :issue
   alias_method :issuable, :issue
   alias_method :awardable, :issue
@@ -237,7 +276,10 @@ class Projects::IssuesController < Projects::ApplicationController
   end
 
   def issue_params
-    params.require(:issue).permit(*issue_params_attributes)
+    params.require(:issue).permit(
+      *issue_params_attributes,
+      sentry_issue_attributes: [:sentry_issue_identifier]
+    )
   end
 
   def issue_params_attributes
@@ -256,6 +298,16 @@ class Projects::IssuesController < Projects::ApplicationController
     ] + [{ label_ids: [], assignee_ids: [], update_task: [:index, :checked, :line_number, :line_source] }]
   end
 
+  def issue_create_params
+    create_params = %i[
+      issue_type
+    ]
+
+    params.require(:issue).permit(
+      *create_params
+    ).merge(issue_params)
+  end
+
   def reorder_params
     params.permit(:move_before_id, :move_after_id, :group_full_path)
   end
@@ -272,7 +324,7 @@ class Projects::IssuesController < Projects::ApplicationController
 
   def update_service
     update_params = issue_params.merge(spammable_params)
-    Issues::UpdateService.new(project, current_user, update_params)
+    ::Issues::UpdateService.new(project, current_user, update_params)
   end
 
   def finder_type
@@ -286,6 +338,43 @@ class Projects::IssuesController < Projects::ApplicationController
     # 2. https://gitlab.com/gitlab-org/gitlab-foss/issues/42424
     # 3. https://gitlab.com/gitlab-org/gitlab-foss/issues/42426
     Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42422')
+  end
+
+  private
+
+  def finder_options
+    options = super
+
+    options[:issue_types] = Issue::TYPES_FOR_LIST
+
+    if service_desk?
+      options.reject! { |key| key == 'author_username' || key == 'author_id' }
+      options[:author_id] = User.support_bot
+    end
+
+    options
+  end
+
+  def branch_link(branch)
+    project_compare_path(project, from: project.default_branch, to: branch[:name])
+  end
+
+  def create_rate_limit
+    key = :issues_create
+
+    if rate_limiter.throttled?(key, scope: [@project, @current_user])
+      rate_limiter.log_request(request, "#{key}_request_limit".to_sym, current_user)
+
+      render plain: _('This endpoint has been requested too many times. Try again later.'), status: :too_many_requests
+    end
+  end
+
+  def rate_limiter
+    ::Gitlab::ApplicationRateLimiter
+  end
+
+  def service_desk?
+    action_name == 'service_desk'
   end
 end
 

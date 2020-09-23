@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-class RefreshLicenseComplianceChecksWorker
+class RefreshLicenseComplianceChecksWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   feature_category :license_compliance
+  weight 2
 
   def perform(project_id)
     project = Project.find(project_id)

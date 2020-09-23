@@ -53,8 +53,9 @@ export default {
     state.messages.minimumQuery = false;
     state.searchCount += 1;
   },
-  [types.RECEIVE_SEARCH_RESULTS_SUCCESS](state, results) {
-    state.projectSearchResults = results;
+  [types.RECEIVE_SEARCH_RESULTS_SUCCESS](state, { data, pageInfo }) {
+    state.projectSearchResults = data;
+    state.pageInfo = pageInfo;
 
     state.messages.noResults = state.projectSearchResults.length === 0;
     state.messages.searchError = false;
@@ -73,11 +74,17 @@ export default {
   },
   [types.SET_MINIMUM_QUERY_MESSAGE](state) {
     state.projectSearchResults = [];
+    state.pageInfo.total = 0;
 
     state.messages.noResults = false;
     state.messages.searchError = false;
     state.messages.minimumQuery = true;
 
     state.searchCount = Math.max(0, state.searchCount - 1);
+  },
+  [types.RECEIVE_NEXT_PAGE_SUCCESS](state, { data, pageInfo }) {
+    state.projectSearchResults = state.projectSearchResults.concat(data);
+
+    state.pageInfo = pageInfo;
   },
 };

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ImportUrlParams do
+RSpec.describe ImportUrlParams do
   let(:import_url_params) do
     controller = OpenStruct.new(params: params).extend(described_class)
     controller.import_url_params
@@ -31,7 +31,8 @@ describe ImportUrlParams do
     describe '#import_url_params' do
       it 'returns hash with import_url' do
         expect(import_url_params).to eq(
-          import_url: "https://user:password@url.com"
+          import_url: "https://user:password@url.com",
+          import_type: 'git'
         )
       end
     end
@@ -48,7 +49,8 @@ describe ImportUrlParams do
     describe '#import_url_params' do
       it 'does not change the url' do
         expect(import_url_params).to eq(
-          import_url: "https://user:password@url.com"
+          import_url: "https://user:password@url.com",
+          import_type: 'git'
         )
       end
     end

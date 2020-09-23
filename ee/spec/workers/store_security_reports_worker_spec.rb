@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe StoreSecurityReportsWorker do
+RSpec.describe StoreSecurityReportsWorker do
   describe '#perform' do
     let(:group)   { create(:group) }
     let(:project) { create(:project, namespace: group) }

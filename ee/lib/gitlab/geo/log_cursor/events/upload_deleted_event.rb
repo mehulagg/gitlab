@@ -13,8 +13,7 @@ module Gitlab
           end
 
           def log_event(job_id)
-            logger.event_info(
-              created_at,
+            super(
               'Delete upload file scheduled',
               upload_id: event.upload_id,
               upload_type: event.upload_type,

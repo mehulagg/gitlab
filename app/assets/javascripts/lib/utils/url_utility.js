@@ -1,9 +1,50 @@
-import { join as joinPaths } from 'path';
+const PATH_SEPARATOR = '/';
+const PATH_SEPARATOR_LEADING_REGEX = new RegExp(`^${PATH_SEPARATOR}+`);
+const PATH_SEPARATOR_ENDING_REGEX = new RegExp(`${PATH_SEPARATOR}+$`);
+const SHA_REGEX = /[\da-f]{40}/gi;
+
+// Reset the cursor in a Regex so that multiple uses before a recompile don't fail
+function resetRegExp(regex) {
+  regex.lastIndex = 0; /* eslint-disable-line no-param-reassign */
+
+  return regex;
+}
 
 // Returns a decoded url parameter value
 // - Treats '+' as '%20'
 function decodeUrlParameter(val) {
   return decodeURIComponent(val.replace(/\+/g, '%20'));
+}
+
+function cleanLeadingSeparator(path) {
+  return path.replace(PATH_SEPARATOR_LEADING_REGEX, '');
+}
+
+function cleanEndingSeparator(path) {
+  return path.replace(PATH_SEPARATOR_ENDING_REGEX, '');
+}
+
+/**
+ * Safely joins the given paths which might both start and end with a `/`
+ *
+ * Example:
+ * - `joinPaths('abc/', '/def') === 'abc/def'`
+ * - `joinPaths(null, 'abc/def', 'zoo) === 'abc/def/zoo'`
+ *
+ * @param  {...String} paths
+ * @returns {String}
+ */
+export function joinPaths(...paths) {
+  return paths.reduce((acc, path) => {
+    if (!path) {
+      return acc;
+    }
+    if (!acc) {
+      return path;
+    }
+
+    return [cleanEndingSeparator(acc), PATH_SEPARATOR, cleanLeadingSeparator(path)].join('');
+  }, '');
 }
 
 // Returns an array containing the value(s) of the
@@ -22,32 +63,73 @@ export function getParameterValues(sParam, url = window.location) {
   }, []);
 }
 
-// @param {Object} params - url keys and value to merge
-// @param {String} url
-export function mergeUrlParams(params, url) {
+/**
+ * Merges a URL to a set of params replacing value for
+ * those already present.
+ *
+ * Also removes `null` param values from the resulting URL.
+ *
+ * @param {Object} params - url keys and value to merge
+ * @param {String} url
+ * @param {Object} options
+ * @param {Boolean} options.spreadArrays - split array values into separate key/value-pairs
+ * @param {Boolean} options.sort - alphabetically sort params in the returned url (in asc order, i.e., a-z)
+ */
+export function mergeUrlParams(params, url, options = {}) {
+  const { spreadArrays = false, sort = false } = options;
   const re = /^([^?#]*)(\?[^#]*)?(.*)/;
-  const merged = {};
-  const urlparts = url.match(re);
+  let merged = {};
+  const [, fullpath, query, fragment] = url.match(re);
 
-  if (urlparts[2]) {
-    urlparts[2]
+  if (query) {
+    merged = query
       .substr(1)
       .split('&')
-      .forEach(part => {
+      .reduce((memo, part) => {
         if (part.length) {
           const kv = part.split('=');
-          merged[decodeUrlParameter(kv[0])] = decodeUrlParameter(kv.slice(1).join('='));
+          let key = decodeUrlParameter(kv[0]);
+          const value = decodeUrlParameter(kv.slice(1).join('='));
+          if (spreadArrays && key.endsWith('[]')) {
+            key = key.slice(0, -2);
+            if (!Array.isArray(memo[key])) {
+              return { ...memo, [key]: [value] };
+            }
+            memo[key].push(value);
+
+            return memo;
+          }
+
+          return { ...memo, [key]: value };
         }
-      });
+
+        return memo;
+      }, {});
   }
 
   Object.assign(merged, params);
 
-  const query = Object.keys(merged)
-    .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(merged[key])}`)
+  const mergedKeys = sort ? Object.keys(merged).sort() : Object.keys(merged);
+
+  const newQuery = mergedKeys
+    .filter(key => merged[key] !== null)
+    .map(key => {
+      let value = merged[key];
+      const encodedKey = encodeURIComponent(key);
+      if (spreadArrays && Array.isArray(value)) {
+        value = merged[key]
+          .map(arrayValue => encodeURIComponent(arrayValue))
+          .join(`&${encodedKey}[]=`);
+        return `${encodedKey}[]=${value}`;
+      }
+      return `${encodedKey}=${encodeURIComponent(value)}`;
+    })
     .join('&');
 
-  return `${urlparts[1]}?${query}${urlparts[3]}`;
+  if (newQuery) {
+    return `${fullpath}?${newQuery}${fragment}`;
+  }
+  return `${fullpath}${fragment}`;
 }
 
 /**
@@ -57,9 +139,10 @@ export function mergeUrlParams(params, url) {
  *
  * @param {string[]} params - the query param names to remove
  * @param {string} [url=windowLocation().href] - url from which the query param will be removed
+ * @param {boolean} skipEncoding - set to true when the url does not require encoding
  * @returns {string} A copy of the original url but without the query param
  */
-export function removeParams(params, url = window.location.href) {
+export function removeParams(params, url = window.location.href, skipEncoding = false) {
   const [rootAndQuery, fragment] = url.split('#');
   const [root, query] = rootAndQuery.split('?');
 
@@ -67,12 +150,13 @@ export function removeParams(params, url = window.location.href) {
     return url;
   }
 
-  const encodedParams = params.map(param => encodeURIComponent(param));
+  const removableParams = skipEncoding ? params : params.map(param => encodeURIComponent(param));
+
   const updatedQuery = query
     .split('&')
     .filter(paramPair => {
       const [foundParam] = paramPair.split('=');
-      return encodedParams.indexOf(foundParam) < 0;
+      return removableParams.indexOf(foundParam) < 0;
     })
     .join('&');
 
@@ -95,6 +179,20 @@ export function doesHashExistInUrl(hashName) {
   return hash && hash.includes(hashName);
 }
 
+export function urlContainsSha({ url = String(window.location) } = {}) {
+  return resetRegExp(SHA_REGEX).test(url);
+}
+
+export function getShaFromUrl({ url = String(window.location) } = {}) {
+  let sha = null;
+
+  if (urlContainsSha({ url })) {
+    [sha] = url.match(resetRegExp(SHA_REGEX));
+  }
+
+  return sha;
+}
+
 /**
  * Apply the fragment to the given url by returning a new url string that includes
  * the fragment. If the given url already contains a fragment, the original fragment
@@ -111,13 +209,23 @@ export const setUrlFragment = (url, fragment) => {
 
 export function visitUrl(url, external = false) {
   if (external) {
-    // Simulate `target="blank" rel="noopener noreferrer"`
+    // Simulate `target="_blank" rel="noopener noreferrer"`
     // See https://mathiasbynens.github.io/rel-noopener/
     const otherWindow = window.open();
     otherWindow.opener = null;
     otherWindow.location = url;
   } else {
     window.location.href = url;
+  }
+}
+
+export function updateHistory({ state = {}, title = '', url, replace = false, win = window } = {}) {
+  if (win.history) {
+    if (replace) {
+      win.history.replaceState(state, title, url);
+    } else {
+      win.history.pushState(state, title, url);
+    }
   }
 }
 
@@ -129,12 +237,14 @@ export function redirectTo(url) {
   return window.location.assign(url);
 }
 
+export const escapeFileUrl = fileUrl => encodeURIComponent(fileUrl).replace(/%2F/g, '/');
+
 export function webIDEUrl(route = undefined) {
   let returnUrl = `${gon.relative_url_root || ''}/-/ide/`;
   if (route) {
     returnUrl += `project${route.replace(new RegExp(`^${gon.relative_url_root || ''}`), '')}`;
   }
-  return returnUrl;
+  return escapeFileUrl(returnUrl);
 }
 
 /**
@@ -146,12 +256,54 @@ export function getBaseURL() {
 }
 
 /**
+ * Returns true if url is an absolute URL
+ *
+ * @param {String} url
+ */
+export function isAbsolute(url) {
+  return /^https?:\/\//.test(url);
+}
+
+/**
+ * Returns true if url is a root-relative URL
+ *
+ * @param {String} url
+ */
+export function isRootRelative(url) {
+  return /^\//.test(url);
+}
+
+/**
+ * Returns true if url is a base64 data URL
+ *
+ * @param {String} url
+ */
+export function isBase64DataUrl(url) {
+  return /^data:[.\w+-]+\/[.\w+-]+;base64,/.test(url);
+}
+
+/**
  * Returns true if url is an absolute or root-relative URL
  *
  * @param {String} url
  */
 export function isAbsoluteOrRootRelative(url) {
-  return /^(https?:)?\//.test(url);
+  return isAbsolute(url) || isRootRelative(url);
+}
+
+/**
+ * Converts a relative path to an absolute or a root relative path depending
+ * on what is passed as a basePath.
+ *
+ * @param {String} path       Relative path, eg. ../img/img.png
+ * @param {String} basePath   Absolute or root relative path, eg. /user/project or
+ *                            https://gitlab.com/user/project
+ */
+export function relativePathToAbsolute(path, basePath) {
+  const absolute = isAbsolute(basePath);
+  const base = absolute ? basePath : `file:///${basePath}`;
+  const url = new URL(path, base);
+  return absolute ? url.href : decodeURIComponent(url.pathname);
 }
 
 /**
@@ -181,4 +333,105 @@ export function getWebSocketUrl(path) {
   return `${getWebSocketProtocol()}//${joinPaths(window.location.host, path)}`;
 }
 
-export { joinPaths };
+/**
+ * Convert search query into an object
+ *
+ * @param {String} query from "document.location.search"
+ * @param {Object} options
+ * @param {Boolean} options.gatherArrays - gather array values into an Array
+ * @returns {Object}
+ *
+ * ex: "?one=1&two=2" into {one: 1, two: 2}
+ */
+export function queryToObject(query, options = {}) {
+  const { gatherArrays = false } = options;
+  const removeQuestionMarkFromQuery = String(query).startsWith('?') ? query.slice(1) : query;
+  return removeQuestionMarkFromQuery.split('&').reduce((accumulator, curr) => {
+    const [key, value] = curr.split('=');
+    if (value === undefined) {
+      return accumulator;
+    }
+    const decodedValue = decodeURIComponent(value);
+
+    if (gatherArrays && key.endsWith('[]')) {
+      const decodedKey = decodeURIComponent(key.slice(0, -2));
+      if (!Array.isArray(accumulator[decodedKey])) {
+        accumulator[decodedKey] = [];
+      }
+      accumulator[decodedKey].push(decodedValue);
+    } else {
+      accumulator[decodeURIComponent(key)] = decodedValue;
+    }
+
+    return accumulator;
+  }, {});
+}
+
+/**
+ * Convert search query object back into a search query
+ *
+ * @param {Object} obj that needs to be converted
+ * @returns {String}
+ *
+ * ex: {one: 1, two: 2} into "one=1&two=2"
+ *
+ */
+export function objectToQuery(obj) {
+  return Object.keys(obj)
+    .map(k => `${encodeURIComponent(k)}=${encodeURIComponent(obj[k])}`)
+    .join('&');
+}
+
+/**
+ * Sets query params for a given URL
+ * It adds new query params, updates existing params with a new value and removes params with value null/undefined
+ *
+ * @param {Object} params The query params to be set/updated
+ * @param {String} url The url to be operated on
+ * @param {Boolean} clearParams Indicates whether existing query params should be removed or not
+ * @param {Boolean} railsArraySyntax When enabled, changes the array syntax from `keys=` to `keys[]=` according to Rails conventions
+ * @returns {String} A copy of the original with the updated query params
+ */
+export const setUrlParams = (
+  params,
+  url = window.location.href,
+  clearParams = false,
+  railsArraySyntax = false,
+) => {
+  const urlObj = new URL(url);
+  const queryString = urlObj.search;
+  const searchParams = clearParams ? new URLSearchParams('') : new URLSearchParams(queryString);
+
+  Object.keys(params).forEach(key => {
+    if (params[key] === null || params[key] === undefined) {
+      searchParams.delete(key);
+    } else if (Array.isArray(params[key])) {
+      const keyName = railsArraySyntax ? `${key}[]` : key;
+      params[key].forEach((val, idx) => {
+        if (idx === 0) {
+          searchParams.set(keyName, val);
+        } else {
+          searchParams.append(keyName, val);
+        }
+      });
+    } else {
+      searchParams.set(key, params[key]);
+    }
+  });
+
+  urlObj.search = searchParams.toString();
+
+  return urlObj.toString();
+};
+
+export function urlIsDifferent(url, compare = String(window.location)) {
+  return url !== compare;
+}
+
+export function getHTTPProtocol(url) {
+  if (!url) {
+    return window.location.protocol.slice(0, -1);
+  }
+  const protocol = url.split(':');
+  return protocol.length > 1 ? protocol[0] : undefined;
+}

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SessionsController, :geo do
+RSpec.describe SessionsController, :geo do
   include DeviseHelpers
   include EE::GeoHelpers
 
@@ -12,8 +12,8 @@ describe SessionsController, :geo do
 
   describe '#new' do
     context 'on a Geo secondary node' do
-      set(:primary_node) { create(:geo_node, :primary) }
-      set(:secondary_node) { create(:geo_node) }
+      let_it_be(:primary_node) { create(:geo_node, :primary) }
+      let_it_be(:secondary_node) { create(:geo_node) }
 
       before do
         stub_current_geo_node(secondary_node)
@@ -26,10 +26,22 @@ describe SessionsController, :geo do
           redirect_uri = URI.parse(response.location)
           redirect_params = CGI.parse(redirect_uri.query)
 
-          expect(response).to have_gitlab_http_status(302)
+          expect(response).to have_gitlab_http_status(:found)
           expect(response).to redirect_to %r(\A#{Gitlab.config.gitlab.url}/oauth/geo/auth)
           expect(redirect_params['state'].first).to end_with(':')
         end
+      end
+
+      context 'when relative URL is configured' do
+        before do
+          host = 'http://this.is.my.host/secondary-relative-url-part'
+
+          stub_config_setting(url: host, https: false)
+          stub_default_url_options(host: "this.is.my.host", script_name: '/secondary-relative-url-part')
+          request.headers['HOST'] = host
+        end
+
+        it_behaves_like 'a valid oauth authentication redirect'
       end
 
       context 'with a tampered HOST header' do

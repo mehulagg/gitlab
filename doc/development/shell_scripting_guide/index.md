@@ -60,12 +60,12 @@ All projects with shell scripts should use this GitLab CI/CD job:
 
 ```yaml
 shell check:
-  image: koalaman/shellcheck-alpine
+  image: koalaman/shellcheck-alpine:stable
   stage: test
   before_script:
     - shellcheck --version
   script:
-    - shellcheck scripts/**/*.sh # path to your shell scripts
+    - shellcheck scripts/**/*.sh  # path to your shell scripts
 ```
 
 TIP: **Tip:**
@@ -79,8 +79,21 @@ It's recommended to use the [shfmt](https://github.com/mvdan/sh#shfmt) tool to m
 We format shell scripts according to the [Google Shell Style Guide](https://google.github.io/styleguide/shell.xml),
 so the following `shfmt` invocation should be applied to the project's script files:
 
-```bash
-shfmt -i 2 -ci scripts/**/*.sh
+```shell
+shfmt -i 2 -ci -w scripts/**/*.sh
+```
+
+In addition to the [Linting](#linting) GitLab CI/CD job, all projects with shell scripts should also
+use this job:
+
+```yaml
+shfmt:
+  image: mvdan/shfmt:v3.1.0-alpine
+  stage: test
+  before_script:
+    - shfmt -version
+  script:
+    - shfmt -i 2 -ci -d scripts  # path to your shell scripts
 ```
 
 TIP: **Tip:**
@@ -88,18 +101,13 @@ By default, shfmt will use the [shell detection](https://github.com/mvdan/sh#shf
 and ignore files starting with a period. To override this, use `-ln` flag to specify the shell dialect:
 `-ln posix` or `-ln bash`.
 
-NOTE: **Note:**
-Currently, the `shfmt` tool [is not shipped](https://github.com/mvdan/sh/issues/68) as a Docker image containing
-a Linux shell. This makes it impossible to use the [official Docker image](https://hub.docker.com/r/mvdan/shfmt)
-in GitLab Runner. This [may change](https://github.com/mvdan/sh/issues/68#issuecomment-507721371) in future.
-
 ## Testing
 
 NOTE: **Note:**
 This is a work in progress.
 
-It is an [ongoing effort](https://gitlab.com/gitlab-org/gitlab-foss/issues/64016) to evaluate different tools for the
-automated testing of shell scripts (like [BATS](https://github.com/sstephenson/bats)).
+It is an [ongoing effort](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/64016) to evaluate different tools for the
+automated testing of shell scripts (like [BATS](https://github.com/bats-core/bats-core)).
 
 ## Code Review
 

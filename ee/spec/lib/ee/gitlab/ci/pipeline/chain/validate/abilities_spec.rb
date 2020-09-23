@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Pipeline::Chain::Validate::Abilities do
-  set(:project) { create(:project, :repository) }
-  set(:user) { create(:user) }
+RSpec.describe Gitlab::Ci::Pipeline::Chain::Validate::Abilities do
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
 
   let(:pipeline) do
     build_stubbed(:ci_pipeline, project: project)

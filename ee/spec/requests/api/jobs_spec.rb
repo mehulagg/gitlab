@@ -2,15 +2,15 @@
 
 require 'spec_helper'
 
-describe API::Jobs do
-  set(:project) do
+RSpec.describe API::Jobs do
+  let_it_be(:project) do
     create(:project, :repository, public_builds: false)
   end
 
-  set(:pipeline) do
-    create(:ci_empty_pipeline, project: project,
-                               sha: project.commit.id,
-                               ref: project.default_branch)
+  let_it_be(:pipeline) do
+    create(:ci_pipeline, project: project,
+                         sha: project.commit.id,
+                         ref: project.default_branch)
   end
 
   let(:developer) { create(:user) }
@@ -26,7 +26,7 @@ describe API::Jobs do
   end
 
   describe 'GET /projects/:id/jobs/:job_id/artifacts' do
-    let(:job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user) }
+    let(:job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user, status: :running) }
 
     context 'when using job_token to authenticate' do
       subject do
@@ -44,7 +44,7 @@ describe API::Jobs do
           it 'returns specific job artifacts' do
             subject
 
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
             expect(response.headers.to_h).to include(download_headers)
             expect(response.body).to match_file(job.artifacts_file.file.file)
           end
@@ -57,7 +57,7 @@ describe API::Jobs do
             subject
 
             expect(project).to be_private
-            expect(response).to have_gitlab_http_status(404)
+            expect(response).to have_gitlab_http_status(:not_found)
           end
         end
       end
@@ -68,18 +68,33 @@ describe API::Jobs do
         it 'disallows access to the artifacts' do
           subject
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
+
+      context 'when the job is not running' do
+        let(:api_user) { developer }
+
+        before do
+          job.success!
+        end
+
+        it 'disallows access to the artifacts' do
+          subject
+
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
       end
     end
   end
 
   describe 'GET /projects/:id/artifacts/:ref_name/download?job=name' do
+    let(:running_job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user, status: :running) }
     let(:job) { create(:ci_build, :artifacts, pipeline: pipeline, user: api_user) }
 
     context 'when using job_token to authenticate' do
       subject do
-        get api("/projects/#{project.id}/jobs/artifacts/#{pipeline.ref}/download"), params: { job: job.name, job_token: job.token }
+        get api("/projects/#{project.id}/jobs/artifacts/#{pipeline.ref}/download"), params: { job: job.name, job_token: running_job.token }
       end
 
       context 'when cross-project pipelines are enabled' do
@@ -98,7 +113,7 @@ describe API::Jobs do
             it 'returns specific job artifacts', :sidekiq_might_not_need_inline do
               subject
 
-              expect(response).to have_gitlab_http_status(200)
+              expect(response).to have_gitlab_http_status(:ok)
               expect(response.headers.to_h).to include(download_headers)
               expect(response.body).to match_file(job.artifacts_file.file.file)
             end
@@ -128,7 +143,7 @@ describe API::Jobs do
           it 'does not allow to see that artfiact is present' do
             subject
 
-            expect(response).to have_gitlab_http_status(404)
+            expect(response).to have_gitlab_http_status(:not_found)
           end
         end
       end

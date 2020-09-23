@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 module ProjectsHelper
-  prepend_if_ee('::EE::ProjectsHelper') # rubocop: disable Cop/InjectEnterpriseEditionModule
+  def project_incident_management_setting
+    @project_incident_management_setting ||= @project.incident_management_setting ||
+      @project.build_incident_management_setting
+  end
 
   def link_to_project(project)
-    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name) do
+    link_to namespace_project_path(namespace_id: project.namespace, id: project), title: h(project.name), class: 'gl-link' do
       title = content_tag(:span, project.name, class: 'project-name')
 
       if project.namespace
@@ -101,26 +104,35 @@ module ProjectsHelper
   end
 
   def remove_project_message(project)
-    _("You are going to remove %{project_full_name}. Removed project CANNOT be restored! Are you ABSOLUTELY sure?") %
+    _("You are going to delete %{project_full_name}. Deleted projects CANNOT be restored! Are you ABSOLUTELY sure?") %
       { project_full_name: project.full_name }
   end
 
   def transfer_project_message(project)
-    _("You are going to transfer %{project_full_name} to another owner. Are you ABSOLUTELY sure?") %
+    _("You are going to transfer %{project_full_name} to another namespace. Are you ABSOLUTELY sure?") %
       { project_full_name: project.full_name }
   end
 
-  def remove_fork_project_message(project)
-    _("You are going to remove the fork relationship to source project %{forked_from_project}. Are you ABSOLUTELY sure?") %
-      { forked_from_project: fork_source_name(project) }
+  def remove_fork_project_description_message(project)
+    source = visible_fork_source(project)
+
+    if source
+      msg = _('This will remove the fork relationship between this project and %{fork_source}.') %
+        { fork_source: link_to(source.full_name, project_path(source)) }
+
+      msg.html_safe
+    else
+      _('This will remove the fork relationship between this project and other projects in the fork network.')
+    end
   end
 
-  def fork_source_name(project)
-    if @project.fork_source
-      @project.fork_source.full_name
-    else
-      @project.fork_network&.deleted_root_project_name
-    end
+  def remove_fork_project_warning_message(project)
+    _("You are going to remove the fork relationship from %{project_full_name}. Are you ABSOLUTELY sure?") %
+      { project_full_name: project.full_name }
+  end
+
+  def visible_fork_source(project)
+    project.fork_source if project.fork_source && can?(current_user, :read_project, project.fork_source)
   end
 
   def project_nav_tabs
@@ -168,13 +180,12 @@ module ProjectsHelper
   end
 
   def link_to_autodeploy_doc
-    link_to _('About auto deploy'), help_page_path('autodevops/index.md#auto-deploy'), target: '_blank'
+    link_to _('About auto deploy'), help_page_path('topics/autodevops/stages.md', anchor: 'auto-deploy'), target: '_blank'
   end
 
   def autodeploy_flash_notice(branch_name)
-    translation = _("Branch <strong>%{branch_name}</strong> was created. To set up auto deploy, choose a GitLab CI Yaml template and commit your changes. %{link_to_autodeploy_doc}") %
-      { branch_name: truncate(sanitize(branch_name)), link_to_autodeploy_doc: link_to_autodeploy_doc }
-    translation.html_safe
+    html_escape(_("Branch %{branch_name} was created. To set up auto deploy, choose a GitLab CI Yaml template and commit your changes. %{link_to_autodeploy_doc}")) %
+      { branch_name: tag.strong(truncate(sanitize(branch_name))), link_to_autodeploy_doc: link_to_autodeploy_doc }
   end
 
   def project_list_cache_key(project, pipeline_status: true)
@@ -188,6 +199,7 @@ module ProjectsHelper
       "cross-project:#{can?(current_user, :read_cross_project)}",
       max_project_member_access_cache_key(project),
       pipeline_status,
+      Gitlab::I18n.locale,
       'v2.6'
     ]
 
@@ -271,8 +283,8 @@ module ProjectsHelper
     "xcode://clone?repo=#{CGI.escape(default_url_to_repo(project))}"
   end
 
-  def link_to_bfg
-    link_to 'BFG', 'https://rtyley.github.io/bfg-repo-cleaner/', target: '_blank', rel: 'noopener noreferrer'
+  def link_to_filter_repo
+    link_to 'git filter-repo', 'https://github.com/newren/git-filter-repo', target: '_blank', rel: 'noopener noreferrer'
   end
 
   def explore_projects_tab?
@@ -282,11 +294,11 @@ module ProjectsHelper
   end
 
   def show_merge_request_count?(disabled: false, compact_mode: false)
-    !disabled && !compact_mode && Feature.enabled?(:project_list_show_mr_count, default_enabled: true)
+    !disabled && !compact_mode
   end
 
   def show_issue_count?(disabled: false, compact_mode: false)
-    !disabled && !compact_mode && Feature.enabled?(:project_list_show_issue_count, default_enabled: true)
+    !disabled && !compact_mode
   end
 
   # overridden in EE
@@ -340,30 +352,45 @@ module ProjectsHelper
 
     description =
       if share_with_group && share_with_members
-        _("You can invite a new member to <strong>%{project_name}</strong> or invite another group.")
+        _("You can invite a new member to %{project_name} or invite another group.")
       elsif share_with_group
-        _("You can invite another group to <strong>%{project_name}</strong>.")
+        _("You can invite another group to %{project_name}.")
       elsif share_with_members
-        _("You can invite a new member to <strong>%{project_name}</strong>.")
+        _("You can invite a new member to %{project_name}.")
       end
 
-    description.html_safe % { project_name: project.name }
+    html_escape(description) % { project_name: tag.strong(project.name) }
   end
 
   def metrics_external_dashboard_url
     @project.metrics_setting_external_dashboard_url
   end
 
+  def metrics_dashboard_timezone
+    @project.metrics_setting_dashboard_timezone
+  end
+
   def grafana_integration_url
     @project.grafana_integration&.grafana_url
   end
 
-  def grafana_integration_token
-    @project.grafana_integration&.token
+  def grafana_integration_masked_token
+    @project.grafana_integration&.masked_token
   end
 
   def grafana_integration_enabled?
     @project.grafana_integration&.enabled?
+  end
+
+  def project_license_name(project)
+    key = "project:#{project.id}:license_name"
+
+    Gitlab::SafeRequestStore.fetch(key) { project.repository.license&.name }
+  rescue GRPC::Unavailable, GRPC::DeadlineExceeded, Gitlab::Git::CommandError => e
+    Gitlab::ErrorTracking.track_exception(e)
+    Gitlab::SafeRequestStore[key] = nil
+
+    nil
   end
 
   private
@@ -372,7 +399,7 @@ module ProjectsHelper
     nav_tabs = [:home]
 
     unless project.empty_repo?
-      nav_tabs << [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
+      nav_tabs += [:files, :commits, :network, :graphs, :forks] if can?(current_user, :download_code, project)
       nav_tabs << :releases if can?(current_user, :read_release, project)
     end
 
@@ -389,8 +416,12 @@ module ProjectsHelper
       nav_tabs << :pipelines
     end
 
-    if can?(current_user, :read_environment, project) || can?(current_user, :read_cluster, project)
+    if can_view_operations_tab?(current_user, project)
       nav_tabs << :operations
+    end
+
+    if can_view_product_analytics?(current_user, project)
+      nav_tabs << :product_analytics
     end
 
     tab_ability_map.each do |tab, ability|
@@ -399,33 +430,61 @@ module ProjectsHelper
       end
     end
 
-    nav_tabs << external_nav_tabs(project)
+    apply_external_nav_tabs(nav_tabs, project)
 
-    nav_tabs.flatten
+    nav_tabs += package_nav_tabs(project, current_user)
+
+    nav_tabs
   end
 
-  def external_nav_tabs(project)
+  def package_nav_tabs(project, current_user)
     [].tap do |tabs|
-      tabs << :external_issue_tracker if project.external_issue_tracker
-      tabs << :external_wiki if project.external_wiki
+      if ::Gitlab.config.packages.enabled && can?(current_user, :read_package, project)
+        tabs << :packages
+      end
+    end
+  end
+
+  def apply_external_nav_tabs(nav_tabs, project)
+    nav_tabs << :external_issue_tracker if project.external_issue_tracker
+    nav_tabs << :external_wiki if project.external_wiki
+
+    if project.has_confluence?
+      nav_tabs.delete(:wiki)
+      nav_tabs << :confluence
     end
   end
 
   def tab_ability_map
     {
-      environments:     :read_environment,
-      milestones:       :read_milestone,
-      snippets:         :read_project_snippet,
-      settings:         :admin_project,
-      builds:           :read_build,
-      clusters:         :read_cluster,
-      serverless:       :read_cluster,
-      error_tracking:   :read_sentry_issue,
-      labels:           :read_label,
-      issues:           :read_issue,
-      project_members:  :read_project_member,
-      wiki:             :read_wiki
+      cycle_analytics:    :read_cycle_analytics,
+      environments:       :read_environment,
+      metrics_dashboards: :metrics_dashboard,
+      milestones:         :read_milestone,
+      snippets:           :read_snippet,
+      settings:           :admin_project,
+      builds:             :read_build,
+      clusters:           :read_cluster,
+      serverless:         :read_cluster,
+      error_tracking:     :read_sentry_issue,
+      alert_management:   :read_alert_management_alert,
+      incidents:          :read_incidents,
+      labels:             :read_label,
+      issues:             :read_issue,
+      project_members:    :read_project_member,
+      wiki:               :read_wiki
     }
+  end
+
+  def can_view_operations_tab?(current_user, project)
+    [:read_environment, :read_cluster, :metrics_dashboard].any? do |ability|
+      can?(current_user, ability, project)
+    end
+  end
+
+  def can_view_product_analytics?(current_user, project)
+    Feature.enabled?(:product_analytics, project) &&
+      can?(current_user, :read_product_analytics, project)
   end
 
   def search_tab_ability_map
@@ -433,7 +492,7 @@ module ProjectsHelper
       blobs:          :download_code,
       commits:        :download_code,
       merge_requests: :read_merge_request,
-      notes:          [:read_merge_request, :download_code, :read_issue, :read_project_snippet],
+      notes:          [:read_merge_request, :download_code, :read_issue, :read_snippet],
       members:        :read_project_member
     )
   end
@@ -507,11 +566,6 @@ module ProjectsHelper
     end
   end
 
-  def project_wiki_path_with_version(proj, page, version, is_newest)
-    url_params = is_newest ? {} : { version_id: version }
-    project_wiki_path(proj, page, url_params)
-  end
-
   def project_status_css_class(status)
     case status
     when "started"
@@ -533,7 +587,7 @@ module ProjectsHelper
   end
 
   def project_child_container_class(view_path)
-    view_path == "projects/issues/issues" ? "prepend-top-default" : "project-show-#{view_path}"
+    view_path == "projects/issues/issues" ? "gl-mt-3" : "project-show-#{view_path}"
   end
 
   def project_issues(project)
@@ -549,10 +603,12 @@ module ProjectsHelper
   def project_permissions_settings(project)
     feature = project.project_feature
     {
+      packagesEnabled: !!project.packages_enabled,
       visibilityLevel: project.visibility_level,
       requestAccessEnabled: !!project.request_access_enabled,
       issuesAccessLevel: feature.issues_access_level,
       repositoryAccessLevel: feature.repository_access_level,
+      forkingAccessLevel: feature.forking_access_level,
       mergeRequestsAccessLevel: feature.merge_requests_access_level,
       buildsAccessLevel: feature.builds_access_level,
       wikiAccessLevel: feature.wiki_access_level,
@@ -560,12 +616,16 @@ module ProjectsHelper
       pagesAccessLevel: feature.pages_access_level,
       containerRegistryEnabled: !!project.container_registry_enabled,
       lfsEnabled: !!project.lfs_enabled,
-      emailsDisabled: project.emails_disabled?
+      emailsDisabled: project.emails_disabled?,
+      metricsDashboardAccessLevel: feature.metrics_dashboard_access_level,
+      showDefaultAwardEmojis: project.show_default_award_emojis?
     }
   end
 
   def project_permissions_panel_data(project)
     {
+      packagesAvailable: ::Gitlab.config.packages.enabled,
+      packagesHelpPath: help_page_path('user/packages/index'),
       currentSettings: project_permissions_settings(project),
       canDisableEmails: can_disable_emails?(project, current_user),
       canChangeVisibilityLevel: can_change_visibility_level?(project, current_user),
@@ -574,10 +634,13 @@ module ProjectsHelper
       registryAvailable: Gitlab.config.registry.enabled,
       registryHelpPath: help_page_path('user/packages/container_registry/index'),
       lfsAvailable: Gitlab.config.lfs.enabled,
-      lfsHelpPath: help_page_path('workflow/lfs/manage_large_binaries_with_git_lfs'),
+      lfsHelpPath: help_page_path('topics/git/lfs/index'),
+      lfsObjectsExist: project.lfs_objects.exists?,
+      lfsObjectsRemovalHelpPath: help_page_path('topics/git/lfs/index', anchor: 'removing-objects-from-lfs'),
       pagesAvailable: Gitlab.config.pages.enabled,
       pagesAccessControlEnabled: Gitlab.config.pages.access_control,
-      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control-core')
+      pagesAccessControlForced: ::Gitlab::Pages.access_control_is_forced?,
+      pagesHelpPath: help_page_path('user/project/pages/introduction', anchor: 'gitlab-pages-access-control')
     }
   end
 
@@ -593,6 +656,7 @@ module ProjectsHelper
 
   def find_file_path
     return unless @project && !@project.empty_repo?
+    return unless can?(current_user, :download_code, @project)
 
     ref = @ref || @project.repository.root_ref
 
@@ -631,16 +695,18 @@ module ProjectsHelper
       projects#show
       projects#activity
       releases#index
-      cycle_analytics#show
     ]
   end
 
   def sidebar_settings_paths
     %w[
       projects#edit
-      project_members#index
       integrations#show
       services#edit
+      hooks#index
+      hooks#edit
+      access_tokens#index
+      hook_logs#show
       repository#show
       ci_cd#show
       operations#show
@@ -674,8 +740,14 @@ module ProjectsHelper
       clusters
       functions
       error_tracking
+      alert_management
+      incidents
+      incident_management
       user
       gcp
+      logs
+      product_analytics
+      metrics_dashboard
     ]
   end
 
@@ -686,7 +758,24 @@ module ProjectsHelper
       !project.repository.gitlab_ci_yml
   end
 
-  def vue_file_list_enabled?
-    Feature.enabled?(:vue_file_list, @project)
+  def native_code_navigation_enabled?(project)
+    Feature.enabled?(:code_navigation, project, default_enabled: true)
+  end
+
+  def show_visibility_confirm_modal?(project)
+    project.unlink_forks_upon_visibility_decrease_enabled? && project.visibility_level > Gitlab::VisibilityLevel::PRIVATE && project.forks_count > 0
+  end
+
+  def settings_container_registry_expiration_policy_available?(project)
+    Gitlab.config.registry.enabled &&
+      can?(current_user, :destroy_container_image, project)
+  end
+
+  def project_access_token_available?(project)
+    return false if ::Gitlab.com?
+
+    ::Feature.enabled?(:resource_access_token, project, default_enabled: true)
   end
 end
+
+ProjectsHelper.prepend_if_ee('EE::ProjectsHelper')

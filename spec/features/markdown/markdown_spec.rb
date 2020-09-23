@@ -26,7 +26,7 @@ require 'erb'
 #
 # See the MarkdownFeature class for setup details.
 
-describe 'GitLab Markdown', :aggregate_failures do
+RSpec.describe 'GitLab Markdown', :aggregate_failures do
   include Capybara::Node::Matchers
   include MarkupHelper
   include MarkdownMatchers
@@ -208,6 +208,8 @@ describe 'GitLab Markdown', :aggregate_failures do
     @group = @feat.group
   end
 
+  let(:project) { @feat.project } # Shadow this so matchers can use it
+
   context 'default pipeline' do
     before do
       @html = markdown(@feat.raw_markdown)
@@ -216,8 +218,12 @@ describe 'GitLab Markdown', :aggregate_failures do
     it_behaves_like 'all pipelines'
 
     it 'includes custom filters' do
-      aggregate_failures 'RelativeLinkFilter' do
-        expect(doc).to parse_relative_links
+      aggregate_failures 'UploadLinkFilter' do
+        expect(doc).to parse_upload_links
+      end
+
+      aggregate_failures 'RepositoryLinkFilter' do
+        expect(doc).to parse_repository_links
       end
 
       aggregate_failures 'EmojiFilter' do
@@ -241,6 +247,7 @@ describe 'GitLab Markdown', :aggregate_failures do
         expect(doc).to reference_commits
         expect(doc).to reference_labels
         expect(doc).to reference_milestones
+        expect(doc).to reference_alerts
       end
 
       aggregate_failures 'TaskListFilter' do
@@ -263,22 +270,26 @@ describe 'GitLab Markdown', :aggregate_failures do
 
   context 'wiki pipeline' do
     before do
-      @project_wiki = @feat.project_wiki
-      @project_wiki_page = @feat.project_wiki_page
+      @wiki = @feat.wiki
+      @wiki_page = @feat.wiki_page
 
       path = 'images/example.jpg'
       gitaly_wiki_file = Gitlab::GitalyClient::WikiFile.new(path: path)
-      expect(@project_wiki).to receive(:find_file).with(path).and_return(Gitlab::Git::WikiFile.new(gitaly_wiki_file))
-      allow(@project_wiki).to receive(:wiki_base_path) { '/namespace1/gitlabhq/wikis' }
+      expect(@wiki).to receive(:find_file).with(path).and_return(Gitlab::Git::WikiFile.new(gitaly_wiki_file))
+      allow(@wiki).to receive(:wiki_base_path) { '/namespace1/gitlabhq/wikis' }
 
-      @html = markdown(@feat.raw_markdown, { pipeline: :wiki, project_wiki: @project_wiki, page_slug: @project_wiki_page.slug })
+      @html = markdown(@feat.raw_markdown, { pipeline: :wiki, wiki: @wiki, page_slug: @wiki_page.slug })
     end
 
     it_behaves_like 'all pipelines'
 
     it 'includes custom filters' do
-      aggregate_failures 'RelativeLinkFilter' do
-        expect(doc).not_to parse_relative_links
+      aggregate_failures 'UploadLinkFilter' do
+        expect(doc).to parse_upload_links
+      end
+
+      aggregate_failures 'RepositoryLinkFilter' do
+        expect(doc).not_to parse_repository_links
       end
 
       aggregate_failures 'EmojiFilter' do

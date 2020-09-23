@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Users::BuildService do
+RSpec.describe Users::BuildService do
   describe '#execute' do
     let(:params) do
       { name: 'John Doe', username: 'jduser', email: 'jd@example.com', password: 'mydummypass' }
@@ -14,6 +14,14 @@ describe Users::BuildService do
 
       it 'returns a valid user' do
         expect(service.execute).to be_valid
+      end
+
+      context 'calls the UpdateCanonicalEmailService' do
+        specify do
+          expect(Users::UpdateCanonicalEmailService).to receive(:new).and_call_original
+
+          service.execute
+        end
       end
 
       context 'allowed params' do
@@ -146,6 +154,26 @@ describe Users::BuildService do
 
         it 'confirms the user' do
           expect(service.execute).to be_confirmed
+        end
+      end
+
+      context 'when user_type is provided' do
+        subject(:user) { service.execute }
+
+        context 'when project_bot' do
+          before do
+            params.merge!({ user_type: :project_bot })
+          end
+
+          it { expect(user.project_bot?).to be true}
+        end
+
+        context 'when not a project_bot' do
+          before do
+            params.merge!({ user_type: :alert_bot })
+          end
+
+          it { expect(user.user_type).to be nil }
         end
       end
 

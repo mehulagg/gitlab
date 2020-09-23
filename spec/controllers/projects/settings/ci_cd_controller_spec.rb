@@ -2,7 +2,7 @@
 
 require('spec_helper')
 
-describe Projects::Settings::CiCdController do
+RSpec.describe Projects::Settings::CiCdController do
   let_it_be(:user) { create(:user) }
   let_it_be(:project_auto_devops) { create(:project_auto_devops) }
   let(:project) { project_auto_devops.project }
@@ -16,7 +16,7 @@ describe Projects::Settings::CiCdController do
     it 'renders show with 200 status code' do
       get :show, params: { namespace_id: project.namespace, project_id: project }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(response).to render_template(:show)
     end
 
@@ -81,6 +81,7 @@ describe Projects::Settings::CiCdController do
 
     it 'resets runner registration token' do
       expect { subject }.to change { project.reload.runners_token }
+      expect(flash[:toast]).to eq('New runners registration token has been generated!')
     end
 
     it 'redirects the user to admin runners page' do
@@ -105,8 +106,8 @@ describe Projects::Settings::CiCdController do
     it 'redirects to the settings page' do
       subject
 
-      expect(response).to have_gitlab_http_status(302)
-      expect(flash[:notice]).to eq("Pipelines settings for '#{project.name}' were successfully updated.")
+      expect(response).to have_gitlab_http_status(:found)
+      expect(flash[:toast]).to eq("Pipelines settings for '#{project.name}' were successfully updated.")
     end
 
     context 'when updating the auto_devops settings' do
@@ -125,12 +126,14 @@ describe Projects::Settings::CiCdController do
 
       context 'when run_auto_devops_pipeline is true' do
         before do
-          expect_any_instance_of(Projects::UpdateService).to receive(:run_auto_devops_pipeline?).and_return(true)
+          expect_next_instance_of(Projects::UpdateService) do |instance|
+            expect(instance).to receive(:run_auto_devops_pipeline?).and_return(true)
+          end
         end
 
         context 'when the project repository is empty' do
-          it 'sets a warning flash' do
-            expect(subject).to set_flash[:warning]
+          it 'sets a notice flash' do
+            expect(subject).to set_flash[:notice]
           end
 
           it 'does not queue a CreatePipelineWorker' do
@@ -143,10 +146,10 @@ describe Projects::Settings::CiCdController do
         context 'when the project repository is not empty' do
           let(:project) { create(:project, :repository) }
 
-          it 'sets a success flash' do
+          it 'displays a toast message' do
             allow(CreatePipelineWorker).to receive(:perform_async).with(project.id, user.id, project.default_branch, :web, any_args)
 
-            expect(subject).to set_flash[:success]
+            expect(subject).to set_flash[:toast]
           end
 
           it 'queues a CreatePipelineWorker' do
@@ -154,12 +157,22 @@ describe Projects::Settings::CiCdController do
 
             subject
           end
+
+          it 'creates a pipeline', :sidekiq_inline do
+            project.repository.create_file(user, 'Gemfile', 'Gemfile contents',
+                                           message: 'Add Gemfile',
+                                           branch_name: 'master')
+
+            expect { subject }.to change { Ci::Pipeline.count }.by(1)
+          end
         end
       end
 
       context 'when run_auto_devops_pipeline is not true' do
         before do
-          expect_any_instance_of(Projects::UpdateService).to receive(:run_auto_devops_pipeline?).and_return(false)
+          expect_next_instance_of(Projects::UpdateService) do |instance|
+            expect(instance).to receive(:run_auto_devops_pipeline?).and_return(false)
+          end
         end
 
         it 'does not queue a CreatePipelineWorker' do
@@ -232,11 +245,22 @@ describe Projects::Settings::CiCdController do
         context 'and user is an admin' do
           let(:user) { create(:admin)  }
 
-          it 'sets max_artifacts_size' do
-            subject
+          context 'with admin mode disabled' do
+            it 'does not set max_artifacts_size' do
+              subject
 
-            project.reload
-            expect(project.max_artifacts_size).to eq(10)
+              project.reload
+              expect(project.max_artifacts_size).to be_nil
+            end
+          end
+
+          context 'with admin mode enabled', :enable_admin_mode do
+            it 'sets max_artifacts_size' do
+              subject
+
+              project.reload
+              expect(project.max_artifacts_size).to eq(10)
+            end
           end
         end
       end

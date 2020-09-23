@@ -1,15 +1,15 @@
-- page_title "Users"
+- page_title _("Users")
 
 .top-area.scrolling-tabs-container.inner-page-scroll-tabs
   .fade-left
-    = icon('angle-left')
+    = sprite_icon('chevron-lg-left', size: 12)
   .fade-right
-    = icon('angle-right')
+    = sprite_icon('chevron-lg-right', size: 12)
   %ul.nav-links.nav.nav-tabs.scrolling-tabs
     = nav_link(html_options: { class: active_when(params[:filter].nil?) }) do
       = link_to admin_users_path do
         = s_('AdminUsers|Active')
-        %small.badge.badge-pill= limited_counter_with_delimiter(User.active)
+        %small.badge.badge-pill= limited_counter_with_delimiter(User.active_without_ghosts)
     = nav_link(html_options: { class: active_when(params[:filter] == 'admins') }) do
       = link_to admin_users_path(filter: "admins") do
         = s_('AdminUsers|Admins')
@@ -40,7 +40,7 @@
         %small.badge.badge-pill= limited_counter_with_delimiter(User.without_projects)
   .nav-controls
     = render_if_exists 'admin/users/admin_email_users'
-    = link_to s_('AdminUsers|New user'), new_admin_user_path, class: 'btn btn-success btn-search float-right'
+    = link_to s_('AdminUsers|New user'), new_admin_user_path, class: 'btn gl-button btn-success btn-search float-right'
 
 .filtered-search-block.row-content-block.border-top-0
   = form_tag admin_users_path, method: :get do

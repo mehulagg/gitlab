@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_examples 'move quick action' do
+RSpec.shared_examples 'move quick action' do
   context 'move the issue to another project' do
     let(:target_project) { create(:project, :public) }
 
@@ -49,6 +49,8 @@ shared_examples 'move quick action' do
       let(:milestone) { create(:milestone, title: '1.0', project: project) }
       let(:bug)      { create(:label, project: project, title: 'bug') }
       let(:wontfix)  { create(:label, project: project, title: 'wontfix') }
+
+      let!(:target_milestone) { create(:milestone, title: '1.0', project: target_project) }
 
       before do
         target_project.add_maintainer(user)

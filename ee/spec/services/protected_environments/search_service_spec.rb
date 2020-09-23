@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe ProtectedEnvironments::SearchService, '#execute' do
+RSpec.describe ProtectedEnvironments::SearchService, '#execute' do
   let(:project) { create(:project) }
   let(:user) { create(:user) }
 

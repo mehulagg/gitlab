@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::LegacyGithubImport::CommentFormatter do
+RSpec.describe Gitlab::LegacyGithubImport::CommentFormatter do
   let(:client) { double }
   let(:project) { create(:project) }
   let(:octocat) { double(id: 123456, login: 'octocat', email: 'octocat@example.com') }

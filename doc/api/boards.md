@@ -1,3 +1,9 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Issue Boards API
 
 Every API call to boards must be authenticated.
@@ -9,7 +15,7 @@ request on that project will result to a `404` status code.
 
 Lists Issue Boards in the given project.
 
-```
+```plaintext
 GET /projects/:id/boards
 ```
 
@@ -17,8 +23,8 @@ GET /projects/:id/boards
 | --------- | ---- | -------- | ----------- |
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/boards
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards"
 ```
 
 Example response:
@@ -49,7 +55,9 @@ Example response:
           "description" : null
         },
         "position" : 1,
-        "max_issue_count": 0
+        "max_issue_count": 0,
+        "max_issue_weight": 0,
+        "limit_metric": null
       },
       {
         "id" : 2,
@@ -59,7 +67,9 @@ Example response:
           "description" : null
         },
         "position" : 2,
-        "max_issue_count": 0
+        "max_issue_count": 0,
+        "max_issue_weight": 0,
+        "limit_metric":  null
       },
       {
         "id" : 3,
@@ -69,7 +79,9 @@ Example response:
           "description" : null
         },
         "position" : 3,
-        "max_issue_count": 0
+        "max_issue_count": 0,
+        "max_issue_weight": 0,
+        "limit_metric":  null
       }
     ]
   }
@@ -80,7 +92,7 @@ Example response:
 
 Get a single board.
 
-```
+```plaintext
 GET /projects/:id/boards/:board_id
 ```
 
@@ -89,8 +101,8 @@ GET /projects/:id/boards/:board_id
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/boards/1
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1"
 ```
 
 Example response:
@@ -121,7 +133,9 @@ Example response:
           "description" : null
         },
         "position" : 1,
-        "max_issue_count": 0
+        "max_issue_count": 0,
+        "max_issue_weight": 0,
+        "limit_metric":  null
       },
       {
         "id" : 2,
@@ -131,7 +145,9 @@ Example response:
           "description" : null
         },
         "position" : 2,
-        "max_issue_count": 0
+        "max_issue_count": 0,
+        "max_issue_weight": 0,
+        "limit_metric":  null
       },
       {
         "id" : 3,
@@ -141,7 +157,9 @@ Example response:
           "description" : null
         },
         "position" : 3,
-        "max_issue_count": 0
+        "max_issue_count": 0,
+        "max_issue_weight": 0,
+        "limit_metric":  null
       }
     ]
   }
@@ -151,7 +169,7 @@ Example response:
 
 Creates a board.
 
-```
+```plaintext
 POST /projects/:id/boards
 ```
 
@@ -160,8 +178,8 @@ POST /projects/:id/boards
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `name` | string | yes | The name of the new board |
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/boards?name=newboard
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards?name=newboard"
 ```
 
 Example response:
@@ -192,7 +210,9 @@ Example response:
           "description" : null
         },
         "position" : 1,
-        "max_issue_count": 0
+        "max_issue_count": 0,
+        "max_issue_weight": 0,
+        "limit_metric":  null
       },
       {
         "id" : 2,
@@ -202,7 +222,9 @@ Example response:
           "description" : null
         },
         "position" : 2,
-        "max_issue_count": 0
+        "max_issue_count": 0,
+        "max_issue_weight": 0,
+        "limit_metric":  null
       },
       {
         "id" : 3,
@@ -212,7 +234,9 @@ Example response:
           "description" : null
         },
         "position" : 3,
-        "max_issue_count": 0
+        "max_issue_count": 0,
+        "max_issue_weight": 0,
+        "limit_metric":  null
       }
     ]
   }
@@ -220,11 +244,11 @@ Example response:
 
 ## Update a board **(STARTER)**
 
-> [Introduced][ee-5954] in [GitLab Starter](https://about.gitlab.com/pricing/) 11.1.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5954) in [GitLab Starter](https://about.gitlab.com/pricing/) 11.1.
 
 Updates a board.
 
-```
+```plaintext
 PUT /projects/:id/boards/:board_id
 ```
 
@@ -238,8 +262,8 @@ PUT /projects/:id/boards/:board_id
 | `labels`            | string         | no       | Comma-separated list of label names which the board should be scoped to |
 | `weight`            | integer        | no       | The weight range from 0 to 9, to which the board should be scoped to |
 
-```bash
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/boards/1?name=new_name&milestone_id=43&assignee_id=1&labels=Doing&weight=4
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1?name=new_name&milestone_id=43&assignee_id=1&labels=Doing&weight=4"
 ```
 
 Example response:
@@ -303,7 +327,7 @@ Example response:
 
 Deletes a board.
 
-```
+```plaintext
 DELETE /projects/:id/boards/:board_id
 ```
 
@@ -312,8 +336,8 @@ DELETE /projects/:id/boards/:board_id
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/boards/1
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1"
 ```
 
 ## List board lists
@@ -321,7 +345,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitl
 Get a list of the board's lists.
 Does not include `open` and `closed` lists
 
-```
+```plaintext
 GET /projects/:id/boards/:board_id/lists
 ```
 
@@ -330,8 +354,8 @@ GET /projects/:id/boards/:board_id/lists
 | `id` | integer/string | yes | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/boards/1/lists
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1/lists"
 ```
 
 Example response:
@@ -346,7 +370,9 @@ Example response:
       "description" : null
     },
     "position" : 1,
-    "max_issue_count": 0
+    "max_issue_count": 0,
+    "max_issue_weight": 0,
+    "limit_metric":  null
   },
   {
     "id" : 2,
@@ -356,7 +382,9 @@ Example response:
       "description" : null
     },
     "position" : 2,
-    "max_issue_count": 0
+    "max_issue_count": 0,
+    "max_issue_weight": 0,
+    "limit_metric":  null
   },
   {
     "id" : 3,
@@ -366,7 +394,9 @@ Example response:
       "description" : null
     },
     "position" : 3,
-    "max_issue_count": 0
+    "max_issue_count": 0,
+    "max_issue_weight": 0,
+    "limit_metric":  null
   }
 ]
 ```
@@ -375,7 +405,7 @@ Example response:
 
 Get a single board list.
 
-```
+```plaintext
 GET /projects/:id/boards/:board_id/lists/:list_id
 ```
 
@@ -385,8 +415,8 @@ GET /projects/:id/boards/:board_id/lists/:list_id
 | `board_id` | integer | yes | The ID of a board |
 | `list_id`| integer | yes | The ID of a board's list |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/boards/1/lists/1
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1/lists/1"
 ```
 
 Example response:
@@ -400,7 +430,9 @@ Example response:
     "description" : null
   },
   "position" : 1,
-  "max_issue_count": 0
+  "max_issue_count": 0,
+  "max_issue_weight": 0,
+  "limit_metric":  null
 }
 ```
 
@@ -408,7 +440,7 @@ Example response:
 
 Creates a new Issue Board list.
 
-```
+```plaintext
 POST /projects/:id/boards/:board_id/lists
 ```
 
@@ -420,14 +452,14 @@ POST /projects/:id/boards/:board_id/lists
 | `assignee_id` **(PREMIUM)** | integer | no | The ID of a user |
 | `milestone_id` **(PREMIUM)** | integer | no | The ID of a milestone |
 
-NOTE: **Note**:
+NOTE: **Note:**
 Label, assignee and milestone arguments are mutually exclusive,
 that is, only one of them are accepted in a request.
-Check the [Issue Board docs](../user/project/issue_board.md#summary-of-features-per-tier)
+Check the [Issue Board docs](../user/project/issue_board.md)
 for more information regarding the required license for each list type.
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/boards/1/lists?label_id=5
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1/lists?label_id=5"
 ```
 
 Example response:
@@ -441,7 +473,9 @@ Example response:
     "description" : null
   },
   "position" : 1,
-  "max_issue_count": 0
+  "max_issue_count": 0,
+  "max_issue_weight": 0,
+  "limit_metric":  null
 }
 ```
 
@@ -449,7 +483,7 @@ Example response:
 
 Updates an existing Issue Board list. This call is used to change list position.
 
-```
+```plaintext
 PUT /projects/:id/boards/:board_id/lists/:list_id
 ```
 
@@ -460,8 +494,8 @@ PUT /projects/:id/boards/:board_id/lists/:list_id
 | `list_id` | integer | yes | The ID of a board's list |
 | `position` | integer | yes | The position of the list |
 
-```bash
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/boards/1/lists/1?position=2
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1/lists/1?position=2"
 ```
 
 Example response:
@@ -475,7 +509,9 @@ Example response:
     "description" : null
   },
   "position" : 1,
-  "max_issue_count": 0
+  "max_issue_count": 0,
+  "max_issue_weight": 0,
+  "limit_metric":  null
 }
 ```
 
@@ -483,7 +519,7 @@ Example response:
 
 Only for admins and project owners. Deletes the board list in question.
 
-```
+```plaintext
 DELETE /projects/:id/boards/:board_id/lists/:list_id
 ```
 
@@ -493,8 +529,6 @@ DELETE /projects/:id/boards/:board_id/lists/:list_id
 | `board_id` | integer | yes | The ID of a board |
 | `list_id` | integer | yes | The ID of a board's list |
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/boards/1/lists/1
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/boards/1/lists/1"
 ```
-
-[ee-5954]: https://gitlab.com/gitlab-org/gitlab/merge_requests/5954

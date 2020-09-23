@@ -19,6 +19,11 @@ module Mutations
                 required: false,
                 description: 'The description of the epic'
 
+      argument :confidential,
+                GraphQL::BOOLEAN_TYPE,
+                required: false,
+                description: 'Indicates if the epic is confidential'
+
       argument :start_date_fixed,
                 GraphQL::STRING_TYPE,
                 required: false,
@@ -38,6 +43,14 @@ module Mutations
                 GraphQL::BOOLEAN_TYPE,
                 required: false,
                 description: 'Indicates end date should be sourced from due_date_fixed field not the issue milestones'
+      argument :add_label_ids,
+               [GraphQL::ID_TYPE],
+               required: false,
+               description: 'The IDs of labels to be added to the epic.'
+      argument :remove_label_ids,
+               [GraphQL::ID_TYPE],
+               required: false,
+               description: 'The IDs of labels to be removed from the epic.'
     end
 
     def validate_arguments!(args)

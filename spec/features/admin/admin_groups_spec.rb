@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Admin Groups' do
+RSpec.describe 'Admin Groups' do
   include Select2Helper
 
   let(:internal) { Gitlab::VisibilityLevel::INTERNAL }
@@ -11,6 +11,8 @@ describe 'Admin Groups' do
   let!(:current_user) { create(:admin) }
 
   before do
+    stub_feature_flags(vue_group_members_list: false)
+
     sign_in(current_user)
     stub_application_setting(default_group_visibility: internal)
   end
@@ -94,6 +96,14 @@ describe 'Admin Groups' do
       expect(page).to have_content("Group: #{group.name}")
       expect(page).to have_content("ID: #{group.id}")
     end
+
+    it 'has a link to the group' do
+      group = create(:group, :private)
+
+      visit admin_group_path(group)
+
+      expect(page).to have_link(group.name, href: group_path(group))
+    end
   end
 
   describe 'group edit' do
@@ -126,7 +136,7 @@ describe 'Admin Groups' do
   end
 
   describe 'add user into a group', :js do
-    shared_context 'adds user into a group' do
+    shared_examples 'adds user into a group' do
       it do
         visit admin_group_path(group)
 
@@ -159,27 +169,27 @@ describe 'Admin Groups' do
     it 'adds admin a to a group as developer', :js do
       visit group_group_members_path(group)
 
-      page.within '.users-group-form' do
+      page.within '.invite-users-form' do
         select2(current_user.id, from: '#user_ids', multiple: true)
         select 'Developer', from: 'access_level'
       end
 
-      click_button 'Add to group'
+      click_button 'Invite'
 
-      page.within '.content-list' do
+      page.within '[data-qa-selector="members_list"]' do
         expect(page).to have_content(current_user.name)
         expect(page).to have_content('Developer')
       end
     end
   end
 
-  describe 'admin remove himself from a group', :js do
+  describe 'admin remove themself from a group', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/222342' do
     it 'removes admin from the group' do
       group.add_user(current_user, Gitlab::Access::DEVELOPER)
 
       visit group_group_members_path(group)
 
-      page.within '.content-list' do
+      page.within '[data-qa-selector="members_list"]' do
         expect(page).to have_content(current_user.name)
         expect(page).to have_content('Developer')
       end
@@ -188,7 +198,7 @@ describe 'Admin Groups' do
 
       visit group_group_members_path(group)
 
-      page.within '.content-list' do
+      page.within '[data-qa-selector="members_list"]' do
         expect(page).not_to have_content(current_user.name)
         expect(page).not_to have_content('Developer')
       end

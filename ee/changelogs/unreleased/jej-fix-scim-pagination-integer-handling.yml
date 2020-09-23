@@ -1,5 +1,0 @@
----
-title: SCIM pagination startIndex handles string input
-merge_request: 19331
-author:
-type: fixed

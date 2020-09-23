@@ -1,12 +1,10 @@
 <script>
-import { s__ } from '~/locale';
-import icon from '~/vue_shared/components/icon.vue';
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import tooltip from '~/vue_shared/directives/tooltip';
-import { GlLoadingIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    icon,
+    GlIcon,
     GlLoadingIcon,
   },
   directives: {
@@ -17,15 +15,7 @@ export default {
       type: Object,
       required: true,
     },
-    nodeDetails: {
-      type: Object,
-      required: true,
-    },
     nodeDetailsLoading: {
-      type: Boolean,
-      required: true,
-    },
-    nodeDetailsFailed: {
       type: Boolean,
       required: true,
     },
@@ -34,33 +24,8 @@ export default {
     isNodeHTTP() {
       return this.node.url.startsWith('http://');
     },
-    showNodeStatusIcon() {
-      if (this.nodeDetailsLoading) {
-        return false;
-      }
-
-      return this.isNodeHTTP || this.nodeDetailsFailed;
-    },
-    nodeStatusIconClass() {
-      const iconClasses = 'prepend-left-10 node-status-icon';
-      if (this.nodeDetailsFailed) {
-        return `${iconClasses} status-icon-failure`;
-      }
-      return `${iconClasses} status-icon-warning`;
-    },
-    nodeStatusIconName() {
-      if (this.nodeDetailsFailed) {
-        return 'status_failed_borderless';
-      }
-      return 'warning';
-    },
-    nodeStatusIconTooltip() {
-      if (this.nodeDetailsFailed) {
-        return '';
-      }
-      return s__(
-        'GeoNodes|You have configured Geo nodes using an insecure HTTP connection. We recommend the use of HTTPS.',
-      );
+    showNodeWarningIcon() {
+      return !this.nodeDetailsLoading && this.isNodeHTTP;
     },
   },
 };
@@ -70,28 +35,35 @@ export default {
   <div class="card-header">
     <div class="row">
       <div class="col-md-8 clearfix">
-        <span class="d-flex float-left append-right-10">
-          <strong class="node-url"> {{ node.url }} </strong>
+        <span class="d-flex align-items-center float-left gl-mr-3">
+          <strong>{{ node.name }}</strong>
           <gl-loading-icon
             v-if="nodeDetailsLoading || node.nodeActionActive"
-            class="node-details-loading prepend-left-10 inline"
+            class="node-details-loading gl-ml-3 inline"
           />
-          <icon
-            v-if="showNodeStatusIcon"
+          <gl-icon
+            v-if="showNodeWarningIcon"
             v-tooltip
-            :name="nodeStatusIconName"
+            class="ml-2 text-warning-500"
+            name="warning"
             :size="18"
-            :class="nodeStatusIconClass"
-            :title="nodeStatusIconTooltip"
+            :title="
+              s__(
+                'GeoNodes|You have configured Geo nodes using an insecure HTTP connection. We recommend the use of HTTPS.',
+              )
+            "
             data-container="body"
             data-placement="bottom"
           />
         </span>
-        <span class="inline node-type-badges">
-          <span v-if="node.current" class="node-badge current-node">
+        <span class="inline">
+          <span v-if="node.current" class="rounded-pill gl-font-sm p-1 text-white bg-success-400">
             {{ s__('Current node') }}
           </span>
-          <span v-if="node.primary" class="prepend-left-5 node-badge primary-node">
+          <span
+            v-if="node.primary"
+            class="ml-1 rounded-pill gl-font-sm p-1 text-white bg-primary-600"
+          >
             {{ s__('Primary') }}
           </span>
         </span>

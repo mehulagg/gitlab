@@ -1,6 +1,6 @@
 <script>
-import IssueStatusIcon from '~/reports/components/issue_status_icon.vue';
 import { components, componentNames } from 'ee_else_ce/reports/components/issue_body';
+import IssueStatusIcon from '~/reports/components/issue_status_icon.vue';
 
 export default {
   name: 'ReportItem',
@@ -52,7 +52,7 @@ export default {
       v-if="showReportSectionStatusIcon"
       :status="status"
       :status-icon-size="statusIconSize"
-      class="append-right-default"
+      class="gl-mr-3"
     />
 
     <component :is="component" v-if="component" :issue="issue" :status="status" :is-new="isNew" />

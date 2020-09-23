@@ -2,12 +2,12 @@
 
 require 'spec_helper'
 
-describe Users::ActivityService do
+RSpec.describe Users::ActivityService do
   include ExclusiveLeaseHelpers
 
   let(:user) { create(:user, last_activity_on: last_activity_on) }
 
-  subject { described_class.new(user, 'type') }
+  subject { described_class.new(user) }
 
   describe '#execute', :clean_gitlab_redis_shared_state do
     context 'when last activity is nil' do
@@ -30,7 +30,7 @@ describe Users::ActivityService do
       end
 
       it 'tries to obtain ExclusiveLease' do
-        expect(Gitlab::ExclusiveLease).to receive(:new).and_call_original
+        expect(Gitlab::ExclusiveLease).to receive(:new).with("activity_service:#{user.id}", anything).and_call_original
 
         subject.execute
       end
@@ -40,7 +40,7 @@ describe Users::ActivityService do
       let(:fake_object) { double(username: 'hello') }
 
       it 'does not record activity' do
-        service = described_class.new(fake_object, 'pull')
+        service = described_class.new(fake_object)
 
         expect(service).not_to receive(:record_activity)
 
@@ -56,7 +56,7 @@ describe Users::ActivityService do
       end
 
       it 'does not try to obtain ExclusiveLease' do
-        expect(Gitlab::ExclusiveLease).not_to receive(:new)
+        expect(Gitlab::ExclusiveLease).not_to receive(:new).with("activity_service:#{user.id}", anything)
 
         subject.execute
       end

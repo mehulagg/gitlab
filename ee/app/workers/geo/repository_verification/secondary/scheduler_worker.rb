@@ -3,7 +3,7 @@
 module Geo
   module RepositoryVerification
     module Secondary
-      class SchedulerWorker < Geo::Scheduler::Secondary::PerShardSchedulerWorker
+      class SchedulerWorker < Geo::Scheduler::Secondary::PerShardSchedulerWorker # rubocop:disable Scalability/IdempotentWorker
         def perform
           return unless Gitlab::Geo.repository_verification_enabled?
 

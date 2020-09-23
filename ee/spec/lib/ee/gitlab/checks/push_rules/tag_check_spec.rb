@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Checks::PushRules::TagCheck do
+RSpec.describe EE::Gitlab::Checks::PushRules::TagCheck do
   include_context 'push rules checks context'
 
   describe '#validate!' do
@@ -14,7 +14,7 @@ describe EE::Gitlab::Checks::PushRules::TagCheck do
     it_behaves_like 'check ignored when push rule unlicensed'
 
     it 'returns an error if the rule denies tag deletion' do
-      expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, 'You cannot delete a tag')
+      expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, 'You cannot delete a tag')
     end
 
     context 'when tag is deleted in web UI' do

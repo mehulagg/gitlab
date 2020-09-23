@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe IssueEntity do
+RSpec.describe IssueEntity do
   let(:project)  { create(:project) }
   let(:resource) { create(:issue, project: project) }
   let(:user)     { create(:user) }
@@ -89,6 +89,38 @@ describe IssueEntity do
         response = described_class.new(issue, request: request).as_json
 
         expect(response[:duplicated_to_id]).to eq(issue.duplicated_to_id)
+      end
+    end
+  end
+
+  context 'when issuable in active or archived project' do
+    before do
+      project.add_developer(user)
+    end
+
+    context 'when project is active' do
+      it 'returns archived false' do
+        expect(subject[:is_project_archived]).to eq(false)
+      end
+
+      it 'returns nil for archived project doc' do
+        response = described_class.new(resource, request: request).as_json
+
+        expect(response[:archived_project_docs_path]).to be nil
+      end
+    end
+
+    context 'when project is archived' do
+      before do
+        project.update!(archived: true)
+      end
+
+      it 'returns archived true' do
+        expect(subject[:is_project_archived]).to eq(true)
+      end
+
+      it 'returns archived project doc' do
+        expect(subject[:archived_project_docs_path]).to eq('/help/user/project/settings/index.md#archiving-a-project')
       end
     end
   end

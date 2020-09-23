@@ -1,15 +1,15 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLink, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { sprintf, n__, s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import RelatedIssuableItem from '~/vue_shared/components/issue/related_issuable_item.vue';
 import { parseIssuableData } from '../../issue_show/utils/parse_data';
 
 export default {
   name: 'RelatedMergeRequests',
   components: {
-    Icon,
+    GlIcon,
+    GlLink,
     GlLoadingIcon,
     RelatedIssuableItem,
   },
@@ -64,18 +64,27 @@ export default {
 </script>
 
 <template>
-  <div v-if="isFetchingMergeRequests || (!isFetchingMergeRequests && totalCount)">
+  <div
+    v-if="isFetchingMergeRequests || (!isFetchingMergeRequests && totalCount)"
+    id="related-merge-requests"
+  >
     <div id="merge-requests" class="card card-slim mt-3">
       <div class="card-header">
-        <div class="card-title mt-0 mb-0 h5 merge-requests-title">
+        <div class="card-title mt-0 mb-0 h5 merge-requests-title position-relative">
+          <gl-link
+            id="user-content-related-merge-requests"
+            class="anchor position-absolute text-decoration-none"
+            href="#related-merge-requests"
+            aria-hidden="true"
+          />
           <span class="mr-1">
             {{ __('Related merge requests') }}
           </span>
           <div v-if="totalCount" class="d-inline-flex lh-100 align-middle">
-            <div class="mr-count-badge">
+            <div class="mr-count-badge gl-display-inline-flex">
               <div class="mr-count-badge-count">
                 <svg class="s16 mr-1 text-secondary">
-                  <icon name="merge-request" class="mr-1 text-secondary" />
+                  <gl-icon name="merge-request" class="mr-1 text-secondary" />
                 </svg>
                 <span class="js-items-count">{{ totalCount }}</span>
               </div>

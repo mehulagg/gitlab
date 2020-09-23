@@ -8,11 +8,12 @@ module Gitlab
         include Gitlab::Utils::StrongMemoize
         include GrapePathHelpers::NamedRouteMatcher
 
-        # We don't use oauth_token_path helper because its output depends
+        # We don't use oauth_*_path helpers because their outputs depends
         # on secondary configuration (ex., relative URL) while we really need
         # it for a primary. This is why we're building it ourselves using
-        # primary node configuration and this static URL
+        # primary node configuration and these static URLs
         TOKEN_PATH = '/oauth/token'
+        AUTHORIZATION_PATH = '/oauth/authorize'
 
         def authorize_url(params = {})
           oauth_client.auth_code.authorize_url(params)
@@ -41,7 +42,7 @@ module Gitlab
               oauth_application&.uid,
               oauth_application&.secret,
               site: Gitlab::Geo.primary_node.url,
-              authorize_url: oauth_authorization_path,
+              authorize_url: oauth_authorization_url,
               token_url: token_url
             )
           end
@@ -53,6 +54,10 @@ module Gitlab
 
         def token_url
           Gitlab::Utils.append_path(Gitlab::Geo.primary_node.internal_url, TOKEN_PATH)
+        end
+
+        def oauth_authorization_url
+          Gitlab::Utils.append_path(Gitlab::Geo.primary_node.internal_url, AUTHORIZATION_PATH)
         end
       end
     end

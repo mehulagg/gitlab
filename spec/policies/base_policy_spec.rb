@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BasePolicy, :do_not_mock_admin_mode do
+RSpec.describe BasePolicy do
   include ExternalAuthorizationServiceHelpers
   include AdminModeHelper
 
@@ -23,12 +23,18 @@ describe BasePolicy, :do_not_mock_admin_mode do
   end
 
   describe 'read cross project' do
-    let(:current_user) { create(:user) }
-    let(:user) { create(:user) }
+    let(:current_user) { build_stubbed(:user) }
+    let(:user) { build_stubbed(:user) }
 
     subject { described_class.new(current_user, [user]) }
 
     it { is_expected.to be_allowed(:read_cross_project) }
+
+    context 'for anonymous' do
+      let(:current_user) { nil }
+
+      it { is_expected.to be_allowed(:read_cross_project) }
+    end
 
     context 'when an external authorization service is enabled' do
       before do
@@ -38,7 +44,7 @@ describe BasePolicy, :do_not_mock_admin_mode do
       it { is_expected.not_to be_allowed(:read_cross_project) }
 
       context 'for admins' do
-        let(:current_user) { build(:admin) }
+        let(:current_user) { build_stubbed(:admin) }
 
         subject { described_class.new(current_user, nil) }
 
@@ -52,18 +58,24 @@ describe BasePolicy, :do_not_mock_admin_mode do
           is_expected.not_to be_allowed(:read_cross_project)
         end
       end
+
+      context 'for anonymous' do
+        let(:current_user) { nil }
+
+        it { is_expected.not_to be_allowed(:read_cross_project) }
+      end
     end
   end
 
   describe 'full private access' do
-    let(:current_user) { create(:user) }
+    let(:current_user) { build_stubbed(:user) }
 
     subject { described_class.new(current_user, nil) }
 
     it { is_expected.not_to be_allowed(:read_all_resources) }
 
     context 'for admins' do
-      let(:current_user) { build(:admin) }
+      let(:current_user) { build_stubbed(:admin) }
 
       it 'allowed when in admin mode' do
         enable_admin_mode!(current_user)

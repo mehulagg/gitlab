@@ -7,10 +7,20 @@ module EE
 
       override :execute
       def execute
-        super.tap { |group| log_audit_event unless group&.persisted? }
+        super.tap do |group|
+          delete_dependency_proxy_blobs(group)
+
+          log_audit_event unless group&.persisted?
+        end
       end
 
       private
+
+      def delete_dependency_proxy_blobs(group)
+        # the blobs reference files that need to be destroyed that cascade delete
+        # does not remove
+        group.dependency_proxy_blobs.destroy_all # rubocop:disable Cop/DestroyAll
+      end
 
       def log_audit_event
         ::AuditEventService.new(

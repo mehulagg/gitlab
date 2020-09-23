@@ -8,12 +8,12 @@ administrator in order to perform this action.
 NOTE: **Note:**
 These statistics are approximate.
 
-```
+```plaintext
 GET /application/statistics
 ```
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/application/statistics
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/application/statistics"
 ```
 
 Example response:

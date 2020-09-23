@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupsHelper do
+RSpec.describe GroupsHelper do
   include ApplicationHelper
 
   describe 'group_icon_url' do
@@ -114,12 +114,14 @@ describe GroupsHelper do
         ancestor_locked_and_has_been_overridden: /This setting is applied on .+ and has been overridden on this subgroup/
       }
     end
+
     let(:possible_linked_ancestors) do
       {
         root_group: root_group,
         subgroup: subgroup
       }
     end
+
     let(:users) do
       {
         root_owner: root_owner,
@@ -127,6 +129,7 @@ describe GroupsHelper do
         sub_sub_owner: sub_sub_owner
       }
     end
+
     subject { helper.share_with_group_lock_help_text(sub_subgroup) }
 
     where(:root_share_with_group_locked, :subgroup_share_with_group_locked, :sub_subgroup_share_with_group_locked, :current_user, :help_text, :linked_ancestor) do
@@ -194,6 +197,7 @@ describe GroupsHelper do
   describe '#group_container_registry_nav' do
     let(:group) { create(:group, :public) }
     let(:user) { create(:user) }
+
     before do
       stub_container_registry_config(enabled: true)
       allow(helper).to receive(:current_user) { user }
@@ -229,6 +233,7 @@ describe GroupsHelper do
   describe '#group_sidebar_links' do
     let(:group) { create(:group, :public) }
     let(:user) { create(:user) }
+
     before do
       group.add_owner(user)
       allow(helper).to receive(:current_user) { user }
@@ -334,6 +339,77 @@ describe GroupsHelper do
         allow(group).to receive(:emails_disabled?).and_return(false)
 
         expect(helper.can_disable_group_emails?(subgroup)).to be_truthy
+      end
+    end
+  end
+
+  describe '#can_update_default_branch_protection?' do
+    let(:current_user) { create(:user) }
+    let(:group) { create(:group) }
+
+    subject { helper.can_update_default_branch_protection?(group) }
+
+    before do
+      allow(helper).to receive(:current_user) { current_user }
+    end
+
+    context 'for users who can update default branch protection of the group' do
+      before do
+        allow(helper).to receive(:can?).with(current_user, :update_default_branch_protection, group) { true }
+      end
+
+      it { is_expected.to be_truthy }
+    end
+
+    context 'for users who cannot update default branch protection of the group' do
+      before do
+        allow(helper).to receive(:can?).with(current_user, :update_default_branch_protection, group) { false }
+      end
+
+      it { is_expected.to be_falsey }
+    end
+  end
+
+  describe '#show_invite_banner?' do
+    let_it_be(:current_user) { create(:user) }
+    let_it_be_with_refind(:group) { create(:group) }
+    let_it_be(:users) { [current_user, create(:user)] }
+
+    subject { helper.show_invite_banner?(group) }
+
+    before do
+      allow(helper).to receive(:current_user) { current_user }
+      allow(helper).to receive(:can?).with(current_user, :admin_group, group).and_return(can_admin_group)
+      stub_feature_flags(invite_your_teammates_banner_a: feature_enabled_flag)
+      users.take(group_members_count).each { |user| group.add_guest(user) }
+    end
+
+    using RSpec::Parameterized::TableSyntax
+
+    where(:feature_enabled_flag, :can_admin_group, :group_members_count, :expected_result) do
+      true  | true  | 1 | true
+      true  | false | 1 | false
+      false | true  | 1 | false
+      false | false | 1 | false
+      true  | true  | 2 | false
+      true  | false | 2 | false
+      false | true  | 2 | false
+      false | false | 2 | false
+    end
+
+    with_them do
+      context 'when the group was just created' do
+        before do
+          flash[:notice] = "Group #{group.name} was successfully created"
+        end
+
+        it { is_expected.to be_falsey }
+      end
+
+      context 'when no flash message' do
+        it 'returns the expected result' do
+          expect(subject).to eq(expected_result)
+        end
       end
     end
   end

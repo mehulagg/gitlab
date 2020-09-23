@@ -8,7 +8,7 @@
   - else
     - button_title = _("Notification setting - %{notification_title}") % { notification_title: notification_title(notification_setting.level) }
 
-  .js-notification-dropdown.notification-dropdown.home-panel-action-button.prepend-top-default.append-right-8.dropdown.inline
+  .js-notification-dropdown.notification-dropdown.home-panel-action-button.gl-mt-3.gl-mr-3.dropdown.inline
     = form_for notification_setting, remote: true, html: { class: "inline notification-form no-label" } do |f|
       = hidden_setting_source_input(notification_setting)
       = hidden_field_tag "hide_label", true
@@ -20,13 +20,13 @@
               = notification_setting_icon(notification_setting)
               %span.js-notification-loading.fa.hidden
             %button.btn.dropdown-toggle{ data: { toggle: "dropdown", target: notifications_menu_identifier("dropdown", notification_setting), flip: "false" }, class: "#{btn_class}" }
-              = sprite_icon("arrow-down", css_class: "icon mr-0")
+              = sprite_icon("chevron-down", css_class: "icon mr-0")
               .sr-only Toggle dropdown
           - else
             %button.dropdown-new.btn.btn-default.has-tooltip.notifications-btn#notifications-button{ type: "button", title: button_title, class: "#{btn_class}", "aria-label" => button_title, data: { container: "body", placement: 'top', toggle: "dropdown", target: notifications_menu_identifier("dropdown", notification_setting), flip: "false" } }
               = notification_setting_icon(notification_setting)
               %span.js-notification-loading.fa.hidden
-              = sprite_icon("arrow-down", css_class: "icon")
+              = sprite_icon("chevron-down", css_class: "icon")
 
           = render "shared/notifications/notification_dropdown", notification_setting: notification_setting
 

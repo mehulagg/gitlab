@@ -4,8 +4,6 @@ module Gitlab
   module Prometheus
     module Queries
       module QueryAdditionalMetrics
-        prepend_if_ee('EE::Gitlab::Prometheus::Queries::QueryAdditionalMetrics') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
         def query_metrics(project, environment, query_context)
           matched_metrics(project).map(&query_group(query_context))
             .select(&method(:group_with_any_metrics))
@@ -59,7 +57,7 @@ module Gitlab
           result =
             if query.key?(:query_range)
               query[:query_range] %= context
-              client_query_range(query[:query_range], start: context[:timeframe_start], stop: context[:timeframe_end])
+              client_query_range(query[:query_range], start_time: context[:timeframe_start], end_time: context[:timeframe_end])
             else
               query[:query] %= context
               client_query(query[:query], time: context[:timeframe_end])
@@ -99,3 +97,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Prometheus::Queries::QueryAdditionalMetrics.prepend_if_ee('EE::Gitlab::Prometheus::Queries::QueryAdditionalMetrics')

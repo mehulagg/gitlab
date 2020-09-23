@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Manually create a todo item from epic', :js do
+RSpec.describe 'Manually create a todo item from epic', :js do
   let(:group) { create(:group) }
   let(:epic) { create(:epic, group: group) }
   let(:user) { create(:user)}
@@ -16,7 +16,7 @@ describe 'Manually create a todo item from epic', :js do
 
   it 'creates todo when clicking button' do
     page.within '.issuable-sidebar' do
-      click_button 'Add a To Do'
+      click_button 'Add a To-Do'
 
       expect(page).to have_content 'Mark as done'
     end
@@ -28,7 +28,7 @@ describe 'Manually create a todo item from epic', :js do
 
   it 'marks a todo as done' do
     page.within '.issuable-sidebar' do
-      click_button 'Add a To Do'
+      click_button 'Add a To-Do'
     end
 
     expect(page).to have_selector('.todos-count', visible: true)

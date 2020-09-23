@@ -53,7 +53,7 @@ module ButtonHelper
     }
 
     content_tag :button, button_attributes do
-      concat(sprite_icon('duplicate')) unless hide_button_icon
+      concat(sprite_icon('copy-to-clipboard')) unless hide_button_icon
       concat(button_text)
     end
   end
@@ -93,8 +93,8 @@ module ButtonHelper
     content_tag (href ? :a : :span),
       (href ? button_content : title),
       class: "#{title.downcase}-selector #{active_class}",
-      href: (href if href),
-      data: (data if data)
+      href: href,
+      data: data
   end
 end
 

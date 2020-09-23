@@ -1,4 +1,4 @@
-fragment BaseEpic on Epic {
+fragment RelatedTreeBaseEpic on Epic {
   id
   iid
   title
@@ -8,10 +8,21 @@ fragment BaseEpic on Epic {
     adminEpic
     createEpic
   }
+  descendantCounts {
+    openedEpics
+    closedEpics
+    openedIssues
+    closedIssues
+  }
+  healthStatus {
+    issuesAtRisk
+    issuesOnTrack
+    issuesNeedingAttention
+  }
 }
 
 fragment EpicNode on Epic {
-  ...BaseEpic
+  ...RelatedTreeBaseEpic
   state
   reference(full: true)
   relationPath

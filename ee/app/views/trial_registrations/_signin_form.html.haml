@@ -5,7 +5,7 @@
   .form-group
     = f.label :password, for: 'user_password', class: 'label-bold'
     = f.password_field :password, class: 'form-control bottom', required: true, title: _('This field is required.'), data: { qa_selector: 'password_field' }
-  .remember-me.gl-py-4
+  .remember-me
     %label{ for: 'user_remember_me' }
       = f.check_box :remember_me, class: 'remember-me-checkbox'
       %span

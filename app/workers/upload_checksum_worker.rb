@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UploadChecksumWorker
+class UploadChecksumWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   feature_category :geo_replication
@@ -10,6 +10,6 @@ class UploadChecksumWorker
     upload.calculate_checksum!
     upload.save!
   rescue ActiveRecord::RecordNotFound
-    Rails.logger.error("UploadChecksumWorker: couldn't find upload #{upload_id}, skipping") # rubocop:disable Gitlab/RailsLogger
+    Gitlab::AppLogger.error("UploadChecksumWorker: couldn't find upload #{upload_id}, skipping")
   end
 end

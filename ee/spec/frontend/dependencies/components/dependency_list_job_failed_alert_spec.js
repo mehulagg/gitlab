@@ -1,17 +1,17 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { GlButton } from '@gitlab/ui';
-import DependencyListAlert from 'ee/dependencies/components/dependency_list_alert.vue';
+import { shallowMount } from '@vue/test-utils';
+import { GlAlert } from '@gitlab/ui';
 import DependencyListJobFailedAlert from 'ee/dependencies/components/dependency_list_job_failed_alert.vue';
+
+const NO_BUTTON_PROPS = {
+  secondaryButtonText: '',
+  secondaryButtonLink: '',
+};
 
 describe('DependencyListJobFailedAlert component', () => {
   let wrapper;
 
   const factory = (options = {}) => {
-    const localVue = createLocalVue();
-
-    wrapper = shallowMount(localVue.extend(DependencyListJobFailedAlert), {
-      localVue,
-      sync: false,
+    wrapper = shallowMount(DependencyListJobFailedAlert, {
       ...options,
     });
   };
@@ -25,16 +25,20 @@ describe('DependencyListJobFailedAlert component', () => {
     expect(wrapper.element).toMatchSnapshot();
   });
 
-  it('inludes a button button if "jobPath" is given', () => {
-    factory({ propsData: { jobPath: '/jobs/foo/3210' } });
+  it('inludes a button if "jobPath" is given', () => {
+    const jobPath = '/jobs/foo/3210';
+    factory({ propsData: { jobPath } });
 
-    expect(wrapper.find(GlButton).exists()).toBe(true);
+    expect(wrapper.find(GlAlert).props()).toMatchObject({
+      secondaryButtonText: 'View job',
+      secondaryButtonLink: jobPath,
+    });
   });
 
   it('does not include a button if "jobPath" is not given', () => {
     factory();
 
-    expect(wrapper.find(GlButton).exists()).toBe(false);
+    expect(wrapper.find(GlAlert).props()).toMatchObject(NO_BUTTON_PROPS);
   });
 
   it.each([undefined, null, ''])(
@@ -42,28 +46,27 @@ describe('DependencyListJobFailedAlert component', () => {
     jobPath => {
       factory({ propsData: { jobPath } });
 
-      expect(wrapper.find(GlButton).exists()).toBe(false);
+      expect(wrapper.find(GlAlert).props()).toMatchObject(NO_BUTTON_PROPS);
     },
   );
 
-  describe('when the generic alert component emits a close event', () => {
-    let closeListenerSpy;
+  describe('when the GlAlert component emits a dismiss event', () => {
+    let dismissListenerSpy;
 
     beforeEach(() => {
-      closeListenerSpy = jest.fn();
+      dismissListenerSpy = jest.fn();
 
       factory({
-        propsData: { jobPath: '/jobs/foo/3210' },
         listeners: {
-          close: closeListenerSpy,
+          dismiss: dismissListenerSpy,
         },
       });
 
-      wrapper.find(DependencyListAlert).vm.$emit('close');
+      wrapper.find(GlAlert).vm.$emit('dismiss');
     });
 
     it('calls the given listener', () => {
-      expect(closeListenerSpy).toHaveBeenCalledTimes(1);
+      expect(dismissListenerSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

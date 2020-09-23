@@ -2,24 +2,21 @@
 
 require 'spec_helper'
 
-describe 'User activates Prometheus' do
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
+RSpec.describe 'User activates Prometheus' do
+  include_context 'project service activation'
 
   before do
-    project.add_maintainer(user)
-    sign_in(user)
-
-    visit(project_settings_integrations_path(project))
-
-    click_link('Prometheus')
+    stub_request(:get, /.*prometheus.example.com.*/)
   end
 
-  it 'activates service' do
+  it 'does not activate service and informs about deprecation', :js do
+    visit_project_integration('Prometheus')
     check('Active')
     fill_in('API URL', with: 'http://prometheus.example.com')
+
     click_button('Save changes')
 
-    expect(page).to have_content('Prometheus activated.')
+    expect(page).not_to have_content('Prometheus settings saved and active.')
+    expect(page).to have_content('Fields on this page has been deprecated.')
   end
 end

@@ -1,8 +1,8 @@
 import AxiosMockAdapter from 'axios-mock-adapter';
 import BoardsStoreEE from 'ee_else_ce/boards/stores/boards_store_ee';
-import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
 import { TEST_HOST } from 'helpers/test_constants';
+import axios from '~/lib/utils/axios_utils';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 
 jest.mock('~/flash');
 
@@ -56,7 +56,7 @@ describe('BoardsStoreEE', () => {
       state[listType] = ['something'];
 
       return BoardsStoreEE.loadList(listPath, listType).then(() => {
-        expect(axiosMock.history.get.length).toBe(0);
+        expect(axiosMock.history.get).toHaveLength(0);
       });
     });
   });
@@ -86,6 +86,41 @@ describe('BoardsStoreEE', () => {
       BoardsStoreEE.store.setCurrentBoard(dummyBoard);
 
       expect(state.milestones).toEqual([]);
+    });
+  });
+
+  describe('updateWeight', () => {
+    const dummyEndpoint = `${TEST_HOST}/update/weight`;
+    const dummyResponse = 'just another response in the network';
+    const weight = 'elephant';
+    const expectedRequest = expect.objectContaining({ data: JSON.stringify({ weight }) });
+
+    let requestSpy;
+
+    beforeEach(() => {
+      requestSpy = jest.fn();
+      axiosMock.onPut(dummyEndpoint).replyOnce(config => requestSpy(config));
+    });
+
+    it('makes a request to update the weight', () => {
+      requestSpy.mockReturnValue([200, dummyResponse]);
+      const expectedResponse = expect.objectContaining({ data: dummyResponse });
+
+      return expect(BoardsStoreEE.store.updateWeight(dummyEndpoint, weight))
+        .resolves.toEqual(expectedResponse)
+        .then(() => {
+          expect(requestSpy).toHaveBeenCalledWith(expectedRequest);
+        });
+    });
+
+    it('fails for error response', () => {
+      requestSpy.mockReturnValue([500]);
+
+      return expect(BoardsStoreEE.store.updateWeight(dummyEndpoint, weight))
+        .rejects.toThrow()
+        .then(() => {
+          expect(requestSpy).toHaveBeenCalledWith(expectedRequest);
+        });
     });
   });
 });

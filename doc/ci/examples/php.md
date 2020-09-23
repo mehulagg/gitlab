@@ -1,4 +1,7 @@
 ---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: tutorial
 ---
 
@@ -13,7 +16,7 @@ using the Shell executor.
 
 While it is possible to test PHP apps on any system, this would require manual
 configuration from the developer. To overcome this we will be using the
-official [PHP docker image][php-hub] that can be found in Docker Hub.
+official [PHP Docker image](https://hub.docker.com/_/php) that can be found in Docker Hub.
 
 This will allow us to test PHP projects against different versions of PHP.
 However, not everything is plug 'n' play, you still need to configure some
@@ -23,7 +26,7 @@ As with every job, you need to create a valid `.gitlab-ci.yml` describing the
 build environment.
 
 Let's first specify the PHP image that will be used for the job process
-(you can read more about what an image means in the Runner's lingo reading
+(you can read more about what an image means in the runner's lingo reading
 about [Using Docker images](../docker/using_docker_images.md#what-is-an-image)).
 
 Start by adding the image to your `.gitlab-ci.yml`:
@@ -40,7 +43,7 @@ done.
 Let's create a `ci/docker_install.sh` file in the root directory of our
 repository with the following content:
 
-```bash
+```shell
 #!/bin/bash
 
 # We need to install dependencies only for Docker
@@ -62,7 +65,7 @@ docker-php-ext-install pdo_mysql
 ```
 
 You might wonder what `docker-php-ext-install` is. In short, it is a script
-provided by the official php docker image that you can use to easily install
+provided by the official PHP Docker image that you can use to easily install
 extensions. For more information read the documentation at
 <https://hub.docker.com/_/php>.
 
@@ -70,24 +73,16 @@ Now that we created the script that contains all prerequisites for our build
 environment, let's add it in `.gitlab-ci.yml`:
 
 ```yaml
-...
-
 before_script:
-- bash ci/docker_install.sh > /dev/null
-
-...
+  - bash ci/docker_install.sh > /dev/null
 ```
 
 Last step, run the actual tests using `phpunit`:
 
 ```yaml
-...
-
 test:app:
   script:
-  - phpunit --configuration phpunit_myapp.xml
-
-...
+    - phpunit --configuration phpunit_myapp.xml
 ```
 
 Finally, commit your files and push them to GitLab to see your build succeeding
@@ -100,35 +95,35 @@ The final `.gitlab-ci.yml` should look similar to this:
 image: php:5.6
 
 before_script:
-# Install dependencies
-- bash ci/docker_install.sh > /dev/null
+  # Install dependencies
+  - bash ci/docker_install.sh > /dev/null
 
 test:app:
   script:
-  - phpunit --configuration phpunit_myapp.xml
+    - phpunit --configuration phpunit_myapp.xml
 ```
 
 ### Test against different PHP versions in Docker builds
 
 Testing against multiple versions of PHP is super easy. Just add another job
-with a different docker image version and the runner will do the rest:
+with a different Docker image version and the runner will do the rest:
 
 ```yaml
 before_script:
-# Install dependencies
-- bash ci/docker_install.sh > /dev/null
+  # Install dependencies
+  - bash ci/docker_install.sh > /dev/null
 
 # We test PHP5.6
 test:5.6:
   image: php:5.6
   script:
-  - phpunit --configuration phpunit_myapp.xml
+    - phpunit --configuration phpunit_myapp.xml
 
 # We test PHP7.0 (good luck with that)
 test:7.0:
   image: php:7.0
   script:
-  - phpunit --configuration phpunit_myapp.xml
+    - phpunit --configuration phpunit_myapp.xml
 ```
 
 ### Custom PHP configuration in Docker builds
@@ -139,7 +134,7 @@ add a `before_script` action:
 
 ```yaml
 before_script:
-- cp my_php.ini /usr/local/etc/php/conf.d/test.ini
+  - cp my_php.ini /usr/local/etc/php/conf.d/test.ini
 ```
 
 Of course, `my_php.ini` must be present in the root directory of your repository.
@@ -153,7 +148,7 @@ dependencies are installed.
 For example, in a VM running Debian 8 we first update the cache, then we
 install `phpunit` and `php5-mysql`:
 
-```bash
+```shell
 sudo apt-get update -y
 sudo apt-get install -y phpunit php5-mysql
 ```
@@ -163,23 +158,23 @@ Next, add the following snippet to your `.gitlab-ci.yml`:
 ```yaml
 test:app:
   script:
-  - phpunit --configuration phpunit_myapp.xml
+    - phpunit --configuration phpunit_myapp.xml
 ```
 
 Finally, push to GitLab and let the tests begin!
 
 ### Test against different PHP versions in Shell builds
 
-The [phpenv][] project allows you to easily manage different versions of PHP
-each with its own config. This is especially useful when testing PHP projects
+The [phpenv](https://github.com/phpenv/phpenv) project allows you to easily manage different versions of PHP
+each with its own configuration. This is especially useful when testing PHP projects
 with the Shell executor.
 
 You will have to install it on your build machine under the `gitlab-runner`
-user following [the upstream installation guide][phpenv-installation].
+user following [the upstream installation guide](https://github.com/phpenv/phpenv#installation).
 
 Using phpenv also allows to easily configure the PHP environment with:
 
-```
+```shell
 phpenv config-add my_config.ini
 ```
 
@@ -198,7 +193,7 @@ some extensions that are not currently present on the build machine.
 
 To install additional extensions simply execute:
 
-```bash
+```shell
 pecl install <extension>
 ```
 
@@ -214,11 +209,11 @@ you can use [atoum](https://github.com/atoum/atoum):
 
 ```yaml
 before_script:
-- wget http://downloads.atoum.org/nightly/mageekguy.atoum.phar
+  - wget http://downloads.atoum.org/nightly/mageekguy.atoum.phar
 
 test:atoum:
   script:
-  - php mageekguy.atoum.phar
+    - php mageekguy.atoum.phar
 ```
 
 ### Using Composer
@@ -228,25 +223,21 @@ In order to execute Composer before running your tests, simply add the
 following in your `.gitlab-ci.yml`:
 
 ```yaml
-...
-
 # Composer stores all downloaded packages in the vendor/ directory.
 # Do not use the following if the vendor/ directory is committed to
 # your git repository.
 cache:
   paths:
-  - vendor/
+    - vendor/
 
 before_script:
-# Install composer dependencies
-- wget https://composer.github.io/installer.sig -O - -q | tr -d '\n' > installer.sig
-- php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-- php -r "if (hash_file('SHA384', 'composer-setup.php') === file_get_contents('installer.sig')) { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
-- php composer-setup.php
-- php -r "unlink('composer-setup.php'); unlink('installer.sig');"
-- php composer.phar install
-
-...
+  # Install composer dependencies
+  - wget https://composer.github.io/installer.sig -O - -q | tr -d '\n' > installer.sig
+  - php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+  - php -r "if (hash_file('SHA384', 'composer-setup.php') === file_get_contents('installer.sig')) { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+  - php composer-setup.php
+  - php -r "unlink('composer-setup.php'); unlink('installer.sig');"
+  - php composer.phar install
 ```
 
 ## Access private packages or dependencies
@@ -269,7 +260,7 @@ documentation.
 With GitLab Runner 1.0 you can also test any changes locally. From your
 terminal execute:
 
-```bash
+```shell
 # Check using docker executor
 gitlab-runner exec docker test:app
 
@@ -279,14 +270,9 @@ gitlab-runner exec shell test:app
 
 ## Example project
 
-We have set up an [Example PHP Project][php-example-repo] for your convenience
+We have set up an [Example PHP Project](https://gitlab.com/gitlab-examples/php) for your convenience
 that runs on [GitLab.com](https://gitlab.com) using our publicly available
 [shared runners](../runners/README.md).
 
 Want to hack on it? Simply fork it, commit, and push your changes. Within a few
 moments the changes will be picked by a public runner and the job will begin.
-
-[php-hub]: https://hub.docker.com/_/php
-[phpenv]: https://github.com/phpenv/phpenv
-[phpenv-installation]: https://github.com/phpenv/phpenv#installation
-[php-example-repo]: https://gitlab.com/gitlab-examples/php

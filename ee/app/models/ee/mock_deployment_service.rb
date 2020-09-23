@@ -17,7 +17,7 @@ module EE
 
     def rollout_status_instances
       data = File.read(Rails.root.join('spec', 'fixtures', 'rollout_status_instances.json'))
-      JSON.parse(data)
+      Gitlab::Json.parse(data)
     end
 
     def rollout_status_deployments

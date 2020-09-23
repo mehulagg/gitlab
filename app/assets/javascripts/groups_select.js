@@ -1,4 +1,5 @@
 import $ from 'jquery';
+import { escape } from 'lodash';
 import axios from './lib/utils/axios_utils';
 import Api from './api';
 import { normalizeHeaders } from './lib/utils/common_utils';
@@ -75,10 +76,12 @@ const groupsSelect = () => {
         }
       },
       formatResult(object) {
-        return `<div class='group-result'> <div class='group-name'>${object.full_name}</div> <div class='group-path'>${object.full_path}</div> </div>`;
+        return `<div class='group-result'> <div class='group-name'>${escape(
+          object.full_name,
+        )}</div> <div class='group-path'>${object.full_path}</div> </div>`;
       },
       formatSelection(object) {
-        return object.full_name;
+        return escape(object.full_name);
       },
       dropdownCssClass: 'ajax-groups-dropdown select2-infinite',
       // we do not want to escape markup since we are displaying html in results
@@ -94,7 +97,10 @@ const groupsSelect = () => {
   });
 };
 
-export default () =>
-  import(/* webpackChunkName: 'select2' */ 'select2/select2')
-    .then(groupsSelect)
-    .catch(() => {});
+export default () => {
+  if ($('.ajax-groups-select').length) {
+    import(/* webpackChunkName: 'select2' */ 'select2/select2')
+      .then(groupsSelect)
+      .catch(() => {});
+  }
+};

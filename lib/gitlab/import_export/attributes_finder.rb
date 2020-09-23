@@ -3,6 +3,8 @@
 module Gitlab
   module ImportExport
     class AttributesFinder
+      attr_reader :tree, :included_attributes, :excluded_attributes, :methods, :preloads
+
       def initialize(config:)
         @tree = config[:tree] || {}
         @included_attributes = config[:included_attributes] || {}
@@ -38,7 +40,7 @@ module Gitlab
       def resolve_preloads(model_key, model_tree)
         model_tree
           .map { |submodel_key, submodel_tree| resolve_preload(model_key, submodel_key, submodel_tree) }
-          .compact
+          .tap { |entries| entries.compact! }
           .to_h
           .deep_merge(@preloads[model_key].to_h)
           .presence

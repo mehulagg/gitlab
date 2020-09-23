@@ -70,7 +70,10 @@ module Gitlab
         end
 
         def filter_allowed(current_user, resolved_type, authorizing_object)
-          if authorizing_object
+          if resolved_type.nil?
+            # We're not rendering anything, for example when a record was not found
+            # no need to do anything
+          elsif authorizing_object
             # Authorizing fields representing scalars, or a simple field with an object
             resolved_type if allowed_access?(current_user, authorizing_object)
           elsif @field.connection?
@@ -81,13 +84,22 @@ module Gitlab
           elsif resolved_type.is_a? Array
             # A simple list of rendered types  each object being an object to authorize
             resolved_type.select do |single_object_type|
-              allowed_access?(current_user, single_object_type.object)
+              allowed_access?(current_user, realized(single_object_type).object)
             end
-          elsif resolved_type.nil?
-            # We're not rendering anything, for example when a record was not found
-            # no need to do anything
           else
             raise "Can't authorize #{@field}"
+          end
+        end
+
+        # Ensure that we are dealing with realized objects, not delayed promises
+        def realized(thing)
+          case thing
+          when BatchLoader::GraphQL
+            thing.sync
+          when GraphQL::Execution::Lazy
+            thing.value # part of the private api, but we need to unwrap it here.
+          else
+            thing
           end
         end
 

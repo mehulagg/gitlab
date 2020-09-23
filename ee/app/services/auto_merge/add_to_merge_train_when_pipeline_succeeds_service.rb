@@ -9,11 +9,11 @@ module AutoMerge
     end
 
     def process(merge_request)
-      return unless merge_request.actual_head_pipeline&.success?
+      return unless merge_request.actual_head_pipeline_success?
 
       merge_train_service = AutoMerge::MergeTrainService.new(project, merge_request.merge_user)
 
-      return abort(merge_request) unless merge_train_service.available_for?(merge_request)
+      return abort(merge_request, 'This merge request cannot be added to the merge train') unless merge_train_service.available_for?(merge_request)
 
       merge_train_service.execute(merge_request)
     end
@@ -31,10 +31,11 @@ module AutoMerge
     end
 
     def available_for?(merge_request)
-      merge_request.project.merge_trains_enabled? &&
-        !merge_request.for_fork? &&
-        merge_request.actual_head_pipeline&.active? &&
-        merge_request.mergeable_state?(skip_ci_check: true)
+      super do
+        merge_request.project.merge_trains_enabled? &&
+          can_add_to_merge_train?(merge_request) &&
+          merge_request.actual_head_pipeline&.active?
+      end
     end
   end
 end

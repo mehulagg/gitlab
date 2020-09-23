@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::CheckUninstallProgressService do
-  RESCHEDULE_PHASES = Gitlab::Kubernetes::Pod::PHASES - [Gitlab::Kubernetes::Pod::SUCCEEDED, Gitlab::Kubernetes::Pod::FAILED].freeze
+RSpec.describe Clusters::Applications::CheckUninstallProgressService do
+  reschedule_phases = Gitlab::Kubernetes::Pod::PHASES - [Gitlab::Kubernetes::Pod::SUCCEEDED, Gitlab::Kubernetes::Pod::FAILED].freeze
 
   let(:application) { create(:clusters_applications_prometheus, :uninstalling) }
   let(:service) { described_class.new(application) }
@@ -42,15 +42,15 @@ describe Clusters::Applications::CheckUninstallProgressService do
   end
 
   context 'when application is uninstalling' do
-    RESCHEDULE_PHASES.each { |phase| it_behaves_like 'a not yet terminated installation', phase }
+    reschedule_phases.each { |phase| it_behaves_like 'a not yet terminated installation', phase }
 
     context 'when installation POD succeeded' do
       let(:phase) { Gitlab::Kubernetes::Pod::SUCCEEDED }
+
       before do
-        expect_any_instance_of(Gitlab::Kubernetes::Helm::Api)
-            .to receive(:delete_pod!)
-            .with(kind_of(String))
-            .once
+        expect_next_instance_of(Gitlab::Kubernetes::Helm::API) do |instance|
+          expect(instance).to receive(:delete_pod!).with(kind_of(String)).once
+        end
         expect(service).to receive(:pod_phase).once.and_return(phase)
       end
 

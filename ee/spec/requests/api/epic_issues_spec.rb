@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::EpicIssues do
+RSpec.describe API::EpicIssues do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
@@ -17,7 +17,7 @@ describe API::EpicIssues do
 
         get api(url, user)
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -30,7 +30,7 @@ describe API::EpicIssues do
         it 'returns 401 unauthorized error for non authenticated user' do
           get api(url)
 
-          expect(response).to have_gitlab_http_status(401)
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
 
         it 'returns 404 not found error for a user without permissions to see the group' do
@@ -39,7 +39,7 @@ describe API::EpicIssues do
 
           get api(url, user)
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
@@ -53,7 +53,7 @@ describe API::EpicIssues do
         end
 
         it 'returns 200 status' do
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it 'matches the response schema' do
@@ -73,7 +73,7 @@ describe API::EpicIssues do
 
         post api(url, user)
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -86,7 +86,7 @@ describe API::EpicIssues do
         it 'returns 401 unauthorized error for non authenticated user' do
           post api(url)
 
-          expect(response).to have_gitlab_http_status(401)
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
 
         it 'returns 404 not found error for a user without permissions to see the group' do
@@ -95,13 +95,13 @@ describe API::EpicIssues do
 
           post api(url, user)
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
 
         it 'returns 403 forbidden error for a user without permissions to admin the epic' do
           post api(url, user)
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
 
         context 'when issue project is not under the epic group' do
@@ -116,7 +116,7 @@ describe API::EpicIssues do
           it 'returns an error' do
             post api(url, user)
 
-            expect(response).to have_gitlab_http_status(404)
+            expect(response).to have_gitlab_http_status(:not_found)
             expect(json_response).to eq('message' => 'No Issue found for given params')
           end
         end
@@ -130,7 +130,7 @@ describe API::EpicIssues do
         end
 
         it 'returns 201 status' do
-          expect(response).to have_gitlab_http_status(201)
+          expect(response).to have_gitlab_http_status(:created)
         end
 
         it 'matches the response schema' do
@@ -158,7 +158,7 @@ describe API::EpicIssues do
 
         post api(url, user)
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -171,7 +171,7 @@ describe API::EpicIssues do
         it 'returns 401 unauthorized error for non authenticated user' do
           delete api(url)
 
-          expect(response).to have_gitlab_http_status(401)
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
 
         it 'returns 404 not found error for a user without permissions to see the group' do
@@ -180,13 +180,13 @@ describe API::EpicIssues do
 
           delete api(url, user)
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
 
         it 'returns 403 forbidden error for a user without permissions to admin the epic' do
           delete api(url, user)
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
 
         context 'when epic_issue association does not include the epic in the url' do
@@ -202,7 +202,7 @@ describe API::EpicIssues do
           it 'returns 404 not found error' do
             delete api(url, user)
 
-            expect(response).to have_gitlab_http_status(404)
+            expect(response).to have_gitlab_http_status(:not_found)
           end
         end
       end
@@ -215,7 +215,7 @@ describe API::EpicIssues do
         it 'returns 200 status' do
           delete api(url, user)
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it 'matches the response schema' do
@@ -243,7 +243,7 @@ describe API::EpicIssues do
         group.add_developer(user)
         put api(url, user)
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -256,7 +256,7 @@ describe API::EpicIssues do
         it 'returns 401 unauthorized error for non authenticated user' do
           put api(url)
 
-          expect(response).to have_gitlab_http_status(401)
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
 
         it 'returns 404 not found error for a user without permissions to see the group' do
@@ -264,13 +264,13 @@ describe API::EpicIssues do
           group.update(visibility_level: Gitlab::VisibilityLevel::PRIVATE)
           put api(url, user)
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
 
         it 'returns 403 forbidden error for a user who can not move the issue' do
           put api(url, user)
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
 
         it 'returns 404 not found error for the link of another epic' do
@@ -280,7 +280,7 @@ describe API::EpicIssues do
 
           put api(url, user)
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
@@ -291,7 +291,7 @@ describe API::EpicIssues do
         end
 
         it 'returns 200 status' do
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it 'updates the positions values' do

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ::SystemNotes::IssuablesService do
+RSpec.describe ::SystemNotes::IssuablesService do
   include ProjectForksHelper
 
   let_it_be(:group)   { create(:group) }
@@ -12,6 +12,38 @@ describe ::SystemNotes::IssuablesService do
   let(:issue)         { noteable }
 
   let(:service) { described_class.new(noteable: noteable, project: project, author: author) }
+
+  describe '#relate_issue' do
+    let(:noteable_ref) { create(:issue) }
+
+    subject { service.relate_issue(noteable_ref) }
+
+    it_behaves_like 'a system note' do
+      let(:action) { 'relate' }
+    end
+
+    context 'when issue marks another as related' do
+      it 'sets the note text' do
+        expect(subject.note).to eq "marked this issue as related to #{noteable_ref.to_reference(project)}"
+      end
+    end
+  end
+
+  describe '#unrelate_issue' do
+    let(:noteable_ref) { create(:issue) }
+
+    subject { service.unrelate_issue(noteable_ref) }
+
+    it_behaves_like 'a system note' do
+      let(:action) { 'unrelate' }
+    end
+
+    context 'when issue relation is removed' do
+      it 'sets the note text' do
+        expect(subject.note).to eq "removed the relation with #{noteable_ref.to_reference(project)}"
+      end
+    end
+  end
 
   describe '#change_assignee' do
     subject { service.change_assignee(assignee) }
@@ -96,87 +128,14 @@ describe ::SystemNotes::IssuablesService do
     end
   end
 
-  describe '#change_milestone' do
-    subject { service.change_milestone(milestone) }
-
-    context 'for a project milestone' do
-      let(:milestone) { create(:milestone, project: project) }
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'milestone' }
-      end
-
-      context 'when milestone added' do
-        it 'sets the note text' do
-          reference = milestone.to_reference(format: :iid)
-
-          expect(subject.note).to eq "changed milestone to #{reference}"
-        end
-
-        it_behaves_like 'a note with overridable created_at'
-      end
-
-      context 'when milestone removed' do
-        let(:milestone) { nil }
-
-        it 'sets the note text' do
-          expect(subject.note).to eq 'removed milestone'
-        end
-
-        it_behaves_like 'a note with overridable created_at'
-      end
-    end
-
-    context 'for a group milestone' do
-      let(:milestone) { create(:milestone, group: group) }
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'milestone' }
-      end
-
-      context 'when milestone added' do
-        it 'sets the note text to use the milestone name' do
-          expect(subject.note).to eq "changed milestone to #{milestone.to_reference(format: :name)}"
-        end
-
-        it_behaves_like 'a note with overridable created_at'
-      end
-
-      context 'when milestone removed' do
-        let(:milestone) { nil }
-
-        it 'sets the note text' do
-          expect(subject.note).to eq 'removed milestone'
-        end
-
-        it_behaves_like 'a note with overridable created_at'
-      end
-    end
-  end
-
   describe '#change_status' do
     subject { service.change_status(status, source) }
 
-    context 'with status reopened' do
-      let(:status) { 'reopened' }
-      let(:source) { nil }
+    let(:status) { 'reopened' }
+    let(:source) { nil }
 
-      it_behaves_like 'a note with overridable created_at'
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'opened' }
-      end
-    end
-
-    context 'with a source' do
-      let(:status) { 'opened' }
-      let(:source) { double('commit', gfm_reference: 'commit 123456') }
-
-      it_behaves_like 'a note with overridable created_at'
-
-      it 'sets the note text' do
-        expect(subject.note).to eq "#{status} via commit 123456"
-      end
+    it 'creates a resource state event' do
+      expect { subject }.to change { ResourceStateEvent.count }.by(1)
     end
   end
 
@@ -265,7 +224,9 @@ describe ::SystemNotes::IssuablesService do
 
     context 'when cross-reference disallowed' do
       before do
-        expect_any_instance_of(described_class).to receive(:cross_reference_disallowed?).and_return(true)
+        expect_next_instance_of(described_class) do |instance|
+          expect(instance).to receive(:cross_reference_disallowed?).and_return(true)
+        end
       end
 
       it 'returns nil' do
@@ -279,7 +240,9 @@ describe ::SystemNotes::IssuablesService do
 
     context 'when cross-reference allowed' do
       before do
-        expect_any_instance_of(described_class).to receive(:cross_reference_disallowed?).and_return(false)
+        expect_next_instance_of(described_class) do |instance|
+          expect(instance).to receive(:cross_reference_disallowed?).and_return(false)
+        end
       end
 
       it_behaves_like 'a system note' do
@@ -594,8 +557,8 @@ describe ::SystemNotes::IssuablesService do
     context 'when mentioner is not a MergeRequest' do
       it 'is falsey' do
         mentioner = noteable.dup
-        expect(service.cross_reference_disallowed?(mentioner))
-          .to be_falsey
+
+        expect(service.cross_reference_disallowed?(mentioner)).to be_falsey
       end
     end
 
@@ -605,24 +568,62 @@ describe ::SystemNotes::IssuablesService do
 
       it 'is truthy when noteable is in commits' do
         expect(mentioner).to receive(:commits).and_return([noteable])
-        expect(service.cross_reference_disallowed?(mentioner))
-          .to be_truthy
+
+        expect(service.cross_reference_disallowed?(mentioner)).to be_truthy
       end
 
       it 'is falsey when noteable is not in commits' do
         expect(mentioner).to receive(:commits).and_return([])
-        expect(service.cross_reference_disallowed?(mentioner))
-          .to be_falsey
+
+        expect(service.cross_reference_disallowed?(mentioner)).to be_falsey
       end
     end
 
     context 'when notable is an ExternalIssue' do
+      let(:project) { create(:project) }
       let(:noteable) { ExternalIssue.new('EXT-1234', project) }
-      it 'is truthy' do
-        mentioner = noteable.dup
-        expect(service.cross_reference_disallowed?(mentioner))
-          .to be_truthy
+
+      it 'is false with issue tracker supporting referencing' do
+        create(:jira_service, project: project)
+
+        expect(service.cross_reference_disallowed?(noteable)).to be_falsey
       end
+
+      it 'is true with issue tracker not supporting referencing' do
+        create(:bugzilla_service, project: project)
+
+        expect(service.cross_reference_disallowed?(noteable)).to be_truthy
+      end
+
+      it 'is true without issue tracker' do
+        expect(service.cross_reference_disallowed?(noteable)).to be_truthy
+      end
+    end
+  end
+
+  describe '#close_after_error_tracking_resolve' do
+    subject { service.close_after_error_tracking_resolve }
+
+    it 'creates the expected state event' do
+      subject
+
+      event = ResourceStateEvent.last
+
+      expect(event.close_after_error_tracking_resolve).to eq(true)
+      expect(event.state).to eq('closed')
+    end
+  end
+
+  describe '#auto_resolve_prometheus_alert' do
+    subject { service.auto_resolve_prometheus_alert }
+
+    it 'creates the expected state event' do
+      subject
+
+      event = ResourceStateEvent.last
+
+      expect(event.close_auto_resolve_prometheus_alert).to eq(true)
+      expect(event.state).to eq('closed')
     end
   end
 end

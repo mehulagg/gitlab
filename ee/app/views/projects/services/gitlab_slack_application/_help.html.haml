@@ -9,5 +9,5 @@
     See the list of available commands in Slack after setting up this service
     by entering
   %kbd.inline /gitlab help
-  - unless @service.template?
+  - unless @service.template? || @service.instance?
     = render "projects/services/#{@service.to_param}/slack_integration_form"

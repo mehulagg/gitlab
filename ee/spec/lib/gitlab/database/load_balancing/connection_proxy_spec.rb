@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Database::LoadBalancing::ConnectionProxy do
+RSpec.describe Gitlab::Database::LoadBalancing::ConnectionProxy do
   let(:proxy) { described_class.new }
 
   describe '#select' do
@@ -44,6 +44,17 @@ describe Gitlab::Database::LoadBalancing::ConnectionProxy do
     end
   end
 
+  Gitlab::Database::LoadBalancing::ConnectionProxy::NON_STICKY_READS.each do |name|
+    describe "#{name}" do
+      it 'runs the query on the replica' do
+        expect(proxy).to receive(:read_using_load_balancer)
+          .with(name, ['foo'])
+
+        proxy.send(name, 'foo')
+      end
+    end
+  end
+
   Gitlab::Database::LoadBalancing::ConnectionProxy::STICKY_WRITES.each do |name|
     describe "#{name}" do
       it 'runs the query on the primary and sticks to it' do
@@ -52,6 +63,45 @@ describe Gitlab::Database::LoadBalancing::ConnectionProxy do
 
         proxy.send(name, 'foo')
       end
+    end
+  end
+
+  describe '.insert_all!' do
+    before do
+      ActiveRecord::Schema.define do
+        create_table :connection_proxy_bulk_insert, force: true do |t|
+          t.string :name, null: true
+        end
+      end
+    end
+
+    after do
+      ActiveRecord::Schema.define do
+        drop_table :connection_proxy_bulk_insert, force: true
+      end
+    end
+
+    let(:model_class) do
+      Class.new(ApplicationRecord) do
+        self.table_name = "connection_proxy_bulk_insert"
+      end
+    end
+
+    it 'inserts data in bulk' do
+      expect(model_class).to receive(:connection)
+        .at_least(:once)
+        .and_return(proxy)
+
+      expect(proxy).to receive(:write_using_load_balancer)
+        .at_least(:once)
+        .and_call_original
+
+      expect do
+        model_class.insert_all! [
+          { name: "item1" },
+          { name: "item2" }
+        ]
+      end.to change { model_class.count }.by(2)
     end
   end
 

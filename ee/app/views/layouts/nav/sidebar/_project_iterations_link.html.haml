@@ -1,0 +1,8 @@
+- return unless Feature.enabled?(:project_iterations, @project.group)
+- return unless @project.feature_available?(:iterations)
+- return unless can?(current_user, :read_iteration, @project)
+
+= nav_link(controller: :iterations) do
+  = link_to project_iterations_path(@project), title: _('Iterations') do
+    %span
+      = _('Iterations')

@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe 'getting notes for a merge request' do
+RSpec.describe 'getting notes for a merge request' do
   include GraphqlHelpers
 
-  let(:noteable) { create(:merge_request) }
+  let_it_be(:noteable) { create(:merge_request) }
 
   def noteable_query(noteable_fields)
     <<~QRY

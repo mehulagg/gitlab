@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :merge_request do
+  factory :merge_request, traits: [:has_internal_id] do
     title { generate(:title) }
     association :source_project, :repository, factory: :project
     target_project { source_project }
@@ -41,6 +41,21 @@ FactoryBot.define do
 
     trait :merged do
       state_id { MergeRequest.available_states[:merged] }
+    end
+
+    trait :with_merged_metrics do
+      merged
+
+      transient do
+        merged_by { author }
+      end
+
+      after(:build) do |merge_request, evaluator|
+        metrics = merge_request.build_metrics
+        metrics.merged_at = 1.week.ago
+        metrics.merged_by = evaluator.merged_by
+        metrics.pipeline = create(:ci_empty_pipeline)
+      end
     end
 
     trait :merged_target do
@@ -100,11 +115,23 @@ FactoryBot.define do
       auto_merge_enabled { true }
       auto_merge_strategy { AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS }
       merge_user { author }
+      merge_params { { sha: diff_head_sha } }
     end
 
     trait :remove_source_branch do
       merge_params do
         { 'force_remove_source_branch' => '1' }
+      end
+    end
+
+    trait :with_head_pipeline do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ci_pipeline,
+          :running,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
       end
     end
 
@@ -114,6 +141,47 @@ FactoryBot.define do
           :ci_pipeline,
           :success,
           :with_test_reports,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
+      end
+    end
+
+    trait :with_accessibility_reports do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ci_pipeline,
+          :success,
+          :with_accessibility_reports,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
+      end
+    end
+
+    trait :unique_branches do
+      source_branch { generate(:branch) }
+      target_branch { generate(:branch) }
+    end
+
+    trait :with_coverage_reports do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ci_pipeline,
+          :success,
+          :with_coverage_report_artifact,
+          project: merge_request.source_project,
+          ref: merge_request.source_branch,
+          sha: merge_request.diff_head_sha)
+      end
+    end
+
+    trait :with_terraform_reports do
+      after(:build) do |merge_request|
+        merge_request.head_pipeline = build(
+          :ci_pipeline,
+          :success,
+          :with_terraform_reports,
           project: merge_request.source_project,
           ref: merge_request.source_branch,
           sha: merge_request.diff_head_sha)
@@ -134,23 +202,13 @@ FactoryBot.define do
 
     trait :with_legacy_detached_merge_request_pipeline do
       after(:create) do |merge_request|
-        merge_request.pipelines_for_merge_request << create(:ci_pipeline,
-          source: :merge_request_event,
-          merge_request: merge_request,
-          project: merge_request.source_project,
-          ref: merge_request.source_branch,
-          sha: merge_request.source_branch_sha)
+        create(:ci_pipeline, :legacy_detached_merge_request_pipeline, merge_request: merge_request)
       end
     end
 
     trait :with_detached_merge_request_pipeline do
       after(:create) do |merge_request|
-        merge_request.pipelines_for_merge_request << create(:ci_pipeline,
-          source: :merge_request_event,
-          merge_request: merge_request,
-          project: merge_request.source_project,
-          ref: merge_request.ref_path,
-          sha: merge_request.source_branch_sha)
+        create(:ci_pipeline, :detached_merge_request_pipeline, merge_request: merge_request)
       end
     end
 
@@ -162,14 +220,12 @@ FactoryBot.define do
       end
 
       after(:create) do |merge_request, evaluator|
-        merge_request.pipelines_for_merge_request << create(:ci_pipeline,
-          source: :merge_request_event,
+        create(:ci_pipeline, :merged_result_pipeline,
           merge_request: merge_request,
-          project: merge_request.source_project,
-          ref: merge_request.merge_ref_path,
           sha: evaluator.merge_sha,
           source_sha: evaluator.source_sha,
-          target_sha: evaluator.target_sha)
+          target_sha: evaluator.target_sha
+        )
       end
     end
 
@@ -185,6 +241,10 @@ FactoryBot.define do
         merge_request.source_project = evaluator.deployment.project
         merge_request.target_project = evaluator.deployment.project
       end
+    end
+
+    trait :sequence_source_branch do
+      sequence(:source_branch) { |n| "feature#{n}" }
     end
 
     after(:build) do |merge_request|
@@ -223,7 +283,7 @@ FactoryBot.define do
       end
 
       after(:create) do |merge_request, evaluator|
-        merge_request.update(labels: evaluator.labels)
+        merge_request.update!(labels: evaluator.labels)
       end
     end
   end

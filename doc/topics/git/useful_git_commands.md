@@ -1,17 +1,20 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference
 ---
 
 # Useful Git commands
 
 Here are some useful Git commands collected by the GitLab support team. You may not
-need to use often, but they can can come in handy when needed.
+need to use often, but they can come in handy when needed.
 
 ## Remotes
 
 ### Add another URL to a remote, so both remotes get updated on each push
 
-```sh
+```shell
 git remote set-url --add <remote_name> <remote_url>
 ```
 
@@ -19,7 +22,7 @@ git remote set-url --add <remote_name> <remote_url>
 
 ### Remove last commit and leave the changes in unstaged
 
-```sh
+```shell
 git reset --soft HEAD^
 ```
 
@@ -27,13 +30,13 @@ git reset --soft HEAD^
 
 To unstage 3 commits, for example, run:
 
-```sh
+```shell
 git reset HEAD^3
 ```
 
 ### Unstage changes to a certain file from HEAD
 
-```sh
+```shell
 git reset <filename>
 ```
 
@@ -46,19 +49,19 @@ There are two options to revert changes to a file:
 
 ### Undo a previous commit by creating a new replacement commit
 
-```sh
+```shell
 git revert <commit-sha>
 ```
 
 ### Create a new message for last commit
 
-```sh
+```shell
 git commit --amend
 ```
 
 ### Add a file to the last commit
 
-```sh
+```shell
 git add <filename>
 git commit --amend
 ```
@@ -70,31 +73,31 @@ message.
 
 ### Stash changes
 
-```sh
+```shell
 git stash save
 ```
 
-The default behavor of `stash` is to save, so you can also use just:
+The default behavior of `stash` is to save, so you can also use just:
 
-```sh
+```shell
 git stash
 ```
 
 ### Unstash your changes
 
-```sh
+```shell
 git stash apply
 ```
 
 ### Discard your stashed changes
 
-```sh
+```shell
 git stash drop
 ```
 
 ### Apply and drop your stashed changes
 
-```sh
+```shell
 git stash pop
 ```
 
@@ -102,7 +105,7 @@ git stash pop
 
 ### Use reflog to show the log of reference changes to HEAD
 
-```sh
+```shell
 git reflog
 ```
 
@@ -110,38 +113,38 @@ git reflog
 
 The basic command to check the Git history of a file:
 
-```sh
+```shell
 git log <file>
 ```
 
 If you get this error message:
 
-```text
+```plaintext
 fatal: ambiguous argument <file_name>: unknown revision or path not in the working tree.
 Use '--' to separate paths from revisions, like this:
 ```
 
 Use this to check the Git history of the file:
 
-```sh
+```shell
 git log -- <file>
 ```
 
 ### Find the tags that contain a particular SHA
 
-```sh
+```shell
 git tag --contains <sha>
 ```
 
 ### Check the content of each change to a file
 
-```sh
+```shell
 gitk <file>
 ```
 
 ### Check the content of each change to a file, follows it past file renames
 
-```sh
+```shell
 gitk --follow <file>
 ```
 
@@ -149,7 +152,7 @@ gitk --follow <file>
 
 ### Use a custom SSH key for a Git command
 
-```sh
+```shell
 GIT_SSH_COMMAND="ssh -i ~/.ssh/gitlabadmin" git <command>
 ```
 
@@ -157,15 +160,23 @@ GIT_SSH_COMMAND="ssh -i ~/.ssh/gitlabadmin" git <command>
 
 With SSH:
 
-```sh
+```shell
 GIT_SSH_COMMAND="ssh -vvv" git clone <git@url>
 ```
 
 With HTTPS:
 
-```sh
+```shell
 GIT_TRACE_PACKET=1 GIT_TRACE=2 GIT_CURL_VERBOSE=1 git clone <url>
 ```
+
+### Debugging with Git embedded traces
+
+Git includes a complete set of [traces for debugging Git commands](https://git-scm.com/book/en/v2/Git-Internals-Environment-Variables#_debugging), for example:
+
+- `GIT_TRACE_PERFORMANCE=1`: enables tracing of performance data, showing how long each particular `git` invocation takes.
+- `GIT_TRACE_SETUP=1`: enables tracing of what `git` is discovering about the repository and environment it’s interacting with.
+- `GIT_TRACE_PACKET=1`: enables packet-level tracing for network operations.
 
 ## Rebasing
 
@@ -173,13 +184,13 @@ GIT_TRACE_PACKET=1 GIT_TRACE=2 GIT_CURL_VERBOSE=1 git clone <url>
 
 The -i flag stands for 'interactive':
 
-```sh
+```shell
 git rebase -i master
 ```
 
 ### Continue the rebase if paused
 
-```sh
+```shell
 git rebase --continue
 ```
 
@@ -187,13 +198,13 @@ git rebase --continue
 
 To _reuse_ recorded solutions to the same problems when repeated:
 
-```sh
+```shell
 git rerere
 ```
 
 To enable `rerere` functionality:
 
-```sh
+```shell
 git config --global rerere.enabled true
 ```
 

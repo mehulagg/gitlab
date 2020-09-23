@@ -1,6 +1,6 @@
 namespace :gitlab do
   namespace :db do
-    desc 'GitLab | Manually insert schema migration version'
+    desc 'GitLab | DB | Manually insert schema migration version'
     task :mark_migration_complete, [:version] => :environment do |_, args|
       unless args[:version]
         puts "Must specify a migration version as an argument".color(:red)
@@ -22,7 +22,7 @@ namespace :gitlab do
       end
     end
 
-    desc 'Drop all tables'
+    desc 'GitLab | DB | Drop all tables'
     task drop_tables: :environment do
       connection = ActiveRecord::Base.connection
 
@@ -39,9 +39,14 @@ namespace :gitlab do
       # PG: http://www.postgresql.org/docs/current/static/ddl-depend.html
       # Add `IF EXISTS` because cascade could have already deleted a table.
       tables.each { |t| connection.execute("DROP TABLE IF EXISTS #{connection.quote_table_name(t)} CASCADE") }
+
+      # Drop all extra schema objects GitLab owns
+      Gitlab::Database::EXTRA_SCHEMAS.each do |schema|
+        connection.execute("DROP SCHEMA IF EXISTS #{connection.quote_table_name(schema)}")
+      end
     end
 
-    desc 'Configures the database by running migrate, or by loading the schema and seeding if needed'
+    desc 'GitLab | DB | Configures the database by running migrate, or by loading the schema and seeding if needed'
     task configure: :environment do
       # Check if we have existing db tables
       # The schema_migrations table will still exist if drop_tables was called
@@ -50,12 +55,12 @@ namespace :gitlab do
       else
         # Add post-migrate paths to ensure we mark all migrations as up
         Gitlab::Database.add_post_migrate_path_to_rails(force: true)
-        Rake::Task['db:schema:load'].invoke
+        Rake::Task['db:structure:load'].invoke
         Rake::Task['db:seed_fu'].invoke
       end
     end
 
-    desc 'Checks if migrations require downtime or not'
+    desc 'GitLab | DB | Checks if migrations require downtime or not'
     task :downtime_check, [:ref] => :environment do |_, args|
       abort 'You must specify a Git reference to compare with' unless args[:ref]
 
@@ -71,12 +76,112 @@ namespace :gitlab do
       Gitlab::DowntimeCheck.new.check_and_print(migrations)
     end
 
-    desc 'Sets up EE specific database functionality'
+    desc 'GitLab | DB | Sets up EE specific database functionality'
 
     if Gitlab.ee?
       task setup_ee: %w[geo:db:drop geo:db:create geo:db:schema:load geo:db:migrate]
     else
       task :setup_ee
+    end
+
+    desc 'This adjusts and cleans db/structure.sql - it runs after db:structure:dump'
+    task :clean_structure_sql do |task_name|
+      structure_file = 'db/structure.sql'
+      schema = File.read(structure_file)
+
+      File.open(structure_file, 'wb+') do |io|
+        Gitlab::Database::SchemaCleaner.new(schema).clean(io)
+      end
+
+      # Allow this task to be called multiple times, as happens when running db:migrate:redo
+      Rake::Task[task_name].reenable
+    end
+
+    desc 'This dumps GitLab specific database details - it runs after db:structure:dump'
+    task :dump_custom_structure do |task_name|
+      Gitlab::Database::CustomStructure.new.dump
+
+      # Allow this task to be called multiple times, as happens when running db:migrate:redo
+      Rake::Task[task_name].reenable
+    end
+
+    desc 'This loads GitLab specific database details - runs after db:structure:dump'
+    task :load_custom_structure do
+      configuration = Rails.application.config_for(:database)
+
+      ENV['PGHOST']     = configuration['host']          if configuration['host']
+      ENV['PGPORT']     = configuration['port'].to_s     if configuration['port']
+      ENV['PGPASSWORD'] = configuration['password'].to_s if configuration['password']
+      ENV['PGUSER']     = configuration['username'].to_s if configuration['username']
+
+      command = 'psql'
+      dump_filepath = Gitlab::Database::CustomStructure.custom_dump_filepath.to_path
+      args = ['-v', 'ON_ERROR_STOP=1', '-q', '-X', '-f', dump_filepath, configuration['database']]
+
+      unless Kernel.system(command, *args)
+        raise "failed to execute:\n#{command} #{args.join(' ')}\n\n" \
+          "Please ensure `#{command}` is installed in your PATH and has proper permissions.\n\n"
+      end
+    end
+
+    # Inform Rake that custom tasks should be run every time rake db:structure:dump is run
+    Rake::Task['db:structure:dump'].enhance do
+      Rake::Task['gitlab:db:clean_structure_sql'].invoke
+      Rake::Task['gitlab:db:dump_custom_structure'].invoke
+    end
+
+    # Inform Rake that custom tasks should be run every time rake db:structure:load is run
+    Rake::Task['db:structure:load'].enhance do
+      Rake::Task['gitlab:db:load_custom_structure'].invoke
+    end
+
+    desc 'Create missing dynamic database partitions'
+    task :create_dynamic_partitions do
+      Gitlab::Database::Partitioning::PartitionCreator.new.create_partitions
+    end
+
+    # This is targeted towards deploys and upgrades of GitLab.
+    # Since we're running migrations already at this time,
+    # we also check and create partitions as needed here.
+    Rake::Task['db:migrate'].enhance do
+      Rake::Task['gitlab:db:create_dynamic_partitions'].invoke
+    end
+
+    # When we load the database schema from db/structure.sql
+    # we don't have any dynamic partitions created. We don't really need to
+    # because application initializers/sidekiq take care of that, too.
+    # However, the presence of partitions for a table has influence on their
+    # position in db/structure.sql (which is topologically sorted).
+    #
+    # Other than that it's helpful to create partitions early when bootstrapping
+    # a new installation.
+    Rake::Task['db:structure:load'].enhance do
+      Rake::Task['gitlab:db:create_dynamic_partitions'].invoke
+    end
+
+    # During testing, db:test:load restores the database schema from scratch
+    # which does not include dynamic partitions. We cannot rely on application
+    # initializers here as the application can continue to run while
+    # a rake task reloads the database schema.
+    Rake::Task['db:test:load'].enhance do
+      Rake::Task['gitlab:db:create_dynamic_partitions'].invoke
+    end
+
+    desc 'reindex a regular (non-unique) index without downtime to eliminate bloat'
+    task :reindex, [:index_name] => :environment do |_, args|
+      unless Feature.enabled?(:database_reindexing, type: :ops)
+        puts "This feature (database_reindexing) is currently disabled.".color(:yellow)
+        exit
+      end
+
+      raise ArgumentError, 'must give the index name to reindex' unless args[:index_name]
+
+      index = Gitlab::Database::Reindexing::Index.find_with_schema(args[:index_name])
+
+      raise ArgumentError, "Given index does not exist: #{args[:index_name]}" unless index
+
+      puts "Rebuilding index #{index}".color(:green)
+      Gitlab::Database::Reindexing::ConcurrentReindex.new(index).perform
     end
   end
 end

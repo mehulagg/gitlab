@@ -2,8 +2,10 @@
 
 require 'spec_helper'
 
-describe TestCaseEntity do
+RSpec.describe TestCaseEntity do
   include TestReportsHelper
+
+  let_it_be(:job) { create(:ci_build) }
 
   let(:entity) { described_class.new(test_case) }
 
@@ -29,6 +31,50 @@ describe TestCaseEntity do
         expect(subject[:name]).to eq('Test#sum when a is 1 and b is 3 returns summary')
         expect(subject[:classname]).to eq('spec.test_spec')
         expect(subject[:execution_time]).to eq(2.22)
+      end
+    end
+
+    context 'when feature is enabled' do
+      before do
+        stub_feature_flags(junit_pipeline_screenshots_view: true)
+      end
+
+      context 'when attachment is present' do
+        let(:test_case) { build(:test_case, :failed_with_attachment, job: job) }
+
+        it 'returns the attachment_url' do
+          expect(subject).to include(:attachment_url)
+        end
+      end
+
+      context 'when attachment is not present' do
+        let(:test_case) { build(:test_case, job: job) }
+
+        it 'returns a nil attachment_url' do
+          expect(subject[:attachment_url]).to be_nil
+        end
+      end
+    end
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(junit_pipeline_screenshots_view: false)
+      end
+
+      context 'when attachment is present' do
+        let(:test_case) { build(:test_case, :failed_with_attachment, job: job) }
+
+        it 'returns no attachment_url' do
+          expect(subject).not_to include(:attachment_url)
+        end
+      end
+
+      context 'when attachment is not present' do
+        let(:test_case) { build(:test_case, job: job) }
+
+        it 'returns no attachment_url' do
+          expect(subject).not_to include(:attachment_url)
+        end
       end
     end
   end

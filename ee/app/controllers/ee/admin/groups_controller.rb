@@ -24,6 +24,10 @@ module EE
           gitlab_subscription_attributes: [:hosted_plan_id]
         ]
       end
+
+      def groups
+        super.with_deletion_schedule
+      end
     end
   end
 end

@@ -12,7 +12,7 @@ module Gitlab
           include ::Gitlab::Config::Entry::Configurable
 
           ALLOWED_KEYS = %i[default include before_script image services
-                            after_script variables stages types cache].freeze
+                            after_script variables stages types cache workflow].freeze
 
           validations do
             validates :config, allowed_keys: ALLOWED_KEYS
@@ -64,13 +64,17 @@ module Gitlab
             description: 'Configure caching between build jobs.',
             reserved: true
 
-          helpers :default, :jobs, :stages, :types, :variables
+          entry :workflow, Entry::Workflow,
+            description: 'List of evaluable rules to determine Pipeline status',
+            default: {}
+
+          dynamic_helpers :jobs
 
           delegate :before_script_value,
                    :image_value,
                    :services_value,
                    :after_script_value,
-                   :cache_value, to: :default
+                   :cache_value, to: :default_entry
 
           attr_reader :jobs_config
 
@@ -97,10 +101,6 @@ module Gitlab
               compose_deprecated_entries!
               compose_jobs!
             end
-          end
-
-          def default
-            self[:default]
           end
 
           private
@@ -134,7 +134,7 @@ module Gitlab
             @jobs_config = @config
               .except(*self.class.reserved_nodes_names)
               .select do |name, config|
-              Entry::Jobs.find_type(name, config).present?
+              Entry::Jobs.find_type(name, config).present? || ALLOWED_KEYS.exclude?(name)
             end
 
             @config = @config.except(*@jobs_config.keys)

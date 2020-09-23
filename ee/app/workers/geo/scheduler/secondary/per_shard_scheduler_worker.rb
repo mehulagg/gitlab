@@ -3,7 +3,7 @@
 module Geo
   module Scheduler
     module Secondary
-      class PerShardSchedulerWorker < Geo::Scheduler::PerShardSchedulerWorker
+      class PerShardSchedulerWorker < Geo::Scheduler::PerShardSchedulerWorker # rubocop:disable Scalability/IdempotentWorker
         def perform
           unless Gitlab::Geo.geo_database_configured?
             log_info('Geo database not configured')

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # for secondary email confirmations - uses the same confirmation controller as :users
 devise_for :emails, path: 'profile/emails', controllers: { confirmations: :confirmations }
 
@@ -20,7 +22,7 @@ resource :profile, only: [:show, :update] do
     end
 
     resource :notifications, only: [:show, :update] do
-      resources :groups, only: :update
+      resources :groups, only: :update, constraints: { id: Gitlab::PathRegex.full_namespace_route_regex }
     end
 
     resource :password, only: [:new, :create, :edit, :update] do
@@ -39,14 +41,6 @@ resource :profile, only: [:show, :update] do
     resources :emails, only: [:index, :create, :destroy] do
       member do
         put :resend_confirmation_instructions
-      end
-    end
-
-    Gitlab.ee do
-      resource :slack, only: [:edit] do
-        member do
-          get :slack_link
-        end
       end
     end
 
@@ -69,14 +63,11 @@ resource :profile, only: [:show, :update] do
         post :create_u2f
         post :codes
         patch :skip
+        post :create_webauthn
       end
     end
 
     resources :u2f_registrations, only: [:destroy]
-
-    Gitlab.ee do
-      resources :pipeline_quota, only: [:index]
-      resources :billings, only: [:index]
-    end
+    resources :webauthn_registrations, only: [:destroy]
   end
 end

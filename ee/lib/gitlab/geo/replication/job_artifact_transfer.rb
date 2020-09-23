@@ -21,12 +21,16 @@ module Gitlab
 
         private
 
+        def uploader
+          resource.file
+        end
+
         def local_job_artifact_attributes(job_artifact)
           {
+            resource: job_artifact,
             file_type: :job_artifact,
             file_id: job_artifact.id,
             filename: job_artifact.file.path,
-            uploader: job_artifact.file,
             expected_checksum: job_artifact.file_sha256,
             request_data: job_artifact_request_data(job_artifact)
           }
@@ -34,9 +38,9 @@ module Gitlab
 
         def remote_job_artifact_attributes(job_artifact)
           {
+            resource: job_artifact,
             file_type: :job_artifact,
             file_id: job_artifact.id,
-            uploader: job_artifact.file,
             request_data: job_artifact_request_data(job_artifact)
           }
         end

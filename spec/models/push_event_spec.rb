@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe PushEvent do
+RSpec.describe PushEvent do
   let(:payload) { PushEventPayload.new }
 
   let(:event) do
@@ -74,7 +74,7 @@ describe PushEvent do
       create(:push_event_payload, event: event4, ref: 'baz', action: :removed)
       create(:push_event_payload, event: event5, ref: 'baz', ref_type: :tag)
 
-      project.repository.create_branch('bar', 'master')
+      project.repository.create_branch('bar')
 
       create(
         :merge_request,
@@ -83,7 +83,7 @@ describe PushEvent do
         source_branch: 'bar'
       )
 
-      project.repository.create_branch('qux', 'master')
+      project.repository.create_branch('qux')
 
       create(
         :merge_request,
@@ -118,8 +118,8 @@ describe PushEvent do
   end
 
   describe '.sti_name' do
-    it 'returns Event::PUSHED' do
-      expect(described_class.sti_name).to eq(Event::PUSHED)
+    it 'returns the integer representation of the :pushed event action' do
+      expect(described_class.sti_name).to eq(Event.actions[:pushed])
     end
   end
 
@@ -299,7 +299,7 @@ describe PushEvent do
 
   describe '#validate_push_action' do
     it 'adds an error when the action is not PUSHED' do
-      event.action = Event::CREATED
+      event.action = :created
       event.validate_push_action
 
       expect(event.errors.count).to eq(1)

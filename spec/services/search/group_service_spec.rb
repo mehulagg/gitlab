@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Search::GroupService do
+RSpec.describe Search::GroupService do
   shared_examples_for 'group search' do
     context 'finding projects by name' do
       let(:user) { create(:user) }
@@ -20,6 +20,7 @@ describe Search::GroupService do
       let!(:project3) { create(:project, :internal, namespace: nested_group.parent, name: "Outer #{term}") }
 
       let(:results) { described_class.new(user, search_group, search: term).execute }
+
       subject { results.objects('projects') }
 
       context 'in parent group' do

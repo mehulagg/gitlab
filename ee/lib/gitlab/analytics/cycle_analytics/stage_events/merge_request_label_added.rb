@@ -6,7 +6,7 @@ module Gitlab
       module StageEvents
         class MergeRequestLabelAdded < LabelBasedStageEvent
           def self.name
-            s_("CycleAnalyticsEvent|Merge Request label was added")
+            s_("CycleAnalyticsEvent|Merge request label was added")
           end
 
           def self.identifier
@@ -15,6 +15,10 @@ module Gitlab
 
           def object_type
             MergeRequest
+          end
+
+          def subquery
+            resource_label_events_with_subquery(:merge_request_id, label, ::ResourceLabelEvent.actions[:add], :asc)
           end
         end
       end

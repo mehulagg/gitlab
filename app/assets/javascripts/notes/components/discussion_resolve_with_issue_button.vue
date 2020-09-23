@@ -1,11 +1,9 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
 import { GlTooltipDirective, GlButton } from '@gitlab/ui';
 
 export default {
   name: 'ResolveWithIssueButton',
   components: {
-    Icon,
     GlButton,
   },
   directives: {
@@ -27,8 +25,7 @@ export default {
       :href="url"
       :title="s__('MergeRequests|Resolve this thread in a new issue')"
       class="new-issue-for-discussion discussion-create-issue-btn"
-    >
-      <icon name="issue-new" />
-    </gl-button>
+      icon="issue-new"
+    />
   </div>
 </template>

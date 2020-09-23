@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe Gitlab::GlobalId do
+RSpec.describe Gitlab::GlobalId do
   describe '.build' do
-    set(:object) { create(:issue) }
+    let_it_be(:object) { create(:issue) }
 
     it 'returns a standard GlobalId if only object is passed' do
       expect(described_class.build(object).to_s).to eq(object.to_global_id.to_s)
@@ -32,6 +32,39 @@ describe Gitlab::GlobalId do
       expect { described_class.build(id: 'myid') }.to raise_error(URI::InvalidComponentError)
       expect { described_class.build(model_name: 'MyModel') }.to raise_error(URI::InvalidComponentError)
       expect { described_class.build }.to raise_error(URI::InvalidComponentError)
+    end
+  end
+
+  describe '.as_global_id' do
+    let(:project) { build_stubbed(:project) }
+
+    it 'is the identify function on GlobalID instances' do
+      gid = project.to_global_id
+
+      expect(described_class.as_global_id(gid)).to eq(gid)
+    end
+
+    it 'wraps URI::GID in GlobalID' do
+      uri = described_class.build(model_name: 'Foo', id: 1)
+
+      expect(described_class.as_global_id(uri)).to eq(GlobalID.new(uri))
+    end
+
+    it 'cannot coerce Integers without a model name' do
+      expect { described_class.as_global_id(1) }
+        .to raise_error(described_class::CoerceError, 'Cannot coerce Integer')
+    end
+
+    it 'can coerce Integers with a model name' do
+      uri = described_class.build(model_name: 'Foo', id: 1)
+
+      expect(described_class.as_global_id(1, model_name: 'Foo')).to eq(GlobalID.new(uri))
+    end
+
+    it 'rejects any other value' do
+      [:symbol, 'string', nil, [], {}, project].each do |value|
+        expect { described_class.as_global_id(value) }.to raise_error(described_class::CoerceError)
+      end
     end
   end
 end

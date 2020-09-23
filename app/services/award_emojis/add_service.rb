@@ -16,7 +16,7 @@ module AwardEmojis
       award = awardable.award_emoji.create(name: name, user: current_user)
 
       if award.persisted?
-        TodoService.new.new_award_emoji(todoable, current_user) if todoable
+        after_create(award)
         success(award: award)
       else
         error(award.errors.full_messages, award: award)
@@ -24,6 +24,10 @@ module AwardEmojis
     end
 
     private
+
+    def after_create(award)
+      TodoService.new.new_award_emoji(todoable, current_user) if todoable
+    end
 
     def todoable
       strong_memoize(:todoable) do
@@ -33,10 +37,13 @@ module AwardEmojis
           awardable.noteable unless awardable.for_personal_snippet?
         when MergeRequest, Issue
           awardable
-        when Snippet
+        else
+          # No todos for all other awardables
           nil
         end
       end
     end
   end
 end
+
+AwardEmojis::AddService.prepend_if_ee('EE::AwardEmojis::AddService')

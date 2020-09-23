@@ -1,0 +1,18 @@
+#authorize-pane.login-box.tab-pane.rounded{ role: 'tabpanel' }
+  .login-body
+    = form_tag(group_authorize_managed_account_path(@unauthenticated_group), html: { class: "user gl-show-field-errors", "aria-live" => "assertive" }) do
+      .d-flex.flex-column.mt-3.mx-3
+        %p
+          = _("Alternatively, you can convert your account to a managed account by the %{group_name} group.") % { group_name: sanitize(@group_name) }
+          %ul
+            %li
+              = _('You will be removed from existing projects/groups')
+            %li
+              = _('Existing sign in methods may be removed')
+
+        .card.card-body.bs-callout-warning
+          = _("Only proceed if you trust %{idp_url} to control your GitLab account sign in.") % { idp_url: @unauthenticated_group.saml_provider.sso_url }
+
+      .submit-container
+        = button_to _("Transfer ownership"), '#', class: 'btn btn-remove js-confirm-danger', data: { 'confirm-danger-message' => transfer_ownership_message(@group_name), qa_selector: 'transfer_ownership_button' }
+= render 'shared/confirm_modal', phrase: current_user.username

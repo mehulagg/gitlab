@@ -21,7 +21,7 @@ module Gitlab
     end
 
     def emojis_aliases
-      @emoji_aliases ||= JSON.parse(File.read(Rails.root.join('fixtures', 'emojis', 'aliases.json')))
+      @emoji_aliases ||= Gitlab::Json.parse(File.read(Rails.root.join('fixtures', 'emojis', 'aliases.json')))
     end
 
     def emoji_filename(name)
@@ -44,8 +44,12 @@ module Gitlab
       "<img class='emoji' title=':#{name}:' alt=':#{name}:' src='#{src}' height='20' width='20' align='absmiddle' />"
     end
 
+    def emoji_exists?(name)
+      emojis.has_key?(name)
+    end
+
     # CSS sprite fallback takes precedence over image fallback
-    def gl_emoji_tag(name)
+    def gl_emoji_tag(name, options = {})
       emoji_name = emojis_aliases[name] || name
       emoji_info = emojis[emoji_name]
       return unless emoji_info
@@ -54,15 +58,16 @@ module Gitlab
         name: emoji_name,
         unicode_version: emoji_unicode_version(emoji_name)
       }
+      options = { title: emoji_info['description'], data: data }.merge(options)
 
-      ActionController::Base.helpers.content_tag('gl-emoji', emoji_info['moji'], title: emoji_info['description'], data: data)
+      ActionController::Base.helpers.content_tag('gl-emoji', emoji_info['moji'], options)
     end
 
     private
 
     def emoji_unicode_versions_by_name
       @emoji_unicode_versions_by_name ||=
-        JSON.parse(File.read(Rails.root.join('fixtures', 'emojis', 'emoji-unicode-version-map.json')))
+        Gitlab::Json.parse(File.read(Rails.root.join('fixtures', 'emojis', 'emoji-unicode-version-map.json')))
     end
   end
 end

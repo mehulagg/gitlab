@@ -30,22 +30,22 @@ To install a Camo server as an asset proxy:
 1. Make sure your instance of GitLab is running, and that you have created a private API token.
    Using the API, configure the asset proxy settings on your GitLab instance. For example:
 
-    ```sh
-    curl --request "PUT" "https://gitlab.example.com/api/v4/application/settings?\
-    asset_proxy_enabled=true&\
-    asset_proxy_url=https://proxy.gitlab.example.com&\
-    asset_proxy_secret_key=<somekey>" \
-    --header 'PRIVATE-TOKEN: <my_private_token>'
-    ```
+   ```shell
+   curl --request "PUT" "https://gitlab.example.com/api/v4/application/settings?\
+   asset_proxy_enabled=true&\
+   asset_proxy_url=https://proxy.gitlab.example.com&\
+   asset_proxy_secret_key=<somekey>" \
+   --header 'PRIVATE-TOKEN: <my_private_token>'
+   ```
 
-    The following settings are supported:
+   The following settings are supported:
 
-    | Attribute                | Description                                                                                                                          |
-    |:-------------------------|:-------------------------------------------------------------------------------------------------------------------------------------|
-    | `asset_proxy_enabled`    | Enable proxying of assets. If enabled, requires: `asset_proxy_url`).                                                                 |
-    | `asset_proxy_secret_key` | Shared secret with the asset proxy server.                                                                                           |
-    | `asset_proxy_url`        | URL of the asset proxy server.                                                                                                       |
-    | `asset_proxy_whitelist`  | Assets that match these domain(s) will NOT be proxied. Wildcards allowed. Your GitLab installation URL is automatically whitelisted. |
+   | Attribute                | Description                                                                                                                          |
+   |:-------------------------|:-------------------------------------------------------------------------------------------------------------------------------------|
+   | `asset_proxy_enabled`    | Enable proxying of assets. If enabled, requires: `asset_proxy_url`).                                                                 |
+   | `asset_proxy_secret_key` | Shared secret with the asset proxy server.                                                                                           |
+   | `asset_proxy_url`        | URL of the asset proxy server.                                                                                                       |
+   | `asset_proxy_whitelist`  | Assets that match these domain(s) will NOT be proxied. Wildcards allowed. Your GitLab installation URL is automatically whitelisted. |
 
 1. Restart the server for the changes to take effect. Each time you change any values for the asset
    proxy, you need to restart the server.
@@ -63,6 +63,6 @@ For example, the following is a link to an image in Markdown:
 
 The following is an example of a source link that could result:
 
-```text
+```plaintext
 http://proxy.gitlab.example.com/f9dd2b40157757eb82afeedbf1290ffb67a3aeeb/68747470733a2f2f61626f75742e6769746c61622e636f6d2f696d616765732f70726573732f6c6f676f2f6a70672f6769746c61622d69636f6e2d7267622e6a7067
 ```

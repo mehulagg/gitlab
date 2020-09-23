@@ -1,35 +1,62 @@
 <script>
 import $ from 'jquery';
-import eventHub from '../../event_hub';
+import { GlLoadingIcon } from '@gitlab/ui';
+import { mapActions } from 'vuex';
 import { __ } from '~/locale';
+import { deprecatedCreateFlash as Flash } from '~/flash';
+import eventHub from '../../event_hub';
 
 export default {
+  components: {
+    GlLoadingIcon,
+  },
   props: {
-    isConfidential: {
+    fullPath: {
+      required: true,
+      type: String,
+    },
+    confidential: {
       required: true,
       type: Boolean,
     },
-    updateConfidentialAttribute: {
-      required: true,
-      type: Function,
-    },
+  },
+  data() {
+    return {
+      isLoading: false,
+    };
   },
   computed: {
     toggleButtonText() {
-      return this.isConfidential ? __('Turn Off') : __('Turn On');
-    },
-    updateConfidentialBool() {
-      return !this.isConfidential;
+      if (this.isLoading) {
+        return __('Applying');
+      }
+
+      return this.confidential ? __('Turn Off') : __('Turn On');
     },
   },
   methods: {
+    ...mapActions(['updateConfidentialityOnIssuable']),
     closeForm() {
       eventHub.$emit('closeConfidentialityForm');
       $(this.$el).trigger('hidden.gl.dropdown');
     },
     submitForm() {
-      this.closeForm();
-      this.updateConfidentialAttribute(this.updateConfidentialBool);
+      this.isLoading = true;
+      const confidential = !this.confidential;
+
+      this.updateConfidentialityOnIssuable({ confidential, fullPath: this.fullPath })
+        .then(() => {
+          eventHub.$emit('updateIssuableConfidentiality', confidential);
+        })
+        .catch(err => {
+          Flash(
+            err || __('Something went wrong trying to change the confidentiality of this issue'),
+          );
+        })
+        .finally(() => {
+          this.closeForm();
+          this.isLoading = false;
+        });
     },
   },
 };
@@ -37,10 +64,17 @@ export default {
 
 <template>
   <div class="sidebar-item-warning-message-actions">
-    <button type="button" class="btn btn-default append-right-10" @click="closeForm">
+    <button type="button" class="btn btn-default gl-mr-3" @click="closeForm">
       {{ __('Cancel') }}
     </button>
-    <button type="button" class="btn btn-close" @click.prevent="submitForm">
+    <button
+      type="button"
+      class="btn btn-close"
+      data-testid="confidential-toggle"
+      :disabled="isLoading"
+      @click.prevent="submitForm"
+    >
+      <gl-loading-icon v-if="isLoading" inline />
       {{ toggleButtonText }}
     </button>
   </div>

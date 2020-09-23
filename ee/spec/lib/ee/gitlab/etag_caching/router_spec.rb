@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::EtagCaching::Router do
+RSpec.describe Gitlab::EtagCaching::Router do
   it 'matches epic notes endpoint' do
     result = described_class.match(
       '/groups/my-group/and-subgroup/-/epics/1/notes'
@@ -18,42 +18,5 @@ describe Gitlab::EtagCaching::Router do
     )
 
     expect(result).to be_blank
-  end
-
-  context 'k8s pod logs' do
-    it 'matches with pod_name and container_name' do
-      result = described_class.match(
-        '/environments/7/pods/pod_name/containers/container_name/logs.json'
-      )
-
-      expect(result).to be_present
-      expect(result.name).to eq 'k8s_pod_logs'
-    end
-
-    it 'matches with pod_name' do
-      result = described_class.match(
-        '/environments/7/pods/pod_name/containers/logs.json'
-      )
-
-      expect(result).to be_present
-      expect(result.name).to eq 'k8s_pod_logs'
-    end
-
-    it 'matches without pod_name and container_name' do
-      result = described_class.match(
-        '/environments/7/pods/containers/logs.json'
-      )
-
-      expect(result).to be_present
-      expect(result.name).to eq 'k8s_pod_logs'
-    end
-
-    it 'does not match non json format' do
-      result = described_class.match(
-        '/environments/7/logs'
-      )
-
-      expect(result).not_to be_present
-    end
   end
 end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Group merge requests page' do
+RSpec.describe 'Group merge requests page' do
   include FilteredSearchHelpers
 
   let(:path) { merge_requests_group_path(group) }
@@ -52,7 +52,7 @@ describe 'Group merge requests page' do
     let(:user2) { user_outside_group }
 
     it 'filters by assignee only group users' do
-      filtered_search.set('assignee:')
+      filtered_search.set('assignee:=')
 
       expect(find('#js-dropdown-assignee .filter-dropdown')).to have_content(user.name)
       expect(find('#js-dropdown-assignee .filter-dropdown')).not_to have_content(user2.name)

@@ -10,9 +10,9 @@ module CycleAnalyticsParams
   end
 
   def cycle_analytics_group_params
-    return {} unless params[:cycle_analytics].present?
+    return {} unless params.present?
 
-    params[:cycle_analytics].permit(:start_date, :created_after, :created_before, project_ids: [])
+    params.permit(:group_id, :start_date, :created_after, :created_before, project_ids: [])
   end
 
   def options(params)
@@ -38,7 +38,8 @@ module CycleAnalyticsParams
   end
 
   def to_utc_time(field)
-    Date.parse(field).to_time.utc
+    date = field.is_a?(Date) || field.is_a?(Time) ? field : Date.parse(field)
+    date.to_time.utc
   end
 end
 

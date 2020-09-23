@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'projects/tree/show' do
+RSpec.describe 'projects/tree/show' do
   include Devise::Test::ControllerHelpers
 
   let(:project) { create(:project, :repository) }
@@ -13,8 +13,6 @@ describe 'projects/tree/show' do
   let(:tree) { repository.tree(commit.id, path) }
 
   before do
-    stub_feature_flags(vue_file_list: false)
-
     assign(:project, project)
     assign(:repository, repository)
     assign(:lfs_blob_ids, [])
@@ -39,29 +37,6 @@ describe 'projects/tree/show' do
       render
 
       expect(rendered).to have_css('.js-project-refs-dropdown .dropdown-toggle-text', text: ref)
-      expect(rendered).to have_css('.readme-holder')
-    end
-  end
-
-  context 'commit signatures' do
-    context 'with vue tree view disabled' do
-      it 'rendered via js-signature-container' do
-        render
-
-        expect(rendered).to have_css('.js-signature-container')
-      end
-    end
-
-    context 'with vue tree view enabled' do
-      before do
-        stub_feature_flags(vue_file_list: true)
-      end
-
-      it 'are not rendered via js-signature-container' do
-        render
-
-        expect(rendered).not_to have_css('.js-signature-container')
-      end
     end
   end
 end

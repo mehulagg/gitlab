@@ -1,12 +1,12 @@
 # Experiment Guide
 
-Experiments will be conducted by teams from the [Growth Section](https://about.gitlab.com/handbook/engineering/development/growth/) and are not tied to releases, because they will primarily target GitLab.com.
+Experiments can be conducted by any GitLab team, most often the teams from the [Growth Sub-department](https://about.gitlab.com/handbook/engineering/development/growth/). Experiments are not tied to releases because they will primarily target GitLab.com.
 
-Experiments will be run as an A/B test and will be behind a feature flag to turn the test on or off. Based on the data the experiment generates, the team decides if the experiment had a positive impact and will be the new default or rolled back.
+Experiments will be run as an A/B test and will be behind a feature flag to turn the test on or off. Based on the data the experiment generates, the team will decide if the experiment had a positive impact and will be the new default or rolled back.
 
-## Follow-up issue
+## Experiment tracking issue
 
-Each experiment requires a follow-up issue to resolve the experiment. Immediately after an experiment is deployed, the deadline of the issue needs to be set (this depends on the experiment but can be up to a few weeks in the future).
+Each experiment should have an [Experiment tracking](https://gitlab.com/groups/gitlab-org/-/issues?scope=all&utf8=%E2%9C%93&state=opened&label_name[]=growth%20experiment&search=%22Experiment+tracking%22) issue to track the experiment from roll-out through to cleanup/removal. Immediately after an experiment is deployed, the due date of the issue should be set (this depends on the experiment but can be up to a few weeks in the future).
 After the deadline, the issue needs to be resolved and either:
 
 - It was successful and the experiment will be the new default.
@@ -16,15 +16,23 @@ In either case, an outcome of the experiment should be posted to the issue with 
 
 ## Code reviews
 
-Since the code of experiments will not be part of the codebase for a long time and we want to iterate fast to retrieve data,the code quality of experiments might sometimes not fulfill our standards but should not negatively impact the availability of GitLab whether the experiment is running or not.
-Experiments will only be deployed to a fraction of users but we still want a flawless experience for those users. Therefore, experiments still require tests.
+Experiments' code quality can fail our standards for several reasons. These
+reasons can include not being added to the codebase for a long time, or because
+of fast iteration to retrieve data. However, having the experiment run (or not
+run) shouldn't impact GitLab's availability. To avoid or identify issues,
+experiments are initially deployed to a small number of users. Regardless,
+experiments still need tests.
 
-For reviewers and maintainers: if you find code that would usually not make it through the review, but is temporarily acceptable, please mention your concerns but note that it's not necessary to change.
-The author then adds a comment to this piece of code and adds a link to the issue that resolves the experiment.
+If, as a reviewer or maintainer, you find code that would usually fail review
+but is acceptable for now, mention your concerns with a note that there's no
+need to change the code. The author can then add a comment to this piece of code
+and link to the issue that resolves the experiment. If the experiment is
+successful and becomes part of the product, any follow up issues should be
+addressed.
 
 ## How to create an A/B test
 
-- [ ] Add the experiment to the `Gitlab::Experimentation::EXPERIMENTS` hash in [`experimentation.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb):
+- Add the experiment to the `Gitlab::Experimentation::EXPERIMENTS` hash in [`experimentation.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/lib%2Fgitlab%2Fexperimentation.rb):
 
   ```ruby
   EXPERIMENTS = {
@@ -32,21 +40,20 @@ The author then adds a comment to this piece of code and adds a link to the issu
       #...
     },
     # Add your experiment here:
-    sign_up_flow: {
-      feature_toggle: :experimental_sign_up_flow, # Feature flag that will be used
-      environment: ::Gitlab.dev_env_or_com?, # Target environment
-      enabled_ratio: 0.1 # Percentage of users that will be part of the experiment. 10% of the users would be part of this experiments.
+    signup_flow: {
+      environment: ::Gitlab.dev_env_or_com?, # Target environment, defaults to enabled for development and GitLab.com
+      tracking_category: 'Growth::Acquisition::Experiment::SignUpFlow' # Used for providing the category when setting up tracking data
     }
   }.freeze
   ```
 
-- [ ] Use the experiment in a controller:
+- Use the experiment in a controller:
 
   ```ruby
-  class RegistrationController < Applicationcontroller
+  class RegistrationController < ApplicationController
    def show
      # experiment_enabled?(:feature_name) is also available in views and helpers
-     if experiment_enabled?(:sign_up_flow)
+     if experiment_enabled?(:signup_flow)
        # render the experiment
      else
        # render the original version
@@ -55,11 +62,18 @@ The author then adds a comment to this piece of code and adds a link to the issu
   end
   ```
 
-- [ ] Track necessery events. See the [event tracking guide](../event_tracking/index.md) for details.
-- [ ] After the merge request is merged, use [`chatops`](../../ci/chatops/README.md) to enable the feature flag and start the experiment. For visibility, please run the command in the `#s_growth` channel:
+- Track necessary events. See the [telemetry guide](../telemetry/index.md) for details.
+- After the merge request is merged, use [`chatops`](../../ci/chatops/README.md) in the
+[appropriate channel](../feature_flags/controls.md#communicate-the-change) to start the experiment for 10% of the users.
+The feature flag should have the name of the experiment with the `_experiment_percentage` suffix appended.
+For visibility, please also share any commands run against production in the `#s_growth` channel:
 
-  ```
-  /chatops run feature set --project=gitlab-org/gitlab experimental_sign_up_flow true
+  ```shell
+  /chatops run feature set signup_flow_experiment_percentage 10
   ```
 
-  If you notice issues with the experiment, you can disable the experiment by setting the feature flag to `false` again.
+  If you notice issues with the experiment, you can disable the experiment by removing the feature flag:
+
+  ```shell
+  /chatops run feature delete signup_flow_experiment_percentage
+  ```

@@ -4,6 +4,9 @@
 class Blob < SimpleDelegator
   include Presentable
   include BlobLanguageFromGitAttributes
+  include BlobActiveModel
+
+  MODE_SYMLINK = '120000' # The STRING 120000 is the git-reported octal filemode for a symlink
 
   CACHE_TIME = 60 # Cache raw blobs referred to by a (mutable) ref for 1 minute
   CACHE_TIME_IMMUTABLE = 3600 # Cache blobs referred to by an immutable reference for 1 hour
@@ -26,6 +29,7 @@ class Blob < SimpleDelegator
     BlobViewer::Markup,
     BlobViewer::Notebook,
     BlobViewer::SVG,
+    BlobViewer::OpenApi,
 
     BlobViewer::Image,
     BlobViewer::Sketch,
@@ -48,12 +52,15 @@ class Blob < SimpleDelegator
     BlobViewer::License,
     BlobViewer::Contributing,
     BlobViewer::Changelog,
+    BlobViewer::MetricsDashboardYml,
 
+    BlobViewer::CargoToml,
     BlobViewer::Cartfile,
     BlobViewer::ComposerJson,
     BlobViewer::Gemfile,
     BlobViewer::Gemspec,
     BlobViewer::GodepsJson,
+    BlobViewer::GoMod,
     BlobViewer::PackageJson,
     BlobViewer::Podfile,
     BlobViewer::Podspec,
@@ -62,7 +69,10 @@ class Blob < SimpleDelegator
     BlobViewer::YarnLock
   ].freeze
 
-  attr_reader :project
+  attr_reader :container
+
+  delegate :repository, to: :container, allow_nil: true
+  delegate :project, to: :repository, allow_nil: true
 
   # Wrap a Gitlab::Git::Blob object, or return nil when given nil
   #
@@ -74,22 +84,22 @@ class Blob < SimpleDelegator
   #
   #     blob = Blob.decorate(nil)
   #     puts "truthy" if blob # No output
-  def self.decorate(blob, project = nil)
+  def self.decorate(blob, container = nil)
     return if blob.nil?
 
-    new(blob, project)
+    new(blob, container)
   end
 
-  def self.lazy(project, commit_id, path)
-    BatchLoader.for([commit_id, path]).batch(key: project.repository) do |items, loader, args|
-      args[:key].blobs_at(items).each do |blob|
+  def self.lazy(repository, commit_id, path, blob_size_limit: Gitlab::Git::Blob::MAX_DATA_DISPLAY_SIZE)
+    BatchLoader.for([commit_id, path]).batch(key: repository) do |items, loader, args|
+      args[:key].blobs_at(items, blob_size_limit: blob_size_limit).each do |blob|
         loader.call([blob.commit_id, blob.path], blob) if blob
       end
     end
   end
 
-  def initialize(blob, project = nil)
-    @project = project
+  def initialize(blob, container = nil)
+    @container = container
 
     super(blob)
   end
@@ -113,7 +123,7 @@ class Blob < SimpleDelegator
   def load_all_data!
     # Endpoint needed: https://gitlab.com/gitlab-org/gitaly/issues/756
     Gitlab::GitalyClient.allow_n_plus_1_calls do
-      super(project.repository) if project
+      super(repository) if container
     end
   end
 
@@ -123,7 +133,7 @@ class Blob < SimpleDelegator
 
   def external_storage_error?
     if external_storage == :lfs
-      !project&.lfs_enabled?
+      !repository.lfs_enabled?
     else
       false
     end
@@ -248,5 +258,3 @@ class Blob < SimpleDelegator
     classes.find { |viewer_class| viewer_class.can_render?(self, verify_binary: verify_binary) }
   end
 end
-
-Blob.prepend_if_ee('EE::Blob')

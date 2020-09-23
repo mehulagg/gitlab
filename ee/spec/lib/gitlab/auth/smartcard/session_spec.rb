@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Smartcard::Session do
+RSpec.describe Gitlab::Auth::Smartcard::Session do
   describe '#active?' do
     let(:user) { create(:user) }
 

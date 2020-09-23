@@ -1,8 +1,11 @@
 # frozen_string_literal: true
 
-class PseudonymizerWorker
+class PseudonymizerWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
+  # rubocop:disable Scalability/CronWorkerContext
+  # This worker does not perform work scoped to a context
   include CronjobQueue
+  # rubocop:enable Scalability/CronWorkerContext
 
   feature_category :integrations
 
@@ -18,7 +21,7 @@ class PseudonymizerWorker
     uploader = Pseudonymizer::Uploader.new(options, progress_output: File.open(File::NULL, "w"))
 
     unless uploader.available?
-      Rails.logger.error("The pseudonymizer object storage must be configured.") # rubocop:disable Gitlab/RailsLogger
+      Gitlab::AppLogger.error("The pseudonymizer object storage must be configured.")
       return
     end
 

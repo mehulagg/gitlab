@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LabelsHelper do
+RSpec.describe LabelsHelper do
   describe '#show_label_issuables_link?' do
     shared_examples 'a valid response to show_label_issuables_link?' do |issuables_type, when_enabled = true, when_disabled = false|
       context "when asking for a #{issuables_type} link" do
@@ -35,7 +35,7 @@ describe LabelsHelper do
     end
 
     context 'with a group label' do
-      set(:group) { create(:group) }
+      let_it_be(:group) { create(:group) }
       let(:label) { create(:group_label, group: group, title: 'bug') }
 
       context 'when asking for an issue link' do
@@ -56,7 +56,7 @@ describe LabelsHelper do
 
     context 'without subject' do
       it "uses the label's project" do
-        expect(link_to_label(label_presenter)).to match %r{<a href="/#{label.project.full_path}/issues\?label_name%5B%5D=#{label.name}">.*</a>}
+        expect(link_to_label(label_presenter)).to match %r{<a.*href="/#{label.project.full_path}/-/issues\?label_name%5B%5D=#{label.name}".*>.*</a>}m
       end
     end
 
@@ -65,7 +65,7 @@ describe LabelsHelper do
       let(:subject) { build(:project, namespace: namespace, name: 'bar3') }
 
       it 'links to project issues page' do
-        expect(link_to_label(label_presenter)).to match %r{<a href="/foo3/bar3/issues\?label_name%5B%5D=#{label.name}">.*</a>}
+        expect(link_to_label(label_presenter)).to match %r{<a.*href="/foo3/bar3/-/issues\?label_name%5B%5D=#{label.name}".*>.*</a>}m
       end
     end
 
@@ -73,7 +73,7 @@ describe LabelsHelper do
       let(:subject) { build(:group, name: 'bar') }
 
       it 'links to group issues page' do
-        expect(link_to_label(label_presenter)).to match %r{<a href="/groups/bar/-/issues\?label_name%5B%5D=#{label.name}">.*</a>}
+        expect(link_to_label(label_presenter)).to match %r{<a.*href="/groups/bar/-/issues\?label_name%5B%5D=#{label.name}".*>.*</a>}m
       end
     end
 
@@ -81,7 +81,7 @@ describe LabelsHelper do
       ['issue', :issue, 'merge_request', :merge_request].each do |type|
         context "set to #{type}" do
           it 'links to correct page' do
-            expect(link_to_label(label_presenter, type: type)).to match %r{<a href="/#{label.project.full_path}/#{type.to_s.pluralize}\?label_name%5B%5D=#{label.name}">.*</a>}
+            expect(link_to_label(label_presenter, type: type)).to match %r{<a.*href="/#{label.project.full_path}/-/#{type.to_s.pluralize}\?label_name%5B%5D=#{label.name}".*>.*</a>}m
           end
         end
       end
@@ -105,7 +105,7 @@ describe LabelsHelper do
     context 'without block' do
       it 'uses render_colored_label as the link content' do
         expect(self).to receive(:render_colored_label)
-          .with(label_presenter, tooltip: true).and_return('Foo')
+          .with(label_presenter).and_return('Foo')
         expect(link_to_label(label_presenter)).to match('Foo')
       end
     end
@@ -127,73 +127,73 @@ describe LabelsHelper do
   end
 
   describe 'create_label_title' do
-    set(:group) { create(:group) }
+    let_it_be(:group) { create(:group) }
 
     context 'with a group as subject' do
       it 'returns "Create group label"' do
-        expect(create_label_title(group)).to eq 'Create group label'
+        expect(create_label_title(group)).to eq _('Create group label')
       end
     end
 
     context 'with a project as subject' do
-      set(:project) { create(:project, namespace: group) }
+      let_it_be(:project) { create(:project, namespace: group) }
 
       it 'returns "Create project label"' do
-        expect(create_label_title(project)).to eq 'Create project label'
+        expect(create_label_title(project)).to eq _('Create project label')
       end
     end
 
     context 'with no subject' do
       it 'returns "Create new label"' do
-        expect(create_label_title(nil)).to eq 'Create new label'
+        expect(create_label_title(nil)).to eq _('Create new label')
       end
     end
   end
 
   describe 'manage_labels_title' do
-    set(:group) { create(:group) }
+    let_it_be(:group) { create(:group) }
 
     context 'with a group as subject' do
       it 'returns "Manage group labels"' do
-        expect(manage_labels_title(group)).to eq 'Manage group labels'
+        expect(manage_labels_title(group)).to eq _('Manage group labels')
       end
     end
 
     context 'with a project as subject' do
-      set(:project) { create(:project, namespace: group) }
+      let_it_be(:project) { create(:project, namespace: group) }
 
       it 'returns "Manage project labels"' do
-        expect(manage_labels_title(project)).to eq 'Manage project labels'
+        expect(manage_labels_title(project)).to eq _('Manage project labels')
       end
     end
 
     context 'with no subject' do
       it 'returns "Manage labels"' do
-        expect(manage_labels_title(nil)).to eq 'Manage labels'
+        expect(manage_labels_title(nil)).to eq _('Manage labels')
       end
     end
   end
 
   describe 'view_labels_title' do
-    set(:group) { create(:group) }
+    let_it_be(:group) { create(:group) }
 
     context 'with a group as subject' do
       it 'returns "View group labels"' do
-        expect(view_labels_title(group)).to eq 'View group labels'
+        expect(view_labels_title(group)).to eq _('View group labels')
       end
     end
 
     context 'with a project as subject' do
-      set(:project) { create(:project, namespace: group) }
+      let_it_be(:project) { create(:project, namespace: group) }
 
       it 'returns "View project labels"' do
-        expect(view_labels_title(project)).to eq 'View project labels'
+        expect(view_labels_title(project)).to eq _('View project labels')
       end
     end
 
     context 'with no subject' do
       it 'returns "View labels"' do
-        expect(view_labels_title(nil)).to eq 'View labels'
+        expect(view_labels_title(nil)).to eq _('View labels')
       end
     end
   end
@@ -266,6 +266,7 @@ describe LabelsHelper do
 
   describe '#label_status_tooltip' do
     let(:status) { 'unsubscribed'.inquiry }
+
     subject { label_status_tooltip(label.present(issuable_subject: nil), status) }
 
     context 'with a project label' do

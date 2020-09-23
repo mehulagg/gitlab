@@ -43,13 +43,44 @@ module Banzai
       # Returns a String replaced with the return of the block.
       def self.references_in(text, pattern = object_class.reference_pattern)
         text.gsub(pattern) do |match|
-          symbol = $~[object_sym]
-          if object_class.reference_valid?(symbol)
-            yield match, symbol.to_i, $~[:project], $~[:namespace], $~
+          if ident = identifier($~)
+            yield match, ident, $~[:project], $~[:namespace], $~
           else
             match
           end
         end
+      end
+
+      def self.identifier(match_data)
+        symbol = symbol_from_match(match_data)
+
+        parse_symbol(symbol, match_data) if object_class.reference_valid?(symbol)
+      end
+
+      def identifier(match_data)
+        self.class.identifier(match_data)
+      end
+
+      def self.symbol_from_match(match)
+        key = object_sym
+        match[key] if match.names.include?(key.to_s)
+      end
+
+      # Transform a symbol extracted from the text to a meaningful value
+      # In most cases these will be integers, so we call #to_i by default
+      #
+      # This method has the contract that if a string `ref` refers to a
+      # record `record`, then `parse_symbol(ref) == record_identifier(record)`.
+      def self.parse_symbol(symbol, match_data)
+        symbol.to_i
+      end
+
+      # We assume that most classes are identifying records by ID.
+      #
+      # This method has the contract that if a string `ref` refers to a
+      # record `record`, then `class.parse_symbol(ref) == record_identifier(record)`.
+      def record_identifier(record)
+        record.id
       end
 
       def object_class
@@ -105,7 +136,7 @@ module Banzai
       end
 
       def call
-        return doc unless project || group
+        return doc unless project || group || user
 
         ref_pattern = object_class.reference_pattern
         link_pattern = object_class.link_reference_pattern
@@ -115,16 +146,16 @@ module Banzai
         link_pattern_start = /\A#{link_pattern}/
         link_pattern_anchor = /\A#{link_pattern}\z/
 
-        nodes.each do |node|
+        nodes.each_with_index do |node, index|
           if text_node?(node) && ref_pattern
-            replace_text_when_pattern_matches(node, ref_pattern) do |content|
+            replace_text_when_pattern_matches(node, index, ref_pattern) do |content|
               object_link_filter(content, ref_pattern)
             end
 
           elsif element_node?(node)
             yield_valid_link(node) do |link, inner_html|
               if ref_pattern && link =~ ref_pattern_anchor
-                replace_link_node_with_href(node, link) do
+                replace_link_node_with_href(node, index, link) do
                   object_link_filter(link, ref_pattern, link_content: inner_html)
                 end
 
@@ -134,7 +165,7 @@ module Banzai
               next unless link_pattern
 
               if link == inner_html && inner_html =~ link_pattern_start
-                replace_link_node_with_text(node, link) do
+                replace_link_node_with_text(node, index) do
                   object_link_filter(inner_html, link_pattern, link_reference: true)
                 end
 
@@ -142,7 +173,7 @@ module Banzai
               end
 
               if link =~ link_pattern_anchor
-                replace_link_node_with_href(node, link) do
+                replace_link_node_with_href(node, index, link) do
                   object_link_filter(link, link_pattern, link_content: inner_html, link_reference: true)
                 end
 
@@ -222,7 +253,7 @@ module Banzai
         object_parent_type = parent.is_a?(Group) ? :group : :project
 
         {
-          original:             text,
+          original:             escape_html_entities(text),
           link:                 link_content,
           link_reference:       link_reference,
           object_parent_type => parent.id,
@@ -234,7 +265,7 @@ module Banzai
         extras = []
 
         if matches.names.include?("anchor") && matches[:anchor] && matches[:anchor] =~ /\A\#note_(\d+)\z/
-          extras << "comment #{$1}"
+          extras << "comment #{Regexp.last_match(1)}"
         end
 
         extension = matches[:extension] if matches.names.include?("extension")
@@ -249,7 +280,7 @@ module Banzai
       end
 
       def object_link_text(object, matches)
-        parent = context[:project] || context[:group]
+        parent = project || group || user
         text = object.reference_link_text(parent)
 
         extras = object_link_text_extras(object, matches)
@@ -265,8 +296,10 @@ module Banzai
 
         @references_per[parent_type] ||= begin
           refs = Hash.new { |hash, key| hash[key] = Set.new }
-
-          regex = Regexp.union(object_class.reference_pattern, object_class.link_reference_pattern)
+          regex = [
+            object_class.link_reference_pattern,
+            object_class.reference_pattern
+          ].compact.reduce { |a, b| Regexp.union(a, b) }
 
           nodes.each do |node|
             node.to_html.scan(regex) do
@@ -276,8 +309,9 @@ module Banzai
                        full_group_path($~[:group])
                      end
 
-              symbol = $~[object_sym]
-              refs[path] << symbol if object_class.reference_valid?(symbol)
+              if ident = identifier($~)
+                refs[path] << ident
+              end
             end
           end
 
@@ -402,7 +436,7 @@ module Banzai
         escaped = escape_html_entities(text)
 
         escaped.gsub(REFERENCE_PLACEHOLDER_PATTERN) do |match|
-          placeholder_data[$1.to_i]
+          placeholder_data[Regexp.last_match(1).to_i]
         end
       end
     end

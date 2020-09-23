@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EnvironmentPolicy do
+RSpec.describe EnvironmentPolicy do
   using RSpec::Parameterized::TableSyntax
 
   let(:user) { create(:user) }
@@ -37,7 +37,13 @@ describe EnvironmentPolicy do
         context 'when an admin user' do
           let(:user) { create(:user, :admin) }
 
-          it { expect(policy).to be_allowed :stop_environment }
+          context 'when admin mode is enabled', :enable_admin_mode do
+            it { expect(policy).to be_allowed :stop_environment }
+          end
+
+          context 'when admin mode is disabled' do
+            it { expect(policy).to be_disallowed :stop_environment }
+          end
         end
 
         context 'with protected branch' do
@@ -54,7 +60,13 @@ describe EnvironmentPolicy do
           context 'when an admin user' do
             let(:user) { create(:user, :admin) }
 
-            it { expect(policy).to be_allowed :stop_environment }
+            context 'when admin mode is enabled', :enable_admin_mode do
+              it { expect(policy).to be_allowed :stop_environment }
+            end
+
+            context 'when admin mode is disabled' do
+              it { expect(policy).to be_disallowed :stop_environment }
+            end
           end
         end
       end
@@ -68,7 +80,7 @@ describe EnvironmentPolicy do
           nil         | false
           :guest      | false
           :reporter   | false
-          :developer  | false
+          :developer  | true
           :maintainer | true
         end
 
@@ -83,7 +95,63 @@ describe EnvironmentPolicy do
         context 'when an admin user' do
           let(:user) { create(:user, :admin) }
 
-          it { expect(policy).to be_allowed :stop_environment }
+          context 'when admin mode is enabled', :enable_admin_mode do
+            it { expect(policy).to be_allowed :stop_environment }
+          end
+
+          context 'when admin mode is disabled' do
+            it { expect(policy).to be_disallowed :stop_environment }
+          end
+        end
+      end
+
+      describe '#destroy_environment' do
+        let(:environment) do
+          create(:environment, project: project)
+        end
+
+        where(:access_level, :allowed?) do
+          nil         | false
+          :guest      | false
+          :reporter   | false
+          :developer  | true
+          :maintainer | true
+        end
+
+        with_them do
+          before do
+            project.add_user(user, access_level) unless access_level.nil?
+          end
+
+          it { expect(policy).to be_disallowed :destroy_environment }
+
+          context 'when environment is stopped' do
+            before do
+              environment.stop!
+            end
+
+            it { expect(policy.allowed?(:destroy_environment)).to be allowed? }
+          end
+        end
+
+        context 'when an admin user' do
+          let(:user) { create(:user, :admin) }
+
+          it { expect(policy).to be_disallowed :destroy_environment }
+
+          context 'when environment is stopped' do
+            before do
+              environment.stop!
+            end
+
+            context 'when admin mode is enabled', :enable_admin_mode do
+              it { expect(policy).to be_allowed :destroy_environment }
+            end
+
+            context 'when admin mode is disabled' do
+              it { expect(policy).to be_disallowed :destroy_environment }
+            end
+          end
         end
       end
     end

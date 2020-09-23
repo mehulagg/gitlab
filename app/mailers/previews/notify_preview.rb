@@ -77,7 +77,11 @@ class NotifyPreview < ActionMailer::Preview
   end
 
   def import_issues_csv_email
-    Notify.import_issues_csv_email(user, project, { success: 3, errors: [5, 6, 7], valid_file: true })
+    Notify.import_issues_csv_email(user.id, project.id, { success: 3, errors: [5, 6, 7], valid_file: true })
+  end
+
+  def issues_csv_email
+    Notify.issues_csv_email(user, project, '1997,Ford,E350', { truncated: false, rows_expected: 3, rows_written: 3 }).message
   end
 
   def closed_merge_request_email
@@ -109,11 +113,11 @@ class NotifyPreview < ActionMailer::Preview
   end
 
   def member_access_requested_email
-    Notify.member_access_requested_email('group', user.id, user.id).message
+    Notify.member_access_requested_email(member.source_type, member.id, user.id).message
   end
 
   def member_invite_accepted_email
-    Notify.member_invite_accepted_email('project', user.id).message
+    Notify.member_invite_accepted_email(member.source_type, member.id).message
   end
 
   def member_invite_declined_email
@@ -145,12 +149,36 @@ class NotifyPreview < ActionMailer::Preview
     Notify.pipeline_failed_email(pipeline, pipeline.user.try(:email))
   end
 
+  def pipeline_fixed_email
+    Notify.pipeline_fixed_email(pipeline, pipeline.user.try(:email))
+  end
+
   def autodevops_disabled_email
     Notify.autodevops_disabled_email(pipeline, user.email).message
   end
 
   def remote_mirror_update_failed_email
     Notify.remote_mirror_update_failed_email(remote_mirror.id, user.id).message
+  end
+
+  def unknown_sign_in_email
+    Notify.unknown_sign_in_email(user, '127.0.0.1', Time.current).message
+  end
+
+  def service_desk_new_note_email
+    cleanup do
+      note = create_note(noteable_type: 'Issue', noteable_id: issue.id, note: 'Issue note content')
+
+      Notify.service_desk_new_note_email(issue.id, note.id).message
+    end
+  end
+
+  def service_desk_thank_you_email
+    Notify.service_desk_thank_you_email(issue.id).message
+  end
+
+  def merge_when_pipeline_succeeds_email
+    Notify.merge_when_pipeline_succeeds_email(user.id, merge_request.id, user.id).message
   end
 
   private

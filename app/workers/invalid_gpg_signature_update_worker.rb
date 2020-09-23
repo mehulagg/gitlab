@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
-class InvalidGpgSignatureUpdateWorker
+class InvalidGpgSignatureUpdateWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   feature_category :source_code_management
+  weight 2
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(gpg_key_id)

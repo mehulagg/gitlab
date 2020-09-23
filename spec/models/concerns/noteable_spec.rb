@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Noteable do
+RSpec.describe Noteable do
   let!(:active_diff_note1) { create(:diff_note_on_merge_request) }
   let(:project) { active_diff_note1.project }
   subject { active_diff_note1.noteable }
@@ -59,6 +59,21 @@ describe Noteable do
         IndividualNoteDiscussion.new([note1], subject),
         IndividualNoteDiscussion.new([note2], subject)
       ])
+    end
+  end
+
+  describe '#discussion_ids_relation' do
+    it 'returns ordered discussion_ids' do
+      discussion_ids = subject.discussion_ids_relation.pluck(:discussion_id)
+
+      expect(discussion_ids).to eq([
+        active_diff_note1,
+        active_diff_note3,
+        outdated_diff_note1,
+        discussion_note1,
+        note1,
+        note2
+      ].map(&:discussion_id))
     end
   end
 
@@ -177,50 +192,6 @@ describe Noteable do
       end
     end
 
-    describe "#discussions_to_be_resolved?" do
-      context "when discussions are not resolvable" do
-        before do
-          allow(subject).to receive(:discussions_resolvable?).and_return(false)
-        end
-
-        it "returns false" do
-          expect(subject.discussions_to_be_resolved?).to be false
-        end
-      end
-
-      context "when discussions are resolvable" do
-        before do
-          allow(subject).to receive(:discussions_resolvable?).and_return(true)
-
-          allow(first_discussion).to receive(:resolvable?).and_return(true)
-          allow(second_discussion).to receive(:resolvable?).and_return(false)
-          allow(third_discussion).to receive(:resolvable?).and_return(true)
-        end
-
-        context "when all resolvable discussions are resolved" do
-          before do
-            allow(first_discussion).to receive(:resolved?).and_return(true)
-            allow(third_discussion).to receive(:resolved?).and_return(true)
-          end
-
-          it "returns false" do
-            expect(subject.discussions_to_be_resolved?).to be false
-          end
-        end
-
-        context "when some resolvable discussions are not resolved" do
-          before do
-            allow(first_discussion).to receive(:resolved?).and_return(true)
-            allow(third_discussion).to receive(:resolved?).and_return(false)
-          end
-
-          it "returns true" do
-            expect(subject.discussions_to_be_resolved?).to be true
-          end
-        end
-      end
-    end
-
     describe "#discussions_to_be_resolved" do
       before do
         allow(first_discussion).to receive(:to_be_resolved?).and_return(true)
@@ -270,7 +241,7 @@ describe Noteable do
 
   describe '.resolvable_types' do
     it 'exposes the replyable types' do
-      expect(described_class.resolvable_types).to include('MergeRequest')
+      expect(described_class.resolvable_types).to include('MergeRequest', 'DesignManagement::Design')
     end
   end
 
@@ -289,6 +260,46 @@ describe Noteable do
       it '10 is returned' do
         expect(subject.capped_notes_count(10)).to eq(10)
       end
+    end
+  end
+
+  describe "#has_any_diff_note_positions?" do
+    let(:source_branch) { "compare-with-merge-head-source" }
+    let(:target_branch) { "compare-with-merge-head-target" }
+    let(:merge_request) { create(:merge_request, source_branch: source_branch, target_branch: target_branch) }
+
+    let!(:note) do
+      path = "files/markdown/ruby-style-guide.md"
+
+      position = Gitlab::Diff::Position.new(
+        old_path: path,
+        new_path: path,
+        new_line: 508,
+        diff_refs: merge_request.diff_refs
+      )
+
+      create(:diff_note_on_merge_request, project: merge_request.project, position: position, noteable: merge_request)
+    end
+
+    before do
+      MergeRequests::MergeToRefService.new(merge_request.project, merge_request.author).execute(merge_request)
+      Discussions::CaptureDiffNotePositionsService.new(merge_request).execute
+    end
+
+    it "returns true when it has diff note positions" do
+      expect(merge_request.has_any_diff_note_positions?).to be(true)
+    end
+
+    it "returns false when it has notes but no diff note positions" do
+      DiffNotePosition.where(note: note).find_each(&:delete)
+
+      expect(merge_request.has_any_diff_note_positions?).to be(false)
+    end
+
+    it "returns false when it has no notes" do
+      merge_request.notes.find_each(&:destroy)
+
+      expect(merge_request.has_any_diff_note_positions?).to be(false)
     end
   end
 end

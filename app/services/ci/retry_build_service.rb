@@ -2,16 +2,22 @@
 
 module Ci
   class RetryBuildService < ::BaseService
-    CLONE_ACCESSORS = %i[pipeline project ref tag options name
-                         allow_failure stage stage_id stage_idx trigger_request
-                         yaml_variables when environment coverage_regex
-                         description tag_list protected needs].freeze
+    def self.clone_accessors
+      %i[pipeline project ref tag options name
+         allow_failure stage stage_id stage_idx trigger_request
+         yaml_variables when environment coverage_regex
+         description tag_list protected needs_attributes
+         resource_group scheduling_type].freeze
+    end
 
     def execute(build)
-      reprocess!(build).tap do |new_build|
-        build.pipeline.mark_as_processable_after_stage(build.stage_idx)
+      build.ensure_scheduling_type!
 
-        new_build.enqueue!
+      reprocess!(build).tap do |new_build|
+        mark_subsequent_stages_as_processable(build)
+        build.pipeline.reset_ancestor_bridges!
+
+        Gitlab::OptimisticLocking.retry_lock(new_build, &:enqueue)
 
         MergeRequests::AddTodoWhenBuildFailsService
           .new(project, current_user)
@@ -25,21 +31,23 @@ module Ci
         raise Gitlab::Access::AccessDeniedError
       end
 
-      attributes = CLONE_ACCESSORS.map do |attribute|
+      attributes = self.class.clone_accessors.map do |attribute|
         [attribute, build.public_send(attribute)] # rubocop:disable GitlabSecurity/PublicSend
-      end
+      end.to_h
 
-      attributes.push([:user, current_user])
-
-      build.retried = true
+      attributes[:user] = current_user
 
       Ci::Build.transaction do
         # mark all other builds of that name as retried
         build.pipeline.builds.latest
           .where(name: build.name)
-          .update_all(retried: true)
+          .update_all(retried: true, processed: true)
 
-        create_build!(attributes)
+        create_build!(attributes).tap do
+          # mark existing object as retried/processed without a reload
+          build.retried = true
+          build.processed = true
+        end
       end
     end
     # rubocop: enable CodeReuse/ActiveRecord
@@ -47,10 +55,21 @@ module Ci
     private
 
     def create_build!(attributes)
-      build = project.builds.new(Hash[attributes])
-      build.deployment = ::Gitlab::Ci::Pipeline::Seed::Deployment.new(build).to_resource
-      build.save!
+      build = project.builds.new(attributes)
+      build.assign_attributes(::Gitlab::Ci::Pipeline::Seed::Build.environment_attributes_for(build))
+      build.retried = false
+      BulkInsertableAssociations.with_bulk_insert(enabled: ::Gitlab::Ci::Features.bulk_insert_on_create?(project)) do
+        build.save!
+      end
       build
+    end
+
+    def mark_subsequent_stages_as_processable(build)
+      build.pipeline.processables.skipped.after_stage(build.stage_idx).find_each do |processable|
+        Gitlab::OptimisticLocking.retry_lock(processable, &:process)
+      end
     end
   end
 end
+
+Ci::RetryBuildService.prepend_if_ee('EE::Ci::RetryBuildService')

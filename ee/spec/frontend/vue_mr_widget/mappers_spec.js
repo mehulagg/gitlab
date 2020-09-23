@@ -28,7 +28,7 @@ describe('EE MR Widget mappers', () => {
         const result = mapApprovalsResponse(data);
 
         expect(result).toEqual(
-          jasmine.objectContaining({
+          expect.objectContaining({
             approvalRuleNamesLeft: ['Lorem', 'Ipsum'],
           }),
         );
@@ -43,7 +43,7 @@ describe('EE MR Widget mappers', () => {
         const result = mapApprovalsResponse(data);
 
         expect(result).toEqual(
-          jasmine.objectContaining({
+          expect.objectContaining({
             approvalRuleNamesLeft: ['Lorem', 'Ipsum', 'License-Check', 'Vulnerability-Check'],
           }),
         );
@@ -58,7 +58,7 @@ describe('EE MR Widget mappers', () => {
         const result = mapApprovalsResponse(data);
 
         expect(result).toEqual(
-          jasmine.objectContaining({
+          expect.objectContaining({
             approvalRuleNamesLeft: ['Lorem', 'Ipsum', 'Code Owners'],
           }),
         );
@@ -71,7 +71,7 @@ describe('EE MR Widget mappers', () => {
         });
 
         expect(result).toEqual(
-          jasmine.objectContaining({
+          expect.objectContaining({
             approvalRuleNamesLeft: [],
           }),
         );
@@ -87,7 +87,7 @@ describe('EE MR Widget mappers', () => {
         const result = mapApprovalsResponse(data);
 
         expect(result).toEqual(
-          jasmine.objectContaining({
+          expect.objectContaining({
             approvalRuleNamesLeft: [],
           }),
         );

@@ -21,27 +21,14 @@ module Boards
     before_action :validate_id_list, only: [:bulk_move]
     before_action :can_move_issues?, only: [:bulk_move]
 
-    # rubocop: disable CodeReuse/ActiveRecord
     def index
       list_service = Boards::Issues::ListService.new(board_parent, current_user, filter_params)
-      issues = list_service.execute
-      issues = issues.page(params[:page]).per(params[:per] || 20).without_count
+      issues = issues_from(list_service)
+
       Issue.move_nulls_to_end(issues) if Gitlab::Database.read_write?
-      issues = issues.preload(:milestone,
-                              :assignees,
-                              project: [
-                                  :route,
-                                  {
-                                      namespace: [:route]
-                                  }
-                              ],
-                              labels: [:priorities],
-                              notes: [:award_emoji, :author]
-                             )
 
       render_issues(issues, list_service.metadata)
     end
-    # rubocop: enable CodeReuse/ActiveRecord
 
     def create
       service = Boards::Issues::CreateService.new(board_parent, project, current_user, issue_params)
@@ -74,12 +61,39 @@ module Boards
 
     private
 
+    def issues_from(list_service)
+      issues = list_service.execute
+      issues.page(params[:page]).per(params[:per] || 20)
+            .without_count
+            .preload(associations_to_preload) # rubocop: disable CodeReuse/ActiveRecord
+            .load
+    end
+
+    def associations_to_preload
+      [
+        :milestone,
+        :assignees,
+        project: [
+            :route,
+            {
+                namespace: [:route]
+            }
+        ],
+        labels: [:priorities],
+        notes: [:award_emoji, :author]
+      ]
+    end
+
     def can_move_issues?
       head(:forbidden) unless can?(current_user, :admin_issue, board)
     end
 
+    def serializer_options(issues)
+      {}
+    end
+
     def render_issues(issues, metadata)
-      data = { issues: serialize_as_json(issues) }
+      data = { issues: serialize_as_json(issues, opts: serializer_options(issues)) }
       data.merge!(metadata)
 
       render json: data
@@ -90,7 +104,7 @@ module Boards
     end
 
     def filter_params
-      params.merge(board_id: params[:board_id], id: params[:list_id])
+      params.permit(*Boards::Issues::ListService.valid_params).merge(board_id: params[:board_id], id: params[:list_id])
         .reject { |_, value| value.nil? }
     end
 
@@ -125,8 +139,10 @@ module Boards
       IssueSerializer.new(current_user: current_user)
     end
 
-    def serialize_as_json(resource)
-      serializer.represent(resource, serializer: 'board', include_full_project_path: board.group_board?)
+    def serialize_as_json(resource, opts: {})
+      opts.merge!(include_full_project_path: board.group_board?, serializer: 'board')
+
+      serializer.represent(resource, opts)
     end
 
     def whitelist_query_limiting
@@ -139,3 +155,5 @@ module Boards
     end
   end
 end
+
+Boards::IssuesController.prepend_if_ee('EE::Boards::IssuesController')

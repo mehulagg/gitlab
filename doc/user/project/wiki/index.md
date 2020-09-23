@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Knowledge
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, how-to
+---
+
 # Wiki
 
 A separate system for documentation called Wiki, is built right into each
@@ -38,7 +45,7 @@ automatically. For example, a title of `docs/my-page` will create a wiki
 page with a path `/wikis/docs/my-page`.
 
 Once you enter the page name, it's time to fill in its content. GitLab wikis
-support Markdown, RDoc and AsciiDoc. For Markdown based pages, all the
+support Markdown, RDoc, AsciiDoc, and Org. For Markdown based pages, all the
 [Markdown features](../../markdown.md) are supported and for links there is
 some [wiki specific](../../markdown.md#wiki-specific-markdown) behavior.
 
@@ -50,13 +57,39 @@ When you're ready, click the **Create page** and the new page will be created.
 
 ![New page](img/wiki_create_new_page.png)
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/issues/33475) in GitLab 11.3.
+### Attachment storage
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/33475) in GitLab 11.3.
 
 Starting with GitLab 11.3, any file that is uploaded to the wiki via GitLab's
 interface will be stored in the wiki Git repository, and it will be available
 if you clone the wiki repository locally. All uploaded files prior to GitLab
 11.3 are stored in GitLab itself. If you want them to be part of the wiki's Git
 repository, you will have to upload them again.
+
+### Special characters in page titles
+
+Wiki pages are stored as files in a Git repository, so certain characters have a special meaning:
+
+- Spaces are converted into hyphens when storing a page.
+- Hyphens (`-`) are converted back into spaces when displaying a page.
+- Slashes (`/`) can't be used, because they're used as path separator.
+
+### Length restrictions for file and directory names
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/24364) in GitLab 12.8.
+
+Many common file systems have a [limit of 255 bytes for file and directory names](https://en.wikipedia.org/wiki/Comparison_of_file_systems#Limits), and while Git and GitLab both support paths exceeding those limits, the presence of them makes it impossible for users on those file systems to checkout a wiki repository locally.
+
+To avoid this situation, these limits are enforced when editing pages through the GitLab web interface and API:
+
+- 245 bytes for page titles (reserving 10 bytes for the file extension).
+- 255 bytes for directory names.
+
+Please note that:
+
+- Non-ASCII characters take up more than one byte.
+- It's still possible to create files and directories exceeding those limits locally through Git, but this might break on other people's machines.
 
 ## Editing a wiki page
 
@@ -66,6 +99,11 @@ Requires Developer [permissions](../../permissions.md).
 To edit a page, simply click on the **Edit** button. From there on, you can
 change its content. When done, click **Save changes** for the changes to take
 effect.
+
+### Adding a table of contents
+
+To generate a table of contents from the headings in a Wiki page, use the `[[_TOC_]]` tag.
+For an example, see [Table of contents](../../markdown.md#table-of-contents).
 
 ## Deleting a wiki page
 
@@ -95,7 +133,7 @@ found. The list is ordered alphabetically.
 ![Wiki sidebar](img/wiki_sidebar.png)
 
 If you have many pages, not all will be listed in the sidebar. Click on
-**More pages** to see all of them.
+**View All Pages** to see all of them.
 
 ## Viewing the history of a wiki page
 
@@ -103,11 +141,69 @@ The changes of a wiki page over time are recorded in the wiki's Git repository,
 and you can view them by clicking the **Page history** button.
 
 From the history page you can see the revision of the page (Git commit SHA), its
-author, the commit message, when it was last updated and the page markup format.
+author, the commit message, and when it was last updated.
 To see how a previous version of the page looked like, click on a revision
-number.
+number in the **Page version** column.
 
 ![Wiki page history](img/wiki_page_history.png)
+
+### Viewing the changes between page versions
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/15242) in GitLab 13.2.
+
+Similar to versioned diff file views, you can see the changes made in a given Wiki page version:
+
+1. Navigate to the Wiki page you're interested in.
+1. Click on **Page history** to see all page versions.
+1. Click on the commit message in the **Changes** column for the version you're interested in:
+
+   ![Wiki page changes](img/wiki_page_diffs_v13_2.png)
+
+## Wiki activity records
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/14902) in **GitLab 12.10.**
+> - Git events were [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/216014) in **GitLab 13.0.**
+> - It's enabled on GitLab.com.
+> - Git access activity creation is managed by a feature flag.
+> - To use it in GitLab self-managed instances, ask a GitLab administrator to [enable it](#enable-or-disable-wiki-events-in-git). **(CORE ONLY)**
+
+Wiki events (creation, deletion, and updates) are tracked by GitLab and
+displayed on the [user profile](../../profile/index.md#user-profile),
+[group](../../group/index.md#view-group-activity),
+and [project](../index.md#project-activity) activity pages.
+
+### Enable or disable Wiki events in Git **(CORE ONLY)**
+
+Tracking wiki events through Git is under development and not ready for production use. It is
+deployed behind a feature flag that is **disabled by default**.
+[GitLab administrators with access to the GitLab Rails console](../../../administration/feature_flags.md)
+can enable it for your instance.
+
+To enable it:
+
+```ruby
+Feature.enable(:wiki_events_on_git_push)
+```
+
+To enable for just a particular project:
+
+```ruby
+project = Project.find_by_full_path('your-group/your-project')
+Feature.enable(:wiki_events_on_git_push, project)
+```
+
+To disable it:
+
+```ruby
+Feature.disable(:wiki_events_on_git_push)
+```
+
+To disable for just a particular project:
+
+```ruby
+project = Project.find_by_full_path('your-group/your-project')
+Feature.disable(:wiki_events_on_git_push, project)
+```
 
 ## Adding and editing wiki pages locally
 
@@ -117,11 +213,36 @@ them like you would do with every other Git repository.
 On the right sidebar, click on **Clone repository** and follow the on-screen
 instructions.
 
+Files that you add to your wiki locally must have one of the following
+supported extensions, depending on the markup language you wish to use,
+otherwise they will not display when pushed to GitLab:
+
+- Markdown extensions: `.mdown`, `.mkd`, `.mkdn`, `.md`, `.markdown`.
+- AsciiDoc extensions: `.adoc`, `.ad`, `.asciidoc`.
+- Other markup extensions: `.textile`, `.rdoc`, `.org`, `.creole`, `.wiki`, `.mediawiki`, `.rst`.
+
 ## Customizing sidebar
 
 On the project's Wiki page, there is a right side navigation that renders the full Wiki pages list by default, with hierarchy.
 
-If the Wiki repository contains a `_sidebar` page, the file of this page replaces the default side navigation.
-This custom file serves to render it's custom content, fully replacing the standard sidebar.
+To customize the sidebar, you can create a file named `_sidebar` to fully replace the default navigation.
+
+CAUTION: **Warning:**
+Unless you link the `_sidebar` file from your custom nav, to edit it you'll have to access it directly
+from the browser's address bar by typing: `https://gitlab.com/<namespace>/<project_name>/-/wikis/_sidebar` (for self-managed GitLab instances, replace `gitlab.com` with your instance's URL).
+
+Example for `_sidebar` (using Markdown format):
+
+```markdown
+### [Home](home)
+
+- [Hello World](hello)
+- [Foo](foo)
+- [Bar](bar)
+
+---
+
+- [Sidebar](_sidebar)
+```
 
 Support for displaying a generated TOC with a custom side navigation is planned.

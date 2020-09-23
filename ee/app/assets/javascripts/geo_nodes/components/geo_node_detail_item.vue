@@ -1,25 +1,26 @@
 <script>
+import { GlIcon, GlPopover, GlLink, GlSprintf } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import popover from '~/vue_shared/directives/popover';
-import tooltip from '~/vue_shared/directives/tooltip';
-import Icon from '~/vue_shared/components/icon.vue';
-import StackedProgressBar from '~/vue_shared/components/stacked_progress_bar.vue';
 
-import { VALUE_TYPE, CUSTOM_TYPE } from '../constants';
+import { VALUE_TYPE, CUSTOM_TYPE, REPLICATION_HELP_URL } from '../constants';
 
 import GeoNodeSyncSettings from './geo_node_sync_settings.vue';
 import GeoNodeEventStatus from './geo_node_event_status.vue';
+import GeoNodeSyncProgress from './geo_node_sync_progress.vue';
 
 export default {
   components: {
-    Icon,
-    StackedProgressBar,
     GeoNodeSyncSettings,
     GeoNodeEventStatus,
+    GeoNodeSyncProgress,
+    GlIcon,
+    GlPopover,
+    GlLink,
+    GlSprintf,
   },
   directives: {
     popover,
-    tooltip,
   },
   props: {
     itemTitle: {
@@ -31,38 +32,19 @@ export default {
       required: false,
       default: '',
     },
+    itemEnabled: {
+      type: Boolean,
+      required: false,
+      default: true,
+    },
     itemValue: {
       type: [Object, String, Number],
       required: true,
     },
-    itemValueStale: {
-      type: Boolean,
-      required: false,
-      default: false,
-    },
-    itemValueStaleTooltip: {
-      type: String,
-      required: false,
-      default: '',
-    },
-    successLabel: {
-      type: String,
-      required: false,
-      default: s__('GeoNodes|Synced'),
-    },
-    failureLabel: {
-      type: String,
-      required: false,
-      default: s__('GeoNodes|Failed'),
-    },
-    neutralLabel: {
-      type: String,
-      required: false,
-      default: s__('GeoNodes|Out of sync'),
-    },
     itemValueType: {
       type: String,
-      required: true,
+      required: false,
+      default: VALUE_TYPE.GRAPH,
     },
     customType: {
       type: String,
@@ -74,15 +56,10 @@ export default {
       required: false,
       default: false,
     },
-    helpInfo: {
-      type: [Boolean, Object],
+    detailsPath: {
+      type: String,
       required: false,
-      default: false,
-    },
-    featureDisabled: {
-      type: Boolean,
-      required: false,
-      default: false,
+      default: '',
     },
   },
   computed: {
@@ -101,76 +78,66 @@ export default {
     isCustomTypeSync() {
       return this.customType === CUSTOM_TYPE.SYNC;
     },
-    popoverConfig() {
-      return {
-        html: true,
-        trigger: 'click',
-        placement: 'top',
-        template: `
-            <div class="popover geo-node-detail-popover" role="tooltip">
-              <div class="arrow"></div>
-              <p class="popover-header"></p>
-              <div class="popover-body"></div>
-            </div>
-          `,
-        title: this.helpInfo.title,
-        content: `
-            <a href="${this.helpInfo.url}">
-              ${this.helpInfo.urlText}
-            </a>
-          `,
-      };
-    },
   },
+  replicationHelpUrl: REPLICATION_HELP_URL,
+  disabledText: s__('Geo|Synchronization of %{itemTitle} is disabled.'),
 };
 </script>
 
 <template>
-  <div v-if="!featureDisabled" class="prepend-top-15 prepend-left-10 node-detail-item">
-    <div class="node-detail-title">
-      <span>{{ itemTitle }}</span>
-      <icon
-        v-if="hasHelpInfo"
-        v-popover="popoverConfig"
-        :size="12"
-        class="node-detail-help-text prepend-left-5"
-        name="question"
-      />
+  <div class="mt-2 ml-2 node-detail-item">
+    <div class="d-flex align-items-center text-secondary-700">
+      <span class="node-detail-title">{{ itemTitle }}</span>
     </div>
-    <div v-if="isValueTypePlain" :class="cssClass" class="node-detail-value">{{ itemValue }}</div>
-    <div v-if="isValueTypeGraph" :class="{ 'd-flex': itemValueStale }" class="node-detail-value">
-      <stacked-progress-bar
-        :css-class="itemValueStale ? 'flex-fill' : ''"
-        :success-label="successLabel"
-        :failure-label="failureLabel"
-        :neutral-label="neutralLabel"
-        :success-count="itemValue.successCount"
-        :failure-count="itemValue.failureCount"
-        :total-count="itemValue.totalCount"
+    <div v-if="itemEnabled">
+      <div v-if="isValueTypePlain" :class="cssClass" class="mt-1 node-detail-value">
+        {{ itemValue }}
+      </div>
+      <geo-node-sync-progress
+        v-if="isValueTypeGraph"
+        :item-enabled="itemEnabled"
+        :item-title="itemTitle"
+        :item-value="itemValue"
+        :details-path="detailsPath"
+        class="mt-1"
       />
-      <icon
-        v-show="itemValueStale"
-        v-tooltip
-        :title="itemValueStaleTooltip"
-        name="time-out"
-        class="prepend-left-10 detail-value-stale-icon"
-        data-container="body"
-      />
+      <template v-if="isValueTypeCustom">
+        <geo-node-sync-settings v-if="isCustomTypeSync" v-bind="itemValue" />
+        <geo-node-event-status
+          v-else
+          :event-id="itemValue.eventId"
+          :event-time-stamp="itemValue.eventTimeStamp"
+          :event-type-log-status="eventTypeLogStatus"
+        />
+      </template>
     </div>
-    <template v-if="isValueTypeCustom">
-      <geo-node-sync-settings
-        v-if="isCustomTypeSync"
-        :sync-status-unavailable="itemValue.syncStatusUnavailable"
-        :selective-sync-type="itemValue.selectiveSyncType"
-        :last-event="itemValue.lastEvent"
-        :cursor-last-event="itemValue.cursorLastEvent"
-      />
-      <geo-node-event-status
-        v-else
-        :event-id="itemValue.eventId"
-        :event-time-stamp="itemValue.eventTimeStamp"
-        :event-type-log-status="eventTypeLogStatus"
-      />
-    </template>
+    <div v-else class="mt-1">
+      <div
+        :id="`syncDisabled-${itemTitle}`"
+        class="d-inline-flex align-items-center cursor-pointer"
+      >
+        <gl-icon name="canceled-circle" :size="14" class="mr-1 text-secondary-300" />
+        <span ref="disabledText" class="text-secondary-600 gl-font-sm">{{
+          __('Synchronization disabled')
+        }}</span>
+      </div>
+      <gl-popover
+        :target="`syncDisabled-${itemTitle}`"
+        placement="right"
+        triggers="hover focus"
+        :css-classes="['w-100']"
+      >
+        <section>
+          <gl-sprintf :message="$options.disabledText">
+            <template #itemTitle>{{ itemTitle.toLowerCase() }}</template>
+          </gl-sprintf>
+          <div class="mt-3">
+            <gl-link class="gl-font-sm" :href="$options.replicationHelpUrl" target="_blank">{{
+              __('Learn how to enable synchronization')
+            }}</gl-link>
+          </div>
+        </section>
+      </gl-popover>
+    </div>
   </div>
 </template>

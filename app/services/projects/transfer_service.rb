@@ -13,8 +13,6 @@ module Projects
     include Gitlab::ShellAdapter
     TransferError = Class.new(StandardError)
 
-    attr_reader :new_namespace
-
     def execute(new_namespace)
       @new_namespace = new_namespace
 
@@ -39,6 +37,8 @@ module Projects
 
     private
 
+    attr_reader :old_path, :new_path, :new_namespace
+
     # rubocop: disable CodeReuse/ActiveRecord
     def transfer(project)
       @old_path = project.full_path
@@ -55,9 +55,17 @@ module Projects
         raise TransferError.new(s_('TransferProject|Project cannot be transferred, because tags are present in its container registry'))
       end
 
+      if project.has_packages?(:npm) && !new_namespace_has_same_root?(project)
+        raise TransferError.new(s_("TransferProject|Root namespace can't be updated if project has NPM packages"))
+      end
+
       attempt_transfer_transaction
     end
     # rubocop: enable CodeReuse/ActiveRecord
+
+    def new_namespace_has_same_root?(project)
+      new_namespace.root_ancestor == project.namespace.root_ancestor
+    end
 
     def attempt_transfer_transaction
       Project.transaction do
@@ -80,15 +88,14 @@ module Projects
         # Move uploads
         move_project_uploads(project)
 
-        # Move pages
-        Gitlab::PagesTransfer.new.move_project(project.path, @old_namespace.full_path, @new_namespace.full_path)
-
         project.old_path_with_namespace = @old_path
 
         update_repository_configuration(@new_path)
 
         execute_system_hooks
       end
+
+      move_pages(project)
     rescue Exception # rubocop:disable Lint/RescueException
       rollback_side_effects
       raise
@@ -132,8 +139,11 @@ module Projects
     end
 
     def rollback_folder_move
+      return if project.hashed_storage?(:repository)
+
       move_repo_folder(@new_path, @old_path)
-      move_repo_folder("#{@new_path}.wiki", "#{@old_path}.wiki")
+      move_repo_folder(new_wiki_repo_path, old_wiki_repo_path)
+      move_repo_folder(new_design_repo_path, old_design_repo_path)
     end
 
     def move_repo_folder(from_name, to_name)
@@ -155,8 +165,9 @@ module Projects
       # Disk path is changed; we need to ensure we reload it
       project.reload_repository!
 
-      # Move wiki repo also if present
-      move_repo_folder("#{@old_path}.wiki", "#{@new_path}.wiki")
+      # Move wiki and design repos also if present
+      move_repo_folder(old_wiki_repo_path, new_wiki_repo_path)
+      move_repo_folder(old_design_repo_path, new_design_repo_path)
     end
 
     def move_project_uploads(project)
@@ -167,6 +178,29 @@ module Projects
         @old_namespace.full_path,
         @new_namespace.full_path
       )
+    end
+
+    def move_pages(project)
+      return unless project.pages_deployed?
+
+      transfer = Gitlab::PagesTransfer.new.async
+      transfer.move_project(project.path, @old_namespace.full_path, @new_namespace.full_path)
+    end
+
+    def old_wiki_repo_path
+      "#{old_path}#{::Gitlab::GlRepository::WIKI.path_suffix}"
+    end
+
+    def new_wiki_repo_path
+      "#{new_path}#{::Gitlab::GlRepository::WIKI.path_suffix}"
+    end
+
+    def old_design_repo_path
+      "#{old_path}#{::Gitlab::GlRepository::DESIGN.path_suffix}"
+    end
+
+    def new_design_repo_path
+      "#{new_path}#{::Gitlab::GlRepository::DESIGN.path_suffix}"
     end
   end
 end

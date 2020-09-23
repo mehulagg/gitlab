@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'cycle analytics events' do
+RSpec.describe 'cycle analytics events' do
   let(:project) { create(:project, :repository) }
   let(:from_date) { 10.days.ago }
   let(:user) { create(:user, :admin) }
@@ -303,48 +303,6 @@ describe 'cycle analytics events' do
 
     it "has the author's name" do
       expect(events.first[:author][:name]).to eq(MergeRequest.first.author.name)
-    end
-  end
-
-  describe '#production_events', :sidekiq_might_not_need_inline do
-    let(:stage) { :production }
-    let!(:context) { create(:issue, project: project, created_at: 2.days.ago) }
-
-    before do
-      merge_merge_requests_closing_issue(user, project, context)
-      deploy_master(user, project)
-    end
-
-    it 'has the total time' do
-      expect(events.first[:total_time]).not_to be_empty
-    end
-
-    it 'has a title' do
-      expect(events.first[:title]).to eq(context.title)
-    end
-
-    it 'has the URL' do
-      expect(events.first[:url]).not_to be_nil
-    end
-
-    it 'has an iid' do
-      expect(events.first[:iid]).to eq(context.iid.to_s)
-    end
-
-    it 'has a created_at timestamp' do
-      expect(events.first[:created_at]).to end_with('ago')
-    end
-
-    it "has the author's URL" do
-      expect(events.first[:author][:web_url]).not_to be_nil
-    end
-
-    it "has the author's avatar URL" do
-      expect(events.first[:author][:avatar_url]).not_to be_nil
-    end
-
-    it "has the author's name" do
-      expect(events.first[:author][:name]).to eq(context.author.name)
     end
   end
 

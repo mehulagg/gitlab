@@ -1,4 +1,4 @@
-/* eslint-disable func-names, no-var, no-return-assign */
+/* eslint-disable func-names, no-return-assign */
 
 import $ from 'jquery';
 import Cookies from 'js-cookie';
@@ -6,54 +6,61 @@ import { __ } from '~/locale';
 import { mergeUrlParams } from '~/lib/utils/url_utility';
 import { serializeForm } from '~/lib/utils/forms';
 import axios from '~/lib/utils/axios_utils';
-import flash from '~/flash';
+import { deprecatedCreateFlash as flash } from '~/flash';
 import projectSelect from '../../project_select';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
 
 export default class Project {
   constructor() {
     const $cloneOptions = $('ul.clone-options-dropdown');
-    const $projectCloneField = $('#project_clone');
-    const $cloneBtnLabel = $('.js-git-clone-holder .js-clone-dropdown-label');
-    const mobileCloneField = document.querySelector(
-      '.js-mobile-git-clone .js-clone-dropdown-label',
-    );
+    if ($cloneOptions.length) {
+      const $projectCloneField = $('#project_clone');
+      const $cloneBtnLabel = $('.js-git-clone-holder .js-clone-dropdown-label');
+      const mobileCloneField = document.querySelector(
+        '.js-mobile-git-clone .js-clone-dropdown-label',
+      );
 
-    const selectedCloneOption = $cloneBtnLabel.text().trim();
-    if (selectedCloneOption.length > 0) {
-      $(`a:contains('${selectedCloneOption}')`, $cloneOptions).addClass('is-active');
+      const selectedCloneOption = $cloneBtnLabel.text().trim();
+      if (selectedCloneOption.length > 0) {
+        $(`a:contains('${selectedCloneOption}')`, $cloneOptions).addClass('is-active');
+      }
+
+      $('a', $cloneOptions).on('click', e => {
+        e.preventDefault();
+        const $this = $(e.currentTarget);
+        const url = $this.attr('href');
+        const cloneType = $this.data('cloneType');
+
+        $('.is-active', $cloneOptions).removeClass('is-active');
+        $(`a[data-clone-type="${cloneType}"]`).each(function() {
+          const $el = $(this);
+          const activeText = $el.find('.dropdown-menu-inner-title').text();
+          const $container = $el.closest('.project-clone-holder');
+          const $label = $container.find('.js-clone-dropdown-label');
+
+          $el.toggleClass('is-active');
+          $label.text(activeText);
+        });
+
+        if (mobileCloneField) {
+          mobileCloneField.dataset.clipboardText = url;
+        } else {
+          $projectCloneField.val(url);
+        }
+        $('.js-git-empty .js-clone').text(url);
+      });
     }
 
-    $('a', $cloneOptions).on('click', e => {
-      e.preventDefault();
-      const $this = $(e.currentTarget);
-      const url = $this.attr('href');
-      const cloneType = $this.data('cloneType');
-
-      $('.is-active', $cloneOptions).removeClass('is-active');
-      $(`a[data-clone-type="${cloneType}"]`).each(function() {
-        const $el = $(this);
-        const activeText = $el.find('.dropdown-menu-inner-title').text();
-        const $container = $el.closest('.project-clone-holder');
-        const $label = $container.find('.js-clone-dropdown-label');
-
-        $el.toggleClass('is-active');
-        $label.text(activeText);
-      });
-
-      if (mobileCloneField) {
-        mobileCloneField.dataset.clipboardText = url;
-      } else {
-        $projectCloneField.val(url);
-      }
-      $('.js-git-empty .js-clone').text(url);
-    });
     // Ref switcher
-    Project.initRefSwitcher();
-    $('.project-refs-select').on('change', function() {
-      return $(this)
-        .parents('form')
-        .submit();
-    });
+    if (document.querySelector('.js-project-refs-dropdown')) {
+      Project.initRefSwitcher();
+      $('.project-refs-select').on('change', function() {
+        return $(this)
+          .parents('form')
+          .submit();
+      });
+    }
+
     $('.hide-no-ssh-message').on('click', function(e) {
       Cookies.set('hide_no_ssh_message', 'false');
       $(this)
@@ -77,6 +84,7 @@ export default class Project {
         .remove();
       return e.preventDefault();
     });
+
     Project.projectSelectDropdown();
   }
 
@@ -90,21 +98,21 @@ export default class Project {
   }
 
   static initRefSwitcher() {
-    var refListItem = document.createElement('li');
-    var refLink = document.createElement('a');
+    const refListItem = document.createElement('li');
+    const refLink = document.createElement('a');
 
     refLink.href = '#';
 
     return $('.js-project-refs-dropdown').each(function() {
-      var $dropdown = $(this);
-      var selected = $dropdown.data('selected');
-      var fieldName = $dropdown.data('fieldName');
-      var shouldVisit = Boolean($dropdown.data('visit'));
-      var $form = $dropdown.closest('form');
-      var action = $form.attr('action');
-      var linkTarget = mergeUrlParams(serializeForm($form[0]), action);
+      const $dropdown = $(this);
+      const selected = $dropdown.data('selected');
+      const fieldName = $dropdown.data('fieldName');
+      const shouldVisit = Boolean($dropdown.data('visit'));
+      const $form = $dropdown.closest('form');
+      const action = $form.attr('action');
+      const linkTarget = mergeUrlParams(serializeForm($form[0]), action);
 
-      return $dropdown.glDropdown({
+      return initDeprecatedJQueryDropdown($dropdown, {
         data(term, callback) {
           axios
             .get($dropdown.data('refsUrl'), {
@@ -123,9 +131,9 @@ export default class Project {
         inputFieldName: $dropdown.data('inputFieldName'),
         fieldName,
         renderRow(ref) {
-          var li = refListItem.cloneNode(false);
+          const li = refListItem.cloneNode(false);
 
-          var link = refLink.cloneNode(false);
+          const link = refLink.cloneNode(false);
 
           if (ref === selected) {
             link.className = 'is-active';

@@ -12,6 +12,7 @@ class Commit
   include StaticModel
   include Presentable
   include ::Gitlab::Utils::StrongMemoize
+  include ActsAsPaginatedDiff
   include CacheMarkdownField
 
   attr_mentionable :safe_message, pipeline: :single_line
@@ -20,17 +21,13 @@ class Commit
   participant :committer
   participant :notes_with_associations
 
-  attr_accessor :project, :author
   attr_accessor :redacted_description_html
   attr_accessor :redacted_title_html
   attr_accessor :redacted_full_title_html
-  attr_reader :gpg_commit
+  attr_reader :container
 
-  DIFF_SAFE_LINES = Gitlab::Git::DiffCollection::DEFAULT_LIMITS[:max_lines]
-
-  # Commits above this size will not be rendered in HTML
-  DIFF_HARD_LIMIT_FILES = 1000
-  DIFF_HARD_LIMIT_LINES = 50000
+  delegate :repository, to: :container
+  delegate :project, to: :repository, allow_nil: true
 
   MIN_SHA_LENGTH = Gitlab::Git::Commit::MIN_SHA_LENGTH
   COMMIT_SHA_PATTERN = /\h{#{MIN_SHA_LENGTH},40}/.freeze
@@ -43,12 +40,12 @@ class Commit
   cache_markdown_field :description, pipeline: :commit_description
 
   class << self
-    def decorate(commits, project)
+    def decorate(commits, container)
       commits.map do |commit|
         if commit.is_a?(Commit)
           commit
         else
-          self.new(commit, project)
+          self.new(commit, container)
         end
       end
     end
@@ -77,31 +74,51 @@ class Commit
       sha[0..MIN_SHA_LENGTH]
     end
 
-    def max_diff_options
+    def diff_safe_lines
+      Gitlab::Git::DiffCollection.default_limits[:max_lines]
+    end
+
+    def diff_hard_limit_files(project: nil)
+      if Feature.enabled?(:increased_diff_limits, project)
+        2000
+      else
+        1000
+      end
+    end
+
+    def diff_hard_limit_lines(project: nil)
+      if Feature.enabled?(:increased_diff_limits, project)
+        75000
+      else
+        50000
+      end
+    end
+
+    def max_diff_options(project: nil)
       {
-        max_files: DIFF_HARD_LIMIT_FILES,
-        max_lines: DIFF_HARD_LIMIT_LINES
+        max_files: diff_hard_limit_files(project: project),
+        max_lines: diff_hard_limit_lines(project: project)
       }
     end
 
-    def from_hash(hash, project)
-      raw_commit = Gitlab::Git::Commit.new(project.repository.raw, hash)
-      new(raw_commit, project)
+    def from_hash(hash, container)
+      raw_commit = Gitlab::Git::Commit.new(container.repository.raw, hash)
+      new(raw_commit, container)
     end
 
     def valid_hash?(key)
       !!(EXACT_COMMIT_SHA_PATTERN =~ key)
     end
 
-    def lazy(project, oid)
-      BatchLoader.for({ project: project, oid: oid }).batch(replace_methods: false) do |items, loader|
-        items_by_project = items.group_by { |i| i[:project] }
+    def lazy(container, oid)
+      BatchLoader.for({ container: container, oid: oid }).batch(replace_methods: false) do |items, loader|
+        items_by_container = items.group_by { |i| i[:container] }
 
-        items_by_project.each do |project, commit_ids|
+        items_by_container.each do |container, commit_ids|
           oids = commit_ids.map { |i| i[:oid] }
 
-          project.repository.commits_by(oids: oids).each do |commit|
-            loader.call({ project: commit.project, oid: commit.id }, commit) if commit
+          container.repository.commits_by(oids: oids).each do |commit|
+            loader.call({ container: commit.container, oid: commit.id }, commit) if commit
           end
         end
       end
@@ -114,12 +131,11 @@ class Commit
 
   attr_accessor :raw
 
-  def initialize(raw_commit, project)
+  def initialize(raw_commit, container)
     raise "Nil as raw commit passed" unless raw_commit
 
     @raw = raw_commit
-    @project = project
-    @gpg_commit = Gitlab::Gpg::Commit.new(self) if project
+    @container = container
   end
 
   delegate \
@@ -140,7 +156,7 @@ class Commit
   end
 
   def project_id
-    project.id
+    project&.id
   end
 
   def ==(other)
@@ -219,11 +235,16 @@ class Commit
     description.present?
   end
 
+  def timestamp
+    committed_date.xmlschema
+  end
+
   def hook_attrs(with_changed_files: false)
     data = {
       id: id,
       message: safe_message,
-      timestamp: committed_date.xmlschema,
+      title: title,
+      timestamp: timestamp,
       url: Gitlab::UrlBuilder.build(self),
       author: {
         name: author_name,
@@ -238,15 +259,9 @@ class Commit
     data
   end
 
-  # Discover issues should be closed when this commit is pushed to a project's
-  # default branch.
-  def closes_issues(current_user = self.committer)
-    Gitlab::ClosingIssueExtractor.new(project, current_user).closed_by_message(safe_message)
-  end
-
   def lazy_author
     BatchLoader.for(author_email.downcase).batch do |emails, loader|
-      users = User.by_any_email(emails).includes(:emails)
+      users = User.by_any_email(emails, confirmed: true).includes(:emails)
 
       emails.each do |email|
         user = users.find { |u| u.any_email?(email) }
@@ -263,22 +278,26 @@ class Commit
   end
   request_cache(:author) { author_email.downcase }
 
-  def committer
-    @committer ||= User.find_by_any_email(committer_email)
+  def committer(confirmed: true)
+    @committer ||= User.find_by_any_email(committer_email, confirmed: confirmed)
   end
 
   def parents
-    @parents ||= parent_ids.map { |oid| Commit.lazy(project, oid) }
+    @parents ||= parent_ids.map { |oid| Commit.lazy(container, oid) }
   end
 
   def parent
     strong_memoize(:parent) do
-      project.commit_by(oid: self.parent_id) if self.parent_id
+      container.commit_by(oid: self.parent_id) if self.parent_id
     end
   end
 
   def notes
-    project.notes.for_commit_id(self.id)
+    container.notes.for_commit_id(self.id)
+  end
+
+  def user_mentions
+    CommitUserMention.where(commit_id: self.id)
   end
 
   def discussion_notes
@@ -287,10 +306,6 @@ class Commit
 
   def notes_with_associations
     notes.includes(:author, :award_emoji)
-  end
-
-  def merge_requests
-    @merge_requests ||= project.merge_requests.by_commit_sha(sha)
   end
 
   def method_missing(method, *args, &block)
@@ -312,20 +327,41 @@ class Commit
     )
   end
 
-  def signature
-    return @signature if defined?(@signature)
-
-    @signature = gpg_commit.signature
+  def has_signature?
+    signature_type && signature_type != :NONE
   end
 
-  delegate :has_signature?, to: :gpg_commit
+  def raw_signature_type
+    strong_memoize(:raw_signature_type) do
+      next unless @raw.instance_of?(Gitlab::Git::Commit)
+
+      @raw.raw_commit.signature_type if defined? @raw.raw_commit.signature_type
+    end
+  end
+
+  def signature_type
+    @signature_type ||= raw_signature_type || :NONE
+  end
+
+  def signature
+    strong_memoize(:signature) do
+      case signature_type
+      when :PGP
+        Gitlab::Gpg::Commit.new(self).signature
+      when :X509
+        Gitlab::X509::Commit.new(self).signature
+      else
+        nil
+      end
+    end
+  end
 
   def revert_branch_name
     "revert-#{short_id}"
   end
 
   def cherry_pick_branch_name
-    project.repository.next_branch("cherry-pick-#{short_id}", mild: true)
+    repository.next_branch("cherry-pick-#{short_id}", mild: true)
   end
 
   def cherry_pick_description(user)
@@ -380,7 +416,7 @@ class Commit
   end
 
   def has_been_reverted?(current_user, notes_association = nil)
-    ext = all_references(current_user)
+    ext = Gitlab::ReferenceExtractor.new(project, current_user)
     notes_association ||= notes_with_associations
 
     notes_association.system.each do |note|
@@ -413,7 +449,7 @@ class Commit
     return unless entry
 
     if entry[:type] == :blob
-      blob = ::Blob.decorate(Gitlab::Git::Blob.new(name: entry[:name]), @project)
+      blob = ::Blob.decorate(Gitlab::Git::Blob.new(name: entry[:name]), container)
       blob.image? || blob.video? || blob.audio? ? :raw : :blob
     else
       entry[:type]
@@ -450,10 +486,12 @@ class Commit
     # We don't want to do anything for `Commit` model, so this is empty.
   end
 
-  WIP_REGEX = /\A\s*(((?i)(\[WIP\]|WIP:|WIP)\s|WIP$))|(fixup!|squash!)\s/.freeze
+  # WIP is deprecated in favor of Draft. Currently both options are supported
+  # https://gitlab.com/gitlab-org/gitlab/-/issues/227426
+  DRAFT_REGEX = /\A\s*#{Regexp.union(Gitlab::Regex.merge_request_wip, Gitlab::Regex.merge_request_draft)}|(fixup!|squash!)\s/.freeze
 
   def work_in_progress?
-    !!(title =~ WIP_REGEX)
+    !!(title =~ DRAFT_REGEX)
   end
 
   def merged_merge_request?(user)
@@ -464,13 +502,25 @@ class Commit
     "commit:#{sha}"
   end
 
+  def expire_note_etag_cache
+    super
+
+    expire_note_etag_cache_for_related_mrs
+  end
+
   private
 
-  def commit_reference(from, referable_commit_id, full: false)
-    reference = project.to_reference(from, full: full)
+  def expire_note_etag_cache_for_related_mrs
+    MergeRequest.includes(target_project: :namespace).by_commit_sha(id).find_each do |mr|
+      mr.expire_note_etag_cache
+    end
+  end
 
-    if reference.present?
-      "#{reference}#{self.class.reference_prefix}#{referable_commit_id}"
+  def commit_reference(from, referable_commit_id, full: false)
+    base = container.to_reference_base(from, full: full)
+
+    if base.present?
+      "#{base}#{self.class.reference_prefix}#{referable_commit_id}"
     else
       referable_commit_id
     end
@@ -493,6 +543,6 @@ class Commit
   end
 
   def merged_merge_request_no_cache(user)
-    MergeRequestsFinder.new(user, project_id: project.id).find_by(merge_commit_sha: id) if merge_commit?
+    MergeRequestsFinder.new(user, project_id: project_id).find_by(merge_commit_sha: id) if merge_commit?
   end
 end

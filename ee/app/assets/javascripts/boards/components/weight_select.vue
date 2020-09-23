@@ -1,25 +1,19 @@
 <script>
-/* eslint-disable vue/require-default-prop */
-/* eslint-disable @gitlab/vue-i18n/no-bare-strings */
+import { GlButton, GlDeprecatedDropdown, GlDeprecatedDropdownItem } from '@gitlab/ui';
 
-import WeightSelect from 'ee/weight_select';
-import { GlLoadingIcon } from '@gitlab/ui';
-
-const ANY_WEIGHT = 'Any Weight';
-const NO_WEIGHT = 'No Weight';
+const ANY_WEIGHT = 'Any weight';
+const NO_WEIGHT = 'None';
 
 export default {
   components: {
-    GlLoadingIcon,
+    GlButton,
+    GlDeprecatedDropdown,
+    GlDeprecatedDropdownItem,
   },
   props: {
     board: {
       type: Object,
       required: true,
-    },
-    value: {
-      type: [Number, String],
-      required: false,
     },
     canEdit: {
       type: Boolean,
@@ -33,7 +27,7 @@ export default {
   },
   data() {
     return {
-      fieldName: 'weight',
+      dropdownHidden: true,
     };
   },
   computed: {
@@ -44,27 +38,27 @@ export default {
       return 'bold';
     },
     valueText() {
-      if (this.value > 0) return this.value;
-      if (this.value === 0) return NO_WEIGHT;
+      const { weight } = this.board;
+      if (weight > 0 || weight === 0) return weight.toString();
+      if (weight === -2) return NO_WEIGHT;
       return ANY_WEIGHT;
     },
   },
-  mounted() {
-    this.weightDropdown = new WeightSelect(this.$refs.dropdownButton, {
-      handleClick: this.selectWeight,
-      selected: this.value,
-      fieldName: this.fieldName,
-    });
-  },
   methods: {
-    selectWeight(weight) {
+    showDropdown() {
+      this.dropdownHidden = false;
+      this.$refs.dropdown.$children[0].show();
+    },
+    selectWeight({ target: { value: weight } }) {
       this.board.weight = this.weightInt(weight);
+      this.dropdownHidden = true;
     },
     weightInt(weight) {
       if (weight > 0) {
-        return weight;
-      }
-      if (weight === NO_WEIGHT) {
+        return parseInt(weight, 10);
+      } else if (weight === NO_WEIGHT) {
+        return -2;
+      } else if (weight === '0') {
         return 0;
       }
       return -1;
@@ -75,39 +69,27 @@ export default {
 
 <template>
   <div class="block weight">
-    <div class="title append-bottom-10">
-      Weight
-      <button v-if="canEdit" type="button" class="edit-link btn btn-blank float-right">
+    <div class="title gl-mb-3">
+      {{ __('Weight') }}
+      <gl-button v-if="canEdit" variant="link" class="float-right" @click="showDropdown">
         {{ __('Edit') }}
-      </button>
+      </gl-button>
     </div>
-    <div :class="valueClass" class="value">{{ valueText }}</div>
-    <div class="selectbox" style="display: none;">
-      <input :name="fieldName" type="hidden" />
-      <div class="dropdown">
-        <button
-          ref="dropdownButton"
-          class="dropdown-menu-toggle js-weight-select wide"
-          type="button"
-          data-default-label="Weight"
-          data-toggle="dropdown"
-        >
-          <span class="dropdown-toggle-text is-default">{{ __('Weight') }}</span>
-          <i aria-hidden="true" data-hidden="true" class="fa fa-chevron-down"> </i>
-        </button>
-        <div class="dropdown-menu dropdown-select dropdown-menu-selectable dropdown-menu-weight">
-          <div class="dropdown-content ">
-            <ul>
-              <li v-for="weight in weights" :key="weight">
-                <a :class="{ 'is-active': weight == valueText }" :data-id="weight" href="#">
-                  {{ weight }}
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div class="dropdown-loading"><gl-loading-icon /></div>
-        </div>
+    <div :class="valueClass" :hidden="!dropdownHidden" class="value">{{ valueText }}</div>
+
+    <gl-deprecated-dropdown
+      ref="dropdown"
+      :hidden="dropdownHidden"
+      :text="valueText"
+      class="w-100"
+      menu-class="w-100"
+      toggle-class="d-flex justify-content-between"
+    >
+      <div ref="weight-select" @click="selectWeight">
+        <gl-deprecated-dropdown-item v-for="weight in weights" :key="weight" :value="weight">
+          {{ weight }}
+        </gl-deprecated-dropdown-item>
       </div>
-    </div>
+    </gl-deprecated-dropdown>
   </div>
 </template>

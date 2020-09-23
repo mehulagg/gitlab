@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::UpdateRunnerService do
+RSpec.describe Ci::UpdateRunnerService do
   let(:runner) { create(:ci_runner) }
 
   describe '#update' do
@@ -23,6 +23,19 @@ describe Ci::UpdateRunnerService do
       end
     end
 
+    context 'with cost factor params' do
+      let(:params) { { public_projects_minutes_cost_factor: 1.1, private_projects_minutes_cost_factor: 2.2 }}
+
+      it 'updates the runner cost factors' do
+        expect(update).to be_truthy
+
+        runner.reload
+
+        expect(runner.public_projects_minutes_cost_factor).to eq(1.1)
+        expect(runner.private_projects_minutes_cost_factor).to eq(2.2)
+      end
+    end
+
     context 'when params are not valid' do
       let(:params) { { run_untagged: false } }
 
@@ -37,7 +50,7 @@ describe Ci::UpdateRunnerService do
     end
 
     def update
-      described_class.new(runner).update(params)
+      described_class.new(runner).update(params) # rubocop: disable Rails/SaveBang
     end
   end
 end

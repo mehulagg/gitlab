@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ExpandVariables do
+RSpec.describe ExpandVariables do
   describe '#expand' do
     context 'table tests' do
       using RSpec::Parameterized::TableSyntax
@@ -100,7 +100,7 @@ describe ExpandVariables do
       end
 
       with_them do
-        subject { ExpandVariables.expand(value, variables) } # rubocop:disable RSpec/DescribedClass
+        subject { ExpandVariables.expand(value, variables) }
 
         it { is_expected.to eq(result) }
       end

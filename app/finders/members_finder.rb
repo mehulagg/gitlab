@@ -1,25 +1,22 @@
 # frozen_string_literal: true
 
 class MembersFinder
-  attr_reader :project, :current_user, :group
+  # Params can be any of the following:
+  #   sort:       string
+  #   search:     string
+  attr_reader :params
 
-  def initialize(project, current_user)
+  def initialize(project, current_user, params: {})
     @project = project
-    @current_user = current_user
     @group = project.group
+    @current_user = current_user
+    @params = params
   end
 
-  def execute(include_descendants: false, include_invited_groups_members: false)
-    project_members = project.project_members
-    project_members = project_members.non_invite unless can?(current_user, :admin_project, project)
+  def execute(include_relations: [:inherited, :direct])
+    members = find_members(include_relations)
 
-    union_members = group_union_members(include_descendants, include_invited_groups_members)
-
-    if union_members.any?
-      distinct_union_of_members(union_members << project_members)
-    else
-      project_members
-    end
+    filter_members(members)
   end
 
   def can?(*args)
@@ -28,15 +25,45 @@ class MembersFinder
 
   private
 
-  def group_union_members(include_descendants, include_invited_groups_members)
+  attr_reader :project, :current_user, :group
+
+  def find_members(include_relations)
+    project_members = project.project_members
+
+    if params[:active_without_invites_and_requests].present?
+      project_members = project_members.active_without_invites_and_requests
+    else
+      project_members = project_members.non_invite unless can?(current_user, :admin_project, project)
+    end
+
+    return project_members if include_relations == [:direct]
+
+    union_members = group_union_members(include_relations)
+    union_members << project_members if include_relations.include?(:direct)
+
+    return project_members unless union_members.any?
+
+    distinct_union_of_members(union_members)
+  end
+
+  def filter_members(members)
+    members = members.search(params[:search]) if params[:search].present?
+    members = members.sort_by_attribute(params[:sort]) if params[:sort].present?
+    members = members.owners_and_maintainers if params[:owners_and_maintainers].present?
+    members
+  end
+
+  def group_union_members(include_relations)
     [].tap do |members|
-      members << direct_group_members(include_descendants) if group
-      members << project_invited_groups_members if include_invited_groups_members
+      members << direct_group_members(include_relations.include?(:descendants)) if group
+      members << project_invited_groups_members if include_relations.include?(:invited_groups_members)
     end
   end
 
   def direct_group_members(include_descendants)
-    GroupMembersFinder.new(group).execute(include_descendants: include_descendants).non_invite # rubocop: disable CodeReuse/Finder
+    requested_relations = [:inherited, :direct]
+    requested_relations << :descendants if include_descendants
+    GroupMembersFinder.new(group).execute(include_relations: requested_relations).non_invite.non_minimal_access # rubocop: disable CodeReuse/Finder
   end
 
   def project_invited_groups_members
@@ -46,7 +73,7 @@ class MembersFinder
       .public_or_visible_to_user(current_user)
       .select(:id)
 
-    GroupMember.with_source_id(invited_groups_ids_including_ancestors)
+    GroupMember.with_source_id(invited_groups_ids_including_ancestors).non_minimal_access
   end
 
   def distinct_union_of_members(union_members)

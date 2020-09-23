@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects > Show > User sees setup shortcut buttons' do
+RSpec.describe 'Projects > Show > User sees setup shortcut buttons' do
   # For "New file", "Add license" functionality,
   # see spec/features/projects/files/project_owner_creates_license_file_spec.rb
   # see spec/features/projects/files/project_owner_sees_link_to_create_license_file_in_empty_project_spec.rb
@@ -33,7 +33,7 @@ describe 'Projects > Show > User sees setup shortcut buttons' do
           expect(page).not_to have_link('Enable Auto DevOps')
           expect(page).not_to have_link('Auto DevOps enabled')
           expect(page).not_to have_link('Add Kubernetes cluster')
-          expect(page).not_to have_link('Kubernetes configured')
+          expect(page).not_to have_link('Kubernetes')
         end
       end
     end
@@ -59,8 +59,25 @@ describe 'Projects > Show > User sees setup shortcut buttons' do
       end
 
       it '"Add license" button linked to new file populated for a license' do
-        page.within('.project-stats') do
-          expect(page).to have_link('Add license', href: presenter.add_license_path)
+        page.within('.project-buttons') do
+          expect(page).to have_link('Add LICENSE', href: presenter.add_license_path)
+        end
+      end
+
+      context 'Gitlab::CurrentSettings.default_branch_name is available' do
+        before do
+          expect(Gitlab::CurrentSettings)
+            .to receive(:default_branch_name)
+            .at_least(:once)
+            .and_return('example_branch')
+
+          visit project_path(project)
+        end
+
+        it '"New file" button linked to new file page' do
+          page.within('.project-buttons') do
+            expect(page).to have_link('New file', href: project_new_blob_path(project, 'example_branch'))
+          end
         end
       end
     end
@@ -100,7 +117,7 @@ describe 'Projects > Show > User sees setup shortcut buttons' do
         it 'no Kubernetes cluster button if can not manage clusters' do
           page.within('.project-buttons') do
             expect(page).not_to have_link('Add Kubernetes cluster')
-            expect(page).not_to have_link('Kubernetes configured')
+            expect(page).not_to have_link('Kubernetes')
           end
         end
       end
@@ -175,7 +192,7 @@ describe 'Projects > Show > User sees setup shortcut buttons' do
         expect(project.repository.license_blob).not_to be_nil
 
         page.within('.project-buttons') do
-          expect(page).not_to have_link('Add license')
+          expect(page).not_to have_link('Add LICENSE')
         end
       end
 
@@ -209,7 +226,7 @@ describe 'Projects > Show > User sees setup shortcut buttons' do
             expect(project.repository.gitlab_ci_yml).to be_nil
 
             page.within('.project-buttons') do
-              expect(page).to have_link('Set up CI/CD', href: presenter.add_ci_yml_path)
+              expect(page).to have_link('Set up CI/CD', href: presenter.add_ci_yml_ide_path)
             end
           end
 
@@ -308,7 +325,7 @@ describe 'Projects > Show > User sees setup shortcut buttons' do
           visit project_path(project)
 
           page.within('.project-buttons') do
-            expect(page).to have_link('Kubernetes configured', href: project_cluster_path(project, cluster))
+            expect(page).to have_link('Kubernetes', href: project_cluster_path(project, cluster))
           end
         end
       end

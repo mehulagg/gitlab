@@ -2,10 +2,11 @@
 
 require 'spec_helper'
 
-describe EE::RepositoryCheck::BatchWorker do
+RSpec.describe EE::RepositoryCheck::BatchWorker do
   include ::EE::GeoHelpers
 
   let(:shard_name) { 'default' }
+
   subject(:worker) { RepositoryCheck::BatchWorker.new }
 
   before do
@@ -13,7 +14,7 @@ describe EE::RepositoryCheck::BatchWorker do
   end
 
   context 'Geo primary' do
-    set(:primary) { create(:geo_node, :primary) }
+    let_it_be(:primary) { create(:geo_node, :primary) }
 
     before do
       stub_current_geo_node(primary)
@@ -27,7 +28,7 @@ describe EE::RepositoryCheck::BatchWorker do
   end
 
   context 'Geo secondary' do
-    set(:secondary) { create(:geo_node) }
+    let_it_be(:secondary) { create(:geo_node) }
 
     before do
       stub_current_geo_node(secondary)

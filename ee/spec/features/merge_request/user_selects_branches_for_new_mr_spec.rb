@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User selects branches for new MR', :js do
+RSpec.describe 'Merge request > User selects branches for new MR', :js do
   let(:project) { create(:project, :public, :repository) }
   let(:user) { project.creator }
 
@@ -17,27 +17,9 @@ describe 'Merge request > User selects branches for new MR', :js do
     sign_in(user)
   end
 
-  context 'when approvals are zero for the target project' do
+  context 'create a merge request for the selected branches' do
     before do
-      project.update(approvals_before_merge: 0)
-
       visit project_new_merge_request_path(project, merge_request: { target_branch: 'master', source_branch: 'feature_conflict' })
-    end
-
-    it 'shows approval settings' do
-      expect(page).to have_content('Approvers')
-    end
-  end
-
-  context 'when approvals are enabled for the target project' do
-    before do
-      project.update(approvals_before_merge: 1)
-
-      visit project_new_merge_request_path(project, merge_request: { target_branch: 'master', source_branch: 'feature_conflict' })
-    end
-
-    it 'shows approval settings' do
-      expect(page).to have_content('Approvers')
     end
 
     context 'saving the MR' do
@@ -45,7 +27,7 @@ describe 'Merge request > User selects branches for new MR', :js do
         fill_in 'merge_request_title', with: 'Test'
         click_button 'Submit merge request'
 
-        expect(page).to have_link('Close merge request')
+        expect(page).to have_button('Close merge request')
       end
     end
   end

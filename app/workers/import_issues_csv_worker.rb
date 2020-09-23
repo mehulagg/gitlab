@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-class ImportIssuesCsvWorker
+class ImportIssuesCsvWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
 
   feature_category :issue_tracking
   worker_resource_boundary :cpu
+  weight 2
 
   sidekiq_retries_exhausted do |job|
     Upload.find(job['args'][2]).destroy

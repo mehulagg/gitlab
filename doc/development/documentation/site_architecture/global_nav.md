@@ -4,9 +4,9 @@ description: "Learn how GitLab docs' global navigation works and how to add new 
 
 # Global navigation
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab-docs/merge_requests/362) in GitLab 11.6.
-> - [Updated](https://gitlab.com/gitlab-org/gitlab-docs/merge_requests/482) in GitLab 12.1.
-> - [Per-project](https://gitlab.com/gitlab-org/gitlab-docs/merge_requests/498) navigation added in GitLab 12.2.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab-docs/-/merge_requests/362) in GitLab 11.6.
+> - [Updated](https://gitlab.com/gitlab-org/gitlab-docs/-/merge_requests/482) in GitLab 12.1.
+> - [Per-project](https://gitlab.com/gitlab-org/gitlab-docs/-/merge_requests/498) navigation added in GitLab 12.2.
 
 Global navigation (the left-most pane in our three pane documentation) provides:
 
@@ -15,6 +15,22 @@ Global navigation (the left-most pane in our three pane documentation) provides:
 - A way to allow the reader to focus on product areas.
 - The ability to refine landing pages, so they don't have to do all the work of surfacing
   every page contained within the documentation.
+
+## Quick start
+
+To add a topic to the global nav, go to the directory that contains
+[navigation files](https://gitlab.com/gitlab-org/gitlab-docs/blob/master/content/_data/)
+and edit the `yaml` file for your product area. You can copy an existing nav entry and
+edit it to point to your topic.
+
+The files are:
+
+| File                  | Document                                                           | Location                                              |
+|-----------------------|--------------------------------------------------------------------|-------------------------------------------------------|
+| `charts-nav.yaml`     | GitLab cloud native Helm Chart                                     | `https://docs.gitlab.com/charts/`                     |
+| `default-nav.yaml`    | GitLab Docs                                                        | `https://docs.gitlab.com/ee/`              |
+| `omnibus-nav.yaml`    | Omnibus GitLab Docs                                                | `https://docs.gitlab.com/omnibus/`         |
+| `runner-nav.yaml`     | GitLab Runner Docs                                                 | `https://docs.gitlab.com/runner/`                     |
 
 ## Adding new items
 
@@ -86,7 +102,7 @@ The available sections are described on the table below:
 | Section       | Description                                |
 | ------------- | ------------------------------------------ |
 | User          | Documentation for the GitLab's user UI.    |
-| Administrator | Documentation for the GitLab's admin area. |
+| Administrator | Documentation for the GitLab's Admin Area. |
 | Contributor   | Documentation for developing GitLab.       |
 
 The majority of the links available on the nav were added according to the UI.
@@ -98,7 +114,7 @@ for clarity.
 To see the improvements planned, check the
 [global nav epic](https://gitlab.com/groups/gitlab-com/-/epics/21).
 
-CAUTION: **Attention!**
+NOTE: **Note:**
 **Do not** [add items](#adding-new-items) to the global nav without
 the consent of one of the technical writers.
 
@@ -272,10 +288,10 @@ and the following syntax rules.
 - For `index.html` files, use the clean (canonical) URL: `path/to/`.
 - For EE-only docs, use the same relative path, but add the attribute `ee_only: true` below
   the `doc_url` or `category_url`, as explained above. This displays
-  an "info" icon on the nav to make the user aware that the feature is
+  an "information" icon on the nav to make the user aware that the feature is
   EE-only.
 
-DANGER: **Important!**
+CAUTION: **Caution:**
 All links present on the data file must end in `.html`, not `.md`. Do not
 start any relative link with a forward slash `/`.
 
@@ -288,8 +304,8 @@ Examples:
   # does not include index.html at the end
 
   docs:
-    - doc_title: Service Desk
-      doc_url: 'user/project/service_desk.html'
+    - doc_title: Container Scanning
+      doc_url: 'user/application_security/container_scanning/'
       ee_only: true
       # note that the URL above ends in html and, as the
       # document is EE-only, the attribute ee_only is set to true.
@@ -356,7 +372,7 @@ files.
 ```
 
 This also allows the nav to be displayed on other
-highest-level dirs (`/omnibus/`, `/runner/`, etc),
+highest-level directories (`/omnibus/`, `/runner/`, etc),
 linking them back to `/ee/`.
 
 The same logic is applied to all sections (`sec[:section_url]`),

@@ -16,11 +16,12 @@ module Gitlab
         ]
       },
       ci: {
-        keys: [:skip]
+        keys: [:skip, :variable]
       }
     }).freeze
 
     MULTI_VALUE_OPTIONS = [
+      %w[ci variable],
       %w[merge_request label],
       %w[merge_request unlabel]
     ].freeze
@@ -30,6 +31,8 @@ module Gitlab
     }).freeze
 
     OPTION_MATCHER = /(?<namespace>[^\.]+)\.(?<key>[^=]+)=?(?<value>.*)/.freeze
+
+    CI_SKIP = 'ci.skip'
 
     attr_reader :options
 

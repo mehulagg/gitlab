@@ -2,39 +2,11 @@
 
 module Resolvers
   class IssuesResolver < BaseResolver
-    argument :iid, GraphQL::STRING_TYPE,
-              required: false,
-              description: 'The IID of the issue, e.g., "1"'
+    prepend IssueResolverArguments
 
-    argument :iids, [GraphQL::STRING_TYPE],
-              required: false,
-              description: 'The list of IIDs of issues, e.g., [1, 2]'
     argument :state, Types::IssuableStateEnum,
               required: false,
-              description: 'Current state of Issue'
-    argument :label_name, GraphQL::STRING_TYPE.to_list_type,
-              required: false,
-              description: 'Labels applied to the Issue'
-    argument :created_before, Types::TimeType,
-              required: false,
-              description: 'Issues created before this date'
-    argument :created_after, Types::TimeType,
-              required: false,
-              description: 'Issues created after this date'
-    argument :updated_before, Types::TimeType,
-              required: false,
-              description: 'Issues updated before this date'
-    argument :updated_after, Types::TimeType,
-              required: false,
-              description: 'Issues updated after this date'
-    argument :closed_before, Types::TimeType,
-              required: false,
-              description: 'Issues closed before this date'
-    argument :closed_after, Types::TimeType,
-              required: false,
-              description: 'Issues closed after this date'
-    argument :search, GraphQL::STRING_TYPE, # rubocop:disable Graphql/Descriptions
-              required: false
+              description: 'Current state of this issue'
     argument :sort, Types::IssueSortEnum,
               description: 'Sort issues by this criteria',
               required: false,
@@ -42,26 +14,36 @@ module Resolvers
 
     type Types::IssueType, null: true
 
-    def resolve(**args)
-      # The project could have been loaded in batch by `BatchLoader`.
-      # At this point we need the `id` of the project to query for issues, so
-      # make sure it's loaded and not `nil` before continuing.
-      project = object.respond_to?(:sync) ? object.sync : object
-      return Issue.none if project.nil?
+    NON_STABLE_CURSOR_SORTS = %i[priority_asc priority_desc
+                                 label_priority_asc label_priority_desc
+                                 milestone_due_asc milestone_due_desc].freeze
 
-      # Will need to be be made group & namespace aware with
-      # https://gitlab.com/gitlab-org/gitlab-foss/issues/54520
-      args[:project_id] = project.id
-      args[:iids] ||= [args[:iid]].compact
+    def continue_issue_resolve(parent, finder, **args)
+      issues = apply_lookahead(Gitlab::Graphql::Loaders::IssuableLoader.new(parent, finder).batching_find_all)
 
-      IssuesFinder.new(context[:current_user], args).execute
+      if non_stable_cursor_sort?(args[:sort])
+        # Certain complex sorts are not supported by the stable cursor pagination yet.
+        # In these cases, we use offset pagination, so we return the correct connection.
+        Gitlab::Graphql::Pagination::OffsetActiveRecordRelationConnection.new(issues)
+      else
+        issues
+      end
     end
 
-    def self.resolver_complexity(args, child_complexity:)
-      complexity = super
-      complexity += 2 if args[:labelName]
+    private
 
-      complexity
+    def preloads
+      {
+        alert_management_alert: [:alert_management_alert],
+        labels: [:labels],
+        assignees: [:assignees]
+      }
+    end
+
+    def non_stable_cursor_sort?(sort)
+      NON_STABLE_CURSOR_SORTS.include?(sort)
     end
   end
 end
+
+Resolvers::IssuesResolver.prepend_if_ee('::EE::Resolvers::IssuesResolver')

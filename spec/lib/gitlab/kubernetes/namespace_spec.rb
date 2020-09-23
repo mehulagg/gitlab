@@ -1,9 +1,13 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Kubernetes::Namespace do
+RSpec.describe Gitlab::Kubernetes::Namespace do
   let(:name) { 'a_namespace' }
   let(:client) { double('kubernetes client') }
-  subject { described_class.new(name, client) }
+  let(:labels) { nil }
+
+  subject { described_class.new(name, client, labels: labels) }
 
   it { expect(subject.name).to eq(name) }
 
@@ -46,6 +50,17 @@ describe Gitlab::Kubernetes::Namespace do
 
       expect { subject.create! }.not_to raise_error
     end
+
+    context 'with labels' do
+      let(:labels) { { foo: :bar } }
+
+      it 'creates a namespace with labels' do
+        matcher = have_attributes(metadata: have_attributes(name: name, labels: have_attributes(foo: :bar)))
+        expect(client).to receive(:create_namespace).with(matcher).once
+
+        expect { subject.create! }.not_to raise_error
+      end
+    end
   end
 
   describe '#ensure_exists!' do
@@ -77,12 +92,14 @@ describe Gitlab::Kubernetes::Namespace do
       it 'logs the error' do
         expect(subject.send(:logger)).to receive(:error).with(
           hash_including(
-            exception: 'Kubeclient::HttpError',
+            exception: {
+              class: 'Kubeclient::HttpError',
+              message: 'system failure'
+            },
             status_code: 500,
             namespace: 'a_namespace',
             class_name: 'Gitlab::Kubernetes::Namespace',
-            event: :failed_to_create_namespace,
-            message: 'system failure'
+            event: :failed_to_create_namespace
           )
         )
 

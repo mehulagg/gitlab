@@ -1,11 +1,13 @@
 ---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
 type: reference
 ---
 
 # Instance template repository **(PREMIUM ONLY)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/5986) in
-> [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/5986) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.3.
 
 ## Overview
 
@@ -17,10 +19,10 @@ while the project remains secure.
 
 ## Configuration
 
-As an administrator, navigate to **Admin area > Settings > Templates** and
+As an administrator, navigate to **Admin Area > Settings > Templates** and
 select the project to serve as the custom template repository.
 
-![File templates in the admin area](img/file_template_admin_area.png)
+![File templates in the Admin Area](img/file_template_admin_area.png)
 
 Once a project has been selected, you can add custom templates to the repository,
 and they will appear in the appropriate places in the
@@ -31,17 +33,18 @@ Templates must be added to a specific subdirectory in the repository,
 corresponding to the kind of template. The following types of custom templates
 are supported:
 
-| Type              | Directory     | Extension     |
-| :---------------: | :-----------: | :-----------: |
-| `Dockerfile`      | `Dockerfile`  | `.dockerfile` |
-| `.gitignore`      | `gitignore`   | `.gitignore`  |
-| `.gitlab-ci.yml`  | `gitlab-ci`   | `.yml`        |
-| `LICENSE`         | `LICENSE`     | `.txt`        |
+| Type                    | Directory            | Extension     |
+| :---------------:       | :-----------:        | :-----------: |
+| `Dockerfile`            | `Dockerfile`         | `.dockerfile` |
+| `.gitignore`            | `gitignore`          | `.gitignore`  |
+| `.gitlab-ci.yml`        | `gitlab-ci`          | `.yml`        |
+| `LICENSE`               | `LICENSE`            | `.txt`        |
+| `metrics-dashboard.yml` | `metrics-dashboards` | `.yml`        |
 
 Each template must go in its respective subdirectory, have the correct
 extension and not be empty. So, the hierarchy should look like this:
 
-```text
+```plaintext
 |-- README.md
 |-- Dockerfile
     |-- custom_dockerfile.dockerfile
@@ -55,6 +58,9 @@ extension and not be empty. So, the hierarchy should look like this:
 |-- LICENSE
     |-- custom_license.txt
     |-- another_license.txt
+|-- metrics-dashboards
+    |-- custom_metrics-dashboard.yml
+    |-- another_metrics-dashboard.yml
 ```
 
 Once this is established, the list of custom templates will be included when

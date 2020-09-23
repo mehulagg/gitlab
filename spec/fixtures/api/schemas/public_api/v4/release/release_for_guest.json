@@ -10,7 +10,7 @@
     "upcoming_release": { "type": "boolean" },
     "milestones": {
       "type": "array",
-      "items": { "$ref": "../milestone.json" }
+      "items": { "$ref": "../milestone_with_stats.json" }
     },
     "commit_path": { "type": "string" },
     "tag_path": { "type": "string" },
@@ -26,11 +26,10 @@
       "additionalProperties": false
     },
     "_links": {
-      "required": ["merge_requests_url", "issues_url", "edit_url"],
+      "required": ["merge_requests_url", "issues_url"],
       "properties": {
         "merge_requests_url": { "type": "string" },
-        "issues_url": { "type": "string" },
-        "edit_url": { "type": "string"}
+        "issues_url": { "type": "string" }
       }
     }
   },

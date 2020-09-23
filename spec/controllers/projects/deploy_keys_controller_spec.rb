@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::DeployKeysController do
+RSpec.describe Projects::DeployKeysController do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:admin) { create(:admin) }
@@ -46,17 +46,27 @@ describe Projects::DeployKeysController do
         create(:deploy_keys_project, project: project_private, deploy_key: create(:another_deploy_key))
       end
 
-      before do
-        project2.add_developer(user)
+      context 'when user has access to all projects where deploy keys are used' do
+        before do
+          project2.add_developer(user)
+        end
+
+        it 'returns json in a correct format' do
+          get :index, params: params.merge(format: :json)
+
+          expect(json_response.keys).to match_array(%w(enabled_keys available_project_keys public_keys))
+          expect(json_response['enabled_keys'].count).to eq(1)
+          expect(json_response['available_project_keys'].count).to eq(1)
+          expect(json_response['public_keys'].count).to eq(1)
+        end
       end
 
-      it 'returns json in a correct format' do
-        get :index, params: params.merge(format: :json)
+      context 'when user has no access to all projects where deploy keys are used' do
+        it 'returns json in a correct format' do
+          get :index, params: params.merge(format: :json)
 
-        expect(json_response.keys).to match_array(%w(enabled_keys available_project_keys public_keys))
-        expect(json_response['enabled_keys'].count).to eq(1)
-        expect(json_response['available_project_keys'].count).to eq(1)
-        expect(json_response['public_keys'].count).to eq(1)
+          expect(json_response['available_project_keys'].count).to eq(0)
+        end
       end
     end
   end
@@ -112,7 +122,7 @@ describe Projects::DeployKeysController do
           put :enable, params: { id: deploy_key.id, namespace_id: project.namespace, project_id: project }
         end.not_to change { DeployKeysProject.count }
 
-        expect(response).to have_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(new_user_session_path)
       end
     end
@@ -127,7 +137,7 @@ describe Projects::DeployKeysController do
           put :enable, params: { id: deploy_key.id, namespace_id: project.namespace, project_id: project }
         end.not_to change { DeployKeysProject.count }
 
-        expect(response).to have_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -142,18 +152,18 @@ describe Projects::DeployKeysController do
         end.to change { DeployKeysProject.count }.by(1)
 
         expect(DeployKeysProject.where(project_id: project.id, deploy_key_id: deploy_key.id).count).to eq(1)
-        expect(response).to have_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(namespace_project_settings_repository_path(anchor: 'js-deploy-keys-settings'))
       end
 
       it 'returns 404' do
         put :enable, params: { id: 0, namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
-    context 'with admin' do
+    context 'with admin', :enable_admin_mode do
       before do
         sign_in(admin)
       end
@@ -164,7 +174,7 @@ describe Projects::DeployKeysController do
         end.to change { DeployKeysProject.count }.by(1)
 
         expect(DeployKeysProject.where(project_id: project.id, deploy_key_id: deploy_key.id).count).to eq(1)
-        expect(response).to have_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(namespace_project_settings_repository_path(anchor: 'js-deploy-keys-settings'))
       end
     end
@@ -182,7 +192,7 @@ describe Projects::DeployKeysController do
       it 'redirects to login' do
         put :disable, params: { id: deploy_key.id, namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(new_user_session_path)
         expect(DeployKey.find(deploy_key.id)).to eq(deploy_key)
       end
@@ -196,7 +206,7 @@ describe Projects::DeployKeysController do
       it 'returns 404' do
         put :disable, params: { id: deploy_key.id, namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
         expect(DeployKey.find(deploy_key.id)).to eq(deploy_key)
       end
     end
@@ -205,7 +215,7 @@ describe Projects::DeployKeysController do
       it 'returns 302' do
         put :disable, params: { id: deploy_key.id, namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(namespace_project_settings_repository_path(anchor: 'js-deploy-keys-settings'))
 
         expect { DeployKey.find(deploy_key.id) }.to raise_error(ActiveRecord::RecordNotFound)
@@ -214,11 +224,11 @@ describe Projects::DeployKeysController do
       it 'returns 404' do
         put :disable, params: { id: 0, namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
-    context 'with admin' do
+    context 'with admin', :enable_admin_mode do
       before do
         sign_in(admin)
       end
@@ -228,7 +238,7 @@ describe Projects::DeployKeysController do
           put :disable, params: { id: deploy_key.id, namespace_id: project.namespace, project_id: project }
         end.to change { DeployKey.count }.by(-1)
 
-        expect(response).to have_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(response).to redirect_to(namespace_project_settings_repository_path(anchor: 'js-deploy-keys-settings'))
 
         expect { DeployKey.find(deploy_key.id) }.to raise_error(ActiveRecord::RecordNotFound)
@@ -246,7 +256,7 @@ describe Projects::DeployKeysController do
     end
 
     def deploy_key_params(title, can_push)
-      deploy_keys_projects_attributes = { '0' => { id: deploy_keys_project, can_push: can_push } }
+      deploy_keys_projects_attributes = { '0' => { can_push: can_push } }
       { deploy_key: { title: title, deploy_keys_projects_attributes: deploy_keys_projects_attributes } }
     end
 
@@ -274,7 +284,7 @@ describe Projects::DeployKeysController do
       end
     end
 
-    context 'with admin' do
+    context 'with admin', :enable_admin_mode do
       before do
         sign_in(admin)
       end
@@ -290,6 +300,42 @@ describe Projects::DeployKeysController do
           expect { subject }.to change { deploy_keys_project.reload.can_push }.from(false).to(true)
         end
       end
+
+      context 'when a different deploy key id param is injected' do
+        let(:extra_params) { deploy_key_params('updated title', '1') }
+        let(:hacked_params) do
+          extra_params.reverse_merge(id: other_deploy_key_id,
+                                     namespace_id: project.namespace,
+                                     project_id: project)
+        end
+
+        subject { put :update, params: hacked_params }
+
+        context 'and that deploy key id exists' do
+          let(:other_project) { create(:project) }
+          let(:other_deploy_key) do
+            key = create(:deploy_key)
+            project.deploy_keys << key
+            key
+          end
+
+          let(:other_deploy_key_id) { other_deploy_key.id }
+
+          it 'does not update the can_push attribute' do
+            expect { subject }.not_to change { deploy_key.deploy_keys_project_for(project).can_push }
+          end
+        end
+
+        context 'and that deploy key id does not exist' do
+          let(:other_deploy_key_id) { 9999 }
+
+          it 'returns 404' do
+            subject
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+      end
     end
 
     context 'with admin as project maintainer' do
@@ -301,8 +347,16 @@ describe Projects::DeployKeysController do
       context 'public deploy key attached to project' do
         let(:extra_params) { deploy_key_params('updated title', '1') }
 
-        it 'updates the title of the deploy key' do
-          expect { subject }.to change { deploy_key.reload.title }.to('updated title')
+        context 'admin mode disabled' do
+          it 'does not update the title of the deploy key' do
+            expect { subject }.not_to change { deploy_key.reload.title }
+          end
+        end
+
+        context 'admin mode enabled', :enable_admin_mode do
+          it 'updates the title of the deploy key' do
+            expect { subject }.to change { deploy_key.reload.title }.to('updated title')
+          end
         end
 
         it 'updates can_push of deploy_keys_project' do

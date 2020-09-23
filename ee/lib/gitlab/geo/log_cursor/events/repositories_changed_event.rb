@@ -19,9 +19,14 @@ module Gitlab
 
           def log_event(job_id)
             if job_id
-              logger.info('Scheduled repositories clean up for Geo node', geo_node_id: event.geo_node_id, job_id: job_id)
+              super(
+                'Scheduled repositories clean up for Geo node',
+                geo_node_id: event.geo_node_id,
+                job_id: job_id)
             else
-              logger.error('Could not schedule repositories clean up for Geo node', geo_node_id: event.geo_node_id)
+              logger.error(
+                'Could not schedule repositories clean up for Geo node',
+                geo_node_id: event.geo_node_id)
             end
           end
         end

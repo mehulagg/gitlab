@@ -9,7 +9,7 @@ GitLab by default supports the [Gravatar](https://gravatar.com) avatar service.
 Libravatar is another service that delivers your avatar (profile picture) to
 other websites. The Libravatar API is
 [heavily based on gravatar](https://wiki.libravatar.org/api/), so you can
-easily switch to the Libravatar avatar service or even a self-hosted Libravatar
+easily switch to the Libravatar avatar service or even your own Libravatar
 server.
 
 ## Configuration
@@ -19,7 +19,7 @@ the configuration options as follows:
 
 ### For HTTP
 
-```yml
+```yaml
   gravatar:
     enabled: true
     # gravatar URLs: possible placeholders: %{hash} %{size} %{email} %{username}
@@ -28,16 +28,16 @@ the configuration options as follows:
 
 ### For HTTPS
 
-```yml
+```yaml
   gravatar:
     enabled: true
     # gravatar URLs: possible placeholders: %{hash} %{size} %{email} %{username}
     ssl_url: "https://seccdn.libravatar.org/avatar/%{hash}?s=%{size}&d=identicon"
 ```
 
-### Self-hosted Libravatar server
+### Your own Libravatar server
 
-If you are [running your own libravatar service](https://wiki.libravatar.org/running_your_own/),
+If you are [running your own Libravatar service](https://wiki.libravatar.org/running_your_own/),
 the URL will be different in the configuration, but you must provide the same
 placeholders so GitLab can parse the URL correctly.
 

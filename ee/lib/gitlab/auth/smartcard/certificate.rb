@@ -16,13 +16,13 @@ module Gitlab
           User.find_by_smartcard_identity(subject, issuer)
         end
 
-        def create_user
-          user = User.find_by_email(email)
-          if user
-            create_smartcard_identity_for(user)
-            return user
+        def create_identity_for_existing_user
+          User.find_by_email(email).tap do |user|
+            create_smartcard_identity_for(user) if user
           end
+        end
 
+        def create_user
           user_params = {
             name:                       common_name,
             username:                   username,
@@ -74,10 +74,6 @@ module Gitlab
 
         def username
           ::Namespace.clean_path(common_name)
-        end
-
-        def password
-          @password ||= Devise.friendly_token(8)
         end
       end
     end

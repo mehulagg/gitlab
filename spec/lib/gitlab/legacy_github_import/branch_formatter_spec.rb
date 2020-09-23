@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::LegacyGithubImport::BranchFormatter do
+RSpec.describe Gitlab::LegacyGithubImport::BranchFormatter do
   let(:project) { create(:project, :repository) }
   let(:commit) { create(:commit, project: project) }
   let(:repo) { double }

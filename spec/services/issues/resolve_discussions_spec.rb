@@ -2,20 +2,21 @@
 
 require 'spec_helper.rb'
 
-describe Issues::ResolveDiscussions do
-  class DummyService < Issues::BaseService
-    include ::Issues::ResolveDiscussions
-
-    def initialize(*args)
-      super
-      filter_resolve_discussion_params
-    end
-  end
-
+RSpec.describe Issues::ResolveDiscussions do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
 
   before do
+    stub_const('DummyService', Class.new(Issues::BaseService))
+    DummyService.class_eval do
+      include ::Issues::ResolveDiscussions
+
+      def initialize(*args)
+        super
+        filter_resolve_discussion_params
+      end
+    end
+
     project.add_developer(user)
   end
 
@@ -78,7 +79,7 @@ describe Issues::ResolveDiscussions do
                                                    noteable: merge_request,
                                                    project: merge_request.target_project,
                                                    line_number: 15
-                                                   )])
+        )])
         service = DummyService.new(
           project,
           user,

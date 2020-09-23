@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequest do
+RSpec.describe MergeRequest do
   let(:block) { create(:merge_request_block) }
 
   let(:blocking_mr) { block.blocking_merge_request }

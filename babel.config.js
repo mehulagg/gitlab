@@ -2,13 +2,30 @@
 
 const BABEL_ENV = process.env.BABEL_ENV || process.env.NODE_ENV || null;
 
-const presets = [
+let presets = [
   [
     '@babel/preset-env',
     {
+      useBuiltIns: 'usage',
+      corejs: { version: 3, proposals: true },
       modules: false,
+      /**
+       * This list of browsers is a conservative first definition, based on
+       * https://docs.gitlab.com/ee/install/requirements.html#supported-web-browsers
+       * with the following reasoning:
+       *
+       * - Edge: Pick the last two major version before the Chrome switch
+       * - Rest: We should support the latest ESR of Firefox: 68, because it used quite a lot.
+       *         For the rest, pick browser versions that have a similar age to Firefox 68.
+       *
+       * See also this follow-up epic:
+       * https://gitlab.com/groups/gitlab-org/-/epics/3957
+       */
       targets: {
-        ie: '11',
+        chrome: '73',
+        edge: '17',
+        firefox: '68',
+        safari: '12',
       },
     },
   ],
@@ -16,11 +33,13 @@ const presets = [
 
 // include stage 3 proposals
 const plugins = [
-  '@babel/plugin-syntax-dynamic-import',
   '@babel/plugin-syntax-import-meta',
   '@babel/plugin-proposal-class-properties',
   '@babel/plugin-proposal-json-strings',
   '@babel/plugin-proposal-private-methods',
+  // See: https://gitlab.com/gitlab-org/gitlab/-/issues/229146
+  '@babel/plugin-transform-arrow-functions',
+  'lodash',
 ];
 
 // add code coverage tooling if necessary
@@ -33,11 +52,6 @@ if (BABEL_ENV === 'coverage') {
   ]);
 }
 
-// add rewire support when running tests
-if (BABEL_ENV === 'karma' || BABEL_ENV === 'coverage') {
-  plugins.push('babel-plugin-rewire');
-}
-
 // Jest is running in node environment, so we need additional plugins
 const isJest = Boolean(process.env.JEST_WORKER_ID);
 if (isJest) {
@@ -47,6 +61,17 @@ if (isJest) {
   https://gitlab.com/gitlab-org/gitlab-foss/issues/58390
   */
   plugins.push('babel-plugin-dynamic-import-node');
+
+  presets = [
+    [
+      '@babel/preset-env',
+      {
+        targets: {
+          node: 'current',
+        },
+      },
+    ],
+  ];
 }
 
-module.exports = { presets, plugins };
+module.exports = { presets, plugins, sourceType: 'unambiguous' };

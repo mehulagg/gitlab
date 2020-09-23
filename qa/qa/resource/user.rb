@@ -7,13 +7,14 @@ module QA
     class User < Base
       attr_reader :unique_id
       attr_writer :username, :password
-      attr_accessor :provider, :extern_uid
+      attr_accessor :admin, :provider, :extern_uid
 
       attribute :id
       attribute :name
       attribute :email
 
       def initialize
+        @admin = false
         @unique_id = SecureRandom.hex(8)
       end
 
@@ -34,14 +35,17 @@ module QA
       end
 
       def email
-        @email ||= "#{username}@example.com"
+        @email ||= begin
+          api_email = api_resource&.dig(:email)
+          api_email && !api_email.empty? ? api_email : "#{username}@example.com"
+        end
       end
 
       def public_email
         @public_email ||= begin
           api_public_email = api_resource&.dig(:public_email)
 
-          api_public_email && api_public_email != '' ? api_public_email : Runtime::User.default_email
+          api_public_email && !api_public_email.empty? ? api_public_email : Runtime::User.default_email
         end
       end
 
@@ -75,7 +79,21 @@ module QA
         super
       end
 
+      def api_delete
+        super
+
+        QA::Runtime::Logger.debug("Deleted user '#{username}'")
+      end
+
+      def api_delete_path
+        "/users/#{id}"
+      rescue NoValueError
+        "/users/#{fetch_id(username)}"
+      end
+
       def api_get_path
+        return "/user" if fetching_own_data?
+
         "/users/#{fetch_id(username)}"
       end
 
@@ -85,6 +103,7 @@ module QA
 
       def api_post_body
         {
+          admin: admin,
           email: email,
           password: password,
           username: username,
@@ -100,7 +119,10 @@ module QA
             user.password = password
           end
         else
-          self.fabricate!
+          self.fabricate! do |user|
+            user.username = username if username
+            user.password = password if password
+          end
         end
       end
 
@@ -123,6 +145,10 @@ module QA
         end
 
         users.first[:id]
+      end
+
+      def fetching_own_data?
+        api_user&.username == username || Runtime::User.username == username
       end
     end
   end

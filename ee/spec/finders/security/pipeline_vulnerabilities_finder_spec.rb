@@ -2,39 +2,30 @@
 
 require 'spec_helper'
 
-describe Security::PipelineVulnerabilitiesFinder do
-  class NoDeduplicationMergeReportsService
-    def initialize(*source_reports)
-      @source_reports = source_reports
-    end
-
-    def execute
-      @source_reports.last
-    end
-  end
-
+RSpec.describe Security::PipelineVulnerabilitiesFinder do
   def disable_deduplication
     allow(::Security::MergeReportsService).to receive(:new) do |*args|
-      NoDeduplicationMergeReportsService.new(*args)
+      instance_double('NoDeduplicationMergeReportsService', execute: args.last)
     end
   end
 
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:pipeline, reload: true) { create(:ci_pipeline, :success, project: project) }
+
   describe '#execute' do
-    set(:project) { create(:project, :repository) }
-    set(:pipeline) { create(:ci_pipeline, :success, project: project) }
     let(:params) { {} }
 
-    set(:build_cs) { create(:ci_build, :success, name: 'cs_job', pipeline: pipeline, project: project) }
-    set(:build_dast) { create(:ci_build, :success, name: 'dast_job', pipeline: pipeline, project: project) }
-    set(:build_ds) { create(:ci_build, :success, name: 'ds_job', pipeline: pipeline, project: project) }
-    set(:build_sast) { create(:ci_build, :success, name: 'sast_job', pipeline: pipeline, project: project) }
+    let_it_be(:build_cs) { create(:ci_build, :success, name: 'cs_job', pipeline: pipeline, project: project) }
+    let_it_be(:build_dast) { create(:ci_build, :success, name: 'dast_job', pipeline: pipeline, project: project) }
+    let_it_be(:build_ds) { create(:ci_build, :success, name: 'ds_job', pipeline: pipeline, project: project) }
+    let_it_be(:build_sast) { create(:ci_build, :success, name: 'sast_job', pipeline: pipeline, project: project) }
 
-    set(:artifact_cs) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs, project: project) }
-    set(:artifact_dast) { create(:ee_ci_job_artifact, :dast, job: build_dast, project: project) }
-    set(:artifact_ds) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds, project: project) }
-    set(:artifact_sast) { create(:ee_ci_job_artifact, :sast, job: build_sast, project: project) }
+    let_it_be(:artifact_cs) { create(:ee_ci_job_artifact, :container_scanning, job: build_cs, project: project) }
+    let_it_be(:artifact_dast) { create(:ee_ci_job_artifact, :dast, job: build_dast, project: project) }
+    let_it_be(:artifact_ds) { create(:ee_ci_job_artifact, :dependency_scanning, job: build_ds, project: project) }
+    let!(:artifact_sast) { create(:ee_ci_job_artifact, :sast, job: build_sast, project: project) }
 
-    let(:cs_count) { read_fixture(artifact_cs)['unapproved'].count }
+    let(:cs_count) { read_fixture(artifact_cs)['vulnerabilities'].count }
     let(:ds_count) { read_fixture(artifact_ds)['vulnerabilities'].count }
     let(:sast_count) { read_fixture(artifact_sast)['vulnerabilities'].count }
     let(:dast_count) do
@@ -53,61 +44,65 @@ describe Security::PipelineVulnerabilitiesFinder do
 
     subject { described_class.new(pipeline: pipeline, params: params).execute }
 
-    it 'assigns commit sha to findings' do
-      expect(subject.map(&:sha).uniq).to eq [pipeline.sha]
-    end
+    context 'findings' do
+      it 'assigns commit sha to findings' do
+        expect(subject.findings.map(&:sha).uniq).to eq([pipeline.sha])
+      end
 
-    context 'by order' do
-      let(:params) { { report_type: %w[sast] } }
-      let!(:high_high) { build(:vulnerabilities_occurrence, confidence: :high, severity: :high) }
-      let!(:critical_medium) { build(:vulnerabilities_occurrence, confidence: :medium, severity: :critical) }
-      let!(:critical_high) { build(:vulnerabilities_occurrence, confidence: :high, severity: :critical) }
-      let!(:unknown_high) { build(:vulnerabilities_occurrence, confidence: :high, severity: :unknown) }
-      let!(:unknown_medium) { build(:vulnerabilities_occurrence, confidence: :medium, severity: :unknown) }
-      let!(:unknown_low) { build(:vulnerabilities_occurrence, confidence: :low, severity: :unknown) }
+      context 'by order' do
+        let(:params) { { report_type: %w[sast] } }
+        let!(:high_high) { build(:vulnerabilities_finding, confidence: :high, severity: :high) }
+        let!(:critical_medium) { build(:vulnerabilities_finding, confidence: :medium, severity: :critical) }
+        let!(:critical_high) { build(:vulnerabilities_finding, confidence: :high, severity: :critical) }
+        let!(:unknown_high) { build(:vulnerabilities_finding, confidence: :high, severity: :unknown) }
+        let!(:unknown_medium) { build(:vulnerabilities_finding, confidence: :medium, severity: :unknown) }
+        let!(:unknown_low) { build(:vulnerabilities_finding, confidence: :low, severity: :unknown) }
 
-      it 'orders by severity and confidence' do
-        allow_any_instance_of(described_class).to receive(:filter).and_return([
-               unknown_low,
-               unknown_medium,
-               critical_high,
-               unknown_high,
-               critical_medium,
-               high_high
-        ])
+        it 'orders by severity and confidence' do
+          allow_next_instance_of(described_class) do |pipeline_vulnerabilities_finder|
+            allow(pipeline_vulnerabilities_finder).to receive(:filter).and_return([
+                 unknown_low,
+                 unknown_medium,
+                 critical_high,
+                 unknown_high,
+                 critical_medium,
+                 high_high
+          ])
 
-        expect(subject).to eq([critical_high, critical_medium, high_high, unknown_high, unknown_medium, unknown_low])
+            expect(subject.findings).to eq([critical_high, critical_medium, high_high, unknown_high, unknown_medium, unknown_low])
+          end
+        end
       end
     end
 
     context 'by report type' do
       context 'when sast' do
         let(:params) { { report_type: %w[sast] } }
-        let(:sast_report_fingerprints) {pipeline.security_reports.reports['sast'].occurrences.map(&:location).map(&:fingerprint) }
+        let(:sast_report_fingerprints) {pipeline.security_reports.reports['sast'].findings.map(&:location).map(&:fingerprint) }
 
         it 'includes only sast' do
-          expect(subject.map(&:location_fingerprint)).to match_array(sast_report_fingerprints)
-          expect(subject.count).to eq sast_count
+          expect(subject.findings.map(&:location_fingerprint)).to match_array(sast_report_fingerprints)
+          expect(subject.findings.count).to eq(sast_count)
         end
       end
 
       context 'when dependency_scanning' do
         let(:params) { { report_type: %w[dependency_scanning] } }
-        let(:ds_report_fingerprints) {pipeline.security_reports.reports['dependency_scanning'].occurrences.map(&:location).map(&:fingerprint) }
+        let(:ds_report_fingerprints) {pipeline.security_reports.reports['dependency_scanning'].findings.map(&:location).map(&:fingerprint) }
 
         it 'includes only dependency_scanning' do
-          expect(subject.map(&:location_fingerprint)).to match_array(ds_report_fingerprints)
-          expect(subject.count).to eq ds_count
+          expect(subject.findings.map(&:location_fingerprint)).to match_array(ds_report_fingerprints)
+          expect(subject.findings.count).to eq(ds_count)
         end
       end
 
       context 'when dast' do
         let(:params) { { report_type: %w[dast] } }
-        let(:dast_report_fingerprints) {pipeline.security_reports.reports['dast'].occurrences.map(&:location).map(&:fingerprint) }
+        let(:dast_report_fingerprints) {pipeline.security_reports.reports['dast'].findings.map(&:location).map(&:fingerprint) }
 
         it 'includes only dast' do
-          expect(subject.map(&:location_fingerprint)).to match_array(dast_report_fingerprints)
-          expect(subject.count).to eq dast_count
+          expect(subject.findings.map(&:location_fingerprint)).to match_array(dast_report_fingerprints)
+          expect(subject.findings.count).to eq(dast_count)
         end
       end
 
@@ -115,16 +110,16 @@ describe Security::PipelineVulnerabilitiesFinder do
         let(:params) { { report_type: %w[container_scanning] } }
 
         it 'includes only container_scanning' do
-          fingerprints = pipeline.security_reports.reports['container_scanning'].occurrences.map(&:location).map(&:fingerprint)
-          expect(subject.map(&:location_fingerprint)).to match_array(fingerprints)
-          expect(subject.count).to eq cs_count
+          fingerprints = pipeline.security_reports.reports['container_scanning'].findings.map(&:location).map(&:fingerprint)
+          expect(subject.findings.map(&:location_fingerprint)).to match_array(fingerprints)
+          expect(subject.findings.count).to eq(cs_count)
         end
       end
     end
 
     context 'by scope' do
-      let(:ds_occurrence) { pipeline.security_reports.reports["dependency_scanning"].occurrences.first }
-      let(:sast_occurrence) { pipeline.security_reports.reports["sast"].occurrences.first }
+      let(:ds_finding) { pipeline.security_reports.reports["dependency_scanning"].findings.first }
+      let(:sast_finding) { pipeline.security_reports.reports["sast"].findings.first }
 
       let!(:feedback) do
         [
@@ -134,8 +129,8 @@ describe Security::PipelineVulnerabilitiesFinder do
             :dependency_scanning,
             project: project,
             pipeline: pipeline,
-            project_fingerprint: ds_occurrence.project_fingerprint,
-            vulnerability_data: ds_occurrence.raw_metadata
+            project_fingerprint: ds_finding.project_fingerprint,
+            vulnerability_data: ds_finding.raw_metadata
           ),
           create(
             :vulnerability_feedback,
@@ -143,8 +138,8 @@ describe Security::PipelineVulnerabilitiesFinder do
             :sast,
             project: project,
             pipeline: pipeline,
-            project_fingerprint: sast_occurrence.project_fingerprint,
-            vulnerability_data: sast_occurrence.raw_metadata
+            project_fingerprint: sast_finding.project_fingerprint,
+            vulnerability_data: sast_finding.raw_metadata
           )
         ]
       end
@@ -153,8 +148,8 @@ describe Security::PipelineVulnerabilitiesFinder do
         subject { described_class.new(pipeline: pipeline).execute }
 
         it 'returns non-dismissed vulnerabilities' do
-          expect(subject.count).to eq cs_count + dast_count + ds_count + sast_count - feedback.count
-          expect(subject.map(&:project_fingerprint)).not_to include(*feedback.map(&:project_fingerprint))
+          expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count - feedback.count)
+          expect(subject.findings.map(&:project_fingerprint)).not_to include(*feedback.map(&:project_fingerprint))
         end
       end
 
@@ -162,8 +157,8 @@ describe Security::PipelineVulnerabilitiesFinder do
         subject { described_class.new(pipeline: pipeline, params: { report_type: %w[dependency_scanning], scope: 'dismissed' } ).execute }
 
         it 'returns non-dismissed vulnerabilities' do
-          expect(subject.count).to eq(ds_count - 1)
-          expect(subject.map(&:project_fingerprint)).not_to include(ds_occurrence.project_fingerprint)
+          expect(subject.findings.count).to eq(ds_count - 1)
+          expect(subject.findings.map(&:project_fingerprint)).not_to include(ds_finding.project_fingerprint)
         end
       end
 
@@ -171,7 +166,7 @@ describe Security::PipelineVulnerabilitiesFinder do
         let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scope: 'all' } }
 
         it 'returns all vulnerabilities' do
-          expect(subject.count).to eq cs_count + dast_count + ds_count + sast_count
+          expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
         end
       end
     end
@@ -181,7 +176,7 @@ describe Security::PipelineVulnerabilitiesFinder do
         subject { described_class.new(pipeline: pipeline).execute }
 
         it 'returns all vulnerability severity levels' do
-          expect(subject.map(&:severity).uniq).to match_array %w[undefined unknown low medium high critical info]
+          expect(subject.findings.map(&:severity).uniq).to match_array(%w[unknown low medium high critical info])
         end
       end
 
@@ -189,7 +184,7 @@ describe Security::PipelineVulnerabilitiesFinder do
         subject { described_class.new(pipeline: pipeline, params: { severity: 'low' } ).execute }
 
         it 'returns only low-severity vulnerabilities' do
-          expect(subject.map(&:severity).uniq).to match_array %w[low]
+          expect(subject.findings.map(&:severity).uniq).to match_array(%w[low])
         end
       end
     end
@@ -199,7 +194,7 @@ describe Security::PipelineVulnerabilitiesFinder do
         subject { described_class.new(pipeline: pipeline).execute }
 
         it 'returns all vulnerability confidence levels' do
-          expect(subject.map(&:confidence).uniq).to match_array %w[undefined unknown low medium high]
+          expect(subject.findings.map(&:confidence).uniq).to match_array %w[unknown low medium high]
         end
       end
 
@@ -207,19 +202,38 @@ describe Security::PipelineVulnerabilitiesFinder do
         subject { described_class.new(pipeline: pipeline, params: { confidence: 'medium' } ).execute }
 
         it 'returns only medium-confidence vulnerabilities' do
-          expect(subject.map(&:confidence).uniq).to match_array %w[medium]
+          expect(subject.findings.map(&:confidence).uniq).to match_array(%w[medium])
+        end
+      end
+    end
+
+    context 'by scanner' do
+      context 'when unscoped' do
+        subject { described_class.new(pipeline: pipeline).execute }
+
+        it 'returns all vulnerabilities with all scanners available' do
+          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bandit bundler_audit find_sec_bugs flawfinder gemnasium klar zaproxy]
+        end
+      end
+
+      context 'when `zaproxy`' do
+        subject { described_class.new(pipeline: pipeline, params: { scanner: 'zaproxy' } ).execute }
+
+        it 'returns only vulnerabilities with selected scanner external id' do
+          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array(%w[zaproxy])
         end
       end
     end
 
     context 'by all filters' do
       context 'with found entity' do
-        let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scope: 'all' } }
+        let(:params) { { report_type: %w[sast dast container_scanning dependency_scanning], scanner: %w[bandit bundler_audit find_sec_bugs flawfinder gemnasium klar zaproxy], scope: 'all' } }
 
         it 'filters by all params' do
-          expect(subject.count).to eq cs_count + dast_count + ds_count + sast_count
-          expect(subject.map(&:confidence).uniq).to match_array %w[undefined unknown low medium high]
-          expect(subject.map(&:severity).uniq).to match_array %w[undefined unknown low medium high critical info]
+          expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
+          expect(subject.findings.map(&:scanner).map(&:external_id).uniq).to match_array %w[bandit bundler_audit find_sec_bugs flawfinder gemnasium klar zaproxy]
+          expect(subject.findings.map(&:confidence).uniq).to match_array(%w[unknown low medium high])
+          expect(subject.findings.map(&:severity).uniq).to match_array(%w[unknown low medium high critical info])
         end
       end
 
@@ -227,7 +241,8 @@ describe Security::PipelineVulnerabilitiesFinder do
         let(:params) { { report_type: %w[code_quality] } }
 
         it 'did not find anything' do
-          is_expected.to be_empty
+          expect(subject.created_at).to be_nil
+          expect(subject.findings).to be_empty
         end
       end
     end
@@ -236,7 +251,7 @@ describe Security::PipelineVulnerabilitiesFinder do
       subject { described_class.new(pipeline: pipeline).execute }
 
       it 'returns all report_types' do
-        expect(subject.count).to eq cs_count + dast_count + ds_count + sast_count
+        expect(subject.findings.count).to eq(cs_count + dast_count + ds_count + sast_count)
       end
     end
 
@@ -277,34 +292,44 @@ describe Security::PipelineVulnerabilitiesFinder do
       subject { described_class.new(pipeline: pipeline, params: { report_type: %w[sast], scope: 'all' }).execute }
 
       it 'assigns vulnerability records to findings providing them with computed state' do
-        confirmed = subject.find { |f| f.project_fingerprint == confirmed_fingerprint }
-        resolved = subject.find { |f| f.project_fingerprint == resolved_fingerprint }
-        dismissed = subject.find { |f| f.project_fingerprint == dismissed_fingerprint }
+        confirmed = subject.findings.find { |f| f.project_fingerprint == confirmed_fingerprint }
+        resolved = subject.findings.find { |f| f.project_fingerprint == resolved_fingerprint }
+        dismissed = subject.findings.find { |f| f.project_fingerprint == dismissed_fingerprint }
 
         expect(confirmed.state).to eq 'confirmed'
         expect(resolved.state).to eq 'resolved'
         expect(dismissed.state).to eq 'dismissed'
-        expect(subject - [confirmed, resolved, dismissed]).to all have_attributes(state: 'new')
+        expect(subject.findings - [confirmed, resolved, dismissed]).to all(have_attributes(state: 'detected'))
       end
     end
 
     context 'when being tested for sort stability' do
       let(:params) { { report_type: %w[sast] } }
 
-      it 'maintains the order of the occurrences having the same severity and confidence' do
+      it 'maintains the order of the findings having the same severity and confidence' do
         select_proc = proc { |o| o.severity == 'medium' && o.confidence == 'high' }
-        report_occurrences = pipeline.security_reports.reports['sast'].occurrences.select(&select_proc)
+        report_findings = pipeline.security_reports.reports['sast'].findings.select(&select_proc)
 
-        found_occurrences = subject.select(&select_proc)
+        found_findings = subject.findings.select(&select_proc)
 
-        found_occurrences.each_with_index do |found, i|
-          expect(found.metadata['cve']).to eq(report_occurrences[i].compare_key)
+        found_findings.each_with_index do |found, i|
+          expect(found.metadata['cve']).to eq(report_findings[i].compare_key)
         end
       end
     end
 
+    context 'when scanner is not provided in the report findings' do
+      let!(:artifact_sast) { create(:ee_ci_job_artifact, :sast_with_missing_scanner, job: build_sast, project: project) }
+
+      it 'sets empty scanner' do
+        sast_scanners = subject.findings.select(&:sast?).map(&:scanner)
+
+        expect(sast_scanners).to all(have_attributes(project_id: nil, external_id: nil, name: nil))
+      end
+    end
+
     def read_fixture(fixture)
-      JSON.parse(File.read(fixture.file.path))
+      Gitlab::Json.parse(File.read(fixture.file.path))
     end
   end
 end

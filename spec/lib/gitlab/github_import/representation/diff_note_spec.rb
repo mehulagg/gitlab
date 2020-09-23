@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Representation::DiffNote do
+RSpec.describe Gitlab::GithubImport::Representation::DiffNote do
   let(:hunk) do
     '@@ -1 +1 @@
     -Hello

@@ -13,18 +13,24 @@ module Emails
       @member_source_type = member_source_type
       @member_id = member_id
 
+      return unless member_exists?
+
       user = User.find(recipient_id)
 
-      mail(to: user.notification_email_for(notification_group),
-           subject: subject("Request to join the #{member_source.human_name} #{member_source.model_name.singular}"))
+      member_email_with_layout(
+        to: user.notification_email_for(notification_group),
+        subject: subject("Request to join the #{member_source.human_name} #{member_source.model_name.singular}"))
     end
 
     def member_access_granted_email(member_source_type, member_id)
       @member_source_type = member_source_type
       @member_id = member_id
 
-      mail(to: member.user.notification_email_for(notification_group),
-           subject: subject("Access to the #{member_source.human_name} #{member_source.model_name.singular} was granted"))
+      return unless member_exists?
+
+      member_email_with_layout(
+        to: member.user.notification_email_for(notification_group),
+        subject: subject("Access to the #{member_source.human_name} #{member_source.model_name.singular} was granted"))
     end
 
     def member_access_denied_email(member_source_type, source_id, user_id)
@@ -33,8 +39,9 @@ module Emails
 
       user = User.find(user_id)
 
-      mail(to: user.notification_email_for(notification_group),
-           subject: subject("Access to the #{member_source.human_name} #{member_source.model_name.singular} was denied"))
+      member_email_with_layout(
+        to: user.notification_email_for(notification_group),
+        subject: subject("Access to the #{member_source.human_name} #{member_source.model_name.singular} was denied"))
     end
 
     def member_invited_email(member_source_type, member_id, token)
@@ -42,17 +49,46 @@ module Emails
       @member_id = member_id
       @token = token
 
-      mail(to: member.invite_email,
-           subject: subject("Invitation to join the #{member_source.human_name} #{member_source.model_name.singular}"))
+      return unless member_exists?
+
+      subject_line = subject("Invitation to join the #{member_source.human_name} #{member_source.model_name.singular}")
+
+      if member.invite_to_unknown_user? && Feature.enabled?(:invite_email_experiment)
+        subject_line = subject("#{member.created_by.name} invited you to join GitLab") if member.created_by
+        @invite_url_params = { new_user_invite: 'experiment' }
+
+        member_email_with_layout(
+          to: member.invite_email,
+          subject: subject_line,
+          template: 'member_invited_email_experiment',
+          layout: 'experiment_mailer'
+        )
+
+        Gitlab::Tracking.event(Gitlab::Experimentation::EXPERIMENTS[:invite_email][:tracking_category], 'sent', property: 'experiment_group')
+      else
+        @invite_url_params = member.invite_to_unknown_user? ? { new_user_invite: 'control' } : {}
+
+        member_email_with_layout(
+          to: member.invite_email,
+          subject: subject_line
+        )
+
+        if member.invite_to_unknown_user?
+          Gitlab::Tracking.event(Gitlab::Experimentation::EXPERIMENTS[:invite_email][:tracking_category], 'sent', property: 'control_group')
+        end
+      end
     end
 
     def member_invite_accepted_email(member_source_type, member_id)
       @member_source_type = member_source_type
       @member_id = member_id
+
+      return unless member_exists?
       return unless member.created_by
 
-      mail(to: member.created_by.notification_email_for(notification_group),
-           subject: subject('Invitation accepted'))
+      member_email_with_layout(
+        to: member.created_by.notification_email_for(notification_group),
+        subject: subject('Invitation accepted'))
     end
 
     def member_invite_declined_email(member_source_type, source_id, invite_email, created_by_id)
@@ -64,13 +100,16 @@ module Emails
 
       user = User.find(created_by_id)
 
-      mail(to: user.notification_email_for(notification_group),
-           subject: subject('Invitation declined'))
+      member_email_with_layout(
+        to: user.notification_email_for(notification_group),
+        subject: subject('Invitation declined'))
     end
 
+    # rubocop: disable CodeReuse/ActiveRecord
     def member
-      @member ||= Member.find(@member_id)
+      @member ||= Member.find_by(id: @member_id)
     end
+    # rubocop: enable CodeReuse/ActiveRecord
 
     def member_source
       @member_source ||= member.source
@@ -82,8 +121,25 @@ module Emails
 
     private
 
+    def member_exists?
+      Gitlab::AppLogger.info("Tried to send an email invitation for a deleted group. Member id: #{@member_id}") if member.blank?
+      member.present?
+    end
+
     def member_source_class
       @member_source_type.classify.constantize
+    end
+
+    def member_email_with_layout(to:, subject:, template: nil, layout: 'mailer')
+      mail(to: to, subject: subject) do |format|
+        if template
+          format.html { render template, layout: layout }
+          format.text { render template, layout: layout }
+        else
+          format.html { render layout: layout }
+          format.text { render layout: layout }
+        end
+      end
     end
   end
 end

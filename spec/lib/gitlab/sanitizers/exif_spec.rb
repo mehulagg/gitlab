@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe Gitlab::Sanitizers::Exif do
+RSpec.describe Gitlab::Sanitizers::Exif do
   let(:sanitizer) { described_class.new }
 
   describe '#batch_clean' do
     context 'with image uploads' do
-      set(:upload1) { create(:upload, :with_file, :issuable_upload) }
-      set(:upload2) { create(:upload, :with_file, :personal_snippet_upload) }
-      set(:upload3) { create(:upload, :with_file, created_at: 3.days.ago) }
+      let_it_be(:upload1) { create(:upload, :with_file, :issuable_upload) }
+      let_it_be(:upload2) { create(:upload, :with_file, :personal_snippet_upload) }
+      let_it_be(:upload3) { create(:upload, :with_file, created_at: 3.days.ago) }
 
       it 'processes all uploads if range ID is not set' do
         expect(sanitizer).to receive(:clean).exactly(3).times
@@ -30,7 +30,7 @@ describe Gitlab::Sanitizers::Exif do
       end
 
       it 'processes only uploads created since specified date' do
-        expect(sanitizer).to receive(:clean).exactly(2).times
+        expect(sanitizer).to receive(:clean).twice
 
         sanitizer.batch_clean(since: 2.days.ago)
       end

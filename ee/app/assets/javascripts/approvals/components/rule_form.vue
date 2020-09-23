@@ -1,46 +1,77 @@
 <script>
 import { mapState, mapActions } from 'vuex';
-import _ from 'underscore';
-import { GlButton } from '@gitlab/ui';
+import { groupBy, isNumber } from 'lodash';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { sprintf, __ } from '~/locale';
 import ApproversList from './approvers_list.vue';
 import ApproversSelect from './approvers_select.vue';
+import BranchesSelect from './branches_select.vue';
 import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from '../constants';
 
 const DEFAULT_NAME = 'Default';
 const DEFAULT_NAME_FOR_LICENSE_REPORT = 'License-Check';
-const READONLY_NAMES = [DEFAULT_NAME_FOR_LICENSE_REPORT];
+const DEFAULT_NAME_FOR_VULNERABILITY_CHECK = 'Vulnerability-Check';
+const READONLY_NAMES = [DEFAULT_NAME_FOR_LICENSE_REPORT, DEFAULT_NAME_FOR_VULNERABILITY_CHECK];
+
+function mapServerResponseToValidationErrors(messages) {
+  return Object.entries(messages).flatMap(([key, msgs]) => msgs.map(msg => `${key} ${msg}`));
+}
 
 export default {
   components: {
     ApproversList,
     ApproversSelect,
-    GlButton,
+    BranchesSelect,
   },
+  // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
+  mixins: [glFeatureFlagsMixin()],
   props: {
     initRule: {
       type: Object,
       required: false,
       default: null,
     },
+    isMrEdit: {
+      type: Boolean,
+      default: true,
+      required: false,
+    },
+    defaultRuleName: {
+      type: String,
+      required: false,
+      default: '',
+    },
   },
   data() {
-    return {
+    const defaults = {
       name: '',
       approvalsRequired: 1,
       minApprovalsRequired: 0,
       approvers: [],
       approversToAdd: [],
+      branches: [],
+      branchesToAdd: [],
       showValidation: false,
       isFallback: false,
       containsHiddenGroups: false,
+      serverValidationErrors: [],
       ...this.getInitialData(),
     };
+    // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
+    if (this.glFeatures.approvalSuggestions) {
+      return { ...defaults, name: this.defaultRuleName || defaults.name };
+    }
+
+    return defaults;
   },
   computed: {
     ...mapState(['settings']),
+    rule() {
+      // If we are creating a new rule with a suggested approval name
+      return this.defaultRuleName ? null : this.initRule;
+    },
     approversByType() {
-      return _.groupBy(this.approvers, x => x.type);
+      return groupBy(this.approvers, x => x.type);
     },
     users() {
       return this.approversByType[TYPE_USER] || [];
@@ -59,21 +90,33 @@ export default {
         return {};
       }
 
-      return {
+      const invalidObject = {
         name: this.invalidName,
         approvalsRequired: this.invalidApprovalsRequired,
         approvers: this.invalidApprovers,
       };
-    },
-    invalidName() {
-      if (!this.isMultiSubmission) {
-        return '';
+
+      if (!this.isMrEdit) {
+        invalidObject.branches = this.invalidBranches;
       }
 
-      return !this.name ? __('Please provide a name') : '';
+      return invalidObject;
+    },
+    invalidName() {
+      let error = '';
+
+      if (this.isMultiSubmission) {
+        if (this.serverValidationErrors.includes('name has already been taken')) {
+          error = __('Rule name is already taken.');
+        } else if (!this.name) {
+          error = __('Please provide a name');
+        }
+      }
+
+      return error;
     },
     invalidApprovalsRequired() {
-      if (!_.isNumber(this.approvalsRequired)) {
+      if (!isNumber(this.approvalsRequired)) {
         return __('Please enter a valid number');
       }
 
@@ -94,6 +137,13 @@ export default {
 
       return !this.approvers.length ? __('Please select and add a member') : '';
     },
+    invalidBranches() {
+      if (this.isMrEdit) return '';
+
+      const invalidTypes = this.branches.filter(id => typeof id !== 'number');
+
+      return invalidTypes.length ? __('Please select a valid target branch') : '';
+    },
     isValid() {
       return Object.keys(this.validation).every(key => !this.validation[key]);
     },
@@ -108,7 +158,16 @@ export default {
     isPersisted() {
       return this.initRule && this.initRule.id;
     },
+    isNameVisible() {
+      return !this.settings.lockedApprovalsRuleName;
+    },
     isNameDisabled() {
+      // TODO: Remove feature flag in https://gitlab.com/gitlab-org/gitlab/-/issues/235114
+      if (this.glFeatures.approvalSuggestions) {
+        return (
+          Boolean(this.isPersisted || this.defaultRuleName) && READONLY_NAMES.includes(this.name)
+        );
+      }
       return this.isPersisted && READONLY_NAMES.includes(this.name);
     },
     removeHiddenGroups() {
@@ -117,23 +176,38 @@ export default {
     submissionData() {
       return {
         id: this.initRule && this.initRule.id,
-        name: this.name || DEFAULT_NAME,
+        name: this.settings.lockedApprovalsRuleName || this.name || DEFAULT_NAME,
         approvalsRequired: this.approvalsRequired,
         users: this.userIds,
         groups: this.groupIds,
         userRecords: this.users,
         groupRecords: this.groups,
         removeHiddenGroups: this.removeHiddenGroups,
+        protectedBranchIds: this.branches,
       };
+    },
+    showProtectedBranch() {
+      return !this.isMrEdit && this.settings.allowMultiRule;
     },
   },
   watch: {
     approversToAdd(value) {
       this.approvers.push(value[0]);
     },
+    branchesToAdd(value) {
+      this.branches = value ? [value] : [];
+    },
   },
   methods: {
-    ...mapActions(['putFallbackRule', 'postRule', 'putRule', 'deleteRule']),
+    ...mapActions(['putFallbackRule', 'postRule', 'putRule', 'deleteRule', 'postRegularRule']),
+    addSelection() {
+      if (!this.approversToAdd.length) {
+        return;
+      }
+
+      this.approvers = this.approversToAdd.concat(this.approvers);
+      this.approversToAdd = [];
+    },
     /**
      * Validate and submit the form based on what type it is.
      * - Fallback rule?
@@ -141,21 +215,37 @@ export default {
      * - Multi rule?
      */
     submit() {
+      let submission;
+
+      this.serverValidationErrors = [];
+
       if (!this.validate()) {
-        return Promise.resolve();
+        submission = Promise.resolve();
       } else if (this.isFallbackSubmission) {
-        return this.submitFallback();
+        submission = this.submitFallback();
       } else if (!this.isMultiSubmission) {
-        return this.submitSingleRule();
+        submission = this.submitSingleRule();
+      } else {
+        submission = this.submitRule();
       }
 
-      return this.submitRule();
+      submission.catch(failureResponse => {
+        this.serverValidationErrors = mapServerResponseToValidationErrors(
+          failureResponse?.response?.data?.message || {},
+        );
+      });
+
+      return submission;
     },
     /**
      * Submit the rule, by either put-ing or post-ing.
      */
     submitRule() {
       const data = this.submissionData;
+
+      if (!this.settings.allowMultiRule && this.settings.prefix === 'mr-edit') {
+        return data.id ? this.putRule(data) : this.postRegularRule(data);
+      }
 
       return data.id ? this.putRule(data) : this.postRule(data);
     },
@@ -190,7 +280,7 @@ export default {
       return this.isValid;
     },
     getInitialData() {
-      if (!this.initRule) {
+      if (!this.initRule || this.defaultRuleName) {
         return {};
       }
 
@@ -205,6 +295,7 @@ export default {
 
       const users = this.initRule.users.map(x => ({ ...x, type: TYPE_USER }));
       const groups = this.initRule.groups.map(x => ({ ...x, type: TYPE_GROUP }));
+      const branches = this.initRule.protectedBranches?.map(x => x.id) || [];
 
       return {
         name: this.initRule.name || '',
@@ -216,6 +307,7 @@ export default {
           .concat(
             containsHiddenGroups && !removeHiddenGroups ? [{ type: TYPE_HIDDEN_GROUPS }] : [],
           ),
+        branches,
       };
     },
   },
@@ -225,7 +317,7 @@ export default {
 <template>
   <form novalidate @submit.prevent.stop="submit">
     <div class="row">
-      <div v-if="settings.allowMultiRule" class="form-group col-sm-6">
+      <div v-if="isNameVisible" class="form-group col-sm-6">
         <label class="label-wrapper">
           <span class="mb-2 bold inline">{{ s__('ApprovalRule|Rule name') }}</span>
           <input
@@ -256,6 +348,23 @@ export default {
           <span class="invalid-feedback">{{ validation.approvalsRequired }}</span>
         </label>
       </div>
+    </div>
+    <div v-if="showProtectedBranch" class="form-group">
+      <label class="label-bold">{{ s__('ApprovalRule|Target branch') }}</label>
+      <div class="d-flex align-items-start">
+        <div class="w-100">
+          <branches-select
+            v-model="branchesToAdd"
+            :project-id="settings.projectId"
+            :is-invalid="!!validation.branches"
+            :init-rule="rule"
+          />
+          <div class="invalid-feedback">{{ validation.branches }}</div>
+        </div>
+      </div>
+      <p class="text-muted">
+        {{ __('Apply this approval rule to any branch or a specific protected branch.') }}
+      </p>
     </div>
     <div class="form-group">
       <label class="label-bold">{{ s__('ApprovalRule|Approvers') }}</label>

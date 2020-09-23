@@ -2,12 +2,8 @@
 
 require 'spec_helper'
 
-describe 'Projects > Show > User sees last commit CI status' do
-  set(:project) { create(:project, :repository, :public) }
-
-  before do
-    stub_feature_flags(vue_file_list: false)
-  end
+RSpec.describe 'Projects > Show > User sees last commit CI status' do
+  let_it_be(:project) { create(:project, :repository, :public) }
 
   it 'shows the project README', :js do
     project.enable_ci
@@ -16,9 +12,9 @@ describe 'Projects > Show > User sees last commit CI status' do
 
     visit project_path(project)
 
-    page.within '.blob-commit-info' do
+    page.within '.commit-detail' do
       expect(page).to have_content(project.commit.sha[0..6])
-      expect(page).to have_link('Pipeline: skipped')
+      expect(page).to have_selector('[aria-label="Pipeline: skipped"]')
     end
   end
 end

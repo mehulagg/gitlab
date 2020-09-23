@@ -1,7 +1,11 @@
 import * as types from './mutation_types';
 
 export default {
-  [types.SET_INITIAL_DATA](state, { groupId, issueId, selectedEpic, selectedEpicIssueId }) {
+  [types.SET_INITIAL_DATA](
+    state,
+    { variant, groupId, issueId, selectedEpic, selectedEpicIssueId },
+  ) {
+    state.variant = variant;
     state.groupId = groupId;
     state.issueId = issueId;
     state.selectedEpic = selectedEpic;
@@ -18,6 +22,10 @@ export default {
 
   [types.SET_SELECTED_EPIC](state, selectedEpic) {
     state.selectedEpic = selectedEpic;
+  },
+
+  [types.SET_SELECTED_EPIC_ISSUE_ID](state, selectedEpicIssueId) {
+    state.selectedEpicIssueId = selectedEpicIssueId;
   },
 
   [types.REQUEST_EPICS](state) {

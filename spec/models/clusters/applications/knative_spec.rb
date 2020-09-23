@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::Knative do
+RSpec.describe Clusters::Applications::Knative do
   let(:knative) { create(:clusters_applications_knative) }
 
   include_examples 'cluster application core specs', :clusters_applications_knative
@@ -14,6 +14,11 @@ describe Clusters::Applications::Knative do
   before do
     allow(ClusterWaitForIngressIpAddressWorker).to receive(:perform_in)
     allow(ClusterWaitForIngressIpAddressWorker).to receive(:perform_async)
+    allow(ClusterConfigureIstioWorker).to receive(:perform_async)
+  end
+
+  describe 'associations' do
+    it { is_expected.to have_one(:serverless_domain_cluster).class_name('::Serverless::DomainCluster').with_foreign_key('clusters_applications_knative_id').inverse_of(:knative) }
   end
 
   describe 'when cloud run is enabled' do
@@ -40,6 +45,32 @@ describe Clusters::Applications::Knative do
     it 'schedules a ClusterWaitForIngressIpAddressWorker' do
       expect(ClusterWaitForIngressIpAddressWorker).to have_received(:perform_in)
         .with(Clusters::Applications::Knative::FETCH_IP_ADDRESS_DELAY, 'knative', application.id)
+    end
+  end
+
+  describe 'configuring istio ingress gateway' do
+    context 'after installed' do
+      let(:application) { create(:clusters_applications_knative, :installing) }
+
+      before do
+        application.make_installed!
+      end
+
+      it 'schedules a ClusterConfigureIstioWorker' do
+        expect(ClusterConfigureIstioWorker).to have_received(:perform_async).with(application.cluster_id)
+      end
+    end
+
+    context 'after updated' do
+      let(:application) { create(:clusters_applications_knative, :updating) }
+
+      before do
+        application.make_installed!
+      end
+
+      it 'schedules a ClusterConfigureIstioWorker' do
+        expect(ClusterConfigureIstioWorker).to have_received(:perform_async).with(application.cluster_id)
+      end
     end
   end
 
@@ -119,7 +150,7 @@ describe Clusters::Applications::Knative do
     subject { knative.install_command }
 
     it 'is initialized with latest version' do
-      expect(subject.version).to eq('0.7.0')
+      expect(subject.version).to eq('0.9.0')
     end
 
     it_behaves_like 'a command'
@@ -127,6 +158,7 @@ describe Clusters::Applications::Knative do
 
   describe '#update_command' do
     let!(:current_installed_version) { knative.version = '0.1.0' }
+
     subject { knative.update_command }
 
     it 'is initialized with current version' do
@@ -161,18 +193,19 @@ describe Clusters::Applications::Knative do
     end
 
     it "initializes command with all necessary postdelete script" do
-      api_resources = YAML.safe_load(File.read(Rails.root.join(Clusters::Applications::Knative::API_RESOURCES_PATH)))
+      api_groups = YAML.safe_load(File.read(Rails.root.join(Clusters::Applications::Knative::API_GROUPS_PATH)))
 
       remove_knative_istio_leftovers_script = [
         "kubectl delete --ignore-not-found ns knative-serving",
         "kubectl delete --ignore-not-found ns knative-build"
       ]
 
-      full_delete_commands_size = api_resources.size + remove_knative_istio_leftovers_script.size
+      full_delete_commands_size = api_groups.size + remove_knative_istio_leftovers_script.size
 
       expect(subject.postdelete).to include(*remove_knative_istio_leftovers_script)
       expect(subject.postdelete.size).to eq(full_delete_commands_size)
-      expect(subject.postdelete[2]).to eq("kubectl delete --ignore-not-found crd #{api_resources[0]}")
+      expect(subject.postdelete[2]).to eq("kubectl api-resources -o name --api-group #{api_groups[0]} | xargs kubectl delete --ignore-not-found crd")
+      expect(subject.postdelete[3]).to eq("kubectl api-resources -o name --api-group #{api_groups[1]} | xargs kubectl delete --ignore-not-found crd")
     end
   end
 
@@ -189,5 +222,35 @@ describe Clusters::Applications::Knative do
 
   describe 'validations' do
     it { is_expected.to validate_presence_of(:hostname) }
+  end
+
+  describe '#available_domains' do
+    let!(:domain) { create(:pages_domain, :instance_serverless) }
+
+    it 'returns all instance serverless domains' do
+      expect(PagesDomain).to receive(:instance_serverless).and_call_original
+
+      domains = subject.available_domains
+
+      expect(domains.length).to eq(1)
+      expect(domains).to include(domain)
+    end
+  end
+
+  describe '#find_available_domain' do
+    let!(:domain) { create(:pages_domain, :instance_serverless) }
+
+    it 'returns the domain scoped to available domains' do
+      expect(subject).to receive(:available_domains).and_call_original
+      expect(subject.find_available_domain(domain.id)).to eq(domain)
+    end
+  end
+
+  describe '#pages_domain' do
+    let!(:sdc) { create(:serverless_domain_cluster, knative: knative) }
+
+    it 'returns the the associated pages domain' do
+      expect(knative.reload.pages_domain).to eq(sdc.pages_domain)
+    end
   end
 end

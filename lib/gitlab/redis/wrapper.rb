@@ -15,16 +15,18 @@ module Gitlab
         delegate :params, :url, to: :new
 
         def with
+          pool.with { |redis| yield redis }
+        end
+
+        def pool
           @pool ||= ConnectionPool.new(size: pool_size) { ::Redis.new(params) }
-          @pool.with { |redis| yield redis }
         end
 
         def pool_size
           # heuristic constant 5 should be a config setting somewhere -- related to CPU count?
           size = 5
-          if Sidekiq.server?
-            # the pool will be used in a multi-threaded context
-            size += Sidekiq.options[:concurrency]
+          if Gitlab::Runtime.multi_threaded?
+            size += Gitlab::Runtime.max_threads
           end
 
           size
@@ -69,6 +71,10 @@ module Gitlab
           # nil will force use of DEFAULT_REDIS_URL when config file is absent
           nil
         end
+
+        def instrumentation_class
+          raise NotImplementedError
+        end
       end
 
       def initialize(rails_env = nil)
@@ -97,6 +103,8 @@ module Gitlab
         config = raw_config_hash
         redis_url = config.delete(:url)
         redis_uri = URI.parse(redis_url)
+
+        config[:instrumentation_class] ||= self.class.instrumentation_class
 
         if redis_uri.scheme == 'unix'
           # Redis::Store does not handle Unix sockets well, so let's do it for them

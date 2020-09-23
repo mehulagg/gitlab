@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::Issues::CreateService do
+RSpec.describe Boards::Issues::CreateService do
   describe '#execute' do
     let(:project) { create(:project) }
     let(:board)   { create(:board, project: project) }
@@ -17,7 +17,9 @@ describe Boards::Issues::CreateService do
     end
 
     it 'delegates the create proceedings to Issues::CreateService' do
-      expect_any_instance_of(Issues::CreateService).to receive(:execute).once
+      expect_next_instance_of(Issues::CreateService) do |instance|
+        expect(instance).to receive(:execute).once
+      end
 
       service.execute
     end

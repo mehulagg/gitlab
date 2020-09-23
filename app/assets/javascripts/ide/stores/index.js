@@ -11,24 +11,25 @@ import branches from './modules/branches';
 import fileTemplates from './modules/file_templates';
 import paneModule from './modules/pane';
 import clientsideModule from './modules/clientside';
+import routerModule from './modules/router';
 
 Vue.use(Vuex);
 
-export const createStore = () =>
-  new Vuex.Store({
-    state: state(),
-    actions,
-    mutations,
-    getters,
-    modules: {
-      commit: commitModule,
-      pipelines,
-      mergeRequests,
-      branches,
-      fileTemplates: fileTemplates(),
-      rightPane: paneModule(),
-      clientside: clientsideModule(),
-    },
-  });
+export const createStoreOptions = () => ({
+  state: state(),
+  actions,
+  mutations,
+  getters,
+  modules: {
+    commit: commitModule,
+    pipelines,
+    mergeRequests,
+    branches,
+    fileTemplates: fileTemplates(),
+    rightPane: paneModule(),
+    clientside: clientsideModule(),
+    router: routerModule,
+  },
+});
 
-export default createStore();
+export const createStore = () => new Vuex.Store(createStoreOptions());

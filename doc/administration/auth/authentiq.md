@@ -1,5 +1,8 @@
 ---
 type: reference
+stage: Manage
+group: Access
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # Authentiq OmniAuth Provider
@@ -14,13 +17,13 @@ Authentiq will generate a Client ID and the accompanying Client Secret for you t
 
    For omnibus installation
 
-   ```sh
+   ```shell
    sudo editor /etc/gitlab/gitlab.rb
    ```
 
    For installations from source:
 
-   ```sh
+   ```shell
    sudo -u git -H editor /home/git/gitlab/config/gitlab.yml
    ```
 
@@ -66,7 +69,10 @@ Authentiq will generate a Client ID and the accompanying Client Secret for you t
 
 On the sign in page there should now be an Authentiq icon below the regular sign in form. Click the icon to begin the authentication process.
 
-- If the user has the Authentiq ID app installed in their iOS or Android device, they can scan the QR code, decide what personal details to share and sign in to your GitLab installation.
+- If the user has the Authentiq ID app installed in their iOS or Android device, they can:
+  1. Scan the QR code.
+  1. Decide what personal details to share.
+  1. Sign in to your GitLab installation.
 - If not they will be prompted to download the app and then follow the procedure above.
 
 If everything goes right, the user will be returned to GitLab and will be signed in.

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects > Members > Member is removed from project' do
+RSpec.describe 'Projects > Members > Member is removed from project' do
   let(:user) { create(:user) }
   let(:project) { create(:project) }
   let(:other_user) { create(:user) }

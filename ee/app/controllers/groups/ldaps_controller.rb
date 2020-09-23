@@ -12,7 +12,7 @@ class Groups::LdapsController < Groups::ApplicationController
     # likely the group will never transition out of its current state,
     # so we should tell the group owner.
     if @group.pending_ldap_sync
-      LdapGroupSyncWorker.perform_async(@group.id)
+      LdapGroupSyncWorker.perform_async(@group.id) # rubocop:disable CodeReuse/Worker
       message = 'The group sync has been scheduled'
     elsif @group.valid?
       message = 'The group sync is already scheduled'
@@ -27,6 +27,6 @@ class Groups::LdapsController < Groups::ApplicationController
   private
 
   def check_enabled_extras!
-    render_404 unless Gitlab::Auth::LDAP::Config.group_sync_enabled?
+    render_404 unless Gitlab::Auth::Ldap::Config.group_sync_enabled?
   end
 end

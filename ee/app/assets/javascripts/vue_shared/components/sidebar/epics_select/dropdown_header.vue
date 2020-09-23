@@ -1,25 +1,22 @@
 <script>
 import { GlButton } from '@gitlab/ui';
 
-import Icon from '~/vue_shared/components/icon.vue';
-
 export default {
   components: {
     GlButton,
-    Icon,
   },
 };
 </script>
 
 <template>
-  <div class="dropdown-title">
-    <span>{{ __('Assign epic') }}</span>
+  <div class="dropdown-title gl-display-flex gl-align-items-center">
+    <span class="gl-ml-auto">{{ __('Assign epic') }}</span>
     <gl-button
       :aria-label="__('Close')"
-      variant="link"
-      class="dropdown-title-button dropdown-menu-close"
-    >
-      <icon name="close" />
-    </gl-button>
+      category="tertiary"
+      class="dropdown-title-button dropdown-menu-close gl-ml-auto"
+      size="small"
+      icon="close"
+    />
   </div>
 </template>

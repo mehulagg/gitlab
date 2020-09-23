@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::GithubImport do
+RSpec.describe Gitlab::GithubImport do
   let(:project) { double(:project) }
 
   describe '.new_client_for' do
@@ -35,7 +35,7 @@ describe Gitlab::GithubImport do
     end
 
     it 'caches the ghost user ID' do
-      expect(Gitlab::GithubImport::Caching)
+      expect(Gitlab::Cache::Import::Caching)
         .to receive(:write)
         .once
         .and_call_original

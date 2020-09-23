@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Milestones::PromoteService do
+RSpec.describe Milestones::PromoteService do
   let(:group) { create(:group) }
   let(:project) { create(:project, namespace: group) }
   let(:user) { create(:user) }
@@ -23,7 +23,7 @@ describe Milestones::PromoteService do
       end
 
       it 'raises error if project does not belong to a group' do
-        project.update(namespace: user.namespace)
+        project.update!(namespace: user.namespace)
 
         expect { service.execute(milestone) }.to raise_error(described_class::PromoteMilestoneError)
       end
@@ -31,7 +31,9 @@ describe Milestones::PromoteService do
       it 'does not promote milestone and update issuables if promoted milestone is not valid' do
         issue = create(:issue, milestone: milestone, project: project)
         merge_request = create(:merge_request, milestone: milestone, source_project: project)
-        allow_any_instance_of(Milestone).to receive(:valid?).and_return(false)
+        allow_next_instance_of(Milestone) do |instance|
+          allow(instance).to receive(:valid?).and_return(false)
+        end
 
         expect { service.execute(milestone) }.to raise_error(described_class::PromoteMilestoneError)
 

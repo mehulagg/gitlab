@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe 'read-only message' do
-  set(:user) { create(:user) }
+RSpec.describe 'read-only message' do
+  let_it_be(:user) { create(:user) }
 
   before do
     sign_in(user)

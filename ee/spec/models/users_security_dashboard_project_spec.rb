@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UsersSecurityDashboardProject do
+RSpec.describe UsersSecurityDashboardProject do
   subject { build(:users_security_dashboard_project) }
 
   describe 'associations' do
@@ -34,6 +34,24 @@ describe UsersSecurityDashboardProject do
         dashboard_project = build(:users_security_dashboard_project)
 
         expect(dashboard_project).to be_valid
+      end
+    end
+  end
+
+  describe '.delete_by_project_id' do
+    it 'deletes all entries for the given project ID' do
+      project = create(:project)
+      dashboard_project = create(:users_security_dashboard_project, project: project)
+
+      result = described_class.delete_by_project_id(project.id)
+
+      expect(result).to be(1)
+      expect { dashboard_project.reload }.to raise_exception(ActiveRecord::UnknownPrimaryKey)
+    end
+
+    context 'when there is no record with the given project ID' do
+      it 'fails silently' do
+        expect(described_class.delete_by_project_id(-1)).to be_zero
       end
     end
   end

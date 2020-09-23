@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class Users < Grape::API
+  class Users < Grape::API::Instance
     include PaginationParams
     include APIGuard
     include Helpers::CustomAttributes
@@ -52,7 +52,10 @@ module API
           optional :external, type: Boolean, desc: 'Flag indicating the user is an external user'
           # TODO: remove rubocop disable - https://gitlab.com/gitlab-org/gitlab/issues/14960
           optional :avatar, type: File, desc: 'Avatar image for user' # rubocop:disable Scalability/FileUploads
-          optional :private_profile, type: Boolean, default: false, desc: 'Flag indicating the user has a private profile'
+          optional :theme_id, type: Integer, desc: 'The GitLab theme for the user'
+          optional :color_scheme_id, type: Integer, desc: 'The color scheme for the file viewer'
+          optional :private_profile, type: Boolean, desc: 'Flag indicating the user has a private profile'
+          optional :note, type: String, desc: 'Admin note for this user'
           all_or_none_of :extern_uid, :provider
 
           use :optional_params_ee
@@ -80,6 +83,8 @@ module API
         optional :blocked, type: Boolean, default: false, desc: 'Filters only blocked users'
         optional :created_after, type: DateTime, desc: 'Return users created after the specified time'
         optional :created_before, type: DateTime, desc: 'Return users created before the specified time'
+        optional :without_projects, type: Boolean, default: false, desc: 'Filters only users without projects'
+        optional :exclude_internal, as: :non_internal, type: Boolean, default: false, desc: 'Filters only non internal users'
         all_or_none_of :extern_uid, :provider
 
         use :sort_params
@@ -92,7 +97,7 @@ module API
         authenticated_as_admin! if params[:external].present? || (params[:extern_uid].present? && params[:provider].present?)
 
         unless current_user&.admin?
-          params.except!(:created_after, :created_before, :order_by, :sort, :two_factor)
+          params.except!(:created_after, :created_before, :order_by, :sort, :two_factor, :without_projects)
         end
 
         users = UsersFinder.new(current_user, params).execute
@@ -111,7 +116,10 @@ module API
 
         entity = current_user&.admin? ? Entities::UserWithAdmin : Entities::UserBasic
         users = users.preload(:identities, :u2f_registrations) if entity == Entities::UserWithAdmin
+        users = users.preload(:identities, :webauthn_registrations) if entity == Entities::UserWithAdmin
         users, options = with_custom_attributes(users, { with: entity, current_user: current_user })
+
+        users = users.preload(:user_detail)
 
         present paginate(users), options
       end
@@ -204,22 +212,49 @@ module API
 
         conflict!('Email has already been taken') if params[:email] &&
             User.by_any_email(params[:email].downcase)
-                .where.not(id: user.id).count > 0
+                .where.not(id: user.id).exists?
 
         conflict!('Username has already been taken') if params[:username] &&
             User.by_username(params[:username])
-                .where.not(id: user.id).count > 0
+                .where.not(id: user.id).exists?
 
         user_params = declared_params(include_missing: false)
+        admin_making_changes_for_another_user = (current_user != user)
 
-        user_params[:password_expires_at] = Time.now if user_params[:password].present?
-        result = ::Users::UpdateService.new(current_user, user_params.merge(user: user)).execute
+        if user_params[:password].present?
+          user_params[:password_expires_at] = Time.current if admin_making_changes_for_another_user
+        end
+
+        result = ::Users::UpdateService.new(current_user, user_params.merge(user: user)).execute do |user|
+          user.send_only_admin_changed_your_password_notification! if admin_making_changes_for_another_user
+        end
 
         if result[:status] == :success
           present user, with: Entities::UserWithAdmin, current_user: current_user
         else
           render_validation_error!(user)
         end
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      desc "Delete a user's identity. Available only for admins" do
+        success Entities::UserWithAdmin
+      end
+      params do
+        requires :id, type: Integer, desc: 'The ID of the user'
+        requires :provider, type: String, desc: 'The external provider'
+      end
+      # rubocop: disable CodeReuse/ActiveRecord
+      delete ":id/identities/:provider" do
+        authenticated_as_admin!
+
+        user = User.find_by(id: params[:id])
+        not_found!('User') unless user
+
+        identity = user.identities.find_by(provider: params[:provider])
+        not_found!('Identity') unless identity
+
+        destroy_conditionally!(identity)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -230,6 +265,7 @@ module API
         requires :id, type: Integer, desc: 'The ID of the user'
         requires :key, type: String, desc: 'The new SSH key'
         requires :title, type: String, desc: 'The title of the new SSH key'
+        optional :expires_at, type: DateTime, desc: 'The expiration date of the SSH key in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)'
       end
       # rubocop: disable CodeReuse/ActiveRecord
       post ":id/keys" do
@@ -238,9 +274,9 @@ module API
         user = User.find_by(id: params.delete(:id))
         not_found!('User') unless user
 
-        key = user.keys.new(declared_params(include_missing: false))
+        key = ::Keys::CreateService.new(current_user, declared_params(include_missing: false).merge(user: user)).execute
 
-        if key.save
+        if key.persisted?
           present key, with: Entities::SSHKey
         else
           render_validation_error!(key)
@@ -252,17 +288,16 @@ module API
         success Entities::SSHKey
       end
       params do
-        requires :id, type: Integer, desc: 'The ID of the user'
+        requires :user_id, type: String, desc: 'The ID or username of the user'
         use :pagination
       end
-      # rubocop: disable CodeReuse/ActiveRecord
-      get ':id/keys' do
-        user = User.find_by(id: params[:id])
+      get ':user_id/keys', requirements: API::USER_REQUIREMENTS do
+        user = find_user(params[:user_id])
         not_found!('User') unless user && can?(current_user, :read_user, user)
 
-        present paginate(user.keys), with: Entities::SSHKey
+        keys = user.keys.preload_users
+        present paginate(keys), with: Entities::SSHKey
       end
-      # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Delete an existing SSH key from a specified user. Available only for admins.' do
         success Entities::SSHKey
@@ -281,13 +316,16 @@ module API
         key = user.keys.find_by(id: params[:key_id])
         not_found!('Key') unless key
 
-        destroy_conditionally!(key)
+        destroy_conditionally!(key) do |key|
+          destroy_service = ::Keys::DestroyService.new(current_user)
+          destroy_service.execute(key)
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Add a GPG key to a specified user. Available only for admins.' do
         detail 'This feature was added in GitLab 10.0'
-        success Entities::GPGKey
+        success Entities::GpgKey
       end
       params do
         requires :id, type: Integer, desc: 'The ID of the user'
@@ -300,10 +338,10 @@ module API
         user = User.find_by(id: params.delete(:id))
         not_found!('User') unless user
 
-        key = user.gpg_keys.new(declared_params(include_missing: false))
+        key = ::GpgKeys::CreateService.new(user, declared_params(include_missing: false)).execute
 
-        if key.save
-          present key, with: Entities::GPGKey
+        if key.persisted?
+          present key, with: Entities::GpgKey
         else
           render_validation_error!(key)
         end
@@ -312,7 +350,7 @@ module API
 
       desc 'Get the GPG keys of a specified user. Available only for admins.' do
         detail 'This feature was added in GitLab 10.0'
-        success Entities::GPGKey
+        success Entities::GpgKey
       end
       params do
         requires :id, type: Integer, desc: 'The ID of the user'
@@ -325,7 +363,7 @@ module API
         user = User.find_by(id: params[:id])
         not_found!('User') unless user
 
-        present paginate(user.gpg_keys), with: Entities::GPGKey
+        present paginate(user.gpg_keys), with: Entities::GpgKey
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -346,8 +384,10 @@ module API
         key = user.gpg_keys.find_by(id: params[:key_id])
         not_found!('GPG Key') unless key
 
-        status 204
-        key.destroy
+        destroy_conditionally!(key) do |key|
+          destroy_service = ::GpgKeys::DestroyService.new(current_user)
+          destroy_service.execute(key)
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -446,12 +486,13 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       delete ":id" do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42279')
+        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab/issues/20757')
 
         authenticated_as_admin!
 
         user = User.find_by(id: params[:id])
         not_found!('User') unless user
+        conflict!('User cannot be removed while is the sole-owner of a group') unless user.can_be_removed? || params[:hard_delete]
 
         destroy_conditionally!(user) do
           user.delete_async(deleted_by: current_user, params: params)
@@ -505,10 +546,17 @@ module API
         user = User.find_by(id: params[:id])
         not_found!('User') unless user
 
-        if !user.ldap_blocked?
-          user.block
-        else
+        if user.ldap_blocked?
           forbidden!('LDAP blocked users cannot be modified by the API')
+        end
+
+        break if user.blocked?
+
+        result = ::Users::BlockService.new(current_user).execute(user)
+        if result[:status] == :success
+          true
+        else
+          render_api_error!(result[:message], result[:http_status])
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
@@ -532,6 +580,32 @@ module API
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
+
+      desc 'Get memberships' do
+        success Entities::Membership
+      end
+      params do
+        requires :user_id, type: Integer, desc: 'The ID of the user'
+        optional :type, type: String, values: %w[Project Namespace]
+        use :pagination
+      end
+      get ":user_id/memberships" do
+        authenticated_as_admin!
+        user = find_user_by_id(params)
+
+        members = case params[:type]
+                  when 'Project'
+                    user.project_members
+                  when 'Namespace'
+                    user.group_members
+                  else
+                    user.members
+                  end
+
+        members = members.including_source
+
+        present paginate(members), with: Entities::Membership
+      end
 
       params do
         requires :user_id, type: Integer, desc: 'The ID of the user'
@@ -638,7 +712,9 @@ module API
         use :pagination
       end
       get "keys" do
-        present paginate(current_user.keys), with: Entities::SSHKey
+        keys = current_user.keys.preload_users
+
+        present paginate(keys), with: Entities::SSHKey
       end
 
       desc 'Get a single key owned by currently authenticated user' do
@@ -662,11 +738,12 @@ module API
       params do
         requires :key, type: String, desc: 'The new SSH key'
         requires :title, type: String, desc: 'The title of the new SSH key'
+        optional :expires_at, type: DateTime, desc: 'The expiration date of the SSH key in ISO 8601 format (YYYY-MM-DDTHH:MM:SSZ)'
       end
       post "keys" do
-        key = current_user.keys.new(declared_params)
+        key = ::Keys::CreateService.new(current_user, declared_params(include_missing: false)).execute
 
-        if key.save
+        if key.persisted?
           present key, with: Entities::SSHKey
         else
           render_validation_error!(key)
@@ -684,24 +761,27 @@ module API
         key = current_user.keys.find_by(id: params[:key_id])
         not_found!('Key') unless key
 
-        destroy_conditionally!(key)
+        destroy_conditionally!(key) do |key|
+          destroy_service = ::Keys::DestroyService.new(current_user)
+          destroy_service.execute(key)
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
       desc "Get the currently authenticated user's GPG keys" do
         detail 'This feature was added in GitLab 10.0'
-        success Entities::GPGKey
+        success Entities::GpgKey
       end
       params do
         use :pagination
       end
       get 'gpg_keys' do
-        present paginate(current_user.gpg_keys), with: Entities::GPGKey
+        present paginate(current_user.gpg_keys), with: Entities::GpgKey
       end
 
       desc 'Get a single GPG key owned by currently authenticated user' do
         detail 'This feature was added in GitLab 10.0'
-        success Entities::GPGKey
+        success Entities::GpgKey
       end
       params do
         requires :key_id, type: Integer, desc: 'The ID of the GPG key'
@@ -711,22 +791,22 @@ module API
         key = current_user.gpg_keys.find_by(id: params[:key_id])
         not_found!('GPG Key') unless key
 
-        present key, with: Entities::GPGKey
+        present key, with: Entities::GpgKey
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
       desc 'Add a new GPG key to the currently authenticated user' do
         detail 'This feature was added in GitLab 10.0'
-        success Entities::GPGKey
+        success Entities::GpgKey
       end
       params do
         requires :key, type: String, desc: 'The new GPG key'
       end
       post 'gpg_keys' do
-        key = current_user.gpg_keys.new(declared_params)
+        key = ::GpgKeys::CreateService.new(current_user, declared_params(include_missing: false)).execute
 
-        if key.save
-          present key, with: Entities::GPGKey
+        if key.persisted?
+          present key, with: Entities::GpgKey
         else
           render_validation_error!(key)
         end
@@ -759,8 +839,10 @@ module API
         key = current_user.gpg_keys.find_by(id: params[:key_id])
         not_found!('GPG Key') unless key
 
-        status 204
-        key.destroy
+        destroy_conditionally!(key) do |key|
+          destroy_service = ::GpgKeys::DestroyService.new(current_user)
+          destroy_service.execute(key)
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

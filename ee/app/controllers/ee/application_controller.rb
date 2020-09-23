@@ -9,8 +9,8 @@ module EE
       around_action :set_current_ip_address
     end
 
-    def check_if_gl_com
-      render_404 unless ::Gitlab.com?
+    def check_if_gl_com_or_dev
+      render_404 unless ::Gitlab.dev_env_or_com?
     end
 
     def verify_namespace_plan_check_enabled
@@ -36,7 +36,8 @@ module EE
     end
 
     def log_audit_event
-      AuditEvents::ImpersonationAuditEventService.new(impersonator, request.remote_ip, 'Stopped Impersonation').for_user(impersonated_user.username).security_event
+      EE::AuditEvents::ImpersonationAuditEventService.new(impersonator, request.remote_ip, 'Stopped Impersonation')
+        .for_user(current_user.username).security_event
     end
 
     def set_current_ip_address(&block)

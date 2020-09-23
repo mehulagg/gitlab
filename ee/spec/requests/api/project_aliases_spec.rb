@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProjectAliases, api: true do
+RSpec.describe API::ProjectAliases, api: true do
   let(:user)  { create(:user) }
   let(:admin) { create(:admin) }
 
@@ -13,7 +13,7 @@ describe API::ProjectAliases, api: true do
       end
 
       it 'returns 403' do
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -25,7 +25,7 @@ describe API::ProjectAliases, api: true do
       end
 
       it 'returns 403' do
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -37,7 +37,7 @@ describe API::ProjectAliases, api: true do
       end
 
       it 'returns 403' do
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
 
@@ -49,7 +49,7 @@ describe API::ProjectAliases, api: true do
       end
 
       it 'returns 403' do
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
   end
@@ -60,13 +60,13 @@ describe API::ProjectAliases, api: true do
         let(:user) { nil }
 
         it 'returns 401' do
-          expect(response).to have_gitlab_http_status(401)
+          expect(response).to have_gitlab_http_status(:unauthorized)
         end
       end
 
       context 'regular user' do
         it 'returns 403' do
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
     end
@@ -88,7 +88,7 @@ describe API::ProjectAliases, api: true do
         let!(:project_alias_2) { create(:project_alias) }
 
         it 'returns the project aliases list' do
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response).to match_response_schema('public_api/v4/project_aliases', dir: 'ee')
           expect(response).to include_pagination_headers
         end
@@ -110,7 +110,7 @@ describe API::ProjectAliases, api: true do
 
         context 'existing project alias' do
           it 'returns the project alias' do
-            expect(response).to have_gitlab_http_status(200)
+            expect(response).to have_gitlab_http_status(:ok)
             expect(response).to match_response_schema('public_api/v4/project_alias', dir: 'ee')
           end
         end
@@ -119,7 +119,7 @@ describe API::ProjectAliases, api: true do
           let(:alias_name) { 'some-project' }
 
           it 'returns 404' do
-            expect(response).to have_gitlab_http_status(404)
+            expect(response).to have_gitlab_http_status(:not_found)
           end
         end
       end
@@ -141,7 +141,7 @@ describe API::ProjectAliases, api: true do
 
         context 'existing project alias' do
           it 'returns 400' do
-            expect(response).to have_gitlab_http_status(400)
+            expect(response).to have_gitlab_http_status(:bad_request)
           end
         end
 
@@ -149,7 +149,7 @@ describe API::ProjectAliases, api: true do
           let(:alias_name) { 'some-project' }
 
           it 'returns 200' do
-            expect(response).to have_gitlab_http_status(201)
+            expect(response).to have_gitlab_http_status(:created)
             expect(response).to match_response_schema('public_api/v4/project_alias', dir: 'ee')
           end
         end
@@ -171,7 +171,7 @@ describe API::ProjectAliases, api: true do
 
         context 'existing project alias' do
           it 'returns 204' do
-            expect(response).to have_gitlab_http_status(204)
+            expect(response).to have_gitlab_http_status(:no_content)
           end
         end
 
@@ -179,7 +179,7 @@ describe API::ProjectAliases, api: true do
           let(:alias_name) { 'some-project' }
 
           it 'returns 404' do
-            expect(response).to have_gitlab_http_status(404)
+            expect(response).to have_gitlab_http_status(:not_found)
           end
         end
       end

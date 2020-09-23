@@ -19,7 +19,13 @@ module Gitlab
       private
 
       def paginate_with_limit_optimization(relation)
-        pagination_data = relation.page(params[:page]).per(params[:per_page])
+        # do not paginate relation if it is already paginated
+        pagination_data = if relation.respond_to?(:current_page) && relation.current_page == params[:page] && relation.limit_value == params[:per_page]
+                            relation
+                          else
+                            relation.page(params[:page]).per(params[:per_page])
+                          end
+
         return pagination_data unless pagination_data.is_a?(ActiveRecord::Relation)
         return pagination_data unless Feature.enabled?(:api_kaminari_count_with_limit)
 
@@ -71,6 +77,29 @@ module Gitlab
 
       def data_without_counts?(paginated_data)
         paginated_data.is_a?(Kaminari::PaginatableWithoutCount)
+      end
+
+      def base_request_uri
+        @base_request_uri ||= URI.parse(request.url).tap do |uri|
+          uri.host = Gitlab.config.gitlab.host
+          uri.port = Gitlab.config.gitlab.port
+        end
+      end
+
+      def build_page_url(query_params:)
+        base_request_uri.tap do |uri|
+          uri.query = query_params
+        end.to_s
+      end
+
+      def page_href(next_page_params = {})
+        query_params = params.merge(**next_page_params, per_page: per_page).to_query
+
+        build_page_url(query_params: query_params)
+      end
+
+      def per_page
+        @per_page ||= params[:per_page]
       end
     end
   end

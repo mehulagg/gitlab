@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Edit Project Settings' do
+RSpec.describe 'Edit Project Settings' do
   let(:member) { create(:user) }
   let!(:project) { create(:project, :public, :repository) }
   let!(:issue) { create(:issue, project: project) }
@@ -41,24 +41,30 @@ describe 'Edit Project Settings' do
     end
 
     context 'When external issue tracker is enabled and issues enabled on project settings' do
-      it 'does not hide issues tab' do
-        allow_any_instance_of(Project).to receive(:external_issue_tracker).and_return(JiraService.new)
+      it 'does not hide issues tab and hides labels tab' do
+        allow_next_instance_of(Project) do |instance|
+          allow(instance).to receive(:external_issue_tracker).and_return(JiraService.new)
+        end
 
         visit project_path(project)
 
         expect(page).to have_selector('.shortcuts-issues')
+        expect(page).not_to have_selector('.shortcuts-labels')
       end
     end
 
     context 'When external issue tracker is enabled and issues disabled on project settings' do
-      it 'hides issues tab' do
+      it 'hides issues tab and show labels tab' do
         project.issues_enabled = false
         project.save!
-        allow_any_instance_of(Project).to receive(:external_issue_tracker).and_return(JiraService.new)
+        allow_next_instance_of(Project) do |instance|
+          allow(instance).to receive(:external_issue_tracker).and_return(JiraService.new)
+        end
 
         visit project_path(project)
 
         expect(page).not_to have_selector('.shortcuts-issues')
+        expect(page).to have_selector('.shortcuts-labels')
       end
     end
 
@@ -88,7 +94,7 @@ describe 'Edit Project Settings' do
       {
         builds: project_job_path(project, job),
         issues: project_issues_path(project),
-        wiki: project_wiki_path(project, :home),
+        wiki: wiki_path(project.wiki),
         snippets: project_snippets_path(project),
         merge_requests: project_merge_requests_path(project)
       }
@@ -180,7 +186,7 @@ describe 'Edit Project Settings' do
         click_button "Save changes"
       end
 
-      expect(find(".sharing-permissions")).to have_selector(".project-feature-toggle.is-disabled", count: 2)
+      expect(find(".sharing-permissions")).to have_selector(".project-feature-toggle.is-disabled", count: 4)
     end
 
     it "shows empty features project homepage" do

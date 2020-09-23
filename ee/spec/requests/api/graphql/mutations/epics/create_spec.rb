@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Creating an Epic' do
+RSpec.describe 'Creating an Epic' do
   include GraphqlHelpers
 
   let_it_be(:current_user) { create(:user) }
@@ -15,7 +15,8 @@ describe 'Creating an Epic' do
       start_date_fixed: '2019-09-17',
       due_date_fixed: '2019-09-18',
       start_date_is_fixed: true,
-      due_date_is_fixed: true
+      due_date_is_fixed: true,
+      confidential: true
     }
   end
 
@@ -34,9 +35,7 @@ describe 'Creating an Epic' do
       stub_licensed_features(epics: true)
     end
 
-    it_behaves_like 'a mutation that returns top-level errors',
-      errors: ['The resource that you are attempting to access does not exist '\
-               'or you don\'t have permission to perform this action']
+    it_behaves_like 'a mutation that returns a top-level access error'
 
     it 'does not create epic' do
       expect { post_graphql_mutation(mutation, current_user: current_user) }.not_to change(Epic, :count)
@@ -73,6 +72,7 @@ describe 'Creating an Epic' do
         expect(epic_hash['startDateIsFixed']).to eq(true)
         expect(epic_hash['dueDateFixed']).to eq('2019-09-18')
         expect(epic_hash['dueDateIsFixed']).to eq(true)
+        expect(epic_hash['confidential']).to eq(true)
       end
 
       context 'when there are ActiveRecord validation errors' do

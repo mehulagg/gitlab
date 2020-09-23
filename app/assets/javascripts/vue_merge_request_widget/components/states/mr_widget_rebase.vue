@@ -1,9 +1,11 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { GlLoadingIcon } from '@gitlab/ui';
+import { escape } from 'lodash';
 import simplePoll from '../../../lib/utils/simple_poll';
 import eventHub from '../../event_hub';
 import statusIcon from '../mr_widget_status_icon.vue';
-import Flash from '../../../flash';
+import { deprecatedCreateFlash as Flash } from '../../../flash';
 import { __, sprintf } from '~/locale';
 
 export default {
@@ -44,11 +46,10 @@ export default {
     fastForwardMergeText() {
       return sprintf(
         __(
-          `Fast-forward merge is not possible. Rebase the source branch onto %{startTag}${this.mr.targetBranch}%{endTag} to allow this merge request to be merged.`,
+          'Fast-forward merge is not possible. Rebase the source branch onto %{targetBranch} to allow this merge request to be merged.',
         ),
         {
-          startTag: '<span class="label-branch">',
-          endTag: '</span>',
+          targetBranch: `<span class="label-branch">${escape(this.mr.targetBranch)}</span>`,
         },
         false,
       );
@@ -127,7 +128,7 @@ export default {
           </button>
           <span v-if="!rebasingError" class="bold">{{
             __(
-              'Fast-forward merge is not possible. Rebase the source branch onto the target branch or merge target branch into source branch to allow this merge request to be merged.',
+              'Fast-forward merge is not possible. Rebase the source branch onto the target branch.',
             )
           }}</span>
           <span v-else class="bold danger">{{ rebasingError }}</span>

@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import PipelinesTableRowComponent from '~/pipelines/components/pipelines_table_row.vue';
+import PipelinesTableRowComponent from '~/pipelines/components/pipelines_list/pipelines_table_row.vue';
 import eventHub from '~/pipelines/event_hub';
 
 describe('Pipelines Table Row', () => {
@@ -12,7 +12,6 @@ describe('Pipelines Table Row', () => {
         autoDevopsHelpPath: 'foo',
         viewType: 'root',
       },
-      sync: false,
     });
 
   let wrapper;
@@ -170,7 +169,7 @@ describe('Pipelines Table Row', () => {
     };
 
     beforeEach(() => {
-      const withActions = Object.assign({}, pipeline);
+      const withActions = { ...pipeline };
       withActions.details.scheduled_actions = [scheduledJobAction];
       withActions.flags.cancelable = true;
       withActions.flags.retryable = true;

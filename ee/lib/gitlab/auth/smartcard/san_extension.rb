@@ -27,7 +27,14 @@ module Gitlab
         end
 
         def email_identity
-          alternate_emails.find { |name| gitlab_host?(name[URI_TAG]) }&.fetch(EMAIL_TAG, nil)
+          email_entry =
+            if alternate_emails.size == 1
+              alternate_emails.first
+            else
+              alternate_emails.find { |name| gitlab_host?(name[URI_TAG]) }
+            end
+
+          email_entry&.fetch(EMAIL_TAG, nil)
         end
 
         def alternate_emails

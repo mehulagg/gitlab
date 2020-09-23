@@ -8,6 +8,11 @@ class Projects::BlobController < Projects::ApplicationController
   include NotesHelper
   include ActionView::Helpers::SanitizeHelper
   include RedirectsForMissingPathOnTree
+  include SourcegraphDecorator
+  include DiffHelper
+  include RedisTracking
+  extend ::Gitlab::Utils::Override
+
   prepend_before_action :authenticate_user!, only: [:edit]
 
   around_action :allow_gitaly_ref_name_caching, only: [:show]
@@ -26,6 +31,14 @@ class Projects::BlobController < Projects::ApplicationController
   before_action :editor_variables, except: [:show, :preview, :diff]
   before_action :validate_diff_params, only: :diff
   before_action :set_last_commit_sha, only: [:edit, :update]
+
+  before_action only: :show do
+    push_frontend_feature_flag(:code_navigation, @project, default_enabled: true)
+    push_frontend_feature_flag(:suggest_pipeline) if experiment_enabled?(:suggest_pipeline)
+    push_frontend_feature_flag(:gitlab_ci_yml_preview, @project, default_enabled: false)
+  end
+
+  track_redis_hll_event :create, :update, name: 'g_edit_by_sfe', feature: :track_editor_edit_actions, feature_default_enabled: true
 
   def new
     commit unless @repository.empty?
@@ -64,6 +77,7 @@ class Projects::BlobController < Projects::ApplicationController
 
   def update
     @path = params[:file_path] if params[:file_path].present?
+
     create_commit(Files::UpdateService, success_path: -> { after_edit_path },
                                         failure_view: :edit,
                                         failure_path: project_blob_path(@project, @id))
@@ -86,13 +100,10 @@ class Projects::BlobController < Projects::ApplicationController
   def destroy
     create_commit(Files::DeleteService, success_notice: _("The file has been successfully deleted."),
                                         success_path: -> { after_delete_path },
-                                        failure_view: :show,
                                         failure_path: project_blob_path(@project, @id))
   end
 
   def diff
-    apply_diff_view_cookie!
-
     @form = Blobs::UnfoldPresenter.new(blob, diff_params)
 
     # keep only json rendering when
@@ -108,6 +119,8 @@ class Projects::BlobController < Projects::ApplicationController
 
   private
 
+  attr_reader :branch_name
+
   def blob
     @blob ||= @repository.blob_at(@commit.id, @path)
 
@@ -120,7 +133,7 @@ class Projects::BlobController < Projects::ApplicationController
         end
       end
 
-      return redirect_to_tree_root_for_missing_path(@project, @ref, @path)
+      redirect_to_tree_root_for_missing_path(@project, @ref, @path)
     end
   end
 
@@ -198,13 +211,15 @@ class Projects::BlobController < Projects::ApplicationController
 
   def set_last_commit_sha
     @last_commit_sha = Gitlab::Git::Commit
-      .last_for_path(@repository, @ref, @path).sha
+      .last_for_path(@repository, @ref, @path, literal_pathspec: true).sha
   end
 
   def show_html
     environment_params = @repository.branch_exists?(@ref) ? { ref: @ref } : { commit: @commit }
+    environment_params[:find_latest] = true
     @environment = EnvironmentsFinder.new(@project, current_user, environment_params).execute.last
-    @last_commit = @repository.last_commit_for_path(@commit.id, @blob.path)
+    @last_commit = @repository.last_commit_for_path(@commit.id, @blob.path, literal_pathspec: true)
+    @code_navigation_path = Gitlab::CodeNavigationPath.new(@project, @blob.commit_id).full_json_path_for(@blob.path)
 
     render 'show'
   end
@@ -243,5 +258,10 @@ class Projects::BlobController < Projects::ApplicationController
 
   def diff_params
     params.permit(:full, :since, :to, :bottom, :unfold, :offset, :indent)
+  end
+
+  override :visitor_id
+  def visitor_id
+    current_user&.id
   end
 end

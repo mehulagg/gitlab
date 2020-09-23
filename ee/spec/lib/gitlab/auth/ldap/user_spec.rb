@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::LDAP::User do
+RSpec.describe Gitlab::Auth::Ldap::User do
   include LdapHelpers
 
   let(:ldap_user) { described_class.new(auth_hash) }
@@ -14,9 +14,11 @@ describe Gitlab::Auth::LDAP::User do
       nickname: 'john'
     }
   end
+
   let(:auth_hash) do
     OmniAuth::AuthHash.new(uid: 'uid=john,ou=people,dc=example,dc=com', provider: 'ldapmain', info: info)
   end
+
   let(:group_cn) { 'foo' }
   let(:group_member_dns) { [auth_hash.uid] }
   let(:external_groups) { [] }
@@ -28,7 +30,7 @@ describe Gitlab::Auth::LDAP::User do
   end
 
   it 'includes the EE module' do
-    expect(described_class).to include_module(EE::Gitlab::Auth::LDAP::User)
+    expect(described_class).to include_module(EE::Gitlab::Auth::Ldap::User)
   end
 
   describe '#initialize' do

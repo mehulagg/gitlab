@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Checks::PushRules::CommitCheck do
+RSpec.describe EE::Gitlab::Checks::PushRules::CommitCheck do
   include_context 'push rules checks context'
 
   describe '#validate!' do
@@ -12,27 +12,27 @@ describe EE::Gitlab::Checks::PushRules::CommitCheck do
       it_behaves_like 'check ignored when push rule unlicensed'
 
       it 'returns an error if the rule fails due to missing required characters' do
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "Commit message does not follow the pattern '#{push_rule.commit_message_regex}'")
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Commit message does not follow the pattern '#{push_rule.commit_message_regex}'")
       end
 
       it 'returns an error if the rule fails due to forbidden characters' do
         push_rule.commit_message_regex = nil
         push_rule.commit_message_negative_regex = '.*'
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "Commit message contains the forbidden pattern '#{push_rule.commit_message_negative_regex}'")
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Commit message contains the forbidden pattern '#{push_rule.commit_message_negative_regex}'")
       end
 
       it 'returns an error if the regex is invalid' do
         push_rule.commit_message_regex = '+'
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, /\ARegular expression '\+' is invalid/)
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /\ARegular expression '\+' is invalid/)
       end
 
       it 'returns an error if the negative regex is invalid' do
         push_rule.commit_message_regex = nil
         push_rule.commit_message_negative_regex = '+'
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, /\ARegular expression '\+' is invalid/)
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /\ARegular expression '\+' is invalid/)
       end
     end
 
@@ -49,19 +49,19 @@ describe EE::Gitlab::Checks::PushRules::CommitCheck do
       it 'returns an error if the rule fails for the committer' do
         allow_any_instance_of(Commit).to receive(:committer_email).and_return('ana@invalid.com')
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "Committer's email 'ana@invalid.com' does not follow the pattern '.*@valid.com'")
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Committer's email 'ana@invalid.com' does not follow the pattern '.*@valid.com'")
       end
 
       it 'returns an error if the rule fails for the author' do
         allow_any_instance_of(Commit).to receive(:author_email).and_return('joan@invalid.com')
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "Author's email 'joan@invalid.com' does not follow the pattern '.*@valid.com'")
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Author's email 'joan@invalid.com' does not follow the pattern '.*@valid.com'")
       end
 
       it 'returns an error if the regex is invalid' do
         push_rule.author_email_regex = '+'
 
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, /\ARegular expression '\+' is invalid/)
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /\ARegular expression '\+' is invalid/)
       end
     end
 
@@ -70,11 +70,11 @@ describe EE::Gitlab::Checks::PushRules::CommitCheck do
 
       context 'with private commit email' do
         it 'returns error if private commit email was not associated to a user' do
-          user_email = "#{User.maximum(:id).next}-foo@#{::Gitlab::CurrentSettings.current_application_settings.commit_email_hostname}"
+          user_email = "#{non_existing_record_id}-foo@#{::Gitlab::CurrentSettings.current_application_settings.commit_email_hostname}"
 
           allow_any_instance_of(Commit).to receive(:author_email).and_return(user_email)
 
-          expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "Author '#{user_email}' is not a member of team")
+          expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Author '#{user_email}' is not a member of team")
         end
 
         it 'returns true when private commit email was associated to a user' do
@@ -93,7 +93,7 @@ describe EE::Gitlab::Checks::PushRules::CommitCheck do
         it_behaves_like 'check ignored when push rule unlicensed'
 
         it 'returns an error if the commit author is not a GitLab member' do
-          expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "Author 'some@mail.com' is not a member of team")
+          expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Author 'some@mail.com' is not a member of team")
         end
       end
     end
@@ -119,7 +119,7 @@ describe EE::Gitlab::Checks::PushRules::CommitCheck do
           end
 
           it 'returns an error' do
-            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "Commit must be signed with a GPG key")
+            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Commit must be signed with a GPG key")
           end
         end
       end
@@ -131,7 +131,7 @@ describe EE::Gitlab::Checks::PushRules::CommitCheck do
           end
 
           it 'returns an error' do
-            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, "Commit must be signed with a GPG key")
+            expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, "Commit must be signed with a GPG key")
           end
 
           context 'but the change is made in the web application' do
@@ -185,12 +185,12 @@ describe EE::Gitlab::Checks::PushRules::CommitCheck do
           end
 
           it 'raises an error when using an unknown private commit email' do
-            user_email = "#{User.maximum(:id).next}-foobar@users.noreply.gitlab.com"
+            user_email = "#{non_existing_record_id}-foobar@users.noreply.gitlab.com"
 
             allow_any_instance_of(Commit).to receive(:committer_email).and_return(user_email)
 
             expect { subject.validate! }
-              .to raise_error(Gitlab::GitAccess::UnauthorizedError,
+              .to raise_error(Gitlab::GitAccess::ForbiddenError,
                               "You cannot push commits for '#{user_email}'. You can only push commits that were committed with one of your own verified emails.")
           end
         end
@@ -216,7 +216,7 @@ describe EE::Gitlab::Checks::PushRules::CommitCheck do
             allow_any_instance_of(Commit).to receive(:committer_email).and_return('secondary_email@user.com')
 
             expect { subject.validate! }
-              .to raise_error(Gitlab::GitAccess::UnauthorizedError,
+              .to raise_error(Gitlab::GitAccess::ForbiddenError,
                               "Committer email 'secondary_email@user.com' is not verified.")
           end
 
@@ -224,7 +224,7 @@ describe EE::Gitlab::Checks::PushRules::CommitCheck do
             allow_any_instance_of(Commit).to receive(:committer_email).and_return('some@mail.com')
 
             expect { subject.validate! }
-              .to raise_error(Gitlab::GitAccess::UnauthorizedError,
+              .to raise_error(Gitlab::GitAccess::ForbiddenError,
                               "You cannot push commits for 'some@mail.com'. You can only push commits that were committed with one of your own verified emails.")
           end
         end

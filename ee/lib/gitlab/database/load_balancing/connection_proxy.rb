@@ -23,13 +23,16 @@ module Gitlab
           update_all
         ).freeze
 
+        NON_STICKY_READS = %i(
+          sanitize_limit
+          select
+          select_one
+          quote_column_name
+        ).freeze
+
         # hosts - The hosts to use for load balancing.
         def initialize(hosts = [])
           @load_balancer = LoadBalancer.new(hosts)
-        end
-
-        def select(*args)
-          read_using_load_balancer(:select, args)
         end
 
         def select_all(arel, name = nil, binds = [], preparable: nil)
@@ -39,6 +42,12 @@ module Gitlab
                                       sticky: true)
           else
             read_using_load_balancer(:select_all, [arel, name, binds])
+          end
+        end
+
+        NON_STICKY_READS.each do |name|
+          define_method(name) do |*args, &block|
+            read_using_load_balancer(name, args, &block)
           end
         end
 
@@ -57,7 +66,7 @@ module Gitlab
         #
         # name - The name of the method to call on a connection object.
         def read_using_load_balancer(name, args, &block)
-          method = Session.current.use_primary? ? :read_write : :read
+          method = ::Gitlab::Database::LoadBalancing::Session.current.use_primary? ? :read_write : :read
 
           @load_balancer.send(method) do |connection|
             connection.send(name, *args, &block)
@@ -74,7 +83,7 @@ module Gitlab
             # Sticking has to be enabled before calling the method. Not doing so
             # could lead to methods called in a block still being performed on a
             # secondary instead of on a primary (when necessary).
-            Session.current.write! if sticky
+            ::Gitlab::Database::LoadBalancing::Session.current.write! if sticky
 
             connection.send(name, *args, &block)
           end

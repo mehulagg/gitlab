@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Issue, :elastic do
+RSpec.describe Issue, :elastic do
   before do
     stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
   end
@@ -11,15 +11,15 @@ describe Issue, :elastic do
   let(:admin) { create :user, :admin }
 
   context 'when limited indexing is on' do
-    set(:project) { create :project, name: 'test1' }
-    set(:issue) { create :issue, project: project}
+    let_it_be(:project) { create :project, name: 'test1' }
+    let_it_be(:issue) { create :issue, project: project}
 
     before do
       stub_ee_application_setting(elasticsearch_limit_indexing: true)
     end
 
     context 'when the project is not enabled specifically' do
-      context '#searchable?' do
+      describe '#searchable?' do
         it 'returns false' do
           expect(issue.searchable?).to be_falsey
         end
@@ -31,7 +31,7 @@ describe Issue, :elastic do
         create :elasticsearch_indexed_project, project: project
       end
 
-      context '#searchable?' do
+      describe '#searchable?' do
         it 'returns true' do
           expect(issue.searchable?).to be_truthy
         end
@@ -39,13 +39,13 @@ describe Issue, :elastic do
     end
 
     context 'when a group is enabled' do
-      set(:group) { create(:group) }
+      let_it_be(:group) { create(:group) }
 
       before do
         create :elasticsearch_indexed_namespace, namespace: group
       end
 
-      context '#searchable?' do
+      describe '#searchable?' do
         it 'returns true' do
           project = create :project, name: 'test1', group: group
           issue = create :issue, project: project
@@ -65,7 +65,7 @@ describe Issue, :elastic do
       # The issue I have no access to except as an administrator
       create :issue, title: 'bla-bla term3', project: create(:project, :private)
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
     options = { project_ids: [project.id] }
@@ -85,7 +85,7 @@ describe Issue, :elastic do
       # MergeRequest with the same iid should not be found in Issue search
       create :merge_request, title: 'bla-bla', source_project: project, iid: issue.iid
 
-      Gitlab::Elastic::Helper.refresh_index
+      ensure_elasticsearch_index!
     end
 
     # User needs to be admin or the MergeRequest would just be filtered by
@@ -123,6 +123,32 @@ describe Issue, :elastic do
     expected_hash['assignee_id'] = [assignee.id]
 
     expect(issue.__elasticsearch__.as_indexed_json).to eq(expected_hash)
+  end
+
+  context 'field length limits' do
+    context 'when there is an elasticsearch_indexed_field_length limit' do
+      it 'truncates to the default plan limit' do
+        stub_ee_application_setting(elasticsearch_indexed_field_length_limit: 10)
+
+        issue = create :issue, description: 'The description is too long'
+
+        indexed_json = issue.__elasticsearch__.as_indexed_json
+
+        expect(indexed_json['description']).to eq('The descri')
+      end
+    end
+
+    context 'when the elasticsearch_indexed_field_length limit is 0' do
+      it 'does not truncate the fields' do
+        stub_ee_application_setting(elasticsearch_indexed_field_length_limit: 0)
+
+        issue = create :issue, description: 'The description is too long'
+
+        indexed_json = issue.__elasticsearch__.as_indexed_json
+
+        expect(indexed_json['description']).to eq('The description is too long')
+      end
+    end
   end
 
   it_behaves_like 'no results when the user cannot read cross project' do

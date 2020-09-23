@@ -44,13 +44,14 @@ module Geo
       object_type == :lfs
     end
 
-    def base_log_data(message)
+    # This is called by LogHelpers to build json log with context info
+    #
+    # @see ::Gitlab::Geo::LogHelpers
+    def extra_log_data
       {
-        class: self.class.name,
         object_type: object_type,
-        object_db_id: object_db_id,
-        message: message
-      }
+        object_db_id: object_db_id
+      }.compact
     end
   end
 end

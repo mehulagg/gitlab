@@ -4,11 +4,12 @@ import DropdownNonUser from './dropdown_non_user';
 import DropdownEmoji from './dropdown_emoji';
 import NullDropdown from './null_dropdown';
 import DropdownAjaxFilter from './dropdown_ajax_filter';
+import DropdownOperator from './dropdown_operator';
 import DropdownUtils from './dropdown_utils';
 import { mergeUrlParams } from '../lib/utils/url_utility';
 
 export default class AvailableDropdownMappings {
-  constructor(
+  constructor({
     container,
     runnerTagsEndpoint,
     labelsEndpoint,
@@ -17,7 +18,7 @@ export default class AvailableDropdownMappings {
     groupsOnly,
     includeAncestorGroups,
     includeDescendantGroups,
-  ) {
+  }) {
     this.container = container;
     this.runnerTagsEndpoint = runnerTagsEndpoint;
     this.labelsEndpoint = labelsEndpoint;
@@ -39,6 +40,11 @@ export default class AvailableDropdownMappings {
         reference: null,
         gl: DropdownHint,
         element: this.container.querySelector('#js-dropdown-hint'),
+      },
+      operator: {
+        reference: null,
+        gl: DropdownOperator,
+        element: this.container.querySelector('#js-dropdown-operator'),
       },
     };
 
@@ -100,7 +106,7 @@ export default class AvailableDropdownMappings {
         gl: DropdownEmoji,
         element: this.container.querySelector('#js-dropdown-my-reaction'),
       },
-      wip: {
+      draft: {
         reference: null,
         gl: DropdownNonUser,
         element: this.container.querySelector('#js-dropdown-wip'),

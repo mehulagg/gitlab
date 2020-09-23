@@ -1,9 +1,15 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`DependencyListIncompleteAlert component matches the snapshot 1`] = `
-<dependencylistalert-stub
-  headertext="Unsupported file(s) detected"
-  type="warning"
+<gl-alert-stub
+  dismissible="true"
+  dismisslabel="Dismiss"
+  primarybuttonlink=""
+  primarybuttontext=""
+  secondarybuttonlink=""
+  secondarybuttontext=""
+  title="Unsupported file(s) detected"
+  variant="warning"
 >
   <p>
     
@@ -11,7 +17,9 @@ exports[`DependencyListIncompleteAlert component matches the snapshot 1`] = `
   
   </p>
    
-  <ul>
+  <ul
+    class="mb-0"
+  >
     <li>
       package-lock.json
     </li>
@@ -34,5 +42,5 @@ exports[`DependencyListIncompleteAlert component matches the snapshot 1`] = `
       pom.xml
     </li>
   </ul>
-</dependencylistalert-stub>
+</gl-alert-stub>
 `;

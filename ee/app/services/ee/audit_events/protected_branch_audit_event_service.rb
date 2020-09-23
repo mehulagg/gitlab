@@ -14,7 +14,8 @@ module EE
           target_type: protected_branch.class.name,
           target_details: protected_branch.name,
           push_access_levels: push_access_levels,
-          merge_access_levels: merge_access_levels
+          merge_access_levels: merge_access_levels,
+          ip_address: author.current_sign_in_ip
         })
       end
     end

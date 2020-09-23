@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe 'Projects > Show > User sees Git instructions' do
-  set(:user) { create(:user) }
+RSpec.describe 'Projects > Show > User sees Git instructions' do
+  let_it_be(:user) { create(:user) }
 
   shared_examples_for 'redirects to the sign in page' do
     it 'redirects to the sign in page' do
@@ -18,6 +18,8 @@ describe 'Projects > Show > User sees Git instructions' do
       page.within '.empty-wrapper' do
         expect(page).to have_content('Command line instructions')
       end
+
+      expect(page).to have_content("git push -u origin master")
     end
   end
 
@@ -49,7 +51,7 @@ describe 'Projects > Show > User sees Git instructions' do
 
   context 'when project is public' do
     context 'when project has no repo' do
-      set(:project) { create(:project, :public) }
+      let_it_be(:project) { create(:project, :public) }
 
       before do
         sign_in(project.owner)
@@ -59,8 +61,28 @@ describe 'Projects > Show > User sees Git instructions' do
       include_examples 'shows details of empty project with no repo'
     end
 
+    context ":default_branch_name is specified" do
+      let_it_be(:project) { create(:project, :public) }
+
+      before do
+        expect(Gitlab::CurrentSettings)
+          .to receive(:default_branch_name)
+          .at_least(:once)
+          .and_return('example_branch')
+
+        sign_in(project.owner)
+        visit project_path(project)
+      end
+
+      it "recommends default_branch_name instead of master" do
+        click_link 'Create empty repository'
+
+        expect(page).to have_content("git push -u origin example_branch")
+      end
+    end
+
     context 'when project is empty' do
-      set(:project) { create(:project_empty_repo, :public) }
+      let_it_be(:project) { create(:project_empty_repo, :public) }
 
       context 'when not signed in' do
         before do
@@ -98,7 +120,7 @@ describe 'Projects > Show > User sees Git instructions' do
     end
 
     context 'when project is not empty' do
-      set(:project) { create(:project, :public, :repository) }
+      let_it_be(:project) { create(:project, :public, :repository) }
 
       before do
         visit(project_path(project))
@@ -141,7 +163,7 @@ describe 'Projects > Show > User sees Git instructions' do
   end
 
   context 'when project is internal' do
-    set(:project) { create(:project, :internal, :repository) }
+    let_it_be(:project) { create(:project, :internal, :repository) }
 
     context 'when not signed in' do
       before do
@@ -163,7 +185,7 @@ describe 'Projects > Show > User sees Git instructions' do
   end
 
   context 'when project is private' do
-    set(:project) { create(:project, :private) }
+    let_it_be(:project) { create(:project, :private) }
 
     before do
       visit(project_path(project))

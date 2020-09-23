@@ -1,15 +1,15 @@
 # Translating GitLab
 
-For managing the translation process we use [Crowdin](https://crowdin.com).
+For managing the translation process we use [CrowdIn](https://crowdin.com).
 
-## Using Crowdin
+## Using CrowdIn
 
-The first step is to get familiar with Crowdin.
+The first step is to get familiar with CrowdIn.
 
 ### Sign In
 
 To contribute translations at <https://translate.gitlab.com>
-you must create a Crowdin account.
+you must create a CrowdIn account.
 You may create a new account or use any of their supported sign in services.
 
 ### Language Selections
@@ -24,7 +24,7 @@ GitLab is being translated into many languages.
 
 The online translation editor is the easiest way to contribute translations.
 
-![Crowdin Editor](img/crowdin-editor.png)
+![CrowdIn Editor](img/crowdin-editor.png)
 
 1. Strings for translation are listed in the left panel
 1. Translations are entered into the central panel.
@@ -61,34 +61,40 @@ This helps maintain a logical connection and consistency between tools (e.g.
 
 ### Formality
 
-The level of formality used in software varies by language.
-For example, in French we translate `you` as the formal `vous`.
+The level of formality used in software varies by language:
+
+| Language | Formality | Example |
+| -------- | --------- | ------- |
+| French | formal | `vous` for `you` |
+| German | informal | `du` for `you` |
 
 You can refer to other translated strings and notes in the glossary to assist
 determining a suitable level of formality.
 
 ### Inclusive language
 
-[Diversity] is one of GitLab's values.
+[Diversity](https://about.gitlab.com/handbook/values/#diversity) is one of GitLab's values.
 We ask you to avoid translations which exclude people based on their gender or
 ethnicity.
 In languages which distinguish between a male and female form, use both or
 choose a neutral formulation.
 
+<!-- vale gitlab.Spelling = NO -->
 For example in German, the word "user" can be translated into "Benutzer" (male) or "Benutzerin" (female).
 Therefore "create a new user" would translate into "Benutzer(in) anlegen".
-
-[Diversity]: https://about.gitlab.com/handbook/values/#diversity
+<!-- vale gitlab.Spelling = YES -->
 
 ### Updating the glossary
 
 To propose additions to the glossary please
-[open an issue](https://gitlab.com/gitlab-org/gitlab/issues?scope=all&utf8=✓&state=all&label_name[]=Category%3AInternationalization).
+[open an issue](https://gitlab.com/gitlab-org/gitlab/-/issues?scope=all&utf8=✓&state=all&label_name[]=Category%3AInternationalization).
 
 ## French Translation Guidelines
 
 ### Inclusive language in French
 
+<!-- vale gitlab.Spelling = NO -->
 In French, the "écriture inclusive" is now over (see on [Legifrance](https://www.legifrance.gouv.fr/affichTexte.do?cidTexte=JORFTEXT000036068906&categorieLien=id)).
 So, to include both genders, write “Utilisateurs et utilisatrices” instead of “Utilisateur·rice·s”.
 When space is missing, the male gender should be used alone.
+<!-- vale gitlab.Spelling = YES -->

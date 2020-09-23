@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Namespace do
+RSpec.describe Namespace do
   include ProjectForksHelper
   include GitHelpers
 
@@ -17,6 +17,8 @@ describe Namespace do
     it { is_expected.to have_many :children }
     it { is_expected.to have_one :root_storage_statistics }
     it { is_expected.to have_one :aggregation_schedule }
+    it { is_expected.to have_one :namespace_settings }
+    it { is_expected.to have_many :custom_emoji }
   end
 
   describe 'validations' do
@@ -26,6 +28,7 @@ describe Namespace do
     it { is_expected.to validate_presence_of(:path) }
     it { is_expected.to validate_length_of(:path).is_at_most(255) }
     it { is_expected.to validate_presence_of(:owner) }
+    it { is_expected.to validate_numericality_of(:max_artifacts_size).only_integer.is_greater_than(0) }
 
     it 'does not allow too deep nesting' do
       ancestors = (1..21).to_a
@@ -61,6 +64,36 @@ describe Namespace do
         let(:group) { build(:group, path: 'tree') }
 
         it { expect(group).to be_valid }
+      end
+    end
+
+    describe '1 char path length' do
+      it 'does not allow to create one' do
+        namespace = build(:namespace, path: 'j')
+
+        expect(namespace).not_to be_valid
+        expect(namespace.errors[:path].first).to eq('is too short (minimum is 2 characters)')
+      end
+
+      it 'does not allow to update one' do
+        namespace = create(:namespace)
+        namespace.update(path: 'j')
+
+        expect(namespace).not_to be_valid
+        expect(namespace.errors[:path].first).to eq('is too short (minimum is 2 characters)')
+      end
+
+      it 'allows updating other attributes for existing record' do
+        namespace = build(:namespace, path: 'j')
+        namespace.save(validate: false)
+        namespace.reload
+
+        expect(namespace.path).to eq('j')
+
+        namespace.update(name: 'something new')
+
+        expect(namespace).to be_valid
+        expect(namespace.name).to eq('something new')
       end
     end
   end
@@ -142,28 +175,32 @@ describe Namespace do
   end
 
   describe '.with_statistics' do
-    let(:namespace) { create :namespace }
+    let_it_be(:namespace) { create(:namespace) }
 
     let(:project1) do
       create(:project,
              namespace: namespace,
              statistics: build(:project_statistics,
+                               namespace:            namespace,
                                repository_size:      101,
                                wiki_size:            505,
                                lfs_objects_size:     202,
                                build_artifacts_size: 303,
-                               packages_size:        404))
+                               packages_size:        404,
+                               snippets_size:        605))
     end
 
     let(:project2) do
       create(:project,
              namespace: namespace,
              statistics: build(:project_statistics,
+                               namespace:            namespace,
                                repository_size:      10,
                                wiki_size:            50,
                                lfs_objects_size:     20,
                                build_artifacts_size: 30,
-                               packages_size:        40))
+                               packages_size:        40,
+                               snippets_size:        60))
     end
 
     it "sums all project storage counters in the namespace" do
@@ -171,12 +208,13 @@ describe Namespace do
       project2
       statistics = described_class.with_statistics.find(namespace.id)
 
-      expect(statistics.storage_size).to eq 1665
+      expect(statistics.storage_size).to eq 2330
       expect(statistics.repository_size).to eq 111
       expect(statistics.wiki_size).to eq 555
       expect(statistics.lfs_objects_size).to eq 222
       expect(statistics.build_artifacts_size).to eq 333
       expect(statistics.packages_size).to eq 444
+      expect(statistics.snippets_size).to eq 665
     end
 
     it "correctly handles namespaces without projects" do
@@ -188,16 +226,44 @@ describe Namespace do
       expect(statistics.lfs_objects_size).to eq 0
       expect(statistics.build_artifacts_size).to eq 0
       expect(statistics.packages_size).to eq 0
+      expect(statistics.snippets_size).to eq 0
     end
   end
 
   describe '.find_by_pages_host' do
     it 'finds namespace by GitLab Pages host and is case-insensitive' do
-      namespace = create(:namespace, name: 'topnamespace')
+      namespace = create(:namespace, name: 'topNAMEspace', path: 'topNAMEspace')
       create(:namespace, name: 'annother_namespace')
       host = "TopNamespace.#{Settings.pages.host.upcase}"
 
       expect(described_class.find_by_pages_host(host)).to eq(namespace)
+    end
+
+    context 'when there is non-top-level group with searched name' do
+      before do
+        create(:group, :nested, path: 'pages')
+      end
+
+      it 'ignores this group' do
+        host = "pages.#{Settings.pages.host.upcase}"
+
+        expect(described_class.find_by_pages_host(host)).to be_nil
+      end
+
+      it 'finds right top level group' do
+        group = create(:group, path: 'pages')
+
+        host = "pages.#{Settings.pages.host.upcase}"
+
+        expect(described_class.find_by_pages_host(host)).to eq(group)
+      end
+    end
+
+    it "returns no result if the provided host is not subdomain of the Pages host" do
+      create(:namespace, name: 'namespace.io')
+      host = "namespace.io"
+
+      expect(described_class.find_by_pages_host(host)).to eq(nil)
     end
   end
 
@@ -274,7 +340,7 @@ describe Namespace do
 
               move_dir_result
             end
-            expect(Gitlab::Sentry).to receive(:should_raise_for_dev?).and_return(false) # like prod
+            expect(Gitlab::ErrorTracking).to receive(:should_raise_for_dev?).and_return(false) # like prod
 
             namespace.update(path: namespace.full_path + '_new')
           end
@@ -327,14 +393,14 @@ describe Namespace do
         let(:uploads_dir) { FileUploader.root }
         let(:pages_dir) { File.join(TestEnv.pages_path) }
 
-        def expect_project_directories_at(namespace_path)
+        def expect_project_directories_at(namespace_path, with_pages: true)
           expected_repository_path = File.join(TestEnv.repos_path, namespace_path, 'the-project.git')
           expected_upload_path = File.join(uploads_dir, namespace_path, 'the-project')
           expected_pages_path = File.join(pages_dir, namespace_path, 'the-project')
 
           expect(File.directory?(expected_repository_path)).to be_truthy
           expect(File.directory?(expected_upload_path)).to be_truthy
-          expect(File.directory?(expected_pages_path)).to be_truthy
+          expect(File.directory?(expected_pages_path)).to be(with_pages)
         end
 
         before do
@@ -343,43 +409,156 @@ describe Namespace do
           FileUtils.mkdir_p(File.join(pages_dir, project.full_path))
         end
 
-        context 'renaming child' do
-          it 'correctly moves the repository, uploads and pages' do
-            child.update!(path: 'renamed')
+        after do
+          FileUtils.remove_entry(File.join(TestEnv.repos_path, parent.full_path), true)
+          FileUtils.remove_entry(File.join(TestEnv.repos_path, new_parent.full_path), true)
+          FileUtils.remove_entry(File.join(TestEnv.repos_path, child.full_path), true)
+          FileUtils.remove_entry(File.join(uploads_dir, project.full_path), true)
+          FileUtils.remove_entry(pages_dir, true)
+        end
 
-            expect_project_directories_at('parent/renamed')
+        context 'renaming child' do
+          context 'when no projects have pages deployed' do
+            it 'moves the repository and uploads', :sidekiq_inline do
+              project.pages_metadatum.update!(deployed: false)
+              child.update!(path: 'renamed')
+
+              expect_project_directories_at('parent/renamed', with_pages: false)
+            end
+          end
+
+          context 'when the project has pages deployed' do
+            before do
+              project.pages_metadatum.update!(deployed: true)
+            end
+
+            it 'correctly moves the repository, uploads and pages', :sidekiq_inline do
+              child.update!(path: 'renamed')
+
+              expect_project_directories_at('parent/renamed')
+            end
+
+            it 'performs the move async of pages async' do
+              expect(PagesTransferWorker).to receive(:perform_async).with('rename_namespace', ['parent/child', 'parent/renamed'])
+
+              child.update!(path: 'renamed')
+            end
           end
         end
 
         context 'renaming parent' do
-          it 'correctly moves the repository, uploads and pages' do
-            parent.update!(path: 'renamed')
+          context 'when no projects have pages deployed' do
+            it 'moves the repository and uploads', :sidekiq_inline do
+              project.pages_metadatum.update!(deployed: false)
+              parent.update!(path: 'renamed')
 
-            expect_project_directories_at('renamed/child')
+              expect_project_directories_at('renamed/child', with_pages: false)
+            end
+          end
+
+          context 'when the project has pages deployed' do
+            before do
+              project.pages_metadatum.update!(deployed: true)
+            end
+
+            it 'correctly moves the repository, uploads and pages', :sidekiq_inline do
+              parent.update!(path: 'renamed')
+
+              expect_project_directories_at('renamed/child')
+            end
+
+            it 'performs the move async of pages async' do
+              expect(PagesTransferWorker).to receive(:perform_async).with('rename_namespace', %w(parent renamed))
+
+              parent.update!(path: 'renamed')
+            end
           end
         end
 
         context 'moving from one parent to another' do
-          it 'correctly moves the repository, uploads and pages' do
-            child.update!(parent: new_parent)
+          context 'when no projects have pages deployed' do
+            it 'moves the repository and uploads', :sidekiq_inline do
+              project.pages_metadatum.update!(deployed: false)
+              child.update!(parent: new_parent)
 
-            expect_project_directories_at('new_parent/child')
+              expect_project_directories_at('new_parent/child', with_pages: false)
+            end
+          end
+
+          context 'when the project has pages deployed' do
+            before do
+              project.pages_metadatum.update!(deployed: true)
+            end
+
+            it 'correctly moves the repository, uploads and pages', :sidekiq_inline do
+              child.update!(parent: new_parent)
+
+              expect_project_directories_at('new_parent/child')
+            end
+
+            it 'performs the move async of pages async' do
+              expect(PagesTransferWorker).to receive(:perform_async).with('move_namespace', %w(child parent new_parent))
+
+              child.update!(parent: new_parent)
+            end
           end
         end
 
         context 'moving from having a parent to root' do
-          it 'correctly moves the repository, uploads and pages' do
-            child.update!(parent: nil)
+          context 'when no projects have pages deployed' do
+            it 'moves the repository and uploads', :sidekiq_inline do
+              project.pages_metadatum.update!(deployed: false)
+              child.update!(parent: nil)
 
-            expect_project_directories_at('child')
+              expect_project_directories_at('child', with_pages: false)
+            end
+          end
+
+          context 'when the project has pages deployed' do
+            before do
+              project.pages_metadatum.update!(deployed: true)
+            end
+
+            it 'correctly moves the repository, uploads and pages', :sidekiq_inline do
+              child.update!(parent: nil)
+
+              expect_project_directories_at('child')
+            end
+
+            it 'performs the move async of pages async' do
+              expect(PagesTransferWorker).to receive(:perform_async).with('move_namespace', ['child', 'parent', nil])
+
+              child.update!(parent: nil)
+            end
           end
         end
 
         context 'moving from root to having a parent' do
-          it 'correctly moves the repository, uploads and pages' do
-            parent.update!(parent: new_parent)
+          context 'when no projects have pages deployed' do
+            it 'moves the repository and uploads', :sidekiq_inline do
+              project.pages_metadatum.update!(deployed: false)
+              parent.update!(parent: new_parent)
 
-            expect_project_directories_at('new_parent/parent/child')
+              expect_project_directories_at('new_parent/parent/child', with_pages: false)
+            end
+          end
+
+          context 'when the project has pages deployed' do
+            before do
+              project.pages_metadatum.update!(deployed: true)
+            end
+
+            it 'correctly moves the repository, uploads and pages', :sidekiq_inline do
+              parent.update!(parent: new_parent)
+
+              expect_project_directories_at('new_parent/parent/child')
+            end
+
+            it 'performs the move async of pages async' do
+              expect(PagesTransferWorker).to receive(:perform_async).with('move_namespace', ['parent', nil, 'new_parent'])
+
+              parent.update!(parent: new_parent)
+            end
           end
         end
       end
@@ -443,6 +622,7 @@ describe Namespace do
         Gitlab.config.repositories.storages.default.legacy_disk_path
       end
     end
+
     let(:path_in_dir) { File.join(repository_storage_path, namespace.full_path) }
     let(:deleted_path) { namespace.full_path.gsub(namespace.path, "#{namespace.full_path}+#{namespace.id}+deleted") }
     let(:deleted_path_in_dir) { File.join(repository_storage_path, deleted_path) }
@@ -520,6 +700,56 @@ describe Namespace do
     it "cleans the path and makes sure it's available" do
       expect(described_class.clean_path("-john+gitlab-ETC%.git@gmail.com")).to eq("johngitlab-ETC2")
       expect(described_class.clean_path("--%+--valid_*&%name=.git.%.atom.atom.@email.com")).to eq("valid_name")
+    end
+  end
+
+  describe ".clean_name" do
+    context "when the name complies with the group name regex" do
+      it "returns the name as is" do
+        valid_name = "Hello - World _ (Hi.)"
+        expect(described_class.clean_name(valid_name)).to eq(valid_name)
+      end
+    end
+
+    context "when the name does not comply with the group name regex" do
+      it "sanitizes the name by replacing all invalid char sequences with a space" do
+        expect(described_class.clean_name("Green'! Test~~~")).to eq("Green Test")
+      end
+    end
+  end
+
+  describe "#default_branch_protection" do
+    let(:namespace) { create(:namespace) }
+    let(:default_branch_protection) { nil }
+    let(:group) { create(:group, default_branch_protection: default_branch_protection) }
+
+    before do
+      stub_application_setting(default_branch_protection: Gitlab::Access::PROTECTION_DEV_CAN_MERGE)
+    end
+
+    context 'for a namespace' do
+      # Unlike a group, the settings of a namespace cannot be altered
+      # via the UI or the API.
+
+      it 'returns the instance level setting' do
+        expect(namespace.default_branch_protection).to eq(Gitlab::Access::PROTECTION_DEV_CAN_MERGE)
+      end
+    end
+
+    context 'for a group' do
+      context 'that has not altered the default value' do
+        it 'returns the instance level setting' do
+          expect(group.default_branch_protection).to eq(Gitlab::Access::PROTECTION_DEV_CAN_MERGE)
+        end
+      end
+
+      context 'that has altered the default value' do
+        let(:default_branch_protection) { Gitlab::Access::PROTECTION_FULL }
+
+        it 'returns the group level setting' do
+          expect(group.default_branch_protection).to eq(default_branch_protection)
+        end
+      end
     end
   end
 
@@ -786,8 +1016,13 @@ describe Namespace do
   end
 
   describe '#root_ancestor' do
+    let!(:root_group) { create(:group) }
+
+    it 'returns root_ancestor for root group without a query' do
+      expect { root_group.root_ancestor }.not_to exceed_query_limit(0)
+    end
+
     it 'returns the top most ancestor' do
-      root_group = create(:group)
       nested_group = create(:group, parent: root_group)
       deep_nested_group = create(:group, parent: nested_group)
       very_deep_nested_group = create(:group, parent: deep_nested_group)
@@ -915,6 +1150,12 @@ describe Namespace do
 
         expect(group.emails_disabled?).to be_truthy
       end
+
+      it 'does not query the db when there is no parent group' do
+        group = create(:group, emails_disabled: true)
+
+        expect { group.emails_disabled? }.not_to exceed_query_limit(0)
+      end
     end
 
     context 'when a subgroup' do
@@ -969,6 +1210,45 @@ describe Namespace do
           expect(virtual_domain.lookup_paths).not_to be_empty
         end
       end
+
+      it 'preloads project_feature and route' do
+        project2 = create(:project, namespace: namespace)
+        project3 = create(:project, namespace: namespace)
+
+        project.mark_pages_as_deployed
+        project2.mark_pages_as_deployed
+        project3.mark_pages_as_deployed
+
+        virtual_domain = namespace.pages_virtual_domain
+
+        queries = ActiveRecord::QueryRecorder.new { virtual_domain.lookup_paths }
+
+        # 1 to load projects
+        # 1 to preload project features
+        # 1 to load routes
+        expect(queries.count).to eq(3)
+      end
+    end
+  end
+
+  describe '#any_project_with_pages_deployed?' do
+    it 'returns true if any project nested under the group has pages deployed' do
+      parent_1 = create(:group) # Three projects, one with pages
+      child_1_1 = create(:group, parent: parent_1) # Two projects, one with pages
+      child_1_2 = create(:group, parent: parent_1) # One project, no pages
+      parent_2 = create(:group) # No projects
+
+      create(:project, group: child_1_1).tap do |project|
+        project.pages_metadatum.update!(deployed: true)
+      end
+
+      create(:project, group: child_1_1)
+      create(:project, group: child_1_2)
+
+      expect(parent_1.any_project_with_pages_deployed?).to be(true)
+      expect(child_1_1.any_project_with_pages_deployed?).to be(true)
+      expect(child_1_2.any_project_with_pages_deployed?).to be(false)
+      expect(parent_2.any_project_with_pages_deployed?).to be(false)
     end
   end
 

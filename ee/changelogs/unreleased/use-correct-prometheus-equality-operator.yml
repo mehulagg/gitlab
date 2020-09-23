@@ -1,5 +1,0 @@
----
-title: Fix equality operator for Prometheus alerts
-merge_request: 18919
-author:
-type: fixed

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BoardsHelper do
+RSpec.describe BoardsHelper do
   let(:project) { create(:project) }
 
   describe '#board_list_data' do

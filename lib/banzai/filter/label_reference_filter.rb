@@ -19,7 +19,7 @@ module Banzai
         unescaped_html = unescape_html_entities(text).gsub(pattern) do |match|
           namespace, project = $~[:namespace], $~[:project]
           project_path = full_project_path(namespace, project)
-          label = find_label(project_path, $~[:label_id], $~[:label_name])
+          label = find_label_cached(project_path, $~[:label_id], $~[:label_name])
 
           if label
             labels[label.id] = yield match, label.id, project, namespace, $~
@@ -32,6 +32,12 @@ module Banzai
         return text if labels.empty?
 
         escape_with_placeholders(unescaped_html, labels)
+      end
+
+      def find_label_cached(parent_ref, label_id, label_name)
+        cached_call(:banzai_find_label_cached, label_name&.tr('"', '') || label_id, path: [object_class, parent_ref]) do
+          find_label(parent_ref, label_id, label_name)
+        end
       end
 
       def find_label(parent_ref, label_id, label_name)
@@ -71,13 +77,16 @@ module Banzai
       end
 
       def url_for_object(label, parent)
-        h = Gitlab::Routing.url_helpers
+        label_url_method =
+          if context[:label_url_method]
+            context[:label_url_method]
+          elsif parent.is_a?(Project)
+            :project_issues_url
+          end
 
-        if parent.is_a?(Project)
-          h.project_issues_url(parent, label_name: label.name, only_path: context[:only_path])
-        elsif context[:label_url_method]
-          h.public_send(context[:label_url_method], parent, label_name: label.name, only_path: context[:only_path]) # rubocop:disable GitlabSecurity/PublicSend
-        end
+        return unless label_url_method
+
+        Gitlab::Routing.url_helpers.public_send(label_url_method, parent, label_name: label.name, only_path: context[:only_path]) # rubocop:disable GitlabSecurity/PublicSend
       end
 
       def object_link_text(object, matches)
@@ -89,24 +98,29 @@ module Banzai
           parent_from_ref = from_ref_cached(project_path)
           reference       = parent_from_ref.to_human_reference(parent)
 
-          label_suffix = " <i>in #{reference}</i>" if reference.present?
+          label_suffix = " <i>in #{ERB::Util.html_escape(reference)}</i>" if reference.present?
         end
 
         presenter = object.present(issuable_subject: parent)
-        LabelsHelper.render_colored_label(presenter, label_suffix: label_suffix, title: tooltip_title(presenter))
+        LabelsHelper.render_colored_label(presenter, suffix: label_suffix)
       end
 
-      def tooltip_title(label)
-        nil
+      def wrap_link(link, label)
+        presenter = label.present(issuable_subject: project || group)
+        LabelsHelper.wrap_label_html(link, small: true, label: presenter)
       end
 
       def full_path_ref?(matches)
         matches[:namespace] && matches[:project]
       end
 
+      def reference_class(type, tooltip: true)
+        super + ' gl-link gl-label-link'
+      end
+
       def object_link_title(object, matches)
-        # use title of wrapped element instead
-        nil
+        presenter = object.present(issuable_subject: project || group)
+        LabelsHelper.label_tooltip_title(presenter)
       end
     end
   end

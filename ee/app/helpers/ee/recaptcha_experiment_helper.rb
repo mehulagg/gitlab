@@ -15,19 +15,8 @@ module EE
     private
 
     def experiment_enabled_for_session?
-      # If EXPERIMENT_GROWTH_RECAPTCHA_FEATURE_NAME is not set, we should show
-      # reCAPTCHA on the sign_up page
-      return true unless recaptcha_sign_up_experiment_set?
-
-      ::Feature.enabled?(EXPERIMENT_GROWTH_RECAPTCHA_FEATURE_NAME, flipper_session)
-    end
-
-    def recaptcha_sign_up_experiment_set?
-      ::Feature.persisted?(recaptcha_sign_up_experiment_feature)
-    end
-
-    def recaptcha_sign_up_experiment_feature
-      ::Feature.get(EXPERIMENT_GROWTH_RECAPTCHA_FEATURE_NAME)
+      ::Feature.enabled?(EXPERIMENT_GROWTH_RECAPTCHA_FEATURE_NAME, flipper_session,
+        default_enabled: true)
     end
   end
 end

@@ -45,7 +45,8 @@
   }
 }
 
-.boards-list {
+.boards-list,
+.board-swimlanes {
   height: calc(100vh - #{$issue-board-list-difference-xs});
   overflow-x: scroll;
   min-height: 200px;
@@ -58,6 +59,10 @@
     height: calc(100vh - #{$issue-board-list-difference-md});
   }
 
+  @include media-breakpoint-up(lg) {
+    height: calc(100vh - #{$issue-board-list-difference-lg});
+  }
+
   .with-performance-bar & {
     height: calc(100vh - #{$issue-board-list-difference-xs} - #{$performance-bar-height});
 
@@ -67,6 +72,10 @@
 
     @include media-breakpoint-up(md) {
       height: calc(100vh - #{$issue-board-list-difference-md} - #{$performance-bar-height});
+    }
+
+    @include media-breakpoint-up(lg) {
+      height: calc(100vh - #{$issue-board-list-difference-lg} - #{$performance-bar-height});
     }
   }
 }
@@ -82,19 +91,23 @@
   }
 
   .board-title-caret {
-    cursor: pointer;
     border-radius: $border-radius-default;
-    padding: 4px;
+    line-height: $gl-spacing-scale-5;
+    height: $gl-spacing-scale-5;
+
+    &.btn svg {
+      top: 0;
+    }
 
     &:hover {
-      background-color: $gray-dark;
+      background-color: $gray-50;
       transition: background-color 0.1s linear;
     }
   }
 
   &:not(.is-collapsed) {
     .board-title-caret {
-      margin: 0 $gl-padding-4 0 -10px;
+      margin-right: $gl-padding-4;
     }
   }
 
@@ -103,8 +116,6 @@
 
     .board-title {
       flex-direction: column;
-      height: 100%;
-      padding: $gl-padding-8 0;
     }
 
     .board-title-caret {
@@ -133,6 +144,7 @@
     .issue-count-badge {
       border: 0;
       white-space: nowrap;
+      padding: 0;
     }
 
     .board-title-text > span,
@@ -154,7 +166,7 @@
 .board-inner {
   font-size: $issue-boards-font-size;
   background: $gray-light;
-  border: 1px solid $border-color;
+  border: 1px solid $gray-100;
 }
 
 .board-header {
@@ -185,28 +197,32 @@
 .board-title {
   align-items: center;
   font-size: 1em;
-  border-bottom: 1px solid $border-color;
-  padding: $gl-padding-8 $gl-padding;
+  border-bottom: 1px solid $gray-100;
+  padding: 0 $gl-spacing-scale-3;
+  height: 3rem;
+
+  .js-max-issue-size::before {
+    content: '/';
+  }
 }
 
 .board-title-text {
   flex-grow: 1;
 }
 
-.board-delete {
-  margin-right: 10px;
-  color: $gray-darkest;
+.board-delete.gl-button {
   background-color: transparent;
   outline: 0;
 
   &:hover {
     color: $blue-600;
+    box-shadow: none;
   }
 }
 
 .board-blank-state,
 .board-promotion-state {
-  background-color: $white-light;
+  background-color: $white;
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
@@ -240,8 +256,8 @@
 }
 
 .board-card {
-  background: $white-light;
-  border: 1px solid $gray-200;
+  background: $white;
+  border: 1px solid $gray-100;
   box-shadow: 0 1px 2px $issue-boards-card-shadow;
   line-height: $gl-padding;
   list-style: none;
@@ -261,25 +277,18 @@
     background-color: $blue-50;
   }
 
-  .badge {
-    border: 0;
-    outline: 0;
-
-    &:hover {
-      text-decoration: underline;
-    }
-
-    @include media-breakpoint-down(lg) {
-      font-size: $gl-font-size-xs;
-      padding-left: $gl-padding-4;
-      padding-right: $gl-padding-4;
-      font-weight: $gl-font-weight-bold;
-    }
+  .gl-label {
+    margin-top: 4px;
+    margin-right: 4px;
   }
 
   .confidential-icon {
-    color: $orange-600;
+    color: $orange-500;
     cursor: help;
+  }
+
+  .issue-blocked-icon {
+    color: $red-500;
   }
 
   @include media-breakpoint-down(md) {
@@ -381,22 +390,19 @@
   margin: 5px;
 }
 
-.issue-boards-sidebar {
+.right-sidebar.issue-boards-sidebar {
   .gutter-toggle {
     bottom: 15px;
     width: 22px;
-    color: $gray-darkest;
+    padding-left: $gl-padding-32;
 
     svg {
       position: absolute;
       top: 50%;
+      right: 0;
       margin-top: (-11px / 2);
-    }
-
-    &:hover {
-      path {
-        fill: $gray-darkest;
-      }
+      height: $gl-font-size-12;
+      width: $gl-font-size-12;
     }
   }
 
@@ -431,7 +437,7 @@
   max-width: 1100px;
   min-height: 500px;
   padding: 25px 15px 0;
-  background-color: $white-light;
+  background-color: $white;
   box-shadow: 0 2px 12px rgba($black, 0.5);
 
   .empty-state {
@@ -480,7 +486,7 @@
   }
 
   .board-card {
-    border: 1px solid $border-gray-dark;
+    border: 1px solid $border-white-normal;
     box-shadow: 0 1px 2px rgba($issue-boards-card-shadow, 0.3);
     cursor: pointer;
   }
@@ -497,7 +503,7 @@
 .add-issues-footer-to-list {
   padding-left: $gl-vert-padding;
   padding-right: $gl-vert-padding;
-  line-height: 34px;
+  line-height: $input-height;
 }
 
 .issue-card-selected {
@@ -506,7 +512,7 @@
   top: -3px;
   width: 17px;
   background-color: $blue-500;
-  color: $white-light;
+  color: $white;
   border: 1px solid $blue-600;
   font-size: 9px;
   line-height: 15px;
@@ -523,7 +529,7 @@
   }
 
   &.board-card-weight {
-    color: $gl-text-color;
+    color: $gl-text-color-secondary;
     cursor: pointer;
 
     &:hover {
@@ -533,8 +539,9 @@
   }
 
   .board-card-info-icon {
-    color: $gray-600;
+    color: $gray-500;
     margin-right: $gl-padding-4;
+    vertical-align: text-top;
   }
 
   @include media-breakpoint-down(md) {
@@ -546,14 +553,61 @@
   cursor: help;
 }
 
-.board-labels-toggle-wrapper {
+.board-labels-toggle-wrapper,
+.board-swimlanes-toggle-wrapper {
   /**
    * Make the wrapper the same height as a button so it aligns properly when the
    * filtered-search-box input element increases in size on Linux smaller breakpoints
    */
-  height: 34px;
+  height: $input-height;
+}
+
+.issue-boards-content.is-focused {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: $white;
+  z-index: 9000;
 
   @include media-breakpoint-down(sm) {
-    margin-bottom: 10px;
+    padding-top: 10px;
+  }
+
+  .boards-list {
+    height: calc(100vh - #{$issue-boards-filter-height});
+    overflow-x: scroll;
+  }
+
+  .issue-boards-sidebar {
+    height: 100%;
+    top: 0;
+  }
+}
+
+.board-swimlanes {
+  overflow-x: auto;
+}
+
+.board-header-collapsed-info-icon:hover {
+  color: $gray-900;
+}
+
+$epic-icons-spacing: 40px;
+
+.board-epic-lane {
+  max-width: calc(100vw - #{$contextual-sidebar-width} - #{$epic-icons-spacing});
+
+  .page-with-icon-sidebar & {
+    max-width: calc(100vw - #{$contextual-sidebar-collapsed-width} - #{$epic-icons-spacing});
+  }
+
+  .page-with-icon-sidebar .is-compact & {
+    max-width: calc(100vw - #{$contextual-sidebar-collapsed-width} - #{$gutter-width} - #{$epic-icons-spacing});
+  }
+
+  .is-compact & {
+    max-width: calc(100vw - #{$contextual-sidebar-width} - #{$gutter-width} - #{$epic-icons-spacing});
   }
 }

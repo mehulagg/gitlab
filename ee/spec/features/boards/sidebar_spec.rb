@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue Boards', :js do
+RSpec.describe 'Issue Boards', :js do
   include BoardHelpers
 
   let(:user)         { create(:user) }
@@ -14,6 +14,8 @@ describe 'Issue Boards', :js do
   let!(:stretch)     { create(:label, project: project, name: 'Stretch') }
   let!(:issue1)      { create(:labeled_issue, project: project, assignees: [user], milestone: milestone, labels: [development], weight: 3, relative_position: 2) }
   let!(:issue2)      { create(:labeled_issue, project: project, labels: [development, stretch], relative_position: 1) }
+  let!(:scoped_label_1) { create(:label, project: project, name: 'Scoped1::Label1') }
+  let!(:scoped_label_2) { create(:label, project: project, name: 'Scoped2::Label2') }
   let(:board)        { create(:board, project: project) }
   let!(:list)        { create(:list, board: board, label: development, position: 0) }
   let(:card1) { find('.board:nth-child(2)').find('.board-card:nth-child(2)') }
@@ -102,6 +104,8 @@ describe 'Issue Boards', :js do
     it 'assignees to current user' do
       click_card(card2)
 
+      wait_for_requests
+
       page.within(find('.assignee')) do
         expect(find('.qa-assign-yourself')).to have_content('None')
 
@@ -147,7 +151,7 @@ describe 'Issue Boards', :js do
   context 'epic' do
     before do
       stub_licensed_features(epics: true)
-
+      group.add_owner(user)
       visit project_board_path(project, board)
       wait_for_requests
     end
@@ -162,14 +166,39 @@ describe 'Issue Boards', :js do
     end
 
     context 'when the issue is associated with an epic' do
-      let(:epic)          { create(:epic, group: group) }
-      let!(:epic_issue)   { create(:epic_issue, issue: issue1, epic: epic) }
+      let(:epic1)         { create(:epic, group: group, title: 'Foo') }
+      let!(:epic2)        { create(:epic, group: group, title: 'Bar') }
+      let!(:epic_issue)   { create(:epic_issue, issue: issue1, epic: epic1) }
 
       it 'displays name of epic and links to it' do
         click_card(card1)
         wait_for_requests
 
-        expect(find('.js-epic-label')).to have_link(epic.title, href: epic_path(epic))
+        expect(find('.js-epic-label')).to have_link(epic1.title, href: epic_path(epic1))
+      end
+
+      it 'updates the epic associated with the issue' do
+        click_card(card1)
+        wait_for_requests
+
+        page.within(find('.js-epic-block')) do
+          page.find('.sidebar-dropdown-toggle').click
+          wait_for_requests
+
+          click_link epic2.title
+          wait_for_requests
+
+          expect(page.find('.value')).to have_content(epic2.title)
+        end
+
+        # Ensure that boards_store is also updated the epic associated with the issue.
+        click_card(card1)
+        wait_for_requests
+
+        click_card(card1)
+        wait_for_requests
+
+        expect(find('.js-epic-label')).to have_content(epic2.title)
       end
     end
   end
@@ -252,9 +281,6 @@ describe 'Issue Boards', :js do
   end
 
   context 'scoped labels' do
-    let!(:scoped_label_1) { create(:label, project: project, name: 'Scoped::Label1') }
-    let!(:scoped_label_2) { create(:label, project: project, name: 'Scoped::Label2') }
-
     before do
       stub_licensed_features(scoped_labels: true)
 
@@ -262,7 +288,7 @@ describe 'Issue Boards', :js do
       wait_for_requests
     end
 
-    it 'removes existing scoped label' do
+    it 'adds multiple scoped labels' do
       click_card(card1)
 
       page.within('.labels') do
@@ -271,6 +297,9 @@ describe 'Issue Boards', :js do
         wait_for_requests
 
         click_link scoped_label_1.title
+
+        wait_for_requests
+
         click_link scoped_label_2.title
 
         wait_for_requests
@@ -278,15 +307,81 @@ describe 'Issue Boards', :js do
         find('.dropdown-menu-close-icon').click
 
         page.within('.value') do
-          expect(page).to have_selector('.scoped-label-wrapper', count: 1)
-          expect(page).not_to have_content(scoped_label_1.title)
-          expect(page).to have_content(scoped_label_2.title)
+          expect(page).to have_selector('.gl-label-scoped', count: 2)
+          expect(page).to have_content(scoped_label_1.scoped_label_key)
+          expect(page).to have_content(scoped_label_1.scoped_label_value)
+          expect(page).to have_content(scoped_label_2.scoped_label_key)
+          expect(page).to have_content(scoped_label_2.scoped_label_value)
         end
       end
+    end
 
-      expect(card1).to have_selector('.scoped-label-wrapper', count: 1)
-      expect(card1).not_to have_content(scoped_label_1.title)
-      expect(card1).to have_content(scoped_label_2.title)
+    context 'with scoped label assigned' do
+      let!(:issue3) { create(:labeled_issue, project: project, labels: [development, scoped_label_1, scoped_label_2], relative_position: 3) }
+      let(:board) { create(:board, project: project) }
+      let(:card3) { find('.board:nth-child(2)').find('.board-card:nth-child(1)') }
+
+      before do
+        stub_licensed_features(scoped_labels: true)
+
+        visit project_board_path(project, board)
+        wait_for_requests
+      end
+
+      it 'removes existing scoped label' do
+        click_card(card3)
+
+        page.within('.labels') do
+          click_link 'Edit'
+
+          wait_for_requests
+
+          click_link scoped_label_2.title
+
+          wait_for_requests
+
+          find('.dropdown-menu-close-icon').click
+
+          page.within('.value') do
+            expect(page).to have_selector('.gl-label-scoped', count: 1)
+            expect(page).not_to have_content(scoped_label_1.scoped_label_value)
+            expect(page).to have_content(scoped_label_2.scoped_label_key)
+            expect(page).to have_content(scoped_label_2.scoped_label_value)
+          end
+        end
+
+        expect(card3).to have_selector('.gl-label-scoped', count: 1)
+        expect(card3).not_to have_content(scoped_label_1.scoped_label_key)
+        expect(card3).not_to have_content(scoped_label_1.scoped_label_value)
+        expect(card3).to have_content(scoped_label_2.scoped_label_key)
+        expect(card3).to have_content(scoped_label_2.scoped_label_value)
+      end
+    end
+  end
+
+  context 'when opening sidebars' do
+    let(:settings_button) { find('.js-board-settings-button') }
+
+    it 'closes card sidebar when opening settings sidebar' do
+      click_card(card1)
+
+      expect(page).to have_selector('.right-sidebar')
+
+      settings_button.click
+
+      expect(page).to have_selector('.js-board-settings-sidebar')
+      expect(page).not_to have_selector('.right-sidebar')
+    end
+
+    it 'closes settings sidebar when opening card sidebar' do
+      settings_button.click
+
+      expect(page).to have_selector('.js-board-settings-sidebar')
+
+      click_card(card1)
+
+      expect(page).to have_selector('.right-sidebar')
+      expect(page).not_to have_selector('.js-board-settings-sidebar')
     end
   end
 end

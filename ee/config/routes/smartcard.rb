@@ -1,4 +1,9 @@
 # frozen_string_literal: true
 
-post 'smartcard/auth' => 'smartcard#auth'
-post 'smartcard/ldap_auth' => 'smartcard#ldap_auth'
+resource :smartcard, only: [], controller: :smartcard do
+  collection do
+    post :auth
+    get :extract_certificate
+    get :verify_certificate
+  end
+end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Avatarable do
+RSpec.describe Avatarable do
   let(:project) { create(:project, :with_avatar) }
 
   let(:gitlab_host) { "https://gitlab.example.com" }
@@ -15,13 +15,13 @@ describe Avatarable do
   end
 
   describe '#update' do
-    let(:validator) { project._validators[:avatar].detect { |v| v.is_a?(FileSizeValidator) } }
+    let(:validator) { project.class.validators_on(:avatar).find { |v| v.is_a?(FileSizeValidator) } }
 
     context 'when avatar changed' do
       it 'validates the file size' do
         expect(validator).to receive(:validate_each).and_call_original
 
-        project.update(avatar: 'uploads/avatar.png')
+        project.update!(avatar: 'uploads/avatar.png')
       end
     end
 
@@ -29,7 +29,7 @@ describe Avatarable do
       it 'skips validation of file size' do
         expect(validator).not_to receive(:validate_each)
 
-        project.update(name: 'Hello world')
+        project.update!(name: 'Hello world')
       end
     end
   end
@@ -48,14 +48,14 @@ describe Avatarable do
       end
 
       it 'calls local_url twice for path and URLs' do
-        expect(project.avatar).to receive(:local_url).exactly(2).times.and_call_original
+        expect(project.avatar).to receive(:local_url).twice.and_call_original
 
         expect(project.avatar_path(only_path: true)).to eq(avatar_path)
         expect(project.avatar_path(only_path: false)).to eq(avatar_url)
       end
 
       it 'calls local_url twice for different sizes' do
-        expect(project.avatar).to receive(:local_url).exactly(2).times.and_call_original
+        expect(project.avatar).to receive(:local_url).twice.and_call_original
 
         expect(project.avatar_path).to eq(avatar_path)
         expect(project.avatar_path(size: 40)).to eq(avatar_path + "?width=40")
@@ -64,7 +64,7 @@ describe Avatarable do
       it 'handles unpersisted objects' do
         new_project = build(:project, :with_avatar)
         path = [relative_url_root, new_project.avatar.local_url].join
-        expect(new_project.avatar).to receive(:local_url).exactly(2).times.and_call_original
+        expect(new_project.avatar).to receive(:local_url).twice.and_call_original
 
         2.times do
           expect(new_project.avatar_path).to eq(path)

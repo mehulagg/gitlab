@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::LabelsController do
+RSpec.describe Groups::LabelsController do
   let_it_be(:group) { create(:group) }
   let_it_be(:user)  { create(:user) }
   let_it_be(:project) { create(:project, namespace: group) }
@@ -53,7 +53,7 @@ describe Groups::LabelsController do
 
       post :toggle_subscription, params: { group_id: group.to_param, id: label.to_param }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
   end
 end

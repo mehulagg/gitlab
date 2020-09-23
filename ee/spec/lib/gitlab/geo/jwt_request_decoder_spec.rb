@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Gitlab::Geo::JwtRequestDecoder do
+RSpec.describe Gitlab::Geo::JwtRequestDecoder do
   include EE::GeoHelpers
 
   let!(:primary_node) { FactoryBot.create(:geo_node, :primary) }
-  let(:data) { { input: 123 } }
+  let(:data) { { input: 123, other_input: 'string value' } }
   let(:request) { Gitlab::Geo::TransferRequest.new(data) }
 
   subject { described_class.new(request.headers['Authorization']) }
@@ -26,11 +26,19 @@ describe Gitlab::Geo::JwtRequestDecoder do
       expect(subject.decode).to be_nil
     end
 
+    it 'decodes when node is disabled if `include_disabled!` is called first' do
+      primary_node.update_attribute(:enabled, false)
+
+      subject.include_disabled!
+
+      expect(subject.decode).to eq(data)
+    end
+
     it 'fails to decode with wrong key' do
       data = request.headers['Authorization']
 
       primary_node.secret_access_key = ''
-      primary_node.save
+      primary_node.save!
       expect(described_class.new(data).decode).to be_nil
     end
 
@@ -53,9 +61,25 @@ describe Gitlab::Geo::JwtRequestDecoder do
     end
 
     it 'raises invalid decryption key error' do
-      allow_any_instance_of(described_class).to receive(:decode_auth_header).and_raise(Gitlab::Geo::InvalidDecryptionKeyError)
+      allow_next_instance_of(described_class) do |instance|
+        allow(instance).to receive(:decode_auth_header).and_raise(Gitlab::Geo::InvalidDecryptionKeyError)
+      end
 
       expect { subject.decode }.to raise_error(Gitlab::Geo::InvalidDecryptionKeyError)
+    end
+  end
+
+  describe '#valid_attributes?' do
+    it 'returns true when all given attributes and decoded data are all the same' do
+      expect(subject.valid_attributes?(input: 123, other_input: 'string value')).to be_truthy
+    end
+
+    it 'returns true when given attributes is a slice of decoded data' do
+      expect(subject.valid_attributes?(input: 123)).to be_truthy
+    end
+
+    it 'returns false when one given data doesnt match its corresponding decoded one' do
+      expect(subject.valid_attributes?(input: 123, other_input: 'wrong value')).to be_falsey
     end
   end
 end

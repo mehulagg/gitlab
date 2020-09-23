@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User page' do
+RSpec.describe 'User page' do
   include ExternalAuthorizationServiceHelpers
 
   let(:user) { create(:user) }
@@ -25,6 +25,34 @@ describe 'User page' do
       visit(user_path(user))
 
       expect(page).not_to have_content("This user has a private profile")
+    end
+
+    context 'work information' do
+      subject { visit(user_path(user)) }
+
+      it 'shows job title and organization details' do
+        user.update(organization: 'GitLab - work info test', job_title: 'Frontend Engineer')
+
+        subject
+
+        expect(page).to have_content('Frontend Engineer at GitLab - work info test')
+      end
+
+      it 'shows job title' do
+        user.update(organization: nil, job_title: 'Frontend Engineer - work info test')
+
+        subject
+
+        expect(page).to have_content('Frontend Engineer - work info test')
+      end
+
+      it 'shows organization details' do
+        user.update(organization: 'GitLab - work info test', job_title: '')
+
+        subject
+
+        expect(page).to have_content('GitLab - work info test')
+      end
     end
   end
 
@@ -56,6 +84,42 @@ describe 'User page' do
         expect(page).to have_link('Personal projects')
         expect(page).to have_link('Snippets')
       end
+    end
+  end
+
+  context 'with blocked profile' do
+    let(:user) { create(:user, state: :blocked) }
+
+    it 'shows no tab' do
+      visit(user_path(user))
+
+      expect(page).to have_css("div.profile-header")
+      expect(page).not_to have_css("ul.nav-links")
+    end
+
+    it 'shows blocked message' do
+      visit(user_path(user))
+
+      expect(page).to have_content("This user is blocked")
+    end
+
+    it 'shows user name as blocked' do
+      visit(user_path(user))
+
+      expect(page).to have_css(".cover-title", text: 'Blocked user')
+    end
+
+    it 'shows no additional fields' do
+      visit(user_path(user))
+
+      expect(page).not_to have_css(".profile-user-bio")
+      expect(page).not_to have_css(".profile-link-holder")
+    end
+
+    it 'shows username' do
+      visit(user_path(user))
+
+      expect(page).to have_content("@#{user.username}")
     end
   end
 

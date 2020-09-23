@@ -4,7 +4,11 @@ module QA
   module Page
     module Component
       module LegacyClonePanel
+        extend QA::Page::PageConcern
+
         def self.included(base)
+          super
+
           base.view 'app/views/shared/_clone_panel.html.haml' do
             element :clone_dropdown
             element :clone_options_dropdown, '.clone-options-dropdown' # rubocop:disable QA/ElementWithPattern
@@ -30,7 +34,7 @@ module QA
         private
 
         def choose_repository_clone(kind, detect_text)
-          wait(reload: false) do
+          wait_until(reload: false) do
             click_element :clone_dropdown
 
             page.within('.clone-options-dropdown') do

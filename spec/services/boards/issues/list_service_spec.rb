@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Boards::Issues::ListService do
+RSpec.describe Boards::Issues::ListService do
   describe '#execute' do
     context 'when parent is a project' do
       let(:user)    { create(:user) }
@@ -33,11 +33,11 @@ describe Boards::Issues::ListService do
       let!(:list1_issue3) { create(:labeled_issue, project: project, milestone: m1, labels: [development, p1]) }
       let!(:list2_issue1) { create(:labeled_issue, project: project, milestone: m1, labels: [testing]) }
 
-      let!(:closed_issue1) { create(:labeled_issue, :closed, project: project, labels: [bug]) }
-      let!(:closed_issue2) { create(:labeled_issue, :closed, project: project, labels: [p3]) }
-      let!(:closed_issue3) { create(:issue, :closed, project: project) }
-      let!(:closed_issue4) { create(:labeled_issue, :closed, project: project, labels: [p1]) }
-      let!(:closed_issue5) { create(:labeled_issue, :closed, project: project, labels: [development]) }
+      let!(:closed_issue1) { create(:labeled_issue, :closed, project: project, labels: [bug], closed_at: 1.day.ago) }
+      let!(:closed_issue2) { create(:labeled_issue, :closed, project: project, labels: [p3], closed_at: 2.days.ago) }
+      let!(:closed_issue3) { create(:issue, :closed, project: project, closed_at: 1.week.ago) }
+      let!(:closed_issue4) { create(:labeled_issue, :closed, project: project, labels: [p1], closed_at: 1.year.ago) }
+      let!(:closed_issue5) { create(:labeled_issue, :closed, project: project, labels: [development], closed_at: 2.years.ago) }
 
       let(:parent) { project }
 
@@ -87,18 +87,18 @@ describe Boards::Issues::ListService do
       let!(:opened_issue1) { create(:labeled_issue, project: project, milestone: m1, title: 'Issue 1', labels: [bug]) }
       let!(:opened_issue2) { create(:labeled_issue, project: project, milestone: m2, title: 'Issue 2', labels: [p2, p2_project]) }
       let!(:opened_issue3) { create(:labeled_issue, project: project_archived, milestone: m1, title: 'Issue 3', labels: [bug]) }
-      let!(:reopened_issue1) { create(:issue, state: 'opened', project: project, title: 'Reopened Issue 1', closed_at: Time.now ) }
+      let!(:reopened_issue1) { create(:issue, state: 'opened', project: project, title: 'Reopened Issue 1', closed_at: Time.current ) }
 
       let!(:list1_issue1) { create(:labeled_issue, project: project, milestone: m1, labels: [p2, p2_project, development]) }
       let!(:list1_issue2) { create(:labeled_issue, project: project, milestone: m2, labels: [development]) }
       let!(:list1_issue3) { create(:labeled_issue, project: project1, milestone: m1, labels: [development, p1, p1_project1]) }
       let!(:list2_issue1) { create(:labeled_issue, project: project1, milestone: m1, labels: [testing]) }
 
-      let!(:closed_issue1) { create(:labeled_issue, :closed, project: project, labels: [bug]) }
-      let!(:closed_issue2) { create(:labeled_issue, :closed, project: project, labels: [p3, p3_project]) }
-      let!(:closed_issue3) { create(:issue, :closed, project: project1) }
-      let!(:closed_issue4) { create(:labeled_issue, :closed, project: project1, labels: [p1, p1_project1]) }
-      let!(:closed_issue5) { create(:labeled_issue, :closed, project: project1, labels: [development]) }
+      let!(:closed_issue1) { create(:labeled_issue, :closed, project: project, labels: [bug], closed_at: 1.day.ago) }
+      let!(:closed_issue2) { create(:labeled_issue, :closed, project: project, labels: [p3, p3_project], closed_at: 2.days.ago) }
+      let!(:closed_issue3) { create(:issue, :closed, project: project1, closed_at: 1.week.ago) }
+      let!(:closed_issue4) { create(:labeled_issue, :closed, project: project1, labels: [p1, p1_project1], closed_at: 1.year.ago) }
+      let!(:closed_issue5) { create(:labeled_issue, :closed, project: project1, labels: [development], closed_at: 2.years.ago) }
 
       before do
         group.add_developer(user)

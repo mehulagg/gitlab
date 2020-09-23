@@ -1,6 +1,33 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Git::DiffCollection, :seed_helper do
+RSpec.describe Gitlab::Git::DiffCollection, :seed_helper do
+  before do
+    stub_const('MutatingConstantIterator', Class.new)
+
+    MutatingConstantIterator.class_eval do
+      include Enumerable
+
+      def initialize(count, value)
+        @count = count
+        @value = value
+      end
+
+      def each
+        return enum_for(:each) unless block_given?
+
+        loop do
+          break if @count == 0
+
+          # It is critical to decrement before yielding. We may never reach the lines after 'yield'.
+          @count -= 1
+          yield @value
+        end
+      end
+    end
+  end
+
   subject do
     Gitlab::Git::DiffCollection.new(
       iterator,
@@ -504,7 +531,9 @@ describe Gitlab::Git::DiffCollection, :seed_helper do
           let(:iterator) { [fake_diff(1, 1)] * 4 }
 
           before do
-            stub_const('Gitlab::Git::DiffCollection::DEFAULT_LIMITS', { max_files: 2, max_lines: max_lines })
+            allow(Gitlab::Git::DiffCollection)
+              .to receive(:default_limits)
+              .and_return({ max_files: 2, max_lines: max_lines })
           end
 
           it 'prunes diffs by default even little ones' do
@@ -529,7 +558,9 @@ describe Gitlab::Git::DiffCollection, :seed_helper do
           end
 
           before do
-            stub_const('Gitlab::Git::DiffCollection::DEFAULT_LIMITS', { max_files: max_files, max_lines: 80 })
+            allow(Gitlab::Git::DiffCollection)
+              .to receive(:default_limits)
+              .and_return({ max_files: max_files, max_lines: 80 })
           end
 
           it 'prunes diffs by default even little ones' do
@@ -554,7 +585,9 @@ describe Gitlab::Git::DiffCollection, :seed_helper do
           end
 
           before do
-            stub_const('Gitlab::Git::DiffCollection::DEFAULT_LIMITS', { max_files: max_files, max_lines: 80 })
+            allow(Gitlab::Git::DiffCollection)
+              .to receive(:default_limits)
+              .and_return({ max_files: max_files, max_lines: 80 })
           end
 
           it 'prunes diffs by default even little ones' do
@@ -638,8 +671,9 @@ describe Gitlab::Git::DiffCollection, :seed_helper do
         end
 
         before do
-          stub_const('Gitlab::Git::DiffCollection::DEFAULT_LIMITS',
-                     { max_files: max_files, max_lines: 80 })
+          allow(Gitlab::Git::DiffCollection)
+            .to receive(:default_limits)
+            .and_return({ max_files: max_files, max_lines: 80 })
         end
 
         it 'considers size of diffs before the offset for prunning' do
@@ -656,26 +690,5 @@ describe Gitlab::Git::DiffCollection, :seed_helper do
 
   def fake_diff(line_length, line_count)
     { 'diff' => "#{'a' * line_length}\n" * line_count }
-  end
-
-  class MutatingConstantIterator
-    include Enumerable
-
-    def initialize(count, value)
-      @count = count
-      @value = value
-    end
-
-    def each
-      return enum_for(:each) unless block_given?
-
-      loop do
-        break if @count.zero?
-
-        # It is critical to decrement before yielding. We may never reach the lines after 'yield'.
-        @count -= 1
-        yield @value
-      end
-    end
   end
 end

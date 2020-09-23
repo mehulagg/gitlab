@@ -2,12 +2,13 @@
 
 require 'spec_helper'
 
-describe MergeRequests::PushOptionsHandlerService do
+RSpec.describe MergeRequests::PushOptionsHandlerService do
   include ProjectForksHelper
 
-  let(:user) { create(:user) }
-  let(:project) { create(:project, :public, :repository) }
-  let(:forked_project) { fork_project(project, user, repository: true) }
+  let_it_be(:project) { create(:project, :public, :repository) }
+  let_it_be(:user) { create(:user, developer_projects: [project]) }
+  let_it_be(:forked_project) { fork_project(project, user, repository: true) }
+
   let(:service) { described_class.new(project, user, changes, push_options) }
   let(:source_branch) { 'fix' }
   let(:target_branch) { 'feature' }
@@ -21,28 +22,14 @@ describe MergeRequests::PushOptionsHandlerService do
   let(:deleted_branch_changes) { "d14d6c0abdd253381df51a723d58691b2ee1ab08 #{Gitlab::Git::BLANK_SHA} refs/heads/#{source_branch}" }
   let(:default_branch_changes) { "d14d6c0abdd253381df51a723d58691b2ee1ab08 570e7b2abdd848b95f2f578043fc23bd6f6fd24d refs/heads/#{project.default_branch}" }
 
-  before do
-    project.add_developer(user)
-  end
-
   shared_examples_for 'a service that can create a merge request' do
     subject(:last_mr) { MergeRequest.last }
 
-    it 'creates a merge request' do
-      expect { service.execute }.to change { MergeRequest.count }.by(1)
-    end
-
-    it 'sets the correct target branch' do
+    it 'creates a merge request with the correct target branch and assigned user' do
       branch = push_options[:target] || project.default_branch
 
-      service.execute
-
+      expect { service.execute }.to change { MergeRequest.count }.by(1)
       expect(last_mr.target_branch).to eq(branch)
-    end
-
-    it 'assigns the MR to the user' do
-      service.execute
-
       expect(last_mr.assignees).to contain_exactly(user)
     end
 
@@ -54,15 +41,10 @@ describe MergeRequests::PushOptionsHandlerService do
         allow(forked_project).to receive(:empty_repo?).and_return(false)
       end
 
-      it 'sets the correct source project' do
+      it 'sets the correct source and target project' do
         service.execute
 
         expect(last_mr.source_project).to eq(forked_project)
-      end
-
-      it 'sets the correct target project' do
-        service.execute
-
         expect(last_mr.target_project).to eq(project)
       end
     end
@@ -101,17 +83,15 @@ describe MergeRequests::PushOptionsHandlerService do
   shared_examples_for 'a service that can set the merge request to merge when pipeline succeeds' do
     subject(:last_mr) { MergeRequest.last }
 
+    let(:change) { Gitlab::ChangesList.new(changes).changes.first }
+
     it 'sets auto_merge_enabled' do
       service.execute
 
       expect(last_mr.auto_merge_enabled).to eq(true)
       expect(last_mr.auto_merge_strategy).to eq(AutoMergeService::STRATEGY_MERGE_WHEN_PIPELINE_SUCCEEDS)
-    end
-
-    it 'sets merge_user to the user' do
-      service.execute
-
       expect(last_mr.merge_user).to eq(user)
+      expect(last_mr.merge_params['sha']).to eq(change[:newrev])
     end
   end
 
@@ -716,9 +696,9 @@ describe MergeRequests::PushOptionsHandlerService do
     let(:exception) { StandardError.new('My standard error') }
 
     def run_service_with_exception
-      allow_any_instance_of(
-        MergeRequests::BuildService
-      ).to receive(:execute).and_raise(exception)
+      allow_next_instance_of(MergeRequests::BuildService) do |instance|
+        allow(instance).to receive(:execute).and_raise(exception)
+      end
 
       service.execute
     end
@@ -748,6 +728,7 @@ describe MergeRequests::PushOptionsHandlerService do
   end
 
   describe 'when MRs are not enabled' do
+    let(:project) { create(:project, :public, :repository).tap { |pr| pr.add_developer(user) } }
     let(:push_options) { { create: true } }
     let(:changes) { new_branch_changes }
 
@@ -768,9 +749,9 @@ describe MergeRequests::PushOptionsHandlerService do
       invalid_merge_request = MergeRequest.new
       invalid_merge_request.errors.add(:base, 'my error')
 
-      expect_any_instance_of(
-        MergeRequests::CreateService
-      ).to receive(:execute).and_return(invalid_merge_request)
+      expect_next_instance_of(MergeRequests::CreateService) do |instance|
+        expect(instance).to receive(:execute).and_return(invalid_merge_request)
+      end
 
       service.execute
 

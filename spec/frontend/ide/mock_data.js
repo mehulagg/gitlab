@@ -18,6 +18,7 @@ export const projectData = {
   },
   mergeRequests: {},
   merge_requests_enabled: true,
+  userPermissions: {},
   default_branch: 'master',
 };
 
@@ -111,7 +112,8 @@ export const jobs = [
   {
     id: 4,
     name: 'test 4',
-    path: 'testing4',
+    // bridge jobs don't have details page and so there is no path attribute
+    // see https://gitlab.com/gitlab-org/gitlab/-/issues/216480
     status: {
       icon: 'status_failed',
       text: 'failed',
@@ -165,7 +167,11 @@ export const mergeRequests = [
     iid: 1,
     title: 'Test merge request',
     project_id: 1,
-    web_url: `${TEST_HOST}/namespace/project-path/merge_requests/1`,
+    web_url: `${TEST_HOST}/namespace/project-path/-/merge_requests/1`,
+    references: {
+      short: '!1',
+      full: 'namespace/project-path!1',
+    },
   },
 ];
 

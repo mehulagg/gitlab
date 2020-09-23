@@ -5,7 +5,7 @@ module Gitlab
     module Reports
       module LicenseScanning
         class Report
-          delegate :empty?, :fetch, to: :found_licenses
+          delegate :empty?, :fetch, :[], to: :found_licenses
           attr_accessor :version
 
           def initialize(version: '1.0')
@@ -37,7 +37,14 @@ module Gitlab
             licenses.find { |license| license.name == name }
           end
 
+          def apply_details_from!(dependency_list_report)
+            return if dependency_list_report.blank?
+
+            merge_dependencies_info!(dependency_list_report.dependencies_with_licenses)
+          end
+
           def merge_dependencies_info!(dependencies_with_licenses)
+            return if dependencies_with_licenses.blank?
             return if found_licenses.empty?
 
             found_licenses.values.each do |license|
@@ -56,8 +63,8 @@ module Gitlab
           end
 
           def violates?(software_license_policies)
-            policies_with_matching_license_name = software_license_policies.blacklisted.with_license_by_name(license_names)
-            policies_with_matching_spdx_id = software_license_policies.blacklisted.by_spdx(licenses.map(&:id).compact)
+            policies_with_matching_license_name = software_license_policies.denied.with_license_by_name(license_names)
+            policies_with_matching_spdx_id = software_license_policies.denied.by_spdx(licenses.map(&:id).compact)
             policies_with_matching_spdx_id.or(policies_with_matching_license_name).exists?
           end
 

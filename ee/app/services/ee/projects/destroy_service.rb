@@ -17,10 +17,30 @@ module EE
         end
       end
 
-      override :log_destroy_event
-      def log_destroy_event
-        super
+      # Removes physical repository in a Geo replicated secondary node
+      # There is no need to do any database operation as it will be
+      # replicated by itself.
+      def geo_replicate
+        return unless ::Gitlab::Geo.secondary?
 
+        # Flush the cache for both repositories. This has to be done _before_
+        # removing the physical repositories as some expiration code depends on
+        # Git data (e.g. a list of branch names).
+        flush_caches(project)
+
+        trash_project_repositories!
+
+        log_info("Project \"#{project.name}\" was removed")
+      end
+
+      private
+
+      override :destroy_project_related_records
+      def destroy_project_related_records(project)
+        super && log_destroy_events
+      end
+
+      def log_destroy_events
         log_geo_event(project)
         log_audit_event(project)
       end
@@ -34,28 +54,10 @@ module EE
       def log_geo_event(project)
         ::Geo::RepositoryDeletedEventStore.new(
           project,
-          repo_path: repo_path,
-          wiki_path: wiki_path
+          repo_path: project.disk_path,
+          wiki_path: project.wiki.disk_path
         ).create!
       end
-
-      # Removes physical repository in a Geo replicated secondary node
-      # There is no need to do any database operation as it will be
-      # replicated by itself.
-      def geo_replicate
-        return unless ::Gitlab::Geo.secondary?
-
-        # Flush the cache for both repositories. This has to be done _before_
-        # removing the physical repositories as some expiration code depends on
-        # Git data (e.g. a list of branch names).
-        flush_caches(project)
-
-        trash_repositories!
-
-        log_info("Project \"#{project.name}\" was removed")
-      end
-
-      private
 
       def log_audit_event(project)
         ::AuditEventService.new(

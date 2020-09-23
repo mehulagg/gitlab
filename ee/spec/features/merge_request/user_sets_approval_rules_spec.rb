@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sets approval rules', :js do
+RSpec.describe 'Merge request > User sets approval rules', :js do
   include ProjectForksHelper
 
   include_context 'project with approval rules'
@@ -63,7 +63,7 @@ describe 'Merge request > User sets approval rules', :js do
         td = tr.find(:css, '.js-approvers')
 
         # The approver granted by the private group is not visible
-        expect(td).to have_text('None')
+        expect(td).to have_text('')
       end
     end
   end

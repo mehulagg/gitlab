@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class BuildDetailsEntity < JobEntity
-  prepend_if_ee('::EE::BuildDetailEntity') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
   expose :coverage, :erased_at, :duration
   expose :tag_list, as: :tags
   expose :has_trace?, as: :has_trace
@@ -22,16 +20,22 @@ class BuildDetailsEntity < JobEntity
     end
   end
 
+  expose :deployment_cluster, if: -> (build) { build&.deployment&.cluster } do |build, options|
+    # Until data is copied over from deployments.cluster_id, this entity must represent Deployment instead of DeploymentCluster
+    # https://gitlab.com/gitlab-org/gitlab/issues/202628
+    DeploymentClusterEntity.represent(build.deployment, options)
+  end
+
   expose :artifact, if: -> (*) { can?(current_user, :read_build, build) } do
-    expose :download_path, if: -> (*) { build.artifacts? } do |build|
+    expose :download_path, if: -> (*) { build.locked_artifacts? || build.artifacts? } do |build|
       download_project_job_artifacts_path(project, build)
     end
 
-    expose :browse_path, if: -> (*) { build.browsable_artifacts? } do |build|
+    expose :browse_path, if: -> (*) { build.locked_artifacts? || build.browsable_artifacts? } do |build|
       browse_project_job_artifacts_path(project, build)
     end
 
-    expose :keep_path, if: -> (*) { build.has_expiring_artifacts? && can?(current_user, :update_build, build) } do |build|
+    expose :keep_path, if: -> (*) { (build.locked_artifacts? || build.has_expiring_archive_artifacts?) && can?(current_user, :update_build, build) } do |build|
       keep_project_job_artifacts_path(project, build)
     end
 
@@ -41,6 +45,10 @@ class BuildDetailsEntity < JobEntity
 
     expose :expired, if: -> (*) { build.artifacts_expire_at.present? } do |build|
       build.artifacts_expired?
+    end
+
+    expose :locked do |build|
+      build.pipeline.artifacts_locked?
     end
   end
 
@@ -143,6 +151,8 @@ class BuildDetailsEntity < JobEntity
   end
 
   def help_message(docs_url)
-    _("Please refer to <a href=\"%{docs_url}\">%{docs_url}</a>") % { docs_url: docs_url }
+    html_escape(_("Please refer to %{docs_url}")) % { docs_url: "<a href=\"#{docs_url}\">#{html_escape(docs_url)}</a>".html_safe }
   end
 end
+
+BuildDetailsEntity.prepend_if_ee('::EE::BuildDetailEntity')

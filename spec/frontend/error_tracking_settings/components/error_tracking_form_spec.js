@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { GlButton, GlFormInput } from '@gitlab/ui';
+import { GlFormInput, GlButton } from '@gitlab/ui';
 import ErrorTrackingForm from '~/error_tracking_settings/components/error_tracking_form.vue';
 import createStore from '~/error_tracking_settings/store';
 import { defaultProps } from '../mock';
@@ -48,7 +48,9 @@ describe('error tracking settings form', () => {
     it('is rendered with labels and placeholders', () => {
       const pageText = wrapper.text();
 
-      expect(pageText).toContain('Find your hostname in your Sentry account settings page');
+      expect(pageText).toContain(
+        "If you self-host Sentry, enter the full URL of your Sentry instance. If you're using Sentry's hosted solution, enter https://sentry.io",
+      );
       expect(pageText).toContain(
         "After adding your Auth Token, use the 'Connect' button to load projects",
       );
@@ -60,6 +62,19 @@ describe('error tracking settings form', () => {
           .at(0)
           .attributes('placeholder'),
       ).toContain('https://mysentryserver.com');
+    });
+  });
+
+  describe('loading projects', () => {
+    beforeEach(() => {
+      store.state.isLoadingProjects = true;
+    });
+
+    it('shows loading spinner', () => {
+      const buttonEl = wrapper.find(GlButton);
+
+      expect(buttonEl.props('loading')).toBe(true);
+      expect(buttonEl.text()).toBe('Connecting');
     });
   });
 

@@ -3,13 +3,14 @@
 module Gitlab
   module Ci
     module Parsers
-      prepend_if_ee('::EE::Gitlab::Ci::Parsers') # rubocop: disable Cop/InjectEnterpriseEditionModule
-
       ParserNotFoundError = Class.new(ParserError)
 
       def self.parsers
         {
-          junit: ::Gitlab::Ci::Parsers::Test::Junit
+          junit: ::Gitlab::Ci::Parsers::Test::Junit,
+          cobertura: ::Gitlab::Ci::Parsers::Coverage::Cobertura,
+          terraform: ::Gitlab::Ci::Parsers::Terraform::Tfplan,
+          accessibility: ::Gitlab::Ci::Parsers::Accessibility::Pa11y
         }
       end
 
@@ -21,3 +22,5 @@ module Gitlab
     end
   end
 end
+
+Gitlab::Ci::Parsers.prepend_if_ee('::EE::Gitlab::Ci::Parsers')

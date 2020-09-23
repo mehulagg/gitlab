@@ -15,12 +15,11 @@ RSpec.describe Release do
     it { is_expected.to have_many(:links).class_name('Releases::Link') }
     it { is_expected.to have_many(:milestones) }
     it { is_expected.to have_many(:milestone_releases) }
-    it { is_expected.to have_one(:evidence) }
+    it { is_expected.to have_many(:evidences).class_name('Releases::Evidence') }
   end
 
   describe 'validation' do
     it { is_expected.to validate_presence_of(:project) }
-    it { is_expected.to validate_presence_of(:description) }
     it { is_expected.to validate_presence_of(:tag) }
 
     context 'when a release exists in the database without a name' do
@@ -34,7 +33,7 @@ RSpec.describe Release do
 
         expect(existing_release_without_name).to be_valid
         expect(existing_release_without_name.description).to eq("change")
-        expect(existing_release_without_name.name).to be_nil
+        expect(existing_release_without_name.name).not_to be_nil
       end
     end
 
@@ -74,6 +73,22 @@ RSpec.describe Release do
     end
   end
 
+  describe '.create' do
+    it "fills released_at using created_at if it's not set" do
+      release = described_class.create(project: project, author: user)
+
+      expect(release.released_at).to eq(release.created_at)
+    end
+
+    it "does not change released_at if it's set explicitly" do
+      released_at = Time.zone.parse('2018-10-20T18:00:00Z')
+
+      release = described_class.create(project: project, author: user, released_at: released_at)
+
+      expect(release.released_at).to eq(released_at)
+    end
+  end
+
   describe '#sources' do
     subject { release.sources }
 
@@ -92,41 +107,33 @@ RSpec.describe Release do
     end
   end
 
-  describe 'evidence', :sidekiq_might_not_need_inline do
-    describe '#create_evidence!' do
-      context 'when a release is created' do
-        it 'creates one Evidence object too' do
-          expect { release }.to change(Evidence, :count).by(1)
-        end
-      end
-    end
+  describe 'evidence' do
+    let(:release_with_evidence) { create(:release, :with_evidence, project: project) }
 
     context 'when a release is deleted' do
       it 'also deletes the associated evidence' do
-        release = create(:release)
+        release_with_evidence
 
-        expect { release.destroy }.to change(Evidence, :count).by(-1)
+        expect { release_with_evidence.destroy }.to change(Releases::Evidence, :count).by(-1)
       end
     end
   end
 
-  describe '#notify_new_release' do
-    context 'when a release is created' do
-      it 'instantiates NewReleaseWorker to send notifications' do
-        expect(NewReleaseWorker).to receive(:perform_async)
+  describe '#name' do
+    context 'name is nil' do
+      before do
+        release.update(name: nil)
+      end
 
-        create(:release)
+      it 'returns tag' do
+        expect(release.name).to eq(release.tag)
       end
     end
+  end
 
-    context 'when a release is updated' do
-      let!(:release) { create(:release) }
+  describe '#milestone_titles' do
+    let(:release) { create(:release, :with_milestones) }
 
-      it 'does not send any new notification' do
-        expect(NewReleaseWorker).not_to receive(:perform_async)
-
-        release.update!(description: 'new description')
-      end
-    end
+    it { expect(release.milestone_titles).to eq(release.milestones.map {|m| m.title }.sort.join(", "))}
   end
 end

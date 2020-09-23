@@ -9,7 +9,7 @@ module Gitlab
     # Begins stealing jobs from the background migrations queue, blocking the
     # caller until all jobs have been completed.
     #
-    # When a migration raises a StandardError is is going to be retries up to
+    # When a migration raises a StandardError it is going to retry up to
     # three times, for example, to recover from a deadlock.
     #
     # When Exception is being raised, it enqueues the migration again, and
@@ -33,6 +33,7 @@ module Gitlab
 
           next unless job.queue == self.queue
           next unless migration_class == steal_class
+          next if block_given? && !(yield migration_args)
 
           begin
             perform(migration_class, migration_args) if job.delete
@@ -58,6 +59,14 @@ module Gitlab
       migration_class_for(class_name).new.perform(*arguments)
     end
 
+    def self.remaining
+      scheduled = Sidekiq::ScheduledSet.new.count do |job|
+        job.queue == self.queue
+      end
+
+      scheduled + Sidekiq::Queue.new(self.queue).size
+    end
+
     def self.exists?(migration_class, additional_queues = [])
       enqueued = Sidekiq::Queue.new(self.queue)
       scheduled = Sidekiq::ScheduledSet.new
@@ -78,6 +87,20 @@ module Gitlab
     end
 
     def self.migration_class_for(class_name)
+      # We don't pass class name with Gitlab::BackgroundMigration:: prefix anymore
+      # but some jobs could be already spawned so we need to have some backward compatibility period.
+      # Can be removed since 13.x
+      full_class_name_prefix_regexp = /\A(::)?Gitlab::BackgroundMigration::/
+
+      if class_name.match(full_class_name_prefix_regexp)
+        Gitlab::ErrorTracking.track_and_raise_for_dev_exception(
+          StandardError.new("Full class name is used"),
+          class_name: class_name
+        )
+
+        class_name = class_name.sub(full_class_name_prefix_regexp, '')
+      end
+
       const_get(class_name, false)
     end
 

@@ -12,7 +12,7 @@ module Projects
       matching_programming_languages = ensure_programming_languages(detection)
 
       RepositoryLanguage.transaction do
-        project.repository_languages.where(programming_language_id: detection.deletions).delete_all
+        RepositoryLanguage.where(project_id: project.id, programming_language_id: detection.deletions).delete_all
 
         detection.updates.each do |update|
           RepositoryLanguage
@@ -21,7 +21,7 @@ module Projects
             .update_all(share: update[:share])
         end
 
-        Gitlab::Database.bulk_insert(
+        Gitlab::Database.bulk_insert( # rubocop:disable Gitlab/BulkInsert
           RepositoryLanguage.table_name,
           detection.insertions(matching_programming_languages)
         )

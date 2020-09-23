@@ -8,6 +8,27 @@
   }
 }
 
+.groups-list {
+  @include basic-list;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+
+  li {
+    .title {
+      font-weight: 600;
+    }
+
+    a {
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+}
+
 .group-root-path {
   max-width: 40vw;
   overflow: hidden;
@@ -15,16 +36,10 @@
   word-wrap: nowrap;
 }
 
-.content-list .group-name {
-  font-weight: $gl-font-weight-bold;
-  color: $pages-group-name-color;
-}
-
 .group-row {
-  @include basic-list-stats;
-
   .description p {
     margin-bottom: 0;
+    color: $gl-text-color-secondary;
   }
 }
 
@@ -32,6 +47,12 @@
   .form-actions {
     margin-bottom: $gl-padding;
   }
+}
+
+.save-group-loader {
+  margin-top: $gl-padding-50;
+  margin-bottom: $gl-padding-50;
+  color: $gray-700;
 }
 
 .group-nav-container .nav-controls {
@@ -321,10 +342,6 @@ table.pipeline-project-metrics tr td {
     }
   }
 
-  .content-list li:last-child {
-    padding-bottom: 0;
-  }
-
   .group-list-tree {
     margin-bottom: 0;
     margin-left: 30px;
@@ -356,7 +373,7 @@ table.pipeline-project-metrics tr td {
       }
 
       &:last-child::before {
-        background: $white-light;
+        background: $white;
         height: auto;
         top: 30px;
         bottom: 0;
@@ -381,8 +398,6 @@ table.pipeline-project-metrics tr td {
   }
 
   .group-row-contents {
-    padding: $gl-padding;
-
     &:hover {
       border-color: $blue-200;
       background-color: $blue-50;
@@ -409,13 +424,7 @@ table.pipeline-project-metrics tr td {
 
     .title {
       margin-top: -$gl-padding-8; // negative margin required for flex-wrap
-      font-size: $gl-font-size-large;
-    }
-
-    @include media-breakpoint-down(md) {
-      .title {
-        font-size: $gl-font-size;
-      }
+      font-size: $gl-font-size;
     }
 
     &.has-more-items {
@@ -427,7 +436,7 @@ table.pipeline-project-metrics tr td {
       p {
         @include str-truncated;
 
-        max-width: none;
+        max-width: 100%;
       }
     }
 
@@ -444,27 +453,8 @@ table.pipeline-project-metrics tr td {
         min-width: 30px;
       }
 
-      > span:last-child {
-        margin-right: 0;
-      }
-
       .stat-value {
         margin: 2px 0 0 5px;
-      }
-    }
-
-    .controls {
-      flex-basis: 90px;
-
-      > .btn {
-        margin: 0 $btn-side-margin 0 0;
-        color: $gl-text-color-secondary;
-      }
-    }
-
-    .metadata {
-      @include media-breakpoint-up(md) {
-        flex-basis: 240px;
       }
     }
   }
@@ -482,7 +472,6 @@ table.pipeline-project-metrics tr td {
 
     .last-updated {
       position: relative;
-      right: 12px;
       min-width: 250px;
       text-align: right;
       color: $gl-text-color-secondary;

@@ -6,7 +6,10 @@
     .issuable-info-container
       .issuable-main-info
         .issue-title.title
-          %span.issue-title-text.qa-epic-title-text
+          %span.issue-title-text{ data: { qa_selector: 'epic_title_text' } }
+            - if epic.confidential?
+              %span.has-tooltip{ title: _('Confidential') }
+                = confidential_icon(epic)
             = link_to epic.title, epic_path(epic)
         .issuable-info
           %span.issuable-reference
@@ -15,6 +18,7 @@
             &middot;
             opened #{time_ago_with_tooltip(epic.created_at, placement: 'bottom')}
             by #{link_to_member(@group, epic.author, avatar: false)}
+            = gitlab_team_member_badge(epic.author)
           - if epic.start_date? || epic.end_date?
             &nbsp;
             %span.issuable-dates.d-inline-flex.align-items-center.align-top
@@ -23,7 +27,7 @@
           - if epic.labels.any?
             &nbsp;
             - epic.labels.each do |label|
-              = render_label(label.present(issuable_subject: @group), tooltip: true, link: group_epics_path(@group, label_name:[label.name]), css: 'label-link')
+              = render_label(label.present(issuable_subject: @group), tooltip: true, link: group_epics_path(@group, label_name:[label.name]), small: true)
 
       .issuable-meta
         %ul.controls

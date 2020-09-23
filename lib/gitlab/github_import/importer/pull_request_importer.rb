@@ -27,6 +27,7 @@ module Gitlab
           mr, already_exists = create_merge_request
 
           if mr
+            set_merge_request_assignees(mr)
             insert_git_data(mr, already_exists)
             issuable_finder.cache_database_id(mr.id)
           end
@@ -54,16 +55,18 @@ module Gitlab
             target_project_id: project.id,
             source_branch: pull_request.formatted_source_branch,
             target_branch: pull_request.target_branch,
-            state: pull_request.state,
             state_id: ::MergeRequest.available_states[pull_request.state],
             milestone_id: milestone_finder.id_for(pull_request),
             author_id: author_id,
-            assignee_id: user_finder.assignee_id_for(pull_request),
             created_at: pull_request.created_at,
             updated_at: pull_request.updated_at
           }
 
           create_merge_request_without_hooks(project, attributes, pull_request.iid)
+        end
+
+        def set_merge_request_assignees(merge_request)
+          merge_request.assignee_ids = [user_finder.assignee_id_for(pull_request)]
         end
 
         def insert_git_data(merge_request, already_exists)
@@ -92,12 +95,10 @@ module Gitlab
 
           project.repository.add_branch(project.creator, source_branch, pull_request.source_branch_sha)
         rescue Gitlab::Git::CommandError => e
-          Gitlab::Sentry.track_acceptable_exception(e,
-                                                    extra: {
-                                                      source_branch: source_branch,
-                                                      project_id: merge_request.project.id,
-                                                      merge_request_id: merge_request.id
-                                                    })
+          Gitlab::ErrorTracking.track_exception(e,
+            source_branch: source_branch,
+            project_id: merge_request.project.id,
+            merge_request_id: merge_request.id)
         end
       end
     end

@@ -1,5 +1,0 @@
----
-title: Rename user_id to author_id in design_management_versions table
-merge_request: 18506
-author:
-type: other

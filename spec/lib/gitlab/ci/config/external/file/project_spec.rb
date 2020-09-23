@@ -2,21 +2,30 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config::External::File::Project do
-  set(:context_project) { create(:project) }
-  set(:project) { create(:project, :repository) }
-  set(:user) { create(:user) }
-
+RSpec.describe Gitlab::Ci::Config::External::File::Project do
+  let_it_be(:context_project) { create(:project) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
   let(:context_user) { user }
-  let(:context_params) { { project: context_project, sha: '12345', user: context_user } }
+  let(:parent_pipeline) { double(:parent_pipeline) }
   let(:context) { Gitlab::Ci::Config::External::Context.new(**context_params) }
   let(:project_file) { described_class.new(params, context) }
+
+  let(:context_params) do
+    {
+      project: context_project,
+      sha: '12345',
+      user: context_user,
+      parent_pipeline: parent_pipeline
+    }
+  end
 
   before do
     project.add_developer(user)
 
-    allow_any_instance_of(Gitlab::Ci::Config::External::Context)
-      .to receive(:check_execution_time!)
+    allow_next_instance_of(Gitlab::Ci::Config::External::Context) do |instance|
+      allow(instance).to receive(:check_execution_time!)
+    end
   end
 
   describe '#matching?' do
@@ -62,7 +71,7 @@ describe Gitlab::Ci::Config::External::File::Project do
       let(:root_ref_sha) { project.repository.root_ref_sha }
 
       before do
-        stub_project_blob(root_ref_sha, '/file.yml') { 'image: ruby:2.1' }
+        stub_project_blob(root_ref_sha, '/file.yml') { 'image: ruby:2.7' }
       end
 
       it 'returns true' do
@@ -87,7 +96,7 @@ describe Gitlab::Ci::Config::External::File::Project do
       let(:ref_sha) { project.commit('master').sha }
 
       before do
-        stub_project_blob(ref_sha, '/file.yml') { 'image: ruby:2.1' }
+        stub_project_blob(ref_sha, '/file.yml') { 'image: ruby:2.7' }
       end
 
       it 'returns true' do
@@ -152,15 +161,19 @@ describe Gitlab::Ci::Config::External::File::Project do
     subject { project_file.send(:expand_context_attrs) }
 
     it 'inherits user, and target project and sha' do
-      is_expected.to include(user: user, project: project, sha: project.commit('master').id)
+      is_expected.to include(
+        user: user,
+        project: project,
+        sha: project.commit('master').id,
+        parent_pipeline: parent_pipeline)
     end
   end
 
   private
 
   def stub_project_blob(ref, path)
-    allow_any_instance_of(Repository)
-      .to receive(:blob_data_at)
-      .with(ref, path) { yield }
+    allow_next_instance_of(Repository) do |instance|
+      allow(instance).to receive(:blob_data_at).with(ref, path) { yield }
+    end
   end
 end

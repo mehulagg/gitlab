@@ -2,19 +2,18 @@
 
 require 'spec_helper'
 
-describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
-  set(:namespace) { create(:namespace) }
-  set(:project) { create(:project, :repository, namespace: namespace) }
-  set(:user) { create(:user) }
+RSpec.describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
+  let_it_be(:namespace) { create(:namespace) }
+  let_it_be(:project, reload: true) { create(:project, :repository, namespace: namespace) }
+  let_it_be(:user) { create(:user) }
 
-  let(:pipeline) do
-    build(:ci_pipeline_with_one_job, project: project,
-                                     ref: 'master')
-  end
+  let(:pipeline) { build(:ci_pipeline, project: project) }
 
   let(:command) do
-    double('command', project: project,
-                      current_user: user)
+    double(:command,
+      project: project,
+      current_user: user,
+      stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
   end
 
   let(:step) { described_class.new(pipeline, command) }
@@ -23,22 +22,22 @@ describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
 
   context 'when pipeline size limit is exceeded' do
     before do
-      gold_plan = create(:gold_plan, pipeline_size_limit: 1)
+      gold_plan = create(:gold_plan)
+      create(:plan_limits, plan: gold_plan, ci_pipeline_size: 1)
       create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
-    end
-
-    let(:pipeline) do
-      config = { rspec: { script: 'rspec' },
-                 spinach: { script: 'spinach' } }
-
-      create(:ci_pipeline, project: project, config: config)
+      stub_ci_pipeline_yaml_file(YAML.dump({
+        rspec: { script: 'rspec' },
+        spinach: { script: 'spinach' }
+      }))
     end
 
     context 'when saving incomplete pipelines' do
       let(:command) do
-        double('command', project: project,
-                          current_user: user,
-                          save_incompleted: true)
+        double(:command,
+          project: project,
+          current_user: user,
+          save_incompleted: true,
+          stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
       end
 
       it 'drops the pipeline' do
@@ -73,9 +72,9 @@ describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
       end
 
       it 'logs the error' do
-        expect(Gitlab::Sentry).to receive(:track_acceptable_exception).with(
+        expect(Gitlab::ErrorTracking).to receive(:track_exception).with(
           instance_of(EE::Gitlab::Ci::Limit::LimitExceededError),
-          extra: { project_id: project.id, plan: namespace.actual_plan_name }
+          project_id: project.id, plan: namespace.actual_plan_name
         )
 
         subject
@@ -84,9 +83,11 @@ describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
 
     context 'when not saving incomplete pipelines' do
       let(:command) do
-        double('command', project: project,
-                          current_user: user,
-                          save_incompleted: false)
+        double(:command,
+          project: project,
+          current_user: user,
+          save_incompleted: false,
+          stage_seeds: [double(:seed_1, size: 1), double(:seed_2, size: 1)])
       end
 
       it 'does not drop the pipeline' do
@@ -104,6 +105,12 @@ describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
   end
 
   context 'when pipeline size limit is not exceeded' do
+    before do
+      gold_plan = create(:gold_plan)
+      create(:plan_limits, plan: gold_plan, ci_pipeline_size: 100)
+      create(:gitlab_subscription, namespace: namespace, hosted_plan: gold_plan)
+    end
+
     it 'does not break the chain' do
       subject
 
@@ -117,7 +124,7 @@ describe ::Gitlab::Ci::Pipeline::Chain::Limit::Size do
     end
 
     it 'does not log any error' do
-      expect(Gitlab::Sentry).not_to receive(:track_acceptable_exception)
+      expect(Gitlab::ErrorTracking).not_to receive(:track_exception)
 
       subject
     end

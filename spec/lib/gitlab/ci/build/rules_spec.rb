@@ -2,18 +2,18 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Build::Rules do
+RSpec.describe Gitlab::Ci::Build::Rules do
   let(:pipeline) { create(:ci_pipeline) }
   let(:ci_build) { build(:ci_build, pipeline: pipeline) }
 
   let(:seed) do
     double('build seed',
       to_resource: ci_build,
-      scoped_variables_hash: ci_build.scoped_variables_hash
+      variables: ci_build.scoped_variables_hash
     )
   end
 
-  let(:rules) { described_class.new(rule_list) }
+  let(:rules) { described_class.new(rule_list, default_when: 'on_success') }
 
   describe '.new' do
     let(:rules_ivar)   { rules.instance_variable_get :@rule_list }
@@ -62,7 +62,7 @@ describe Gitlab::Ci::Build::Rules do
 
     context 'with a specified default when:' do
       let(:rule_list) { [{ if: '$VAR == null', when: 'always' }] }
-      let(:rules)     { described_class.new(rule_list, 'manual') }
+      let(:rules)     { described_class.new(rule_list, default_when: 'manual') }
 
       it 'sets @rule_list to an array of a single rule' do
         expect(rules_ivar).to be_an(Array)
@@ -83,7 +83,7 @@ describe Gitlab::Ci::Build::Rules do
       it { is_expected.to eq(described_class::Result.new('on_success')) }
 
       context 'and when:manual set as the default' do
-        let(:rules) { described_class.new(rule_list, 'manual') }
+        let(:rules) { described_class.new(rule_list, default_when: 'manual') }
 
         it { is_expected.to eq(described_class::Result.new('manual')) }
       end
@@ -95,16 +95,16 @@ describe Gitlab::Ci::Build::Rules do
       it { is_expected.to eq(described_class::Result.new('never')) }
 
       context 'and when:manual set as the default' do
-        let(:rules) { described_class.new(rule_list, 'manual') }
+        let(:rules) { described_class.new(rule_list, default_when: 'manual') }
 
         it { is_expected.to eq(described_class::Result.new('never')) }
       end
     end
 
     context 'with one rule without any clauses' do
-      let(:rule_list) { [{ when: 'manual' }] }
+      let(:rule_list) { [{ when: 'manual', allow_failure: true }] }
 
-      it { is_expected.to eq(described_class::Result.new('manual')) }
+      it { is_expected.to eq(described_class::Result.new('manual', nil, true)) }
     end
 
     context 'with one matching rule' do
@@ -159,10 +159,56 @@ describe Gitlab::Ci::Build::Rules do
       it { is_expected.to eq(described_class::Result.new('never')) }
 
       context 'and when:manual set as the default' do
-        let(:rules) { described_class.new(rule_list, 'manual') }
+        let(:rules) { described_class.new(rule_list, default_when: 'manual') }
 
         it 'does not return the default when:' do
           expect(subject).to eq(described_class::Result.new('never'))
+        end
+      end
+    end
+
+    context 'with only allow_failure' do
+      context 'with matching rule' do
+        let(:rule_list) { [{ if: '$VAR == null', allow_failure: true }] }
+
+        it { is_expected.to eq(described_class::Result.new('on_success', nil, true)) }
+      end
+
+      context 'with non-matching rule' do
+        let(:rule_list) { [{ if: '$VAR != null', allow_failure: true }] }
+
+        it { is_expected.to eq(described_class::Result.new('never')) }
+      end
+    end
+  end
+
+  describe 'Gitlab::Ci::Build::Rules::Result' do
+    let(:when_value) { 'on_success' }
+    let(:start_in) { nil }
+    let(:allow_failure) { nil }
+
+    subject { Gitlab::Ci::Build::Rules::Result.new(when_value, start_in, allow_failure) }
+
+    describe '#build_attributes' do
+      it 'compacts nil values' do
+        expect(subject.build_attributes).to eq(options: {}, when: 'on_success')
+      end
+    end
+
+    describe '#pass?' do
+      context "'when' is 'never'" do
+        let!(:when_value) { 'never' }
+
+        it 'returns false' do
+          expect(subject.pass?).to eq(false)
+        end
+      end
+
+      context "'when' is 'on_success'" do
+        let!(:when_value) { 'on_success' }
+
+        it 'returns true' do
+          expect(subject.pass?).to eq(true)
         end
       end
     end

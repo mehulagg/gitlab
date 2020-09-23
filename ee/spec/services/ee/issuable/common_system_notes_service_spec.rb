@@ -2,16 +2,90 @@
 
 require 'spec_helper'
 
-describe Issuable::CommonSystemNotesService do
+RSpec.describe Issuable::CommonSystemNotesService do
   let(:user) { create(:user) }
   let(:project) { create(:project) }
   let(:issuable) { create(:issue) }
 
+  RSpec.shared_examples 'issuable iteration changed' do
+    context 'when iteration is changed' do
+      let_it_be(:iteration) { create(:iteration) }
+
+      before do
+        issuable.update!(iteration: iteration)
+      end
+
+      it 'creates a resource iteration event' do
+        subject
+        event = issuable.reload.resource_iteration_events.last
+
+        expect(event).not_to be_nil
+        expect(event.iteration.id).to eq iteration.id
+        expect(event.user_id).to eq user.id
+      end
+
+      context 'when resource iteration event tracking is disabled' do
+        before do
+          stub_feature_flags(track_iteration_change_events: false)
+        end
+
+        it 'does not created a resource weight event' do
+          expect { subject }.not_to change { ResourceIterationEvent.count }
+        end
+
+        it 'does create a system note' do
+          expect { subject }.to change { Note.count }.from(0).to(1)
+
+          expect(Note.first.note).to eq("changed iteration to #{iteration.to_reference(issuable.resource_parent, format: :id)}")
+        end
+      end
+    end
+  end
+
   context 'on issuable update' do
-    it_behaves_like 'system note creation', { weight: 5 }, 'changed weight to **5**'
+    subject { described_class.new(project, user).execute(issuable, old_labels: []) }
+
+    context 'when weight is changed' do
+      before do
+        issuable.update!(weight: 5)
+      end
+
+      it 'creates a resource weight event' do
+        subject
+        event = issuable.reload.resource_weight_events.last
+
+        expect(event).not_to be_nil
+        expect(event.weight).to eq 5
+        expect(event.user_id).to eq user.id
+      end
+    end
+
+    context 'when health status is updated' do
+      before do
+        issuable.update!(health_status: 2)
+      end
+
+      context 'when setting a health_status' do
+        it 'creates system note' do
+          expect { subject }.to change { Note.count }.from(0).to(1)
+
+          expect(Note.last.note).to eq('changed health status to **needs attention**')
+        end
+      end
+
+      context 'when health status is removed' do
+        it 'creates system note' do
+          issuable.update!(health_status: nil)
+
+          expect { subject }.to change { Note.count }.from(0).to(1)
+
+          expect(Note.last.note).to eq('removed the health status')
+        end
+      end
+    end
 
     context 'when issuable is an epic' do
-      let(:timestamp) { Time.now }
+      let(:timestamp) { Time.current }
       let(:issuable) { create(:epic, end_date: timestamp) }
 
       subject { described_class.new(nil, user).execute(issuable, old_labels: []) }
@@ -28,6 +102,8 @@ describe Issuable::CommonSystemNotesService do
         expect(Note.second.note).to match('removed the finish date')
       end
     end
+
+    it_behaves_like 'issuable iteration changed'
   end
 
   context 'on issuable create' do
@@ -35,12 +111,18 @@ describe Issuable::CommonSystemNotesService do
 
     subject { described_class.new(project, user).execute(issuable, old_labels: [], is_update: false) }
 
-    it 'creates a system note for weight' do
-      issuable.weight = 5
-      issuable.save
-
-      expect { subject }.to change { issuable.notes.count }.from(0).to(1)
-      expect(issuable.notes.last.note).to match('changed weight')
+    before do
+      issuable.update(weight: 5, health_status: 'at_risk')
     end
+
+    it 'creates a resource weight event' do
+      expect { subject }.to change { ResourceWeightEvent.count }
+    end
+
+    it 'does not create a system note' do
+      expect { subject }.not_to change { Note.count }
+    end
+
+    it_behaves_like 'issuable iteration changed'
   end
 end

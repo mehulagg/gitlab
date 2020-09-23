@@ -2,12 +2,12 @@
 
 require "spec_helper"
 
-describe "User creates a merge request", :js do
+RSpec.describe "User creates a merge request", :js do
   include ProjectForksHelper
 
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
   let(:title) { "Some feature" }
-  let(:project) { create(:project, :repository) }
-  let(:user) { create(:user) }
 
   before do
     project.add_maintainer(user)
@@ -25,11 +25,36 @@ describe "User creates a merge request", :js do
 
     click_button("Compare branches")
 
+    page.within('.merge-request-form') do
+      expect(page.find('#merge_request_title')['placeholder']).to eq 'Title'
+      expect(page.find('#merge_request_description')['placeholder']).to eq 'Describe the goal of the changes and what reviewers should be aware of.'
+    end
+
     fill_in("Title", with: title)
     click_button("Submit merge request")
 
     page.within(".merge-request") do
       expect(page).to have_content(title)
+    end
+  end
+
+  context "XSS branch name exists" do
+    before do
+      project.repository.create_branch("<img/src='x'/onerror=alert('oops')>", "master")
+    end
+
+    it "doesn't execute the dodgy branch name" do
+      visit(project_new_merge_request_path(project))
+
+      find(".js-source-branch").click
+      click_link("<img/src='x'/onerror=alert('oops')>")
+
+      find(".js-target-branch").click
+      click_link("feature")
+
+      click_button("Compare branches")
+
+      expect { page.driver.browser.switch_to.alert }.to raise_error(Selenium::WebDriver::Error::NoSuchAlertError)
     end
   end
 

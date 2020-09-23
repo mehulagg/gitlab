@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::ClustersController do
+RSpec.describe Groups::ClustersController do
   include AccessMatchersForController
   include GoogleApi::CloudPlatformHelpers
 
@@ -32,7 +32,7 @@ describe Groups::ClustersController do
           create(:cluster, :disabled, :provided_by_gcp, :production_environment, cluster_type: :group_type, groups: [group])
         end
 
-        it 'lists available clusters' do
+        it 'lists available clusters and renders html' do
           go
 
           expect(response).to have_gitlab_http_status(:ok)
@@ -40,19 +40,45 @@ describe Groups::ClustersController do
           expect(assigns(:clusters)).to match_array([enabled_cluster, disabled_cluster])
         end
 
+        it 'lists available clusters with json serializer' do
+          go(format: :json)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response).to match_response_schema('cluster_list')
+        end
+
+        it 'sets the polling interval header for json requests' do
+          go(format: :json)
+
+          expect(response).to have_gitlab_http_status(:ok)
+          expect(response.headers['Poll-Interval']).to eq("10000")
+        end
+
         context 'when page is specified' do
           let(:last_page) { group.clusters.page.total_pages }
+          let(:total_count) { group.clusters.page.total_count }
 
           before do
-            allow(Clusters::Cluster).to receive(:paginates_per).and_return(1)
-            create_list(:cluster, 2, :provided_by_gcp, :production_environment, cluster_type: :group_type, groups: [group])
+            create_list(:cluster, 30, :provided_by_gcp, :production_environment, cluster_type: :group_type, groups: [group])
           end
 
           it 'redirects to the page' do
+            expect(last_page).to be > 1
+
             go(page: last_page)
 
             expect(response).to have_gitlab_http_status(:ok)
             expect(assigns(:clusters).current_page).to eq(last_page)
+          end
+
+          it 'displays cluster list for associated page' do
+            expect(last_page).to be > 1
+
+            go(page: last_page, format: :json)
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(response.headers['X-Page'].to_i).to eq(last_page)
+            expect(response.headers['X-Total'].to_i).to eq(total_count)
           end
         end
       end
@@ -97,29 +123,15 @@ describe Groups::ClustersController do
         end
 
         before do
-          stub_feature_flags(create_eks_clusters: false)
           allow(SecureRandom).to receive(:hex).and_return(key)
         end
 
-        it 'has authorize_url' do
+        it 'redirects to gcp authorize_url' do
           go
 
           expect(assigns(:authorize_url)).to include(key)
-          expect(session[session_key_for_redirect_uri]).to eq(new_group_cluster_path(group))
-        end
-
-        context 'when create_eks_clusters feature flag is enabled' do
-          before do
-            stub_feature_flags(create_eks_clusters: true)
-          end
-
-          context 'when selected provider is gke and no valid gcp token exists' do
-            it 'redirects to gcp authorize_url' do
-              go
-
-              expect(response).to redirect_to(assigns(:authorize_url))
-            end
-          end
+          expect(session[session_key_for_redirect_uri]).to eq(new_group_cluster_path(group, provider: :gcp))
+          expect(response).to redirect_to(assigns(:authorize_url))
         end
       end
 
@@ -168,6 +180,8 @@ describe Groups::ClustersController do
       end
     end
 
+    include_examples 'GET new cluster shared examples'
+
     describe 'security' do
       it { expect { go }.to be_allowed_for(:admin) }
       it { expect { go }.to be_allowed_for(:owner).of(group) }
@@ -177,6 +191,46 @@ describe Groups::ClustersController do
       it { expect { go }.to be_denied_for(:guest).of(group) }
       it { expect { go }.to be_denied_for(:user) }
       it { expect { go }.to be_denied_for(:external) }
+    end
+  end
+
+  it_behaves_like 'GET #metrics_dashboard for dashboard', 'Cluster health' do
+    let(:cluster) { create(:cluster, :provided_by_gcp, cluster_type: :group_type, groups: [group]) }
+
+    let(:metrics_dashboard_req_params) do
+      {
+        id: cluster.id,
+        group_id: group.name
+      }
+    end
+  end
+
+  describe 'GET #prometheus_proxy' do
+    let(:proxyable) do
+      create(:cluster, :provided_by_gcp, cluster_type: :group_type, groups: [group])
+    end
+
+    it_behaves_like 'metrics dashboard prometheus api proxy' do
+      let(:proxyable_params) do
+        {
+          id: proxyable.id.to_s,
+          group_id: group.name
+        }
+      end
+
+      context 'with anonymous user' do
+        let(:prometheus_body) { nil }
+
+        before do
+          sign_out(user)
+        end
+
+        it 'returns 404' do
+          get :prometheus_proxy, params: prometheus_proxy_params
+
+          expect(response).to have_gitlab_http_status(:not_found)
+        end
+      end
     end
   end
 
@@ -372,15 +426,82 @@ describe Groups::ClustersController do
     end
   end
 
-  describe 'POST authorize AWS role for EKS cluster' do
-    let(:role_arn) { 'arn:aws:iam::123456789012:role/role-name' }
-    let(:role_external_id) { '12345' }
-
+  describe 'POST #create_aws' do
     let(:params) do
       {
         cluster: {
-          role_arn: role_arn,
-          role_external_id: role_external_id
+          name: 'new-cluster',
+          provider_aws_attributes: {
+            key_name: 'key',
+            role_arn: 'arn:role',
+            region: 'region',
+            vpc_id: 'vpc',
+            instance_type: 'instance type',
+            num_nodes: 3,
+            security_group_id: 'security group',
+            subnet_ids: %w(subnet1 subnet2)
+          }
+        }
+      }
+    end
+
+    def post_create_aws
+      post :create_aws, params: params.merge(group_id: group)
+    end
+
+    it 'creates a new cluster' do
+      expect(ClusterProvisionWorker).to receive(:perform_async)
+      expect { post_create_aws }.to change { Clusters::Cluster.count }
+        .and change { Clusters::Providers::Aws.count }
+
+      cluster = group.clusters.first
+
+      expect(response).to have_gitlab_http_status(:created)
+      expect(response.location).to eq(group_cluster_path(group, cluster))
+      expect(cluster).to be_aws
+      expect(cluster).to be_kubernetes
+    end
+
+    context 'params are invalid' do
+      let(:params) do
+        {
+          cluster: { name: '' }
+        }
+      end
+
+      it 'does not create a cluster' do
+        expect { post_create_aws }.not_to change { Clusters::Cluster.count }
+
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
+        expect(response.content_type).to eq('application/json')
+        expect(response.body).to include('is invalid')
+      end
+    end
+
+    describe 'security' do
+      before do
+        allow(WaitForClusterCreationWorker).to receive(:perform_in)
+      end
+
+      it { expect { post_create_aws }.to be_allowed_for(:admin) }
+      it { expect { post_create_aws }.to be_allowed_for(:owner).of(group) }
+      it { expect { post_create_aws }.to be_allowed_for(:maintainer).of(group) }
+      it { expect { post_create_aws }.to be_denied_for(:developer).of(group) }
+      it { expect { post_create_aws }.to be_denied_for(:reporter).of(group) }
+      it { expect { post_create_aws }.to be_denied_for(:guest).of(group) }
+      it { expect { post_create_aws }.to be_denied_for(:user) }
+      it { expect { post_create_aws }.to be_denied_for(:external) }
+    end
+  end
+
+  describe 'POST authorize AWS role for EKS cluster' do
+    let!(:role) { create(:aws_role, user: user) }
+
+    let(:role_arn) { 'arn:new-role' }
+    let(:params) do
+      {
+        cluster: {
+          role_arn: role_arn
         }
       }
     end
@@ -389,25 +510,70 @@ describe Groups::ClustersController do
       post :authorize_aws_role, params: params.merge(group_id: group)
     end
 
-    it 'creates an Aws::Role record' do
-      expect { go }.to change { Aws::Role.count }
-
-      expect(response.status).to eq 201
-
-      role = Aws::Role.last
-      expect(role.user).to eq user
-      expect(role.role_arn).to eq role_arn
-      expect(role.role_external_id).to eq role_external_id
+    before do
+      allow(Clusters::Aws::FetchCredentialsService).to receive(:new)
+        .and_return(double(execute: double))
     end
 
-    context 'role cannot be created' do
+    it 'updates the associated role with the supplied ARN' do
+      go
+
+      expect(response).to have_gitlab_http_status(:ok)
+      expect(role.reload.role_arn).to eq(role_arn)
+    end
+
+    context 'supplied role is invalid' do
       let(:role_arn) { 'invalid-role' }
 
-      it 'does not create a record' do
-        expect { go }.not_to change { Aws::Role.count }
+      it 'does not update the associated role' do
+        expect { go }.not_to change { role.role_arn }
 
-        expect(response.status).to eq 422
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
       end
+    end
+
+    describe 'security' do
+      before do
+        allow_next_instance_of(Clusters::Aws::AuthorizeRoleService) do |service|
+          response = double(status: :ok, body: double)
+
+          allow(service).to receive(:execute).and_return(response)
+        end
+      end
+
+      it { expect { go }.to be_allowed_for(:admin) }
+      it { expect { go }.to be_allowed_for(:owner).of(group) }
+      it { expect { go }.to be_allowed_for(:maintainer).of(group) }
+      it { expect { go }.to be_denied_for(:developer).of(group) }
+      it { expect { go }.to be_denied_for(:reporter).of(group) }
+      it { expect { go }.to be_denied_for(:guest).of(group) }
+      it { expect { go }.to be_denied_for(:user) }
+      it { expect { go }.to be_denied_for(:external) }
+    end
+  end
+
+  describe 'DELETE clear cluster cache' do
+    let(:cluster) { create(:cluster, :group, groups: [group]) }
+    let!(:kubernetes_namespace) do
+      create(:cluster_kubernetes_namespace,
+        cluster: cluster,
+        project: create(:project)
+      )
+    end
+
+    def go
+      delete :clear_cache,
+        params: {
+          group_id: group,
+          id: cluster
+        }
+    end
+
+    it 'deletes the namespaces associated with the cluster' do
+      expect { go }.to change { Clusters::KubernetesNamespace.count }
+
+      expect(response).to redirect_to(group_cluster_path(group, cluster))
+      expect(cluster.kubernetes_namespaces).to be_empty
     end
 
     describe 'security' do
@@ -559,7 +725,7 @@ describe Groups::ClustersController do
             go(format: :json)
 
             cluster.reload
-            expect(response).to have_http_status(:no_content)
+            expect(response).to have_gitlab_http_status(:no_content)
             expect(cluster.enabled).to be_falsey
             expect(cluster.name).to eq('my-new-cluster-name')
             expect(cluster).not_to be_managed
@@ -579,7 +745,7 @@ describe Groups::ClustersController do
           it 'rejects changes' do
             go(format: :json)
 
-            expect(response).to have_http_status(:bad_request)
+            expect(response).to have_gitlab_http_status(:bad_request)
           end
         end
       end

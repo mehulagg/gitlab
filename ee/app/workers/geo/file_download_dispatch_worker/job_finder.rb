@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class FileDownloadDispatchWorker
+  class FileDownloadDispatchWorker # rubocop:disable Scalability/IdempotentWorker
     # This class is meant to be inherited, and is responsible for generating
     # batches of job arguments for FileDownloadWorker.
     #
@@ -12,7 +12,7 @@ module Geo
     #   * RESOURCE_ID_KEY
     #   * FILE_SERVICE_OBJECT_TYPE
     #
-    class JobFinder
+    class JobFinder # rubocop:disable Scalability/IdempotentWorker
       include Gitlab::Utils::StrongMemoize
 
       attr_reader :scheduled_file_ids
@@ -21,19 +21,19 @@ module Geo
         @scheduled_file_ids = scheduled_file_ids
       end
 
-      def find_unsynced_jobs(batch_size:)
-        convert_resource_relation_to_job_args(
-          registry_finder.find_unsynced(find_batch_params(batch_size))
-        )
-      end
-
-      def find_failed_jobs(batch_size:)
+      def find_jobs_never_attempted_sync(batch_size:)
         convert_registry_relation_to_job_args(
-          registry_finder.find_retryable_failed_registries(find_batch_params(batch_size))
+          registry_finder.find_registries_never_attempted_sync(find_batch_params(batch_size))
         )
       end
 
-      def find_synced_missing_on_primary_jobs(batch_size:)
+      def find_jobs_needs_sync_again(batch_size:)
+        convert_registry_relation_to_job_args(
+          registry_finder.find_registries_needs_sync_again(find_batch_params(batch_size))
+        )
+      end
+
+      def find_jobs_synced_missing_on_primary(batch_size:)
         convert_registry_relation_to_job_args(
           registry_finder.find_retryable_synced_missing_on_primary_registries(find_batch_params(batch_size))
         )

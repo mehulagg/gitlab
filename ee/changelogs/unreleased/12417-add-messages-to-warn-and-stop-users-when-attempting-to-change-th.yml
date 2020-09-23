@@ -1,5 +1,0 @@
----
-title: Add messages to warn and stop users when attempting to change the path of projects with NPM packages
-merge_request: 18515
-author:
-type: fixed

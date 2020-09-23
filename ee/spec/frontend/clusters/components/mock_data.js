@@ -1,6 +1,7 @@
 export default [
   {
     environmentPath: 'some/path',
+    logsPath: 'some/path/logs',
     project: { path_with_namespace: 'some/path', name: 'some project' },
     name: 'production',
     lastDeployment: { id: '123' },
@@ -14,6 +15,7 @@ export default [
   },
   {
     environmentPath: 'some/other/path',
+    logsPath: 'some/other/path/logs',
     project: { path_with_namespace: 'some/other/path', name: 'some other project' },
     name: 'staging',
     lastDeployment: { id: '456' },
@@ -25,6 +27,7 @@ export default [
   },
   {
     environmentPath: 'yet/another/path',
+    logsPath: 'yet/another/path/logs',
     project: { path_with_namespace: 'yet/another/path', name: 'yet another project' },
     name: 'development',
     lastDeployment: { id: '789' },

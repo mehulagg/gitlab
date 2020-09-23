@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::DataBuilder::Note do
+RSpec.describe Gitlab::DataBuilder::Note do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
   let(:data) { described_class.build(note, user) }
@@ -137,7 +137,7 @@ describe Gitlab::DataBuilder::Note do
     it 'returns the note and project snippet data' do
       expect(data).to have_key(:snippet)
       expect(data[:snippet].except('updated_at'))
-        .to eq(snippet.reload.hook_attrs.except('updated_at'))
+        .to eq(snippet.hook_attrs.except('updated_at'))
       expect(data[:snippet]['updated_at'])
         .to be >= snippet.hook_attrs['updated_at']
     end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Issues::ReopenService do
+RSpec.describe Issues::ReopenService do
   let(:project) { create(:project) }
   let(:issue) { create(:issue, :closed, project: project) }
 
@@ -41,6 +41,25 @@ describe Issues::ReopenService do
 
         expect { service.execute(issue) }
           .to change { project.open_issues_count }.from(0).to(1)
+      end
+
+      it 'deletes milestone issue counters cache' do
+        issue.update!(milestone: create(:milestone, project: project))
+
+        expect_next_instance_of(Milestones::ClosedIssuesCountService, issue.milestone) do |service|
+          expect(service).to receive(:delete_cache).and_call_original
+        end
+
+        described_class.new(project, user).execute(issue)
+      end
+
+      context 'issue is incident type' do
+        let(:issue) { create(:incident, :closed, project: project) }
+        let(:current_user) { user }
+
+        subject { described_class.new(project, user).execute(issue) }
+
+        it_behaves_like 'an incident management tracked event', :incident_management_incident_reopened
       end
 
       context 'when issue is not confidential' do

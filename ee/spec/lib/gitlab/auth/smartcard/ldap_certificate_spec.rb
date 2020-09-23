@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Smartcard::LDAPCertificate do
+RSpec.describe Gitlab::Auth::Smartcard::LdapCertificate do
   let(:certificate_header) { 'certificate' }
   let(:openssl_certificate_store) { instance_double(OpenSSL::X509::Store) }
   let(:user_build_service) { instance_double(Users::BuildService) }
@@ -13,6 +13,7 @@ describe Gitlab::Auth::Smartcard::LDAPCertificate do
                     { issuer: issuer,
                       serial: '42' } )
   end
+
   let(:ldap_provider) { 'ldapmain' }
   let(:ldap_connection) { instance_double(::Net::LDAP) }
   let(:ldap_person_name) { 'John Doe' }
@@ -25,7 +26,6 @@ describe Gitlab::Auth::Smartcard::LDAPCertificate do
       entry['mail'] = ldap_person_email
     end
   end
-  let(:ldap_person) { ::Gitlab::Auth::LDAP::Person.new(ldap_entry, ldap_provider) }
 
   before do
     allow(described_class).to(
@@ -41,7 +41,7 @@ describe Gitlab::Auth::Smartcard::LDAPCertificate do
   describe '#find_or_create_user' do
     subject { described_class.new(ldap_provider, certificate_header).find_or_create_user }
 
-    context 'user already exists' do
+    context 'user and smartcard ldap certificate already exists' do
       let(:user) { create(:user) }
 
       before do
@@ -59,11 +59,53 @@ describe Gitlab::Auth::Smartcard::LDAPCertificate do
       end
     end
 
+    context 'user exists but it is using a new ldap certificate' do
+      let(:ldap_person_email) { user.email }
+
+      let_it_be(:user) { create(:user) }
+
+      it 'finds existing user' do
+        expect(subject).to eql(user)
+      end
+
+      it 'does create new user identity' do
+        expect { subject }.to change { user.identities.count }.by(1)
+      end
+
+      context 'user already has a different ldap certificate identity' do
+        before do
+          create(:identity, { provider: 'ldapmain',
+                              extern_uid: 'old_subject_ldap_dn',
+                              user: user })
+        end
+
+        it "doesn't create a new identity" do
+          expect { subject }.not_to change { Identity.count }
+        end
+
+        it "doesn't create a new user" do
+          expect { subject }.not_to change { User.count }
+        end
+      end
+    end
+
     context 'user does not exist' do
       let(:user) { create(:user) }
 
-      it 'creates user' do
-        expect { subject }.to change { User.count }.from(0).to(1)
+      shared_examples_for 'creates user' do
+        it do
+          expect { subject }.to change { User.count }.from(0).to(1)
+        end
+      end
+
+      it_behaves_like 'creates user'
+
+      context 'when the current minimum password length is different from the default minimum password length' do
+        before do
+          stub_application_setting minimum_password_length: 21
+        end
+
+        it_behaves_like 'creates user'
       end
 
       it 'creates user with correct attributes' do

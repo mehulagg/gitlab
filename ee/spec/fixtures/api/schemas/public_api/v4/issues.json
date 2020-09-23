@@ -4,8 +4,22 @@
     { "$ref": "../../../../../../../spec/fixtures/api/schemas/public_api/v4/issues.json" },
     {
       "properties": {
+        "blocking_issues_count": { "type": ["integer", "null"] }, 
         "weight": { "type": ["integer", "null"] },
-        "epic_iid": { "type": ["integer", "null"] }
+        "epic_iid": { "type": ["integer", "null"] },
+        "epic": {
+          "type": "object",
+          "properties": {
+            "id": { "type": "integer" },
+            "iid": { "type": "integer" },
+            "group_id": { "type": "integer" },
+            "title": { "type": "string" },
+            "url": { "type": "string" }
+          }
+        },
+        "health_status": {
+          "type": ["string",  "null"]
+        }
       }
     }
   ]

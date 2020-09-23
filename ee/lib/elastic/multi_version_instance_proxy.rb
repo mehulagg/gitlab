@@ -12,6 +12,8 @@ module Elastic
       generate_forwarding
     end
 
+    private
+
     def proxy_class_name
       "#{@data_class.name}InstanceProxy"
     end

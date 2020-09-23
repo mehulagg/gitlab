@@ -1,9 +1,9 @@
 import Vue from 'vue';
 
+import mountComponent from 'helpers/vue_mount_component_helper';
 import dropdownFooterComponent from '~/vue_shared/components/sidebar/labels_select/dropdown_footer.vue';
 
-import mountComponent from 'helpers/vue_mount_component_helper';
-import { mockConfig } from '../../../../../javascripts/vue_shared/components/sidebar/labels_select/mock_data';
+import { mockConfig } from './mock_data';
 
 const createComponent = (
   labelsWebUrl = mockConfig.labelsWebUrl,

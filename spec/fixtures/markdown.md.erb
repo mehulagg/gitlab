@@ -111,7 +111,13 @@ Markdown should be usable inside a link. Let's try!
 - [**text**](#link-strong)
 - [`text`](#link-code)
 
-### RelativeLinkFilter
+### UploadLinkFilter
+
+Linking to an upload in this project should work:
+[Relative Upload Link](/uploads/e90decf88d8f96fe9e1389afc2e4a91f/test.jpg)
+![Relative Upload Image](/uploads/e90decf88d8f96fe9e1389afc2e4a91f/test.jpg)
+
+### RepositoryLinkFilter
 
 Linking to a file relative to this project's repository should work.
 
@@ -238,6 +244,15 @@ References should be parseable even inside _<%= merge_request.to_reference %>_ e
 - Group milestone by name: <%= Milestone.reference_prefix %><%= group_milestone.name %>
 - Group milestone by name in quotes: <%= group_milestone.to_reference(format: :name) %>
 - Group milestone by URL is ignore: <%= urls.milestone_url(group_milestone) %>
+
+##### AlertReferenceFilter
+- Alert: <%= alert.to_reference %>
+- Alert in another project: <%= xalert.to_reference(project) %>
+- Ignored in code: `<%= alert.to_reference %>`
+- Ignored in links: [Link to <%= alert.to_reference %>](#alert-link)
+- Alert by URL: <%= alert.details_url %>
+- Link to alert by reference: [Alert](<%= alert.to_reference %>)
+- Link to alert by URL: [Alert](<%= alert.details_url %>)
 
 ### Task Lists
 

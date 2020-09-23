@@ -6,7 +6,26 @@ FactoryBot.define do
     color { "#990000" }
   end
 
-  factory :label, traits: [:base_label], class: ProjectLabel do
+  trait :described do
+    description { "Description of #{title}" }
+  end
+
+  trait :scoped do
+    transient do
+      prefix { 'scope' }
+    end
+
+    title { "#{prefix}::#{generate(:label_title)}" }
+  end
+
+  trait :incident do
+    properties = IncidentManagement::CreateIncidentLabelService::LABEL_PROPERTIES
+    title { properties.fetch(:title) }
+    description { properties.fetch(:description) }
+    color { properties.fetch(:color) }
+  end
+
+  factory :label, traits: [:base_label], class: 'ProjectLabel' do
     project
 
     transient do
@@ -15,7 +34,7 @@ FactoryBot.define do
 
     after(:create) do |label, evaluator|
       if evaluator.priority
-        label.priorities.create(project: label.project, priority: evaluator.priority)
+        label.priorities.create!(project: label.project, priority: evaluator.priority)
       end
     end
   end

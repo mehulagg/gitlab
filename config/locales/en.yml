@@ -20,6 +20,10 @@ en:
         token: "Grafana HTTP API Token"
         grafana_url: "Grafana API URL"
         grafana_enabled: "Grafana integration enabled"
+      user/user_detail:
+        job_title: 'Job title'
+      user/user_detail:
+        bio: 'Bio'
   views:
     pagination:
       previous: "Prev"
@@ -195,6 +199,8 @@ en:
       wrong_length:
         one: is the wrong length (should be 1 character)
         other: is the wrong length (should be %{count} characters)
+      search_chars_too_long: Search query is too long (maximum is %{count} characters)
+      search_terms_too_long: Search query is too long (maximum is %{count} terms)
       other_than: must be other than %{count}
     template:
       body: 'There were problems with the following fields:'
@@ -268,4 +274,5 @@ en:
       long: "%B %d, %Y %H:%M"
       short: "%d %b %H:%M"
       timeago_tooltip: "%b %-d, %Y %-l:%M%P"
+      with_timezone: "%Y-%m-%d %H:%M:%S %z"
     pm: pm

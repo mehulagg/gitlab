@@ -1,0 +1,195 @@
+.layout-page.design-detail-layout {
+  max-height: 100vh;
+}
+
+.design-detail {
+  background-color: rgba($black, 0.9);
+
+  .with-performance-bar & {
+    top: 35px;
+  }
+
+  .design-pin {
+    transition: opacity $gl-transition-duration-medium $general-hover-transition-curve;
+
+    &.inactive {
+      @include gl-opacity-5;
+
+      &:hover {
+        @include gl-opacity-10;
+      }
+    }
+  }
+
+  .badge.badge-pill {
+    display: flex;
+    height: 28px;
+    width: 28px;
+    background-color: $blue-400;
+    color: $white;
+    border: $white 1px solid;
+    border-radius: 50%;
+
+    &.resolved {
+      background-color: $gray-500;
+    }
+  }
+
+  .design-detail-overlay-add-comment {
+    cursor: crosshair;
+  }
+}
+
+.design-presentation-wrapper {
+  top: 0;
+  left: 0;
+}
+
+.design-scaler {
+  z-index: 1;
+}
+
+.design-scaler-wrapper {
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.design-checkbox {
+  position: absolute;
+  top: $gl-padding;
+  left: 30px;
+}
+
+.image-notes {
+  overflow-y: scroll;
+  padding: $gl-padding;
+  padding-top: 50px;
+  background-color: $white;
+  flex-shrink: 0;
+  min-width: 400px;
+  flex-basis: 28%;
+
+  .link-inherit-color {
+    &:hover,
+    &:active,
+    &:focus {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+
+  .toggle-comments {
+    line-height: 20px;
+    border-top: 1px solid $border-color;
+
+    &.expanded {
+      border-bottom: 1px solid $border-color;
+    }
+
+    .toggle-comments-button:focus {
+      text-decoration: none;
+      color: $blue-600;
+    }
+  }
+
+  .badge.badge-pill {
+    margin-left: $gl-padding;
+  }
+
+  .design-discussion {
+    margin: $gl-padding 0;
+
+    &::before {
+      content: '';
+      border-left: 1px solid $gray-100;
+      position: absolute;
+      left: 28px;
+      top: -18px;
+      height: 18px;
+    }
+
+    .design-note {
+      padding: $gl-padding;
+      list-style: none;
+      transition: background $gl-transition-duration-medium $general-hover-transition-curve;
+      border-top-left-radius: $border-radius-default; // same border radius used by .bordered-box
+      border-top-right-radius: $border-radius-default;
+
+      a {
+        color: inherit;
+      }
+
+      .note-text a {
+        color: $blue-600;
+      }
+    }
+
+    .reply-wrapper {
+      padding: $gl-padding;
+    }
+  }
+
+  .reply-wrapper {
+    border-top: 1px solid $border-color;
+  }
+
+  .new-discussion-disclaimer {
+    line-height: 20px;
+  }
+}
+
+@media (max-width: map-get($grid-breakpoints, lg)) {
+  .design-detail {
+    overflow-y: scroll;
+  }
+
+  .image-notes {
+    overflow-y: auto;
+    min-width: 100%;
+    flex-grow: 1;
+    flex-basis: auto;
+  }
+}
+
+.design-card-header {
+  background: transparent;
+}
+
+.design-dropzone-border {
+  border: 2px dashed $gray-100;
+}
+
+.design-dropzone-card {
+  transition: border $gl-transition-duration-medium $general-hover-transition-curve;
+  color: $gl-text-color;
+
+  &:focus,
+  &:active {
+    outline: none;
+    border: 2px dashed $purple;
+    color: $gl-text-color;
+  }
+
+  &:hover {
+    border-color: $gray-300;
+  }
+}
+
+.design-dropzone-overlay {
+  border: 2px dashed $purple;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  opacity: 1;
+}
+
+.design-dropzone-fade-enter-active,
+.design-dropzone-fade-leave-active {
+  transition: opacity $general-hover-transition-duration $general-hover-transition-curve;
+}
+
+.design-dropzone-fade-enter,
+.design-dropzone-fade-leave-to {
+  opacity: 0;
+}

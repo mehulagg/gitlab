@@ -5,8 +5,16 @@ module Quality
     UnknownTestLevelError = Class.new(StandardError)
 
     TEST_LEVEL_FOLDERS = {
+      migration: %w[
+        migrations
+      ],
+      background_migration: %w[
+        lib/gitlab/background_migration
+        lib/ee/gitlab/background_migration
+      ],
       unit: %w[
         bin
+        channels
         config
         db
         dependencies
@@ -19,22 +27,24 @@ module Quality
         initializers
         javascripts
         lib
-        migrations
         models
         policies
         presenters
         rack_servers
+        replicators
         routing
         rubocop
         serializers
         services
         sidekiq
+        support_specs
         tasks
         uploaders
         validators
         views
         workers
         elastic_integration
+        tooling
       ],
       integration: %w[
         controllers
@@ -62,6 +72,10 @@ module Quality
 
     def level_for(file_path)
       case file_path
+      # Detect migration first since some background migration tests are under
+      # spec/lib/gitlab/background_migration and tests under spec/lib are unit by default
+      when regexp(:migration), regexp(:background_migration)
+        :migration
       when regexp(:unit)
         :unit
       when regexp(:integration)
@@ -73,10 +87,20 @@ module Quality
       end
     end
 
+    def background_migration?(file_path)
+      !!(file_path =~ regexp(:background_migration))
+    end
+
     private
+
+    def migration_and_background_migration_folders
+      TEST_LEVEL_FOLDERS.fetch(:migration) + TEST_LEVEL_FOLDERS.fetch(:background_migration)
+    end
 
     def folders_pattern(level)
       case level
+      when :migration
+        "{#{migration_and_background_migration_folders.join(',')}}"
       # Geo specs aren't in a specific folder, but they all have the :geo tag, so we must search for them globally
       when :all, :geo
         '**'
@@ -87,6 +111,8 @@ module Quality
 
     def folders_regex(level)
       case level
+      when :migration
+        "(#{migration_and_background_migration_folders.join('|')})"
       # Geo specs aren't in a specific folder, but they all have the :geo tag, so we must search for them globally
       when :all, :geo
         ''

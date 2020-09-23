@@ -1,71 +1,86 @@
 ---
+stage: Verify
+group: Continuous Integration
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference
 last_update: 2019-07-03
 ---
 
 # Pipelines for Merged Results **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/7380) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.10.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7380) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.10.
 
-It's possible for your source and target branches to diverge, which can result
-in the scenario that source branch's pipeline was green, the target's pipeline was green,
-but the combined output fails.
+When you submit a merge request, you are requesting to merge changes from a
+source branch into a target branch. By default, the CI pipeline runs jobs
+against the source branch.
 
-By having your merge request pipeline automatically
-create a new ref that contains the merge result of the source and target branch
-(then running a pipeline on that ref), we can better test that the combined result
-is also valid.
+With *pipelines for merged results*, the pipeline runs as if the changes from
+the source branch have already been merged into the target branch.
 
-GitLab can run pipelines for merge requests
-on this merged result. That is, where the source and target branches are combined into a
-new ref and a pipeline for this ref validates the result prior to merging.
+If the pipeline fails due to a problem in the target branch, you can wait until the
+target is fixed and re-run the pipeline.
+This new pipeline will run as if the source is merged with the updated target, and you
+will not need to rebase.
 
-![Merge request pipeline as the head pipeline](img/merged_result_pipeline_v12_3.png)
+The pipeline does not automatically run when the target branch changes. Only changes
+to the source branch trigger a new pipeline. If a long time has passed since the last successful
+pipeline, you may want to re-run it before merge, to ensure that the source changes
+can still be successfully merged into the target.
 
-There are some cases where creating a combined ref is not possible or not wanted.
-For example, a source branch that has conflicts with the target branch
-or a merge request that is still in WIP status. In this case,
-GitLab doesn't create a merge commit and the pipeline runs on source branch, instead,
-which is a default behavior of [Pipelines for merge requests](../index.md)
- i.e. `detached` label is shown to the pipelines.
+When the merge request can't be merged, the pipeline runs against the source branch only. For example, when:
 
-The detached state serves to warn you that you are working in a situation
-subjected to merge problems, and helps to highlight that you should
-get out of WIP status or resolve merge conflicts as soon as possible.
+- The target branch has changes that conflict with the changes in the source branch.
+- The merge request is a [**Draft** merge request](../../../user/project/merge_requests/work_in_progress_merge_requests.md).
 
-## Requirements and limitations
+In these cases, the pipeline runs as a [pipeline for merge requests](../index.md)
+and is labeled as `detached`. If these cases no longer exist, new pipelines will
+again run against the merged results.
 
-Pipelines for merged results require a [GitLab Runner][runner] 11.9 or newer.
+Any user who has developer [permissions](../../../user/permissions.md) can run a
+pipeline for merged results.
 
-[runner]: https://gitlab.com/gitlab-org/gitlab-runner
+## Prerequisites
 
-In addition, pipelines for merged results have the following limitations:
+To enable pipelines for merge results:
 
-- Forking/cross-repo workflows are not currently supported. To follow progress,
-  see [#11934](https://gitlab.com/gitlab-org/gitlab/issues/11934).
-- This feature is not available for
+- You must have maintainer [permissions](../../../user/permissions.md).
+- You must be using [GitLab Runner](https://gitlab.com/gitlab-org/gitlab-runner) 11.9 or later.
+- You must not be using
   [fast forward merges](../../../user/project/merge_requests/fast_forward_merge.md) yet.
-  To follow progress, see [#58226](https://gitlab.com/gitlab-org/gitlab-foss/issues/58226).
+  To follow progress, see [#58226](https://gitlab.com/gitlab-org/gitlab/-/issues/26996).
 
-## Enabling Pipelines for Merged Results
+## Enable pipelines for merged results
 
-To enable pipelines on merged results at the project level:
+To enable pipelines for merged results for your project:
 
+1. [Configure your CI/CD configuration file](../index.md#configuring-pipelines-for-merge-requests)
+   so that the pipeline or individual jobs run for merge requests.
 1. Visit your project's **Settings > General** and expand **Merge requests**.
-1. Check **Merge pipelines will try to validate the post-merge result prior to merging**.
-1. Click **Save changes** button.
+1. Check **Enable merge trains and pipelines for merged results**.
+1. Click **Save changes**.
 
-![Merge request pipeline config](img/merge_request_pipeline_config.png)
+CAUTION: **Caution:**
+If you select the check box but don't configure your CI/CD to use
+pipelines for merge requests, your merge requests may become stuck in an
+unresolved state or your pipelines may be dropped.
 
-CAUTION: **Warning:**
-Make sure your `gitlab-ci.yml` file is [configured properly for pipelines for merge requests](../index.md#configuring-pipelines-for-merge-requests),
-otherwise pipelines for merged results won't run and your merge requests will be stuck in an unresolved state.
+## Using Merge Trains
 
-## Automatic pipeline cancelation
+When you enable [Pipelines for merged results](#pipelines-for-merged-results),
+GitLab [automatically displays](merge_trains/index.md#add-a-merge-request-to-a-merge-train)
+a **Start/Add Merge Train button**.
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/12996) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.3.
+Generally, this is a safer option than merging merge requests immediately, because your
+merge request will be evaluated with an expected post-merge result before the actual
+merge happens.
 
-GitLab CI can detect the presence of redundant pipelines,
+For more information, read the [documentation on Merge Trains](merge_trains/index.md).
+
+## Automatic pipeline cancellation
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/12996) in [GitLab Premium](https://about.gitlab.com/pricing/) 12.3.
+
+GitLab CI/CD can detect the presence of redundant pipelines,
 and will cancel them automatically in order to conserve CI resources.
 
 When a user merges a merge request immediately within an ongoing merge
@@ -82,36 +97,35 @@ canceled.
 Can be caused by some disabled feature flags. Please make sure that
 the following feature flags are enabled on your GitLab instance:
 
-- `:ci_use_merge_request_ref`
 - `:merge_ref_auto_sync`
 
-To check these feature flag values, please ask administrator to execute the following commands:
+To check and set these feature flag values, please ask an administrator to:
 
-```shell
-> sudo gitlab-rails console                         # Login to Rails console of GitLab instance.
-> Feature.enabled?(:ci_use_merge_request_ref)       # Check if it's enabled or not.
-> Feature.enable(:ci_use_merge_request_ref)         # Enable the feature flag.
-```
+1. Log into the Rails console of the GitLab instance:
+
+   ```shell
+   sudo gitlab-rails console
+   ```
+
+1. Check if the flags are enabled or not:
+
+   ```ruby
+   Feature.enabled?(:merge_ref_auto_sync)
+   ```
+
+1. If needed, enable the feature flags:
+
+   ```ruby
+   Feature.enable(:merge_ref_auto_sync)
+   ```
 
 ### Intermittently pipelines fail by `fatal: reference is not a tree:` error
 
 Since pipelines for merged results are a run on a merge ref of a merge request
-(`refs/merge-requests/<iid>/merge`), the git-reference could be overwritten at an
-unexpected timing, for example, when a source or target branch is advanced.
+(`refs/merge-requests/<iid>/merge`), the Git reference could be overwritten at an
+unexpected timing. For example, when a source or target branch is advanced.
 In this case, the pipeline fails because of `fatal: reference is not a tree:` error,
 which indicates that the checkout-SHA is not found in the merge ref.
 
-This behavior was improved at GitLab 12.4 by introducing [Persistent pipeline refs](../../pipelines.md#persistent-pipeline-refs).
+This behavior was improved at GitLab 12.4 by introducing [Persistent pipeline refs](../../troubleshooting.md#fatal-reference-is-not-a-tree-error).
 You should be able to create pipelines at any timings without concerning the error.
-
-## Using Merge Trains **(PREMIUM)**
-
-By enabling [Pipelines for merged results](#pipelines-for-merged-results-premium),
-GitLab will [automatically display](merge_trains/index.md#how-to-add-a-merge-request-to-a-merge-train)
-a **Start/Add Merge Train button** as the most recommended merge strategy.
-
-Generally, this is a safer option than merging merge requests immediately as your
-merge request will be evaluated with an expected post-merge result before the actual
-merge happens.
-
-For more information, read the [documentation on Merge Trains](merge_trains/index.md).

@@ -1,16 +1,25 @@
 <script>
-import _ from 'underscore';
+import { isEmpty } from 'lodash';
+import { GlSprintf, GlLink } from '@gitlab/ui';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
-import { sprintf, __ } from '../../locale';
+import { __ } from '../../locale';
 
 export default {
+  creatingEnvironment: 'creating',
   components: {
     CiIcon,
+    GlSprintf,
+    GlLink,
   },
   props: {
     deploymentStatus: {
       type: Object,
       required: true,
+    },
+    deploymentCluster: {
+      type: Object,
+      required: false,
+      default: null,
     },
     iconStatus: {
       type: Object,
@@ -26,7 +35,7 @@ export default {
           return this.outOfDateEnvironmentMessage();
         case 'failed':
           return this.failedEnvironmentMessage();
-        case 'creating':
+        case this.$options.creatingEnvironment:
           return this.creatingEnvironmentMessage();
         default:
           return '';
@@ -34,17 +43,12 @@ export default {
     },
     environmentLink() {
       if (this.hasEnvironment) {
-        return sprintf(
-          '%{startLink}%{name}%{endLink}',
-          {
-            startLink: `<a href="${this.deploymentStatus.environment.environment_path}" class="js-environment-link">`,
-            name: _.escape(this.deploymentStatus.environment.name),
-            endLink: '</a>',
-          },
-          false,
-        );
+        return {
+          link: this.deploymentStatus.environment.environment_path,
+          name: this.deploymentStatus.environment.name,
+        };
       }
-      return '';
+      return {};
     },
     hasLastDeployment() {
       return this.hasEnvironment && this.deploymentStatus.environment.last_deployment;
@@ -53,145 +57,162 @@ export default {
       return this.hasLastDeployment ? this.deploymentStatus.environment.last_deployment : {};
     },
     hasEnvironment() {
-      return !_.isEmpty(this.deploymentStatus.environment);
+      return !isEmpty(this.deploymentStatus.environment);
     },
     lastDeploymentPath() {
-      return !_.isEmpty(this.lastDeployment.deployable)
+      return !isEmpty(this.lastDeployment.deployable)
         ? this.lastDeployment.deployable.build_path
         : '';
     },
     hasCluster() {
-      return this.hasLastDeployment && this.lastDeployment.cluster;
+      return Boolean(this.deploymentCluster) && Boolean(this.deploymentCluster.name);
     },
     clusterNameOrLink() {
       if (!this.hasCluster) {
         return '';
       }
 
-      const { name, path } = this.lastDeployment.cluster;
-      const escapedName = _.escape(name);
-      const escapedPath = _.escape(path);
+      const { name, path } = this.deploymentCluster;
 
-      if (!escapedPath) {
-        return escapedName;
-      }
-
-      return sprintf(
-        '%{startLink}%{name}%{endLink}',
-        {
-          startLink: `<a href="${escapedPath}" class="js-job-cluster-link">`,
-          name: escapedName,
-          endLink: '</a>',
-        },
-        false,
-      );
+      return {
+        path,
+        name,
+      };
+    },
+    kubernetesNamespace() {
+      return this.hasCluster ? this.deploymentCluster.kubernetes_namespace : null;
+    },
+    deploymentLink() {
+      return {
+        path: this.lastDeploymentPath,
+        name:
+          this.deploymentStatus.status === this.$options.creatingEnvironment
+            ? __('latest deployment')
+            : __('most recent deployment'),
+      };
     },
   },
   methods: {
-    deploymentLink(name) {
-      return sprintf(
-        '%{startLink}%{name}%{endLink}',
-        {
-          startLink: `<a href="${this.lastDeploymentPath}" class="js-job-deployment-link">`,
-          name,
-          endLink: '</a>',
-        },
-        false,
-      );
-    },
     failedEnvironmentMessage() {
-      const { environmentLink } = this;
-
-      return sprintf(
-        __('The deployment of this job to %{environmentLink} did not succeed.'),
-        { environmentLink },
-        false,
-      );
+      return __('The deployment of this job to %{environmentLink} did not succeed.');
     },
     lastEnvironmentMessage() {
-      const { environmentLink, clusterNameOrLink, hasCluster } = this;
-
-      const message = hasCluster
-        ? __('This job is deployed to %{environmentLink} using cluster %{clusterNameOrLink}.')
-        : __('This job is deployed to %{environmentLink}.');
-
-      return sprintf(message, { environmentLink, clusterNameOrLink }, false);
+      if (this.hasCluster) {
+        if (this.kubernetesNamespace) {
+          return __(
+            'This job is deployed to %{environmentLink} using cluster %{clusterNameOrLink} and namespace %{kubernetesNamespace}.',
+          );
+        }
+        // we know the cluster but not the namespace
+        return __('This job is deployed to %{environmentLink} using cluster %{clusterNameOrLink}.');
+      }
+      // not a cluster deployment
+      return __('This job is deployed to %{environmentLink}.');
     },
     outOfDateEnvironmentMessage() {
-      const { hasLastDeployment, hasCluster, environmentLink, clusterNameOrLink } = this;
-
-      if (hasLastDeployment) {
-        const message = hasCluster
-          ? __(
-              'This job is an out-of-date deployment to %{environmentLink} using cluster %{clusterNameOrLink}. View the %{deploymentLink}.',
-            )
-          : __(
-              'This job is an out-of-date deployment to %{environmentLink}. View the %{deploymentLink}.',
+      if (this.hasLastDeployment) {
+        if (this.hasCluster) {
+          if (this.kubernetesNamespace) {
+            return __(
+              'This job is an out-of-date deployment to %{environmentLink} using cluster %{clusterNameOrLink} and namespace %{kubernetesNamespace}. View the %{deploymentLink}.',
             );
-
-        return sprintf(
-          message,
-          {
-            environmentLink,
-            clusterNameOrLink,
-            deploymentLink: this.deploymentLink(__('most recent deployment')),
-          },
-          false,
+          }
+          // we know the cluster but not the namespace
+          return __(
+            'This job is an out-of-date deployment to %{environmentLink} using cluster %{clusterNameOrLink}. View the %{deploymentLink}.',
+          );
+        }
+        // not a cluster deployment
+        return __(
+          'This job is an out-of-date deployment to %{environmentLink}. View the %{deploymentLink}.',
         );
       }
-
-      const message = hasCluster
-        ? __(
-            'This job is an out-of-date deployment to %{environmentLink} using cluster %{clusterNameOrLink}.',
-          )
-        : __('This job is an out-of-date deployment to %{environmentLink}.');
-
-      return sprintf(
-        message,
-        {
-          environmentLink,
-          clusterNameOrLink,
-        },
-        false,
-      );
+      // no last deployment, i.e. this is the first deployment
+      if (this.hasCluster) {
+        if (this.kubernetesNamespace) {
+          return __(
+            'This job is an out-of-date deployment to %{environmentLink} using cluster %{clusterNameOrLink} and namespace %{kubernetesNamespace}.',
+          );
+        }
+        // we know the cluster but not the namespace
+        return __(
+          'This job is an out-of-date deployment to %{environmentLink} using cluster %{clusterNameOrLink}.',
+        );
+      }
+      // not a cluster deployment
+      return __('This job is an out-of-date deployment to %{environmentLink}.');
     },
     creatingEnvironmentMessage() {
-      const { hasLastDeployment, hasCluster, environmentLink, clusterNameOrLink } = this;
-
-      if (hasLastDeployment) {
-        const message = hasCluster
-          ? __(
-              'This job is creating a deployment to %{environmentLink} using cluster %{clusterNameOrLink}. This will overwrite the %{deploymentLink}.',
-            )
-          : __(
-              'This job is creating a deployment to %{environmentLink}. This will overwrite the %{deploymentLink}.',
+      if (this.hasLastDeployment) {
+        if (this.hasCluster) {
+          if (this.kubernetesNamespace) {
+            return __(
+              'This job is creating a deployment to %{environmentLink} using cluster %{clusterNameOrLink} and namespace %{kubernetesNamespace}. This will overwrite the %{deploymentLink}.',
             );
-
-        return sprintf(
-          message,
-          {
-            environmentLink,
-            clusterNameOrLink,
-            deploymentLink: this.deploymentLink(__('latest deployment')),
-          },
-          false,
+          }
+          // we know the cluster but not the namespace
+          return __(
+            'This job is creating a deployment to %{environmentLink} using cluster %{clusterNameOrLink}. This will overwrite the %{deploymentLink}.',
+          );
+        }
+        // not a cluster deployment
+        return __(
+          'This job is creating a deployment to %{environmentLink}. This will overwrite the %{deploymentLink}.',
         );
       }
-
-      return sprintf(
-        __('This job is creating a deployment to %{environmentLink}.'),
-        { environmentLink },
-        false,
-      );
+      // no last deployment, i.e. this is the first deployment
+      if (this.hasCluster) {
+        if (this.kubernetesNamespace) {
+          return __(
+            'This job is creating a deployment to %{environmentLink} using cluster %{clusterNameOrLink} and namespace %{kubernetesNamespace}.',
+          );
+        }
+        // we know the cluster but not the namespace
+        return __(
+          'This job is creating a deployment to %{environmentLink} using cluster %{clusterNameOrLink}.',
+        );
+      }
+      // not a cluster deployment
+      return __('This job is creating a deployment to %{environmentLink}.');
     },
   },
 };
 </script>
 <template>
-  <div class="prepend-top-default append-bottom-default js-environment-container">
+  <div class="gl-mt-3 gl-mb-3 js-environment-container">
     <div class="environment-information">
       <ci-icon :status="iconStatus" />
-      <p class="inline append-bottom-0" v-html="environment"></p>
+      <p class="inline gl-mb-0">
+        <gl-sprintf :message="environment">
+          <template #environmentLink>
+            <gl-link
+              v-if="hasEnvironment"
+              :href="environmentLink.link"
+              data-testid="job-environment-link"
+              v-text="environmentLink.name"
+            />
+          </template>
+          <template #clusterNameOrLink>
+            <gl-link
+              v-if="clusterNameOrLink.path"
+              :href="clusterNameOrLink.path"
+              data-testid="job-cluster-link"
+              v-text="clusterNameOrLink.name"
+            />
+            <template v-else>{{ clusterNameOrLink.name }}</template>
+          </template>
+          <template #kubernetesNamespace>
+            <template>{{ kubernetesNamespace }}</template>
+          </template>
+          <template #deploymentLink>
+            <gl-link
+              :href="deploymentLink.path"
+              data-testid="job-deployment-link"
+              v-text="deploymentLink.name"
+            />
+          </template>
+        </gl-sprintf>
+      </p>
     </div>
   </div>
 </template>

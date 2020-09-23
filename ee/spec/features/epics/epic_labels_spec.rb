@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Assign labels to an epic', :js do
+RSpec.describe 'Assign labels to an epic', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group, :public) }
   let(:label) { create(:group_label, group: group, title: 'bug') }
@@ -38,7 +38,7 @@ describe 'Assign labels to an epic', :js do
   context 'when labels icon is clicked on collapsed sidebar' do
     before do
       page.within('aside.right-sidebar') do
-        find('.fa-tags').click
+        find('[data-testid="labels-icon"]').click
       end
       wait_for_requests
     end
@@ -51,7 +51,7 @@ describe 'Assign labels to an epic', :js do
 
     it 'opens labels dropdown' do
       page.within('aside.right-sidebar') do
-        expect(page).to have_css('.js-selectbox .dropdown.show')
+        expect(page).to have_css('.js-labels-block .labels-select-dropdown-contents')
       end
     end
 

@@ -1,13 +1,13 @@
 /* eslint-disable class-methods-use-this, no-new */
 
 import $ from 'jquery';
-import { property } from 'underscore';
+import { property } from 'lodash';
 import IssuableBulkUpdateActions from './issuable_bulk_update_actions';
 import MilestoneSelect from './milestone_select';
 import issueStatusSelect from './issue_status_select';
 import subscriptionSelect from './subscription_select';
 import LabelsSelect from './labels_select';
-import issueableEventHub from './issuables_list/eventhub';
+import issueableEventHub from './issues_list/eventhub';
 
 const HIDDEN_CLASS = 'hidden';
 const DISABLED_CONTENT_CLASS = 'disabled-content';
@@ -63,6 +63,22 @@ export default class IssuableBulkUpdateSidebar {
     new MilestoneSelect();
     issueStatusSelect();
     subscriptionSelect();
+
+    if (IS_EE) {
+      import('ee/vue_shared/components/sidebar/health_status_select/health_status_bundle')
+        .then(({ default: HealthStatusSelect }) => {
+          HealthStatusSelect();
+        })
+        .catch(() => {});
+    }
+
+    if (IS_EE) {
+      import('ee/vue_shared/components/sidebar/epics_select/epics_select_bundle')
+        .then(({ default: EpicSelect }) => {
+          EpicSelect();
+        })
+        .catch(() => {});
+    }
   }
 
   setupBulkUpdateActions() {

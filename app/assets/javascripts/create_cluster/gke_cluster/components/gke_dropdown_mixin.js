@@ -1,8 +1,7 @@
-import _ from 'underscore';
+import { GlLoadingIcon } from '@gitlab/ui';
 import DropdownSearchInput from '~/vue_shared/components/dropdown/dropdown_search_input.vue';
 import DropdownHiddenInput from '~/vue_shared/components/dropdown/dropdown_hidden_input.vue';
 import DropdownButton from '~/vue_shared/components/dropdown/dropdown_button.vue';
-import { GlLoadingIcon } from '@gitlab/ui';
 
 import store from '../store';
 
@@ -49,7 +48,7 @@ export default {
   methods: {
     fetchSuccessHandler() {
       if (this.defaultValue) {
-        const itemToSelect = _.find(this.items, item => item.name === this.defaultValue);
+        const itemToSelect = this.items.find(item => item.name === this.defaultValue);
 
         if (itemToSelect) {
           this.setItem(itemToSelect.name);

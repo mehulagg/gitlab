@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LfsObject do
+RSpec.describe LfsObject do
   context 'scopes' do
     describe '.not_existing_in_project' do
       it 'contains only lfs objects not linked to the project' do
@@ -11,6 +11,15 @@ describe LfsObject do
         other_lfs_object = create(:lfs_object)
 
         expect(described_class.not_linked_to_project(project)).to contain_exactly(other_lfs_object)
+      end
+    end
+
+    describe '.for_oids' do
+      it 'returns the correct LfsObjects' do
+        lfs_object_1, lfs_object_2 = create_list(:lfs_object, 2)
+
+        expect(described_class.for_oids(lfs_object_1.oid)).to contain_exactly(lfs_object_1)
+        expect(described_class.for_oids([lfs_object_1.oid, lfs_object_2.oid])).to contain_exactly(lfs_object_1, lfs_object_2)
       end
     end
   end
@@ -44,8 +53,8 @@ describe LfsObject do
   end
 
   describe '#project_allowed_access?' do
-    set(:lfs_object) { create(:lfs_objects_project).lfs_object }
-    set(:project) { create(:project) }
+    let_it_be(:lfs_object) { create(:lfs_objects_project).lfs_object }
+    let_it_be(:project, reload: true) { create(:project) }
 
     it 'returns true when project is linked' do
       create(:lfs_objects_project, lfs_object: lfs_object, project: project)
@@ -58,9 +67,9 @@ describe LfsObject do
     end
 
     context 'when project is a member of a fork network' do
-      set(:fork_network) { create(:fork_network) }
-      set(:fork_network_root_project) { fork_network.root_project }
-      set(:fork_network_membership) { create(:fork_network_member, project: project, fork_network: fork_network) }
+      let_it_be(:fork_network) { create(:fork_network) }
+      let_it_be(:fork_network_root_project, reload: true) { fork_network.root_project }
+      let_it_be(:fork_network_membership) { create(:fork_network_member, project: project, fork_network: fork_network) }
 
       it 'returns true for all members when forked project is linked' do
         create(:lfs_objects_project, lfs_object: lfs_object, project: project)
@@ -143,14 +152,10 @@ describe LfsObject do
     end
 
     describe 'file is being stored' do
-      let(:lfs_object) { create(:lfs_object, :with_file) }
+      subject { create(:lfs_object, :with_file) }
 
       context 'when existing object has local store' do
-        it 'is stored locally' do
-          expect(lfs_object.file_store).to be(ObjectStorage::Store::LOCAL)
-          expect(lfs_object.file).to be_file_storage
-          expect(lfs_object.file.object_store).to eq(ObjectStorage::Store::LOCAL)
-        end
+        it_behaves_like 'mounted file in local store'
       end
 
       context 'when direct upload is enabled' do
@@ -158,13 +163,7 @@ describe LfsObject do
           stub_lfs_object_storage(direct_upload: true)
         end
 
-        context 'when file is stored' do
-          it 'is stored remotely' do
-            expect(lfs_object.file_store).to eq(ObjectStorage::Store::REMOTE)
-            expect(lfs_object.file).not_to be_file_storage
-            expect(lfs_object.file.object_store).to eq(ObjectStorage::Store::REMOTE)
-          end
-        end
+        it_behaves_like 'mounted file in object store'
       end
     end
   end

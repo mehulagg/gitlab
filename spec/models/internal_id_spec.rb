@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe InternalId do
+RSpec.describe InternalId do
   let(:project) { create(:project) }
   let(:usage) { :issues }
   let(:issue) { build(:issue, project: project) }
@@ -88,33 +88,6 @@ describe InternalId do
 
       expect(normalized).to eq((0..seq.size - 1).to_a)
     end
-
-    context 'with an insufficient schema version' do
-      before do
-        described_class.reset_column_information
-        # Project factory will also call the current_version
-        expect(ActiveRecord::Migrator).to receive(:current_version).at_least(:once).and_return(InternalId::REQUIRED_SCHEMA_VERSION - 1)
-      end
-
-      let(:init) { double('block') }
-
-      it 'calculates next internal ids on the fly' do
-        val = rand(1..100)
-
-        expect(init).to receive(:call).with(issue).and_return(val)
-        expect(subject).to eq(val + 1)
-      end
-
-      it 'always attempts to generate internal IDs in production mode' do
-        stub_rails_env('production')
-
-        val = rand(1..100)
-        generator = double(generate: val)
-        expect(InternalId::InternalIdGenerator).to receive(:new).and_return(generator)
-
-        expect(subject).to eq(val)
-      end
-    end
   end
 
   describe '.reset' do
@@ -152,24 +125,11 @@ describe InternalId do
         described_class.generate_next(issue, scope, usage, init)
       end
     end
-
-    context 'with an insufficient schema version' do
-      let(:value) { 2 }
-
-      before do
-        described_class.reset_column_information
-        # Project factory will also call the current_version
-        expect(ActiveRecord::Migrator).to receive(:current_version).at_least(:once).and_return(InternalId::REQUIRED_SCHEMA_VERSION - 1)
-      end
-
-      it 'does not reset any of the iids' do
-        expect(subject).to be_falsey
-      end
-    end
   end
 
   describe '.track_greatest' do
     let(:value) { 9001 }
+
     subject { described_class.track_greatest(issue, scope, usage, value, init) }
 
     context 'in the absence of a record' do
@@ -210,6 +170,7 @@ describe InternalId do
 
   describe '#increment_and_save!' do
     let(:id) { create(:internal_id) }
+
     subject { id.increment_and_save! }
 
     it 'returns incremented iid' do
@@ -236,6 +197,7 @@ describe InternalId do
   describe '#track_greatest_and_save!' do
     let(:id) { create(:internal_id) }
     let(:new_last_value) { 9001 }
+
     subject { id.track_greatest_and_save!(new_last_value) }
 
     it 'returns new last value' do

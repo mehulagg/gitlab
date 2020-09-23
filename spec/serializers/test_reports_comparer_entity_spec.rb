@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe TestReportsComparerEntity do
+RSpec.describe TestReportsComparerEntity do
   include TestReportsHelper
 
   let(:entity) { described_class.new(comparer) }
@@ -24,7 +24,7 @@ describe TestReportsComparerEntity do
 
         it 'contains correct compared test reports details' do
           expect(subject[:status]).to eq('success')
-          expect(subject[:summary]).to include(total: 2, resolved: 0, failed: 0)
+          expect(subject[:summary]).to include(total: 2, resolved: 0, failed: 0, errored: 0)
           expect(subject[:suites].first[:name]).to eq('rspec')
           expect(subject[:suites].first[:status]).to eq('success')
           expect(subject[:suites].second[:name]).to eq('junit')
@@ -42,7 +42,7 @@ describe TestReportsComparerEntity do
 
         it 'contains correct compared test reports details' do
           expect(subject[:status]).to eq('failed')
-          expect(subject[:summary]).to include(total: 2, resolved: 0, failed: 1)
+          expect(subject[:summary]).to include(total: 2, resolved: 0, failed: 1, errored: 0)
           expect(subject[:suites].first[:name]).to eq('rspec')
           expect(subject[:suites].first[:status]).to eq('success')
           expect(subject[:suites].second[:name]).to eq('junit')
@@ -60,7 +60,7 @@ describe TestReportsComparerEntity do
 
         it 'contains correct compared test reports details' do
           expect(subject[:status]).to eq('success')
-          expect(subject[:summary]).to include(total: 2, resolved: 1, failed: 0)
+          expect(subject[:summary]).to include(total: 2, resolved: 1, failed: 0, errored: 0)
           expect(subject[:suites].first[:name]).to eq('rspec')
           expect(subject[:suites].first[:status]).to eq('success')
           expect(subject[:suites].second[:name]).to eq('junit')

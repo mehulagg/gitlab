@@ -406,34 +406,6 @@ export const getEpicsTimeframeRange = ({ presetType = '', timeframe = [] }) => {
   };
 };
 
-export const getEpicsPathForPreset = ({
-  basePath = '',
-  filterQueryString = '',
-  presetType = '',
-  timeframe = [],
-  epicsState = 'all',
-}) => {
-  let epicsPath = basePath;
-
-  if (!basePath || !timeframe.length) {
-    return null;
-  }
-
-  const range = getEpicsTimeframeRange({
-    presetType,
-    timeframe,
-  });
-
-  epicsPath += epicsPath.indexOf('?') === -1 ? '?' : '&';
-  epicsPath += `state=${epicsState}&start_date=${range.startDate}&end_date=${range.dueDate}`;
-
-  if (filterQueryString) {
-    epicsPath += `&${filterQueryString}`;
-  }
-
-  return epicsPath;
-};
-
 /**
  * This function takes two epics and return sortable dates depending on the '
  * type of sorting order -- startDate or endDate.

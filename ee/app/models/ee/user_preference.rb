@@ -11,5 +11,9 @@ module EE
 
       validates :epic_notes_filter, inclusion: { in: ::UserPreference::NOTES_FILTERS.values }, presence: true
     end
+
+    FEATURE_FILTER_UNKNOWN = 0
+    FEATURE_FILTER_CONTROL = 1
+    FEATURE_FILTER_EXPERIMENT = 2
   end
 end

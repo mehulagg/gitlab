@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Chat::Command do
+RSpec.describe Gitlab::Chat::Command do
   let(:chat_name) { create(:chat_name) }
 
   let(:command) do
@@ -44,7 +44,7 @@ describe Gitlab::Chat::Command do
     let(:pipeline) { command.create_pipeline }
 
     before do
-      stub_repository_ci_yaml_file(sha: project.commit.id)
+      stub_ci_pipeline_yaml_file(gitlab_ci_yaml)
 
       project.add_developer(chat_name.user)
     end

@@ -3,7 +3,7 @@
 require 'securerandom'
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Group issue boards' do
       let(:board_1) { "Board-#{SecureRandom.hex(4)}" }
       let(:board_2) { "Board-#{SecureRandom.hex(4)}" }
@@ -14,8 +14,7 @@ module QA
       end
 
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
         create_group_board(board_1)
         create_group_board(board_2)
@@ -28,8 +27,8 @@ module QA
         Page::Group::Menu.perform(&:go_to_issue_boards)
       end
 
-      it 'shows multiple group boards in the boards dropdown menu' do
-        EE::Page::Component::IssueBoard::Show.perform do |show|
+      it 'shows multiple group boards in the boards dropdown menu', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/537' do
+        Page::Component::IssueBoard::Show.perform do |show|
           show.click_boards_dropdown_button
 
           expect(show.boards_dropdown_content).to have_content(board_1)

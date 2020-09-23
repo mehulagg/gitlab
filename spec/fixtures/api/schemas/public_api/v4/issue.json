@@ -71,7 +71,14 @@
         "avatar_url": { "type": "uri" },
         "web_url": { "type": "uri" }
       },
-      "additionalProperties": false
+      "required": [
+        "id",
+        "state",
+        "avatar_url",
+        "name",
+        "username",
+        "web_url"
+      ]
     },
     "user_notes_count": { "type": "integer" },
     "upvotes": { "type": "integer" },
@@ -84,6 +91,11 @@
       "total_time_spent": { "type": "integer" },
       "human_time_estimate": { "type": ["string", "null"] },
       "human_total_time_spent": { "type": ["string", "null"] }
+    },
+    "references": {
+      "short": {"type": "string"},
+      "relative": {"type": "string"},
+      "full": {"type": "string"}
     }
   },
   "required": [

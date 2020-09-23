@@ -1,14 +1,13 @@
 <script>
-import { GlButton, GlLoadingIcon } from '@gitlab/ui';
+import { GlDeprecatedButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import { __ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 import UserAvatarList from '~/vue_shared/components/user_avatar/user_avatar_list.vue';
 import ApprovalsList from './approvals_list.vue';
 
 export default {
   components: {
-    Icon,
-    GlButton,
+    GlIcon,
+    GlDeprecatedButton,
     GlLoadingIcon,
     UserAvatarList,
     ApprovalsList,
@@ -33,6 +32,11 @@ export default {
       default: false,
     },
     securityApprovalsHelpPagePath: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    eligibleApproversDocsPath: {
       type: String,
       required: false,
       default: '',
@@ -64,26 +68,31 @@ export default {
   <div>
     <div class="mr-widget-extension d-flex align-items-center pl-3">
       <button
-        class="btn btn-blank square s32 append-right-default"
+        class="btn btn-blank square s32 gl-mr-3"
         type="button"
         :aria-label="ariaLabel"
         @click="toggle"
       >
         <gl-loading-icon v-if="!isCollapsed && isLoadingRules" />
-        <icon v-else :name="angleIcon" :size="16" />
+        <gl-icon v-else :name="angleIcon" :size="16" />
       </button>
       <template v-if="isCollapsed">
         <user-avatar-list :items="suggestedApproversTrimmed" :breakpoint="0" empty-text="" />
-        <gl-button variant="link" @click="toggle">{{ __('View eligible approvers') }}</gl-button>
+        <gl-deprecated-button variant="link" @click="toggle">{{
+          __('View eligible approvers')
+        }}</gl-deprecated-button>
       </template>
       <template v-else>
-        <gl-button variant="link" @click="toggle">{{ __('Collapse') }}</gl-button>
+        <gl-deprecated-button variant="link" @click="toggle">{{
+          __('Collapse')
+        }}</gl-deprecated-button>
       </template>
     </div>
     <div v-if="!isCollapsed && approvalRules.length" class="border-top">
       <approvals-list
         :approval-rules="approvalRules"
         :security-approvals-help-page-path="securityApprovalsHelpPagePath"
+        :eligible-approvers-docs-path="eligibleApproversDocsPath"
       />
     </div>
   </div>

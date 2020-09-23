@@ -5,14 +5,14 @@ module Gitlab
     module ContainerRepositoryLogHelpers
       include LogHelpers
 
-      def base_log_data(message)
+      # This is called by LogHelpers to build json log with context info
+      #
+      # @see ::Gitlab::Geo::LogHelpers
+      def extra_log_data
         {
-          class: self.class.name,
           project_id: container_repository.project.id,
           project_path: container_repository.project.full_path,
-          container_repository_name: container_repository.name,
-          message: message,
-          job_id: get_sidekiq_job_id
+          container_repository_name: container_repository.name
         }.compact
       end
     end

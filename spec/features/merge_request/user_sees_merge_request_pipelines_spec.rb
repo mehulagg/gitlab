@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User sees pipelines triggered by merge request', :js do
+RSpec.describe 'Merge request > User sees pipelines triggered by merge request', :js do
   include ProjectForksHelper
   include TestReportsHelper
 
@@ -34,7 +34,7 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
   end
 
   context 'when a user created a merge request in the parent project' do
-    let(:merge_request) do
+    let!(:merge_request) do
       create(:merge_request,
               source_project: project,
               target_project: project,
@@ -68,6 +68,8 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
     end
 
     it 'sees the latest detached merge request pipeline as the head pipeline', :sidekiq_might_not_need_inline do
+      click_link "Overview"
+
       page.within('.ci-widget-content') do
         expect(page).to have_content("##{detached_merge_request_pipeline.id}")
       end
@@ -127,6 +129,8 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
       end
 
       it 'sees the latest detached merge request pipeline as the head pipeline' do
+        click_link 'Overview'
+
         page.within('.ci-widget-content') do
           expect(page).to have_content("##{detached_merge_request_pipeline_2.id}")
         end
@@ -135,6 +139,7 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
 
     context 'when a user merges a merge request in the parent project', :sidekiq_might_not_need_inline do
       before do
+        click_link 'Overview'
         click_button 'Merge when pipeline succeeds'
 
         wait_for_requests
@@ -162,6 +167,7 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
 
       context 'when branch pipeline succeeds' do
         before do
+          click_link 'Overview'
           push_pipeline.succeed!
 
           wait_for_requests
@@ -197,6 +203,8 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
       end
 
       it 'sees the latest branch pipeline as the head pipeline', :sidekiq_might_not_need_inline do
+        click_link 'Overview'
+
         page.within('.ci-widget-content') do
           expect(page).to have_content("##{push_pipeline.id}")
         end
@@ -244,6 +252,8 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
     end
 
     it 'sees the latest detached merge request pipeline as the head pipeline' do
+      click_link "Overview"
+
       page.within('.ci-widget-content') do
         expect(page).to have_content("##{detached_merge_request_pipeline.id}")
       end
@@ -309,6 +319,8 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
       end
 
       it 'sees the latest detached merge request pipeline as the head pipeline' do
+        click_link "Overview"
+
         page.within('.ci-widget-content') do
           expect(page).to have_content("##{detached_merge_request_pipeline_2.id}")
         end
@@ -323,6 +335,8 @@ describe 'Merge request > User sees pipelines triggered by merge request', :js d
 
     context 'when a user merges a merge request from a forked project to the parent project' do
       before do
+        click_link("Overview")
+
         click_button 'Merge when pipeline succeeds'
 
         wait_for_requests

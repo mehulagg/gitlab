@@ -2,15 +2,15 @@
 
 require 'spec_helper'
 
-describe LabelNote do
+RSpec.describe LabelNote do
   include Gitlab::Routing.url_helpers
 
-  set(:group)  { create(:group) }
-  set(:user)   { create(:user) }
-  set(:label) { create(:group_label, group: group) }
-  set(:label2) { create(:group_label, group: group) }
+  let_it_be(:group)  { create(:group) }
+  let_it_be(:user)   { create(:user) }
+  let_it_be(:label) { create(:group_label, group: group) }
+  let_it_be(:label2) { create(:group_label, group: group) }
   let(:resource_parent) { group }
-  set(:resource) { create(:epic, group: group) }
+  let_it_be(:resource) { create(:epic, group: group) }
   let(:project) { nil }
   let(:resource_key) { resource.class.name.underscore.to_s }
   let(:events) { [create(:resource_label_event, label: label, resource_key => resource)] }

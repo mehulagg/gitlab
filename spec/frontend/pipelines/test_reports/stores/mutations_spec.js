@@ -1,58 +1,77 @@
+import { getJSONFixture } from 'helpers/fixtures';
 import * as types from '~/pipelines/stores/test_reports/mutation_types';
 import mutations from '~/pipelines/stores/test_reports/mutations';
-import { testReports, testSuites } from '../mock_data';
 
 describe('Mutations TestReports Store', () => {
   let mockState;
 
+  const testReports = getJSONFixture('pipelines/test_report.json');
+
   const defaultState = {
     endpoint: '',
     testReports: {},
-    selectedSuite: {},
+    selectedSuite: null,
     isLoading: false,
   };
 
   beforeEach(() => {
-    mockState = defaultState;
+    mockState = { ...defaultState };
   });
 
-  describe('set endpoint', () => {
-    it('should set endpoint', () => {
-      const expectedState = Object.assign({}, mockState, { endpoint: 'foo' });
-      mutations[types.SET_ENDPOINT](mockState, 'foo');
+  describe('set suite', () => {
+    it('should set the suite at the given index', () => {
+      mockState.testReports = testReports;
+      const suite = { name: 'test_suite' };
+      const index = 0;
+      const expectedState = { ...mockState };
+      expectedState.testReports.test_suites[index] = { suite, hasFullSuite: true };
+      mutations[types.SET_SUITE](mockState, { suite, index });
 
-      expect(mockState.endpoint).toEqual(expectedState.endpoint);
+      expect(mockState.testReports.test_suites[index]).toEqual(
+        expectedState.testReports.test_suites[index],
+      );
     });
   });
 
-  describe('set reports', () => {
-    it('should set testReports', () => {
-      const expectedState = Object.assign({}, mockState, { testReports });
-      mutations[types.SET_REPORTS](mockState, testReports);
+  describe('set selected suite index', () => {
+    it('should set selectedSuiteIndex', () => {
+      const selectedSuiteIndex = 0;
+      mutations[types.SET_SELECTED_SUITE_INDEX](mockState, selectedSuiteIndex);
 
-      expect(mockState.testReports).toEqual(expectedState.testReports);
+      expect(mockState.selectedSuiteIndex).toEqual(selectedSuiteIndex);
     });
   });
 
-  describe('set selected suite', () => {
-    it('should set selectedSuite', () => {
-      const expectedState = Object.assign({}, mockState, { selectedSuite: testSuites[0] });
-      mutations[types.SET_SELECTED_SUITE](mockState, testSuites[0]);
+  describe('set summary', () => {
+    it('should set summary', () => {
+      const summary = {
+        total: { time: 0, count: 10, success: 1, failed: 2, skipped: 3, error: 4 },
+      };
+      const expectedSummary = {
+        ...summary,
+        total_time: 0,
+        total_count: 10,
+        success_count: 1,
+        failed_count: 2,
+        skipped_count: 3,
+        error_count: 4,
+      };
+      mutations[types.SET_SUMMARY](mockState, summary);
 
-      expect(mockState.selectedSuite).toEqual(expectedState.selectedSuite);
+      expect(mockState.testReports).toEqual(expectedSummary);
     });
   });
 
   describe('toggle loading', () => {
     it('should set to true', () => {
-      const expectedState = Object.assign({}, mockState, { isLoading: true });
+      const expectedState = { ...mockState, isLoading: true };
       mutations[types.TOGGLE_LOADING](mockState);
 
       expect(mockState.isLoading).toEqual(expectedState.isLoading);
     });
 
     it('should toggle back to false', () => {
-      const expectedState = Object.assign({}, mockState, { isLoading: false });
+      const expectedState = { ...mockState, isLoading: false };
       mockState.isLoading = true;
 
       mutations[types.TOGGLE_LOADING](mockState);

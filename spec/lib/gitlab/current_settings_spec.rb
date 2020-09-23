@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::CurrentSettings do
+RSpec.describe Gitlab::CurrentSettings do
   before do
     stub_env('IN_MEMORY_APPLICATION_SETTINGS', 'false')
   end
@@ -49,20 +49,16 @@ describe Gitlab::CurrentSettings do
       end
     end
 
-    context 'with DB unavailable' do
-      context 'and settings in cache' do
-        include_context 'with settings in cache'
-
-        it 'fetches the settings from cache without issuing any query' do
-          expect(ActiveRecord::QueryRecorder.new { described_class.current_application_settings }.count).to eq(0)
-        end
+    context 'in a Rake task with DB unavailable' do
+      before do
+        allow(Gitlab::Runtime).to receive(:rake?).and_return(true)
+        # For some reason, `allow(described_class).to receive(:connect_to_db?).and_return(false)` causes issues
+        # during the initialization phase of the test suite, so instead let's mock the internals of it
+        allow(ActiveRecord::Base.connection).to receive(:active?).and_return(false)
       end
 
       context 'and no settings in cache' do
         before do
-          # For some reason, `allow(described_class).to receive(:connect_to_db?).and_return(false)` causes issues
-          # during the initialization phase of the test suite, so instead let's mock the internals of it
-          allow(ActiveRecord::Base.connection).to receive(:active?).and_return(false)
           expect(ApplicationSetting).not_to receive(:current)
         end
 
@@ -119,18 +115,24 @@ describe Gitlab::CurrentSettings do
           expect(settings).to have_attributes(settings_from_defaults)
         end
 
-        context 'with pending migrations' do
+        context 'when ApplicationSettings does not have a primary key' do
           before do
-            expect_any_instance_of(ActiveRecord::MigrationContext).to receive(:needs_migration?).and_return(true)
+            allow(ActiveRecord::Base.connection).to receive(:primary_key).with('application_settings').and_return(nil)
+          end
+
+          it 'raises an exception if ApplicationSettings does not have a primary key' do
+            expect { described_class.current_application_settings }.to raise_error(/table is missing a primary key constraint/)
+          end
+        end
+
+        context 'with pending migrations' do
+          let(:current_settings) { described_class.current_application_settings }
+
+          before do
+            allow(Gitlab::Runtime).to receive(:rake?).and_return(false)
           end
 
           shared_examples 'a non-persisted ApplicationSetting object' do
-            let(:current_settings) { described_class.current_application_settings }
-
-            it 'returns a FakeApplicationSettings object' do
-              expect(current_settings).to be_a(Gitlab::FakeApplicationSettings)
-            end
-
             it 'uses the default value from ApplicationSetting.defaults' do
               expect(current_settings.signup_enabled).to eq(ApplicationSetting.defaults[:signup_enabled])
             end
@@ -144,18 +146,16 @@ describe Gitlab::CurrentSettings do
             end
           end
 
-          context 'with no ApplicationSetting DB record' do
-            it_behaves_like 'a non-persisted ApplicationSetting object'
-          end
-
-          context 'with an existing ApplicationSetting DB record' do
-            let!(:db_settings) { ApplicationSetting.build_from_defaults(home_page_url: 'http://mydomain.com').save! && ApplicationSetting.last }
-            let(:current_settings) { described_class.current_application_settings }
+          context 'in a Rake task' do
+            before do
+              allow(Gitlab::Runtime).to receive(:rake?).and_return(true)
+              expect_any_instance_of(ActiveRecord::MigrationContext).to receive(:needs_migration?).and_return(true)
+            end
 
             it_behaves_like 'a non-persisted ApplicationSetting object'
 
-            it 'uses the value from the DB attribute if present and not overridden by an accessor' do
-              expect(current_settings.home_page_url).to eq(db_settings.home_page_url)
+            it 'returns a FakeApplicationSettings object' do
+              expect(current_settings).to be_a(Gitlab::FakeApplicationSettings)
             end
 
             context 'when a new column is used before being migrated' do
@@ -168,6 +168,20 @@ describe Gitlab::CurrentSettings do
               end
             end
           end
+
+          context 'with no ApplicationSetting DB record' do
+            it_behaves_like 'a non-persisted ApplicationSetting object'
+          end
+
+          context 'with an existing ApplicationSetting DB record' do
+            let!(:db_settings) { ApplicationSetting.build_from_defaults(home_page_url: 'http://mydomain.com').save! && ApplicationSetting.last }
+
+            it_behaves_like 'a non-persisted ApplicationSetting object'
+
+            it 'uses the value from the DB attribute if present and not overridden by an accessor' do
+              expect(current_settings.home_page_url).to eq(db_settings.home_page_url)
+            end
+          end
         end
 
         context 'when ApplicationSettings.current is present' do
@@ -175,17 +189,6 @@ describe Gitlab::CurrentSettings do
             expect(ApplicationSetting).to receive(:current).and_return(:current_settings)
 
             expect(described_class.current_application_settings).to eq(:current_settings)
-          end
-        end
-
-        context 'when the application_settings table does not exist' do
-          it 'returns a FakeApplicationSettings object' do
-            expect(Gitlab::Database)
-              .to receive(:cached_table_exists?)
-              .with('application_settings')
-              .and_return(false)
-
-            expect(described_class.current_application_settings).to be_a(Gitlab::FakeApplicationSettings)
           end
         end
       end

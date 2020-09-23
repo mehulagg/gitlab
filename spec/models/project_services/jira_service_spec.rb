@@ -2,17 +2,19 @@
 
 require 'spec_helper'
 
-describe JiraService do
-  include Gitlab::Routing
+RSpec.describe JiraService do
   include AssetsHelpers
 
-  let(:title) { 'custom title' }
-  let(:description) { 'custom description' }
   let(:url) { 'http://jira.example.com' }
   let(:api_url) { 'http://api-jira.example.com' }
   let(:username) { 'jira-username' }
   let(:password) { 'jira-password' }
   let(:transition_id) { 'test27' }
+  let(:server_info_results) { { 'deploymentType' => 'Cloud' } }
+
+  before do
+    WebMock.stub_request(:get, /serverInfo/).to_return(body: server_info_results.to_json )
+  end
 
   describe '#options' do
     let(:options) do
@@ -26,7 +28,7 @@ describe JiraService do
       }
     end
 
-    let(:service) { described_class.create(options) }
+    let(:service) { described_class.create!(options) }
 
     it 'sets the URL properly' do
       # jira-ruby gem parses the URI and handles trailing slashes fine:
@@ -70,11 +72,23 @@ describe JiraService do
   end
 
   describe '.reference_pattern' do
-    it_behaves_like 'allows project key on reference pattern'
+    using RSpec::Parameterized::TableSyntax
 
-    it 'does not allow # on the code' do
-      expect(described_class.reference_pattern.match('#123')).to be_nil
-      expect(described_class.reference_pattern.match('1#23#12')).to be_nil
+    where(:key, :result) do
+      '#123'               | ''
+      '1#23#12'            | ''
+      'JIRA-1234A'         | 'JIRA-1234'
+      'JIRA-1234-some_tag' | 'JIRA-1234'
+      'JIRA-1234_some_tag' | 'JIRA-1234'
+      'EXT_EXT-1234'       | 'EXT_EXT-1234'
+      'EXT3_EXT-1234'      | 'EXT3_EXT-1234'
+      '3EXT_EXT-1234'      | ''
+    end
+
+    with_them do
+      specify do
+        expect(described_class.reference_pattern.match(key).to_s).to eq(result)
+      end
     end
   end
 
@@ -82,33 +96,19 @@ describe JiraService do
     let(:params) do
       {
         project: create(:project),
-        title: 'custom title', description: 'custom description',
         url: url, api_url: api_url,
         username: username, password: password,
         jira_issue_transition_id: transition_id
       }
     end
 
-    subject { described_class.create(params) }
+    subject { described_class.create!(params) }
 
     it 'does not store data into properties' do
       expect(subject.properties).to be_nil
     end
 
-    it 'sets title correctly' do
-      service = subject
-
-      expect(service.title).to eq('custom title')
-    end
-
-    it 'sets service data correctly' do
-      service = subject
-
-      expect(service.title).to eq('custom title')
-      expect(service.description).to eq('custom description')
-    end
-
-    it 'stores data in data_fields correcty' do
+    it 'stores data in data_fields correctly' do
       service = subject
 
       expect(service.jira_tracker_data.url).to eq(url)
@@ -116,6 +116,35 @@ describe JiraService do
       expect(service.jira_tracker_data.username).to eq(username)
       expect(service.jira_tracker_data.password).to eq(password)
       expect(service.jira_tracker_data.jira_issue_transition_id).to eq(transition_id)
+      expect(service.jira_tracker_data.deployment_cloud?).to be_truthy
+    end
+
+    context 'when loading serverInfo' do
+      let!(:jira_service) { subject }
+
+      context 'Cloud instance' do
+        let(:server_info_results) { { 'deploymentType' => 'Cloud' } }
+
+        it 'is detected' do
+          expect(jira_service.jira_tracker_data.deployment_cloud?).to be_truthy
+        end
+      end
+
+      context 'Server instance' do
+        let(:server_info_results) { { 'deploymentType' => 'Server' } }
+
+        it 'is detected' do
+          expect(jira_service.jira_tracker_data.deployment_server?).to be_truthy
+        end
+      end
+
+      context 'Unknown instance' do
+        let(:server_info_results) { { 'deploymentType' => 'FutureCloud' } }
+
+        it 'is detected' do
+          expect(jira_service.jira_tracker_data.deployment_unknown?).to be_truthy
+        end
+      end
     end
   end
 
@@ -126,6 +155,7 @@ describe JiraService do
       { url: url, api_url: api_url, username: username, password: password,
         jira_issue_transition_id: transition_id }
     end
+
     let(:data_params) do
       {
         url: url, api_url: api_url,
@@ -153,13 +183,13 @@ describe JiraService do
         end
       end
 
-      context '#update' do
+      describe '#update' do
         context 'basic update' do
-          let(:new_username) { 'new_username' }
-          let(:new_url) { 'http://jira-new.example.com' }
+          let_it_be(:new_username) { 'new_username' }
+          let_it_be(:new_url) { 'http://jira-new.example.com' }
 
           before do
-            service.update(username: new_username, url: new_url)
+            service.update!(username: new_username, url: new_url)
           end
 
           it 'leaves properties field emtpy' do
@@ -177,6 +207,63 @@ describe JiraService do
           end
         end
 
+        context 'when updating the url, api_url, username, or password' do
+          it 'updates deployment type' do
+            service.update!(url: 'http://first.url')
+            service.jira_tracker_data.update!(deployment_type: 'server')
+
+            expect(service.jira_tracker_data.deployment_server?).to be_truthy
+
+            service.update!(api_url: 'http://another.url')
+            service.jira_tracker_data.reload
+
+            expect(service.jira_tracker_data.deployment_cloud?).to be_truthy
+            expect(WebMock).to have_requested(:get, /serverInfo/).twice
+          end
+
+          it 'calls serverInfo for url' do
+            service.update!(url: 'http://first.url')
+
+            expect(WebMock).to have_requested(:get, /serverInfo/)
+          end
+
+          it 'calls serverInfo for api_url' do
+            service.update!(api_url: 'http://another.url')
+
+            expect(WebMock).to have_requested(:get, /serverInfo/)
+          end
+
+          it 'calls serverInfo for username' do
+            service.update!(username: 'test-user')
+
+            expect(WebMock).to have_requested(:get, /serverInfo/)
+          end
+
+          it 'calls serverInfo for password' do
+            service.update!(password: 'test-password')
+
+            expect(WebMock).to have_requested(:get, /serverInfo/)
+          end
+        end
+
+        context 'when not updating the url, api_url, username, or password' do
+          it 'does not update deployment type' do
+            expect {service.update!(jira_issue_transition_id: 'jira_issue_transition_id')}.to raise_error(ActiveRecord::RecordInvalid)
+
+            expect(WebMock).not_to have_requested(:get, /serverInfo/)
+          end
+        end
+
+        context 'when not allowed to test an instance or group' do
+          it 'does not update deployment type' do
+            allow(service).to receive(:can_test?).and_return(false)
+
+            service.update!(url: 'http://first.url')
+
+            expect(WebMock).not_to have_requested(:get, /serverInfo/)
+          end
+        end
+
         context 'stored password invalidation' do
           context 'when a password was previously set' do
             context 'when only web url present' do
@@ -191,16 +278,15 @@ describe JiraService do
               it 'resets password if url changed' do
                 service
                 service.url = 'http://jira_edited.example.com'
-                service.save
+                service.save!
 
                 expect(service.reload.url).to eq('http://jira_edited.example.com')
                 expect(service.password).to be_nil
               end
 
               it 'does not reset password if url "changed" to the same url as before' do
-                service.title = 'aaaaaa'
                 service.url = 'http://jira.example.com'
-                service.save
+                service.save!
 
                 expect(service.reload.url).to eq('http://jira.example.com')
                 expect(service.password).not_to be_nil
@@ -208,7 +294,7 @@ describe JiraService do
 
               it 'resets password if url not changed but api url added' do
                 service.api_url = 'http://jira_edited.example.com/rest/api/2'
-                service.save
+                service.save!
 
                 expect(service.reload.api_url).to eq('http://jira_edited.example.com/rest/api/2')
                 expect(service.password).to be_nil
@@ -217,7 +303,7 @@ describe JiraService do
               it 'does not reset password if new url is set together with password, even if it\'s the same password' do
                 service.url = 'http://jira_edited.example.com'
                 service.password = password
-                service.save
+                service.save!
 
                 expect(service.password).to eq(password)
                 expect(service.url).to eq('http://jira_edited.example.com')
@@ -226,14 +312,14 @@ describe JiraService do
               it 'resets password if url changed, even if setter called multiple times' do
                 service.url = 'http://jira1.example.com/rest/api/2'
                 service.url = 'http://jira1.example.com/rest/api/2'
-                service.save
+                service.save!
 
                 expect(service.password).to be_nil
               end
 
               it 'does not reset password if username changed' do
                 service.username = 'some_name'
-                service.save
+                service.save!
 
                 expect(service.reload.password).to eq(password)
               end
@@ -241,7 +327,7 @@ describe JiraService do
               it 'does not reset password if password changed' do
                 service.url = 'http://jira_edited.example.com'
                 service.password = 'new_password'
-                service.save
+                service.save!
 
                 expect(service.reload.password).to eq('new_password')
               end
@@ -249,7 +335,7 @@ describe JiraService do
               it 'does not reset password if the password is touched and same as before' do
                 service.url = 'http://jira_edited.example.com'
                 service.password = password
-                service.save
+                service.save!
 
                 expect(service.reload.password).to eq(password)
               end
@@ -266,20 +352,20 @@ describe JiraService do
 
               it 'resets password if api url changed' do
                 service.api_url = 'http://jira_edited.example.com/rest/api/2'
-                service.save
+                service.save!
 
                 expect(service.password).to be_nil
               end
 
               it 'does not reset password if url changed' do
                 service.url = 'http://jira_edited.example.com'
-                service.save
+                service.save!
 
                 expect(service.password).to eq(password)
               end
 
               it 'resets password if api url set to empty' do
-                service.update(api_url: '')
+                service.update!(api_url: '')
 
                 expect(service.reload.password).to be_nil
               end
@@ -296,7 +382,7 @@ describe JiraService do
             it 'saves password if new url is set together with password' do
               service.url = 'http://jira_edited.example.com/rest/api/2'
               service.password = 'password'
-              service.save
+              service.save!
               expect(service.reload.password).to eq('password')
               expect(service.reload.url).to eq('http://jira_edited.example.com/rest/api/2')
             end
@@ -307,45 +393,31 @@ describe JiraService do
 
     # this  will be removed as part of https://gitlab.com/gitlab-org/gitlab/issues/29404
     context 'when data are stored in properties' do
-      let(:properties) { data_params.merge(title: title, description: description) }
+      let(:properties) { data_params }
       let!(:service) do
         create(:jira_service, :without_properties_callback, properties: properties.merge(additional: 'something'))
       end
 
-      it_behaves_like 'issue tracker fields'
       it_behaves_like 'handles jira fields'
     end
 
     context 'when data are stored in separated fields' do
       let(:service) do
-        create(:jira_service, data_params.merge(properties: {}, title: title, description: description))
+        create(:jira_service, data_params.merge(properties: {}))
       end
 
-      it_behaves_like 'issue tracker fields'
       it_behaves_like 'handles jira fields'
     end
 
     context 'when data are stored in both properties and separated fields' do
-      let(:properties) { data_params.merge(title: title, description: description) }
+      let(:properties) { data_params }
       let(:service) do
         create(:jira_service, :without_properties_callback, active: false, properties: properties).tap do |service|
           create(:jira_tracker_data, data_params.merge(service: service))
         end
       end
 
-      it_behaves_like 'issue tracker fields'
       it_behaves_like 'handles jira fields'
-    end
-
-    context 'when no title & description are set' do
-      let(:service) do
-        create(:jira_service, properties: access_params)
-      end
-
-      it 'returns default values' do
-        expect(service.title).to eq('Jira')
-        expect(service.description).to eq('Jira issue tracker')
-      end
     end
   end
 
@@ -379,7 +451,7 @@ describe JiraService do
         allow_any_instance_of(JIRA::Resource::Issue).to receive(:key).and_return('JIRA-123')
         allow(JIRA::Resource::Remotelink).to receive(:all).and_return([])
 
-        @jira_service.save
+        @jira_service.save!
 
         project_issues_url = 'http://jira.example.com/rest/api/2/issue/JIRA-123'
         @transitions_url   = 'http://jira.example.com/rest/api/2/issue/JIRA-123/transitions'
@@ -422,13 +494,44 @@ describe JiraService do
             GlobalID: 'GitLab',
             relationship: 'mentioned on',
             object: {
-              url: "#{Gitlab.config.gitlab.url}/#{project.full_path}/commit/#{commit_id}",
+              url: "#{Gitlab.config.gitlab.url}/#{project.full_path}/-/commit/#{commit_id}",
               title: "Solved by commit #{commit_id}.",
               icon: { title: 'GitLab', url16x16: favicon_path },
               status: { resolved: true }
             }
           )
         ).once
+      end
+
+      context 'when "comment_on_event_enabled" is set to false' do
+        it 'creates Remote Link reference but does not create comment' do
+          allow(@jira_service).to receive_messages(comment_on_event_enabled: false)
+          @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+
+          expect(WebMock).not_to have_requested(:post, @comment_url)
+          expect(WebMock).to have_requested(:post, @remote_link_url)
+        end
+      end
+
+      context 'when Remote Link already exists' do
+        let(:remote_link) do
+          double(
+            'remote link',
+            object: {
+              url: "#{Gitlab.config.gitlab.url}/#{project.full_path}/-/commit/#{commit_id}"
+            }.with_indifferent_access
+          )
+        end
+
+        it 'does not create comment' do
+          allow(JIRA::Resource::Remotelink).to receive(:all).and_return([remote_link])
+
+          expect(remote_link).to receive(:save!)
+
+          @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
+
+          expect(WebMock).not_to have_requested(:post, @comment_url)
+        end
       end
 
       it 'does not send comment or remote links to issues already closed' do
@@ -455,7 +558,7 @@ describe JiraService do
         @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
 
         expect(WebMock).to have_requested(:post, @comment_url).with(
-          body: %r{#{custom_base_url}/#{project.full_path}/commit/#{commit_id}}
+          body: %r{#{custom_base_url}/#{project.full_path}/-/commit/#{commit_id}}
         ).once
       end
 
@@ -470,7 +573,7 @@ describe JiraService do
         @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
 
         expect(WebMock).to have_requested(:post, @comment_url).with(
-          body: %r{#{Gitlab.config.gitlab.url}/#{project.full_path}/commit/#{commit_id}}
+          body: %r{#{Gitlab.config.gitlab.url}/#{project.full_path}/-/commit/#{commit_id}}
         ).once
       end
 
@@ -480,7 +583,14 @@ describe JiraService do
 
         @jira_service.close_issue(resource, ExternalIssue.new('JIRA-123', project))
 
-        expect(@jira_service).to have_received(:log_error).with("Issue transition failed", error: "Bad Request", client_url: "http://jira.example.com")
+        expect(@jira_service).to have_received(:log_error).with(
+          "Issue transition failed",
+          error: hash_including(
+            exception_class: 'StandardError',
+            exception_message: "Bad Request"
+          ),
+          client_url: "http://jira.example.com"
+        )
       end
 
       it 'calls the api with jira_issue_transition_id' do
@@ -533,100 +643,125 @@ describe JiraService do
     end
   end
 
-  describe '#test_settings' do
+  describe '#create_cross_reference_note' do
+    let_it_be(:user)    { build_stubbed(:user) }
+    let_it_be(:project) { create(:project, :repository) }
     let(:jira_service) do
       described_class.new(
-        project: create(:project),
-        url: 'http://jira.example.com',
-        username: 'jira_username',
-        password: 'jira_password'
+        project: project,
+        url: url,
+        username: username,
+        password: password
       )
     end
 
-    def test_settings(api_url = nil)
-      api_url ||= 'jira.example.com'
-      test_url = "http://#{api_url}/rest/api/2/serverInfo"
+    let(:jira_issue) { ExternalIssue.new('JIRA-123', project) }
 
-      WebMock.stub_request(:get, test_url).with(basic_auth: %w(jira_username jira_password)).to_return(body: { url: 'http://url' }.to_json )
+    subject { jira_service.create_cross_reference_note(jira_issue, resource, user) }
 
+    shared_examples 'creates a comment on Jira' do
+      let(:issue_url) { "#{url}/rest/api/2/issue/JIRA-123" }
+      let(:comment_url) { "#{issue_url}/comment" }
+      let(:remote_link_url) { "#{issue_url}/remotelink" }
+
+      before do
+        allow(JIRA::Resource::Remotelink).to receive(:all).and_return([])
+        stub_request(:get, issue_url).with(basic_auth: [username, password])
+        stub_request(:post, comment_url).with(basic_auth: [username, password])
+        stub_request(:post, remote_link_url).with(basic_auth: [username, password])
+      end
+
+      it 'creates a comment on Jira' do
+        subject
+
+        expect(WebMock).to have_requested(:post, comment_url).with(
+          body: /mentioned this issue in/
+        ).once
+      end
+    end
+
+    context 'when resource is a commit' do
+      let(:resource) { project.commit('master') }
+
+      context 'when disabled' do
+        before do
+          allow_next_instance_of(JiraService) do |instance|
+            allow(instance).to receive(:commit_events) { false }
+          end
+        end
+
+        it { is_expected.to eq('Events for commits are disabled.') }
+      end
+
+      context 'when enabled' do
+        it_behaves_like 'creates a comment on Jira'
+      end
+    end
+
+    context 'when resource is a merge request' do
+      let(:resource) { build_stubbed(:merge_request, source_project: project) }
+
+      context 'when disabled' do
+        before do
+          allow_next_instance_of(JiraService) do |instance|
+            allow(instance).to receive(:merge_requests_events) { false }
+          end
+        end
+
+        it { is_expected.to eq('Events for merge requests are disabled.') }
+      end
+
+      context 'when enabled' do
+        it_behaves_like 'creates a comment on Jira'
+      end
+    end
+  end
+
+  describe '#test' do
+    let(:server_info_results) { { 'url' => 'http://url', 'deploymentType' => 'Cloud' } }
+    let_it_be(:project) { create(:project, :repository) }
+    let(:jira_service) do
+      described_class.new(
+        url: url,
+        project: project,
+        username: username,
+        password: password
+      )
+    end
+
+    def server_info
       jira_service.test(nil)
     end
 
     context 'when the test succeeds' do
-      it 'tries to get Jira project with URL when API URL not set' do
-        test_settings('jira.example.com')
+      it 'gets Jira project with URL when API URL not set' do
+        expect(server_info).to eq(success: true, result: server_info_results)
+        expect(WebMock).to have_requested(:get, /jira.example.com/)
       end
 
-      it 'returns correct result' do
-        expect(test_settings).to eq( { success: true, result: { 'url' => 'http://url' } })
-      end
+      it 'gets Jira project with API URL if set' do
+        jira_service.update!(api_url: 'http://jira.api.com')
 
-      it 'tries to get Jira project with API URL if set' do
-        jira_service.update(api_url: 'http://jira.api.com')
-        test_settings('jira.api.com')
+        expect(server_info).to eq(success: true, result: server_info_results)
+        expect(WebMock).to have_requested(:get, /jira.api.com/)
       end
     end
 
     context 'when the test fails' do
       it 'returns result with the error' do
         test_url = 'http://jira.example.com/rest/api/2/serverInfo'
-        WebMock.stub_request(:get, test_url).with(basic_auth: %w(jira_username jira_password))
-          .to_raise(JIRA::HTTPError.new(double(message: 'Some specific failure.')))
+        error_message = 'Some specific failure.'
 
-        expect(jira_service.test(nil)).to eq( { success: false, result: 'Some specific failure.' })
-      end
-    end
-  end
+        WebMock.stub_request(:get, test_url).with(basic_auth: [username, password])
+          .to_raise(JIRA::HTTPError.new(double(message: error_message)))
 
-  describe 'description and title' do
-    let(:title) { 'Jira One' }
-    let(:description) { 'Jira One issue tracker' }
-    let(:properties) do
-      {
-        url: 'http://jira.example.com/web',
-        username: 'mic',
-        password: 'password',
-        title: title,
-        description: description
-      }
-    end
+        expect(jira_service).to receive(:log_error).with(
+          'Error sending message',
+          client_url: 'http://jira.example.com',
+          error: error_message
+        )
 
-    context 'when it is not set' do
-      it 'default values are returned' do
-        service = create(:jira_service)
-
-        expect(service.title).to eq('Jira')
-        expect(service.description).to eq('Jira issue tracker')
-      end
-    end
-
-    context 'when it is set in properties' do
-      it 'values from properties are returned' do
-        service = create(:jira_service, :without_properties_callback, properties: properties)
-
-        expect(service.title).to eq(title)
-        expect(service.description).to eq(description)
-      end
-    end
-
-    context 'when it is in title & description fields' do
-      it 'values from title and description fields are returned' do
-        service = create(:jira_service, title: title, description: description)
-
-        expect(service.title).to eq(title)
-        expect(service.description).to eq(description)
-      end
-    end
-
-    context 'when it is in both properites & title & description fields' do
-      it 'values from title and description fields are returned' do
-        title2 = 'Jira 2'
-        description2 = 'Jira description 2'
-
-        service = create(:jira_service, title: title2, description: description2, properties: properties)
-
-        expect(service.title).to eq(title2)
-        expect(service.description).to eq(description2)
+        expect(jira_service.test(nil)).to eq(success: false, result: error_message)
       end
     end
   end
@@ -682,7 +817,7 @@ describe JiraService do
 
     describe '#new_issue_url' do
       it 'handles trailing slashes' do
-        expect(service.new_issue_url).to eq('http://jira.test.com/path/secure/CreateIssue.jspa')
+        expect(service.new_issue_url).to eq('http://jira.test.com/path/secure/CreateIssue!default.jspa')
       end
     end
   end

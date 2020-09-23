@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Import::GoogleCodeController do
+RSpec.describe Import::GoogleCodeController do
   include ImportSpecHelper
 
   let(:user) { create(:user) }
@@ -57,5 +57,9 @@ describe Import::GoogleCodeController do
       expect(assigns(:repos)).to be_empty
       expect(assigns(:incompatible_repos)).to eq([@repo])
     end
+  end
+
+  describe "POST create" do
+    it_behaves_like 'project import rate limiter'
   end
 end

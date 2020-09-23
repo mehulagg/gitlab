@@ -1,0 +1,12 @@
+.audit-controls {
+  .gl-form-input {
+    background-color: $white;
+  }
+
+  @include media-breakpoint-down(md) {
+    .dropdown-menu-toggle,
+    .filter-item {
+      width: 100%;
+    }
+  }
+}

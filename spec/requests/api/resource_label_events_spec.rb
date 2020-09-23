@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe API::ResourceLabelEvents do
-  set(:user) { create(:user) }
-  set(:project) { create(:project, :public, namespace: user.namespace) }
-  set(:label) { create(:label, project: project) }
+RSpec.describe API::ResourceLabelEvents do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project, reload: true) { create(:project, :public, namespace: user.namespace) }
+  let_it_be(:label) { create(:label, project: project) }
 
   before do
     project.add_developer(user)

@@ -2,12 +2,14 @@
 
 require 'spec_helper'
 
-describe 'epics list', :js do
+RSpec.describe 'epics list', :js do
   let(:group) { create(:group, :public) }
   let(:user) { create(:user) }
 
   before do
     stub_licensed_features(epics: true)
+    stub_feature_flags(unfiltered_epic_aggregates: false)
+    stub_feature_flags(async_filtering: false)
 
     sign_in(user)
   end
@@ -50,8 +52,8 @@ describe 'epics list', :js do
 
     it 'shows epic start and/or end dates when present' do
       page.within('.issuable-list') do
-        expect(find("li[data-id='#{epic1.id}'] .issuable-info .issuable-dates")).to have_content("Until #{epic1.end_date.strftime('%b %d, %Y')}")
-        expect(find("li[data-id='#{epic2.id}'] .issuable-info .issuable-dates")).to have_content("From #{epic2.start_date.strftime('%b %d, %Y')}")
+        expect(find("li[data-id='#{epic1.id}'] .issuable-info .issuable-dates")).to have_content("No start date – #{epic1.end_date.strftime('%b %d, %Y')}")
+        expect(find("li[data-id='#{epic2.id}'] .issuable-info .issuable-dates")).to have_content("#{epic2.start_date.strftime('%b %d, %Y')} – No end date")
       end
     end
 
@@ -138,15 +140,15 @@ describe 'epics list', :js do
 
       page.within('.content-wrapper .content') do
         page.within('.epics-list-section') do
-          page.within('div.epics-list-item:nth-child(1)') do
+          page.within('div.epic-item-container:nth-child(1) div.epics-list-item') do
             expect(page).to have_content(epic1.title)
           end
 
-          page.within('div.epics-list-item:nth-child(2)') do
+          page.within('div.epic-item-container:nth-child(2) div.epics-list-item') do
             expect(page).to have_content(epic3.title)
           end
 
-          page.within('div.epics-list-item:nth-child(3)') do
+          page.within('div.epic-item-container:nth-child(3) div.epics-list-item') do
             expect(page).to have_content(epic2.title)
           end
         end

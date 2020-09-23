@@ -19,7 +19,7 @@ module Gitlab
 
             metrics_report.add_metric(name, metric_values.first)
           rescue => e
-            Gitlab::Sentry.track_exception(e)
+            Gitlab::ErrorTracking.track_and_raise_for_dev_exception(e)
             raise MetricsParserError, "Metrics parsing failed"
           end
         end

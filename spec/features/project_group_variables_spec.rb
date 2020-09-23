@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Project group variables', :js do
+RSpec.describe 'Project group variables', :js do
   let(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:subgroup) { create(:group, parent: group) }
@@ -24,6 +24,7 @@ describe 'Project group variables', :js do
     sign_in(user)
     project.add_maintainer(user)
     group.add_owner(user)
+    stub_feature_flags(new_variables_ui: false)
   end
 
   it 'project in group shows inherited vars from ancestor group' do

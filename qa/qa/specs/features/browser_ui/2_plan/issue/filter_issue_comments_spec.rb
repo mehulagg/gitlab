@@ -1,22 +1,15 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'filter issue comments activities' do
-      let(:issue_title) { 'issue title' }
-
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
-        issue = Resource::Issue.fabricate_via_api! do |issue|
-          issue.title = issue_title
-        end
-
-        issue.visit!
+        Resource::Issue.fabricate_via_api!.visit!
       end
 
-      it 'user filters comments and activities in an issue' do
+      it 'filters comments and activities in an issue', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/425' do
         Page::Project::Issue::Show.perform do |show|
           my_own_comment = "My own comment"
           made_the_issue_confidential = "made the issue confidential"

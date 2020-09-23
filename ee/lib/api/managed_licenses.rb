@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ManagedLicenses < Grape::API
+  class ManagedLicenses < Grape::API::Instance
     include PaginationParams
 
     before { authenticate! unless route.settings[:skip_authentication] }
@@ -113,8 +113,9 @@ module API
         authorize_can_admin!
         not_found!('SoftwareLicensePolicy') unless software_license_policy
 
-        status 204
         software_license_policy.destroy!
+
+        no_content!
       end
     end
   end

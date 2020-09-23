@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Ci::Build do
-  set(:group) { create(:group, plan: :bronze_plan) }
+RSpec.describe Ci::Build do
+  let_it_be(:group) { create(:group_with_plan, plan: :bronze_plan) }
   let(:project) { create(:project, :repository, group: group) }
 
   let(:pipeline) do
@@ -14,34 +14,72 @@ describe Ci::Build do
   end
 
   let(:job) { create(:ci_build, pipeline: pipeline) }
+  let(:artifact) { create(:ee_ci_job_artifact, :sast, job: job, project: job.project) }
+
+  describe '.license_scan' do
+    subject(:build) { described_class.license_scan.first }
+
+    let(:artifact) { build.job_artifacts.first }
+
+    context 'with old license_management artifact' do
+      let!(:license_artifact) { create(:ee_ci_job_artifact, :license_management, job: job, project: job.project) }
+
+      it { expect(artifact.file_type).to eq 'license_management' }
+    end
+
+    context 'with new license_scanning artifact' do
+      let!(:license_artifact) { create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project) }
+
+      it { expect(artifact.file_type).to eq 'license_scanning' }
+    end
+  end
+
+  describe 'associations' do
+    it { is_expected.to have_many(:security_scans) }
+  end
 
   describe '#shared_runners_minutes_limit_enabled?' do
     subject { job.shared_runners_minutes_limit_enabled? }
 
-    context 'for shared runner' do
-      before do
-        job.runner = create(:ci_runner, :instance)
+    shared_examples 'depends on runner presence and type' do
+      context 'for shared runner' do
+        before do
+          job.runner = create(:ci_runner, :instance)
+        end
+
+        context 'when project#shared_runners_minutes_limit_enabled? is true' do
+          specify do
+            expect(job.project).to receive(:shared_runners_minutes_limit_enabled?)
+              .and_return(true)
+
+            is_expected.to be_truthy
+          end
+        end
+
+        context 'when project#shared_runners_minutes_limit_enabled? is false' do
+          specify do
+            expect(job.project).to receive(:shared_runners_minutes_limit_enabled?)
+              .and_return(false)
+
+            is_expected.to be_falsey
+          end
+        end
       end
 
-      it do
-        expect(job.project).to receive(:shared_runners_minutes_limit_enabled?)
-          .and_return(true)
+      context 'with specific runner' do
+        before do
+          job.runner = create(:ci_runner, :project)
+        end
 
-        is_expected.to be_truthy
+        it { is_expected.to be_falsey }
+      end
+
+      context 'without runner' do
+        it { is_expected.to be_falsey }
       end
     end
 
-    context 'with specific runner' do
-      before do
-        job.runner = create(:ci_runner, :project)
-      end
-
-      it { is_expected.to be_falsey }
-    end
-
-    context 'without runner' do
-      it { is_expected.to be_falsey }
-    end
+    it_behaves_like 'depends on runner presence and type'
   end
 
   context 'updates pipeline minutes' do
@@ -67,7 +105,7 @@ describe Ci::Build do
       expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
         .with(:build, job.id)
 
-      job.update(status: :running)
+      job.update!(status: :running)
     end
   end
 
@@ -80,7 +118,7 @@ describe Ci::Build do
       end
 
       before do
-        job.update(environment: 'staging')
+        job.update!(environment: 'staging')
         create(:environment, name: 'staging', project: job.project)
 
         variable =
@@ -99,10 +137,27 @@ describe Ci::Build do
         end
       end
     end
+
+    describe 'variable CI_HAS_OPEN_REQUIREMENTS' do
+      it "is included with value 'true' if there are open requirements" do
+        create(:requirement, project: project)
+
+        expect(subject).to include({ key: 'CI_HAS_OPEN_REQUIREMENTS',
+                                     value: 'true', public: true, masked: false })
+      end
+
+      it 'is not included if there are no open requirements' do
+        create(:requirement, project: project, state: :archived)
+
+        requirement_variable = subject.find { |var| var[:key] == 'CI_HAS_OPEN_REQUIREMENTS' }
+
+        expect(requirement_variable).to be_nil
+      end
+    end
   end
 
   describe '#collect_security_reports!' do
-    let(:security_reports) { ::Gitlab::Ci::Reports::Security::Reports.new(pipeline.sha) }
+    let(:security_reports) { ::Gitlab::Ci::Reports::Security::Reports.new(pipeline) }
 
     subject { job.collect_security_reports!(security_reports) }
 
@@ -112,58 +167,59 @@ describe Ci::Build do
 
     context 'when build has a security report' do
       context 'when there is a sast report' do
-        before do
-          create(:ee_ci_job_artifact, :sast, job: job, project: job.project)
-        end
+        let!(:artifact) { create(:ee_ci_job_artifact, :sast, job: job, project: job.project) }
 
         it 'parses blobs and add the results to the report' do
           subject
 
-          expect(security_reports.get_report('sast').occurrences.size).to eq(33)
+          expect(security_reports.get_report('sast', artifact).findings.size).to eq(33)
+        end
+
+        it 'adds the created date to the report' do
+          subject
+
+          expect(security_reports.get_report('sast', artifact).created_at.to_s).to eq(artifact.created_at.to_s)
         end
       end
 
       context 'when there are multiple reports' do
-        before do
-          create(:ee_ci_job_artifact, :sast, job: job, project: job.project)
-          create(:ee_ci_job_artifact, :dependency_scanning, job: job, project: job.project)
-          create(:ee_ci_job_artifact, :container_scanning, job: job, project: job.project)
-          create(:ee_ci_job_artifact, :dast, job: job, project: job.project)
-        end
+        let!(:sast_artifact) { create(:ee_ci_job_artifact, :sast, job: job, project: job.project) }
+        let!(:ds_artifact) { create(:ee_ci_job_artifact, :dependency_scanning, job: job, project: job.project) }
+        let!(:cs_artifact) { create(:ee_ci_job_artifact, :container_scanning, job: job, project: job.project) }
+        let!(:dast_artifact) { create(:ee_ci_job_artifact, :dast, job: job, project: job.project) }
 
         it 'parses blobs and adds the results to the reports' do
           subject
 
-          expect(security_reports.get_report('sast').occurrences.size).to eq(33)
-          expect(security_reports.get_report('dependency_scanning').occurrences.size).to eq(4)
-          expect(security_reports.get_report('container_scanning').occurrences.size).to eq(8)
-          expect(security_reports.get_report('dast').occurrences.size).to eq(20)
+          expect(security_reports.get_report('sast', sast_artifact).findings.size).to eq(33)
+          expect(security_reports.get_report('dependency_scanning', ds_artifact).findings.size).to eq(4)
+          expect(security_reports.get_report('container_scanning', cs_artifact).findings.size).to eq(8)
+          expect(security_reports.get_report('dast', dast_artifact).findings.size).to eq(20)
         end
       end
 
       context 'when there is a corrupted sast report' do
-        before do
-          create(:ee_ci_job_artifact, :sast_with_corrupted_data, job: job, project: job.project)
-        end
+        let!(:artifact) { create(:ee_ci_job_artifact, :sast_with_corrupted_data, job: job, project: job.project) }
 
         it 'stores an error' do
           subject
 
-          expect(security_reports.get_report('sast')).to be_errored
+          expect(security_reports.get_report('sast', artifact)).to be_errored
         end
       end
     end
 
     context 'when there is unsupported file type' do
+      let!(:artifact) { create(:ee_ci_job_artifact, :codequality, job: job, project: job.project) }
+
       before do
         stub_const("Ci::JobArtifact::SECURITY_REPORT_FILE_TYPES", %w[codequality])
-        create(:ee_ci_job_artifact, :codequality, job: job, project: job.project)
       end
 
       it 'stores an error' do
         subject
 
-        expect(security_reports.get_report('codequality')).to be_errored
+        expect(security_reports.get_report('codequality', artifact)).to be_errored
       end
     end
   end
@@ -174,13 +230,27 @@ describe Ci::Build do
     let(:license_scanning_report) { Gitlab::Ci::Reports::LicenseScanning::Report.new }
 
     before do
-      stub_licensed_features(license_management: true)
+      stub_licensed_features(license_scanning: true)
     end
 
     it { expect(license_scanning_report.licenses.count).to eq(0) }
 
-    context 'when build has a license management report' do
-      context 'when there is a license scanning report' do
+    context 'when build has a license scanning report' do
+      context 'when there is a new type report' do
+        before do
+          create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
+        end
+
+        it 'parses blobs and add the results to the report' do
+          expect { subject }.not_to raise_error
+
+          expect(license_scanning_report.licenses.count).to eq(4)
+          expect(license_scanning_report.licenses.map(&:name)).to contain_exactly("Apache 2.0", "MIT", "New BSD", "unknown")
+          expect(license_scanning_report.licenses.find { |x| x.name == 'MIT' }.dependencies.count).to eq(52)
+        end
+      end
+
+      context 'when there is an old type report' do
         before do
           create(:ee_ci_job_artifact, :license_management, job: job, project: job.project)
         end
@@ -194,20 +264,21 @@ describe Ci::Build do
         end
       end
 
-      context 'when there is a corrupted license management report' do
+      context 'when there is a corrupted report' do
         before do
-          create(:ee_ci_job_artifact, :corrupted_license_management_report, job: job, project: job.project)
+          create(:ee_ci_job_artifact, :license_scan, :with_corrupted_data, job: job, project: job.project)
         end
 
-        it 'raises an error' do
-          expect { subject }.to raise_error(Gitlab::Ci::Parsers::LicenseCompliance::LicenseScanning::LicenseScanningParserError)
+        it 'returns an empty report' do
+          expect { subject }.not_to raise_error
+          expect(license_scanning_report).to be_empty
         end
       end
 
       context 'when Feature flag is disabled for License Scanning reports parsing' do
         before do
           stub_feature_flags(parse_license_management_reports: false)
-          create(:ee_ci_job_artifact, :license_management, job: job, project: job.project)
+          create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
         end
 
         it 'does NOT parse license scanning report' do
@@ -217,10 +288,10 @@ describe Ci::Build do
         end
       end
 
-      context 'when the license management feature is disabled' do
+      context 'when the license scanning feature is disabled' do
         before do
-          stub_licensed_features(license_management: false)
-          create(:ee_ci_job_artifact, :license_management, job: job, project: job.project)
+          stub_licensed_features(license_scanning: false)
+          create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
         end
 
         it 'does NOT parse license scanning report' do
@@ -240,18 +311,40 @@ describe Ci::Build do
 
     context 'with available licensed feature' do
       before do
-        stub_licensed_features(dependency_list: true)
+        stub_licensed_features(dependency_scanning: true)
       end
 
       it 'parses blobs and add the results to the report' do
         subject
-        blob_path = "/#{project.full_path}/blob/#{job.sha}/yarn/yarn.lock"
+        blob_path = "/#{project.full_path}/-/blob/#{job.sha}/yarn/yarn.lock"
         mini_portile2 = dependency_list_report.dependencies[0]
         yarn = dependency_list_report.dependencies[20]
 
         expect(dependency_list_report.dependencies.count).to eq(21)
         expect(mini_portile2[:name]).to eq('mini_portile2')
         expect(yarn[:location][:blob_path]).to eq(blob_path)
+      end
+    end
+
+    context 'with different report format' do
+      let!(:dl_artifact) { create(:ee_ci_job_artifact, :dependency_scanning, job: job, project: job.project) }
+      let(:dependency_list_report) { Gitlab::Ci::Reports::DependencyList::Report.new }
+
+      before do
+        stub_licensed_features(dependency_scanning: true)
+      end
+
+      subject { job.collect_dependency_list_reports!(dependency_list_report) }
+
+      it 'parses blobs and add the results to the report' do
+        subject
+        blob_path = "/#{project.full_path}/-/blob/#{job.sha}/sast-sample-rails/Gemfile.lock"
+        netty = dependency_list_report.dependencies.first
+        ffi = dependency_list_report.dependencies.last
+
+        expect(dependency_list_report.dependencies.count).to eq(4)
+        expect(netty[:name]).to eq('io.netty/netty')
+        expect(ffi[:location][:blob_path]).to eq(blob_path)
       end
     end
 
@@ -265,7 +358,7 @@ describe Ci::Build do
   end
 
   describe '#collect_licenses_for_dependency_list!' do
-    let!(:lm_artifact) { create(:ee_ci_job_artifact, :license_management, job: job, project: job.project) }
+    let!(:license_scan_artifact) { create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project) }
     let(:dependency_list_report) { Gitlab::Ci::Reports::DependencyList::Report.new }
     let(:dependency) { build(:dependency, :nokogiri) }
 
@@ -277,7 +370,7 @@ describe Ci::Build do
 
     context 'with available licensed feature' do
       before do
-        stub_licensed_features(dependency_list: true)
+        stub_licensed_features(dependency_scanning: true)
       end
 
       it 'parses blobs and add found license' do
@@ -320,13 +413,47 @@ describe Ci::Build do
 
       context 'when license does not have metrics_reports' do
         before do
-          stub_licensed_features(license_management: false)
+          stub_licensed_features(license_scanning: false)
         end
 
         it 'does not parse metrics report' do
           subject
 
           expect(metrics_report.metrics.count).to eq(0)
+        end
+      end
+    end
+  end
+
+  describe '#collect_requirements_reports!' do
+    subject { job.collect_requirements_reports!(requirements_report) }
+
+    let(:requirements_report) { Gitlab::Ci::Reports::RequirementsManagement::Report.new }
+
+    context 'when there is a requirements report' do
+      before do
+        create(:ee_ci_job_artifact, :all_passing_requirements, job: job, project: job.project)
+      end
+
+      context 'when requirements are available' do
+        before do
+          stub_licensed_features(requirements: true)
+        end
+
+        it 'parses blobs and adds the results to the report' do
+          expect { subject }.to change { requirements_report.requirements.count }.from(0).to(1)
+        end
+      end
+
+      context 'when requirements are not available' do
+        before do
+          stub_licensed_features(requirements: false)
+        end
+
+        it 'does not parse requirements report' do
+          subject
+
+          expect(requirements_report.requirements.count).to eq(0)
         end
       end
     end
@@ -348,6 +475,89 @@ describe Ci::Build do
       let(:merge_request) { create(:merge_request, :on_train, :with_merge_train_pipeline) }
 
       it { is_expected.to be false }
+    end
+  end
+
+  describe ".license_scan" do
+    it 'returns only license artifacts' do
+      create(:ci_build, job_artifacts: [create(:ci_job_artifact, :zip)])
+      build_with_license_scan = create(:ci_build, job_artifacts: [create(:ci_job_artifact, file_type: :license_scanning, file_format: :raw)])
+
+      expect(described_class.license_scan).to contain_exactly(build_with_license_scan)
+    end
+  end
+
+  describe 'ci_secrets_management_available?' do
+    subject(:build) { job.ci_secrets_management_available? }
+
+    context 'when secrets management feature is available' do
+      before do
+        stub_licensed_features(ci_secrets_management: true)
+      end
+
+      it { is_expected.to be true }
+    end
+
+    context 'when secrets management feature is not available' do
+      before do
+        stub_licensed_features(ci_secrets_management: false)
+      end
+
+      it { is_expected.to be false }
+    end
+  end
+
+  describe '#runner_required_feature_names' do
+    let(:valid_secrets) do
+      {
+        DATABASE_PASSWORD: {
+          vault: {
+            engine: { name: 'kv-v2', path: 'kv-v2' },
+            path: 'production/db',
+            field: 'password'
+          }
+        }
+      }
+    end
+
+    let(:build) { create(:ci_build, secrets: secrets) }
+
+    subject { build.runner_required_feature_names }
+
+    context 'when secrets management feature is available' do
+      before do
+        stub_licensed_features(ci_secrets_management: true)
+      end
+
+      context 'when there are secrets defined' do
+        let(:secrets) { valid_secrets }
+
+        it { is_expected.to include(:vault_secrets) }
+      end
+
+      context 'when there are no secrets defined' do
+        let(:secrets) { {} }
+
+        it { is_expected.not_to include(:vault_secrets) }
+      end
+    end
+
+    context 'when secrets management feature is not available' do
+      before do
+        stub_licensed_features(ci_secrets_management: false)
+      end
+
+      context 'when there are secrets defined' do
+        let(:secrets) { valid_secrets }
+
+        it { is_expected.not_to include(:vault_secrets) }
+      end
+
+      context 'when there are no secrets defined' do
+        let(:secrets) { {} }
+
+        it { is_expected.not_to include(:vault_secrets) }
+      end
     end
   end
 end

@@ -2,29 +2,27 @@
 
 require 'spec_helper'
 
-describe API::Issues do
-  set(:user) { create(:user) }
-  let(:user2)       { create(:user) }
-  let(:non_member)  { create(:user) }
-  set(:guest)       { create(:user) }
-  set(:author)      { create(:author) }
-  set(:assignee)    { create(:assignee) }
-  let(:admin)       { create(:user, :admin) }
-
-  let(:issue_title)       { 'foo' }
-  let(:issue_description) { 'closed' }
-
-  let(:no_milestone_title) { 'None' }
-  let(:any_milestone_title) { 'Any' }
+RSpec.describe API::Issues do
+  let_it_be(:user2)               { create(:user) }
+  let_it_be(:admin)               { create(:user, :admin) }
+  let_it_be(:non_member)          { create(:user) }
+  let_it_be(:user)                { create(:user) }
+  let_it_be(:guest)               { create(:user) }
+  let_it_be(:author)              { create(:author) }
+  let_it_be(:assignee)            { create(:assignee) }
+  let_it_be(:issue_title)         { 'foo' }
+  let_it_be(:issue_description)   { 'closed' }
+  let_it_be(:no_milestone_title)  { 'None' }
+  let_it_be(:any_milestone_title) { 'Any' }
 
   before do
     stub_licensed_features(multiple_issue_assignees: false, issue_weights: false)
   end
 
   describe 'GET /groups/:id/issues' do
-    let!(:group)            { create(:group) }
-    let!(:group_project)    { create(:project, :public, :repository, creator_id: user.id, namespace: group) }
-    let!(:private_mrs_project) do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:group_project) { create(:project, :public, :repository, creator_id: user.id, namespace: group) }
+    let_it_be(:private_mrs_project) do
       create(:project, :public, :repository, creator_id: user.id, namespace: group, merge_requests_access_level: ProjectFeature::PRIVATE)
     end
 
@@ -38,6 +36,7 @@ describe API::Issues do
         updated_at: 3.hours.ago,
         created_at: 1.day.ago
     end
+
     let!(:group_confidential_issue) do
       create :issue,
         :confidential,
@@ -47,6 +46,7 @@ describe API::Issues do
         updated_at: 2.hours.ago,
         created_at: 2.days.ago
     end
+
     let!(:group_issue) do
       create :issue,
         author: user,
@@ -58,14 +58,17 @@ describe API::Issues do
         description: issue_description,
         created_at: 5.days.ago
     end
+
     let!(:group_label) do
       create(:label, title: 'group_lbl', color: '#FFAABB', project: group_project)
     end
+
     let!(:group_label_link) { create(:label_link, label: group_label, target: group_issue) }
     let!(:group_milestone) { create(:milestone, title: '3.0.0', project: group_project) }
     let!(:group_empty_milestone) do
       create(:milestone, title: '4.0.0', project: group_project)
     end
+
     let!(:group_note) { create(:note_on_issue, author: user, project: group_project, noteable: group_issue) }
 
     let(:base_url) { "/groups/#{group.id}/issues" }
@@ -74,7 +77,7 @@ describe API::Issues do
       it 'returns issues statistics' do
         get api("/groups/#{group.id}/issues_statistics", user), params: params
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['statistics']).not_to be_nil
         expect(json_response['statistics']['counts']['all']).to eq counts[:all]
         expect(json_response['statistics']['counts']['closed']).to eq counts[:closed]
@@ -248,6 +251,7 @@ describe API::Issues do
                    target_project: private_mrs_project,
                    description: "closes #{group_issue.to_reference(private_mrs_project)}")
           end
+
           let!(:merge_request2) do
             create(:merge_request,
                    :simple,
@@ -345,7 +349,7 @@ describe API::Issues do
       it 'exposes known attributes' do
         get api(base_url, admin)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response.last.keys).to include(*%w(id iid project_id title description))
         expect(json_response.last).not_to have_key('subscribed')
       end
@@ -398,30 +402,76 @@ describe API::Issues do
         expect_paginated_array_response([group_closed_issue.id, group_issue.id])
       end
 
-      it 'returns an array of labeled group issues' do
-        get api(base_url, user), params: { labels: group_label.title }
+      shared_examples 'labels parameter' do
+        it 'returns an array of labeled group issues' do
+          get api(base_url, user), params: { labels: group_label.title }
 
-        expect_paginated_array_response(group_issue.id)
-        expect(json_response.first['labels']).to eq([group_label.title])
+          expect_paginated_array_response(group_issue.id)
+          expect(json_response.first['labels']).to eq([group_label.title])
+        end
+
+        it 'returns an array of labeled group issues' do
+          get api(base_url, user), params: { labels: group_label.title }
+
+          expect_paginated_array_response(group_issue.id)
+          expect(json_response.first['labels']).to eq([group_label.title])
+        end
+
+        it 'returns an array of labeled group issues with labels param as array' do
+          get api(base_url, user), params: { labels: [group_label.title] }
+
+          expect_paginated_array_response(group_issue.id)
+          expect(json_response.first['labels']).to eq([group_label.title])
+        end
+
+        it 'returns an array of labeled group issues where all labels match' do
+          get api(base_url, user), params: { labels: "#{group_label.title},foo,bar" }
+
+          expect_paginated_array_response([])
+        end
+
+        it 'returns an array of labeled group issues where all labels match with labels param as array' do
+          get api(base_url, user), params: { labels: [group_label.title, 'foo', 'bar'] }
+
+          expect_paginated_array_response([])
+        end
+
+        context 'with labeled issues' do
+          let(:group_issue2) { create :issue, project: group_project }
+          let(:label_b) { create(:label, title: 'foo', project: group_project) }
+          let(:label_c) { create(:label, title: 'bar', project: group_project) }
+
+          before do
+            create(:label_link, label: group_label, target: group_issue2)
+            create(:label_link, label: label_b, target: group_issue)
+            create(:label_link, label: label_b, target: group_issue2)
+            create(:label_link, label: label_c, target: group_issue)
+
+            get api(base_url, user), params: params
+          end
+
+          let(:issue) { group_issue }
+          let(:issue2) { group_issue2 }
+          let(:label) { group_label }
+
+          it_behaves_like 'labeled issues with labels and label_name params'
+        end
       end
 
-      it 'returns an array of labeled group issues with labels param as array' do
-        get api(base_url, user), params: { labels: [group_label.title] }
+      context 'when `optimized_issuable_label_filter` feature flag is off' do
+        before do
+          stub_feature_flags(optimized_issuable_label_filter: false)
+        end
 
-        expect_paginated_array_response(group_issue.id)
-        expect(json_response.first['labels']).to eq([group_label.title])
+        it_behaves_like 'labels parameter'
       end
 
-      it 'returns an array of labeled group issues where all labels match' do
-        get api(base_url, user), params: { labels: "#{group_label.title},foo,bar" }
+      context 'when `optimized_issuable_label_filter` feature flag is on' do
+        before do
+          stub_feature_flags(optimized_issuable_label_filter: true)
+        end
 
-        expect_paginated_array_response([])
-      end
-
-      it 'returns an array of labeled group issues where all labels match with labels param as array' do
-        get api(base_url, user), params: { labels: [group_label.title, 'foo', 'bar'] }
-
-        expect_paginated_array_response([])
+        it_behaves_like 'labels parameter'
       end
 
       it 'returns issues matching given search string for title' do
@@ -436,25 +486,27 @@ describe API::Issues do
         expect_paginated_array_response(group_issue.id)
       end
 
-      context 'with labeled issues' do
-        let(:group_issue2) { create :issue, project: group_project }
-        let(:label_b) { create(:label, title: 'foo', project: group_project) }
-        let(:label_c) { create(:label, title: 'bar', project: group_project) }
-
-        before do
-          create(:label_link, label: group_label, target: group_issue2)
-          create(:label_link, label: label_b, target: group_issue)
-          create(:label_link, label: label_b, target: group_issue2)
-          create(:label_link, label: label_c, target: group_issue)
-
-          get api(base_url, user), params: params
+      context 'with archived projects' do
+        let_it_be(:archived_issue) do
+          create(
+            :issue, author: user, assignees: [user],
+            project: create(:project, :public, :archived, creator_id: user.id, namespace: group)
+          )
         end
 
-        let(:issue) { group_issue }
-        let(:issue2) { group_issue2 }
-        let(:label) { group_label }
+        it 'returns only non archived projects issues' do
+          get api(base_url, user)
 
-        it_behaves_like 'labeled issues with labels and label_name params'
+          expect_paginated_array_response([group_closed_issue.id, group_confidential_issue.id, group_issue.id])
+        end
+
+        it 'returns issues from archived projects if non_archived it set to false' do
+          get api(base_url, user), params: { non_archived: false }
+
+          expect_paginated_array_response(
+            [archived_issue.id, group_closed_issue.id, group_confidential_issue.id, group_issue.id]
+          )
+        end
       end
 
       it 'returns an array of issues found by iids' do
@@ -477,27 +529,27 @@ describe API::Issues do
       end
 
       it 'returns an array of group issues with any label' do
-        get api(base_url, user), params: { labels: IssuesFinder::FILTER_ANY }
+        get api(base_url, user), params: { labels: IssuableFinder::Params::FILTER_ANY }
 
         expect_paginated_array_response(group_issue.id)
         expect(json_response.first['id']).to eq(group_issue.id)
       end
 
       it 'returns an array of group issues with any label with labels param as array' do
-        get api(base_url, user), params: { labels: [IssuesFinder::FILTER_ANY] }
+        get api(base_url, user), params: { labels: [IssuableFinder::Params::FILTER_ANY] }
 
         expect_paginated_array_response(group_issue.id)
         expect(json_response.first['id']).to eq(group_issue.id)
       end
 
       it 'returns an array of group issues with no label' do
-        get api(base_url, user), params: { labels: IssuesFinder::FILTER_NONE }
+        get api(base_url, user), params: { labels: IssuableFinder::Params::FILTER_NONE }
 
         expect_paginated_array_response([group_closed_issue.id, group_confidential_issue.id])
       end
 
       it 'returns an array of group issues with no label with labels param as array' do
-        get api(base_url, user), params: { labels: [IssuesFinder::FILTER_NONE] }
+        get api(base_url, user), params: { labels: [IssuableFinder::Params::FILTER_NONE] }
 
         expect_paginated_array_response([group_closed_issue.id, group_confidential_issue.id])
       end
@@ -529,7 +581,7 @@ describe API::Issues do
       it 'returns an array of issues with no milestone' do
         get api(base_url, user), params: { milestone: no_milestone_title }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
 
         expect_paginated_array_response(group_confidential_issue.id)
       end
@@ -676,15 +728,42 @@ describe API::Issues do
         it 'returns error when multiple assignees are passed' do
           get api(base_url, user), params: { assignee_username: [assignee.username, another_assignee.username], scope: 'all' }
 
-          expect(response).to have_gitlab_http_status(400)
+          expect(response).to have_gitlab_http_status(:bad_request)
           expect(json_response["error"]).to include("allows one value, but found 2")
         end
 
         it 'returns error when assignee_username and assignee_id are passed together' do
           get api(base_url, user), params: { assignee_username: [assignee.username], assignee_id: another_assignee.id, scope: 'all' }
 
-          expect(response).to have_gitlab_http_status(400)
+          expect(response).to have_gitlab_http_status(:bad_request)
           expect(json_response["error"]).to include("mutually exclusive")
+        end
+      end
+    end
+
+    describe "#to_reference" do
+      it 'exposes reference path in context of group' do
+        get api(base_url, user)
+
+        expect(json_response.first['references']['short']).to eq("##{group_closed_issue.iid}")
+        expect(json_response.first['references']['relative']).to eq("#{group_closed_issue.project.path}##{group_closed_issue.iid}")
+        expect(json_response.first['references']['full']).to eq("#{group_closed_issue.project.full_path}##{group_closed_issue.iid}")
+      end
+
+      context 'referencing from parent group' do
+        let(:parent_group) { create(:group) }
+
+        before do
+          group.update(parent_id: parent_group.id)
+          group_closed_issue.reload
+        end
+
+        it 'exposes reference path in context of parent group' do
+          get api("/groups/#{parent_group.id}/issues")
+
+          expect(json_response.first['references']['short']).to eq("##{group_closed_issue.iid}")
+          expect(json_response.first['references']['relative']).to eq("#{group_closed_issue.project.full_path}##{group_closed_issue.iid}")
+          expect(json_response.first['references']['full']).to eq("#{group_closed_issue.project.full_path}##{group_closed_issue.iid}")
         end
       end
     end

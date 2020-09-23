@@ -1,10 +1,9 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
 import ItemButton from './button.vue';
+import { isTextFile } from '~/ide/utils';
 
 export default {
   components: {
-    Icon,
     ItemButton,
   },
   props: {
@@ -25,41 +24,28 @@ export default {
     },
   },
   methods: {
-    isText(content, fileType) {
-      const knownBinaryFileTypes = ['image/'];
-      const knownTextFileTypes = ['text/'];
-      const isKnownBinaryFileType = knownBinaryFileTypes.find(type => fileType.includes(type));
-      const isKnownTextFileType = knownTextFileTypes.find(type => fileType.includes(type));
-      const asciiRegex = /^[ -~\t\n\r]+$/; // tests whether a string contains ascii characters only (ranges from space to tilde, tabs and new lines)
-
-      if (isKnownBinaryFileType) {
-        return false;
-      }
-
-      if (isKnownTextFileType) {
-        return true;
-      }
-
-      // if it's not a known file type, determine the type by evaluating the file contents
-      return asciiRegex.test(content);
-    },
     createFile(target, file) {
       const { name } = file;
-      let { result } = target;
-      const encodedContent = result.split('base64,')[1];
+      const encodedContent = target.result.split('base64,')[1];
       const rawContent = encodedContent ? atob(encodedContent) : '';
-      const isText = this.isText(rawContent, file.type);
+      const isText = isTextFile({ content: rawContent, mimeType: file.type, name });
 
-      result = isText ? rawContent : encodedContent;
+      const emitCreateEvent = content =>
+        this.$emit('create', {
+          name: `${this.path ? `${this.path}/` : ''}${name}`,
+          type: 'blob',
+          content,
+          rawPath: !isText ? target.result : '',
+        });
 
-      this.$emit('create', {
-        name: `${this.path ? `${this.path}/` : ''}${name}`,
-        type: 'blob',
-        content: result,
-        base64: !isText,
-        binary: !isText,
-        rawPath: !isText ? target.result : '',
-      });
+      if (isText) {
+        const reader = new FileReader();
+
+        reader.addEventListener('load', e => emitCreateEvent(e.target.result), { once: true });
+        reader.readAsText(file);
+      } else {
+        emitCreateEvent(encodedContent);
+      }
     },
     readFile(file) {
       const reader = new FileReader();

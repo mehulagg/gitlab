@@ -36,8 +36,6 @@ describe('IDE store integration', () => {
     beforeEach(() => {
       const { entries, treeList } = decorateFiles({
         data: [`${TEST_PATH_DIR}/`, TEST_PATH, 'README.md'],
-        projectId: TEST_PROJECT_ID,
-        branchId: TEST_BRANCH,
       });
 
       Object.assign(entries[TEST_PATH], {
@@ -61,19 +59,14 @@ describe('IDE store integration', () => {
         store.dispatch('createTempEntry', { name: TEST_PATH, type: 'blob' });
       });
 
-      it('has changed and staged', () => {
-        expect(store.state.changedFiles).toEqual([
-          expect.objectContaining({
-            path: TEST_PATH,
-            tempFile: true,
-            deleted: false,
-          }),
-        ]);
-
+      it('is added to staged as modified', () => {
         expect(store.state.stagedFiles).toEqual([
           expect.objectContaining({
             path: TEST_PATH,
-            deleted: true,
+            deleted: false,
+            staged: true,
+            changed: true,
+            tempFile: false,
           }),
         ]);
       });

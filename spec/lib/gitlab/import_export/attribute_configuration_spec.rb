@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 # Part of the test security suite for the Import/Export feature
@@ -7,24 +9,14 @@ require 'spec_helper'
 # to be included as part of the export, or blacklist them using the import_export.yml configuration file.
 # Likewise, new models added to import_export.yml, will need to be added with their correspondent attributes
 # to this spec.
-describe 'Import/Export attribute configuration' do
+RSpec.describe 'Import/Export attribute configuration' do
   include ConfigurationHelper
-
-  let(:config_hash) { Gitlab::ImportExport::Config.new.to_h.deep_stringify_keys }
-  let(:relation_names) do
-    names = names_from_tree(config_hash.dig('tree', 'project'))
-
-    # Remove duplicated or add missing models
-    # - project is not part of the tree, so it has to be added manually.
-    # - milestone, labels have both singular and plural versions in the tree, so remove the duplicates.
-    names.flatten.uniq - %w(milestones labels) + ['project']
-  end
 
   let(:safe_attributes_file) { 'spec/lib/gitlab/import_export/safe_model_attributes.yml' }
   let(:safe_model_attributes) { YAML.load_file(safe_attributes_file) }
 
   it 'has no new columns' do
-    relation_names.each do |relation_name|
+    relation_names_for(:project).each do |relation_name|
       relation_class = relation_class_for_name(relation_name)
       relation_attributes = relation_class.new.attributes.keys - relation_class.encrypted_attributes.keys.map(&:to_s)
 
@@ -50,8 +42,5 @@ describe 'Import/Export attribute configuration' do
       SAFE_MODEL_ATTRIBUTES: #{File.expand_path(safe_attributes_file)}
       IMPORT_EXPORT_CONFIG: #{Gitlab::ImportExport.config_file}
     MSG
-  end
-
-  class Author < User
   end
 end

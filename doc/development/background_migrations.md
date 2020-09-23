@@ -10,15 +10,15 @@ migrations automatically reschedule themselves for a later point in time.
 
 ## When To Use Background Migrations
 
-> **Note:**
-> When adding background migrations _you must_ make sure they are announced in the
-> monthly release post along with an estimate of how long it will take to complete
-> the migrations.
-
 In the vast majority of cases you will want to use a regular Rails migration
-instead. Background migrations should _only_ be used when migrating _data_ in
+instead. Background migrations should be used when migrating _data_ in
 tables that have so many rows this process would take hours when performed in a
 regular Rails migration.
+
+Background migrations _may_ also be used when executing numerous single-row queries
+for every item on a large dataset. Typically, for single-record patterns, runtime is
+largely dependent on the size of the dataset, hence it should be split accordingly
+and put into background migrations.
 
 Background migrations _may not_ be used to perform schema migrations, they
 should only be used for data migrations.
@@ -28,6 +28,11 @@ Some examples where background migrations can be useful:
 - Migrating events from one table to multiple separate tables.
 - Populating one column based on JSON stored in another column.
 - Migrating data that depends on the output of external services (e.g. an API).
+
+NOTE: **Note:**
+If the background migration is part of an important upgrade, make sure it's announced
+in the release post. Discuss with your Project Manager if you're not sure the migration falls
+into this category.
 
 ## Isolation
 
@@ -51,6 +56,12 @@ for more details.
 Make sure that in case that your migration job is going to be retried data
 integrity is guaranteed.
 
+## Background migrations for EE-only features
+
+All the background migration classes for EE-only features should be present in GitLab CE.
+For this purpose, an empty class can be created for GitLab CE, and it can be extended for GitLab EE
+as explained in the [guidelines for implementing Enterprise Edition features](ee_features.md#code-in-libgitlabbackground_migration).
+
 ## How It Works
 
 Background migrations are simple classes that define a `perform` method. A
@@ -61,20 +72,21 @@ migration classes must be defined in the namespace
 
 ## Scheduling
 
-Scheduling a background migration should be done in a post-deployment migration.
+Scheduling a background migration should be done in a post-deployment
+migration that includes `Gitlab::Database::MigrationHelpers`
 To do so, simply use the following code while
 replacing the class name and arguments with whatever values are necessary for
 your migration:
 
 ```ruby
-BackgroundMigrationWorker.perform_async('BackgroundMigrationClassName', [arg1, arg2, ...])
+migrate_async('BackgroundMigrationClassName', [arg1, arg2, ...])
 ```
 
 Usually it's better to enqueue jobs in bulk, for this you can use
-`BackgroundMigrationWorker.bulk_perform_async`:
+`bulk_migrate_async`:
 
 ```ruby
-BackgroundMigrationWorker.bulk_perform_async(
+bulk_migrate_async(
   [['BackgroundMigrationClassName', [1]],
    ['BackgroundMigrationClassName', [2]]]
 )
@@ -94,7 +106,7 @@ If you would like to schedule jobs in bulk with a delay, you can use
 jobs = [['BackgroundMigrationClassName', [1]],
         ['BackgroundMigrationClassName', [2]]]
 
-BackgroundMigrationWorker.bulk_perform_in(5.minutes, jobs)
+bulk_migrate_in(5.minutes, jobs)
 ```
 
 ### Rescheduling background migrations
@@ -111,7 +123,7 @@ once.
 
 ## Cleaning Up
 
->**Note:**
+NOTE: **Note:**
 Cleaning up any remaining background migrations _must_ be done in either a major
 or minor release, you _must not_ do this in a patch release.
 
@@ -145,7 +157,7 @@ roughly be as follows:
          enough times to be marked as dead.
    1. Remove the old column.
 
-This may also require a bump to the [import/export version][import-export], if
+This may also require a bump to the [import/export version](../user/project/settings/import_export.md), if
 importing a project from a prior version of GitLab requires the data to be in
 the new format.
 
@@ -271,7 +283,7 @@ end
 The final step runs for any un-migrated rows after all of the jobs have been
 processed. This is in case a Sidekiq process running the background migrations
 received SIGKILL, leading to the jobs being lost. (See
-[more reliable Sidekiq queue][reliable-sidekiq] for more information.)
+[more reliable Sidekiq queue](https://gitlab.com/gitlab-org/gitlab-foss/-/issues/36791) for more information.)
 
 If the application does not depend on the data being 100% migrated (for
 instance, the data is advisory, and not mission-critical), then this final step
@@ -289,17 +301,18 @@ It is required to write tests for:
 - The background migration itself.
 - A cleanup migration.
 
-You can use the `:migration` RSpec tag when testing the migrations.
+The `:migration` and `schema: :latest` RSpec tags are automatically set for
+background migration specs.
 See the
 [Testing Rails migrations](testing_guide/testing_migrations_guide.md#testing-a-non-activerecordmigration-class)
 style guide.
 
-When you do that, keep in mind that `before` and `after` RSpec hooks are going
+Keep in mind that `before` and `after` RSpec hooks are going
 to migrate you database down and up, which can result in other background
 migrations being called. That means that using `spy` test doubles with
 `have_received` is encouraged, instead of using regular test doubles, because
 your expectations defined in a `it` block can conflict with what is being
-called in RSpec hooks. See [issue #35351][issue-rspec-hooks]
+called in RSpec hooks. See [issue #35351](https://gitlab.com/gitlab-org/gitlab/-/issues/18839)
 for more details.
 
 ## Best practices
@@ -316,8 +329,3 @@ for more details.
 1. Make sure to discuss the numbers with a database specialist, the migration may add
    more pressure on DB than you expect (measure on staging,
    or ask someone to measure on production).
-
-[migrations-readme]: https://gitlab.com/gitlab-org/gitlab/blob/master/spec/migrations/README.md
-[issue-rspec-hooks]: https://gitlab.com/gitlab-org/gitlab-foss/issues/35351
-[reliable-sidekiq]: https://gitlab.com/gitlab-org/gitlab-foss/issues/36791
-[import-export]: ../user/project/settings/import_export.md

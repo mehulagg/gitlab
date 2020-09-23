@@ -20,7 +20,7 @@ module QA
 
           def wait_issues_analytics_graph_finish_loading
             within_element(:issues_analytics_wrapper) do
-              wait(reload: false, max: 5, interval: 1) do
+              wait_until(reload: false, max_duration: 5, sleep_interval: 1) do
                 finished_loading?
                 yield
               end

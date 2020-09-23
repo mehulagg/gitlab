@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::MergeRequestsController do
+RSpec.describe Projects::MergeRequestsController do
   let(:merge_request) { create(:merge_request) }
   let(:project) { merge_request.project }
   let(:user) { merge_request.author }
@@ -28,8 +28,8 @@ describe Projects::MergeRequestsController do
 
         create(:code_owner_rule, merge_request: merge_request)
 
-        # Threshold of 2 because we load the users & group users for all rules
-        expect { get_edit }.not_to exceed_query_limit(control).with_threshold(2)
+        # Threshold of 3 because we load the source_rule, users & group users for all rules
+        expect { get_edit }.not_to exceed_query_limit(control).with_threshold(3)
       end
 
       it 'does not cause extra queries when multiple code owner rules are present' do

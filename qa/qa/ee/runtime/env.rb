@@ -20,6 +20,10 @@ module QA
         def simple_saml_fingerprint
           ENV['SIMPLE_SAML_FINGERPRINT']
         end
+
+        def elasticsearch_url
+          ENV.fetch('ELASTIC_URL', 'http://elastic68:9200')
+        end
       end
     end
   end

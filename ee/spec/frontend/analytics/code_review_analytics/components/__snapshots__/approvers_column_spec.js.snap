@@ -1,0 +1,67 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ApproversColumn component when a list with more than three approvers is passed matches the snapshot 1`] = `
+<div>
+  <gl-avatars-inline-stub
+    avatars="[object Object],[object Object],[object Object],[object Object]"
+    avatarsize="24"
+    badgetooltipmaxchars="50"
+    badgetooltipprop="name"
+    collapsed="true"
+    maxvisible="2"
+  />
+</div>
+`;
+
+exports[`ApproversColumn component when a list with one approver is passed matches the snapshot 1`] = `
+<div>
+  <gl-avatar-link-stub
+    href="http://127.0.0.1:3000/root"
+    target="_blank"
+    title="Administrator"
+  >
+    <gl-avatar-stub
+      alt="avatar"
+      entityid="0"
+      entityname=""
+      shape="circle"
+      size="24"
+      src="https://www.gravatar.com/avatar/e64c7d89f26bd1972efa854d13d7dd61?s=80&d=identicon"
+    />
+  </gl-avatar-link-stub>
+</div>
+`;
+
+exports[`ApproversColumn component when a list with three approvers is passed matches the snapshot 1`] = `
+<div>
+  <gl-avatars-inline-stub
+    avatars="[object Object],[object Object],[object Object]"
+    avatarsize="24"
+    badgetooltipmaxchars="50"
+    badgetooltipprop="name"
+    collapsed="true"
+    maxvisible="3"
+  />
+</div>
+`;
+
+exports[`ApproversColumn component when a list with two approvers is passed matches the snapshot 1`] = `
+<div>
+  <gl-avatars-inline-stub
+    avatars="[object Object],[object Object]"
+    avatarsize="24"
+    badgetooltipmaxchars="50"
+    badgetooltipprop="name"
+    collapsed="true"
+    maxvisible="3"
+  />
+</div>
+`;
+
+exports[`ApproversColumn component when an empty list approvers is passed matches the snapshot 1`] = `
+<div>
+  
+    –
+  
+</div>
+`;

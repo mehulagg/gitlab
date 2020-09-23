@@ -1,17 +1,31 @@
-const MARKDOWN_EXTENSIONS = ['mdown', 'mkd', 'mkdn', 'md', 'markdown'];
-const ASCIIDOC_EXTENSIONS = ['adoc', 'ad', 'asciidoc'];
-const OTHER_EXTENSIONS = ['textile', 'rdoc', 'org', 'creole', 'wiki', 'mediawiki', 'rst'];
-const EXTENSIONS = [...MARKDOWN_EXTENSIONS, ...ASCIIDOC_EXTENSIONS, ...OTHER_EXTENSIONS];
-const PLAIN_FILENAMES = ['readme', 'index'];
-const FILE_REGEXP = new RegExp(`^(${PLAIN_FILENAMES.join('|')})`, 'i');
-const EXTENSIONS_REGEXP = new RegExp(`.(${EXTENSIONS.join('|')})$`, 'i');
+const FILENAMES = ['index', 'readme'];
 
-// eslint-disable-next-line import/prefer-default-export
-export const readmeFile = blobs => {
-  const readMeFiles = blobs.filter(f => f.name.search(FILE_REGEXP) !== -1);
+const MARKUP_EXTENSIONS = [
+  'ad',
+  'adoc',
+  'asciidoc',
+  'creole',
+  'markdown',
+  'md',
+  'mdown',
+  'mediawiki',
+  'mkd',
+  'mkdn',
+  'org',
+  'rdoc',
+  'rst',
+  'textile',
+  'wiki',
+];
 
-  const previewableReadme = readMeFiles.find(f => f.name.search(EXTENSIONS_REGEXP) !== -1);
-  const plainReadme = readMeFiles.find(f => f.name.search(FILE_REGEXP) !== -1);
-
-  return previewableReadme || plainReadme;
+const isRichReadme = file => {
+  const re = new RegExp(`^(${FILENAMES.join('|')})\\.(${MARKUP_EXTENSIONS.join('|')})$`, 'i');
+  return re.test(file.name);
 };
+
+const isPlainReadme = file => {
+  const re = new RegExp(`^(${FILENAMES.join('|')})(\\.txt)?$`, 'i');
+  return re.test(file.name);
+};
+
+export const readmeFile = blobs => blobs.find(isRichReadme) || blobs.find(isPlainReadme);

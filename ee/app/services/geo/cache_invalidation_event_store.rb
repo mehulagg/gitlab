@@ -16,15 +16,13 @@ module Geo
       Geo::CacheInvalidationEvent.new(key: key)
     end
 
-    # This is called by ProjectLogHelpers to build json log with context info
+    # This is called by LogHelpers to build json log with context info
     #
-    # @see ::Gitlab::Geo::ProjectLogHelpers
-    def base_log_data(message)
+    # @see ::Gitlab::Geo::LogHelpers
+    def extra_log_data
       {
-        class: self.class.name,
         cache_key: key.to_s,
-        job_id: get_sidekiq_job_id,
-        message: message
+        job_id: get_sidekiq_job_id
       }.compact
     end
   end

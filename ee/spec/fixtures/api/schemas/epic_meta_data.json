@@ -3,12 +3,15 @@
   "type": "object",
   "required": ["epic_id", "created", "author", "ancestors", "todo_exists", "todo_path", "lock_version",
     "state", "namespace", "labels_path", "toggle_subscription_path", "labels_web_url", "epics_web_url",
-    "scoped_labels", "scoped_labels_documentation_link", "start_date", "start_date_is_fixed", "start_date_fixed",
+    "new_epic_web_url", "scoped_labels", "start_date", "start_date_is_fixed", "start_date_fixed",
     "start_date_from_milestones", "start_date_sourcing_milestone_title", "start_date_sourcing_milestone_dates",
     "due_date", "due_date_is_fixed", "due_date_fixed",
     "due_date_from_milestones", "due_date_sourcing_milestone_title", "due_date_sourcing_milestone_dates"],
   "properties": {
     "epic_id": {
+      "type": "integer"
+    },
+    "epic_iid": {
       "type": "integer"
     },
     "created": {
@@ -23,7 +26,8 @@
         "name",
         "url",
         "username",
-        "src"
+        "src",
+        "is_gitlab_employee"
       ],
       "properties": {
         "name": {
@@ -37,6 +41,9 @@
         },
         "src": {
           "type": "string"
+        },
+        "is_gitlab_employee": {
+          "type": "boolean"
         }
       }
     },
@@ -93,11 +100,11 @@
     "epics_web_url": {
       "type": "string"
     },
+    "new_epic_web_url": {
+      "type": "string"
+    },
     "scoped_labels": {
       "type": "boolean"
-    },
-    "scoped_labels_documentation_link": {
-      "type": "string"
     },
     "start_date": {
       "type": [

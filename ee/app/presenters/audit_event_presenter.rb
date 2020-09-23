@@ -4,21 +4,21 @@ class AuditEventPresenter < Gitlab::View::Presenter::Simple
   presents :audit_event
 
   def author_name
-    user = audit_event.user
+    author&.name
+  end
 
-    if user
-      link_to(user.name, user_path(user))
-    else
-      audit_event.author_name
-    end
+  def author_url
+    return if author.is_a?(Gitlab::Audit::NullAuthor)
+
+    url_for(user_path(author))
   end
 
   def target
-    details[:target_details]
+    audit_event.target_details
   end
 
   def ip_address
-    details[:ip_address]
+    audit_event.ip_address
   end
 
   def details
@@ -26,11 +26,15 @@ class AuditEventPresenter < Gitlab::View::Presenter::Simple
   end
 
   def object
-    entity = audit_event.entity
+    return if entity.is_a?(Gitlab::Audit::NullEntity)
 
-    return unless entity
+    audit_event.entity_path || entity.name
+  end
 
-    link_to(details[:entity_path] || entity.name, entity).html_safe
+  def object_url
+    return if entity.is_a?(Gitlab::Audit::NullEntity)
+
+    url_for(entity)
   end
 
   def date
@@ -43,11 +47,11 @@ class AuditEventPresenter < Gitlab::View::Presenter::Simple
 
   private
 
-  # The class can't include ActionView::Helpers::UrlHelper because it overwrites
-  # the method url_for. In this helper, that implementation of that method
-  # doesn't accept objects to resolve their route. That's why here we call the
-  # native url_for to get the route of the object and then call the link_to with it
-  def link_to(name, object)
-    ActionController::Base.helpers.link_to(name, url_for(object))
+  def author
+    @author ||= audit_event.lazy_author
+  end
+
+  def entity
+    @entity ||= audit_event.lazy_entity
   end
 end

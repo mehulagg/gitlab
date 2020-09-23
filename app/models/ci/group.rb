@@ -11,11 +11,12 @@ module Ci
     include StaticModel
     include Gitlab::Utils::StrongMemoize
 
-    attr_reader :stage, :name, :jobs
+    attr_reader :project, :stage, :name, :jobs
 
     delegate :size, to: :jobs
 
-    def initialize(stage, name:, jobs:)
+    def initialize(project, stage, name:, jobs:)
+      @project = project
       @stage = stage
       @name = name
       @jobs = jobs
@@ -23,15 +24,9 @@ module Ci
 
     def status
       strong_memoize(:status) do
-        if Feature.enabled?(:ci_composite_status, default_enabled: false)
-          Gitlab::Ci::Status::Composite
-            .new(@jobs)
-            .status
-        else
-          CommitStatus
-            .where(id: @jobs)
-            .legacy_status
-        end
+        Gitlab::Ci::Status::Composite
+          .new(@jobs)
+          .status
       end
     end
 
@@ -44,11 +39,11 @@ module Ci
       end
     end
 
-    def self.fabricate(stage)
-      stage.statuses.ordered.latest
+    def self.fabricate(project, stage)
+      stage.latest_statuses
         .sort_by(&:sortable_name).group_by(&:group_name)
         .map do |group_name, grouped_statuses|
-          self.new(stage, name: group_name, jobs: grouped_statuses)
+          self.new(project, stage, name: group_name, jobs: grouped_statuses)
         end
     end
   end

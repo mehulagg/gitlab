@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SortingPreference do
+RSpec.describe SortingPreference do
   let(:user) { create(:user) }
 
   let(:controller_class) do
@@ -75,7 +75,7 @@ describe SortingPreference do
       it 'sets the cookie with the right values and flags' do
         subject
 
-        expect(cookies['issue_sort']).to eq(value: 'popularity', secure: false, httponly: false)
+        expect(cookies['issue_sort']).to eq(expires: nil, value: 'popularity', secure: false, httponly: false)
       end
     end
 
@@ -86,7 +86,7 @@ describe SortingPreference do
       it 'sets the cookie with the right values and flags' do
         subject
 
-        expect(cookies['issue_sort']).to eq(value: 'created_asc', secure: false, httponly: false)
+        expect(cookies['issue_sort']).to eq(expires: nil, value: 'created_asc', secure: false, httponly: false)
       end
     end
   end

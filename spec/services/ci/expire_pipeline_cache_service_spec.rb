@@ -2,17 +2,17 @@
 
 require 'spec_helper'
 
-describe Ci::ExpirePipelineCacheService do
-  set(:user) { create(:user) }
-  set(:project) { create(:project) }
-  set(:pipeline) { create(:ci_pipeline, project: project) }
+RSpec.describe Ci::ExpirePipelineCacheService do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:pipeline) { create(:ci_pipeline, project: project) }
   subject { described_class.new }
 
   describe '#execute' do
     it 'invalidates Etag caching for project pipelines path' do
-      pipelines_path = "/#{project.full_path}/pipelines.json"
-      new_mr_pipelines_path = "/#{project.full_path}/merge_requests/new.json"
-      pipeline_path = "/#{project.full_path}/pipelines/#{pipeline.id}.json"
+      pipelines_path = "/#{project.full_path}/-/pipelines.json"
+      new_mr_pipelines_path = "/#{project.full_path}/-/merge_requests/new.json"
+      pipeline_path = "/#{project.full_path}/-/pipelines/#{pipeline.id}.json"
 
       expect_any_instance_of(Gitlab::EtagCaching::Store).to receive(:touch).with(pipelines_path)
       expect_any_instance_of(Gitlab::EtagCaching::Store).to receive(:touch).with(new_mr_pipelines_path)
@@ -22,19 +22,19 @@ describe Ci::ExpirePipelineCacheService do
     end
 
     it 'invalidates Etag caching for merge request pipelines if pipeline runs on any commit of that source branch' do
-      pipeline = create(:ci_empty_pipeline, status: 'created', project: project, ref: 'master')
-      merge_request = create(:merge_request, source_project: project, source_branch: pipeline.ref)
-      merge_request_pipelines_path = "/#{project.full_path}/merge_requests/#{merge_request.iid}/pipelines.json"
+      merge_request = create(:merge_request, :with_detached_merge_request_pipeline)
+      project = merge_request.target_project
+
+      merge_request_pipelines_path = "/#{project.full_path}/-/merge_requests/#{merge_request.iid}/pipelines.json"
 
       allow_any_instance_of(Gitlab::EtagCaching::Store).to receive(:touch)
       expect_any_instance_of(Gitlab::EtagCaching::Store).to receive(:touch).with(merge_request_pipelines_path)
 
-      subject.execute(pipeline)
+      subject.execute(merge_request.all_pipelines.last)
     end
 
     it 'updates the cached status for a project' do
-      expect(Gitlab::Cache::Ci::ProjectPipelineStatus).to receive(:update_for_pipeline)
-                                                            .with(pipeline)
+      expect(Gitlab::Cache::Ci::ProjectPipelineStatus).to receive(:update_for_pipeline).with(pipeline)
 
       subject.execute(pipeline)
     end

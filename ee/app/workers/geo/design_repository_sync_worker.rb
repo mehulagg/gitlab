@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Geo
-  class DesignRepositorySyncWorker
+  class DesignRepositorySyncWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
     include GeoQueue
     include Gitlab::Geo::LogHelpers
@@ -15,10 +15,7 @@ module Geo
     end
 
     def perform(project_id)
-      return if Feature.disabled?(:enable_geo_design_sync)
-
       registry = Geo::DesignRegistry.find_or_initialize_by(project_id: project_id) # rubocop: disable CodeReuse/ActiveRecord
-
       project = registry.project
 
       if project.nil?

@@ -2,31 +2,40 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::AbstractReferenceFilter do
-  let(:project) { create(:project) }
+RSpec.describe Banzai::Filter::AbstractReferenceFilter do
+  let_it_be(:project) { create(:project) }
+
+  let(:doc) { Nokogiri::HTML.fragment('') }
+  let(:filter) { described_class.new(doc, project: project) }
 
   describe '#references_per_parent' do
-    it 'returns a Hash containing references grouped per parent paths' do
-      doc = Nokogiri::HTML.fragment("#1 #{project.full_path}#2")
-      filter = described_class.new(doc, project: project)
+    let(:doc) { Nokogiri::HTML.fragment("#1 #{project.full_path}#2 #2") }
 
-      expect(filter).to receive(:object_class).exactly(4).times.and_return(Issue)
-      expect(filter).to receive(:object_sym).twice.and_return(:issue)
+    it 'returns a Hash containing references grouped per parent paths' do
+      expect(described_class).to receive(:object_class).exactly(6).times.and_return(Issue)
 
       refs = filter.references_per_parent
 
-      expect(refs).to be_an_instance_of(Hash)
-      expect(refs[project.full_path]).to eq(Set.new(%w[1 2]))
+      expect(refs).to match(a_hash_including(project.full_path => contain_exactly(1, 2)))
+    end
+  end
+
+  describe '#data_attributes_for' do
+    let_it_be(:issue) { create(:issue, project: project) }
+
+    it 'is not an XSS vector' do
+      allow(described_class).to receive(:object_class).and_return(Issue)
+
+      data_attributes = filter.data_attributes_for('xss &lt;img onerror=alert(1) src=x&gt;', project, issue, link_content: true)
+
+      expect(data_attributes[:original]).to eq('xss &amp;lt;img onerror=alert(1) src=x&amp;gt;')
     end
   end
 
   describe '#parent_per_reference' do
     it 'returns a Hash containing projects grouped per parent paths' do
-      doc = Nokogiri::HTML.fragment('')
-      filter = described_class.new(doc, project: project)
-
       expect(filter).to receive(:references_per_parent)
-        .and_return({ project.full_path => Set.new(%w[1]) })
+        .and_return({ project.full_path => Set.new([1]) })
 
       expect(filter.parent_per_reference)
         .to eq({ project.full_path => project })
@@ -34,9 +43,6 @@ describe Banzai::Filter::AbstractReferenceFilter do
   end
 
   describe '#find_for_paths' do
-    let(:doc) { Nokogiri::HTML.fragment('') }
-    let(:filter) { described_class.new(doc, project: project) }
-
     context 'with RequestStore disabled' do
       it 'returns a list of Projects for a list of paths' do
         expect(filter.find_for_paths([project.full_path]))

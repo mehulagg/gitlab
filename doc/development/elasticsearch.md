@@ -1,3 +1,9 @@
+---
+stage: Enablement
+group: Global Search
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Elasticsearch knowledge **(STARTER ONLY)**
 
 This area is to maintain a compendium of useful information when working with Elasticsearch.
@@ -7,68 +13,38 @@ the [Elasticsearch integration documentation](../integration/elasticsearch.md#en
 
 ## Deep Dive
 
-In June 2019, Mario de la Ossa hosted a [Deep Dive] on GitLab's [Elasticsearch integration] to share his domain specific knowledge with anyone who may work in this part of the code base in the future. You can find the [recording on YouTube], and the slides on [Google Slides] and in [PDF]. Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details may have changed since then, it should still serve as a good introduction.
+In June 2019, Mario de la Ossa hosted a Deep Dive (GitLab team members only: `https://gitlab.com/gitlab-org/create-stage/issues/1`) on GitLab's [Elasticsearch integration](../integration/elasticsearch.md) to share his domain specific knowledge with anyone who may work in this part of the code base in the future. You can find the [recording on YouTube](https://www.youtube.com/watch?v=vrvl-tN2EaA), and the slides on [Google Slides](https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit) and in [PDF](https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf). Everything covered in this deep dive was accurate as of GitLab 12.0, and while specific details may have changed since then, it should still serve as a good introduction.
 
-[Deep Dive]: https://gitlab.com/gitlab-org/create-stage/issues/1
-[Elasticsearch integration]: ../integration/elasticsearch.md
-[recording on YouTube]: https://www.youtube.com/watch?v=vrvl-tN2EaA
-[Google Slides]: https://docs.google.com/presentation/d/1H-pCzI_LNrgrL5pJAIQgvLX8Ji0-jIKOg1QeJQzChug/edit
-[PDF]: https://gitlab.com/gitlab-org/create-stage/uploads/c5aa32b6b07476fa8b597004899ec538/Elasticsearch_Deep_Dive.pdf
+In August 2020, a second Deep Dive was hosted, focusing on [GitLab's specific architecture for multi-indices support](#zero-downtime-reindexing-with-multiple-indices). The [recording on YouTube](https://www.youtube.com/watch?v=0WdPR9oB2fg) and the [slides](https://lulalala.gitlab.io/gitlab-elasticsearch-deepdive) are available. Everything covered in this deep dive was accurate as of GitLab 13.3.
 
-## Initial installation on OS X
+## Supported Versions
 
-It is recommended to use the Docker image. After installing docker you can immediately spin up an instance with
+See [Version Requirements](../integration/elasticsearch.md#version-requirements).
 
-```
-docker run --name elastic56 -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:5.6.12
-```
+Developers making significant changes to Elasticsearch queries should test their features against all our supported versions.
 
-and use `docker stop elastic56` and `docker start elastic56` to stop/start it.
+## Setting up development environment
 
-### Installing on the host
+See the [Elasticsearch GDK setup instructions](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/elasticsearch.md)
 
-We currently only support Elasticsearch [5.6 to 6.x](../integration/elasticsearch.md#version-requirements)
-
-Version 5.6 is available on homebrew and is the recommended version to use in order to test compatibility.
-
-```
-brew install elasticsearch@5.6
-```
-
-There is no need to install any plugins
-
-## New repo indexer (beta)
-
-If you're interested on working with the new beta repo indexer, all you need to do is:
-
-```sh
-git clone git@gitlab.com:gitlab-org/gitlab-elasticsearch-indexer.git
-make
-make install
-```
-
-this adds `gitlab-elasticsearch-indexer` to `$GOPATH/bin`, please make sure that is in your `$PATH`. After that GitLab will find it and you'll be able to enable it in the admin settings area.
-
-**note:** `make` will not recompile the executable unless you do `make clean` beforehand
-
-## Helpful rake tasks
+## Helpful Rake tasks
 
 - `gitlab:elastic:test:index_size`: Tells you how much space the current index is using, as well as how many documents are in the index.
 - `gitlab:elastic:test:index_size_change`: Outputs index size, reindexes, and outputs index size again. Useful when testing improvements to indexing size.
 
-Additionally, if you need large repos or multiple forks for testing, please consider [following these instructions](rake_tasks.md#extra-project-seed-options)
+Additionally, if you need large repositories or multiple forks for testing, please consider [following these instructions](rake_tasks.md#extra-project-seed-options)
 
 ## How does it work?
 
-The Elasticsearch integration depends on an external indexer. We ship an [indexer written in Go](https://gitlab.com/gitlab-org/gitlab-elasticsearch-indexer). The user must trigger the initial indexing via a rake task but, after this is done, GitLab itself will trigger reindexing when required via `after_` callbacks on create, update, and destroy that are inherited from [/ee/app/models/concerns/elastic/application_versioned_search.rb](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/models/concerns/elastic/application_versioned_search.rb).
+The Elasticsearch integration depends on an external indexer. We ship an [indexer written in Go](https://gitlab.com/gitlab-org/gitlab-elasticsearch-indexer). The user must trigger the initial indexing via a Rake task but, after this is done, GitLab itself will trigger reindexing when required via `after_` callbacks on create, update, and destroy that are inherited from [`/ee/app/models/concerns/elastic/application_versioned_search.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/app/models/concerns/elastic/application_versioned_search.rb).
 
-All indexing after the initial one is done via `ElasticIndexerWorker` (Sidekiq jobs).
+After initial indexing is complete, create, update, and delete operations for all models except projects (see [#207494](https://gitlab.com/gitlab-org/gitlab/-/issues/207494)) are tracked in a Redis [`ZSET`](https://redis.io/topics/data-types#sorted-sets). A regular `sidekiq-cron` `ElasticIndexBulkCronWorker` processes this queue, updating many Elasticsearch documents at a time with the [Bulk Request API](https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html).
 
-Search queries are generated by the concerns found in [ee/app/models/concerns/elastic](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/models/concerns/elastic). These concerns are also in charge of access control, and have been a historic source of security bugs so please pay close attention to them!
+Search queries are generated by the concerns found in [`ee/app/models/concerns/elastic`](https://gitlab.com/gitlab-org/gitlab/tree/master/ee/app/models/concerns/elastic). These concerns are also in charge of access control, and have been a historic source of security bugs so please pay close attention to them!
 
 ## Existing Analyzers/Tokenizers/Filters
 
-These are all defined in <https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/elasticsearch/git/model.rb>
+These are all defined in [`ee/lib/elastic/latest/config.rb`](https://gitlab.com/gitlab-org/gitlab/blob/master/ee/lib/elastic/latest/config.rb)
 
 ### Analyzers
 
@@ -86,11 +62,14 @@ Please see the `sha_tokenizer` explanation later below for an example.
 
 #### `code_analyzer`
 
-Used when indexing a blob's filename and content. Uses the `whitespace` tokenizer and the filters: `code`, `edgeNGram_filter`, `lowercase`, and `asciifolding`
+Used when indexing a blob's filename and content. Uses the `whitespace` tokenizer and the filters: [`code`](#code), `lowercase`, and `asciifolding`
 
 The `whitespace` tokenizer was selected in order to have more control over how tokens are split. For example the string `Foo::bar(4)` needs to generate tokens like `Foo` and `bar(4)` in order to be properly searched.
 
 Please see the `code` filter for an explanation on how tokens are split.
+
+NOTE: **Note:**
+Currently the [Elasticsearch code_analyzer doesn't account for all code cases](../integration/elasticsearch.md#known-issues).
 
 #### `code_search_analyzer`
 
@@ -100,7 +79,7 @@ Not directly used for indexing, but rather used to transform a search input. Use
 
 #### `sha_tokenizer`
 
-This is a custom tokenizer that uses the [`edgeNGram` tokenizer](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/analysis-edgengram-tokenizer.html) to allow SHAs to be searcheable by any sub-set of it (minimum of 5 chars).
+This is a custom tokenizer that uses the [`edgeNGram` tokenizer](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/analysis-edgengram-tokenizer.html) to allow SHAs to be searchable by any sub-set of it (minimum of 5 chars).
 
 Example:
 
@@ -140,11 +119,8 @@ Patterns:
 - `'"((?:\\"|[^"]|\\")*)"'`: captures terms inside quotes, removing the quotes
 - `"'((?:\\'|[^']|\\')*)'"`: same as above, for single-quotes
 - `'\.([^.]+)(?=\.|\s|\Z)'`: separate terms with periods in-between
-- `'\/?([^\/]+)(?=\/|\b)'`: separate path terms `like/this/one`
-
-#### `edgeNGram_filter`
-
-Uses an [Edge NGram token filter](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/analysis-edgengram-tokenfilter.html) to allow inputs with only parts of a token to find the token. For example it would turn `glasses` into permutations starting with `gl` and ending with `glasses`, which would allow a search for "`glass`" to find the original token `glasses`
+- `'([\p{L}_.-]+)'`: some common chars in file names to keep the whole filename intact (eg. `my_file-ñame.txt`)
+- `'([\p{L}\d_]+)'`: letters, numbers and underscores are the most common tokens in programming. Always capture them greedily regardless of context.
 
 ## Gotchas
 
@@ -152,6 +128,9 @@ Uses an [Edge NGram token filter](https://www.elastic.co/guide/en/elasticsearch/
 - `Character` filters (as opposed to token filters) always replace the original character, so they're not a good choice as they can hinder exact searches
 
 ## Zero downtime reindexing with multiple indices
+
+NOTE: **Note:**
+This is not applicable yet as multiple indices functionality is not fully implemented.
 
 Currently GitLab can only handle a single version of setting. Any setting/schema changes would require reindexing everything from scratch. Since reindexing can take a long time, this can cause search functionality downtime.
 
@@ -178,7 +157,7 @@ These proxy objects would talk to Elasticsearch server directly (see top half of
 
 ![Elasticsearch Architecture](img/elasticsearch_architecture.svg)
 
-In the planned new design, each model would have a pair of corresponding subclassed proxy objects, in which model-specific logic is located. For example, `Snippet` would have `SnippetClassProxy` and `SnippetInstanceProxy` (being subclass of `Elasticsearch::Model::Proxy::ClassMethodsProxy` and `Elasticsearch::Model::Proxy::InstanceMethodsProxy`, respectively).
+In the planned new design, each model would have a pair of corresponding sub-classed proxy objects, in which model-specific logic is located. For example, `Snippet` would have `SnippetClassProxy` and `SnippetInstanceProxy` (being subclass of `Elasticsearch::Model::Proxy::ClassMethodsProxy` and `Elasticsearch::Model::Proxy::InstanceMethodsProxy`, respectively).
 
 `__elasticsearch__` would represent another layer of proxy object, keeping track of multiple actual proxy objects. It would forward method calls to the appropriate index. For example:
 
@@ -189,7 +168,8 @@ The global configurations per version are now in the `Elastic::(Version)::Config
 
 ### Creating new version of schema
 
-NOTE: **Note:** this is not applicable yet as multiple indices functionality is not fully implemented.
+NOTE: **Note:**
+This is not applicable yet as multiple indices functionality is not fully implemented.
 
 Folders like `ee/lib/elastic/v12p1` contain snapshots of search logic from different versions. To keep a continuous Git history, the latest version lives under `ee/lib/elastic/latest`, but its classes are aliased under an actual version (e.g. `ee/lib/elastic/v12p3`). When referencing these classes, never use the `Latest` namespace directly, but use the actual version (e.g. `V12p3`).
 
@@ -204,13 +184,70 @@ If the current version is `v12p1`, and we need to create a new version for `v12p
 1. Change the namespace for files under `v12p1` folder from `Latest` to `V12p1`
 1. Make changes to files under the `latest` folder as needed
 
+## Performance Monitoring
+
+### Prometheus
+
+GitLab exports [Prometheus
+metrics](../administration/monitoring/prometheus/gitlab_metrics.md) relating to
+the number of requests and timing for all web/API requests and Sidekiq jobs,
+which can help diagnose performance trends and compare how Elasticsearch timing
+is impacting overall performance relative to the time spent doing other things.
+
+#### Indexing queues
+
+GitLab also exports [Prometheus
+metrics](../administration/monitoring/prometheus/gitlab_metrics.md) for
+indexing queues, which can help diagnose performance bottlenecks and determine
+whether or not your GitLab instance or Elasticsearch server can keep up with
+the volume of updates.
+
+### Logs
+
+All of the indexing happens in Sidekiq, so much of the relevant logs for the
+Elasticsearch integration can be found in
+[`sidekiq.log`](../administration/logs.md#sidekiqlog). In particular, all
+Sidekiq workers that make requests to Elasticsearch in any way will log the
+number of requests and time taken querying/writing to Elasticsearch. This can
+be useful to understand whether or not your cluster is keeping up with
+indexing.
+
+Searching Elasticsearch is done via ordinary web workers handling requests. Any
+requests to load a page or make an API request, which then make requests to
+Elasticsearch, will log the number of requests and the time taken to
+[`production_json.log`](../administration/logs.md#production_jsonlog). These
+logs will also include the time spent on Database and Gitaly requests, which
+may help to diagnose which part of the search is performing poorly.
+
+There are additional logs specific to Elasticsearch that are sent to
+[`elasticsearch.log`](../administration/logs.md#elasticsearchlog)
+that may contain information to help diagnose performance issues.
+
+### Performance Bar
+
+Elasticsearch requests will be displayed in the [`Performance
+Bar`](../administration/monitoring/performance/performance_bar.md), which can
+be used both locally in development and on any deployed GitLab instance to
+diagnose poor search performance. This will show the exact queries being made,
+which is useful to diagnose why a search might be slow.
+
+### Correlation ID and `X-Opaque-Id`
+
+Our [correlation
+ID](./distributed_tracing.md#developer-guidelines-for-working-with-correlation-ids)
+is forwarded by all requests from Rails to Elasticsearch as the
+[`X-Opaque-Id`](https://www.elastic.co/guide/en/elasticsearch/reference/current/tasks.html#_identifying_running_tasks)
+header which allows us to track any
+[tasks](https://www.elastic.co/guide/en/elasticsearch/reference/current/tasks.html)
+in the cluster back the request in GitLab.
+
 ## Troubleshooting
 
 ### Getting `flood stage disk watermark [95%] exceeded`
 
 You might get an error such as
 
-```
+```plaintext
 [2018-10-31T15:54:19,762][WARN ][o.e.c.r.a.DiskThresholdMonitor] [pval5Ct]
    flood stage disk watermark [95%] exceeded on
    [pval5Ct7SieH90t5MykM5w][pval5Ct][/usr/local/var/lib/elasticsearch/nodes/0] free: 56.2gb[3%],
@@ -219,22 +256,22 @@ You might get an error such as
 
 This is because you've exceeded the disk space threshold - it thinks you don't have enough disk space left, based on the default 95% threshold.
 
-In addition, the `read_only_allow_delete` setting will be set to `true`.  It will block indexing, `forcemerge`, etc
+In addition, the `read_only_allow_delete` setting will be set to `true`. It will block indexing, `forcemerge`, etc
 
-```
+```shell
 curl "http://localhost:9200/gitlab-development/_settings?pretty"
 ```
 
 Add this to your `elasticsearch.yml` file:
 
-```
+```yaml
 # turn off the disk allocator
 cluster.routing.allocation.disk.threshold_enabled: false
 ```
 
 _or_
 
-```
+```yaml
 # set your own limits
 cluster.routing.allocation.disk.threshold_enabled: true
 cluster.routing.allocation.disk.watermark.flood_stage: 5gb   # ES 6.x only

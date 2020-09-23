@@ -5,24 +5,60 @@ description: 'Learn how to contribute to GitLab.'
 
 # Contributor and Development Docs
 
+Learn the processes and technical information needed for contributing to GitLab.
+
+This content is intended for members of the GitLab Team as well as community contributors.
+Content specific to the GitLab Team should instead be included in the [Handbook](https://about.gitlab.com/handbook/).
+
+For information on using GitLab to work on your own software projects, see the [GitLab user documentation](../user/index.md).
+
+For information on working with GitLab's API, see the [API documentation](../api/README.md).
+
+For information on how to install, configure, update, and upgrade your own GitLab instance, see the [administration documentation](../administration/index.md).
+
 ## Get started
 
-- Set up GitLab's development environment with [GitLab Development Kit (GDK)](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/README.md)
+- Set up GitLab's development environment with [GitLab Development Kit (GDK)](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/README.md)
 - [GitLab contributing guide](contributing/index.md)
-- [Architecture](architecture.md) of GitLab
+  - [Issues workflow](contributing/issue_workflow.md) for more information on:
+    - Issue tracker guidelines.
+    - Triaging.
+    - Labels.
+    - Feature proposals.
+    - Issue weight.
+    - Regression issues.
+    - Technical or UX debt.
+  - [Merge requests workflow](contributing/merge_request_workflow.md) for more
+    information on:
+    - Merge request guidelines.
+    - Contribution acceptance criteria.
+    - Definition of done.
+    - Dependencies.
+  - [Style guides](contributing/style_guides.md)
+  - [Implement design & UI elements](contributing/design.md)
+- [GitLab Architecture Overview](architecture.md)
 - [Rake tasks](rake_tasks.md) for development
 
 ## Processes
 
-- [GitLab core team & GitLab Inc. contribution process](https://gitlab.com/gitlab-org/gitlab/blob/master/PROCESS.md)
-- [Generate a changelog entry with `bin/changelog`](changelog.md)
+**Must-reads:**
+
+- [Guide on adapting existing and introducing new components](architecture.md#adapting-existing-and-introducing-new-components)
 - [Code review guidelines](code_review.md) for reviewing code and having code reviewed
-- [Database review guidelines](database_review.md) for reviewing database-related changes and complex SQL queries
+- [Database review guidelines](database_review.md) for reviewing database-related changes and complex SQL queries, and having them reviewed
+- [Secure coding guidelines](secure_coding_guidelines.md)
 - [Pipelines for the GitLab project](pipelines.md)
-- [Guidelines for implementing Enterprise Edition features](ee_features.md)
+
+Complementary reads:
+
+- [GitLab core team & GitLab Inc. contribution process](https://gitlab.com/gitlab-org/gitlab/blob/master/PROCESS.md)
 - [Security process for developers](https://gitlab.com/gitlab-org/release/docs/blob/master/general/security/developer.md#security-releases-critical-non-critical-as-a-developer)
-- [Requesting access to Chatops on GitLab.com](chatops_on_gitlabcom.md#requesting-access) (for GitLabbers)
+- [Guidelines for implementing Enterprise Edition features](ee_features.md)
 - [Danger bot](dangerbot.md)
+- [Generate a changelog entry with `bin/changelog`](changelog.md)
+- [Requesting access to Chatops on GitLab.com](chatops_on_gitlabcom.md#requesting-access) (for GitLab team members)
+- [Patch release process for developers](https://gitlab.com/gitlab-org/release/docs/blob/master/general/patch/process.md#process-for-developers)
+- [Adding a new service component to GitLab](adding_service_component.md)
 
 ## UX and Frontend guides
 
@@ -35,15 +71,13 @@ description: 'Learn how to contribute to GitLab.'
 - [GitLab utilities](utilities.md)
 - [Issuable-like Rails models](issuable-like-models.md)
 - [Logging](logging.md)
-- [API styleguide](api_styleguide.md) Use this styleguide if you are
-  contributing to the API
-- [GraphQL API styleguide](api_graphql_styleguide.md) Use this
-  styleguide if you are contributing to the [GraphQL API](../api/graphql/index.md)
+- [API style guide](api_styleguide.md) for contributing to the API
+- [GraphQL API style guide](api_graphql_styleguide.md) for contributing to the [GraphQL API](../api/graphql/index.md)
 - [Sidekiq guidelines](sidekiq_style_guide.md) for working with Sidekiq workers
 - [Working with Gitaly](gitaly.md)
-- [Manage feature flags](feature_flags.md)
+- [Manage feature flags](feature_flags/index.md)
 - [Licensed feature availability](licensed_feature_availability.md)
-- [View sent emails or preview mailers](emails.md)
+- [Dealing with email/mailers](emails.md)
 - [Shell commands](shell_commands.md) in the GitLab codebase
 - [`Gemfile` guidelines](gemfile.md)
 - [Pry debugging](pry_debugging.md)
@@ -54,11 +88,12 @@ description: 'Learn how to contribute to GitLab.'
 - [How to dump production data to staging](db_dump.md)
 - [Working with the GitHub importer](github_importer.md)
 - [Import/Export development documentation](import_export.md)
+- [Test Import Project](import_project.md)
 - [Elasticsearch integration docs](elasticsearch.md)
 - [Working with Merge Request diffs](diffs.md)
 - [Kubernetes integration guidelines](kubernetes.md)
 - [Permissions](permissions.md)
-- [Prometheus metrics](prometheus_metrics.md)
+- [Prometheus](prometheus.md)
 - [Guidelines for reusing abstractions](reusing_abstractions.md)
 - [DeclarativePolicy framework](policies.md)
 - [How Git object deduplication works in GitLab](git_object_deduplication.md)
@@ -69,6 +104,18 @@ description: 'Learn how to contribute to GitLab.'
 - [Developing against interacting components or features](interacting_components.md)
 - [File uploads](uploads.md)
 - [Auto DevOps development guide](auto_devops.md)
+- [Mass Inserting Models](mass_insert.md)
+- [Value Stream Analytics development guide](value_stream_analytics.md)
+- [Issue types vs first-class types](issue_types.md)
+- [Application limits](application_limits.md)
+- [Redis guidelines](redis.md)
+- [Rails initializers](rails_initializers.md)
+- [Code comments](code_comments.md)
+- [Renaming features](renaming_features.md)
+- [Windows Development on GCP](windows.md)
+- [Code Intelligence](code_intelligence/index.md)
+- [Approval Rules](approval_rules.md)
+- [Feature categorization](feature_categorization/index.md)
 
 ## Performance guides
 
@@ -83,61 +130,32 @@ description: 'Learn how to contribute to GitLab.'
 
 ## Database guides
 
-### Tooling
-
-- [Understanding EXPLAIN plans](understanding_explain_plans.md)
-- [explain.depesz.com](https://explain.depesz.com/) for visualising the output
-  of `EXPLAIN`
-- [pgFormatter](http://sqlformat.darold.net/) a PostgreSQL SQL syntax beautifier
-
-### Migrations
-
-- [What requires downtime?](what_requires_downtime.md)
-- [SQL guidelines](sql.md) for working with SQL queries
-- [Migrations style guide](migration_style_guide.md) for creating safe SQL migrations
-- [Testing Rails migrations](testing_guide/testing_migrations_guide.md) guide
-- [Post deployment migrations](post_deployment_migrations.md)
-- [Background migrations](background_migrations.md)
-- [Swapping tables](swapping_tables.md)
-- [Deleting migrations](deleting_migrations.md)
-
-### Best practices
-
-- [Merge Request checklist](database_merge_request_checklist.md)
-- [Adding database indexes](adding_database_indexes.md)
-- [Foreign keys & associations](foreign_keys.md)
-- [Single table inheritance](single_table_inheritance.md)
-- [Polymorphic associations](polymorphic_associations.md)
-- [Serializing data](serializing_data.md)
-- [Hash indexes](hash_indexes.md)
-- [Storing SHA1 hashes as binary](sha1_as_binary.md)
-- [Iterating tables in batches](iterating_tables_in_batches.md)
-- [Ordering table columns](ordering_table_columns.md)
-- [Verifying database capabilities](verifying_database_capabilities.md)
-- [Database Debugging and Troubleshooting](database_debugging.md)
-- [Query Count Limits](query_count_limits.md)
-- [Database helper modules](database_helpers.md)
-- [Code comments](code_comments.md)
-- [Creating enums](creating_enums.md)
-
-### Case studies
-
-- [Database case study: Filtering by label](filtering_by_label.md)
-- [Database case study: Namespaces storage statistics](namespaces_storage_statistics.md)
+See [database guidelines](database/index.md).
 
 ## Integration guides
 
 - [Jira Connect app](integrations/jira_connect.md)
+- [Security Scanners](integrations/secure.md)
+- [Secure Partner Integration](integrations/secure_partner_integration.md)
+- [How to run Jenkins in development environment](integrations/jenkins.md)
 
 ## Testing guides
 
 - [Testing standards and style guidelines](testing_guide/index.md)
 - [Frontend testing standards and style guidelines](testing_guide/frontend_testing.md)
 
+## Refactoring guides
+
+- [Refactoring guidelines](refactoring_guide/index.md)
+
+## Deprecation guides
+
+- [Deprecation guidelines](deprecation_guidelines/index.md)
+
 ## Documentation guides
 
 - [Writing documentation](documentation/index.md)
-- [Documentation styleguide](documentation/styleguide.md)
+- [Documentation style guide](documentation/styleguide.md)
 - [Markdown](../user/markdown.md)
 
 ## Internationalization (i18n) guides
@@ -146,13 +164,13 @@ description: 'Learn how to contribute to GitLab.'
 - [Externalization](i18n/externalization.md)
 - [Translation](i18n/translation.md)
 
-## Event tracking guides
+## Telemetry guides
 
-- [Introduction](event_tracking/index.md)
-- [Frontend tracking guide](event_tracking/frontend.md)
-- [Backend tracking guide](event_tracking/backend.md)
+- [Telemetry guide](telemetry/index.md)
+- [Usage Ping guide](telemetry/usage_ping.md)
+- [Snowplow guide](telemetry/snowplow.md)
 
-## Experiment Guide
+## Experiment guide
 
 - [Introduction](experiment_guide/index.md)
 
@@ -172,11 +190,19 @@ description: 'Learn how to contribute to GitLab.'
 
 - [Shell scripting standards and style guidelines](shell_scripting_guide/index.md)
 
+## Domain-specific guides
+
+- [CI/CD development documentation](cicd/index.md)
+
 ## Other Development guides
 
 - [Defining relations between files using projections](projections.md)
+- [Reference processing](./reference_processing.md)
+- [Compatibility with multiple versions of the application running at the same time](multi_version_compatibility.md)
+- [Features inside `.gitlab/`](./features_inside_dot_gitlab.md)
 
 ## Other GitLab Development Kit (GDK) guides
 
 - [Run full Auto DevOps cycle in a GDK instance](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/auto_devops.md)
-- [Using GitLab Runner with GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/runner.md)
+- [Using GitLab Runner with the GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/blob/master/doc/howto/runner.md)
+- [Using the Web IDE terminal with the GDK](https://gitlab.com/gitlab-org/gitlab-development-kit/-/blob/master/doc/howto/web_ide_terminal_gdk_setup.md)

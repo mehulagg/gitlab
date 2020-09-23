@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::CertManager do
+RSpec.describe Clusters::Applications::CertManager do
   let(:cert_manager) { create(:clusters_applications_cert_manager) }
 
   include_examples 'cluster application core specs', :clusters_applications_cert_manager
@@ -46,11 +46,11 @@ describe Clusters::Applications::CertManager do
       expect(subject.name).to eq('certmanager')
       expect(subject.chart).to eq('certmanager/cert-manager')
       expect(subject.repository).to eq('https://charts.jetstack.io')
-      expect(subject.version).to eq('v0.9.1')
+      expect(subject.version).to eq('v0.10.1')
       expect(subject).to be_rbac
       expect(subject.files).to eq(cert_manager.files.merge(cluster_issuer_file))
       expect(subject.preinstall).to eq([
-        'kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.9/deploy/manifests/00-crds.yaml',
+        'kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.10/deploy/manifests/00-crds.yaml',
         'kubectl label --overwrite namespace gitlab-managed-apps certmanager.k8s.io/disable-validation=true'
       ])
       expect(subject.postinstall).to eq([
@@ -65,7 +65,7 @@ describe Clusters::Applications::CertManager do
         cert_manager.email = cert_email
       end
 
-      it 'uses his/her email to register issuer with certificate provider' do
+      it 'uses their email to register issuer with certificate provider' do
         expect(subject.files).to eq(cert_manager.files.merge(cluster_issuer_file))
       end
     end
@@ -82,7 +82,7 @@ describe Clusters::Applications::CertManager do
       let(:cert_manager) { create(:clusters_applications_cert_manager, :errored, version: '0.0.1') }
 
       it 'is initialized with the locked version' do
-        expect(subject.version).to eq('v0.9.1')
+        expect(subject.version).to eq('v0.10.1')
       end
     end
   end

@@ -7,7 +7,6 @@ import treeMutations from './mutations/tree';
 import branchMutations from './mutations/branch';
 import {
   sortTree,
-  replaceFileUrl,
   swapInParentTreeWithSorting,
   updateFileCollections,
   removeFromParentTree,
@@ -29,28 +28,9 @@ export default {
       });
     }
   },
-  [types.SET_LEFT_PANEL_COLLAPSED](state, collapsed) {
-    Object.assign(state, {
-      leftPanelCollapsed: collapsed,
-    });
-  },
-  [types.SET_RIGHT_PANEL_COLLAPSED](state, collapsed) {
-    Object.assign(state, {
-      rightPanelCollapsed: collapsed,
-    });
-  },
   [types.SET_RESIZING_STATUS](state, resizing) {
     Object.assign(state, {
       panelResizing: resizing,
-    });
-  },
-  [types.SET_LAST_COMMIT_DATA](state, { entry, lastCommit }) {
-    Object.assign(entry.lastCommit, {
-      id: lastCommit.commit.id,
-      url: lastCommit.commit_path,
-      message: lastCommit.commit.message,
-      author: lastCommit.commit.author_name,
-      updatedAt: lastCommit.commit.authored_date,
     });
   },
   [types.SET_LAST_COMMIT_MSG](state, lastCommitMsg) {
@@ -68,20 +48,16 @@ export default {
       entries,
     });
   },
-  [types.CREATE_TMP_ENTRY](state, { data, projectId, branchId }) {
+  [types.CREATE_TMP_ENTRY](state, { data }) {
     Object.keys(data.entries).reduce((acc, key) => {
       const entry = data.entries[key];
       const foundEntry = state.entries[key];
 
       // NOTE: We can't clone `entry` in any of the below assignments because
       // we need `state.entries` and the `entry.tree` to reference the same object.
-      if (!foundEntry) {
+      if (!foundEntry || foundEntry.deleted) {
         Object.assign(state.entries, {
           [key]: entry,
-        });
-      } else if (foundEntry.deleted) {
-        Object.assign(state.entries, {
-          [key]: Object.assign(entry, { replaces: true }),
         });
       } else {
         const tree = entry.tree.filter(
@@ -95,13 +71,12 @@ export default {
       return acc.concat(key);
     }, []);
 
-    const foundEntry = state.trees[`${projectId}/${branchId}`].tree.find(
-      e => e.path === data.treeList[0].path,
-    );
+    const currentTree = state.trees[`${state.currentProjectId}/${state.currentBranchId}`];
+    const foundEntry = currentTree.tree.find(e => e.path === data.treeList[0].path);
 
     if (!foundEntry) {
-      Object.assign(state.trees[`${projectId}/${branchId}`], {
-        tree: sortTree(state.trees[`${projectId}/${branchId}`].tree.concat(data.treeList)),
+      Object.assign(currentTree, {
+        tree: sortTree(currentTree.tree.concat(data.treeList)),
       });
     }
   },
@@ -157,13 +132,11 @@ export default {
       raw: file.content,
       changed: Boolean(changedFile),
       staged: false,
-      replaces: false,
       lastCommitSha: lastCommit.commit.id,
 
       prevId: undefined,
       prevPath: undefined,
       prevName: undefined,
-      prevUrl: undefined,
       prevKey: undefined,
       prevParentPath: undefined,
     });
@@ -174,16 +147,8 @@ export default {
 
       Object.assign(state.entries[file.path], {
         rawPath: file.rawPath.replace(regex, file.path),
-        permalink: file.permalink.replace(regex, file.path),
-        commitsPath: file.commitsPath.replace(regex, file.path),
-        blamePath: file.blamePath.replace(regex, file.path),
       });
     }
-  },
-  [types.BURST_UNUSED_SEAL](state) {
-    Object.assign(state, {
-      unusedSeal: false,
-    });
   },
   [types.SET_LINKS](state, links) {
     Object.assign(state, { links });
@@ -196,15 +161,6 @@ export default {
   },
   [types.SET_ERROR_MESSAGE](state, errorMessage) {
     Object.assign(state, { errorMessage });
-  },
-  [types.OPEN_NEW_ENTRY_MODAL](state, { type, path }) {
-    Object.assign(state, {
-      entryModal: {
-        type,
-        path,
-        entry: { ...state.entries[path] },
-      },
-    });
   },
   [types.DELETE_ENTRY](state, path) {
     const entry = state.entries[path];
@@ -221,7 +177,12 @@ export default {
 
     if (entry.type === 'blob') {
       if (tempFile) {
+        // Since we only support one list of file changes, it's safe to just remove from both
+        // changed and staged. Otherwise, we'd need to somehow evaluate the difference between
+        // changed and HEAD.
+        // https://gitlab.com/gitlab-org/create-stage/-/issues/12669
         state.changedFiles = state.changedFiles.filter(f => f.path !== path);
+        state.stagedFiles = state.stagedFiles.filter(f => f.path !== path);
       } else {
         state.changedFiles = state.changedFiles.concat(entry);
       }
@@ -231,9 +192,6 @@ export default {
     const oldEntry = state.entries[path];
     const newPath = parentPath ? `${parentPath}/${name}` : name;
     const isRevert = newPath === oldEntry.prevPath;
-
-    const newUrl = replaceFileUrl(oldEntry.url, oldEntry.path, newPath);
-
     const newKey = oldEntry.key.replace(new RegExp(oldEntry.path, 'g'), newPath);
 
     const baseProps = {
@@ -241,7 +199,6 @@ export default {
       name,
       id: newPath,
       path: newPath,
-      url: newUrl,
       key: newKey,
       parentPath: parentPath || '',
     };
@@ -252,7 +209,6 @@ export default {
             prevId: undefined,
             prevPath: undefined,
             prevName: undefined,
-            prevUrl: undefined,
             prevKey: undefined,
             prevParentPath: undefined,
           }
@@ -260,7 +216,6 @@ export default {
             prevId: oldEntry.prevId || oldEntry.id,
             prevPath: oldEntry.prevPath || oldEntry.path,
             prevName: oldEntry.prevName || oldEntry.name,
-            prevUrl: oldEntry.prevUrl || oldEntry.url,
             prevKey: oldEntry.prevKey || oldEntry.key,
             prevParentPath: oldEntry.prevParentPath || oldEntry.parentPath,
           };

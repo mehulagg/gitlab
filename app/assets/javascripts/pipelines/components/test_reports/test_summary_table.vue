@@ -1,16 +1,21 @@
 <script>
 import { mapGetters } from 'vuex';
+import { GlIcon, GlTooltipDirective } from '@gitlab/ui';
 import { s__ } from '~/locale';
-import store from '~/pipelines/stores/test_reports';
 
 export default {
   name: 'TestsSummaryTable',
-  store,
+  components: {
+    GlIcon,
+  },
+  directives: {
+    GlTooltip: GlTooltipDirective,
+  },
   props: {
     heading: {
       type: String,
       required: false,
-      default: s__('TestReports|Test suites'),
+      default: s__('TestReports|Jobs'),
     },
   },
   computed: {
@@ -20,8 +25,8 @@ export default {
     },
   },
   methods: {
-    tableRowClick(suite) {
-      this.$emit('row-click', suite);
+    tableRowClick(index) {
+      this.$emit('row-click', index);
     },
   },
 };
@@ -29,16 +34,16 @@ export default {
 
 <template>
   <div>
-    <div class="row prepend-top-default">
+    <div class="row gl-mt-3">
       <div class="col-12">
         <h4>{{ heading }}</h4>
       </div>
     </div>
 
-    <div v-if="hasSuites" class="test-reports-table js-test-suites-table">
+    <div v-if="hasSuites" class="test-reports-table gl-mb-3 js-test-suites-table">
       <div role="row" class="gl-responsive-table-row table-row-header font-weight-bold">
         <div role="rowheader" class="table-section section-25 pl-3">
-          {{ __('Suite') }}
+          {{ __('Job') }}
         </div>
         <div role="rowheader" class="table-section section-25">
           {{ __('Duration') }}
@@ -64,15 +69,26 @@ export default {
         v-for="(testSuite, index) in getTestSuites"
         :key="index"
         role="row"
-        class="gl-responsive-table-row test-reports-summary-row rounded cursor-pointer js-suite-row"
-        @click="tableRowClick(testSuite)"
+        class="gl-responsive-table-row test-reports-summary-row rounded js-suite-row"
+        :class="{
+          'gl-responsive-table-row-clickable cursor-pointer': !testSuite.suite_error,
+        }"
+        @click="tableRowClick(index)"
       >
         <div class="table-section section-25">
           <div role="rowheader" class="table-mobile-header font-weight-bold">
             {{ __('Suite') }}
           </div>
-          <div class="table-mobile-content test-reports-summary-suite cgray pl-3">
+          <div class="table-mobile-content underline cgray pl-3">
             {{ testSuite.name }}
+            <gl-icon
+              v-if="testSuite.suite_error"
+              ref="suiteErrorIcon"
+              v-gl-tooltip
+              name="error"
+              :title="testSuite.suite_error"
+              class="vertical-align-middle"
+            />
           </div>
         </div>
 

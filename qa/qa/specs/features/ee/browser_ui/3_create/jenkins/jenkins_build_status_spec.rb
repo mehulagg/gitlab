@@ -2,8 +2,7 @@
 require 'securerandom'
 
 module QA
-  # Issue: https://gitlab.com/gitlab-org/gitlab/issues/35370
-  context 'Create', :docker, :quarantine do
+  context 'Create', :requires_admin, :skip_live_env, quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/195179', type: :flaky } do
     describe 'Jenkins integration' do
       let(:project_name) { "project_with_jenkins_#{SecureRandom.hex(4)}" }
 
@@ -27,7 +26,7 @@ module QA
         setup_jenkins
       end
 
-      it 'integrates and displays build status for MR pipeline in GitLab' do
+      it 'integrates and displays build status for MR pipeline in GitLab', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/719' do
         login_to_gitlab
 
         setup_project_integration_with_jenkins
@@ -42,9 +41,20 @@ module QA
             push.file_name = "file_#{SecureRandom.hex(4)}.txt"
           end
 
+          Vendor::Jenkins::Page::LastJobConsole.perform do |job_console|
+            job_console.job_name = project_name
+
+            job_console.visit!
+
+            Support::Waiter.wait_until(sleep_interval: 2, reload_page: page) do
+              job_console.has_successful_build? && job_console.no_failed_status_update?
+            end
+          end
+
           project.visit!
 
           Page::Project::Menu.perform(&:click_ci_cd_pipelines)
+
           Page::Project::Pipeline::Index.perform(&:click_on_latest_pipeline)
 
           Page::Project::Pipeline::Show.perform do |show|
@@ -81,6 +91,7 @@ module QA
         end
 
         Vendor::Jenkins::Page::ConfigureJob.perform do |configure_job|
+          configure_job.job_name = project_name
           configure_job.configure(scm_url: patch_host_name(project.repository_http_location.git_uri, 'gitlab'))
         end
       end
@@ -105,8 +116,7 @@ module QA
       end
 
       def login_to_gitlab
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
       end
 
       def patch_host_name(host_name, container_name)
@@ -121,7 +131,7 @@ module QA
 
         Page::Project::Menu.perform(&:click_project)
         Page::Project::Menu.perform(&:go_to_integrations_settings)
-        QA::EE::Page::Project::Settings::Integrations.perform(&:click_jenkins_ci_link)
+        Page::Project::Settings::Integrations.perform(&:click_jenkins_ci_link)
 
         QA::EE::Page::Project::Settings::Services::Jenkins.perform do |jenkins|
           jenkins.setup_service_with(jenkins_url: patch_host_name(Vendor::Jenkins::Page::Base.host, 'jenkins-server'),
@@ -131,9 +141,8 @@ module QA
 
       def allow_requests_to_local_networks
         Page::Main::Menu.perform(&:sign_out_if_signed_in)
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_admin_credentials)
-        Page::Main::Menu.perform(&:click_admin_area)
+        Flow::Login.sign_in_as_admin
+        Page::Main::Menu.perform(&:go_to_admin_area)
         Page::Admin::Menu.perform(&:go_to_network_settings)
 
         Page::Admin::Settings::Network.perform do |network|

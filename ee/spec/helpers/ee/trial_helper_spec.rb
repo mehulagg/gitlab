@@ -2,8 +2,163 @@
 
 require 'spec_helper'
 
-describe EE::TrialHelper do
+RSpec.describe EE::TrialHelper do
   using RSpec::Parameterized::TableSyntax
+
+  describe '#should_ask_company_question?' do
+    before do
+      allow(helper).to receive(:glm_params).and_return(glm_source ? { glm_source: glm_source } : {})
+    end
+
+    subject { helper.should_ask_company_question? }
+
+    where(:glm_source, :result) do
+      'about.gitlab.com'  | false
+      'abouts.gitlab.com' | true
+      'about.gitlab.org'  | true
+      'about.gitlob.com'  | true
+      nil                 | true
+    end
+
+    with_them do
+      it { is_expected.to eq(result) }
+    end
+  end
+
+  describe '#glm_params' do
+    let(:glm_source) { nil }
+    let(:glm_content) { nil }
+    let(:params) do
+      ActionController::Parameters.new({
+        controller: 'FooBar', action: 'stuff', id: '123'
+      }.tap do |p|
+        p[:glm_source] = glm_source if glm_source
+        p[:glm_content] = glm_content if glm_content
+      end)
+    end
+
+    before do
+      allow(helper).to receive(:params).and_return(params)
+    end
+
+    subject { helper.glm_params }
+
+    it 'is memoized' do
+      expect(helper).to receive(:strong_memoize)
+
+      subject
+    end
+
+    where(:glm_source, :glm_content, :result) do
+      nil       | nil       | {}
+      'source'  | nil       | { glm_source: 'source' }
+      nil       | 'content' | { glm_content: 'content' }
+      'source'  | 'content' | { glm_source: 'source', glm_content: 'content' }
+    end
+
+    with_them do
+      it { is_expected.to eq(HashWithIndifferentAccess.new(result)) }
+    end
+  end
+
+  describe '#namespace_options_for_select' do
+    let_it_be(:user) { create :user }
+    let_it_be(:group1) { create :group }
+    let_it_be(:group2) { create :group }
+
+    let(:trial_user_namespaces) { [] }
+    let(:trial_group_namespaces) { [] }
+
+    let(:new_optgroup_regex) { /<optgroup label="New"><option/ }
+    let(:groups_optgroup_regex) { /<optgroup label="Groups"><option/ }
+    let(:users_optgroup_regex) { /<optgroup label="Users"><option/ }
+
+    before do
+      allow(helper).to receive(:trial_group_namespaces).and_return(trial_group_namespaces)
+      allow(helper).to receive(:trial_user_namespaces).and_return(trial_user_namespaces)
+    end
+
+    subject { helper.namespace_options_for_select }
+
+    context 'when there are no eligible group or user namespaces' do
+      it 'returns just the "New" option group', :aggregate_failures do
+        is_expected.to match(new_optgroup_regex)
+        is_expected.not_to match(groups_optgroup_regex)
+        is_expected.not_to match(users_optgroup_regex)
+      end
+    end
+
+    context 'when only group namespaces are eligible' do
+      let(:trial_group_namespaces) { [group1, group2] }
+
+      it 'returns the "New" and "Groups" option groups', :aggregate_failures do
+        is_expected.to match(new_optgroup_regex)
+        is_expected.to match(groups_optgroup_regex)
+        is_expected.not_to match(users_optgroup_regex)
+      end
+    end
+
+    context 'when only the user namespace is eligible' do
+      let(:trial_user_namespaces) { [user.namespace] }
+
+      it 'returns the "New" and "Users" option groups', :aggregate_failures do
+        is_expected.to match(new_optgroup_regex)
+        is_expected.to match(users_optgroup_regex)
+        is_expected.not_to match(groups_optgroup_regex)
+      end
+    end
+
+    context 'when some group namespaces & the user namespace are eligible' do
+      let(:trial_group_namespaces) { [group1, group2] }
+      let(:trial_user_namespaces) { [user.namespace] }
+
+      it 'returns the "New", "Groups", and "Users" option groups', :aggregate_failures do
+        is_expected.to match(new_optgroup_regex)
+        is_expected.to match(groups_optgroup_regex)
+        is_expected.to match(users_optgroup_regex)
+      end
+    end
+  end
+
+  describe '#trial_selection_intro_text' do
+    before do
+      allow(helper).to receive(:any_trial_user_namespaces?).and_return(have_user_namespace)
+      allow(helper).to receive(:any_trial_group_namespaces?).and_return(have_group_namespace)
+    end
+
+    subject { helper.trial_selection_intro_text }
+
+    where(:have_user_namespace, :have_group_namespace, :text) do
+      true  | true  | 'You can apply your trial to a new group, an existing group, or your personal account.'
+      true  | false | 'You can apply your trial to a new group or your personal account.'
+      false | true  | 'You can apply your trial to a new group or an existing group.'
+      false | false | 'Create a new group to start your GitLab Gold trial.'
+    end
+
+    with_them do
+      it { is_expected.to eq(text) }
+    end
+  end
+
+  describe '#show_trial_namespace_select?' do
+    before do
+      allow(helper).to receive(:any_trial_group_namespaces?).and_return(have_group_namespace)
+      allow(helper).to receive(:any_trial_user_namespaces?).and_return(have_user_namespace)
+    end
+
+    subject { helper.show_trial_namespace_select? }
+
+    where(:have_user_namespace, :have_group_namespace, :result) do
+      true  | true  | true
+      true  | false | true
+      false | true  | true
+      false | false | false
+    end
+
+    with_them do
+      it { is_expected.to eq(result) }
+    end
+  end
 
   describe '#show_trial_errors?' do
     shared_examples 'shows errors based on trial generation result' do

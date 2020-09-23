@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'User views tags', :feature do
+RSpec.describe 'User views tags', :feature do
   context 'rss' do
     shared_examples 'has access to the tags RSS feed' do
       it do
         visit project_tags_path(project, format: :atom)
 
-        expect(page).to have_gitlab_http_status(200)
+        expect(page).to have_gitlab_http_status(:ok)
       end
     end
 

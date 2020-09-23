@@ -2,10 +2,11 @@
 
 require 'spec_helper'
 
-describe MergeRequests::ResolvedDiscussionNotificationService do
+RSpec.describe MergeRequests::ResolvedDiscussionNotificationService do
   let(:merge_request) { create(:merge_request) }
   let(:user) { create(:user) }
   let(:project) { merge_request.project }
+
   subject { described_class.new(project, user) }
 
   describe "#execute" do

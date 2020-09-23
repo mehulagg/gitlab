@@ -6,31 +6,17 @@ module Elastic
 
     include ApplicationVersionedSearch
 
-    INDEXED_ASSOCIATIONS = [
-      :issues,
-      :merge_requests,
-      :snippets,
-      :notes,
-      :milestones
-    ].freeze
-
     included do
       def use_elasticsearch?
         ::Gitlab::CurrentSettings.elasticsearch_indexes_project?(self)
       end
 
-      def each_indexed_association
-        INDEXED_ASSOCIATIONS.each do |association_name|
-          association = self.association(association_name)
-          scope = association.scope
-          klass = association.klass
+      def maintain_elasticsearch_create
+        ::Elastic::ProcessInitialBookkeepingService.track!(self)
+      end
 
-          if klass == Note
-            scope = scope.searchable
-          end
-
-          yield klass, scope
-        end
+      def maintain_elasticsearch_destroy
+        ElasticDeleteProjectWorker.perform_async(self.id, self.es_id)
       end
     end
   end

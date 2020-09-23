@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe Admin::Geo::UploadsController, :geo do
+RSpec.describe Admin::Geo::UploadsController, :geo do
   include EE::GeoHelpers
 
-  set(:admin) { create(:admin) }
-  set(:secondary) { create(:geo_node) }
-  set(:synced_registry) { create(:geo_upload_registry, :with_file, :attachment, success: true) }
-  set(:failed_registry) { create(:geo_upload_registry, :failed) }
-  set(:never_registry) { create(:geo_upload_registry, :failed, retry_count: nil) }
+  let_it_be(:admin) { create(:admin) }
+  let_it_be(:secondary) { create(:geo_node) }
+  let_it_be(:synced_registry) { create(:geo_upload_registry, :with_file, :attachment, success: true) }
+  let_it_be(:failed_registry) { create(:geo_upload_registry, :failed) }
+  let_it_be(:never_registry) { create(:geo_upload_registry, :failed, retry_count: nil) }
 
   def css_id(registry)
     "#upload-#{registry.id}-header"
@@ -21,9 +21,8 @@ describe Admin::Geo::UploadsController, :geo do
 
   shared_examples 'license required' do
     context 'without a valid license' do
-      it 'redirects to license page with a flash message' do
-        expect(subject).to redirect_to(admin_license_path)
-        expect(flash[:alert]).to include('You need a different license to use Geo replication')
+      it 'redirects to 403 page' do
+        expect(subject).to have_gitlab_http_status(:forbidden)
       end
     end
   end
@@ -42,13 +41,13 @@ describe Admin::Geo::UploadsController, :geo do
       end
 
       it 'renders the index template' do
-        expect(subject).to have_gitlab_http_status(200)
+        expect(subject).to have_gitlab_http_status(:ok)
         expect(subject).to render_template(:index)
       end
 
       context 'without sync_status specified' do
         it 'renders all registries' do
-          expect(subject).to have_gitlab_http_status(200)
+          expect(subject).to have_gitlab_http_status(:ok)
           expect(response.body).to have_css(css_id(synced_registry))
           expect(response.body).to have_css(css_id(failed_registry))
           expect(response.body).to have_css(css_id(never_registry))
@@ -59,7 +58,7 @@ describe Admin::Geo::UploadsController, :geo do
         subject { get :index, params: { sync_status: 'synced' } }
 
         it 'renders only synced registries' do
-          expect(subject).to have_gitlab_http_status(200)
+          expect(subject).to have_gitlab_http_status(:ok)
           expect(response.body).to have_css(css_id(synced_registry))
           expect(response.body).not_to have_css(css_id(failed_registry))
           expect(response.body).not_to have_css(css_id(never_registry))
@@ -70,18 +69,19 @@ describe Admin::Geo::UploadsController, :geo do
         subject { get :index, params: { sync_status: 'failed' } }
 
         it 'renders only failed registries' do
-          expect(subject).to have_gitlab_http_status(200)
+          expect(subject).to have_gitlab_http_status(:ok)
           expect(response.body).not_to have_css(css_id(synced_registry))
           expect(response.body).to have_css(css_id(failed_registry))
           expect(response.body).not_to have_css(css_id(never_registry))
         end
       end
 
-      context 'with sync_status=never' do
-        subject { get :index, params: { sync_status: 'never' } }
+      # Explained via: https://gitlab.com/gitlab-org/gitlab/-/issues/216049
+      context 'with sync_status=pending' do
+        subject { get :index, params: { sync_status: 'pending' } }
 
         it 'renders only never synced registries' do
-          expect(subject).to have_gitlab_http_status(200)
+          expect(subject).to have_gitlab_http_status(:ok)
           expect(response.body).not_to have_css(css_id(synced_registry))
           expect(response.body).not_to have_css(css_id(failed_registry))
           expect(response.body).to have_css(css_id(never_registry))
@@ -109,7 +109,7 @@ describe Admin::Geo::UploadsController, :geo do
           registry.update_column(:file_id, -1)
 
           expect(subject).to redirect_to(admin_geo_uploads_path)
-          expect(flash[:notice]).to include('was successfully removed')
+          expect(flash[:toast]).to include('was successfully removed')
           expect { Geo::UploadRegistry.find(registry.id) }.to raise_error(ActiveRecord::RecordNotFound)
         end
       end

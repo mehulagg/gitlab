@@ -6,12 +6,14 @@ module EE
       attr_accessor :project
 
       COLUMNS = [:merge_requests_access_level,
+                 :forking_access_level,
                  :issues_access_level,
                  :wiki_access_level,
                  :snippets_access_level,
                  :builds_access_level,
                  :repository_access_level,
-                 :pages_access_level].freeze
+                 :pages_access_level,
+                 :metrics_dashboard_access_level].freeze
 
       def initialize(current_user, model, project)
         @project = project
@@ -21,7 +23,7 @@ module EE
 
       def execute
         COLUMNS.each do |column|
-          audit_changes(column, as: column.to_s, target_model: @project, model: model)
+          audit_changes(column, as: column.to_s, entity: @project, model: model)
         end
       end
 

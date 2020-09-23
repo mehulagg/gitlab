@@ -9,12 +9,14 @@ class Admin::Geo::UploadsController < Admin::Geo::ApplicationController
 
   def destroy
     if registry.upload
-      return redirect_admin_geo_uploads(alert: s_('Geo|Could not remove tracking entry for an existing upload.'))
+      flash[:alert] = s_('Geo|Could not remove tracking entry for an existing upload.')
+      return redirect_back_or_default(default: admin_geo_uploads_path)
     end
 
     registry.destroy
 
-    redirect_admin_geo_uploads(notice: s_('Geo|Tracking entry for upload (%{type}/%{id}) was successfully removed.') % { type: registry.file_type, id: registry.file_id })
+    flash[:toast] = s_('Geo|Tracking entry for upload (%{type}/%{id}) was successfully removed.') % { type: registry.file_type, id: registry.file_id }
+    redirect_back_or_default(default: admin_geo_uploads_path)
   end
 
   private
@@ -30,9 +32,5 @@ class Admin::Geo::UploadsController < Admin::Geo::ApplicationController
 
   def registry
     @registry ||= ::Geo::UploadRegistry.find_by_id(params[:id])
-  end
-
-  def redirect_admin_geo_uploads(options)
-    redirect_back_or_default(default: admin_geo_uploads_path, options: options)
   end
 end

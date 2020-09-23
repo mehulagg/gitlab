@@ -1,36 +1,46 @@
 # frozen_string_literal: true
 
 class Projects::EnvironmentsController < Projects::ApplicationController
+  # Metrics dashboard code is getting decoupled from environments and is being moved
+  # into app/controllers/projects/metrics_dashboard_controller.rb
+  # See https://gitlab.com/gitlab-org/gitlab/-/issues/226002 for more details.
+
   include MetricsDashboard
 
   layout 'project'
-  before_action :authorize_read_environment!
+
+  before_action only: [:metrics, :additional_metrics, :metrics_dashboard] do
+    authorize_metrics_dashboard!
+
+    push_frontend_feature_flag(:prometheus_computed_alerts)
+    push_frontend_feature_flag(:disable_metric_dashboard_refresh_rate)
+  end
+  before_action :authorize_read_environment!, except: [:metrics, :additional_metrics, :metrics_dashboard, :metrics_redirect]
   before_action :authorize_create_environment!, only: [:new, :create]
   before_action :authorize_stop_environment!, only: [:stop]
-  before_action :authorize_update_environment!, only: [:edit, :update]
+  before_action :authorize_update_environment!, only: [:edit, :update, :cancel_auto_stop]
   before_action :authorize_admin_environment!, only: [:terminal, :terminal_websocket_authorize]
-  before_action :environment, only: [:show, :edit, :update, :stop, :terminal, :terminal_websocket_authorize, :metrics]
+  before_action :environment, only: [:show, :edit, :update, :stop, :terminal, :terminal_websocket_authorize, :metrics, :cancel_auto_stop]
   before_action :verify_api_request!, only: :terminal_websocket_authorize
-  before_action :expire_etag_cache, only: [:index]
-  before_action only: [:metrics, :additional_metrics, :metrics_dashboard] do
-    push_frontend_feature_flag(:environment_metrics_use_prometheus_endpoint, default_enabled: true)
-    push_frontend_feature_flag(:environment_metrics_additional_panel_types)
-    push_frontend_feature_flag(:prometheus_computed_alerts)
-  end
+  before_action :expire_etag_cache, only: [:index], unless: -> { request.format.json? }
+  after_action :expire_etag_cache, only: [:cancel_auto_stop]
 
   def index
     @environments = project.environments
       .with_state(params[:scope] || :available)
+    @project = ProjectPresenter.new(project, current_user: current_user)
 
     respond_to do |format|
       format.html
       format.json do
         Gitlab::PollingInterval.set_header(response, interval: 3_000)
+        environments_count_by_state = project.environments.count_by_state
 
         render json: {
           environments: serialize_environments(request, response, params[:nested]),
-          available_count: project.environments.available.count,
-          stopped_count: project.environments.stopped.count
+          review_app: serialize_review_app,
+          available_count: environments_count_by_state[:available],
+          stopped_count: environments_count_by_state[:stopped]
         }
       end
     end
@@ -95,7 +105,7 @@ class Projects::EnvironmentsController < Projects::ApplicationController
 
     action_or_env_url =
       if stop_action
-        polymorphic_url([project.namespace.becomes(Namespace), project, stop_action])
+        polymorphic_url([project, stop_action])
       else
         project_environment_url(project, @environment)
       end
@@ -103,6 +113,27 @@ class Projects::EnvironmentsController < Projects::ApplicationController
     respond_to do |format|
       format.html { redirect_to action_or_env_url }
       format.json { render json: { redirect_url: action_or_env_url } }
+    end
+  end
+
+  def cancel_auto_stop
+    result = Environments::ResetAutoStopService.new(project, current_user)
+      .execute(environment)
+
+    if result[:status] == :success
+      respond_to do |format|
+        message = _('Auto stop successfully canceled.')
+
+        format.html { redirect_back_or_default(default: { action: 'show' }, options: { notice: message }) }
+        format.json { render json: { message: message }, status: :ok }
+      end
+    else
+      respond_to do |format|
+        message = result[:message]
+
+        format.html { redirect_back_or_default(default: { action: 'show' }, options: { alert: message }) }
+        format.json { render json: { message: message }, status: :unprocessable_entity }
+      end
     end
   end
 
@@ -128,18 +159,14 @@ class Projects::EnvironmentsController < Projects::ApplicationController
   end
 
   def metrics_redirect
-    environment = project.default_environment
-
-    if environment
-      redirect_to environment_metrics_path(environment)
-    else
-      render :empty_metrics
-    end
+    redirect_to project_metrics_dashboard_path(project)
   end
 
   def metrics
     respond_to do |format|
-      format.html
+      format.html do
+        redirect_to project_metrics_dashboard_path(project, environment: environment )
+      end
       format.json do
         # Currently, this acts as a hint to load the metrics details into the cache
         # if they aren't there already
@@ -177,8 +204,6 @@ class Projects::EnvironmentsController < Projects::ApplicationController
   end
 
   def expire_etag_cache
-    return if request.format.json?
-
     # this forces to reload json content
     Gitlab::EtagCaching::Store.new.tap do |store|
       store.touch(project_environments_path(project, format: :json))
@@ -199,7 +224,7 @@ class Projects::EnvironmentsController < Projects::ApplicationController
 
   def metrics_dashboard_params
     params
-      .permit(:embedded, :group, :title, :y_label, :dashboard_path, :environment)
+      .permit(:embedded, :group, :title, :y_label, :dashboard_path, :environment, :sample_metrics, :embed_json)
       .merge(dashboard_path: params[:dashboard], environment: environment)
   end
 
@@ -221,8 +246,16 @@ class Projects::EnvironmentsController < Projects::ApplicationController
       .represent(@environments)
   end
 
+  def serialize_review_app
+    ReviewAppSetupSerializer.new(current_user: @current_user).represent(@project)
+  end
+
   def authorize_stop_environment!
     access_denied! unless can?(current_user, :stop_environment, environment)
+  end
+
+  def authorize_update_environment!
+    access_denied! unless can?(current_user, :update_environment, environment)
   end
 end
 

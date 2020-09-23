@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AvatarUploader do
+RSpec.describe AvatarUploader do
   let(:model) { build_stubbed(:user) }
   let(:uploader) { described_class.new(model, :avatar) }
   let(:upload) { create(:upload, model: model) }
@@ -45,5 +45,31 @@ describe AvatarUploader do
       expect(uploader.absolute_path.scan(storage_path).size).to eq(1)
       expect(uploader.absolute_path).to eq(absolute_path)
     end
+  end
+
+  context 'accept whitelist file content type' do
+    # We need to feed through a valid path, but we force the parsed mime type
+    # in a stub below so we can set any path.
+    let_it_be(:path) { File.join('spec', 'fixtures', 'video_sample.mp4') }
+
+    where(:mime_type) { described_class::MIME_WHITELIST }
+
+    with_them do
+      include_context 'force content type detection to mime_type'
+
+      it_behaves_like 'accepted carrierwave upload'
+    end
+  end
+
+  context 'upload non-whitelisted file content type' do
+    let_it_be(:path) { File.join('spec', 'fixtures', 'sanitized.svg') }
+
+    it_behaves_like 'denied carrierwave upload'
+  end
+
+  context 'upload misnamed non-whitelisted file content type' do
+    let_it_be(:path) { File.join('spec', 'fixtures', 'not_a_png.png') }
+
+    it_behaves_like 'denied carrierwave upload'
   end
 end

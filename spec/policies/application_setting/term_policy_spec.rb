@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe ApplicationSetting::TermPolicy do
+RSpec.describe ApplicationSetting::TermPolicy do
   include TermsHelper
 
-  set(:term) { create(:term) }
+  let_it_be(:term) { create(:term) }
   let(:user) { create(:user) }
 
   subject(:policy) { described_class.new(user, term) }

@@ -10,43 +10,21 @@ module EE
 
       GEO_SERVER_DOCS_URL = 'https://docs.gitlab.com/ee/administration/geo/replication/using_a_geo_server.html'.freeze
 
-      override :check_custom_action
-      def check_custom_action(cmd)
-        custom_action = custom_action_for(cmd)
-        return custom_action if custom_action
-
-        super
-      end
-
-      override :check_for_console_messages
-      def check_for_console_messages(cmd)
-        super.push(
-          *current_replication_lag_message
-        )
-      end
-
       protected
 
       def project_or_wiki
-        @project
+        project
       end
 
       private
 
-      def custom_action_for?(cmd)
-        return unless receive_pack?(cmd) # git push
-        return unless ::Gitlab::Database.read_only?
-
-        ::Gitlab::Geo.secondary_with_primary?
-      end
-
-      def custom_action_for(cmd)
-        return unless custom_action_for?(cmd)
+      def geo_custom_action
+        return unless geo_custom_action?
 
         payload = {
           'action' => 'geo_proxy_to_primary',
           'data' => {
-            'api_endpoints' => custom_action_api_endpoints,
+            'api_endpoints' => custom_action_api_endpoints_for(cmd),
             'primary_repo' => primary_http_repo_url
           }
         }
@@ -54,8 +32,21 @@ module EE
         ::Gitlab::GitAccessResult::CustomAction.new(payload, messages)
       end
 
+      def geo_custom_action?
+        return unless ::Gitlab::Database.read_only?
+        return unless ::Gitlab::Geo.secondary_with_primary?
+
+        receive_pack? || upload_pack_and_not_replicated?
+      end
+
+      def upload_pack_and_not_replicated?
+        return false unless project
+
+        upload_pack? && !::Geo::ProjectRegistry.repository_replicated_for?(project.id)
+      end
+
       def messages
-        messages = proxying_to_primary_message
+        messages = ::Gitlab::Geo.interacting_with_primary_message(primary_ssh_url_to_repo).split("\n")
         lag_message = current_replication_lag_message
 
         return messages unless lag_message
@@ -90,25 +81,8 @@ module EE
         geo_primary_ssh_url_to_repo(project_or_wiki)
       end
 
-      def proxying_to_primary_message
-        # This is formatted like this to fit into the console 'box', e.g.
-        #
-        # remote:
-        # remote: You're pushing to a Geo secondary! We'll help you by proxying this
-        # remote: request to the primary:
-        # remote:
-        # remote:   ssh://<user>@<host>:<port>/<group>/<repo>.git
-        # remote:
-        <<~STR.split("\n")
-          You're pushing to a Geo secondary! We'll help you by proxying this
-          request to the primary:
-
-            #{primary_ssh_url_to_repo}
-        STR
-      end
-
       def current_replication_lag_message
-        return if ::Gitlab::Database.read_write? || current_replication_lag.zero?
+        return if ::Gitlab::Database.read_write? || current_replication_lag == 0
 
         "Current replication lag: #{current_replication_lag} seconds"
       end
@@ -117,10 +91,21 @@ module EE
         @current_replication_lag ||= ::Gitlab::Geo::HealthCheck.new.db_replication_lag_seconds
       end
 
-      def custom_action_api_endpoints
+      def custom_action_api_endpoints_for(cmd)
+        receive_pack? ? custom_action_push_api_endpoints : custom_action_pull_api_endpoints
+      end
+
+      def custom_action_pull_api_endpoints
         [
-          api_v4_geo_proxy_git_push_ssh_info_refs_path,
-          api_v4_geo_proxy_git_push_ssh_push_path
+         api_v4_geo_proxy_git_ssh_info_refs_upload_pack_path,
+         api_v4_geo_proxy_git_ssh_upload_pack_path
+        ]
+      end
+
+      def custom_action_push_api_endpoints
+        [
+          api_v4_geo_proxy_git_ssh_info_refs_receive_pack_path,
+          api_v4_geo_proxy_git_ssh_receive_pack_path
         ]
       end
     end

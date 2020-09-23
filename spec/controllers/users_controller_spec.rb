@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UsersController do
+RSpec.describe UsersController do
   let(:user) { create(:user) }
   let(:private_user) { create(:user, private_profile: true) }
   let(:public_user) { create(:user) }
@@ -28,7 +28,7 @@ describe UsersController do
         it 'renders the show template' do
           get :show, params: { username: user.username }
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template('show')
         end
       end
@@ -53,7 +53,7 @@ describe UsersController do
 
         it 'renders show' do
           get :show, params: { username: user.username }
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(response).to render_template('show')
         end
       end
@@ -74,13 +74,14 @@ describe UsersController do
 
         it 'renders 404' do
           get :show, params: { username: 'nonexistent' }
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
 
     context 'json with events' do
       let(:project) { create(:project) }
+
       before do
         project.add_developer(user)
         Gitlab::DataBuilder::Push.build_sample(project, user)
@@ -129,7 +130,7 @@ describe UsersController do
 
           get :calendar, params: { username: public_user.username }, format: :json
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
 
@@ -174,7 +175,9 @@ describe UsersController do
     let(:user) { create(:user) }
 
     before do
-      allow_any_instance_of(User).to receive(:contributed_projects_ids).and_return([project.id])
+      allow_next_instance_of(User) do |instance|
+        allow(instance).to receive(:contributed_projects_ids).and_return([project.id])
+      end
 
       sign_in(user)
       project.add_developer(user)
@@ -282,7 +285,7 @@ describe UsersController do
     context 'format html' do
       it 'renders snippets page' do
         get :snippets, params: { username: user.username }
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(response).to render_template('show')
       end
     end
@@ -290,7 +293,7 @@ describe UsersController do
     context 'format json' do
       it 'response with snippets json data' do
         get :snippets, params: { username: user.username }, format: :json
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response).to have_key('html')
       end
     end

@@ -11,7 +11,7 @@ module SpammableActions
   end
 
   def mark_as_spam
-    if SpamService.new(spammable).mark_as_spam!
+    if Spam::MarkAsSpamService.new(target: spammable).execute
       redirect_to spammable_path, notice: _("%{spammable_titlecase} was submitted to Akismet successfully.") % { spammable_titlecase: spammable.spammable_entity_type.titlecase }
     else
       redirect_to spammable_path, alert: _('Error with Akismet. Please check the logs for more info.')
@@ -82,6 +82,6 @@ module SpammableActions
     return false if spammable.errors.count > 1 # re-render "new" template in case there are other errors
     return false unless Gitlab::Recaptcha.enabled?
 
-    spammable.spam
+    spammable.needs_recaptcha?
   end
 end

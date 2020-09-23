@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe Projects::BranchesController do
-  set(:project) { create(:project, :repository) }
+RSpec.describe Projects::BranchesController do
+  let_it_be(:project) { create(:project, :repository) }
   let(:user) { project.owner }
 
   before do
@@ -18,7 +18,7 @@ describe Projects::BranchesController do
       render_views
 
       before do
-        create(:import_state, :mirror, :finished, project: project, last_successful_update_at: Time.now)
+        create(:import_state, :mirror, :finished, project: project, last_successful_update_at: Time.current)
         allow(project.repository).to receive(:diverged_from_upstream?) { true }
       end
 

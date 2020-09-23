@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::Jupyter do
+RSpec.describe Clusters::Applications::Jupyter do
   include_examples 'cluster application core specs', :clusters_applications_jupyter
   include_examples 'cluster application status specs', :clusters_applications_jupyter
   include_examples 'cluster application version specs', :clusters_applications_jupyter
@@ -57,7 +57,8 @@ describe Clusters::Applications::Jupyter do
     it 'is initialized with 4 arguments' do
       expect(subject.name).to eq('jupyter')
       expect(subject.chart).to eq('jupyter/jupyterhub')
-      expect(subject.version).to eq('0.9-174bbd5')
+      expect(subject.version).to eq('0.9.0')
+
       expect(subject).to be_rbac
       expect(subject.repository).to eq('https://jupyterhub.github.io/helm-chart/')
       expect(subject.files).to eq(jupyter.files)
@@ -75,7 +76,7 @@ describe Clusters::Applications::Jupyter do
       let(:jupyter) { create(:clusters_applications_jupyter, :errored, version: '0.0.1') }
 
       it 'is initialized with the locked version' do
-        expect(subject.version).to eq('0.9-174bbd5')
+        expect(subject.version).to eq('0.9.0')
       end
     end
   end

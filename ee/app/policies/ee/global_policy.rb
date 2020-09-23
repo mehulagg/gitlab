@@ -9,23 +9,34 @@ module EE
         License.feature_available?(:operations_dashboard)
       end
 
-      condition(:security_dashboard_available) do
-        License.feature_available?(:security_dashboard)
+      condition(:pages_size_limit_available) do
+        License.feature_available?(:pages_size_limit)
+      end
+
+      condition(:adjourned_project_deletion_available) do
+        License.feature_available?(:adjourned_deletion_for_projects_and_groups)
       end
 
       rule { ~anonymous & operations_dashboard_available }.enable :read_operations_dashboard
-      rule { ~anonymous & security_dashboard_available }.enable :read_security_dashboard
 
       rule { admin }.policy do
         enable :read_licenses
         enable :destroy_licenses
+        enable :read_all_geo
       end
 
-      rule { support_bot }.prevent :use_quick_actions
+      rule { admin & pages_size_limit_available }.enable :update_max_pages_size
 
       rule { ~anonymous }.policy do
         enable :view_productivity_analytics
-        enable :view_code_analytics
+      end
+
+      rule { ~(admin | allow_to_manage_default_branch_protection) }.policy do
+        prevent :create_group_with_default_branch_protection
+      end
+
+      rule { admin & adjourned_project_deletion_available }.policy do
+        enable :list_removable_projects
       end
     end
   end

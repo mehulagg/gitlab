@@ -3,7 +3,7 @@
 module EE
   module Gitlab
     module Auth
-      module LDAP
+      module Ldap
         module Sync
           class AdminUsers < Sync::Users
             private

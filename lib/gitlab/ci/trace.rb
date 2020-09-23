@@ -9,6 +9,10 @@ module Gitlab
       LOCK_TTL = 10.minutes
       LOCK_RETRIES = 2
       LOCK_SLEEP = 0.001.seconds
+      WATCH_FLAG_TTL = 10.seconds
+
+      UPDATE_FREQUENCY_DEFAULT = 30.seconds
+      UPDATE_FREQUENCY_WHEN_BEING_WATCHED = 3.seconds
 
       ArchiveError = Class.new(StandardError)
       AlreadyArchivedError = Class.new(StandardError)
@@ -75,22 +79,13 @@ module Gitlab
         job.trace_chunks.any? || current_path.present? || old_trace.present?
       end
 
-      def read
-        stream = Gitlab::Ci::Trace::Stream.new do
-          if trace_artifact
-            trace_artifact.open
-          elsif job.trace_chunks.any?
-            Gitlab::Ci::Trace::ChunkedIO.new(job)
-          elsif current_path
-            File.open(current_path, "rb")
-          elsif old_trace
-            StringIO.new(old_trace)
-          end
-        end
+      def read(should_retry: true, &block)
+        read_stream(&block)
+      rescue Errno::ENOENT
+        raise unless should_retry
 
-        yield stream
-      ensure
-        stream&.close
+        job.reset
+        read_stream(&block)
       end
 
       def write(mode, &blk)
@@ -119,7 +114,41 @@ module Gitlab
         end
       end
 
+      def update_interval
+        being_watched? ? UPDATE_FREQUENCY_WHEN_BEING_WATCHED : UPDATE_FREQUENCY_DEFAULT
+      end
+
+      def being_watched!
+        Gitlab::Redis::SharedState.with do |redis|
+          redis.set(being_watched_cache_key, true, ex: WATCH_FLAG_TTL)
+        end
+      end
+
+      def being_watched?
+        Gitlab::Redis::SharedState.with do |redis|
+          redis.exists(being_watched_cache_key)
+        end
+      end
+
       private
+
+      def read_stream
+        stream = Gitlab::Ci::Trace::Stream.new do
+          if trace_artifact
+            trace_artifact.open
+          elsif job.trace_chunks.any?
+            Gitlab::Ci::Trace::ChunkedIO.new(job)
+          elsif current_path
+            File.open(current_path, "rb")
+          elsif old_trace
+            StringIO.new(old_trace)
+          end
+        end
+
+        yield stream
+      ensure
+        stream&.close
+      end
 
       def unsafe_write!(mode, &blk)
         stream = Gitlab::Ci::Trace::Stream.new do
@@ -127,7 +156,7 @@ module Gitlab
             raise AlreadyArchivedError, 'Could not write to the archived trace'
           elsif current_path
             File.open(current_path, mode)
-          elsif Feature.enabled?('ci_enable_live_trace', job.project)
+          elsif Feature.enabled?(:ci_enable_live_trace, job.project)
             Gitlab::Ci::Trace::ChunkedIO.new(job)
           else
             File.open(ensure_path, mode)
@@ -235,6 +264,10 @@ module Gitlab
 
       def trace_artifact
         job.job_artifacts_trace
+      end
+
+      def being_watched_cache_key
+        "gitlab:ci:trace:#{job.id}:watched"
       end
     end
   end

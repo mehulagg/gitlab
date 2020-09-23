@@ -2,32 +2,27 @@
 
 require 'spec_helper'
 
-describe 'User activates Atlassian Bamboo CI' do
-  let(:project) { create(:project) }
-  let(:user) { create(:user) }
+RSpec.describe 'User activates Atlassian Bamboo CI' do
+  include_context 'project service activation'
 
   before do
-    project.add_maintainer(user)
-    sign_in(user)
-
-    visit(project_settings_integrations_path(project))
-
-    click_link('Atlassian Bamboo CI')
+    stub_request(:get, /.*bamboo.example.com.*/)
   end
 
-  it 'activates service' do
-    check('Active')
+  it 'activates service', :js do
+    visit_project_integration('Atlassian Bamboo CI')
     fill_in('Bamboo url', with: 'http://bamboo.example.com')
     fill_in('Build key', with: 'KEY')
     fill_in('Username', with: 'user')
     fill_in('Password', with: 'verySecret')
-    click_button('Save')
 
-    expect(page).to have_content('Atlassian Bamboo CI activated.')
+    click_test_then_save_integration(expect_test_to_fail: false)
+
+    expect(page).to have_content('Atlassian Bamboo CI settings saved and active.')
 
     # Password field should not be filled in.
     click_link('Atlassian Bamboo CI')
 
-    expect(find_field('Enter new password').value).to be_nil
+    expect(find_field('Enter new Password').value).to be_blank
   end
 end

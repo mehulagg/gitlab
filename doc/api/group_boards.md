@@ -1,3 +1,9 @@
+---
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Group Issue Boards API
 
 Every API call to group boards must be authenticated.
@@ -9,7 +15,7 @@ request will result in `404` status code.
 
 Lists Issue Boards in the given group.
 
-```
+```plaintext
 GET /groups/:id/boards
 ```
 
@@ -17,8 +23,8 @@ GET /groups/:id/boards
 | --------- | ---- | -------- | ----------- |
 | `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/boards
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/boards"
 ```
 
 Example response:
@@ -126,7 +132,7 @@ Example response:
 
 Gets a single group issue board.
 
-```
+```plaintext
 GET /groups/:id/boards/:board_id
 ```
 
@@ -135,8 +141,8 @@ GET /groups/:id/boards/:board_id
 | `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/boards/1
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/boards/1"
 ```
 
 Example response:
@@ -240,7 +246,7 @@ Example response:
 
 Creates a Group Issue Board.
 
-```
+```plaintext
 POST /groups/:id/boards
 ```
 
@@ -249,8 +255,8 @@ POST /groups/:id/boards
 | `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `name` | string | yes | The name of the new board |
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/boards?name=newboard
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/boards?name=newboard"
 ```
 
 Example response:
@@ -302,11 +308,11 @@ Example response:
 
 ## Update a group issue board **(PREMIUM)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/5954) in GitLab 11.1.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5954) in GitLab 11.1.
 
 Updates a Group Issue Board.
 
-```
+```plaintext
 PUT /groups/:id/boards/:board_id
 ```
 
@@ -320,8 +326,8 @@ PUT /groups/:id/boards/:board_id
 | `labels`            | string         | no       | Comma-separated list of label names which the board should be scoped to |
 | `weight`            | integer        | no       | The weight range from 0 to 9, to which the board should be scoped to |
 
-```bash
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/boards/1?name=new_name&milestone_id=44&assignee_id=1&labels=GroupLabel&weight=4
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/boards/1?name=new_name&milestone_id=44&assignee_id=1&labels=GroupLabel&weight=4"
 ```
 
 Example response:
@@ -372,7 +378,7 @@ Example response:
 
 Deletes a Group Issue Board.
 
-```
+```plaintext
 DELETE /groups/:id/boards/:board_id
 ```
 
@@ -381,8 +387,8 @@ DELETE /groups/:id/boards/:board_id
 | `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/boards/1
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/boards/1"
 ```
 
 ## List group issue board lists
@@ -390,7 +396,7 @@ curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitl
 Get a list of the board's lists.
 Does not include `open` and `closed` lists
 
-```
+```plaintext
 GET /groups/:id/boards/:board_id/lists
 ```
 
@@ -399,8 +405,8 @@ GET /groups/:id/boards/:board_id/lists
 | `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `board_id` | integer | yes | The ID of a board |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/boards/1/lists
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/boards/1/lists"
 ```
 
 Example response:
@@ -441,7 +447,7 @@ Example response:
 
 Get a single board list.
 
-```
+```plaintext
 GET /groups/:id/boards/:board_id/lists/:list_id
 ```
 
@@ -451,8 +457,8 @@ GET /groups/:id/boards/:board_id/lists/:list_id
 | `board_id` | integer | yes | The ID of a board |
 | `list_id` | integer | yes | The ID of a board's list |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/boards/1/lists/1
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/boards/1/lists/1"
 ```
 
 Example response:
@@ -473,7 +479,7 @@ Example response:
 
 Creates a new Issue Board list.
 
-```
+```plaintext
 POST /groups/:id/boards/:board_id/lists
 ```
 
@@ -483,21 +489,30 @@ POST /groups/:id/boards/:board_id/lists
 | `board_id` | integer | yes | The ID of a board |
 | `label_id` | integer | yes | The ID of a label |
 
-```bash
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/boards/1/lists?label_id=5
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/4/boards/12/lists?milestone_id=7"
 ```
 
 Example response:
 
 ```json
 {
-  "id" : 1,
-  "label" : {
-    "name" : "Testing",
-    "color" : "#F0AD4E",
-    "description" : null
-  },
-  "position" : 1
+  "id": 9,
+  "label": null,
+  "position": 0,
+  "milestone": {
+    "id": 7,
+    "iid": 3,
+    "group_id": 12,
+    "title": "Milestone with due date",
+    "description": "",
+    "state": "active",
+    "created_at": "2017-09-03T07:16:28.596Z",
+    "updated_at": "2017-09-03T07:16:49.521Z",
+    "due_date": null,
+    "start_date": null,
+    "web_url": "https://gitlab.example.com/groups/issue-reproduce/-/milestones/3"
+  }
 }
 ```
 
@@ -505,7 +520,7 @@ Example response:
 
 Updates an existing Issue Board list. This call is used to change list position.
 
-```
+```plaintext
 PUT /groups/:id/boards/:board_id/lists/:list_id
 ```
 
@@ -516,8 +531,8 @@ PUT /groups/:id/boards/:board_id/lists/:list_id
 | `list_id` | integer | yes | The ID of a board's list |
 | `position` | integer | yes | The position of the list |
 
-```bash
-curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/group/5/boards/1/lists/1?position=2
+```shell
+curl --request PUT --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/group/5/boards/1/lists/1?position=2"
 ```
 
 Example response:
@@ -538,7 +553,7 @@ Example response:
 
 Only for admins and group owners. Deletes the board list in question.
 
-```
+```plaintext
 DELETE /groups/:id/boards/:board_id/lists/:list_id
 ```
 
@@ -548,6 +563,6 @@ DELETE /groups/:id/boards/:board_id/lists/:list_id
 | `board_id` | integer | yes | The ID of a board |
 | `list_id` | integer | yes | The ID of a board's list |
 
-```bash
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/groups/5/boards/1/lists/1
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/groups/5/boards/1/lists/1"
 ```

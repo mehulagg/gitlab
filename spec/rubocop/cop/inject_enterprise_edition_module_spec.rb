@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-require 'spec_helper'
+require 'fast_spec_helper'
 require 'rubocop'
 require 'rubocop/rspec/support'
 require_relative '../../../rubocop/cop/inject_enterprise_edition_module'
 
-describe RuboCop::Cop::InjectEnterpriseEditionModule do
+RSpec.describe RuboCop::Cop::InjectEnterpriseEditionModule, type: :rubocop do
   include CopHelper
 
   subject(:cop) { described_class.new }
@@ -156,6 +156,31 @@ describe RuboCop::Cop::InjectEnterpriseEditionModule do
     end
 
     Foo.extend_if_ee('EE::Foo')
+    SOURCE
+  end
+
+  it 'does not flag the double use of `X_if_ee` on the last line' do
+    expect_no_offenses(<<~SOURCE)
+    class Foo
+    end
+
+    Foo.extend_if_ee('EE::Foo')
+    Foo.include_if_ee('EE::Foo')
+    Foo.prepend_if_ee('EE::Foo')
+    SOURCE
+  end
+
+  it 'does not flag the use of `prepend_if_ee EE` as long as all injections are at the end of the file' do
+    expect_no_offenses(<<~SOURCE)
+    class Foo
+    end
+
+    Foo.include_if_ee('EE::Foo')
+    Foo.prepend_if_ee('EE::Foo')
+
+    Foo.include(Bar)
+    # comment on prepending Bar
+    Foo.prepend(Bar)
     SOURCE
   end
 

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe DependencyProxy::FileUploader do
+RSpec.describe DependencyProxy::FileUploader do
   let(:blob) { create(:dependency_proxy_blob) }
   let(:uploader) { described_class.new(blob, :file) }
   let(:path) { Gitlab.config.dependency_proxy.storage_path }

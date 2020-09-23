@@ -1,9 +1,8 @@
 <script>
-import { GlButton, GlLoadingIcon, GlModal } from '@gitlab/ui';
+import { GlLoadingIcon, GlModal } from '@gitlab/ui';
 
 export default {
   components: {
-    GlButton,
     GlLoadingIcon,
     GlModal,
   },

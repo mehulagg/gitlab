@@ -1,7 +1,7 @@
 <script>
-import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { noneEpic } from 'ee/vue_shared/constants';
 import EpicsSelect from 'ee/vue_shared/components/sidebar/epics_select/base.vue';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 
 export default {
   components: {
@@ -88,7 +88,6 @@ export default {
     :can-edit="canEdit"
     :initial-epic="epic"
     :initial-epic-loading="initialEpicLoading"
-    :block-title="__('Epic')"
   >
     {{ __('None') }}
   </epics-select>

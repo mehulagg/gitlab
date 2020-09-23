@@ -1,10 +1,13 @@
 # frozen_string_literal: true
 
 module Geo
-  class MetricsUpdateWorker
+  class MetricsUpdateWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
     include ExclusiveLeaseGuard
+    # rubocop:disable Scalability/CronWorkerContext
+    # This worker does not perform work scoped to a context
     include CronjobQueue
+    # rubocop:enable Scalability/CronWorkerContext
 
     feature_category :geo_replication
 

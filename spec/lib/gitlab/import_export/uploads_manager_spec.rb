@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ImportExport::UploadsManager do
+RSpec.describe Gitlab::ImportExport::UploadsManager do
   let(:shared) { project.import_export_shared }
   let(:export_path) { "#{Dir.tmpdir}/project_tree_saver_spec" }
   let(:project) { create(:project) }
@@ -10,7 +12,9 @@ describe Gitlab::ImportExport::UploadsManager do
   subject(:manager) { described_class.new(project: project, shared: shared) }
 
   before do
-    allow_any_instance_of(Gitlab::ImportExport).to receive(:storage_path).and_return(export_path)
+    allow_next_instance_of(Gitlab::ImportExport) do |instance|
+      allow(instance).to receive(:storage_path).and_return(export_path)
+    end
     FileUtils.mkdir_p(shared.export_path)
   end
 

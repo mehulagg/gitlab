@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe MergeRequestMetricsService do
+RSpec.describe MergeRequestMetricsService do
   let(:metrics) { create(:merge_request).metrics }
 
   describe '#merge' do
     it 'updates metrics' do
       user = create(:user)
       service = described_class.new(metrics)
-      event = double(Event, author_id: user.id, created_at: Time.now)
+      event = double(Event, author_id: user.id, created_at: Time.current)
 
       service.merge(event)
 
@@ -22,7 +22,7 @@ describe MergeRequestMetricsService do
     it 'updates metrics' do
       user = create(:user)
       service = described_class.new(metrics)
-      event = double(Event, author_id: user.id, created_at: Time.now)
+      event = double(Event, author_id: user.id, created_at: Time.current)
 
       service.close(event)
 

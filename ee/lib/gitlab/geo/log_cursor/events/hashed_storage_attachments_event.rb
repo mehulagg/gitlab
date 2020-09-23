@@ -24,14 +24,12 @@ module Gitlab
           end
 
           def log_event(job_id)
-            logger.event_info(
-              created_at,
+            super(
               'Migrating attachments to hashed storage',
               project_id: event.project_id,
               old_attachments_path: event.old_attachments_path,
               new_attachments_path: event.new_attachments_path,
-              job_id: job_id
-            )
+              job_id: job_id)
           end
         end
       end

@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe 'Multiple Issue Boards', :js do
-  set(:user) { create(:user) }
-  set(:group) { create(:group, :public) }
-  set(:planning) { create(:group_label, group: group, name: 'Planning') }
-  set(:board) { create(:board, group: group) }
+RSpec.describe 'Multiple Issue Boards', :js do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:group) { create(:group, :public) }
+  let_it_be(:planning) { create(:group_label, group: group, name: 'Planning') }
+  let_it_be(:board) { create(:board, group: group) }
   let(:parent) { group }
   let(:boards_path) { group_boards_path(group) }
 
@@ -57,6 +57,7 @@ describe 'Multiple Issue Boards', :js do
 
     before do
       stub_licensed_features(multiple_group_issue_boards: true)
+      stub_feature_flags(graphql_board_lists: false)
     end
 
     it_behaves_like 'multiple issue boards'

@@ -1,12 +1,15 @@
 ---
 type: reference
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # Burndown Charts **(STARTER)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/1540) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.1 for project milestones.
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/5354) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.8 for group milestones.
-> - [Added](https://gitlab.com/gitlab-org/gitlab/merge_requests/6495) to [GitLab Starter](https://about.gitlab.com/pricing/) 11.2 for group milestones.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1540) in [GitLab Starter](https://about.gitlab.com/pricing/) 9.1 for project milestones.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5354) in [GitLab Premium](https://about.gitlab.com/pricing/) 10.8 for group milestones.
+> - [Added](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/6495) to [GitLab Starter](https://about.gitlab.com/pricing/) 11.2 for group milestones.
 > - Closed or reopened issues prior to GitLab 9.1 won't have a `closed_at`
 >   value, so the burndown chart considers them as closed on the milestone
 >  `start_date`. In that case, a warning will be displayed.
@@ -28,11 +31,11 @@ For an overview, check the video demonstration on [Mapping work versus time with
 
 ## Use cases
 
-Burndown Charts, in general, are used for tracking and analyzing the completion of
+Burndown Charts are generally used for tracking and analyzing the completion of
 a milestone. Therefore, their use cases are tied to the
 [use you are assigning your milestone to](index.md).
 
-To exemplify, suppose you lead a team of developers in a large company,
+For example, suppose you lead a team of developers in a large company,
 and you follow this workflow:
 
 - Your company set the goal for the quarter to deliver 10 new features for your app

@@ -2,7 +2,7 @@
 
 require('spec_helper')
 
-describe Projects::ProjectMembersController do
+RSpec.describe Projects::ProjectMembersController do
   let(:user) { create(:user) }
   let(:project) { create(:project, :public, namespace: namespace) }
   let(:namespace) { create :group }
@@ -32,13 +32,13 @@ describe Projects::ProjectMembersController do
 
       context 'and the project group has membership lock enabled' do
         before do
-          project.namespace.update(membership_lock: true)
+          project.namespace.update!(membership_lock: true)
         end
 
         it 'responds with 403' do
           apply_import
 
-          expect(response.status).to eq 403
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
     end
@@ -64,13 +64,13 @@ describe Projects::ProjectMembersController do
 
     context 'when project group has membership lock enabled' do
       before do
-        project.namespace.update(membership_lock: true)
+        project.namespace.update!(membership_lock: true)
       end
 
       it 'responds with 403' do
         create_member
 
-        expect(response.status).to eq 403
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
   end
@@ -90,13 +90,13 @@ describe Projects::ProjectMembersController do
 
     context 'when project group has membership lock enabled' do
       before do
-        project.namespace.update(membership_lock: true)
+        project.namespace.update!(membership_lock: true)
       end
 
       it 'responds with 403' do
         import
 
-        expect(response.status).to eq 403
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
   end

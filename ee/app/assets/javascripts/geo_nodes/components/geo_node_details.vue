@@ -1,5 +1,4 @@
 <script>
-/* eslint-disable vue/no-side-effects-in-computed-properties */
 import { GlLink } from '@gitlab/ui';
 import { s__ } from '~/locale';
 
@@ -33,48 +32,46 @@ export default {
       type: Boolean,
       required: true,
     },
+    nodeRemovalAllowed: {
+      type: Boolean,
+      required: true,
+    },
     geoTroubleshootingHelpPath: {
       type: String,
       required: true,
     },
   },
-  data() {
-    return {
-      showAdvanceItems: false,
-      errorMessage: '',
-    };
-  },
   computed: {
-    hasError() {
-      if (!this.nodeDetails.healthy) {
-        this.errorMessage = this.nodeDetails.health;
-      }
-      return !this.nodeDetails.healthy;
-    },
     hasVersionMismatch() {
-      if (
+      return (
         this.nodeDetails.version !== this.nodeDetails.primaryVersion ||
         this.nodeDetails.revision !== this.nodeDetails.primaryRevision
-      ) {
-        this.errorMessage = s__('GeoNodes|GitLab version does not match the primary node version');
-        return true;
+      );
+    },
+    errorMessage() {
+      if (!this.nodeDetails.healthy) {
+        return this.nodeDetails.health;
+      } else if (!this.node.primary && this.hasVersionMismatch) {
+        return s__('GeoNodes|GitLab version does not match the primary node version');
       }
-      return false;
+
+      return '';
     },
   },
 };
 </script>
 
 <template>
-  <div class="card-body">
+  <div class="card-body p-0">
     <node-details-section-main
       :node="node"
       :node-details="nodeDetails"
       :node-actions-allowed="nodeActionsAllowed"
       :node-edit-allowed="nodeEditAllowed"
+      :node-removal-allowed="nodeRemovalAllowed"
       :version-mismatch="hasVersionMismatch"
     />
-    <node-details-section-sync v-if="!node.primary" :node-details="nodeDetails" />
+    <node-details-section-sync v-if="!node.primary" :node="node" :node-details="nodeDetails" />
     <node-details-section-verification
       v-if="nodeDetails.repositoryVerificationEnabled"
       :node-details="nodeDetails"
@@ -85,8 +82,8 @@ export default {
       :node-details="nodeDetails"
       :node-type-primary="node.primary"
     />
-    <div v-if="hasError || hasVersionMismatch" class="node-health-message-container">
-      <p class="node-health-message">
+    <div v-if="errorMessage" data-testid="errorSection">
+      <p class="p-3 mb-0 bg-danger-100 text-danger-500">
         {{ errorMessage }}
         <gl-link :href="geoTroubleshootingHelpPath">{{
           s__('Geo|Please refer to Geo Troubleshooting.')

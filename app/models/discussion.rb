@@ -14,13 +14,16 @@ class Discussion
             :author,
             :noteable,
             :commit_id,
+            :confidential?,
             :for_commit?,
             :for_merge_request?,
             :noteable_ability_name,
             :to_ability_name,
             :editable?,
-            :visible_for?,
-
+            :resolved_by_id,
+            :system_note_with_references_visible_for?,
+            :resource_parent,
+            :save,
             to: :first_note
 
   def declarative_policy_delegate
@@ -137,10 +140,6 @@ class Discussion
 
   def can_convert_to_discussion?
     false
-  end
-
-  def new_discussion?
-    notes.length == 1
   end
 
   def last_note

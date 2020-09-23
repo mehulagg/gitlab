@@ -21,9 +21,9 @@ To get the credentials (a pair of Client ID and Client Secret), you must [create
 1. Select **API (Enable OAuth Settings)** and click on **Enable OAuth Settings**.
 1. Fill in the application details into the following fields:
    - **Callback URL**: The callback URL of your GitLab installation. For example, `https://gitlab.example.com/users/auth/salesforce/callback`.
-   - **Selected OAuth Scopes**: Move **Access your basic information (id, profile, email, address, phone)** and **Allow access to your unique identifier (OpenID)** to the right column.
+   - **Selected OAuth Scopes**: Move `Access your basic information (id, profile, email, address, phone)` and `Allow access to your unique identifier (openid)` to the right column.
 
-   ![Salesforce Oauth App Details](img/salesforce_oauth_app_details.png)
+   ![Salesforce OAuth App Details](img/salesforce_oauth_app_details.png)
 
 1. Click **Save**.
 
@@ -31,13 +31,13 @@ To get the credentials (a pair of Client ID and Client Secret), you must [create
 
    For Omnibus package:
 
-   ```sh
+   ```shell
    sudo editor /etc/gitlab/gitlab.rb
    ```
 
    For installations from source:
 
-   ```sh
+   ```shell
    cd /home/git/gitlab
    sudo -u git -H editor config/gitlab.yml
    ```
@@ -60,7 +60,7 @@ To get the credentials (a pair of Client ID and Client Secret), you must [create
 
    For installation from source:
 
-   ```
+   ```yaml
    - { name: 'salesforce',
        app_id: 'SALESFORCE_CLIENT_ID',
        app_secret: 'SALESFORCE_CLIENT_SECRET'

@@ -1,0 +1,204 @@
+/* Checkout Page */
+$subscriptions-form-group-width: 420px;
+$subscriptions-full-width-md: $subscriptions-form-group-width + $gl-padding * 2 + 2;
+$subscriptions-full-width-lg: 541px;
+
+.subscriptions-layout-html {
+  .container {
+    max-width: none;
+    padding-top: 40px;
+  }
+
+  .checkout-pane {
+    border-bottom: 1px solid $gray-100;
+    flex-grow: 1;
+    flex-shrink: 0;
+
+    @media(min-width: map-get($grid-breakpoints, lg)) {
+      border-bottom: 0;
+      border-right: 1px solid $border-color;
+    }
+  }
+
+  .checkout {
+    align-items: center;
+    flex-grow: 1;
+    margin-top: $gl-padding;
+    max-width: $subscriptions-full-width-md;
+
+    @media(min-width: map-get($grid-breakpoints, lg)) {
+      justify-content: inherit !important;
+      margin-top: $gl-padding-32;
+      max-width: none;
+    }
+
+    .full-width {
+      max-width: $subscriptions-full-width-lg;
+      width: 100%;
+    }
+  }
+
+  .bar {
+    @media(min-width: map-get($grid-breakpoints, lg)) {
+      width: 400px;
+    }
+
+    list-style-position: inside;
+    list-style-type: decimal;
+
+    .phase {
+      border-bottom: 5px solid $gray-100;
+      color: $gray-500;
+      flex-basis: 100%;
+      font-size: $gl-font-size-12;
+      line-height: $gl-line-height;
+      padding-bottom: $gl-padding-8;
+
+      &.current,
+      &.finished {
+        border-bottom-color: $blue-400;
+      }
+
+      &.current {
+        color: $gray-900;
+      }
+    }
+  }
+
+  .checkmark {
+    color: $green-500;
+    margin-top: -1px;
+  }
+
+  .card {
+    margin-bottom: 0;
+    min-height: 32px;
+    padding: $gl-padding;
+    max-width: $subscriptions-full-width-lg;
+
+    @media(min-width: map-get($grid-breakpoints, lg)) {
+      width: $subscriptions-full-width-lg;
+    }
+
+    &.payment-method {
+      // Use literals here to avoid dark theme from changing the color
+      // scss-lint:disable ColorVariable
+      background-color: #fff;
+      color: #303030;
+      // scss-lint:enable ColorVariable
+    }
+  }
+
+  .gl-form-group,
+  .combined {
+    flex-grow: 1;
+    max-width: 420px;
+
+    legend {
+      border-bottom: 0;
+      font-weight: $gl-font-weight-bold;
+    }
+
+    .gl-form-input,
+    .gl-form-select {
+      height: 32px;
+      line-height: 1rem;
+    }
+  }
+
+  .number {
+    @media(min-width: map-get($grid-breakpoints, lg)) {
+      max-width: 202px;
+    }
+  }
+
+  .label {
+    padding: 0;
+
+    .gl-link {
+      font-size: inherit;
+    }
+  }
+
+  .btn {
+    line-height: $gl-line-height-14;
+    padding: $gl-padding-8 $gl-padding-12;
+    width: 100%;
+
+    @media(min-width: map-get($grid-breakpoints, lg)) {
+      width: initial;
+    }
+  }
+
+  .overview {
+    line-height: $gl-line-height-20;
+
+    .btn {
+      height: 24px;
+      padding: 1px 8px;
+      width: 48px;
+
+      @media(min-width: map-get($grid-breakpoints, lg)) {
+        width: initial;
+      }
+    }
+  }
+
+  #zuora_payment {
+    margin-right: -8px;
+
+    @media(min-width: map-get($grid-breakpoints, lg)) {
+      margin-right: 0;
+    }
+
+    iframe {
+      // Use literal to avoid dark theme from changing the color
+      // scss-lint:disable ColorVariable
+      background-color: #fff;
+      // scss-lint:enable ColorVariable
+      margin: -4px;
+      width: 100% !important;
+    }
+  }
+
+  .order-summary {
+    max-width: $subscriptions-full-width-md;
+
+    @media(min-width: map-get($grid-breakpoints, lg)) {
+      max-width: none;
+    }
+  }
+
+  .edit-group,
+  .edit-profile,
+  .new-project {
+    max-width: 400px;
+
+    .bar {
+      width: 100%;
+    }
+
+    .normal {
+      font-weight: $gl-font-weight-normal;
+    }
+
+    .field_with_errors {
+      @include gl-flex-grow-1;
+      display: inline;
+    }
+
+    .project-import {
+      h5 {
+        display: none;
+      }
+
+      .import-buttons {
+        justify-content: center;
+
+        .btn {
+          width: 288px;
+        }
+      }
+    }
+  }
+}

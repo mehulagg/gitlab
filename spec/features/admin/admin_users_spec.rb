@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe "Admin::Users" do
+RSpec.describe "Admin::Users" do
   include Spec::Support::Helpers::Features::ResponsiveTableHelpers
 
   let!(:user) do
@@ -38,7 +38,7 @@ describe "Admin::Users" do
     end
 
     describe "view extra user information" do
-      it 'shows the user popover on hover', :js, :quarantine do
+      it 'shows the user popover on hover', :js, quarantine: 'https://gitlab.com/gitlab-org/gitlab/-/issues/11290' do
         expect(page).not_to have_selector('#__BV_popover_1__')
 
         first_user_link = page.first('.js-user-link')
@@ -179,7 +179,9 @@ describe "Admin::Users" do
     end
 
     it "calls send mail" do
-      expect_any_instance_of(NotificationService).to receive(:new_user)
+      expect_next_instance_of(NotificationService) do |instance|
+        expect(instance).to receive(:new_user)
+      end
 
       click_button "Create user"
     end
@@ -277,7 +279,8 @@ describe "Admin::Users" do
 
       expect(page).to have_content(user.email)
       expect(page).to have_content(user.name)
-      expect(page).to have_content(user.id)
+      expect(page).to have_content("ID: #{user.id}")
+      expect(page).to have_content("Namespace ID: #{user.namespace_id}")
       expect(page).to have_button('Deactivate user')
       expect(page).to have_button('Block user')
       expect(page).to have_button('Delete user')
@@ -351,7 +354,7 @@ describe "Admin::Users" do
         it 'sees impersonation log out icon' do
           subject
 
-          icon = first('.fa.fa-user-secret')
+          icon = first('[data-testid="incognito-icon"]')
           expect(icon).not_to be nil
         end
 
@@ -510,14 +513,14 @@ describe "Admin::Users" do
     end
 
     it "lists group projects" do
-      within(:css, '.append-bottom-default + .card') do
+      within(:css, '.gl-mb-3 + .card') do
         expect(page).to have_content 'Group projects'
         expect(page).to have_link group.name, href: admin_group_path(group)
       end
     end
 
     it 'allows navigation to the group details' do
-      within(:css, '.append-bottom-default + .card') do
+      within(:css, '.gl-mb-3 + .card') do
         click_link group.name
       end
       within(:css, 'h3.page-title') do
@@ -527,14 +530,14 @@ describe "Admin::Users" do
     end
 
     it 'shows the group access level' do
-      within(:css, '.append-bottom-default + .card') do
+      within(:css, '.gl-mb-3 + .card') do
         expect(page).to have_content 'Developer'
       end
     end
 
     it 'allows group membership to be revoked', :js do
       page.within(first('.group_member')) do
-        accept_confirm { find('.btn-remove').click }
+        accept_confirm { find('.btn[data-testid="remove-user"]').click }
       end
       wait_for_requests
 

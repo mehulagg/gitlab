@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Smartcard::Certificate do
+RSpec.describe Gitlab::Auth::Smartcard::Certificate do
   let(:subject_dn) { '/O=Random Corp Ltd/CN=gitlab-user/emailAddress=gitlab-user@random-corp.org' }
   let(:issuer_dn) { '/O=Random Corp Ltd/CN=Random Corp' }
   let(:certificate_header) { 'certificate' }
@@ -18,11 +18,10 @@ describe Gitlab::Auth::Smartcard::Certificate do
 
   shared_examples 'a new smartcard identity' do
     it 'creates smartcard identity' do
-      expect { subject }.to change { SmartcardIdentity.count }.from(0).to(1)
+      expect { subject }.to change { SmartcardIdentity.count }.by(1)
 
-      identity = SmartcardIdentity.first
-      expect(identity.subject).to eql(subject_dn)
-      expect(identity.issuer).to eql(issuer_dn)
+      identity = SmartcardIdentity.find_by(subject: subject_dn, issuer: issuer_dn)
+      expect(identity).not_to be_nil
     end
   end
 
@@ -63,6 +62,28 @@ describe Gitlab::Auth::Smartcard::Certificate do
       end
     end
 
+    context 'user exists but it is using a new smartcard' do
+      let_it_be(:user) { create(:user, email: 'gitlab-user@random-corp.org') }
+      let_it_be(:old_identity) do
+        create(:smartcard_identity,
+               subject: 'old_subject',
+               issuer: 'old_issuer_dn',
+               user: user)
+      end
+
+      it_behaves_like 'an existing user'
+
+      it_behaves_like 'a new smartcard identity'
+
+      it 'keeps both identities for the user' do
+        subject
+
+        new_identity = SmartcardIdentity.find_by(subject: subject_dn, issuer: issuer_dn)
+
+        expect(user.smartcard_identities).to contain_exactly(new_identity, old_identity)
+      end
+    end
+
     context 'user and smartcard identity do not exist' do
       let(:user) { create(:user) }
 
@@ -70,10 +91,22 @@ describe Gitlab::Auth::Smartcard::Certificate do
         allow(Gitlab::Auth::Smartcard).to receive(:enabled?).and_return(true)
       end
 
-      it 'creates user' do
-        expect { subject }.to change { User.count }.from(0).to(1)
-        expect(User.first.username).to eql('gitlab-user')
-        expect(User.first.email).to eql('gitlab-user@random-corp.org')
+      shared_examples_for 'creates user' do
+        it do
+          expect { subject }.to change { User.count }.from(0).to(1)
+          expect(User.first.username).to eql('gitlab-user')
+          expect(User.first.email).to eql('gitlab-user@random-corp.org')
+        end
+      end
+
+      it_behaves_like 'creates user'
+
+      context 'when the current minimum password length is different from the default minimum password length' do
+        before do
+          stub_application_setting minimum_password_length: 21
+        end
+
+        it_behaves_like 'creates user'
       end
 
       it_behaves_like 'a new smartcard identity'

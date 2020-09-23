@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::DiscussionsController do
+RSpec.describe Projects::DiscussionsController do
   let(:user) { create(:user) }
   let(:merge_request) { create(:merge_request) }
   let(:project) { merge_request.source_project }
@@ -27,7 +27,7 @@ describe Projects::DiscussionsController do
       it 'returns 404' do
         get :show, params: request_params, session: { format: :json }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -39,7 +39,7 @@ describe Projects::DiscussionsController do
       it 'returns status 200' do
         get :show, params: request_params, session: { format: :json }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
 
       it 'returns status 404 if MR does not exists' do
@@ -47,7 +47,7 @@ describe Projects::DiscussionsController do
 
         get :show, params: request_params, session: { format: :json }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -60,7 +60,7 @@ describe Projects::DiscussionsController do
       it 'returns status 200' do
         get :show, params: request_params, session: { format: :json }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
   end
@@ -74,7 +74,7 @@ describe Projects::DiscussionsController do
       it "returns status 404" do
         post :resolve, params: request_params
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -91,7 +91,7 @@ describe Projects::DiscussionsController do
         it "returns status 404" do
           post :resolve, params: request_params
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
@@ -104,7 +104,9 @@ describe Projects::DiscussionsController do
         end
 
         it "sends notifications if all discussions are resolved" do
-          expect_any_instance_of(MergeRequests::ResolvedDiscussionNotificationService).to receive(:execute).with(merge_request)
+          expect_next_instance_of(MergeRequests::ResolvedDiscussionNotificationService) do |instance|
+            expect(instance).to receive(:execute).with(merge_request)
+          end
 
           post :resolve, params: request_params
         end
@@ -118,12 +120,14 @@ describe Projects::DiscussionsController do
         it "returns status 200" do
           post :resolve, params: request_params
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         it "renders discussion with serializer" do
-          expect_any_instance_of(DiscussionSerializer).to receive(:represent)
-            .with(instance_of(Discussion), { context: instance_of(described_class), render_truncated_diff_lines: true })
+          expect_next_instance_of(DiscussionSerializer) do |instance|
+            expect(instance).to receive(:represent)
+              .with(instance_of(Discussion), { context: instance_of(described_class), render_truncated_diff_lines: true })
+          end
 
           post :resolve, params: request_params
         end
@@ -153,7 +157,7 @@ describe Projects::DiscussionsController do
       it "returns status 404" do
         delete :unresolve, params: request_params
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -170,7 +174,7 @@ describe Projects::DiscussionsController do
         it "returns status 404" do
           delete :unresolve, params: request_params
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
@@ -178,13 +182,14 @@ describe Projects::DiscussionsController do
         it "unresolves the discussion" do
           delete :unresolve, params: request_params
 
-          expect(note.reload.discussion.resolved?).to be false
+          # discussion is memoized and reload doesn't clear the memoization
+          expect(Note.find(note.id).discussion.resolved?).to be false
         end
 
         it "returns status 200" do
           delete :unresolve, params: request_params
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
         end
 
         context "when vue_mr_discussions cookie is present" do
@@ -193,8 +198,10 @@ describe Projects::DiscussionsController do
           end
 
           it "renders discussion with serializer" do
-            expect_any_instance_of(DiscussionSerializer).to receive(:represent)
-              .with(instance_of(Discussion), { context: instance_of(described_class), render_truncated_diff_lines: true })
+            expect_next_instance_of(DiscussionSerializer) do |instance|
+              expect(instance).to receive(:represent)
+                .with(instance_of(Discussion), { context: instance_of(described_class), render_truncated_diff_lines: true })
+            end
 
             delete :unresolve, params: request_params
           end

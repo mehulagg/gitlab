@@ -1,0 +1,168 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Status Page settings form default state should match the default snapshot 1`] = `
+<section
+  class="settings no-animate js-status-page-settings"
+  id="status-page"
+>
+  <div
+    class="settings-header"
+  >
+    <h4
+      class="gl-my-3! gl-py-1"
+    >
+      
+      Status page
+    
+    </h4>
+     
+    <gl-button-stub
+      buttontextclasses=""
+      category="primary"
+      class="js-settings-toggle"
+      icon=""
+      size="medium"
+      variant="default"
+    >
+      Expand
+    </gl-button-stub>
+     
+    <p>
+      
+      Configure file storage settings to link issues in this project to an external status page.
+    
+    </p>
+  </div>
+   
+  <div
+    class="settings-content"
+  >
+    <p>
+      <gl-sprintf-stub
+        message="To publish incidents to an external status page, GitLab will store a JSON file in your Amazon S3 account in a location accessible to your external status page service. Make sure to also set up %{docsLink}"
+      />
+    </p>
+     
+    <form>
+      <gl-form-group-stub
+        class="gl-pl-0 mb-3"
+      >
+        <gl-form-checkbox-stub>
+          <span
+            class="bold"
+          >
+            Active
+          </span>
+        </gl-form-checkbox-stub>
+      </gl-form-group-stub>
+       
+      <gl-form-group-stub
+        class="col-8 col-md-9 gl-pl-0 mb-3"
+        label="Status page URL"
+        label-for="status-page-url"
+        label-size="sm"
+      >
+        <gl-form-input-stub
+          id="status-page-url"
+          value=""
+        />
+         
+        <p
+          class="form-text text-muted"
+        >
+          <gl-link-stub
+            href="/help/user/project/status_page/index.html"
+          >
+            
+            Status page frontend documentation
+          
+          </gl-link-stub>
+        </p>
+      </gl-form-group-stub>
+       
+      <gl-form-group-stub
+        class="col-8 col-md-9 gl-pl-0 mb-3"
+        label="S3 Bucket name"
+        label-for="status-page-s3-bucket-name"
+        label-size="sm"
+      >
+        <gl-form-input-stub
+          id="status-page-s3-bucket-name"
+          value=""
+        />
+         
+        <p
+          class="form-text text-muted"
+        >
+          <gl-sprintf-stub
+            message="Bucket %{docsLink}"
+          />
+        </p>
+      </gl-form-group-stub>
+       
+      <gl-form-group-stub
+        class="col-8 col-md-9 gl-pl-0 mb-3"
+        label="AWS region"
+        label-for="status-page-aws-region"
+        label-size="sm"
+      >
+        <gl-form-input-stub
+          id="status-page-aws-region"
+          placeholder="example: us-west-2"
+          value=""
+        />
+         
+        <p
+          class="form-text text-muted"
+        >
+          <gl-sprintf-stub
+            message="For help with configuration, visit %{docsLink}"
+          />
+        </p>
+      </gl-form-group-stub>
+       
+      <gl-form-group-stub
+        class="col-8 col-md-9 gl-pl-0 mb-3"
+        label="AWS access key ID"
+        label-for="status-page-aws-access-key"
+        label-size="sm"
+      >
+        <gl-form-input-stub
+          id="status-page-aws-access-key "
+          value=""
+        />
+      </gl-form-group-stub>
+       
+      <gl-form-group-stub
+        class="col-8 col-md-9 gl-pl-0 mb-3"
+        label="AWS Secret access key"
+        label-for="status-page-aws-secret-access-key"
+        label-size="sm"
+      >
+        <gl-form-input-stub
+          id="status-page-aws-secret-access-key "
+          value=""
+        />
+      </gl-form-group-stub>
+       
+      <div
+        class="gl-display-flex gl-justify-content-end"
+      >
+        <gl-button-stub
+          buttontextclasses=""
+          category="primary"
+          class="js-no-auto-disable"
+          icon=""
+          size="medium"
+          type="submit"
+          variant="success"
+        >
+          
+          Save changes
+        
+        </gl-button-stub>
+      </div>
+    </form>
+  </div>
+</section>
+`;

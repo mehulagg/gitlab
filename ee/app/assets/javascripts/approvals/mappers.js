@@ -1,5 +1,28 @@
-import _ from 'underscore';
-import { RULE_TYPE_REGULAR, RULE_TYPE_FALLBACK } from './constants';
+import { RULE_TYPE_REGULAR, RULE_TYPE_ANY_APPROVER } from './constants';
+
+const visibleTypes = new Set([RULE_TYPE_ANY_APPROVER, RULE_TYPE_REGULAR]);
+
+function withDefaultEmptyRule(rules = []) {
+  if (rules && rules.length > 0) {
+    return rules;
+  }
+
+  return [
+    {
+      id: null,
+      name: '',
+      approvalsRequired: 0,
+      minApprovalsRequired: 0,
+      approvers: [],
+      containsHiddenGroups: false,
+      users: [],
+      groups: [],
+      ruleType: RULE_TYPE_ANY_APPROVER,
+      protectedBranches: [],
+      overridden: false,
+    },
+  ];
+}
 
 export const mapApprovalRuleRequest = req => ({
   name: req.name,
@@ -7,6 +30,7 @@ export const mapApprovalRuleRequest = req => ({
   users: req.users,
   groups: req.groups,
   remove_hidden_groups: req.removeHiddenGroups,
+  protected_branch_ids: req.protectedBranchIds,
 });
 
 export const mapApprovalFallbackRuleRequest = req => ({
@@ -23,10 +47,13 @@ export const mapApprovalRuleResponse = res => ({
   containsHiddenGroups: res.contains_hidden_groups,
   users: res.users,
   groups: res.groups,
+  ruleType: res.rule_type,
+  protectedBranches: res.protected_branches,
+  overridden: res.overridden,
 });
 
 export const mapApprovalSettingsResponse = res => ({
-  rules: res.rules.map(mapApprovalRuleResponse),
+  rules: withDefaultEmptyRule(res.rules.map(mapApprovalRuleResponse)),
   fallbackApprovalsRequired: res.fallback_approvals_required,
 });
 
@@ -52,19 +79,16 @@ export const mapMRSourceRule = ({ id, ...rule }) => ({
  *   from the fallback rule.
  */
 export const mapMRApprovalSettingsResponse = res => {
-  const rulesByType = _.groupBy(res.rules, x => x.rule_type);
+  const rules = res.rules.filter(({ rule_type }) => visibleTypes.has(rule_type));
 
-  const regularRules = rulesByType[RULE_TYPE_REGULAR] || [];
-
-  const [fallback] = rulesByType[RULE_TYPE_FALLBACK] || [];
-  const fallbackApprovalsRequired = fallback
-    ? fallback.approvals_required
-    : res.fallback_approvals_required || 0;
+  const fallbackApprovalsRequired = res.fallback_approvals_required || 0;
 
   return {
-    rules: regularRules
-      .map(mapApprovalRuleResponse)
-      .map(res.approval_rules_overwritten ? x => x : mapMRSourceRule),
+    rules: withDefaultEmptyRule(
+      rules
+        .map(mapApprovalRuleResponse)
+        .map(res.approval_rules_overwritten ? x => x : mapMRSourceRule),
+    ),
     fallbackApprovalsRequired,
     minFallbackApprovalsRequired: 0,
   };

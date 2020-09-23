@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::Git::RepositoryCleaner do
+RSpec.describe Gitlab::Git::RepositoryCleaner do
   include HttpIOHelpers
 
   let(:project) { create(:project, :repository) }

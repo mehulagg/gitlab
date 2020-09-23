@@ -11,24 +11,26 @@ module EE
 
       override :scalar_params
       def scalar_params
-        @scalar_params ||= super + [:weight]
+        @scalar_params ||= super + [:weight, :epic_id, :include_subepics]
       end
     end
 
     override :filter_items
     def filter_items(items)
-      by_weight(super)
+      issues = by_weight(super)
+      issues = by_epic(issues)
+      by_iteration(issues)
     end
 
     private
 
     # rubocop: disable CodeReuse/ActiveRecord
     def by_weight(items)
-      return items unless weights?
+      return items unless params.weights?
 
-      if filter_by_no_weight?
+      if params.filter_by_no_weight?
         items.where(weight: [-1, nil])
-      elsif filter_by_any_weight?
+      elsif params.filter_by_any_weight?
         items.where.not(weight: [-1, nil])
       else
         items.where(weight: params[:weight])
@@ -36,22 +38,10 @@ module EE
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
-    def weights?
-      params[:weight].present? && params[:weight] != ::Issue::WEIGHT_ALL
-    end
-
-    def filter_by_no_weight?
-      params[:weight].to_s.downcase == ::IssuesFinder::FILTER_NONE
-    end
-
-    def filter_by_any_weight?
-      params[:weight].to_s.downcase == ::IssuesFinder::FILTER_ANY
-    end
-
     override :by_assignee
     def by_assignee(items)
-      if assignees.any?
-        assignees.each do |assignee|
+      if params.assignees.any?
+        params.assignees.each do |assignee|
           items = items.assigned_to(assignee)
         end
 
@@ -61,18 +51,29 @@ module EE
       super
     end
 
-    # rubocop: disable CodeReuse/ActiveRecord
-    def assignees
-      strong_memoize(:assignees) do
-        if params[:assignee_ids]
-          ::User.where(id: params[:assignee_ids])
-        elsif params[:assignee_username]
-          ::User.where(username: params[:assignee_username])
-        else
-          []
-        end
+    def by_epic(items)
+      return items unless params.by_epic?
+
+      if params.filter_by_no_epic?
+        items.no_epic
+      elsif params.filter_by_any_epic?
+        items.any_epic
+      else
+        items.in_epics(params.epics)
       end
     end
-    # rubocop: enable CodeReuse/ActiveRecord
+
+    def by_iteration(items)
+      return items unless params.iterations
+
+      case params.iterations.to_s.downcase
+      when ::IssuableFinder::Params::FILTER_NONE
+        items.no_iteration
+      when ::IssuableFinder::Params::FILTER_ANY
+        items.any_iteration
+      else
+        items.in_iterations(params.iterations)
+      end
+    end
   end
 end

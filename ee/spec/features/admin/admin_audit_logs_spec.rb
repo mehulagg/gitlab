@@ -2,13 +2,14 @@
 
 require 'spec_helper'
 
-describe 'Admin::AuditLogs', :js do
+RSpec.describe 'Admin::AuditLogs', :js do
   include Select2Helper
 
   let(:user) { create(:user) }
+  let(:admin) { create(:admin, name: 'Bruce Wayne') }
 
   before do
-    sign_in(create(:admin))
+    sign_in(admin)
   end
 
   context 'unlicensed' do
@@ -36,6 +37,21 @@ describe 'Admin::AuditLogs', :js do
       expect(page).to have_link('Audit Log', href: admin_audit_logs_path)
     end
 
+    describe 'release created events' do
+      let(:project) { create(:project) }
+      let(:release) { create(:release, project: project, tag: 'v0.1', author: user) }
+
+      before do
+        EE::AuditEvents::ReleaseCreatedAuditEventService.new(user, project, '127.0.0.1', release).security_event
+      end
+
+      it 'shows the related audit event' do
+        visit admin_audit_logs_path
+
+        expect(page).to have_content('Created Release')
+      end
+    end
+
     describe 'user events' do
       before do
         AuditEventService.new(user, user, with: :ldap)
@@ -45,16 +61,7 @@ describe 'Admin::AuditLogs', :js do
       end
 
       it 'filters by user' do
-        filter_by_type('User Events')
-
-        click_button 'Search users'
-        wait_for_requests
-
-        within '.dropdown-menu-user' do
-          click_link user.name
-        end
-
-        wait_for_requests
+        filter_for('User Events', user.name)
 
         expect(page).to have_content('Signed in with LDAP authentication')
       end
@@ -71,13 +78,7 @@ describe 'Admin::AuditLogs', :js do
       end
 
       it 'filters by group' do
-        filter_by_type('Group Events')
-
-        find('.group-item-select').click
-        wait_for_requests
-        find('.select2-results').click
-
-        find('#events-table td', match: :first)
+        filter_for('Group Events', group_member.group.name)
 
         expect(page).to have_content('Added user access as Owner')
       end
@@ -95,66 +96,58 @@ describe 'Admin::AuditLogs', :js do
       end
 
       it 'filters by project' do
-        filter_by_type('Project Events')
-
-        find('.project-item-select').click
-        wait_for_requests
-        find('.select2-results').click
-
-        find('#events-table td', match: :first)
+        filter_for('Project Events', project_member.project.name)
 
         expect(page).to have_content('Removed user access')
       end
     end
 
-    describe 'filter by date', js: false do
-      set(:audit_event_1) { create(:user_audit_event, created_at: 5.days.ago) }
-      set(:audit_event_2) { create(:user_audit_event, created_at: 3.days.ago) }
-      set(:audit_event_3) { create(:user_audit_event, created_at: 1.day.ago) }
+    describe 'filter by date' do
+      let_it_be(:audit_event_1) { create(:user_audit_event, created_at: 5.days.ago) }
+      let_it_be(:audit_event_2) { create(:user_audit_event, created_at: 3.days.ago) }
+      let_it_be(:audit_event_3) { create(:user_audit_event, created_at: 1.day.ago) }
+      let_it_be(:events_path) { :admin_audit_logs_path }
+      let_it_be(:entity) { nil }
 
-      before do
+      it_behaves_like 'audit events date filter'
+    end
+
+    describe 'impersonated events' do
+      it 'show impersonation details' do
+        visit admin_user_path(user)
+
+        click_link 'Impersonate'
+
+        visit(new_project_path)
+
+        fill_in(:project_name, with: 'Gotham City')
+
+        page.within('#content-body') do
+          click_button('Create project')
+        end
+
+        wait_for('Creation to complete') do
+          page.has_content?('was successfully created', wait: 0)
+        end
+
+        click_link 'Stop impersonation'
+
         visit admin_audit_logs_path
-      end
 
-      it 'shows only 2 days old events' do
-        page.within '.content' do
-          fill_in 'Created after', with: 4.days.ago
-          fill_in 'Created before', with: 2.days.ago
-          click_button 'Search'
-        end
-
-        expect(page).to have_content(audit_event_2.author_name)
-        expect(page).not_to have_content(audit_event_1.author_name)
-        expect(page).not_to have_content(audit_event_3.author_name)
-      end
-
-      it 'shows only yesterday events' do
-        page.within '.content' do
-          fill_in 'Created after', with: 2.days.ago
-          click_button 'Search'
-        end
-
-        expect(page).to have_content(audit_event_3.author_name)
-        expect(page).not_to have_content(audit_event_1.author_name)
-        expect(page).not_to have_content(audit_event_2.author_name)
-      end
-
-      it 'shows a message if provided date is invalid' do
-        page.within '.content' do
-          fill_in 'Created after', with: '12-345-6789'
-          click_button 'Search'
-        end
-
-        expect(page).to have_content('Invalid date format. Please use UTC format as YYYY-MM-DD')
+        expect(page).to have_content('by Bruce Wayne')
       end
     end
   end
 
-  def filter_by_type(type)
-    click_button 'All Events'
+  def filter_for(type, name)
+    filter_container = '[data-testid="audit-events-filter"]'
 
-    within '.dropdown-menu-type' do
+    find(filter_container).click
+    within filter_container do
       click_link type
+      click_link name
+
+      find('button[type="button"]:not([name="clear"])').click
     end
 
     wait_for_requests

@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import Api from '~/api';
 import { sprintf, __ } from '~/locale';
+import { sanitizeItem } from '~/frequent_items/utils';
 
 const formatResult = selectedItem => {
   if (selectedItem.path_with_namespace) {
@@ -38,7 +39,7 @@ const AdminEmailSelect = () => {
           const all = {
             id: 'all',
           };
-          const data = [all].concat(groups, projects);
+          const data = [all].concat(groups, projects.data).map(sanitizeItem);
           return query.callback({
             results: data,
           });

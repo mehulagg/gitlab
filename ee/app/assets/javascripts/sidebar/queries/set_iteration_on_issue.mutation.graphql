@@ -1,0 +1,12 @@
+mutation updateIssueConfidential($projectPath: ID!, $iid: String!, $iterationId: ID) {
+  issueSetIteration(input: { projectPath: $projectPath, iid: $iid, iterationId: $iterationId }) {
+    errors
+    issue {
+      iteration {
+        title
+        id
+        state
+      }
+    }
+  }
+}

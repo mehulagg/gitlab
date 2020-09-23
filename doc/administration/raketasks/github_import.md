@@ -1,22 +1,27 @@
-# GitHub import
+# GitHub import **(CORE ONLY)**
 
-> [Introduced]( https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/10308) in GitLab 9.1.
+> [Introduced]( https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/10308) in GitLab 9.1.
 
 In order to retrieve and import GitHub repositories, you will need a
 [GitHub personal access token](https://github.com/settings/tokens).
-A username should be passed as the second argument to the rake task
+A username should be passed as the second argument to the Rake task
 which will become the owner of the project. You can resume an import
 with the same command.
 
 Bear in mind that the syntax is very specific. Remove any spaces within the argument block and
-before/after the brackets. Also, Some shells (e.g., zsh) can interpret the open/close brackets
+before/after the brackets. Also, some shells (for example, `zsh`) can interpret the open/close brackets
 (`[]`) separately. You may need to either escape the brackets or use double quotes.
+
+## Caveats
+
+If the GitHub [rate limit](https://developer.github.com/v3/#rate-limiting) is reached while importing,
+the importing process will wait (`sleep()`) until it can continue importing.
 
 ## Importing multiple projects
 
 To import a project from the list of your GitHub projects available:
 
-```bash
+```shell
 # Omnibus installations
 sudo gitlab-rake "import:github[access_token,root,foo/bar]"
 
@@ -32,7 +37,7 @@ will get created from your GitHub project. Subgroups are also possible: `foo/foo
 
 To import a specific GitHub project (named `foo/github_repo` here):
 
-```bash
+```shell
 # Omnibus installations
 sudo gitlab-rake "import:github[access_token,root,foo/bar,foo/github_repo]"
 

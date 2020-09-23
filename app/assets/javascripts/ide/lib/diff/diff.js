@@ -1,8 +1,13 @@
 import { diffLines } from 'diff';
+import { defaultDiffOptions } from '../editor_options';
 
-// eslint-disable-next-line import/prefer-default-export
 export const computeDiff = (originalContent, newContent) => {
-  const changes = diffLines(originalContent, newContent);
+  // prevent EOL changes from highlighting the entire file
+  const changes = diffLines(
+    originalContent.replace(/\r\n/g, '\n'),
+    newContent.replace(/\r\n/g, '\n'),
+    defaultDiffOptions,
+  );
 
   let lineNumber = 1;
   return changes.reduce((acc, change) => {
@@ -14,13 +19,12 @@ export const computeDiff = (originalContent, newContent) => {
         endLineNumber: lineNumber + change.count - 1,
       });
     } else if ('added' in change || 'removed' in change) {
-      acc.push(
-        Object.assign({}, change, {
-          lineNumber,
-          modified: undefined,
-          endLineNumber: lineNumber + change.count - 1,
-        }),
-      );
+      acc.push({
+        ...change,
+        lineNumber,
+        modified: undefined,
+        endLineNumber: lineNumber + change.count - 1,
+      });
     }
 
     if (!change.removed) {

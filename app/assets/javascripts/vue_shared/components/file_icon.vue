@@ -1,7 +1,7 @@
 <script>
-import { GlLoadingIcon } from '@gitlab/ui';
+import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import getIconForFile from './file_icon/file_icon_map';
-import icon from '../../vue_shared/components/icon.vue';
+import { FILE_SYMLINK_MODE } from '../constants';
 
 /* This is a re-usable vue component for rendering a svg sprite
     icon
@@ -17,13 +17,18 @@ import icon from '../../vue_shared/components/icon.vue';
   */
 export default {
   components: {
-    icon,
     GlLoadingIcon,
+    GlIcon,
   },
   props: {
     fileName: {
       type: String,
       required: true,
+    },
+    fileMode: {
+      type: String,
+      required: false,
+      default: '',
     },
 
     folder: {
@@ -31,7 +36,11 @@ export default {
       required: false,
       default: false,
     },
-
+    submodule: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
     opened: {
       type: Boolean,
       required: false,
@@ -57,8 +66,12 @@ export default {
     },
   },
   computed: {
+    isSymlink() {
+      return this.fileMode === FILE_SYMLINK_MODE;
+    },
     spriteHref() {
-      const iconName = getIconForFile(this.fileName) || 'file';
+      const iconName = this.submodule ? 'folder-git' : getIconForFile(this.fileName) || 'file';
+
       return `${gon.sprite_file_icons}#${iconName}`;
     },
     folderIconName() {
@@ -72,10 +85,11 @@ export default {
 </script>
 <template>
   <span>
-    <svg v-if="!loading && !folder" :class="[iconSizeClass, cssClasses]">
+    <gl-loading-icon v-if="loading" :inline="true" />
+    <gl-icon v-else-if="isSymlink" name="symlink" :size="size" />
+    <svg v-else-if="!folder" :key="spriteHref" :class="[iconSizeClass, cssClasses]">
       <use v-bind="{ 'xlink:href': spriteHref }" />
     </svg>
-    <icon v-if="!loading && folder" :name="folderIconName" :size="size" class="folder-icon" />
-    <gl-loading-icon v-if="loading" :inline="true" />
+    <gl-icon v-else :name="folderIconName" :size="size" class="folder-icon" />
   </span>
 </template>

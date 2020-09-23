@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import Cookies from 'js-cookie';
-import bp from '~/breakpoints';
+import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 
 export default class SidebarContext {
   constructor() {
@@ -20,19 +20,21 @@ export default class SidebarContext {
         // which requires us to use `display: none;`
         // in `labels_select/base.vue` as well.
         // see: https://gitlab.com/gitlab-org/gitlab/merge_requests/4773#note_61844731
-        const isVisible = Boolean($selectbox.get(0).offsetParent);
-        $selectbox.toggle(!isVisible);
-        $block.find('.js-value').toggle(isVisible);
+        if ($selectbox.length) {
+          const isVisible = Boolean($selectbox.get(0).offsetParent);
+          $selectbox.toggle(!isVisible);
+          $block.find('.js-value').toggle(isVisible);
 
-        if ($selectbox.get(0).offsetParent) {
-          setTimeout(() => $block.find('.js-label-select').trigger('click'), 0);
+          if ($selectbox.get(0).offsetParent) {
+            setTimeout(() => $block.find('.js-label-select').trigger('click'), 0);
+          }
         }
       });
 
     window.addEventListener('beforeunload', () => {
       // collapsed_gutter cookie hides the sidebar
       const bpBreakpoint = bp.getBreakpointSize();
-      if (bpBreakpoint === 'xs' || bpBreakpoint === 'sm') {
+      if (bpBreakpoint === 'xs' || bpBreakpoint === 'sm' || bpBreakpoint === 'md') {
         Cookies.set('collapsed_gutter', true);
       }
     });

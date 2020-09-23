@@ -1,9 +1,9 @@
-import _ from 'underscore';
+import { isNumber } from 'lodash';
 
 export default {
   computed: {
     validIssueWeight() {
-      if (this.issue && _.isNumber(this.issue.weight)) {
+      if (this.issue && isNumber(this.issue.weight)) {
         return this.issue.weight >= 0;
       }
 
@@ -15,7 +15,7 @@ export default {
       if (!this.updateFilters) return;
 
       const issueWeight = encodeURIComponent(weight);
-      /* eslint-disable-next-line @gitlab/i18n/no-non-i18n-strings */
+      /* eslint-disable-next-line @gitlab/require-i18n-strings */
       const filter = `weight=${issueWeight}`;
 
       this.applyFilter(filter);

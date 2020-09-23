@@ -1,8 +1,8 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 
 export default {
-  components: { Icon },
+  components: { GlIcon },
   props: {
     name: {
       type: String,
@@ -13,7 +13,7 @@ export default {
 </script>
 
 <template>
-  <div class="circle-icon-container append-right-default align-self-start align-self-lg-center">
-    <icon :name="name" :size="24" />
+  <div class="circle-icon-container gl-mr-3 align-self-start align-self-lg-center">
+    <gl-icon :name="name" :size="24" />
   </div>
 </template>

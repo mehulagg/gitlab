@@ -1,0 +1,6 @@
+- if project.marked_for_deletion?
+  %span.badge.badge-warning
+    = _('pending removal')
+- elsif project.archived
+  %span.badge.badge-warning
+    = _('archived')

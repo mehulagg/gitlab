@@ -1,0 +1,5 @@
+<%= _('Hi %{username}!') % { username: sanitize_name(@user.name) } %>
+
+<%= n_('The following personal access token: %{token_names} was revoked, because a new policy to expire personal access tokens were set.', 'The following personal access tokens: %{token_names} were revoked, because a new policy to expire personal access tokens were set.', @revoked_token_names.size) % { token_names: @revoked_token_names.to_sentence } %>
+
+<%= _('You can create new ones at your Personal Access Tokens settings %{pat_link}') % { pat_link: @target_url } %>

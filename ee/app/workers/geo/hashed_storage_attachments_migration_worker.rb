@@ -1,9 +1,11 @@
 # frozen_string_literal: true
 
 module Geo
-  class HashedStorageAttachmentsMigrationWorker
+  class HashedStorageAttachmentsMigrationWorker # rubocop:disable Scalability/IdempotentWorker
     include ApplicationWorker
     include GeoQueue
+
+    loggable_arguments 1, 2
 
     def perform(project_id, old_attachments_path, new_attachments_path)
       Geo::HashedStorageAttachmentsMigrationService.new(

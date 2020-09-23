@@ -2,19 +2,20 @@
 
 require 'spec_helper'
 
-describe Sortable do
+RSpec.describe Sortable do
   describe '.order_by' do
+    let(:arel_table) { Group.arel_table }
     let(:relation) { Group.all }
 
     describe 'ordering by id' do
       it 'ascending' do
-        expect(relation).to receive(:reorder).with(id: :asc)
+        expect(relation).to receive(:reorder).with(arel_table['id'].asc)
 
         relation.order_by('id_asc')
       end
 
       it 'descending' do
-        expect(relation).to receive(:reorder).with(id: :desc)
+        expect(relation).to receive(:reorder).with(arel_table['id'].desc)
 
         relation.order_by('id_desc')
       end
@@ -22,19 +23,19 @@ describe Sortable do
 
     describe 'ordering by created day' do
       it 'ascending' do
-        expect(relation).to receive(:reorder).with(created_at: :asc)
+        expect(relation).to receive(:reorder).with(arel_table['created_at'].asc)
 
         relation.order_by('created_asc')
       end
 
       it 'descending' do
-        expect(relation).to receive(:reorder).with(created_at: :desc)
+        expect(relation).to receive(:reorder).with(arel_table['created_at'].desc)
 
         relation.order_by('created_desc')
       end
 
       it 'order by "date"' do
-        expect(relation).to receive(:reorder).with(created_at: :desc)
+        expect(relation).to receive(:reorder).with(arel_table['created_at'].desc)
 
         relation.order_by('created_date')
       end
@@ -66,13 +67,13 @@ describe Sortable do
 
     describe 'ordering by Updated Time' do
       it 'ascending' do
-        expect(relation).to receive(:reorder).with(updated_at: :asc)
+        expect(relation).to receive(:reorder).with(arel_table['updated_at'].asc)
 
         relation.order_by('updated_asc')
       end
 
       it 'descending' do
-        expect(relation).to receive(:reorder).with(updated_at: :desc)
+        expect(relation).to receive(:reorder).with(arel_table['updated_at'].desc)
 
         relation.order_by('updated_desc')
       end
@@ -90,7 +91,7 @@ describe Sortable do
       Group.all.order_by(order).map(&:name)
     end
 
-    let!(:ref_time) { Time.parse('2018-05-01 00:00:00') }
+    let!(:ref_time) { Time.zone.parse('2018-05-01 00:00:00') }
     let!(:group1) { create(:group, name: 'aa', id: 1, created_at: ref_time - 15.seconds, updated_at: ref_time) }
     let!(:group2) { create(:group, name: 'AAA', id: 2, created_at: ref_time - 10.seconds, updated_at: ref_time - 5.seconds) }
     let!(:group3) { create(:group, name: 'BB', id: 3, created_at: ref_time - 5.seconds, updated_at: ref_time - 10.seconds) }

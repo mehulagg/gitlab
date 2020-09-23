@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config::Entry::Root do
+RSpec.describe Gitlab::Ci::Config::Entry::Root do
   let(:root) { described_class.new(hash) }
 
   describe '.nodes' do
@@ -18,9 +18,8 @@ describe Gitlab::Ci::Config::Entry::Root do
         #
         # The purpose of `Root` is have only globally defined configuration.
         expect(described_class.nodes.keys)
-          .to match_array(%i[before_script image services
-                             after_script variables cache
-                             stages types include default])
+          .to match_array(%i[before_script image services after_script
+                             variables cache stages types include default workflow])
       end
     end
   end
@@ -28,16 +27,30 @@ describe Gitlab::Ci::Config::Entry::Root do
   context 'when configuration is valid' do
     context 'when top-level entries are defined' do
       let(:hash) do
-        { before_script: %w(ls pwd),
-          image: 'ruby:2.2',
+        {
+          before_script: %w(ls pwd),
+          image: 'ruby:2.7',
           default: {},
           services: ['postgres:9.1', 'mysql:5.5'],
-          variables: { VAR: 'value' },
+          variables: { VAR: 'root' },
           after_script: ['make clean'],
-          stages: %w(build pages),
+          stages: %w(build pages release),
           cache: { key: 'k', untracked: true, paths: ['public/'] },
           rspec: { script: %w[rspec ls] },
-          spinach: { before_script: [], variables: {}, script: 'spinach' } }
+          spinach: { before_script: [], variables: {}, script: 'spinach' },
+          release: {
+            stage: 'release',
+            before_script: [],
+            after_script: [],
+            variables: { 'VAR' => 'job' },
+            script: ["make changelog | tee release_changelog.txt"],
+            release: {
+              tag_name: 'v0.06',
+              name: "Release $CI_TAG_NAME",
+              description: "./release_changelog.txt"
+            }
+          }
+        }
       end
 
       describe '#compose!' do
@@ -50,7 +63,7 @@ describe Gitlab::Ci::Config::Entry::Root do
         end
 
         it 'creates node object for each entry' do
-          expect(root.descendants.count).to eq 10
+          expect(root.descendants.count).to eq 11
         end
 
         it 'creates node object using valid class' do
@@ -88,7 +101,7 @@ describe Gitlab::Ci::Config::Entry::Root do
         describe '#stages_value' do
           context 'when stages key defined' do
             it 'returns array of stages' do
-              expect(root.stages_value).to eq %w[build pages]
+              expect(root.stages_value).to eq %w[build pages release]
             end
           end
 
@@ -106,29 +119,49 @@ describe Gitlab::Ci::Config::Entry::Root do
 
         describe '#jobs_value' do
           it 'returns jobs configuration' do
-            expect(root.jobs_value).to eq(
-              rspec: { name: :rspec,
+            expect(root.jobs_value.keys).to eq([:rspec, :spinach, :release])
+            expect(root.jobs_value[:rspec]).to eq(
+              { name: :rspec,
                        script: %w[rspec ls],
                        before_script: %w(ls pwd),
-                       image: { name: 'ruby:2.2' },
+                       image: { name: 'ruby:2.7' },
                        services: [{ name: 'postgres:9.1' }, { name: 'mysql:5.5' }],
                        stage: 'test',
                        cache: { key: 'k', untracked: true, paths: ['public/'], policy: 'pull-push' },
-                       variables: {},
+                       variables: { 'VAR' => 'root' },
                        ignore: false,
                        after_script: ['make clean'],
-                       only: { refs: %w[branches tags] } },
-              spinach: { name: :spinach,
+                       only: { refs: %w[branches tags] },
+                       scheduling_type: :stage }
+            )
+            expect(root.jobs_value[:spinach]).to eq(
+              { name: :spinach,
                          before_script: [],
                          script: %w[spinach],
-                         image: { name: 'ruby:2.2' },
+                         image: { name: 'ruby:2.7' },
                          services: [{ name: 'postgres:9.1' }, { name: 'mysql:5.5' }],
                          stage: 'test',
                          cache: { key: 'k', untracked: true, paths: ['public/'], policy: 'pull-push' },
-                         variables: {},
+                         variables: { 'VAR' => 'root' },
                          ignore: false,
                          after_script: ['make clean'],
-                         only: { refs: %w[branches tags] } }
+                         only: { refs: %w[branches tags] },
+                         scheduling_type: :stage }
+            )
+            expect(root.jobs_value[:release]).to eq(
+              { name: :release,
+                         stage: 'release',
+                         before_script: [],
+                         script: ["make changelog | tee release_changelog.txt"],
+                         release: { name: "Release $CI_TAG_NAME", tag_name: 'v0.06', description: "./release_changelog.txt" },
+                         image: { name: "ruby:2.7" },
+                         services: [{ name: "postgres:9.1" }, { name: "mysql:5.5" }],
+                         cache: { key: "k", untracked: true, paths: ["public/"], policy: "pull-push" },
+                         only: { refs: %w(branches tags) },
+                         variables: { 'VAR' => 'job' },
+                         after_script: [],
+                         ignore: false,
+                         scheduling_type: :stage }
             )
           end
         end
@@ -140,14 +173,14 @@ describe Gitlab::Ci::Config::Entry::Root do
         { before_script: %w(ls pwd),
           after_script: ['make clean'],
           default: {
-            image: 'ruby:2.1',
+            image: 'ruby:2.7',
             services: ['postgres:9.1', 'mysql:5.5']
           },
-          variables: { VAR: 'value' },
+          variables: { VAR: 'root' },
           stages: %w(build pages),
           cache: { key: 'k', untracked: true, paths: ['public/'] },
           rspec: { script: %w[rspec ls] },
-          spinach: { before_script: [], variables: { VAR: 'AA' }, script: 'spinach' } }
+          spinach: { before_script: [], variables: { VAR: 'job' }, script: 'spinach' } }
       end
 
       context 'when composed' do
@@ -167,25 +200,27 @@ describe Gitlab::Ci::Config::Entry::Root do
               rspec: { name: :rspec,
                        script: %w[rspec ls],
                        before_script: %w(ls pwd),
-                       image: { name: 'ruby:2.1' },
+                       image: { name: 'ruby:2.7' },
                        services: [{ name: 'postgres:9.1' }, { name: 'mysql:5.5' }],
                        stage: 'test',
                        cache: { key: 'k', untracked: true, paths: ['public/'], policy: "pull-push" },
-                       variables: {},
+                       variables: { 'VAR' => 'root' },
                        ignore: false,
                        after_script: ['make clean'],
-                       only: { refs: %w[branches tags] } },
+                       only: { refs: %w[branches tags] },
+                       scheduling_type: :stage },
               spinach: { name: :spinach,
                          before_script: [],
                          script: %w[spinach],
-                         image: { name: 'ruby:2.1' },
+                         image: { name: 'ruby:2.7' },
                          services: [{ name: 'postgres:9.1' }, { name: 'mysql:5.5' }],
                          stage: 'test',
                          cache: { key: 'k', untracked: true, paths: ['public/'], policy: "pull-push" },
-                         variables: { 'VAR' => 'AA' },
+                         variables: { 'VAR' => 'job' },
                          ignore: false,
                          after_script: ['make clean'],
-                         only: { refs: %w[branches tags] } }
+                         only: { refs: %w[branches tags] },
+                         scheduling_type: :stage }
             )
           end
         end
@@ -203,7 +238,7 @@ describe Gitlab::Ci::Config::Entry::Root do
 
       describe '#nodes' do
         it 'instantizes all nodes' do
-          expect(root.descendants.count).to eq 10
+          expect(root.descendants.count).to eq 11
         end
 
         it 'contains unspecified nodes' do
@@ -262,7 +297,7 @@ describe Gitlab::Ci::Config::Entry::Root do
     # despite the fact, that key is present. See issue #18775 for more
     # details.
     #
-    context 'when entires specified but not defined' do
+    context 'when entries are specified but not defined' do
       before do
         root.compose!
       end
@@ -309,9 +344,9 @@ describe Gitlab::Ci::Config::Entry::Root do
       end
 
       describe '#errors' do
-        it 'reports errors about missing script' do
+        it 'reports errors about missing script or trigger' do
           expect(root.errors)
-            .to include "root config contains unknown keys: rspec"
+            .to include 'jobs rspec config should implement a script: or a trigger: keyword'
         end
       end
     end

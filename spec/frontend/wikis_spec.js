@@ -1,4 +1,6 @@
-import Wikis from '~/pages/projects/wikis/wikis';
+import { escape } from 'lodash';
+import Wikis from '~/pages/shared/wikis/wikis';
+import Tracking from '~/tracking';
 import { setHTMLFixture } from './helpers/fixtures';
 
 describe('Wikis', () => {
@@ -8,11 +10,26 @@ describe('Wikis', () => {
     }">
         <input type="text" id="wiki_title" value="My title" />
         <input type="text" id="wiki_message" />
-      </form>`;
+        <select class="form-control select-control" name="wiki[format]" id="wiki_format">
+          <option value="markdown">Markdown</option>
+          <option selected="selected" value="rdoc">RDoc</option>
+          <option value="asciidoc">AsciiDoc</option>
+          <option value="org">Org</option>
+        </select>
+        <textarea id="wiki_content"></textarea>
+        <code class="js-markup-link-example">{Link title}[link:page-slug]</code>
+      </form>
+      `;
 
     let wikis;
     let titleInput;
     let messageInput;
+    let changeFormatSelect;
+    let linkExample;
+
+    const findBeforeUnloadWarning = () => window.onbeforeunload?.();
+    const findContent = () => document.getElementById('wiki_content');
+    const findForm = () => document.querySelector('.wiki-form');
 
     describe('when the wiki page is being created', () => {
       const formHtmlFixture = editFormHtmlFixture({ newPage: true });
@@ -22,6 +39,8 @@ describe('Wikis', () => {
 
         titleInput = document.getElementById('wiki_title');
         messageInput = document.getElementById('wiki_message');
+        changeFormatSelect = document.querySelector('#wiki_format');
+        linkExample = document.querySelector('.js-markup-link-example');
         wikis = new Wikis();
       });
 
@@ -68,6 +87,68 @@ describe('Wikis', () => {
         titleInput.dispatchEvent(new Event('keyup'));
 
         expect(messageInput.value).toEqual('Update My title');
+      });
+
+      it.each`
+        value         | text
+        ${'markdown'} | ${'[Link Title](page-slug)'}
+        ${'rdoc'}     | ${'{Link title}[link:page-slug]'}
+        ${'asciidoc'} | ${'link:page-slug[Link title]'}
+        ${'org'}      | ${'[[page-slug]]'}
+      `('updates a message when value=$value is selected', ({ value, text }) => {
+        changeFormatSelect.value = value;
+        changeFormatSelect.dispatchEvent(new Event('change'));
+
+        expect(linkExample.innerHTML).toBe(text);
+      });
+
+      it('starts with no unload warning', () => {
+        expect(findBeforeUnloadWarning()).toBeUndefined();
+      });
+
+      describe('when wiki content is updated', () => {
+        beforeEach(() => {
+          const content = findContent();
+          content.value = 'Lorem ipsum dolar sit!';
+          content.dispatchEvent(new Event('input'));
+        });
+
+        it('sets before unload warning', () => {
+          expect(findBeforeUnloadWarning()).toBe('');
+        });
+
+        it('when form submitted, unsets before unload warning', () => {
+          findForm().dispatchEvent(new Event('submit'));
+          expect(findBeforeUnloadWarning()).toBeUndefined();
+        });
+      });
+    });
+  });
+
+  describe('trackPageView', () => {
+    const trackingPage = 'projects:wikis:show';
+    const trackingContext = { foo: 'bar' };
+    const showPageHtmlFixture = `
+      <div class="js-wiki-page-content" data-tracking-context="${escape(
+        JSON.stringify(trackingContext),
+      )}"></div>
+    `;
+
+    beforeEach(() => {
+      setHTMLFixture(showPageHtmlFixture);
+      document.body.dataset.page = trackingPage;
+      jest.spyOn(Tracking, 'event').mockImplementation();
+
+      Wikis.trackPageView();
+    });
+
+    it('sends the tracking event and context', () => {
+      expect(Tracking.event).toHaveBeenCalledWith(trackingPage, 'view_wiki_page', {
+        label: 'view_wiki_page',
+        context: {
+          schema: 'iglu:com.gitlab/wiki_page_context/jsonschema/1-0-0',
+          data: trackingContext,
+        },
       });
     });
   });

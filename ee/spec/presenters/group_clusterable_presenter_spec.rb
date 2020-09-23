@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe GroupClusterablePresenter do
+RSpec.describe GroupClusterablePresenter do
   include Gitlab::Routing.url_helpers
 
-  set(:user) { create(:user) }
+  let_it_be(:user) { create(:user) }
 
   let(:presenter) { described_class.new(group) }
   let(:cluster) { create(:cluster, :provided_by_gcp, :group) }
@@ -39,11 +39,5 @@ describe GroupClusterablePresenter do
 
       it { is_expected.to be_nil }
     end
-  end
-
-  describe '#metrics_dashboard_path' do
-    subject { presenter.metrics_dashboard_path(cluster) }
-
-    it { is_expected.to eq(metrics_dashboard_group_cluster_path(group, cluster)) }
   end
 end

@@ -1,16 +1,15 @@
 <script>
+import { GlLink, GlTooltip, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import CiBadgeLink from '~/vue_shared/components/ci_badge_link.vue';
 import CiIcon from '~/vue_shared/components/ci_icon.vue';
-import Icon from '~/vue_shared/components/icon.vue';
-import { GlLink, GlTooltip } from '@gitlab/ui';
 import { STATUS_FAILED } from '../constants';
 
 export default {
   components: {
     CiBadgeLink,
     CiIcon,
-    Icon,
+    GlIcon,
     GlLink,
     GlTooltip,
   },
@@ -112,12 +111,12 @@ export default {
         <div class="text-tertiary">{{ upstreamPipeline.project.full_name }}</div>
       </gl-tooltip>
 
-      <icon name="arrow-right" class="dashboard-card-footer-arrow align-middle mx-1" />
+      <gl-icon name="arrow-right" class="dashboard-card-footer-arrow align-middle mx-1" />
     </template>
 
     <ci-badge-link
       ref="status"
-      class="bg-white"
+      class="bg-white d-inline-block align-middle py-0"
       :status="lastPipeline.details.status"
       :show-text="true"
     />
@@ -127,7 +126,7 @@ export default {
     </gl-tooltip>
 
     <template v-if="hasDownstreamPipelines">
-      <icon name="arrow-right" class="dashboard-card-footer-arrow align-middle mx-1" />
+      <gl-icon name="arrow-right" class="dashboard-card-footer-arrow align-middle mx-1" />
 
       <div
         v-for="(pipeline, index) in shownDownstreamPipelines"

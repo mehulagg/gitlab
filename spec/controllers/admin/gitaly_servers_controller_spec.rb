@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Admin::GitalyServersController do
+RSpec.describe Admin::GitalyServersController do
   describe '#index' do
     before do
       sign_in(create(:admin))
@@ -11,7 +11,7 @@ describe Admin::GitalyServersController do
     it 'shows the gitaly servers page' do
       get :index
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
   end
 end

@@ -2,9 +2,10 @@
 
 require 'spec_helper'
 
-describe User, :do_not_mock_admin_mode do
+RSpec.describe User do
   include ProjectForksHelper
   include TermsHelper
+  include ExclusiveLeaseHelpers
 
   it_behaves_like 'having unique enum values'
 
@@ -16,15 +17,62 @@ describe User, :do_not_mock_admin_mode do
     it { is_expected.to include_module(Sortable) }
     it { is_expected.to include_module(TokenAuthenticatable) }
     it { is_expected.to include_module(BlocksJsonSerialization) }
+    it { is_expected.to include_module(AsyncDeviseEmail) }
   end
 
   describe 'delegations' do
     it { is_expected.to delegate_method(:path).to(:namespace).with_prefix }
+
+    it { is_expected.to delegate_method(:notes_filter_for).to(:user_preference) }
+    it { is_expected.to delegate_method(:set_notes_filter).to(:user_preference) }
+
+    it { is_expected.to delegate_method(:first_day_of_week).to(:user_preference) }
+    it { is_expected.to delegate_method(:first_day_of_week=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:timezone).to(:user_preference) }
+    it { is_expected.to delegate_method(:timezone=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:time_display_relative).to(:user_preference) }
+    it { is_expected.to delegate_method(:time_display_relative=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:time_format_in_24h).to(:user_preference) }
+    it { is_expected.to delegate_method(:time_format_in_24h=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:show_whitespace_in_diffs).to(:user_preference) }
+    it { is_expected.to delegate_method(:show_whitespace_in_diffs=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:tab_width).to(:user_preference) }
+    it { is_expected.to delegate_method(:tab_width=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:sourcegraph_enabled).to(:user_preference) }
+    it { is_expected.to delegate_method(:sourcegraph_enabled=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:gitpod_enabled).to(:user_preference) }
+    it { is_expected.to delegate_method(:gitpod_enabled=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:setup_for_company).to(:user_preference) }
+    it { is_expected.to delegate_method(:setup_for_company=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:render_whitespace_in_code).to(:user_preference) }
+    it { is_expected.to delegate_method(:render_whitespace_in_code=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:experience_level).to(:user_preference) }
+    it { is_expected.to delegate_method(:experience_level=).to(:user_preference).with_arguments(:args) }
+
+    it { is_expected.to delegate_method(:job_title).to(:user_detail).allow_nil }
+    it { is_expected.to delegate_method(:job_title=).to(:user_detail).with_arguments(:args).allow_nil }
+
+    it { is_expected.to delegate_method(:bio).to(:user_detail).allow_nil }
+    it { is_expected.to delegate_method(:bio=).to(:user_detail).with_arguments(:args).allow_nil }
+    it { is_expected.to delegate_method(:bio_html).to(:user_detail).allow_nil }
   end
 
   describe 'associations' do
     it { is_expected.to have_one(:namespace) }
     it { is_expected.to have_one(:status) }
+    it { is_expected.to have_one(:user_detail) }
+    it { is_expected.to have_one(:atlassian_identity) }
+    it { is_expected.to have_one(:user_highest_role) }
     it { is_expected.to have_many(:snippets).dependent(:destroy) }
     it { is_expected.to have_many(:members) }
     it { is_expected.to have_many(:project_members) }
@@ -32,6 +80,7 @@ describe User, :do_not_mock_admin_mode do
     it { is_expected.to have_many(:groups) }
     it { is_expected.to have_many(:keys).dependent(:destroy) }
     it { is_expected.to have_many(:deploy_keys).dependent(:nullify) }
+    it { is_expected.to have_many(:group_deploy_keys) }
     it { is_expected.to have_many(:events).dependent(:delete_all) }
     it { is_expected.to have_many(:issues).dependent(:destroy) }
     it { is_expected.to have_many(:notes).dependent(:destroy) }
@@ -48,6 +97,33 @@ describe User, :do_not_mock_admin_mode do
     it { is_expected.to have_many(:reported_abuse_reports).dependent(:destroy).class_name('AbuseReport') }
     it { is_expected.to have_many(:custom_attributes).class_name('UserCustomAttribute') }
     it { is_expected.to have_many(:releases).dependent(:nullify) }
+    it { is_expected.to have_many(:metrics_users_starred_dashboards).inverse_of(:user) }
+    it { is_expected.to have_many(:reviews).inverse_of(:author) }
+
+    describe "#user_detail" do
+      it 'does not persist `user_detail` by default' do
+        expect(create(:user).user_detail).not_to be_persisted
+      end
+
+      it 'creates `user_detail` when `bio` is given' do
+        user = create(:user, bio: 'my bio')
+
+        expect(user.user_detail).to be_persisted
+        expect(user.user_detail.bio).to eq('my bio')
+      end
+
+      it 'delegates `bio` to `user_detail`' do
+        user = create(:user, bio: 'my bio')
+
+        expect(user.bio).to eq(user.user_detail.bio)
+      end
+
+      it 'creates `user_detail` when `bio` is first updated' do
+        user = create(:user)
+
+        expect { user.update(bio: 'my bio') }.to change { user.user_detail.persisted? }.from(false).to(true)
+      end
+    end
 
     describe "#abuse_report" do
       let(:current_user) { create(:user) }
@@ -97,18 +173,145 @@ describe User, :do_not_mock_admin_mode do
     end
   end
 
+  describe 'Devise emails' do
+    let!(:user) { create(:user) }
+
+    describe 'behaviour' do
+      it 'sends emails asynchronously' do
+        expect do
+          user.update!(email: 'hello@hello.com')
+        end.to have_enqueued_job.on_queue('mailers').exactly(:twice)
+      end
+    end
+
+    context 'emails sent on changing password' do
+      context 'when password is updated' do
+        context 'default behaviour' do
+          it 'enqueues the `password changed` email' do
+            user.password = User.random_password
+
+            expect { user.save! }.to have_enqueued_mail(DeviseMailer, :password_change)
+          end
+
+          it 'does not enqueue the `admin changed your password` email' do
+            user.password = User.random_password
+
+            expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+          end
+        end
+
+        context '`admin changed your password` email' do
+          it 'is enqueued only when explicitly allowed' do
+            user.password = User.random_password
+            user.send_only_admin_changed_your_password_notification!
+
+            expect { user.save! }.to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+          end
+
+          it '`password changed` email is not enqueued if it is explicitly allowed' do
+            user.password = User.random_password
+            user.send_only_admin_changed_your_password_notification!
+
+            expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_changed)
+          end
+
+          it 'is not enqueued if sending notifications on password updates is turned off as per Devise config' do
+            user.password = User.random_password
+            user.send_only_admin_changed_your_password_notification!
+
+            allow(Devise).to receive(:send_password_change_notification).and_return(false)
+
+            expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+          end
+        end
+      end
+
+      context 'when password is not updated' do
+        it 'does not enqueue the `admin changed your password` email even if explicitly allowed' do
+          user.name = 'John'
+          user.send_only_admin_changed_your_password_notification!
+
+          expect { user.save! }.not_to have_enqueued_mail(DeviseMailer, :password_change_by_admin)
+        end
+      end
+    end
+  end
+
   describe 'validations' do
+    describe 'password' do
+      let!(:user) { build_stubbed(:user) }
+
+      before do
+        allow(Devise).to receive(:password_length).and_return(8..128)
+        allow(described_class).to receive(:password_length).and_return(10..130)
+      end
+
+      context 'length' do
+        it { is_expected.to validate_length_of(:password).is_at_least(10).is_at_most(130) }
+      end
+
+      context 'length validator' do
+        context 'for a short password' do
+          before do
+            user.password = user.password_confirmation = 'abc'
+          end
+
+          it 'does not run the default Devise password length validation' do
+            expect(user).to be_invalid
+            expect(user.errors.full_messages.join).not_to include('is too short (minimum is 8 characters)')
+          end
+
+          it 'runs the custom password length validator' do
+            expect(user).to be_invalid
+            expect(user.errors.full_messages.join).to include('is too short (minimum is 10 characters)')
+          end
+        end
+
+        context 'for a long password' do
+          before do
+            user.password = user.password_confirmation = 'a' * 140
+          end
+
+          it 'does not run the default Devise password length validation' do
+            expect(user).to be_invalid
+            expect(user.errors.full_messages.join).not_to include('is too long (maximum is 128 characters)')
+          end
+
+          it 'runs the custom password length validator' do
+            expect(user).to be_invalid
+            expect(user.errors.full_messages.join).to include('is too long (maximum is 130 characters)')
+          end
+        end
+      end
+    end
+
     describe 'name' do
       it { is_expected.to validate_presence_of(:name) }
-      it { is_expected.to validate_length_of(:name).is_at_most(128) }
+      it { is_expected.to validate_length_of(:name).is_at_most(255) }
     end
 
     describe 'first name' do
-      it { is_expected.to validate_length_of(:first_name).is_at_most(255) }
+      it { is_expected.to validate_length_of(:first_name).is_at_most(127) }
     end
 
     describe 'last name' do
-      it { is_expected.to validate_length_of(:last_name).is_at_most(255) }
+      it { is_expected.to validate_length_of(:last_name).is_at_most(127) }
+    end
+
+    describe 'preferred_language' do
+      context 'when its value is nil in the database' do
+        let(:user) { build(:user, preferred_language: nil) }
+
+        it 'falls back to I18n.default_locale when empty in the database' do
+          expect(user.preferred_language).to eq I18n.default_locale.to_s
+        end
+
+        it 'falls back to english when I18n.default_locale is not an available language' do
+          I18n.default_locale = :kl
+
+          expect(user.preferred_language).to eq 'en'
+        end
+      end
     end
 
     describe 'username' do
@@ -142,7 +345,7 @@ describe User, :do_not_mock_admin_mode do
           expect(user.namespace).to receive(:any_project_has_container_registry_tags?).and_return(true)
           user.username = 'new_path'
           expect(user).to be_invalid
-          expect(user.errors.messages[:username].first).to match('cannot be changed if a personal project has container registry tags')
+          expect(user.errors.messages[:username].first).to eq(_('cannot be changed if a personal project has container registry tags.'))
         end
       end
 
@@ -175,14 +378,12 @@ describe User, :do_not_mock_admin_mode do
     it { is_expected.not_to allow_value(-1).for(:projects_limit) }
     it { is_expected.not_to allow_value(Gitlab::Database::MAX_INT_VALUE + 1).for(:projects_limit) }
 
-    it { is_expected.to validate_length_of(:bio).is_at_most(255) }
-
     it_behaves_like 'an object with email-formated attributes', :email do
       subject { build(:user) }
     end
 
-    it_behaves_like 'an object with email-formated attributes', :public_email, :notification_email do
-      subject { build(:user).tap { |user| user.emails << build(:email, email: email_value) } }
+    it_behaves_like 'an object with RFC3696 compliant email-formated attributes', :public_email, :notification_email do
+      subject { create(:user).tap { |user| user.emails << build(:email, email: email_value, confirmed_at: Time.current) } }
     end
 
     describe '#commit_email' do
@@ -252,6 +453,20 @@ describe User, :do_not_mock_admin_mode do
         end
       end
 
+      context 'bad regex' do
+        before do
+          allow_any_instance_of(ApplicationSetting).to receive(:domain_whitelist).and_return(['([a-zA-Z0-9]+)+\.com'])
+        end
+
+        it 'does not hang on evil input' do
+          user = build(:user, email: 'user@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!.com')
+
+          expect do
+            Timeout.timeout(2.seconds) { user.valid? }
+          end.not_to raise_error
+        end
+      end
+
       context 'when a signup domain is whitelisted and subdomains are allowed' do
         before do
           allow_any_instance_of(ApplicationSetting).to receive(:domain_whitelist).and_return(['example.com', '*.example.com'])
@@ -305,6 +520,20 @@ describe User, :do_not_mock_admin_mode do
           allow_any_instance_of(ApplicationSetting).to receive(:domain_blacklist).and_return(['example.com'])
         end
 
+        context 'bad regex' do
+          before do
+            allow_any_instance_of(ApplicationSetting).to receive(:domain_blacklist).and_return(['([a-zA-Z0-9]+)+\.com'])
+          end
+
+          it 'does not hang on evil input' do
+            user = build(:user, email: 'user@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa!.com')
+
+            expect do
+              Timeout.timeout(2.seconds) { user.valid? }
+            end.not_to raise_error
+          end
+        end
+
         context 'when a signup domain is blacklisted' do
           it 'accepts info@test.com' do
             user = build(:user, email: 'info@test.com')
@@ -351,10 +580,91 @@ describe User, :do_not_mock_admin_mode do
         end
       end
 
+      context 'email restrictions' do
+        context 'when email restriction is disabled' do
+          before do
+            stub_application_setting(email_restrictions_enabled: false)
+            stub_application_setting(email_restrictions: '\+')
+          end
+
+          it 'does accept email address' do
+            user = build(:user, email: 'info+1@test.com')
+
+            expect(user).to be_valid
+          end
+        end
+
+        context 'when email restrictions is enabled' do
+          before do
+            stub_application_setting(email_restrictions_enabled: true)
+            stub_application_setting(email_restrictions: '([\+]|\b(\w*gitlab.com\w*)\b)')
+          end
+
+          it 'does not accept email address with + characters' do
+            user = build(:user, email: 'info+1@test.com')
+
+            expect(user).not_to be_valid
+          end
+
+          it 'does not accept email with a gitlab domain' do
+            user = build(:user, email: 'info@gitlab.com')
+
+            expect(user).not_to be_valid
+          end
+
+          it 'adds an error message when email is not accepted' do
+            user = build(:user, email: 'info@gitlab.com')
+
+            expect(user).not_to be_valid
+            expect(user.errors.messages[:email].first).to eq(_('is not allowed. Try again with a different email address, or contact your GitLab admin.'))
+          end
+
+          it 'does accept a valid email address' do
+            user = build(:user, email: 'info@test.com')
+
+            expect(user).to be_valid
+          end
+
+          context 'when created_by_id is set' do
+            it 'does accept the email address' do
+              user = build(:user, email: 'info+1@test.com', created_by_id: 1)
+
+              expect(user).to be_valid
+            end
+          end
+        end
+      end
+
       context 'owns_notification_email' do
         it 'accepts temp_oauth_email emails' do
           user = build(:user, email: "temp-email-for-oauth@example.com")
           expect(user).to be_valid
+        end
+
+        it 'does not accept not verified emails' do
+          email = create(:email)
+          user = email.user
+          user.update(notification_email: email.email)
+
+          expect(user).to be_invalid
+        end
+      end
+
+      context 'owns_public_email' do
+        it 'accepts verified emails' do
+          email = create(:email, :confirmed, email: 'test@test.com')
+          user = email.user
+          user.update(public_email: email.email)
+
+          expect(user).to be_valid
+        end
+
+        it 'does not accept not verified emails' do
+          email = create(:email)
+          user = email.user
+          user.update(public_email: email.email)
+
+          expect(user).to be_invalid
         end
       end
 
@@ -405,30 +715,40 @@ describe User, :do_not_mock_admin_mode do
         expect(users_with_two_factor).not_to include(user_without_2fa.id)
       end
 
-      it "returns users with 2fa enabled via U2F" do
-        user_with_2fa = create(:user, :two_factor_via_u2f)
-        user_without_2fa = create(:user)
-        users_with_two_factor = described_class.with_two_factor.pluck(:id)
+      shared_examples "returns the right users" do |trait|
+        it "returns users with 2fa enabled via hardware token" do
+          user_with_2fa = create(:user, trait)
+          user_without_2fa = create(:user)
+          users_with_two_factor = described_class.with_two_factor.pluck(:id)
 
-        expect(users_with_two_factor).to include(user_with_2fa.id)
-        expect(users_with_two_factor).not_to include(user_without_2fa.id)
+          expect(users_with_two_factor).to include(user_with_2fa.id)
+          expect(users_with_two_factor).not_to include(user_without_2fa.id)
+        end
+
+        it "returns users with 2fa enabled via OTP and hardware token" do
+          user_with_2fa = create(:user, :two_factor_via_otp, trait)
+          user_without_2fa = create(:user)
+          users_with_two_factor = described_class.with_two_factor.pluck(:id)
+
+          expect(users_with_two_factor).to eq([user_with_2fa.id])
+          expect(users_with_two_factor).not_to include(user_without_2fa.id)
+        end
+
+        it 'works with ORDER BY' do
+          user_with_2fa = create(:user, :two_factor_via_otp, trait)
+
+          expect(described_class
+                     .with_two_factor
+                     .reorder_by_name).to eq([user_with_2fa])
+        end
       end
 
-      it "returns users with 2fa enabled via OTP and U2F" do
-        user_with_2fa = create(:user, :two_factor_via_otp, :two_factor_via_u2f)
-        user_without_2fa = create(:user)
-        users_with_two_factor = described_class.with_two_factor.pluck(:id)
-
-        expect(users_with_two_factor).to eq([user_with_2fa.id])
-        expect(users_with_two_factor).not_to include(user_without_2fa.id)
+      describe "and U2F" do
+        it_behaves_like "returns the right users", :two_factor_via_u2f
       end
 
-      it 'works with ORDER BY' do
-        user_with_2fa = create(:user, :two_factor_via_otp, :two_factor_via_u2f)
-
-        expect(described_class
-          .with_two_factor
-          .reorder_by_name).to eq([user_with_2fa])
+      describe "and WebAuthn" do
+        it_behaves_like "returns the right users", :two_factor_via_webauthn
       end
     end
 
@@ -442,22 +762,86 @@ describe User, :do_not_mock_admin_mode do
         expect(users_without_two_factor).not_to include(user_with_2fa.id)
       end
 
-      it "excludes users with 2fa enabled via U2F" do
-        user_with_2fa = create(:user, :two_factor_via_u2f)
-        user_without_2fa = create(:user)
-        users_without_two_factor = described_class.without_two_factor.pluck(:id)
+      describe "and u2f" do
+        it "excludes users with 2fa enabled via U2F" do
+          user_with_2fa = create(:user, :two_factor_via_u2f)
+          user_without_2fa = create(:user)
+          users_without_two_factor = described_class.without_two_factor.pluck(:id)
 
-        expect(users_without_two_factor).to include(user_without_2fa.id)
-        expect(users_without_two_factor).not_to include(user_with_2fa.id)
+          expect(users_without_two_factor).to include(user_without_2fa.id)
+          expect(users_without_two_factor).not_to include(user_with_2fa.id)
+        end
+
+        it "excludes users with 2fa enabled via OTP and U2F" do
+          user_with_2fa = create(:user, :two_factor_via_otp, :two_factor_via_u2f)
+          user_without_2fa = create(:user)
+          users_without_two_factor = described_class.without_two_factor.pluck(:id)
+
+          expect(users_without_two_factor).to include(user_without_2fa.id)
+          expect(users_without_two_factor).not_to include(user_with_2fa.id)
+        end
       end
 
-      it "excludes users with 2fa enabled via OTP and U2F" do
-        user_with_2fa = create(:user, :two_factor_via_otp, :two_factor_via_u2f)
-        user_without_2fa = create(:user)
-        users_without_two_factor = described_class.without_two_factor.pluck(:id)
+      describe "and webauthn" do
+        it "excludes users with 2fa enabled via WebAuthn" do
+          user_with_2fa = create(:user, :two_factor_via_webauthn)
+          user_without_2fa = create(:user)
+          users_without_two_factor = described_class.without_two_factor.pluck(:id)
 
-        expect(users_without_two_factor).to include(user_without_2fa.id)
-        expect(users_without_two_factor).not_to include(user_with_2fa.id)
+          expect(users_without_two_factor).to include(user_without_2fa.id)
+          expect(users_without_two_factor).not_to include(user_with_2fa.id)
+        end
+
+        it "excludes users with 2fa enabled via OTP and WebAuthn" do
+          user_with_2fa = create(:user, :two_factor_via_otp, :two_factor_via_webauthn)
+          user_without_2fa = create(:user)
+          users_without_two_factor = described_class.without_two_factor.pluck(:id)
+
+          expect(users_without_two_factor).to include(user_without_2fa.id)
+          expect(users_without_two_factor).not_to include(user_with_2fa.id)
+        end
+      end
+    end
+
+    describe '.random_password' do
+      let(:random_password) { described_class.random_password }
+
+      before do
+        expect(User).to receive(:password_length).and_return(88..128)
+      end
+
+      context 'length' do
+        it 'conforms to the current password length settings' do
+          expect(random_password.length).to eq(128)
+        end
+      end
+    end
+
+    describe '.password_length' do
+      let(:password_length) { described_class.password_length }
+
+      it 'is expected to be a Range' do
+        expect(password_length).to be_a(Range)
+      end
+
+      context 'minimum value' do
+        before do
+          stub_application_setting(minimum_password_length: 101)
+        end
+
+        it 'is determined by the current value of `minimum_password_length` attribute of application_setting' do
+          expect(password_length.min).to eq(101)
+        end
+      end
+
+      context 'maximum value' do
+        before do
+          allow(Devise.password_length).to receive(:max).and_return(201)
+        end
+
+        it 'is determined by the current value of `Devise.password_length.max`' do
+          expect(password_length.max).to eq(201)
+        end
       end
     end
 
@@ -529,6 +913,89 @@ describe User, :do_not_mock_admin_mode do
           .to contain_exactly(user)
       end
     end
+
+    describe '.with_expiring_and_not_notified_personal_access_tokens' do
+      let_it_be(:user1) { create(:user) }
+      let_it_be(:user2) { create(:user) }
+      let_it_be(:user3) { create(:user) }
+
+      let_it_be(:expired_token) { create(:personal_access_token, user: user1, expires_at: 2.days.ago) }
+      let_it_be(:revoked_token) { create(:personal_access_token, user: user1, revoked: true) }
+      let_it_be(:impersonation_token) { create(:personal_access_token, :impersonation, user: user1, expires_at: 2.days.from_now) }
+      let_it_be(:valid_token_and_notified) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now, expire_notification_delivered: true) }
+      let_it_be(:valid_token1) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now) }
+      let_it_be(:valid_token2) { create(:personal_access_token, user: user2, expires_at: 2.days.from_now) }
+      let(:users) { described_class.with_expiring_and_not_notified_personal_access_tokens(from) }
+
+      context 'in one day' do
+        let(:from) { 1.day.from_now }
+
+        it "doesn't include an user" do
+          expect(users).to be_empty
+        end
+      end
+
+      context 'in three days' do
+        let(:from) { 3.days.from_now }
+
+        it 'only includes user2' do
+          expect(users).to contain_exactly(user2)
+        end
+      end
+    end
+
+    describe '.with_personal_access_tokens_expired_today' do
+      let_it_be(:user1) { create(:user) }
+      let_it_be(:expired_today) { create(:personal_access_token, user: user1, expires_at: Date.current) }
+
+      let_it_be(:user2) { create(:user) }
+      let_it_be(:revoked_token) { create(:personal_access_token, user: user2, expires_at: Date.current, revoked: true) }
+
+      let_it_be(:user3) { create(:user) }
+      let_it_be(:impersonated_token) { create(:personal_access_token, user: user3, expires_at: Date.current, impersonation: true) }
+
+      let_it_be(:user4) { create(:user) }
+      let_it_be(:already_notified) { create(:personal_access_token, user: user4, expires_at: Date.current, after_expiry_notification_delivered: true) }
+
+      it 'returns users whose token has expired today' do
+        expect(described_class.with_personal_access_tokens_expired_today).to contain_exactly(user1)
+      end
+    end
+
+    describe '.active_without_ghosts' do
+      let_it_be(:user1) { create(:user, :external) }
+      let_it_be(:user2) { create(:user, state: 'blocked') }
+      let_it_be(:user3) { create(:user, :ghost) }
+      let_it_be(:user4) { create(:user) }
+
+      it 'returns all active users but ghost users' do
+        expect(described_class.active_without_ghosts).to match_array([user1, user4])
+      end
+    end
+
+    describe '.without_ghosts' do
+      let_it_be(:user1) { create(:user, :external) }
+      let_it_be(:user2) { create(:user, state: 'blocked') }
+      let_it_be(:user3) { create(:user, :ghost) }
+
+      it 'returns users without ghosts users' do
+        expect(described_class.without_ghosts).to match_array([user1, user2])
+      end
+    end
+
+    describe '.by_id_and_login' do
+      let_it_be(:user) { create(:user) }
+
+      it 'finds a user regardless of case' do
+        expect(described_class.by_id_and_login(user.id, user.username.upcase))
+          .to contain_exactly(user)
+      end
+
+      it 'finds a user when login is an email address regardless of case' do
+        expect(described_class.by_id_and_login(user.id, user.email.upcase))
+          .to contain_exactly(user)
+      end
+    end
   end
 
   describe "Respond to" do
@@ -538,7 +1005,7 @@ describe User, :do_not_mock_admin_mode do
   end
 
   describe 'before save hook' do
-    context '#default_private_profile_to_false' do
+    describe '#default_private_profile_to_false' do
       let(:user) { create(:user, private_profile: true) }
 
       it 'converts nil to false' do
@@ -613,6 +1080,108 @@ describe User, :do_not_mock_admin_mode do
         expect(@user.emails.count).to eq 1
         expect(@user.emails.first.confirmed_at).not_to eq nil
       end
+
+      context 'when the first email was unconfirmed and the second email gets confirmed' do
+        let(:user) { create(:user, :unconfirmed, email: 'should-be-unconfirmed@test.com') }
+
+        before do
+          user.update!(email: 'should-be-confirmed@test.com')
+          user.confirm
+        end
+
+        it 'updates user.email' do
+          expect(user.email).to eq('should-be-confirmed@test.com')
+        end
+
+        it 'confirms user.email' do
+          expect(user).to be_confirmed
+        end
+
+        it 'keeps the unconfirmed email unconfirmed' do
+          email = user.emails.first
+
+          expect(email.email).to eq('should-be-unconfirmed@test.com')
+          expect(email).not_to be_confirmed
+        end
+
+        it 'has only one email association' do
+          expect(user.emails.size).to eq(1)
+        end
+      end
+    end
+
+    context 'when an existing email record is set as primary' do
+      let(:user) { create(:user, email: 'confirmed@test.com') }
+
+      context 'when it is unconfirmed' do
+        let(:originally_unconfirmed_email) { 'should-stay-unconfirmed@test.com' }
+
+        before do
+          user.emails << create(:email, email: originally_unconfirmed_email, confirmed_at: nil)
+
+          user.update!(email: originally_unconfirmed_email)
+        end
+
+        it 'keeps the user confirmed' do
+          expect(user).to be_confirmed
+        end
+
+        it 'keeps the original email' do
+          expect(user.email).to eq('confirmed@test.com')
+        end
+
+        context 'when the email gets confirmed' do
+          before do
+            user.confirm
+          end
+
+          it 'keeps the user confirmed' do
+            expect(user).to be_confirmed
+          end
+
+          it 'updates the email' do
+            expect(user.email).to eq(originally_unconfirmed_email)
+          end
+        end
+      end
+
+      context 'when it is confirmed' do
+        let!(:old_confirmed_email) { user.email }
+        let(:confirmed_email) { 'already-confirmed@test.com' }
+
+        before do
+          user.emails << create(:email, :confirmed, email: confirmed_email)
+
+          user.update!(email: confirmed_email)
+        end
+
+        it 'keeps the user confirmed' do
+          expect(user).to be_confirmed
+        end
+
+        it 'updates the email' do
+          expect(user.email).to eq(confirmed_email)
+        end
+
+        it 'moves the old email' do
+          email = user.reload.emails.first
+
+          expect(email.email).to eq(old_confirmed_email)
+          expect(email).to be_confirmed
+        end
+      end
+    end
+
+    context 'when unconfirmed user deletes a confirmed additional email' do
+      let(:user) { create(:user, :unconfirmed) }
+
+      before do
+        user.emails << create(:email, :confirmed)
+      end
+
+      it 'does not affect the confirmed status' do
+        expect { user.emails.confirmed.destroy_all }.not_to change { user.confirmed? } # rubocop: disable Cop/DestroyAll
+      end
     end
 
     describe '#update_notification_email' do
@@ -626,7 +1195,6 @@ describe User, :do_not_mock_admin_mode do
             user.tap { |u| u.update!(email: new_email) }.reload
           end.to change(user, :unconfirmed_email).to(new_email)
         end
-
         it 'does not change :notification_email' do
           expect do
             user.tap { |u| u.update!(email: new_email) }.reload
@@ -699,64 +1267,42 @@ describe User, :do_not_mock_admin_mode do
   end
 
   describe '#highest_role' do
-    let(:user) { create(:user) }
+    let_it_be(:user) { create(:user) }
 
-    let(:group) { create(:group) }
-
-    it 'returns NO_ACCESS if none has been set' do
-      expect(user.highest_role).to eq(Gitlab::Access::NO_ACCESS)
+    context 'when user_highest_role does not exist' do
+      it 'returns NO_ACCESS' do
+        expect(user.highest_role).to eq(Gitlab::Access::NO_ACCESS)
+      end
     end
 
-    it 'returns MAINTAINER if user is maintainer of a project' do
-      create(:project, group: group) do |project|
-        project.add_maintainer(user)
+    context 'when user_highest_role exists' do
+      context 'stored highest access level is nil' do
+        it 'returns Gitlab::Access::NO_ACCESS' do
+          create(:user_highest_role, user: user)
+
+          expect(user.highest_role).to eq(Gitlab::Access::NO_ACCESS)
+        end
       end
 
-      expect(user.highest_role).to eq(Gitlab::Access::MAINTAINER)
-    end
+      context 'stored highest access level present' do
+        context 'with association :user_highest_role' do
+          let(:another_user) { create(:user) }
 
-    it 'returns the highest role if user is member of multiple projects' do
-      create(:project, group: group) do |project|
-        project.add_maintainer(user)
+          before do
+            create(:user_highest_role, :maintainer, user: user)
+            create(:user_highest_role, :developer, user: another_user)
+          end
+
+          it 'returns the correct highest role' do
+            users = User.includes(:user_highest_role).where(id: [user.id, another_user.id])
+
+            expect(users.collect { |u| [u.id, u.highest_role] }).to contain_exactly(
+              [user.id, Gitlab::Access::MAINTAINER],
+              [another_user.id, Gitlab::Access::DEVELOPER]
+            )
+          end
+        end
       end
-
-      create(:project, group: group) do |project|
-        project.add_developer(user)
-      end
-
-      expect(user.highest_role).to eq(Gitlab::Access::MAINTAINER)
-    end
-
-    it 'returns MAINTAINER if user is maintainer of a group' do
-      create(:group) do |group|
-        group.add_user(user, GroupMember::MAINTAINER)
-      end
-
-      expect(user.highest_role).to eq(Gitlab::Access::MAINTAINER)
-    end
-
-    it 'returns the highest role if user is member of multiple groups' do
-      create(:group) do |group|
-        group.add_user(user, GroupMember::MAINTAINER)
-      end
-
-      create(:group) do |group|
-        group.add_user(user, GroupMember::DEVELOPER)
-      end
-
-      expect(user.highest_role).to eq(Gitlab::Access::MAINTAINER)
-    end
-
-    it 'returns the highest role if user is member of multiple groups and projects' do
-      create(:group) do |group|
-        group.add_user(user, GroupMember::DEVELOPER)
-      end
-
-      create(:project, group: group) do |project|
-        project.add_maintainer(user)
-      end
-
-      expect(user.highest_role).to eq(Gitlab::Access::MAINTAINER)
     end
   end
 
@@ -893,6 +1439,10 @@ describe User, :do_not_mock_admin_mode do
     end
 
     it 'uses SecureRandom to generate the incoming email token' do
+      allow_next_instance_of(User) do |user|
+        allow(user).to receive(:update_highest_role)
+      end
+
       expect(SecureRandom).to receive(:hex).and_return('3b8ca303')
 
       user = create(:user)
@@ -969,7 +1519,7 @@ describe User, :do_not_mock_admin_mode do
     end
 
     it 'is true when sent less than one minute ago' do
-      user = build_stubbed(:user, reset_password_sent_at: Time.now)
+      user = build_stubbed(:user, reset_password_sent_at: Time.current)
 
       expect(user.recently_sent_password_reset?).to eq true
     end
@@ -1148,7 +1698,7 @@ describe User, :do_not_mock_admin_mode do
     let(:user) { double }
 
     it 'filters by active users by default' do
-      expect(described_class).to receive(:active).and_return([user])
+      expect(described_class).to receive(:active_without_ghosts).and_return([user])
 
       expect(described_class.filter_items(nil)).to include user
     end
@@ -1200,7 +1750,7 @@ describe User, :do_not_mock_admin_mode do
       # add user to project
       project.add_maintainer(user)
 
-      # create invite to projet
+      # create invite to project
       create(:project_member, :developer, project: project, invite_token: '1234', invite_email: 'inviteduser1@example.com')
 
       # create request to join project
@@ -1745,18 +2295,28 @@ describe User, :do_not_mock_admin_mode do
 
   describe '#all_emails' do
     let(:user) { create(:user) }
+    let!(:email_confirmed) { create :email, user: user, confirmed_at: Time.current }
+    let!(:email_unconfirmed) { create :email, user: user }
 
-    it 'returns all emails' do
-      email_confirmed   = create :email, user: user, confirmed_at: Time.now
-      email_unconfirmed = create :email, user: user
-      user.reload
+    context 'when `include_private_email` is true' do
+      it 'returns all emails' do
+        expect(user.reload.all_emails).to contain_exactly(
+          user.email,
+          user.private_commit_email,
+          email_unconfirmed.email,
+          email_confirmed.email
+        )
+      end
+    end
 
-      expect(user.all_emails).to contain_exactly(
-        user.email,
-        user.private_commit_email,
-        email_unconfirmed.email,
-        email_confirmed.email
-      )
+    context 'when `include_private_email` is false' do
+      it 'does not include the private commit email' do
+        expect(user.reload.all_emails(include_private_email: false)).to contain_exactly(
+          user.email,
+          email_unconfirmed.email,
+          email_confirmed.email
+        )
+      end
     end
   end
 
@@ -1764,7 +2324,7 @@ describe User, :do_not_mock_admin_mode do
     let(:user) { create(:user) }
 
     it 'returns only confirmed emails' do
-      email_confirmed = create :email, user: user, confirmed_at: Time.now
+      email_confirmed = create :email, user: user, confirmed_at: Time.current
       create :email, user: user
 
       expect(user.verified_emails).to contain_exactly(
@@ -1775,11 +2335,36 @@ describe User, :do_not_mock_admin_mode do
     end
   end
 
+  describe '#public_verified_emails' do
+    let(:user) { create(:user) }
+
+    it 'returns only confirmed public emails' do
+      email_confirmed = create :email, user: user, confirmed_at: Time.current
+      create :email, user: user
+
+      expect(user.public_verified_emails).to contain_exactly(
+        user.email,
+        email_confirmed.email
+      )
+    end
+
+    it 'returns confirmed public emails plus main user email when user is not confirmed' do
+      user = create(:user, confirmed_at: nil)
+      email_confirmed = create :email, user: user, confirmed_at: Time.current
+      create :email, user: user
+
+      expect(user.public_verified_emails).to contain_exactly(
+        user.email,
+        email_confirmed.email
+      )
+    end
+  end
+
   describe '#verified_email?' do
     let(:user) { create(:user) }
 
     it 'returns true when the email is verified/confirmed' do
-      email_confirmed = create :email, user: user, confirmed_at: Time.now
+      email_confirmed = create :email, user: user, confirmed_at: Time.current
       create :email, user: user
       user.reload
 
@@ -1887,26 +2472,19 @@ describe User, :do_not_mock_admin_mode do
         expect(user.blocked?).to be_truthy
         expect(user.ldap_blocked?).to be_truthy
       end
-    end
-  end
 
-  describe '#ultraauth_user?' do
-    it 'is true if provider is ultraauth' do
-      user = create(:omniauth_user, provider: 'ultraauth')
+      context 'on a read-only instance' do
+        before do
+          allow(Gitlab::Database).to receive(:read_only?).and_return(true)
+        end
 
-      expect(user.ultraauth_user?).to be_truthy
-    end
+        it 'does not block user' do
+          user.ldap_block
 
-    it 'is false with othe provider' do
-      user = create(:omniauth_user, provider: 'not-ultraauth')
-
-      expect(user.ultraauth_user?).to be_falsey
-    end
-
-    it 'is false if no extern_uid is provided' do
-      user = create(:omniauth_user, extern_uid: nil)
-
-      expect(user.ldap_user?).to be_falsey
+          expect(user.blocked?).to be_falsey
+          expect(user.ldap_blocked?).to be_falsey
+        end
+      end
     end
   end
 
@@ -2016,7 +2594,7 @@ describe User, :do_not_mock_admin_mode do
 
   describe '.find_by_private_commit_email' do
     context 'with email' do
-      set(:user) { create(:user) }
+      let_it_be(:user) { create(:user) }
 
       it 'returns user through private commit email' do
         expect(described_class.find_by_private_commit_email(user.private_commit_email)).to eq(user)
@@ -2286,6 +2864,7 @@ describe User, :do_not_mock_admin_mode do
 
   describe '#authorizations_for_projects' do
     let!(:user) { create(:user) }
+
     subject { Project.where("EXISTS (?)", user.authorizations_for_projects) }
 
     it 'includes projects that belong to a user, but no other projects' do
@@ -2402,10 +2981,10 @@ describe User, :do_not_mock_admin_mode do
     it "includes projects shared with user's group" do
       user    = create(:user)
       project = create(:project, :private)
-      group   = create(:group)
-
-      group.add_reporter(user)
-      project.project_group_links.create(group: group)
+      group   = create(:group) do |group|
+        group.add_reporter(user)
+      end
+      create(:project_group_link, group: group, project: project)
 
       expect(user.authorized_projects).to include(project)
     end
@@ -2479,62 +3058,47 @@ describe User, :do_not_mock_admin_mode do
 
   describe '#ci_owned_runners' do
     let(:user) { create(:user) }
-    let!(:project) { create(:project) }
-    let(:runner) { create(:ci_runner, :project, projects: [project]) }
 
-    context 'without any projects nor groups' do
-      it 'does not load' do
-        expect(user.ci_owned_runners).to be_empty
-      end
-    end
+    shared_examples :nested_groups_owner do
+      context 'when the user is the owner of a multi-level group' do
+        before do
+          set_permissions_for_users
+        end
 
-    context 'with personal projects runners' do
-      let(:namespace) { create(:namespace, owner: user) }
-      let!(:project) { create(:project, namespace: namespace) }
-
-      it 'loads' do
-        expect(user.ci_owned_runners).to contain_exactly(runner)
-      end
-    end
-
-    context 'with personal group runner' do
-      let!(:project) { create(:project) }
-      let(:group_runner) { create(:ci_runner, :group, groups: [group]) }
-      let!(:group) do
-        create(:group).tap do |group|
-          group.add_owner(user)
+        it 'loads all the runners in the tree of groups' do
+          expect(user.ci_owned_runners).to contain_exactly(runner, group_runner)
         end
       end
-
-      it 'loads' do
-        expect(user.ci_owned_runners).to contain_exactly(group_runner)
-      end
     end
 
-    context 'with personal project and group runner' do
-      let(:namespace) { create(:namespace, owner: user) }
-      let!(:project) { create(:project, namespace: namespace) }
-      let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
-
-      let!(:group) do
-        create(:group).tap do |group|
+    shared_examples :group_owner do
+      context 'when the user is the owner of a one level group' do
+        before do
           group.add_owner(user)
         end
-      end
 
-      it 'loads' do
-        expect(user.ci_owned_runners).to contain_exactly(runner, group_runner)
+        it 'loads the runners in the group' do
+          expect(user.ci_owned_runners).to contain_exactly(group_runner)
+        end
       end
     end
 
-    shared_examples :member do
+    shared_examples :project_owner do
+      context 'when the user is the owner of a project' do
+        it 'loads the runner belonging to the project' do
+          expect(user.ci_owned_runners).to contain_exactly(runner)
+        end
+      end
+    end
+
+    shared_examples :project_member do
       context 'when the user is a maintainer' do
         before do
           add_user(:maintainer)
         end
 
-        it 'loads' do
-          expect(user.ci_owned_runners).to contain_exactly(runner)
+        it 'loads the runners of the project' do
+          expect(user.ci_owned_runners).to contain_exactly(project_runner)
         end
       end
 
@@ -2543,57 +3107,210 @@ describe User, :do_not_mock_admin_mode do
           add_user(:developer)
         end
 
-        it 'does not load' do
+        it 'does not load any runner' do
+          expect(user.ci_owned_runners).to be_empty
+        end
+      end
+
+      context 'when the user is a reporter' do
+        before do
+          add_user(:reporter)
+        end
+
+        it 'does not load any runner' do
+          expect(user.ci_owned_runners).to be_empty
+        end
+      end
+
+      context 'when the user is a guest' do
+        before do
+          add_user(:guest)
+        end
+
+        it 'does not load any runner' do
           expect(user.ci_owned_runners).to be_empty
         end
       end
     end
 
-    context 'with groups projects runners' do
-      let(:group) { create(:group) }
-      let!(:project) { create(:project, group: group) }
+    shared_examples :group_member do
+      context 'when the user is a maintainer' do
+        before do
+          add_user(:maintainer)
+        end
 
-      def add_user(access)
-        group.add_user(user, access)
+        it 'does not load the runners of the group' do
+          expect(user.ci_owned_runners).to be_empty
+        end
       end
 
-      it_behaves_like :member
+      context 'when the user is a developer' do
+        before do
+          add_user(:developer)
+        end
+
+        it 'does not load any runner' do
+          expect(user.ci_owned_runners).to be_empty
+        end
+      end
+
+      context 'when the user is a reporter' do
+        before do
+          add_user(:reporter)
+        end
+
+        it 'does not load any runner' do
+          expect(user.ci_owned_runners).to be_empty
+        end
+      end
+
+      context 'when the user is a guest' do
+        before do
+          add_user(:guest)
+        end
+
+        it 'does not load any runner' do
+          expect(user.ci_owned_runners).to be_empty
+        end
+      end
     end
 
-    context 'with groups runners' do
-      let!(:runner) { create(:ci_runner, :group, groups: [group]) }
+    context 'without any projects nor groups' do
+      it 'does not load any runner' do
+        expect(user.ci_owned_runners).to be_empty
+      end
+    end
+
+    context 'with runner in a personal project' do
+      let!(:namespace) { create(:namespace, owner: user) }
+      let!(:project) { create(:project, namespace: namespace) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      it_behaves_like :project_owner
+    end
+
+    context 'with group runner in a non owned group' do
       let!(:group) { create(:group) }
+      let!(:runner) { create(:ci_runner, :group, groups: [group]) }
 
       def add_user(access)
         group.add_user(user, access)
       end
 
-      it_behaves_like :member
+      it_behaves_like :group_member
     end
 
-    context 'with other projects runners' do
+    context 'with group runner in an owned group' do
+      let!(:group) { create(:group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
+
+      it_behaves_like :group_owner
+    end
+
+    context 'with group runner in an owned group and group runner in a different owner subgroup' do
+      let!(:group) { create(:group) }
+      let!(:runner) { create(:ci_runner, :group, groups: [group]) }
+      let!(:subgroup) { create(:group, parent: group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [subgroup]) }
+      let!(:another_user) { create(:user) }
+
+      def set_permissions_for_users
+        group.add_owner(user)
+        subgroup.add_owner(another_user)
+      end
+
+      it_behaves_like :nested_groups_owner
+    end
+
+    context 'with personal project runner in an an owned group and a group runner in that same group' do
+      let!(:group) { create(:group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
+      let!(:project) { create(:project, group: group) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      def set_permissions_for_users
+        group.add_owner(user)
+      end
+
+      it_behaves_like :nested_groups_owner
+    end
+
+    context 'with personal project runner in an owned group and a group runner in a subgroup' do
+      let!(:group) { create(:group) }
+      let!(:subgroup) { create(:group, parent: group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [subgroup]) }
+      let!(:project) { create(:project, group: group) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      def set_permissions_for_users
+        group.add_owner(user)
+      end
+
+      it_behaves_like :nested_groups_owner
+    end
+
+    context 'with personal project runner in an owned group in an owned namespace and a group runner in that group' do
+      let!(:namespace) { create(:namespace, owner: user) }
+      let!(:group) { create(:group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [group]) }
+      let!(:project) { create(:project, namespace: namespace, group: group) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      def set_permissions_for_users
+        group.add_owner(user)
+      end
+
+      it_behaves_like :nested_groups_owner
+    end
+
+    context 'with personal project runner in an owned namespace, an owned group, a subgroup and a group runner in that subgroup' do
+      let!(:namespace) { create(:namespace, owner: user) }
+      let!(:group) { create(:group) }
+      let!(:subgroup) { create(:group, parent: group) }
+      let!(:group_runner) { create(:ci_runner, :group, groups: [subgroup]) }
+      let!(:project) { create(:project, namespace: namespace, group: group) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
+
+      def set_permissions_for_users
+        group.add_owner(user)
+      end
+
+      it_behaves_like :nested_groups_owner
+    end
+
+    context 'with a project runner that belong to projects that belong to a not owned group' do
+      let!(:group) { create(:group) }
+      let!(:project) { create(:project, group: group) }
+      let!(:project_runner) { create(:ci_runner, :project, projects: [project]) }
+
+      def add_user(access)
+        project.add_user(user, access)
+      end
+
+      it_behaves_like :project_member
+    end
+
+    context 'with project runners that belong to projects that do not belong to any group' do
       let!(:project) { create(:project) }
+      let!(:runner) { create(:ci_runner, :project, projects: [project]) }
 
-      def add_user(access)
-        project.add_role(user, access)
+      it 'does not load any runner' do
+        expect(user.ci_owned_runners).to be_empty
       end
-
-      it_behaves_like :member
     end
 
-    context 'with subgroup with different owner for project runner' do
-      let(:group) { create(:group) }
-      let(:another_user) { create(:user) }
-      let(:subgroup) { create(:group, parent: group) }
-      let!(:project) { create(:project, group: subgroup) }
+    context 'with a group runner that belongs to a subgroup of a group owned by another user' do
+      let!(:group) { create(:group) }
+      let!(:subgroup) { create(:group, parent: group) }
+      let!(:runner) { create(:ci_runner, :group, groups: [subgroup]) }
+      let!(:another_user) { create(:user) }
 
       def add_user(access)
-        group.add_user(user, access)
+        subgroup.add_user(user, access)
         group.add_user(another_user, :owner)
-        subgroup.add_user(another_user, :owner)
       end
 
-      it_behaves_like :member
+      it_behaves_like :group_member
     end
   end
 
@@ -2790,31 +3507,32 @@ describe User, :do_not_mock_admin_mode do
     end
   end
 
-  describe '#full_private_access?' do
+  describe '#can_read_all_resources?', :request_store do
     it 'returns false for regular user' do
-      user = build(:user)
+      user = build_stubbed(:user)
 
-      expect(user.full_private_access?).to be_falsy
+      expect(user.can_read_all_resources?).to be_falsy
     end
 
     context 'for admin user' do
       include_context 'custom session'
 
-      let(:user) { build(:user, :admin) }
+      let(:user) { build_stubbed(:user, :admin) }
 
       context 'when admin mode is disabled' do
         it 'returns false' do
-          expect(user.full_private_access?).to be_falsy
+          expect(user.can_read_all_resources?).to be_falsy
         end
       end
 
       context 'when admin mode is enabled' do
         before do
+          Gitlab::Auth::CurrentUserMode.new(user).request_admin_mode!
           Gitlab::Auth::CurrentUserMode.new(user).enable_admin_mode!(password: user.password)
         end
 
         it 'returns true' do
-          expect(user.full_private_access?).to be_truthy
+          expect(user.can_read_all_resources?).to be_truthy
         end
       end
     end
@@ -2828,6 +3546,7 @@ describe User, :do_not_mock_admin_mode do
       expect(ghost).to be_persisted
       expect(ghost.namespace).not_to be_nil
       expect(ghost.namespace).to be_persisted
+      expect(ghost.user_type).to eq 'ghost'
     end
 
     it "does not create a second ghost user if one is already present" do
@@ -2962,7 +3681,43 @@ describe User, :do_not_mock_admin_mode do
     end
   end
 
-  context '.active' do
+  describe '#source_groups_of_two_factor_authentication_requirement' do
+    let_it_be(:group_not_requiring_2FA) { create :group }
+    let(:user) { create :user }
+
+    before do
+      group.add_user(user, GroupMember::OWNER)
+      group_not_requiring_2FA.add_user(user, GroupMember::OWNER)
+    end
+
+    context 'when user is direct member of group requiring 2FA' do
+      let_it_be(:group) { create :group, require_two_factor_authentication: true }
+
+      it 'returns group requiring 2FA' do
+        expect(user.source_groups_of_two_factor_authentication_requirement).to contain_exactly(group)
+      end
+    end
+
+    context 'when user is member of group which parent requires 2FA' do
+      let_it_be(:parent_group) { create :group, require_two_factor_authentication: true }
+      let_it_be(:group) { create :group, parent: parent_group }
+
+      it 'returns group requiring 2FA' do
+        expect(user.source_groups_of_two_factor_authentication_requirement).to contain_exactly(group)
+      end
+    end
+
+    context 'when user is member of group which child requires 2FA' do
+      let_it_be(:group) { create :group }
+      let_it_be(:child_group) { create :group, require_two_factor_authentication: true, parent: group }
+
+      it 'returns group requiring 2FA' do
+        expect(user.source_groups_of_two_factor_authentication_requirement).to contain_exactly(group)
+      end
+    end
+  end
+
+  describe '.active' do
     before do
       described_class.ghost
       create(:user, name: 'user', state: 'active')
@@ -2982,7 +3737,7 @@ describe User, :do_not_mock_admin_mode do
     end
   end
 
-  context '#invalidate_issue_cache_counts' do
+  describe '#invalidate_issue_cache_counts' do
     let(:user) { build_stubbed(:user) }
 
     it 'invalidates cache for issue counter' do
@@ -2996,7 +3751,7 @@ describe User, :do_not_mock_admin_mode do
     end
   end
 
-  context '#invalidate_merge_request_cache_counts' do
+  describe '#invalidate_merge_request_cache_counts' do
     let(:user) { build_stubbed(:user) }
 
     it 'invalidates cache for Merge Request counter' do
@@ -3010,7 +3765,7 @@ describe User, :do_not_mock_admin_mode do
     end
   end
 
-  context '#invalidate_personal_projects_count' do
+  describe '#invalidate_personal_projects_count' do
     let(:user) { build_stubbed(:user) }
 
     it 'invalidates cache for personal projects counter' do
@@ -3044,12 +3799,6 @@ describe User, :do_not_mock_admin_mode do
 
       expect(user.allow_password_authentication_for_web?).to be_falsey
     end
-
-    it 'returns false for ultraauth user' do
-      user = create(:omniauth_user, provider: 'ultraauth')
-
-      expect(user.allow_password_authentication_for_web?).to be_falsey
-    end
   end
 
   describe '#allow_password_authentication_for_git?' do
@@ -3069,12 +3818,6 @@ describe User, :do_not_mock_admin_mode do
 
     it 'returns false for ldap user' do
       user = create(:omniauth_user, provider: 'ldapmain')
-
-      expect(user.allow_password_authentication_for_git?).to be_falsey
-    end
-
-    it 'returns false for ultraauth user' do
-      user = create(:omniauth_user, provider: 'ultraauth')
 
       expect(user.allow_password_authentication_for_git?).to be_falsey
     end
@@ -3141,6 +3884,12 @@ describe User, :do_not_mock_admin_mode do
 
         expect(user.namespace).not_to be_nil
       end
+
+      it 'creates the namespace setting' do
+        user.save!
+
+        expect(user.namespace.namespace_settings).to be_persisted
+      end
     end
 
     context 'for an existing user' do
@@ -3184,7 +3933,7 @@ describe User, :do_not_mock_admin_mode do
 
             it 'causes the user save to fail' do
               expect(user.update(username: new_username)).to be_falsey
-              expect(user.namespace.errors.messages[:path].first).to eq('has already been taken')
+              expect(user.namespace.errors.messages[:path].first).to eq(_('has already been taken'))
             end
 
             it 'adds the namespace errors to the user' do
@@ -3312,15 +4061,15 @@ describe User, :do_not_mock_admin_mode do
       end
 
       it 'returns false if email can not be synced' do
-        stub_omniauth_setting(sync_profile_attributes: %w(location email))
+        stub_omniauth_setting(sync_profile_attributes: %w(location name))
 
-        expect(user.sync_attribute?(:name)).to be_falsey
+        expect(user.sync_attribute?(:email)).to be_falsey
       end
 
       it 'returns false if location can not be synced' do
-        stub_omniauth_setting(sync_profile_attributes: %w(location email))
+        stub_omniauth_setting(sync_profile_attributes: %w(name email))
 
-        expect(user.sync_attribute?(:name)).to be_falsey
+        expect(user.sync_attribute?(:location)).to be_falsey
       end
 
       it 'returns true for all syncable attributes if all syncable attributes can be synced' do
@@ -3581,6 +4330,7 @@ describe User, :do_not_mock_admin_mode do
 
   describe '#required_terms_not_accepted?' do
     let(:user) { build(:user) }
+
     subject { user.required_terms_not_accepted? }
 
     context "when terms are not enforced" do
@@ -3628,7 +4378,7 @@ describe User, :do_not_mock_admin_mode do
 
     context 'in single-user environment' do
       it 'requires user consent after one week' do
-        create(:user, ghost: true)
+        create(:user, :ghost)
 
         expect(user.requires_usage_stats_consent?).to be true
       end
@@ -3782,9 +4532,10 @@ describe User, :do_not_mock_admin_mode do
           context 'when an ancestor has a level other than Global' do
             let(:ancestor) { create(:group) }
             let(:group) { create(:group, parent: ancestor) }
+            let(:email) { create(:email, :confirmed, email: 'ancestor@example.com', user: user) }
 
             before do
-              create(:notification_setting, user: user, source: ancestor, level: 'participating', notification_email: 'ancestor@example.com')
+              create(:notification_setting, user: user, source: ancestor, level: 'participating', notification_email: email.email)
             end
 
             it 'has the same level set' do
@@ -3809,10 +4560,12 @@ describe User, :do_not_mock_admin_mode do
             let(:grand_ancestor) { create(:group) }
             let(:ancestor) { create(:group, parent: grand_ancestor) }
             let(:group) { create(:group, parent: ancestor) }
+            let(:ancestor_email) { create(:email, :confirmed, email: 'ancestor@example.com', user: user) }
+            let(:grand_email) { create(:email, :confirmed, email: 'grand@example.com', user: user) }
 
             before do
-              create(:notification_setting, user: user, source: grand_ancestor, level: 'participating', notification_email: 'grand@example.com')
-              create(:notification_setting, user: user, source: ancestor, level: 'global', notification_email: 'ancestor@example.com')
+              create(:notification_setting, user: user, source: grand_ancestor, level: 'participating', notification_email: grand_email.email)
+              create(:notification_setting, user: user, source: ancestor, level: 'global', notification_email: ancestor_email.email)
             end
 
             it 'has the same email set' do
@@ -3822,6 +4575,44 @@ describe User, :do_not_mock_admin_mode do
           end
         end
       end
+    end
+  end
+
+  describe '#notification_settings_for_groups' do
+    let_it_be(:user) { create(:user) }
+    let_it_be(:groups) { create_list(:group, 2) }
+
+    subject { user.notification_settings_for_groups(arg) }
+
+    before do
+      groups.each do |group|
+        group.add_maintainer(user)
+      end
+    end
+
+    shared_examples_for 'notification_settings_for_groups method' do
+      it 'returns NotificationSetting objects for provided groups', :aggregate_failures do
+        expect(subject.count).to eq(groups.count)
+        expect(subject.map(&:source_id)).to match_array(groups.map(&:id))
+      end
+    end
+
+    context 'when given an ActiveRecord relationship' do
+      let_it_be(:arg) { Group.where(id: groups.map(&:id)) }
+
+      it_behaves_like 'notification_settings_for_groups method'
+
+      it 'uses #select to maintain lazy querying behavior' do
+        expect(arg).to receive(:select).and_call_original
+
+        subject
+      end
+    end
+
+    context 'when given an Array of Groups' do
+      let_it_be(:arg) { groups }
+
+      it_behaves_like 'notification_settings_for_groups method'
     end
   end
 
@@ -3850,7 +4641,7 @@ describe User, :do_not_mock_admin_mode do
     context 'when group has notification email set' do
       it 'returns group notification email' do
         group_notification_email = 'user+group@example.com'
-
+        create(:email, :confirmed, user: user, email: group_notification_email)
         create(:notification_setting, user: user, source: group, notification_email: group_notification_email)
 
         is_expected.to eq(group_notification_email)
@@ -3886,5 +4677,308 @@ describe User, :do_not_mock_admin_mode do
         is_expected.to be_falsey
       end
     end
+  end
+
+  describe '#read_only_attribute?' do
+    context 'when synced attributes metadata is present' do
+      it 'delegates to synced_attributes_metadata' do
+        subject.build_user_synced_attributes_metadata
+
+        expect(subject.build_user_synced_attributes_metadata)
+          .to receive(:read_only?).with(:email).and_return('return-value')
+        expect(subject.read_only_attribute?(:email)).to eq('return-value')
+      end
+    end
+
+    context 'when synced attributes metadata is not present' do
+      it 'is false for any attribute' do
+        expect(subject.read_only_attribute?(:email)).to be_falsey
+      end
+    end
+  end
+
+  describe '.active_without_ghosts' do
+    let_it_be(:user1) { create(:user, :external) }
+    let_it_be(:user2) { create(:user, state: 'blocked') }
+    let_it_be(:user3) { create(:user, :ghost) }
+    let_it_be(:user4) { create(:user, user_type: :support_bot) }
+    let_it_be(:user5) { create(:user, state: 'blocked', user_type: :support_bot) }
+
+    it 'returns all active users including active bots but ghost users' do
+      expect(described_class.active_without_ghosts).to match_array([user1, user4])
+    end
+  end
+
+  describe '#dismissed_callout?' do
+    subject(:user) { create(:user) }
+
+    let(:feature_name) { UserCallout.feature_names.each_key.first }
+
+    context 'when no callout dismissal record exists' do
+      it 'returns false when no ignore_dismissal_earlier_than provided' do
+        expect(user.dismissed_callout?(feature_name: feature_name)).to eq false
+      end
+
+      it 'returns false when ignore_dismissal_earlier_than provided' do
+        expect(user.dismissed_callout?(feature_name: feature_name, ignore_dismissal_earlier_than: 3.months.ago)).to eq false
+      end
+    end
+
+    context 'when dismissed callout exists' do
+      before do
+        create(:user_callout, user: user, feature_name: feature_name, dismissed_at: 4.months.ago)
+      end
+
+      it 'returns true when no ignore_dismissal_earlier_than provided' do
+        expect(user.dismissed_callout?(feature_name: feature_name)).to eq true
+      end
+
+      it 'returns true when ignore_dismissal_earlier_than is earlier than dismissed_at' do
+        expect(user.dismissed_callout?(feature_name: feature_name, ignore_dismissal_earlier_than: 6.months.ago)).to eq true
+      end
+
+      it 'returns false when ignore_dismissal_earlier_than is later than dismissed_at' do
+        expect(user.dismissed_callout?(feature_name: feature_name, ignore_dismissal_earlier_than: 3.months.ago)).to eq false
+      end
+    end
+  end
+
+  describe '#hook_attrs' do
+    it 'includes name, username, avatar_url, and email' do
+      user = create(:user)
+      user_attributes = {
+        name: user.name,
+        username: user.username,
+        avatar_url: user.avatar_url(only_path: false),
+        email: user.email
+      }
+      expect(user.hook_attrs).to eq(user_attributes)
+    end
+  end
+
+  describe 'user detail' do
+    context 'when user is initialized' do
+      let(:user) { build(:user) }
+
+      it { expect(user.user_detail).to be_present }
+      it { expect(user.user_detail).not_to be_persisted }
+    end
+
+    context 'when user detail exists' do
+      let(:user) { create(:user, job_title: 'Engineer') }
+
+      it { expect(user.user_detail).to be_persisted }
+    end
+  end
+
+  describe '#current_highest_access_level' do
+    let_it_be(:user) { create(:user) }
+
+    context 'when no memberships exist' do
+      it 'returns nil' do
+        expect(user.current_highest_access_level).to be_nil
+      end
+    end
+
+    context 'when memberships exist' do
+      it 'returns the highest access level for non requested memberships' do
+        create(:group_member, :reporter, user_id: user.id)
+        create(:project_member, :guest, user_id: user.id)
+        create(:project_member, :maintainer, user_id: user.id, requested_at: Time.current)
+
+        expect(user.current_highest_access_level).to eq(Gitlab::Access::REPORTER)
+      end
+    end
+  end
+
+  context 'when after_commit :update_highest_role' do
+    describe 'create user' do
+      subject { create(:user) }
+
+      it 'schedules a job in the future', :aggregate_failures, :clean_gitlab_redis_shared_state do
+        allow_next_instance_of(Gitlab::ExclusiveLease) do |instance|
+          allow(instance).to receive(:try_obtain).and_return('uuid')
+        end
+
+        expect(UpdateHighestRoleWorker).to receive(:perform_in).and_call_original
+
+        expect { subject }.to change(UpdateHighestRoleWorker.jobs, :size).by(1)
+      end
+    end
+
+    context 'when user already exists' do
+      let!(:user) { create(:user) }
+      let(:user_id) { user.id }
+
+      describe 'update user' do
+        using RSpec::Parameterized::TableSyntax
+
+        where(:attributes) do
+          [
+            { state: 'blocked' },
+            { user_type: :ghost },
+            { user_type: :alert_bot },
+            { user_type: :support_bot }
+          ]
+        end
+
+        with_them do
+          context 'when state was changed' do
+            subject { user.update(attributes) }
+
+            include_examples 'update highest role with exclusive lease'
+          end
+        end
+
+        context 'when state was not changed' do
+          subject { user.update(email: 'newmail@example.com') }
+
+          include_examples 'does not update the highest role'
+        end
+      end
+
+      describe 'destroy user' do
+        subject { user.destroy }
+
+        include_examples 'does not update the highest role'
+      end
+    end
+  end
+
+  describe '#active_for_authentication?' do
+    subject { user.active_for_authentication? }
+
+    let(:user) { create(:user) }
+
+    context 'when user is blocked' do
+      before do
+        user.block
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'when user is a ghost user' do
+      before do
+        user.update(user_type: :ghost)
+      end
+
+      it { is_expected.to be false }
+    end
+
+    context 'based on user type' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:user_type, :expected_result) do
+        'human'             | true
+        'alert_bot'         | false
+        'support_bot'       | false
+      end
+
+      with_them do
+        before do
+          user.update(user_type: user_type)
+        end
+
+        it { is_expected.to be expected_result }
+      end
+    end
+  end
+
+  describe '#inactive_message' do
+    subject { user.inactive_message }
+
+    let(:user) { create(:user) }
+
+    context 'when user is blocked' do
+      before do
+        user.block
+      end
+
+      it { is_expected.to eq User::BLOCKED_MESSAGE }
+    end
+
+    context 'when user is an internal user' do
+      before do
+        user.update(user_type: :ghost)
+      end
+
+      it { is_expected.to be User::LOGIN_FORBIDDEN }
+    end
+
+    context 'when user is locked' do
+      before do
+        user.lock_access!
+      end
+
+      it { is_expected.to be :locked }
+    end
+  end
+
+  describe '#password_required?' do
+    let_it_be(:user) { create(:user) }
+
+    shared_examples 'does not require password to be present' do
+      it { expect(user).not_to validate_presence_of(:password) }
+
+      it { expect(user).not_to validate_presence_of(:password_confirmation) }
+    end
+
+    context 'when user is an internal user' do
+      before do
+        user.update(user_type: 'alert_bot')
+      end
+
+      it_behaves_like 'does not require password to be present'
+    end
+
+    context 'when user is a project bot user' do
+      before do
+        user.update(user_type: 'project_bot')
+      end
+
+      it_behaves_like 'does not require password to be present'
+    end
+  end
+
+  context 'bot users' do
+    shared_examples 'bot users' do |bot_type|
+      it 'creates the user if it does not exist' do
+        expect do
+          described_class.public_send(bot_type)
+        end.to change { User.where(user_type: bot_type).count }.by(1)
+      end
+
+      it 'creates a route for the namespace of the created user' do
+        bot_user = described_class.public_send(bot_type)
+
+        expect(bot_user.namespace.route).to be_present
+      end
+
+      it 'does not create a new user if it already exists' do
+        described_class.public_send(bot_type)
+
+        expect do
+          described_class.public_send(bot_type)
+        end.not_to change { User.count }
+      end
+    end
+
+    shared_examples 'bot user avatars' do |bot_type, avatar_filename|
+      it 'sets the custom avatar for the created bot' do
+        bot_user = described_class.public_send(bot_type)
+
+        expect(bot_user.avatar.url).to be_present
+        expect(bot_user.avatar.filename).to eq(avatar_filename)
+      end
+    end
+
+    it_behaves_like 'bot users', :alert_bot
+    it_behaves_like 'bot users', :support_bot
+    it_behaves_like 'bot users', :migration_bot
+    it_behaves_like 'bot users', :ghost
+
+    it_behaves_like 'bot user avatars', :alert_bot, 'alert-bot.png'
+    it_behaves_like 'bot user avatars', :support_bot, 'support-bot.png'
   end
 end

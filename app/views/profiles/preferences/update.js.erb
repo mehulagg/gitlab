@@ -12,5 +12,9 @@ if ('<%= current_user.layout %>' === 'fluid') {
 // Re-enable the "Save" button
 $('input[type=submit]').enable()
 
-// Show the notice flash message
-new Flash('<%= flash.discard(:notice) %>', 'notice')
+// Show flash messages
+<% if flash.notice %>
+  new Flash({ message: '<%= flash.discard(:notice) %>', type: 'notice'})
+<% elsif flash.alert %>
+  new Flash({ message: '<%= flash.discard(:alert) %>', type: 'alert'})
+<% end %>

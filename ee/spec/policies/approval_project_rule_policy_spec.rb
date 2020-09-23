@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ApprovalProjectRulePolicy do
+RSpec.describe ApprovalProjectRulePolicy do
   let(:project) { create(:project) }
   let!(:approval_rule) { create(:approval_project_rule, project: project) }
 

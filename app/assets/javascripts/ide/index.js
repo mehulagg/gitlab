@@ -1,12 +1,13 @@
 import Vue from 'vue';
 import { mapActions } from 'vuex';
-import _ from 'underscore';
+import { identity } from 'lodash';
 import Translate from '~/vue_shared/translate';
 import ide from './components/ide.vue';
-import store from './stores';
-import router from './ide_router';
+import { createStore } from './stores';
+import { createRouter } from './ide_router';
 import { parseBoolean } from '../lib/utils/common_utils';
 import { resetServiceWorkersPublicPath } from '../lib/utils/webpack';
+import { DEFAULT_THEME } from './lib/themes';
 
 Vue.use(Translate);
 
@@ -30,7 +31,9 @@ Vue.use(Translate);
 export function initIde(el, options = {}) {
   if (!el) return null;
 
-  const { rootComponent = ide, extendStore = _.identity } = options;
+  const { rootComponent = ide, extendStore = identity } = options;
+  const store = createStore();
+  const router = createRouter(store);
 
   return new Vue({
     el,
@@ -50,6 +53,9 @@ export function initIde(el, options = {}) {
       });
       this.setInitialData({
         clientsidePreviewEnabled: parseBoolean(el.dataset.clientsidePreviewEnabled),
+        renderWhitespaceInCode: parseBoolean(el.dataset.renderWhitespaceInCode),
+        editorTheme: window.gon?.user_color_scheme || DEFAULT_THEME,
+        codesandboxBundlerUrl: el.dataset.codesandboxBundlerUrl,
       });
     },
     methods: {

@@ -13,14 +13,20 @@ class CommitStatusPresenter < Gitlab::View::Presenter::Delegated
     archived_failure: 'The job is archived and cannot be run',
     unmet_prerequisites: 'The job failed to complete prerequisite tasks',
     scheduler_failure: 'The scheduler failed to assign job to the runner, please try again or contact system administrator',
-    data_integrity_failure: 'There has been a structural integrity problem detected, please contact system administrator'
+    data_integrity_failure: 'There has been a structural integrity problem detected, please contact system administrator',
+    forward_deployment_failure: 'The deployment job is older than the previously succeeded deployment job, and therefore cannot be run',
+    invalid_bridge_trigger: 'This job could not be executed because downstream pipeline trigger definition is invalid',
+    downstream_bridge_project_not_found: 'This job could not be executed because downstream bridge project could not be found',
+    insufficient_bridge_permissions: 'This job could not be executed because of insufficient permissions to create a downstream pipeline',
+    bridge_pipeline_is_child_pipeline: 'This job belongs to a child pipeline and cannot create further child pipelines',
+    downstream_pipeline_creation_failed: 'The downstream pipeline could not be created',
+    secrets_provider_not_found: 'The secrets provider can not be found',
+    reached_max_descendant_pipelines_depth: 'Maximum child pipeline depth has been reached'
   }.freeze
 
   private_constant :CALLOUT_FAILURE_MESSAGES
 
   presents :build
-
-  prepend_if_ee('::EE::CommitStatusPresenter') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
   def self.callout_failure_messages
     CALLOUT_FAILURE_MESSAGES
@@ -29,12 +35,6 @@ class CommitStatusPresenter < Gitlab::View::Presenter::Delegated
   def callout_failure_message
     self.class.callout_failure_messages.fetch(failure_reason.to_sym)
   end
-
-  def recoverable?
-    failed? && !unrecoverable?
-  end
-
-  def unrecoverable?
-    script_failure? || missing_dependency_failure? || archived_failure? || scheduler_failure? || data_integrity_failure?
-  end
 end
+
+CommitStatusPresenter.prepend_if_ee('::EE::CommitStatusPresenter')

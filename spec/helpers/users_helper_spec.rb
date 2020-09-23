@@ -2,10 +2,14 @@
 
 require 'spec_helper'
 
-describe UsersHelper do
+RSpec.describe UsersHelper do
   include TermsHelper
 
   let(:user) { create(:user) }
+
+  def filter_ee_badges(badges)
+    badges.reject { |badge| badge[:text] == 'Is using seat' }
+  end
 
   describe '#user_link' do
     subject { helper.user_link(user) }
@@ -91,9 +95,9 @@ describe UsersHelper do
     end
 
     it 'includes the settings tab if the user can update themself' do
-      expect(helper).to receive(:can?).with(user, :read_user, user) { true }
+      expect(helper).to receive(:can?).with(user, :update_user, user) { true }
 
-      expect(items).to include(:profile)
+      expect(items).to include(:settings)
     end
 
     context 'when terms are enforced' do
@@ -118,7 +122,7 @@ describe UsersHelper do
 
         badges = helper.user_badges_in_admin_section(blocked_user)
 
-        expect(badges).to eq([text: "Blocked", variant: "danger"])
+        expect(filter_ee_badges(badges)).to eq([text: "Blocked", variant: "danger"])
       end
     end
 
@@ -128,7 +132,7 @@ describe UsersHelper do
 
         badges = helper.user_badges_in_admin_section(admin_user)
 
-        expect(badges).to eq([text: "Admin", variant: "success"])
+        expect(filter_ee_badges(badges)).to eq([text: "Admin", variant: "success"])
       end
     end
 
@@ -138,7 +142,7 @@ describe UsersHelper do
 
         badges = helper.user_badges_in_admin_section(external_user)
 
-        expect(badges).to eq([text: "External", variant: "secondary"])
+        expect(filter_ee_badges(badges)).to eq([text: "External", variant: "secondary"])
       end
     end
 
@@ -146,7 +150,7 @@ describe UsersHelper do
       it 'returns the "It\'s You" badge' do
         badges = helper.user_badges_in_admin_section(user)
 
-        expect(badges).to eq([text: "It's you!", variant: nil])
+        expect(filter_ee_badges(badges)).to eq([text: "It's you!", variant: nil])
       end
     end
 
@@ -170,8 +174,46 @@ describe UsersHelper do
 
         badges = helper.user_badges_in_admin_section(user)
 
-        expect(badges).to be_empty
+        expect(filter_ee_badges(badges)).to be_empty
       end
+    end
+  end
+
+  describe '#work_information' do
+    subject { helper.work_information(user) }
+
+    context 'when both job_title and organization are present' do
+      let(:user) { build(:user, organization: 'GitLab', job_title: 'Frontend Engineer') }
+
+      it 'returns job title concatenated with organization' do
+        is_expected.to eq('Frontend Engineer at GitLab')
+      end
+    end
+
+    context 'when only organization is present' do
+      let(:user) { build(:user, organization: 'GitLab') }
+
+      it "returns organization" do
+        is_expected.to eq('GitLab')
+      end
+    end
+
+    context 'when only job_title is present' do
+      let(:user) { build(:user, job_title: 'Frontend Engineer') }
+
+      it 'returns job title' do
+        is_expected.to eq('Frontend Engineer')
+      end
+    end
+
+    context 'when neither organization nor job_title are present' do
+      it { is_expected.to be_nil }
+    end
+
+    context 'when user parameter is nil' do
+      let(:user) { nil }
+
+      it { is_expected.to be_nil }
     end
   end
 end

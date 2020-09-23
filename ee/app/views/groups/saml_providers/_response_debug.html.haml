@@ -1,0 +1,19 @@
+= bootstrap_form_for @saml_response_check.tap(&:valid?), url: '#', html: { class: 'gl-show-field-errors' } do |f|
+  - if f.object.valid?
+    .alert.alert-success
+      = s_('GroupSAML|Valid SAML Response')
+  = f.errors_on :xml_response, hide_attribute_name: true
+  = f.text_field :name_id, disabled: true, label: s_('GroupSAML|NameID'), label_class: 'label-bold', input_group_class: 'gl-field-error-anchor'
+  = f.text_field :name_id_format, disabled: true, label: s_('GroupSAML|NameID Format'), label_class: 'label-bold', input_group_class: 'gl-field-error-anchor'
+.file-holder
+  - indented_xml = Nokogiri.XML(@saml_response_check.xml).to_xml
+  .js-file-title.file-title
+    = s_("GroupSAML|SAML Response XML")
+    .file-actions
+      .btn-group
+        = clipboard_button(text: indented_xml, class: "btn btn-sm js-copy-blob-source-btn", title: s_('GroupSAML|Copy SAML Response XML'))
+  .file-content.code.js-syntax-highlight.qa-file-content
+    .blob-content
+      %pre.code.highlight
+        %code
+          = Gitlab::Highlight.highlight('response.xml', indented_xml, language: 'xml')

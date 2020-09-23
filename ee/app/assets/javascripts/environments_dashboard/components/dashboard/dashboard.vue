@@ -1,12 +1,15 @@
 <script>
-import _ from 'underscore';
+import { isEmpty } from 'lodash';
 import { mapState, mapActions } from 'vuex';
 import {
-  GlLoadingIcon,
-  GlModal,
-  GlModalDirective,
   GlButton,
   GlDashboardSkeleton,
+  GlEmptyState,
+  GlLink,
+  GlModal,
+  GlModalDirective,
+  GlPagination,
+  GlSprintf,
 } from '@gitlab/ui';
 import { s__ } from '~/locale';
 import ProjectSelector from '~/vue_shared/components/project_selector/project_selector.vue';
@@ -30,13 +33,16 @@ export default {
   viewDocumentationButton: s__('View documentation'),
 
   components: {
-    GlModal,
-    GlDashboardSkeleton,
-    GlLoadingIcon,
-    GlButton,
-    ProjectSelector,
     Environment,
+    GlButton,
+    GlDashboardSkeleton,
+    GlEmptyState,
+    GlLink,
+    GlModal,
+    GlPagination,
+    GlSprintf,
     ProjectHeader,
+    ProjectSelector,
   },
   directives: {
     'gl-modal': GlModalDirective,
@@ -59,6 +65,10 @@ export default {
       type: String,
       required: true,
     },
+    environmentsDashboardHelpPath: {
+      type: String,
+      required: true,
+    },
   },
   computed: {
     ...mapState([
@@ -70,12 +80,36 @@ export default {
       'searchCount',
       'searchQuery',
       'messages',
+      'pageInfo',
+      'projectsPage',
     ]),
+    currentPage: {
+      get() {
+        return this.projectsPage.pageInfo.page;
+      },
+      set(newPage) {
+        this.paginateDashboard(newPage);
+      },
+    },
+    projectsPerPage() {
+      return this.projectsPage.pageInfo.perPage;
+    },
+    totalProjects() {
+      return this.projectsPage.pageInfo.total;
+    },
+    shouldPaginate() {
+      return this.projectsPage.pageInfo.totalPages > 1;
+    },
     isSearchingProjects() {
       return this.searchCount > 0;
     },
     okDisabled() {
-      return _.isEmpty(this.selectedProjects);
+      return isEmpty(this.selectedProjects);
+    },
+  },
+  watch: {
+    currentPage: () => {
+      window.scrollTo(0, 0);
     },
   },
   created() {
@@ -90,11 +124,15 @@ export default {
       'fetchSearchResults',
       'addProjectsToDashboard',
       'fetchProjects',
+      'fetchNextPage',
       'setProjectEndpoints',
       'clearSearchResults',
       'toggleSelectedProject',
       'setSearchQuery',
       'removeProject',
+      'clearProjectsEtagPoll',
+      'stopProjectsPolling',
+      'paginateDashboard',
     ]),
     addProjects() {
       this.addProjectsToDashboard();
@@ -117,7 +155,7 @@ export default {
 </script>
 
 <template>
-  <div class="operations-dashboard">
+  <div class="environments-dashboard">
     <gl-modal
       :modal-id="$options.modalId"
       :title="$options.addProjectsModalHeader"
@@ -135,54 +173,79 @@ export default {
         :show-loading-indicator="isSearchingProjects"
         :show-minimum-search-query-message="messages.minimumQuery"
         :show-search-error-message="messages.searchError"
+        :total-results="pageInfo.totalResults"
         @searched="searched"
         @projectClicked="projectClicked"
+        @bottomReached="fetchNextPage"
       />
     </gl-modal>
     <div class="page-title-holder flex-fill d-flex align-items-center">
       <h1 class="js-dashboard-title page-title text-nowrap flex-fill">
         {{ $options.dashboardHeader }}
       </h1>
-      <gl-button v-gl-modal="$options.modalId" class="js-add-projects-button btn btn-success">
+      <gl-button v-gl-modal="$options.modalId" class="js-add-projects-button" variant="success">
         {{ $options.addProjectsButton }}
       </gl-button>
     </div>
-    <div class="prepend-top-default">
-      <div v-if="projects.length" class="dashboard-cards">
-        <div v-for="project in projects" :key="project.id" class="column prepend-top-default">
+    <p class="mt-2 mb-4 js-page-limits-message">
+      <gl-sprintf
+        :message="
+          s__(
+            'EnvironmentsDashboard|This dashboard displays 3 environments per project, and is linked to the Operations Dashboard. When you add or remove a project from one dashboard, GitLab adds or removes the project from the other. %{readMoreLink}',
+          )
+        "
+      >
+        <template #readMoreLink>
+          <gl-link :href="environmentsDashboardHelpPath" target="_blank" rel="noopener noreferrer">
+            {{ s__('EnvironmentsDashboard|More information') }}
+          </gl-link>
+        </template>
+      </gl-sprintf>
+    </p>
+    <div class="gl-mt-3">
+      <div v-if="projects.length">
+        <div v-for="project in projects" :key="project.id">
           <project-header :project="project" @remove="removeProject" />
-          <div class="row">
+          <div class="row gl-mt-3 no-gutters mx-n2">
             <environment
               v-for="environment in project.environments"
               :key="environment.id"
               :environment="environment"
-              class="col-12 col-md-6 col-xl-4 px-2 prepend-top-default"
+              class="col-12 col-md-6 col-xl-4 px-2"
             />
           </div>
         </div>
+
+        <gl-pagination
+          v-if="shouldPaginate"
+          v-model="currentPage"
+          :per-page="projectsPerPage"
+          :total-items="totalProjects"
+          align="center"
+          class="gl-w-full gl-mt-3"
+        />
       </div>
-      <div v-else-if="!isLoadingProjects" class="row prepend-top-20 text-center">
-        <div class="col-12 d-flex justify-content-center svg-content">
-          <img :src="emptyDashboardSvgPath" class="js-empty-state-svg col-12 prepend-top-20" />
-        </div>
-        <h4 class="js-title col-12 prepend-top-20">
-          {{ $options.emptyDashboardHeader }}
-        </h4>
-        <div class="col-12 d-flex justify-content-center">
-          <span class="js-sub-title mw-460 text-tertiary text-left">
-            {{ $options.emptyDashboardDocs }}
-          </span>
-        </div>
-        <div class="col-12">
-          <a
-            :href="emptyDashboardHelpPath"
-            class="js-documentation-link btn btn-primary prepend-top-default append-bottom-default"
-          >
-            {{ $options.viewDocumentationButton }}
-          </a>
-        </div>
-      </div>
-      <gl-dashboard-skeleton v-else />
+
+      <gl-dashboard-skeleton v-else-if="isLoadingProjects" />
+
+      <gl-empty-state
+        v-else
+        :title="$options.emptyDashboardHeader"
+        :svg-path="emptyDashboardSvgPath"
+      >
+        <template #description>
+          {{ $options.emptyDashboardDocs }}
+          <gl-link :href="emptyDashboardHelpPath" class="js-documentation-link">{{
+            $options.viewDocumentationButton
+          }}</gl-link
+          >.
+        </template>
+        <template #actions>
+          <gl-button v-gl-modal="$options.modalId" variant="success" class="js-add-projects-button">
+            {{ s__('ModalButton|Add projects') }}
+          </gl-button>
+        </template>
+      </gl-empty-state>
     </div>
   </div>
 </template>

@@ -4,6 +4,14 @@ module Elastic
   module Latest
     class ApplicationClassProxy < Elasticsearch::Model::Proxy::ClassMethodsProxy
       include ClassProxyUtil
+      include Elastic::Latest::Routing
+
+      def search(query, search_options = {})
+        es_options = routing_options(search_options)
+
+        # Calling elasticsearch-ruby method
+        super(query, es_options)
+      end
 
       def es_type
         target.name.underscore
@@ -25,12 +33,24 @@ module Elastic
 
       private
 
+      def default_operator
+        return :or if Feature.enabled?(:elasticsearch_use_or_default_operator)
+
+        :and
+      end
+
       def highlight_options(fields)
         es_fields = fields.map { |field| field.split('^').first }.each_with_object({}) do |field, memo|
           memo[field.to_sym] = {}
         end
 
-        { fields: es_fields }
+        # Adding number_of_fragments: 0 to not split results into snippets.  This way controllers can decide how to handle the highlighted data.
+        {
+            fields: es_fields,
+            number_of_fragments: 0,
+            pre_tags: ['<span class="gl-text-black-normal gl-font-weight-bold">'],
+            post_tags: ['</span>']
+        }
       end
 
       def basic_query_hash(fields, query)
@@ -43,7 +63,7 @@ module Elastic
                     simple_query_string: {
                       fields: fields,
                       query: query,
-                      default_operator: :and
+                      default_operator: default_operator
                     }
                   }],
                   filter: [{
@@ -62,11 +82,6 @@ module Elastic
               track_scores: true
             }
           end
-
-        query_hash[:sort] = [
-          { updated_at: { order: :desc } },
-          :_score
-        ]
 
         query_hash[:highlight] = highlight_options(fields)
 
@@ -116,28 +131,26 @@ module Elastic
       # documents gated by that project feature - e.g., "issues". The feature's
       # visibility level must be taken into account.
       def project_ids_query(user, project_ids, public_and_internal_projects, features = nil)
-        # When reading cross project is not allowed, only allow searching a
-        # a single project, so the `:read_*` ability is only checked once.
-        unless Ability.allowed?(user, :read_cross_project)
-          project_ids = [] if project_ids.is_a?(Array) && project_ids.size > 1
-        end
+        scoped_project_ids = scoped_project_ids(user, project_ids)
 
         # At least one condition must be present, so pick no projects for
         # anonymous users.
         # Pick private, internal and public projects the user is a member of.
         # Pick all private projects for admins & auditors.
-        conditions = [pick_projects_by_membership(project_ids, user, features)]
+        conditions = pick_projects_by_membership(scoped_project_ids, user, features)
 
         if public_and_internal_projects
           # Skip internal projects for anonymous and external users.
-          # Others are given access to all internal projects. Admins & auditors
-          # get access to internal projects where the feature is private.
-          conditions << pick_projects_by_visibility(Project::INTERNAL, user, features) if user && !user.external?
+          # Others are given access to all internal projects.
+          #
+          # Admins & auditors get access to internal projects even
+          # if the feature is private.
+          conditions += pick_projects_by_visibility(Project::INTERNAL, user, features) if user && !user.external?
 
           # All users, including anonymous, can access public projects.
           # Admins & auditors get access to public projects where the feature is
           # private.
-          conditions << pick_projects_by_visibility(Project::PUBLIC, user, features)
+          conditions += pick_projects_by_visibility(Project::PUBLIC, user, features)
         end
 
         { should: conditions }
@@ -153,9 +166,9 @@ module Elastic
       def pick_projects_by_membership(project_ids, user, features = nil)
         if features.nil?
           if project_ids == :any
-            return { term: { visibility_level: Project::PRIVATE } }
+            return [{ term: { visibility_level: Project::PRIVATE } }]
           else
-            return { terms: { id: project_ids } }
+            return [{ terms: { id: project_ids } }]
           end
         end
 
@@ -181,7 +194,7 @@ module Elastic
       def pick_projects_by_visibility(visibility, user, features)
         condition = { term: { visibility_level: visibility } }
 
-        limit_by_feature(condition, features, include_members_only: user&.full_private_access?)
+        limit_by_feature(condition, features, include_members_only: user&.can_read_all_resources?)
       end
 
       # If a project feature(s) is specified, access is dependent on its visibility
@@ -194,7 +207,7 @@ module Elastic
       # Always denies access to projects when the features are disabled - even to
       # admins & auditors - as stale child documents may be present.
       def limit_by_feature(condition, features, include_members_only:)
-        return condition unless features
+        return [condition] unless features
 
         features = Array(features)
 
@@ -215,6 +228,33 @@ module Elastic
           .id_in(project_ids)
           .filter_by_feature_visibility(feature, user)
           .pluck_primary_key
+      end
+
+      def scoped_project_ids(current_user, project_ids)
+        return :any if project_ids == :any
+
+        project_ids ||= []
+
+        # When reading cross project is not allowed, only allow searching a
+        # a single project, so the `:read_*` ability is only checked once.
+        unless Ability.allowed?(current_user, :read_cross_project)
+          return [] if project_ids.size > 1
+        end
+
+        project_ids
+      end
+
+      def authorized_project_ids(current_user, options = {})
+        return [] unless current_user
+
+        scoped_project_ids = scoped_project_ids(current_user, options[:project_ids])
+        authorized_project_ids = current_user.authorized_projects(Gitlab::Access::REPORTER).pluck_primary_key.to_set
+
+        # if the current search is limited to a subset of projects, we should do
+        # confidentiality check for these projects.
+        authorized_project_ids &= scoped_project_ids.to_set unless scoped_project_ids == :any
+
+        authorized_project_ids.to_a
       end
     end
   end

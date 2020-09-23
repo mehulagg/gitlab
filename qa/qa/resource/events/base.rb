@@ -3,14 +3,18 @@
 module QA
   module Resource
     module Events
-      MAX_WAIT = 10
+      MAX_WAIT = 60
+      RAISE_ON_FAILURE = true
 
       EventNotFoundError = Class.new(RuntimeError)
 
       module Base
-        def events(action: nil)
+        def events(action: nil, target_type: nil)
+          query = []
+          query << "action=#{CGI.escape(action)}" if action
+          query << "target_type=#{CGI.escape(target_type)}" if target_type
           path = [api_get_events]
-          path << "?action=#{CGI.escape(action)}" if action
+          path << "?#{query.join("&")}" unless query.empty?
           parse_body(api_get_from("#{path.join}"))
         end
 
@@ -21,7 +25,7 @@ module QA
         end
 
         def wait_for_event
-          event_found = QA::Support::Waiter.wait(max: max_wait) do
+          event_found = Support::Waiter.wait_until(max_duration: max_wait, raise_on_failure: raise_on_failure) do
             yield
           end
 
@@ -30,6 +34,10 @@ module QA
 
         def max_wait
           MAX_WAIT
+        end
+
+        def raise_on_failure
+          RAISE_ON_FAILURE
         end
       end
     end

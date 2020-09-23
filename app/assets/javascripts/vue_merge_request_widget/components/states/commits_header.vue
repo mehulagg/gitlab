@@ -1,12 +1,11 @@
 <script>
+/* eslint-disable vue/no-v-html */
 import { GlButton } from '@gitlab/ui';
-import _ from 'underscore';
+import { escape } from 'lodash';
 import { __, n__, sprintf, s__ } from '~/locale';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
-    Icon,
     GlButton,
   },
   props: {
@@ -60,7 +59,7 @@ export default {
         {
           commitCount: `<strong class="commits-count-message">${this.commitsCountMessage}</strong>`,
           mergeCommitCount: `<strong>${s__('mrWidgetCommitsAdded|1 merge commit')}</strong>`,
-          targetBranch: `<span class="label-branch">${_.escape(this.targetBranch)}</span>`,
+          targetBranch: `<span class="label-branch">${escape(this.targetBranch)}</span>`,
         },
         false,
       );
@@ -82,12 +81,11 @@ export default {
     >
       <gl-button
         :aria-label="ariaLabel"
-        variant="blank"
-        class="commit-edit-toggle square s24 append-right-default"
+        category="tertiary"
+        class="commit-edit-toggle gl-mr-3"
+        :icon="collapseIcon"
         @click.stop="toggle()"
-      >
-        <icon :name="collapseIcon" :size="16" />
-      </gl-button>
+      />
       <span v-if="expanded">{{ __('Collapse') }}</span>
       <span v-else>
         <span class="vertical-align-middle" v-html="message"></span>

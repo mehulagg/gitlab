@@ -2,9 +2,12 @@
 
 require 'spec_helper'
 
-describe BlocksJsonSerialization do
-  DummyModel = Class.new do
-    include BlocksJsonSerialization
+RSpec.describe BlocksJsonSerialization do
+  before do
+    stub_const('DummyModel', Class.new)
+    DummyModel.class_eval do
+      include BlocksJsonSerialization
+    end
   end
 
   it 'blocks as_json' do

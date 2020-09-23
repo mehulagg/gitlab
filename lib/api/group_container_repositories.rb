@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class GroupContainerRepositories < Grape::API
+  class GroupContainerRepositories < Grape::API::Instance
     include PaginationParams
 
     before { authorize_read_group_container_images! }
@@ -20,13 +20,16 @@ module API
       params do
         use :pagination
         optional :tags, type: Boolean, default: false, desc: 'Determines if tags should be included'
+        optional :tags_count, type: Boolean, default: false, desc: 'Determines if the tags count should be included'
       end
       get ':id/registry/repositories' do
         repositories = ContainerRepositoriesFinder.new(
           user: current_user, subject: user_group
         ).execute
 
-        present paginate(repositories), with: Entities::ContainerRegistry::Repository, tags: params[:tags]
+        track_event('list_repositories')
+
+        present paginate(repositories), with: Entities::ContainerRegistry::Repository, tags: params[:tags], tags_count: params[:tags_count]
       end
     end
 

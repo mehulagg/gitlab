@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Clusters::Applications::Helm do
+RSpec.describe Clusters::Applications::Helm do
   include_examples 'cluster application core specs', :clusters_applications_helm
 
   describe '.available' do
@@ -52,6 +52,7 @@ describe Clusters::Applications::Helm do
 
   describe '#issue_client_cert' do
     let(:application) { create(:clusters_applications_helm) }
+
     subject { application.issue_client_cert }
 
     it 'returns a new cert' do

@@ -3,11 +3,11 @@
 # LDAP connection adapter EE mixin
 #
 # This module is intended to encapsulate EE-specific adapter methods
-# and be **prepended** in the `Gitlab::Auth::LDAP::Adapter` class.
+# and be **prepended** in the `Gitlab::Auth::Ldap::Adapter` class.
 module EE
   module Gitlab
     module Auth
-      module LDAP
+      module Ldap
         module Adapter
           # Get LDAP groups from ou=Groups
           #
@@ -26,7 +26,7 @@ module EE
             options[:size] = size if size
 
             ldap_search(options).map do |entry|
-              LDAP::Group.new(entry, self)
+              Ldap::Group.new(entry, self)
             end
           end
 
@@ -52,7 +52,7 @@ module EE
             }
 
             ldap_search(options).map do |entry|
-              LDAP::Group.new(entry, self)
+              Ldap::Group.new(entry, self)
             end
           end
 
@@ -72,7 +72,7 @@ module EE
 
           def user_options_for_cert(certificate_assertion)
             options = {
-              attributes: ::Gitlab::Auth::LDAP::Person.ldap_attributes(config),
+              attributes: ::Gitlab::Auth::Ldap::Person.ldap_attributes(config),
               base: config.base
             }
 

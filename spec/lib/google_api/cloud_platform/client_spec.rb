@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GoogleApi::CloudPlatform::Client do
+RSpec.describe GoogleApi::CloudPlatform::Client do
   let(:token) { 'token' }
   let(:client) { described_class.new(token, nil) }
   let(:user_agent_options) { client.instance_eval { user_agent_header } }
@@ -92,7 +92,12 @@ describe GoogleApi::CloudPlatform::Client do
           name: cluster_name,
           initial_node_count: cluster_size,
           node_config: {
-            machine_type: machine_type
+            machine_type: machine_type,
+            oauth_scopes: [
+              "https://www.googleapis.com/auth/devstorage.read_only",
+              "https://www.googleapis.com/auth/logging.write",
+              "https://www.googleapis.com/auth/monitoring"
+            ]
           },
           master_auth: {
             username: 'admin',

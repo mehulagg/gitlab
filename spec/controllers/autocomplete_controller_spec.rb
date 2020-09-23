@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe AutocompleteController do
+RSpec.describe AutocompleteController do
   let(:project) { create(:project) }
   let(:user) { project.owner }
 
@@ -32,7 +32,7 @@ describe AutocompleteController do
           get(:users, params: { project_id: 'unknown' })
         end
 
-        it { expect(response).to have_gitlab_http_status(404) }
+        it { expect(response).to have_gitlab_http_status(:not_found) }
       end
     end
 
@@ -61,7 +61,7 @@ describe AutocompleteController do
           get(:users, params: { group_id: 'unknown' })
         end
 
-        it { expect(response).to have_gitlab_http_status(404) }
+        it { expect(response).to have_gitlab_http_status(:not_found) }
       end
     end
 
@@ -112,9 +112,7 @@ describe AutocompleteController do
 
     context 'limited users per page' do
       before do
-        25.times do
-          create(:user)
-        end
+        create_list(:user, 25)
 
         sign_in(user)
         get(:users)
@@ -142,7 +140,7 @@ describe AutocompleteController do
           get(:users, params: { project_id: project.id })
         end
 
-        it { expect(response).to have_gitlab_http_status(404) }
+        it { expect(response).to have_gitlab_http_status(:not_found) }
       end
 
       describe 'GET #users with unknown project' do
@@ -150,7 +148,7 @@ describe AutocompleteController do
           get(:users, params: { project_id: 'unknown' })
         end
 
-        it { expect(response).to have_gitlab_http_status(404) }
+        it { expect(response).to have_gitlab_http_status(:not_found) }
       end
 
       describe 'GET #users with inaccessible group' do
@@ -159,7 +157,7 @@ describe AutocompleteController do
           get(:users, params: { group_id: user.namespace.id })
         end
 
-        it { expect(response).to have_gitlab_http_status(404) }
+        it { expect(response).to have_gitlab_http_status(:not_found) }
       end
 
       describe 'GET #users with no project' do
@@ -175,7 +173,7 @@ describe AutocompleteController do
         it 'gives an array of users' do
           get :users, params: { todo_filter: true }
 
-          expect(response.status).to eq 200
+          expect(response).to have_gitlab_http_status(:ok)
           expect(json_response).to be_kind_of(Array)
         end
       end
@@ -194,9 +192,9 @@ describe AutocompleteController do
         end
 
         it 'rejects non existent user ids' do
-          get(:users, params: { author_id: 99999 })
+          get(:users, params: { author_id: non_existing_record_id })
 
-          expect(json_response.collect { |u| u['id'] }).not_to include(99999)
+          expect(json_response.collect { |u| u['id'] }).not_to include(non_existing_record_id)
         end
       end
 
@@ -365,35 +363,128 @@ describe AutocompleteController do
         expect(json_response[3]).to match('name' => 'thumbsdown')
       end
     end
+  end
 
-    context 'Get merge_request_target_branches' do
-      let(:user2) { create(:user) }
-      let!(:merge_request1) { create(:merge_request, source_project: project, target_branch: 'feature') }
+  context 'GET deploy_keys_with_owners' do
+    let!(:deploy_key) { create(:deploy_key, user: user) }
+    let!(:deploy_keys_project) { create(:deploy_keys_project, :write_access, project: project, deploy_key: deploy_key) }
 
-      context 'unauthorized user' do
-        it 'returns empty json' do
-          get :merge_request_target_branches
+    context 'unauthorized user' do
+      it 'returns a not found response' do
+        get(:deploy_keys_with_owners, params: { project_id: project.id })
 
-          expect(json_response).to be_empty
+        expect(response).to have_gitlab_http_status(:redirect)
+      end
+    end
+
+    context 'when the user who can read the project is logged in' do
+      before do
+        sign_in(user)
+      end
+
+      it 'renders the deploy key in a json payload, with its owner' do
+        get(:deploy_keys_with_owners, params: { project_id: project.id })
+
+        expect(json_response.count).to eq(1)
+        expect(json_response.first['title']).to eq(deploy_key.title)
+        expect(json_response.first['owner']['id']).to eq(deploy_key.user.id)
+      end
+
+      context 'with an unknown project' do
+        it 'returns a not found response' do
+          get(:deploy_keys_with_owners, params: { project_id: 9999 })
+
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
 
-      context 'sign in as user without any accesible merge requests' do
-        it 'returns empty json' do
-          sign_in(user2)
-          get :merge_request_target_branches
+      context 'and the user cannot read the owner of the key' do
+        before do
+          allow(Ability).to receive(:allowed?).and_call_original
+          allow(Ability).to receive(:allowed?).with(user, :read_user, deploy_key.user).and_return(false)
+        end
 
-          expect(json_response).to be_empty
+        it 'returns a payload without owner' do
+          get(:deploy_keys_with_owners, params: { project_id: project.id })
+
+          expect(json_response.count).to eq(1)
+          expect(json_response.first['title']).to eq(deploy_key.title)
+          expect(json_response.first['owner']).to be_nil
         end
       end
+    end
+  end
 
-      context 'sign in as user with a accesible merge request' do
-        it 'returns json' do
+  context 'Get merge_request_target_branches' do
+    let!(:merge_request) { create(:merge_request, source_project: project, target_branch: 'feature') }
+
+    context 'anonymous user' do
+      it 'returns empty json' do
+        get :merge_request_target_branches, params: { project_id: project.id }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_empty
+      end
+    end
+
+    context 'user without any accessible merge requests' do
+      it 'returns empty json' do
+        sign_in(create(:user))
+
+        get :merge_request_target_branches, params: { project_id: project.id }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to be_empty
+      end
+    end
+
+    context 'user with an accessible merge request but no scope' do
+      where(
+        params: [
+          {},
+          { group_id: ' ' },
+          { project_id: ' ' },
+          { group_id: ' ', project_id: ' ' }
+        ]
+      )
+
+      with_them do
+        it 'returns an error' do
           sign_in(user)
-          get :merge_request_target_branches
 
-          expect(json_response).to contain_exactly({ 'title' => 'feature' })
+          get :merge_request_target_branches, params: params
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response).to eq({ 'error' => 'At least one of group_id or project_id must be specified' })
         end
+      end
+    end
+
+    context 'user with an accessible merge request by project' do
+      it 'returns json' do
+        sign_in(user)
+
+        get :merge_request_target_branches, params: { project_id: project.id }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to contain_exactly({ 'title' => 'feature' })
+      end
+    end
+
+    context 'user with an accessible merge request by group' do
+      let(:group) { create(:group) }
+      let(:project) { create(:project, namespace: group) }
+      let(:user) { create(:user) }
+
+      it 'returns json' do
+        group.add_owner(user)
+
+        sign_in(user)
+
+        get :merge_request_target_branches, params: { group_id: group.id }
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response).to contain_exactly({ 'title' => 'feature' })
       end
     end
   end

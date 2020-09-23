@@ -2,7 +2,10 @@
 
 class CountriesController < ActionController::Metal
   include AbstractController::Rendering
-  include ActionController::Renderers::All
+  include ActionController::ApiRendering
+  include ActionController::Renderers
+
+  use_renderers :json
 
   def index
     countries = World.countries_for_select

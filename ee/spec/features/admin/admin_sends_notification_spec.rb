@@ -2,13 +2,15 @@
 
 require "spec_helper"
 
-describe "Admin sends notification", :js, :sidekiq_might_not_need_inline do
+RSpec.describe "Admin sends notification", :js, :sidekiq_might_not_need_inline do
   let(:group) { create(:group) }
   let!(:project) { create(:project, group: group) }
   let(:admin) { create(:admin) }
   let(:user) { create(:user) }
 
   before do
+    stub_const('NOTIFICATION_TEXT', 'Your project has been moved.')
+
     group.add_developer(user)
 
     sign_in(admin)
@@ -20,7 +22,6 @@ describe "Admin sends notification", :js, :sidekiq_might_not_need_inline do
 
   it "sends notification" do
     perform_enqueued_jobs do
-      NOTIFICATION_TEXT = "Your project has been moved.".freeze
       body = find(:xpath, "//body")
 
       page.within("form#new-admin-email") do
@@ -47,7 +48,6 @@ describe "Admin sends notification", :js, :sidekiq_might_not_need_inline do
 
     emails = ActionMailer::Base.deliveries
 
-    expect(find(".flash-notice")).to have_content("Email sent")
     expect(emails.count).to eql(group.users.count)
     expect(emails.last.text_part.body.decoded).to include(NOTIFICATION_TEXT)
   end

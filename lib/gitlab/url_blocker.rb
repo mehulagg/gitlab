@@ -11,8 +11,8 @@ module Gitlab
       # Validates the given url according to the constraints specified by arguments.
       #
       # ports - Raises error if the given URL port does is not between given ports.
-      # allow_localhost - Raises error if URL resolves to a localhost IP address and argument is true.
-      # allow_local_network - Raises error if URL resolves to a link-local address and argument is true.
+      # allow_localhost - Raises error if URL resolves to a localhost IP address and argument is false.
+      # allow_local_network - Raises error if URL resolves to a link-local address and argument is false.
       # ascii_only - Raises error if URL has unicode characters and argument is true.
       # enforce_user - Raises error if URL user doesn't start with alphanumeric characters and argument is true.
       # enforce_sanitization - Raises error if URL includes any HTML/CSS/JS tags and argument is true.
@@ -49,7 +49,7 @@ module Gitlab
         return [uri, nil] unless address_info
 
         ip_address = ip_address(address_info)
-        return [uri, nil] if domain_whitelisted?(uri) || ip_whitelisted?(ip_address)
+        return [uri, nil] if domain_whitelisted?(uri) || ip_whitelisted?(ip_address, port: get_port(uri))
 
         protected_uri_with_hostname = enforce_uri_hostname(ip_address, uri, dns_rebind_protection)
 
@@ -254,11 +254,11 @@ module Gitlab
       end
 
       def domain_whitelisted?(uri)
-        Gitlab::UrlBlockers::UrlWhitelist.domain_whitelisted?(uri.normalized_host)
+        Gitlab::UrlBlockers::UrlWhitelist.domain_whitelisted?(uri.normalized_host, port: get_port(uri))
       end
 
-      def ip_whitelisted?(ip_address)
-        Gitlab::UrlBlockers::UrlWhitelist.ip_whitelisted?(ip_address)
+      def ip_whitelisted?(ip_address, port: nil)
+        Gitlab::UrlBlockers::UrlWhitelist.ip_whitelisted?(ip_address, port: port)
       end
 
       def config

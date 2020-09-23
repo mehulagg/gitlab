@@ -1,13 +1,16 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'fileutils'
 
-describe Gitlab::ImportExport::Shared do
+RSpec.describe Gitlab::ImportExport::Shared do
   let(:project) { build(:project) }
+
   subject { project.import_export_shared }
 
   context 'with a repository on disk' do
     let(:project) { create(:project, :repository) }
-    let(:base_path) { %(/tmp/project_exports/#{project.disk_path}/) }
+    let(:base_path) { %(/tmp/gitlab_exports/#{project.disk_path}/) }
 
     describe '#archive_path' do
       it 'uses a random hash to avoid conflicts' do
@@ -46,24 +49,9 @@ describe Gitlab::ImportExport::Shared do
     it 'updates the import JID' do
       import_state = create(:import_state, project: project, jid: 'jid-test')
 
-      expect_next_instance_of(Gitlab::Import::Logger) do |logger|
-        expect(logger).to receive(:error).with(hash_including(import_jid: import_state.jid))
-      end
-
-      subject.error(error)
-    end
-
-    it 'calls the error logger without a backtrace' do
-      expect(subject).to receive(:log_error).with(message: error.message)
-
-      subject.error(error)
-    end
-
-    it 'calls the error logger with the full message' do
-      backtrace = caller
-      allow(error).to receive(:backtrace).and_return(caller)
-
-      expect(subject).to receive(:log_error).with(message: error.message, error_backtrace: Gitlab::Profiler.clean_backtrace(backtrace))
+      expect(Gitlab::ErrorTracking)
+        .to receive(:track_exception)
+        .with(error, hash_including(import_jid: import_state.jid))
 
       subject.error(error)
     end

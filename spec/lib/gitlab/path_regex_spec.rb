@@ -2,7 +2,12 @@
 
 require 'spec_helper'
 
-describe Gitlab::PathRegex do
+RSpec.describe Gitlab::PathRegex do
+  let(:starting_with_namespace) { %r{^/\*namespace_id/:(project_)?id} }
+  let(:non_param_parts) { %r{[^:*][a-z\-_/]*} }
+  let(:any_other_path_part) { %r{[a-z\-_/:]*} }
+  let(:wildcard_segment) { /\*/ }
+
   # Pass in a full path to remove the format segment:
   # `/ci/lint(.:format)` -> `/ci/lint`
   def without_format(path)
@@ -14,7 +19,7 @@ describe Gitlab::PathRegex do
   # `/*namespace_id/:project_id/builds/artifacts/*ref_name_and_path`
   #    -> 'builds/artifacts'
   def path_before_wildcard(path)
-    path = path.gsub(STARTING_WITH_NAMESPACE, "")
+    path = path.gsub(starting_with_namespace, "")
     path_segments = path.split('/').reject(&:empty?)
     wildcard_index = path_segments.index { |segment| parameter?(segment) }
 
@@ -121,13 +126,9 @@ describe Gitlab::PathRegex do
   # - Followed by one or more path-parts not starting with `:` or `*`
   # - Followed by a path-part that includes a wildcard parameter `*`
   # At the time of writing these routes match: http://rubular.com/r/Rv2pDE5Dvw
-  STARTING_WITH_NAMESPACE = %r{^/\*namespace_id/:(project_)?id}.freeze
-  NON_PARAM_PARTS = %r{[^:*][a-z\-_/]*}.freeze
-  ANY_OTHER_PATH_PART = %r{[a-z\-_/:]*}.freeze
-  WILDCARD_SEGMENT = /\*/.freeze
   let(:namespaced_wildcard_routes) do
     routes_without_format.select do |p|
-      p =~ %r{#{STARTING_WITH_NAMESPACE}/#{NON_PARAM_PARTS}/#{ANY_OTHER_PATH_PART}#{WILDCARD_SEGMENT}}
+      p =~ %r{#{starting_with_namespace}/#{non_param_parts}/#{any_other_path_part}#{wildcard_segment}}
     end
   end
 
@@ -145,16 +146,14 @@ describe Gitlab::PathRegex do
     end.uniq
   end
 
-  STARTING_WITH_GROUP = %r{^/groups/\*(group_)?id/}.freeze
+  let(:starting_with_group) { %r{^/groups/\*(group_)?id/} }
   let(:group_routes) do
-    routes_without_format.select do |path|
-      path =~ STARTING_WITH_GROUP
-    end
+    routes_without_format.grep(starting_with_group)
   end
 
   let(:paths_after_group_id) do
     group_routes.map do |route|
-      route.gsub(STARTING_WITH_GROUP, '').split('/').first
+      route.gsub(starting_with_group, '').split('/').first
     end.uniq
   end
 
@@ -170,6 +169,11 @@ describe Gitlab::PathRegex do
       expect(described_class::TOP_LEVEL_ROUTES)
         .to contain_exactly(*top_level_words), failure_block
     end
+
+    # We ban new items in this list, see https://gitlab.com/gitlab-org/gitlab/-/issues/215362
+    it 'does not allow expansion' do
+      expect(described_class::TOP_LEVEL_ROUTES.size).to eq(41)
+    end
   end
 
   describe 'GROUP_ROUTES' do
@@ -184,6 +188,11 @@ describe Gitlab::PathRegex do
       expect(described_class::GROUP_ROUTES)
         .to contain_exactly(*paths_after_group_id), failure_block
     end
+
+    # We ban new items in this list, see https://gitlab.com/gitlab-org/gitlab/-/issues/215362
+    it 'does not allow expansion' do
+      expect(described_class::GROUP_ROUTES.size).to eq(1)
+    end
   end
 
   describe 'PROJECT_WILDCARD_ROUTES' do
@@ -194,6 +203,11 @@ describe Gitlab::PathRegex do
             .to be(true), failure_message('PROJECT_WILDCARD_ROUTES', 'rename_wildcard_paths', missing_words: path)
         end
       end
+    end
+
+    # We ban new items in this list, see https://gitlab.com/gitlab-org/gitlab/-/issues/215362
+    it 'does not allow expansion' do
+      expect(described_class::PROJECT_WILDCARD_ROUTES.size).to eq(21)
     end
   end
 
@@ -410,5 +424,38 @@ describe Gitlab::PathRegex do
     it { is_expected.not_to match('?gitlab') }
     it { is_expected.not_to match('git lab') }
     it { is_expected.not_to match('gitlab.git') }
+  end
+
+  shared_examples 'invalid snippet routes' do
+    it { is_expected.not_to match('gitlab-org/gitlab/snippets/1.git') }
+    it { is_expected.not_to match('snippets/1.git') }
+    it { is_expected.not_to match('gitlab-org/gitlab/snippets/') }
+    it { is_expected.not_to match('/gitlab-org/gitlab/snippets/1') }
+    it { is_expected.not_to match('gitlab-org/gitlab/snippets/foo') }
+    it { is_expected.not_to match('root/snippets/1') }
+    it { is_expected.not_to match('/snippets/1') }
+    it { is_expected.not_to match('snippets/') }
+    it { is_expected.not_to match('snippets/foo') }
+  end
+
+  describe '.full_snippets_repository_path_regex' do
+    subject { described_class.full_snippets_repository_path_regex }
+
+    it { is_expected.to match('gitlab-org/gitlab/snippets/1') }
+    it { is_expected.to match('snippets/1') }
+
+    it_behaves_like 'invalid snippet routes'
+  end
+
+  describe '.personal_and_project_snippets_path_regex' do
+    subject { %r{\A#{described_class.personal_and_project_snippets_path_regex}\z} }
+
+    it { is_expected.to match('gitlab-org/gitlab/snippets') }
+    it { is_expected.to match('snippets') }
+
+    it { is_expected.not_to match('gitlab-org/gitlab/snippets/1') }
+    it { is_expected.not_to match('snippets/1') }
+
+    it_behaves_like 'invalid snippet routes'
   end
 end

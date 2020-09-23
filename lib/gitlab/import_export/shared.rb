@@ -23,21 +23,21 @@
 module Gitlab
   module ImportExport
     class Shared
-      attr_reader :errors, :project
+      attr_reader :errors, :exportable, :logger
 
       LOCKS_DIRECTORY = 'locks'
 
-      def initialize(project)
-        @project = project
-        @errors = []
-        @logger = Gitlab::Import::Logger.build
+      def initialize(exportable)
+        @exportable = exportable
+        @errors     = []
+        @logger     = Gitlab::Import::Logger.build
       end
 
       def active_export_count
         Dir[File.join(base_path, '*')].count { |name| File.basename(name) != LOCKS_DIRECTORY && File.directory?(name) }
       end
 
-      # The path where the project metadata and repository bundle is saved
+      # The path where the exportable metadata and repository bundle (in case of project) is saved
       def export_path
         @export_path ||= Gitlab::ImportExport.export_path(relative_path: relative_path)
       end
@@ -56,11 +56,7 @@ module Gitlab
       end
 
       def error(error)
-        error_payload = { message: error.message }
-        error_payload[:error_backtrace] = Gitlab::Profiler.clean_backtrace(error.backtrace) if error.backtrace
-        log_error(error_payload)
-
-        Gitlab::Sentry.track_acceptable_exception(error, extra: log_base_data)
+        Gitlab::ErrorTracking.track_exception(error, log_base_data)
 
         add_error_message(error.message)
       end
@@ -84,32 +80,38 @@ module Gitlab
       end
 
       def relative_archive_path
-        @relative_archive_path ||= File.join(@project.disk_path, SecureRandom.hex)
+        @relative_archive_path ||= File.join(relative_base_path, SecureRandom.hex)
       end
 
       def relative_base_path
-        @project.disk_path
-      end
-
-      def log_error(details)
-        @logger.error(log_base_data.merge(details))
-      end
-
-      def log_debug(details)
-        @logger.debug(log_base_data.merge(details))
+        case exportable_type
+        when 'Project'
+          @exportable.disk_path
+        when 'Group'
+          @exportable.full_path
+        else
+          raise Gitlab::ImportExport::Error.new("Unsupported Exportable Type #{@exportable&.class}")
+        end
       end
 
       def log_base_data
-        {
-          importer: 'Import/Export',
-          import_jid: @project&.import_state&.jid,
-          project_id: @project&.id,
-          project_path: @project&.full_path
+        log = {
+          importer:        'Import/Export',
+          exportable_id:   @exportable&.id,
+          exportable_path: @exportable&.full_path
         }
+
+        log[:import_jid] = @exportable&.import_state&.jid if exportable_type == 'Project'
+
+        log
       end
 
       def filtered_error_message(message)
         Projects::ImportErrorFilter.filter_message(message)
+      end
+
+      def exportable_type
+        @exportable.class.name
       end
     end
   end

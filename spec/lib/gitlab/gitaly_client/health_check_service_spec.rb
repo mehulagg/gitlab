@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GitalyClient::HealthCheckService do
+RSpec.describe Gitlab::GitalyClient::HealthCheckService do
   let(:project) { create(:project) }
   let(:storage_name) { project.repository_storage }
 

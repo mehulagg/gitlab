@@ -1,12 +1,14 @@
 <script>
 import { mapActions, mapGetters, mapState } from 'vuex';
-import { s__ } from '~/locale';
+import { GlButton } from '@gitlab/ui';
+import { sprintf, s__ } from '~/locale';
 import { componentNames } from './issue_body';
 import ReportSection from './report_section.vue';
 import SummaryRow from './summary_row.vue';
 import IssuesList from './issues_list.vue';
 import Modal from './modal.vue';
 import createStore from '../store';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { summaryTextBuilder, reportTextBuilder, statusIcon } from '../store/utils';
 
 export default {
@@ -17,11 +19,18 @@ export default {
     SummaryRow,
     IssuesList,
     Modal,
+    GlButton,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     endpoint: {
       type: String,
       required: true,
+    },
+    pipelinePath: {
+      type: String,
+      required: false,
+      default: '',
     },
   },
   componentNames,
@@ -43,6 +52,12 @@ export default {
 
       return summaryTextBuilder(s__('Reports|Test summary'), this.summary);
     },
+    testTabURL() {
+      return `${this.pipelinePath}/test_report`;
+    },
+    showViewFullReport() {
+      return this.pipelinePath.length;
+    },
   },
   created() {
     this.setEndpoint(this.endpoint);
@@ -52,8 +67,17 @@ export default {
   methods: {
     ...mapActions(['setEndpoint', 'fetchReports']),
     reportText(report) {
-      const summary = report.summary || {};
-      return reportTextBuilder(report.name, summary);
+      const { name, summary } = report || {};
+
+      if (report.status === 'error') {
+        return sprintf(s__('Reports|An error occurred while loading %{name} results'), { name });
+      }
+
+      if (!report.name) {
+        return s__('Reports|An error occured while loading report');
+      }
+
+      return reportTextBuilder(name, summary);
     },
     getReportIcon(report) {
       return statusIcon(report.status);
@@ -62,8 +86,20 @@ export default {
       return (
         report.existing_failures.length > 0 ||
         report.new_failures.length > 0 ||
-        report.resolved_failures.length > 0
+        report.resolved_failures.length > 0 ||
+        report.existing_errors.length > 0 ||
+        report.new_errors.length > 0 ||
+        report.resolved_errors.length > 0
       );
+    },
+    unresolvedIssues(report) {
+      return report.existing_failures.concat(report.existing_errors);
+    },
+    newIssues(report) {
+      return report.new_failures.concat(report.new_errors);
+    },
+    resolvedIssues(report) {
+      return report.resolved_failures.concat(report.resolved_errors);
     },
   },
 };
@@ -77,25 +113,38 @@ export default {
     :has-issues="reports.length > 0"
     class="mr-widget-section grouped-security-reports mr-report"
   >
-    <div slot="body" class="mr-widget-grouped-section report-block">
-      <template v-for="(report, i) in reports">
-        <summary-row
-          :key="`summary-row-${i}`"
-          :summary="reportText(report)"
-          :status-icon="getReportIcon(report)"
-        />
-        <issues-list
-          v-if="shouldRenderIssuesList(report)"
-          :key="`issues-list-${i}`"
-          :unresolved-issues="report.existing_failures"
-          :new-issues="report.new_failures"
-          :resolved-issues="report.resolved_failures"
-          :component="$options.componentNames.TestIssueBody"
-          class="report-block-group-list"
-        />
-      </template>
+    <template v-if="showViewFullReport" #actionButtons>
+      <gl-button
+        :href="testTabURL"
+        target="_blank"
+        icon="external-link"
+        data-testid="group-test-reports-full-link"
+        class="gl-mr-3"
+      >
+        {{ s__('ciReport|View full report') }}
+      </gl-button>
+    </template>
+    <template #body>
+      <div class="mr-widget-grouped-section report-block">
+        <template v-for="(report, i) in reports">
+          <summary-row
+            :key="`summary-row-${i}`"
+            :summary="reportText(report)"
+            :status-icon="getReportIcon(report)"
+          />
+          <issues-list
+            v-if="shouldRenderIssuesList(report)"
+            :key="`issues-list-${i}`"
+            :unresolved-issues="unresolvedIssues(report)"
+            :new-issues="newIssues(report)"
+            :resolved-issues="resolvedIssues(report)"
+            :component="$options.componentNames.TestIssueBody"
+            class="report-block-group-list"
+          />
+        </template>
 
-      <modal :title="modalTitle" :modal-data="modalData" />
-    </div>
+        <modal :title="modalTitle" :modal-data="modalData" />
+      </div>
+    </template>
   </report-section>
 </template>

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::PipelineTriggerService do
+RSpec.describe Ci::PipelineTriggerService do
   let(:project) { create(:project, :repository) }
 
   before do
@@ -45,7 +45,9 @@ describe Ci::PipelineTriggerService do
 
           context 'when commit message has [ci skip]' do
             before do
-              allow_any_instance_of(Ci::Pipeline).to receive(:git_commit_message) { '[ci skip]' }
+              allow_next_instance_of(Ci::Pipeline) do |instance|
+                allow(instance).to receive(:git_commit_message) { '[ci skip]' }
+              end
             end
 
             it 'ignores [ci skip] and create as general' do
@@ -104,9 +106,23 @@ describe Ci::PipelineTriggerService do
         let(:params) { { token: job.token, ref: 'master', variables: nil } }
         let(:job) { create(:ci_build, :success, pipeline: pipeline, user: user) }
 
-        it 'does nothing' do
+        it 'does nothing', :aggregate_failures do
           expect { result }.not_to change { Ci::Pipeline.count }
-          expect(result[:message]).to eq('400 Job has to be running')
+          expect(result[:message]).to eq('Job is not running')
+          expect(result[:http_status]).to eq(401)
+        end
+      end
+
+      context 'when job does not have a project' do
+        let(:params) { { token: job.token, ref: 'master', variables: nil } }
+        let(:job) { create(:ci_build, status: :running, pipeline: pipeline, user: user) }
+
+        it 'does nothing', :aggregate_failures do
+          job.update!(project: nil)
+
+          expect { result }.not_to change { Ci::Pipeline.count }
+          expect(result[:message]).to eq('Project has been deleted!')
+          expect(result[:http_status]).to eq(401)
         end
       end
 
@@ -124,7 +140,9 @@ describe Ci::PipelineTriggerService do
 
           context 'when commit message has [ci skip]' do
             before do
-              allow_any_instance_of(Ci::Pipeline).to receive(:git_commit_message) { '[ci skip]' }
+              allow_next_instance_of(Ci::Pipeline) do |instance|
+                allow(instance).to receive(:git_commit_message) { '[ci skip]' }
+              end
             end
 
             it 'ignores [ci skip] and create as general' do

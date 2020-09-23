@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Projects > Audit Events', :js do
+RSpec.describe 'Projects > Audit Events', :js do
   let(:user) { create(:user) }
   let(:pete) { create(:user, name: 'Pete') }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
@@ -53,12 +53,24 @@ describe 'Projects > Audit Events', :js do
 
       expect(page).to have_link('Audit Events')
     end
+
+    it 'does not have Project Audit Events in the header' do
+      visit project_audit_events_path(project)
+
+      expect(page).not_to have_content('Project Audit Events')
+    end
   end
 
   it 'has Audit Events button in head nav bar' do
     visit edit_project_path(project)
 
     expect(page).to have_link('Audit Events')
+  end
+
+  it 'has Project Audit Events in the header' do
+    visit project_audit_events_path(project)
+
+    expect(page).to have_content('Project Audit Events')
   end
 
   describe 'adding an SSH key' do
@@ -74,18 +86,18 @@ describe 'Projects > Audit Events', :js do
 
       visit project_audit_events_path(project)
 
-      expect(page).to have_content('Add deploy key')
+      expect(page).to have_content('Added deploy key')
 
       visit project_deploy_keys_path(project)
 
       accept_confirm do
-        find('.ic-remove').click
+        find('[data-testid="remove-icon"]').click
       end
 
       visit project_audit_events_path(project)
 
       wait_for('Audit event background creation job is done', polling_interval: 0.5, reload: true) do
-        page.has_content?('Remove deploy key', wait: 0)
+        page.has_content?('Removed deploy key', wait: 0)
       end
     end
   end
@@ -96,7 +108,7 @@ describe 'Projects > Audit Events', :js do
     end
 
     it "appears in the project's audit events" do
-      visit project_settings_members_path(project)
+      visit project_project_members_path(project)
 
       project_member = project.project_member(pete)
 
@@ -109,15 +121,55 @@ describe 'Projects > Audit Events', :js do
 
       click_link 'Audit Events'
 
-      page.within('table#audits') do
-        expect(page).to have_content 'Change access level from developer to maintainer'
+      page.within('.audit-log-table') do
+        expect(page).to have_content 'Changed access level from Developer to Maintainer'
         expect(page).to have_content(project.owner.name)
         expect(page).to have_content('Pete')
       end
     end
   end
 
-  it_behaves_like 'audit event contains custom message' do
-    let(:audit_events_url) { project_audit_events_path(project) }
+  describe 'changing merge request approval permission for authors and reviewers' do
+    before do
+      project.add_developer(pete)
+    end
+
+    it "appears in the project's audit events" do
+      visit edit_project_path(project)
+
+      page.within('#js-merge-request-approval-settings') do
+        uncheck 'project_merge_requests_author_approval'
+        check 'project_merge_requests_disable_committers_approval'
+        click_button 'Save changes'
+      end
+
+      wait_for('Save is completed') do
+        page.has_content?('was successfully updated', wait: 0)
+      end
+
+      page.within('.qa-project-sidebar') do
+        find(:link, text: 'Settings').click
+        click_link 'Audit Events'
+      end
+
+      wait_for_all_requests
+
+      page.within('.audit-log-table') do
+        expect(page).to have_content(project.owner.name)
+        expect(page).to have_content('Changed prevent merge request approval from authors')
+        expect(page).to have_content('Changed prevent merge request approval from reviewers')
+        expect(page).to have_content(project.name)
+      end
+    end
+  end
+
+  describe 'filter by date' do
+    let!(:audit_event_1) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 5.days.ago) }
+    let!(:audit_event_2) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 3.days.ago) }
+    let!(:audit_event_3) { create(:project_audit_event, entity_type: 'Project', entity_id: project.id, created_at: 1.day.ago) }
+    let!(:events_path) { :project_audit_events_path }
+    let!(:entity) { project }
+
+    it_behaves_like 'audit events date filter'
   end
 end

@@ -13,26 +13,27 @@
     - if user
       = image_tag avatar_icon_for_user(user, 40), class: "avatar s40 flex-shrink-0 flex-grow-0", alt: ''
       .user-info
-        = link_to user.name, user_path(user), class: 'member js-user-link', data: { user_id: user.id }
-        = user_status(user)
-        %span.cgray= user.to_reference
+        %span.mr-1
+          = link_to user.name, user_path(user), class: 'member js-user-link', data: { user_id: user.id }
+          = user_status(user)
+          %span.cgray= user.to_reference
 
-        = render_if_exists 'shared/members/ee/sso_badge', member: member
+        .mx-n1.d-inline-flex.flex-wrap
+          = render_if_exists 'shared/members/ee/sso_badge', member: member
 
-        - if user == current_user
-          %span.badge.badge-success.prepend-left-5= _("It's you")
+          = render_if_exists 'shared/members/ee/gma_badge', member: member
 
-        - if user.blocked?
-          %label.badge.badge-danger
-            %strong= _("Blocked")
+          = render 'shared/members/its_you_badge', user: user, current_user: current_user
 
-        - if user.two_factor_enabled?
-          %label.badge.badge-info
-            = _("2FA")
+          = render_if_exists 'shared/members/ee/license_badge', user: user, group: @group
+
+          = render 'shared/members/blocked_badge', user: user
+
+          = render 'shared/members/two_factor_auth_badge', user: user
 
         - if source.instance_of?(Group) && source != @group
           &middot;
-          = link_to source.full_name, source, class: "member-group-link"
+          = link_to source.full_name, source, class: "gl-display-inline-block inline-link"
 
         .cgray
           - if member.request?
@@ -61,7 +62,7 @@
       - if show_controls && member.source == current_resource
 
         - if member.can_resend_invite?
-          = link_to icon('paper-plane'), polymorphic_path([:resend_invite, member]),
+          = link_to sprite_icon('paper-airplane'), polymorphic_path([:resend_invite, member]),
                     method: :post,
                     class: 'btn btn-default align-self-center mr-sm-2',
                     title: _('Resend invite')
@@ -96,7 +97,7 @@
                 placeholder: _('Expiration date'),
                 id: "member_expires_at_#{member.id}",
                 data: { el_id: dom_id(member) }
-              %i.clear-icon.js-clear-input
+              = sprite_icon('close', size: 16, css_class: 'clear-icon js-clear-input gl-text-gray-200')
         - else
           %span.member-access-text.user-access-role= member.human_access
 
@@ -112,20 +113,17 @@
 
         - if member.can_remove?
           - if current_user == user
-            = link_to icon('sign-out', text: _('Leave')), polymorphic_path([:leave, member.source, :members]),
-                      method: :delete,
-                      data: { confirm: leave_confirmation_message(member.source) },
-                      class: "btn btn-remove align-self-center m-0 #{'ml-sm-2' unless force_mobile_view}"
+            = link_to polymorphic_path([:leave, member.source, :members]), method: :delete, data: { confirm: leave_confirmation_message(member.source) }, class: "btn gl-button btn-svg btn-danger align-self-center m-0 #{'ml-sm-2' unless force_mobile_view}" do
+              = sprite_icon('leave', css_class: 'gl-icon')
+              = _('Leave')
           - else
-            = link_to member,
-                      method: :delete,
-                      data: { confirm: remove_member_message(member), qa_selector: 'delete_member_button' },
-                      class: "btn btn-remove align-self-center m-0 #{'ml-sm-2' unless force_mobile_view}",
-                      title: remove_member_title(member) do
+            %button{ data: { member_path: member_path(member.member), message: remove_member_message(member), is_access_request: member.request?.to_s, qa_selector: 'delete_member_button' },
+              class: "js-remove-member-button btn gl-button btn-danger align-self-center m-0 #{'ml-sm-2 btn-icon' unless force_mobile_view}",
+              title: remove_member_title(member) }
               %span{ class: ('d-block d-sm-none' unless force_mobile_view) }
                 = _("Delete")
               - unless force_mobile_view
-                = icon('trash', class: 'd-none d-sm-block')
+                = sprite_icon('remove', css_class: 'd-none d-sm-block gl-icon')
         = render_if_exists 'shared/members/ee/override_member_buttons', group: @group, member: member, user: user, action: :edit, can_override: member.can_override?
       - else
         %span.member-access-text.user-access-role= member.human_access

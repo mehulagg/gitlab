@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import { isEmpty, escape } from 'lodash';
 import stageColumnMixin from '../../mixins/stage_column_mixin';
 import JobItem from './job_item.vue';
 import JobGroupDropdown from './job_group_dropdown.vue';
@@ -36,15 +36,25 @@ export default {
       required: false,
       default: () => ({}),
     },
+    jobHovered: {
+      type: String,
+      required: false,
+      default: '',
+    },
+    pipelineExpanded: {
+      type: Object,
+      required: false,
+      default: () => ({}),
+    },
   },
   computed: {
     hasAction() {
-      return !_.isEmpty(this.action);
+      return !isEmpty(this.action);
     },
   },
   methods: {
     groupId(group) {
-      return `ci-badge-${_.escape(group.name)}`;
+      return `ci-badge-${escape(group.name)}`;
     },
     pipelineActionRequestComplete() {
       this.$emit('refreshPipelineGraph');
@@ -80,6 +90,8 @@ export default {
           <job-item
             v-if="group.size === 1"
             :job="group.jobs[0]"
+            :job-hovered="jobHovered"
+            :pipeline-expanded="pipelineExpanded"
             css-class-job-name="build-content"
             @pipelineActionRequestComplete="pipelineActionRequestComplete"
           />

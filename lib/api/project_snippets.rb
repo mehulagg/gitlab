@@ -1,16 +1,22 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectSnippets < Grape::API
+  class ProjectSnippets < Grape::API::Instance
     include PaginationParams
 
     before { authenticate! }
+    before { check_snippets_enabled }
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
     end
     resource :projects, requirements: API::NAMESPACE_OR_PROJECT_REQUIREMENTS do
+      helpers Helpers::SnippetsHelpers
       helpers do
+        def check_snippets_enabled
+          forbidden! unless user_project.feature_available?(:snippets, current_user)
+        end
+
         def handle_project_member_errors(errors)
           if errors[:project_access].any?
             error!(errors[:project_access], 422)
@@ -31,7 +37,7 @@ module API
         use :pagination
       end
       get ":id/snippets" do
-        present paginate(snippets_for_current_user), with: Entities::ProjectSnippet
+        present paginate(snippets_for_current_user), with: Entities::ProjectSnippet, current_user: current_user
       end
 
       desc 'Get a single project snippet' do
@@ -42,36 +48,34 @@ module API
       end
       get ":id/snippets/:snippet_id" do
         snippet = snippets_for_current_user.find(params[:snippet_id])
-        present snippet, with: Entities::ProjectSnippet
+        present snippet, with: Entities::ProjectSnippet, current_user: current_user
       end
 
       desc 'Create a new project snippet' do
         success Entities::ProjectSnippet
       end
       params do
-        requires :title, type: String, desc: 'The title of the snippet'
-        requires :file_name, type: String, desc: 'The file name of the snippet'
-        optional :code, type: String, allow_blank: false, desc: 'The content of the snippet (deprecated in favor of "content")'
-        optional :content, type: String, allow_blank: false, desc: 'The content of the snippet'
+        requires :title, type: String, allow_blank: false, desc: 'The title of the snippet'
         optional :description, type: String, desc: 'The description of a snippet'
         requires :visibility, type: String,
                               values: Gitlab::VisibilityLevel.string_values,
                               desc: 'The visibility of the snippet'
-        mutually_exclusive :code, :content
+        use :create_file_params
       end
       post ":id/snippets" do
-        authorize! :create_project_snippet, user_project
-        snippet_params = declared_params(include_missing: false).merge(request: request, api: true)
-        snippet_params[:content] = snippet_params.delete(:code) if snippet_params[:code].present?
+        authorize! :create_snippet, user_project
 
-        snippet = CreateSnippetService.new(user_project, current_user, snippet_params).execute
+        snippet_params = process_create_params(declared_params(include_missing: false))
 
-        render_spam_error! if snippet.spam?
+        service_response = ::Snippets::CreateService.new(user_project, current_user, snippet_params).execute
+        snippet = service_response.payload[:snippet]
 
-        if snippet.persisted?
-          present snippet, with: Entities::ProjectSnippet
+        if service_response.success?
+          present snippet, with: Entities::ProjectSnippet, current_user: current_user
         else
-          render_validation_error!(snippet)
+          render_spam_error! if snippet.spam?
+
+          render_api_error!({ error: service_response.message }, service_response.http_status)
         end
       end
 
@@ -80,38 +84,37 @@ module API
       end
       params do
         requires :snippet_id, type: Integer, desc: 'The ID of a project snippet'
-        optional :title, type: String, desc: 'The title of the snippet'
-        optional :file_name, type: String, desc: 'The file name of the snippet'
-        optional :code, type: String, allow_blank: false, desc: 'The content of the snippet (deprecated in favor of "content")'
         optional :content, type: String, allow_blank: false, desc: 'The content of the snippet'
         optional :description, type: String, desc: 'The description of a snippet'
+        optional :file_name, type: String, desc: 'The file name of the snippet'
+        optional :title, type: String, allow_blank: false, desc: 'The title of the snippet'
         optional :visibility, type: String,
                               values: Gitlab::VisibilityLevel.string_values,
                               desc: 'The visibility of the snippet'
-        at_least_one_of :title, :file_name, :code, :content, :visibility_level
-        mutually_exclusive :code, :content
+
+        use :update_file_params
+        use :minimum_update_params
       end
       # rubocop: disable CodeReuse/ActiveRecord
       put ":id/snippets/:snippet_id" do
         snippet = snippets_for_current_user.find_by(id: params.delete(:snippet_id))
         not_found!('Snippet') unless snippet
 
-        authorize! :update_project_snippet, snippet
+        authorize! :update_snippet, snippet
 
-        snippet_params = declared_params(include_missing: false)
-          .merge(request: request, api: true)
+        validate_params_for_multiple_files(snippet)
 
-        snippet_params[:content] = snippet_params.delete(:code) if snippet_params[:code].present?
+        snippet_params = process_update_params(declared_params(include_missing: false))
 
-        UpdateSnippetService.new(user_project, current_user, snippet,
-                                 snippet_params).execute
+        service_response = ::Snippets::UpdateService.new(user_project, current_user, snippet_params).execute(snippet)
+        snippet = service_response.payload[:snippet]
 
-        render_spam_error! if snippet.spam?
-
-        if snippet.valid?
-          present snippet, with: Entities::ProjectSnippet
+        if service_response.success?
+          present snippet, with: Entities::ProjectSnippet, current_user: current_user
         else
-          render_validation_error!(snippet)
+          render_spam_error! if snippet.spam?
+
+          render_api_error!({ error: service_response.message }, service_response.http_status)
         end
       end
       # rubocop: enable CodeReuse/ActiveRecord
@@ -125,9 +128,16 @@ module API
         snippet = snippets_for_current_user.find_by(id: params[:snippet_id])
         not_found!('Snippet') unless snippet
 
-        authorize! :admin_project_snippet, snippet
+        authorize! :admin_snippet, snippet
 
-        destroy_conditionally!(snippet)
+        destroy_conditionally!(snippet) do |snippet|
+          service = ::Snippets::DestroyService.new(current_user, snippet)
+          response = service.execute
+
+          if response.error?
+            render_api_error!({ error: response.message }, response.http_status)
+          end
+        end
       end
       # rubocop: enable CodeReuse/ActiveRecord
 
@@ -140,9 +150,18 @@ module API
         snippet = snippets_for_current_user.find_by(id: params[:snippet_id])
         not_found!('Snippet') unless snippet
 
-        env['api.format'] = :txt
-        content_type 'text/plain'
-        present snippet.content
+        present content_for(snippet)
+      end
+
+      desc 'Get raw project snippet file contents from the repository'
+      params do
+        use :raw_file_params
+      end
+      get ":id/snippets/:snippet_id/files/:ref/:file_path/raw", requirements: { file_path: API::NO_SLASH_URL_PART_REGEX } do
+        snippet = snippets_for_current_user.find_by(id: params[:snippet_id])
+        not_found!('Snippet') unless snippet&.repo_exists?
+
+        present file_content_for(snippet)
       end
       # rubocop: enable CodeReuse/ActiveRecord
 

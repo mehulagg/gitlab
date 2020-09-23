@@ -49,7 +49,8 @@ module Gitlab
 
         def load_status
           return if loaded?
-          return unless commit
+
+          return unless Gitlab::Ci::Features.pipeline_status_omit_commit_sha_in_cache_key?(project) || commit
 
           if has_cache?
             load_from_cache
@@ -59,9 +60,15 @@ module Gitlab
           end
 
           self.loaded = true
+        rescue GRPC::Unavailable, GRPC::DeadlineExceeded => e
+          # Handle Gitaly connection issues gracefully
+          Gitlab::ErrorTracking
+            .track_exception(e, project_id: project.id)
         end
 
         def load_from_project
+          return unless commit
+
           self.sha, self.status, self.ref = commit.sha, commit.status, project.default_branch
         end
 
@@ -110,7 +117,11 @@ module Gitlab
         end
 
         def cache_key
-          "#{Gitlab::Redis::Cache::CACHE_NAMESPACE}:project:#{project.id}:pipeline_status:#{commit&.sha}"
+          if Gitlab::Ci::Features.pipeline_status_omit_commit_sha_in_cache_key?(project)
+            "#{Gitlab::Redis::Cache::CACHE_NAMESPACE}:project:#{project.id}:pipeline_status"
+          else
+            "#{Gitlab::Redis::Cache::CACHE_NAMESPACE}:project:#{project.id}:pipeline_status:#{commit&.sha}"
+          end
         end
 
         def commit

@@ -11,7 +11,11 @@ module EE
         end
 
         def container_image_regex
-          @container_image_regex ||= %r{\A([\w\.-]+\/){0,1}([\w\.-]+)\z}.freeze
+          @container_image_regex ||= %r{([\w\.-]+\/){0,1}[\w\.-]+}.freeze
+        end
+
+        def container_image_blob_sha_regex
+          @container_image_blob_sha_regex ||= %r{[\w+.-]+:?[\w]+}.freeze
         end
       end
     end

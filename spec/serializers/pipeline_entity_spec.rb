@@ -2,12 +2,11 @@
 
 require 'spec_helper'
 
-describe PipelineEntity do
+RSpec.describe PipelineEntity do
   include Gitlab::Routing
 
-  set(:project) { create(:project) }
-  set(:user) { create(:user) }
-  set(:project) { create(:project) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user) }
   let(:request) { double('request') }
 
   before do
@@ -123,6 +122,26 @@ describe PipelineEntity do
       end
     end
 
+    context 'delete path' do
+      context 'user has ability to delete pipeline' do
+        let(:project) { create(:project, namespace: user.namespace) }
+        let(:pipeline) { create(:ci_pipeline, project: project) }
+
+        it 'contains delete path' do
+          expect(subject[:delete_path]).to be_present
+        end
+      end
+
+      context 'user does not have ability to delete pipeline' do
+        let(:project) { create(:project) }
+        let(:pipeline) { create(:ci_pipeline, project: project) }
+
+        it 'does not contain delete path' do
+          expect(subject).not_to have_key(:delete_path)
+        end
+      end
+    end
+
     context 'when pipeline ref is empty' do
       let(:pipeline) { create(:ci_empty_pipeline) }
 
@@ -216,6 +235,29 @@ describe PipelineEntity do
 
       it 'exposes merge request event type' do
         expect(subject[:merge_request_event_type]).to be_present
+      end
+    end
+
+    context 'when pipeline has failed builds' do
+      let_it_be(:pipeline) { create(:ci_pipeline, project: project, user: user) }
+      let_it_be(:build) { create(:ci_build, :success, pipeline: pipeline) }
+      let_it_be(:failed_1) { create(:ci_build, :failed, pipeline: pipeline) }
+      let_it_be(:failed_2) { create(:ci_build, :failed, pipeline: pipeline) }
+
+      context 'when the user can retry the pipeline' do
+        it 'exposes these failed builds' do
+          allow(entity).to receive(:can_retry?).and_return(true)
+
+          expect(subject[:failed_builds].map { |b| b[:id] }).to contain_exactly(failed_1.id, failed_2.id)
+        end
+      end
+
+      context 'when the user cannot retry the pipeline' do
+        it 'is nil' do
+          allow(entity).to receive(:can_retry?).and_return(false)
+
+          expect(subject[:failed_builds]).to be_nil
+        end
       end
     end
   end

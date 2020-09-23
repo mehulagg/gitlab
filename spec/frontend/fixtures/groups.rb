@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Groups (JavaScript fixtures)', type: :controller do
+RSpec.describe 'Groups (JavaScript fixtures)', type: :controller do
   include JavaScriptFixturesHelpers
 
   let(:admin) { create(:admin) }
@@ -15,6 +15,7 @@ describe 'Groups (JavaScript fixtures)', type: :controller do
   end
 
   before do
+    stub_feature_flags(new_variables_ui: false)
     group.add_maintainer(admin)
     sign_in(admin)
   end

@@ -15,6 +15,7 @@ GitLab can be integrated with the following external issue trackers:
 - Jira
 - Redmine
 - Bugzilla
+- EWM
 - YouTrack
 
 ## Authentication sources
@@ -30,6 +31,7 @@ GitLab can be configured to authenticate access requests with the following auth
 - Use [OmniAuth](omniauth.md) to enable sign in via Twitter, GitHub, GitLab.com, Google,
 Bitbucket, Facebook, Shibboleth, SAML, Crowd, Azure or Authentiq ID.
 - Use GitLab as an [OpenID Connect](openid_connect_provider.md) identity provider.
+- Authenticate to [Vault](vault.md) through GitLab OpenID Connect.
 - Configure GitLab as a [SAML](saml.md) 2.0 Service Provider.
 
 ## Security enhancements
@@ -54,10 +56,13 @@ GitLab can be integrated with the following enhancements:
 - Add GitLab actions to [Gmail actions buttons](gmail_action_buttons_for_gitlab.md).
 - Configure [PlantUML](../administration/integration/plantuml.md) to use diagrams in AsciiDoc documents.
 - Attach merge requests to [Trello](trello_power_up.md) cards.
+- Enable integrated code intelligence powered by [Sourcegraph](sourcegraph.md).
+- Add [Elasticsearch](elasticsearch.md) for [Advanced Search](../user/search/advanced_global_search.md),
+  [Advanced System Search](../user/search/advanced_search_syntax.md), and faster searching.
 
-## Project services
+## Integrations
 
-Integration with services such as Campfire, Flowdock, HipChat, Pivotal Tracker, and Slack are available as [Project Services](../user/project/integrations/project_services.md).
+Integration with services such as Campfire, Flowdock, HipChat, Pivotal Tracker, and Slack are available as [Integrations](../user/project/integrations/overview.md).
 
 ## Troubleshooting
 
@@ -81,7 +86,7 @@ at Super User also has relevant information.
 **Omnibus Trusted Chain**
 
 [Install the self signed certificate or custom certificate authorities](https://docs.gitlab.com/omnibus/common_installation_problems/README.html#using-self-signed-certificate-or-custom-certificate-authorities)
-in to GitLab Omnibus.
+in to Omnibus GitLab.
 
 It is enough to concatenate the certificate to the main trusted certificate
 however it may be overwritten during upgrades:

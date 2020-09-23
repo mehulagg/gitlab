@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
 FactoryBot.define do
-  factory :deployment, class: Deployment do
+  factory :deployment, class: 'Deployment' do
     sha { 'b83d6e391c22777fca1ed3012fce84f633d7fed0' }
     ref { 'master' }
     tag { false }
     user { nil }
     project { nil }
-    deployable factory: :ci_build
+    deployable { association :ci_build, environment: environment.name, pipeline: association(:ci_pipeline, project: environment.project) }
     environment factory: :environment
 
     after(:build) do |deployment, evaluator|

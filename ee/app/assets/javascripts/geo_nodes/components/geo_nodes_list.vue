@@ -18,6 +18,10 @@ export default {
       type: Boolean,
       required: true,
     },
+    nodeRemovalAllowed: {
+      type: Boolean,
+      required: true,
+    },
     geoTroubleshootingHelpPath: {
       type: String,
       required: true,
@@ -35,6 +39,7 @@ export default {
       :primary-node="node.primary"
       :node-actions-allowed="nodeActionsAllowed"
       :node-edit-allowed="nodeEditAllowed"
+      :node-removal-allowed="nodeRemovalAllowed"
       :geo-troubleshooting-help-path="geoTroubleshootingHelpPath"
     />
   </div>

@@ -15,7 +15,7 @@ module GitlabSubscriptions
     private
 
     def client
-      Gitlab::SubscriptionPortal::Client.new
+      Gitlab::SubscriptionPortal::Client
     end
   end
 end

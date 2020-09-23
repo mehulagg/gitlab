@@ -3,7 +3,7 @@ include:
   template: Container-Scanning.gitlab-ci.yml
   template: SAST.gitlab-ci.yml
   template: DAST.gitlab-ci.yml
-  template: License-Management.gitlab-ci.yml
+  template: License-Scanning.gitlab-ci.yml
 
 dependency_scanning:
   tags:
@@ -50,7 +50,7 @@ dast:
     reports:
       dast: gl-dast-report.json
 
-license_management:
+license_scanning:
   tags:
     - qa
     - test
@@ -58,4 +58,4 @@ license_management:
     - echo "Skipped"
   artifacts:
     reports:
-      license_management: gl-license-management-report.json
+      license_scanning: gl-license-scanning-report.json

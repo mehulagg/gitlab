@@ -16,6 +16,10 @@ module Gitlab
           def object_type
             Issue
           end
+
+          def subquery
+            resource_label_events_with_subquery(:issue_id, label, ::ResourceLabelEvent.actions[:add], :asc)
+          end
         end
       end
     end

@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Projects::BatchOpenIssuesCountService do
+RSpec.describe Projects::BatchOpenIssuesCountService do
   let!(:project_1) { create(:project) }
   let!(:project_2) { create(:project) }
 
   let(:subject) { described_class.new([project_1, project_2]) }
 
-  context '#refresh_cache', :use_clean_rails_memory_store_caching do
+  describe '#refresh_cache', :use_clean_rails_memory_store_caching do
     before do
       create(:issue, project: project_1)
       create(:issue, project: project_1, confidential: true)

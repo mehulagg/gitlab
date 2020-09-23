@@ -8,7 +8,7 @@ module Boards
     end
 
     def execute
-      finder_service.execute(include_descendants: true).non_invite
+      finder_service.execute(include_relations: [:direct, :descendants, :inherited]).non_invite
     end
 
     private

@@ -17,4 +17,10 @@ export default () => ({
     minimumQuery: false,
   },
   searchCount: 0,
+  pageInfo: {
+    page: 0,
+    nextPage: 0,
+    total: 0,
+    totalPages: 0,
+  },
 });

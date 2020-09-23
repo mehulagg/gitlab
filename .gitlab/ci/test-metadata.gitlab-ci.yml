@@ -1,16 +1,8 @@
 .tests-metadata-state:
-  extends:
-    - .default-only
-    - .only:changes-code-backstage
   variables:
     TESTS_METADATA_S3_BUCKET: "gitlab-ce-cache"
   before_script:
     - source scripts/utils.sh
-  cache:
-    key: tests_metadata
-    paths:
-      - knapsack/
-      - rspec_flaky/
   artifacts:
     expire_in: 31d
     paths:
@@ -19,49 +11,33 @@
       - rspec_profiling/
 
 retrieve-tests-metadata:
-  extends: .tests-metadata-state
+  extends:
+    - .tests-metadata-state
+    - .test-metadata:rules:retrieve-tests-metadata
   stage: prepare
-  cache:
-    policy: pull
   script:
     - source scripts/rspec_helpers.sh
     - retrieve_tests_metadata
 
 update-tests-metadata:
-  extends: .tests-metadata-state
+  extends:
+    - .tests-metadata-state
+    - .test-metadata:rules:update-tests-metadata
   stage: post-test
-  cache:
-    policy: push
+  dependencies:
+    - setup-test-env
+    - rspec migration pg11
+    - rspec unit pg11
+    - rspec integration pg11
+    - rspec system pg11
+    - rspec-ee migration pg11
+    - rspec-ee unit pg11
+    - rspec-ee integration pg11
+    - rspec-ee system pg11
+    - rspec-ee unit pg11 geo
+    - rspec-ee integration pg11 geo
+    - rspec-ee system pg11 geo
   script:
     - retry gem install fog-aws mime-types activesupport rspec_profiling postgres-copy --no-document
     - source scripts/rspec_helpers.sh
     - update_tests_metadata
-  only:
-    refs:
-      - schedules
-    variables:
-      # Only update the Knapsack metadata on GitLab.com/gitlab-org/gitlab
-      - $CI_SERVER_HOST == "gitlab.com" && $CI_PROJECT_PATH == "gitlab-org/gitlab"
-
-flaky-examples-check:
-  extends:
-    - .default-tags
-    - .default-retry
-    - .default-only
-    - .only:changes-code-backstage
-  image: ruby:2.6-alpine
-  stage: post-test
-  variables:
-    NEW_FLAKY_SPECS_REPORT: rspec_flaky/report-new.json
-  allow_failure: true
-  only:
-    refs:
-      - merge_requests
-  artifacts:
-    expire_in: 30d
-    paths:
-      - rspec_flaky/
-  script:
-    - '[[ -f $NEW_FLAKY_SPECS_REPORT ]] || echo "{}" > ${NEW_FLAKY_SPECS_REPORT}'
-    - scripts/merge-reports ${NEW_FLAKY_SPECS_REPORT} rspec_flaky/new_*_*.json
-    - scripts/detect-new-flaky-examples $NEW_FLAKY_SPECS_REPORT

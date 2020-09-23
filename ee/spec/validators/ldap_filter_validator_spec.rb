@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe LdapFilterValidator do
+RSpec.describe LdapFilterValidator do
   let(:validator) { described_class.new(attributes: [:filter]) }
 
   describe '#validates_each' do

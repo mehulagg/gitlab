@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BlobEntity do
+RSpec.describe BlobEntity do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
   let(:blob) { project.commit('master').diffs.diff_files.first.blob }
@@ -23,7 +23,7 @@ describe BlobEntity do
         mode: "100644",
         readable_text: true,
         icon: "file-text-o",
-        url: "/#{project.full_path}/blob/master/bar/branch-test.txt"
+        url: "/#{project.full_path}/-/blob/master/bar/branch-test.txt"
       })
     end
   end

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User Snippets' do
+RSpec.describe 'User Snippets' do
   let(:author) { create(:user) }
   let!(:public_snippet) { create(:personal_snippet, :public, author: author, title: "This is a public snippet") }
   let!(:internal_snippet) { create(:personal_snippet, :internal, author: author, title: "This is an internal snippet") }
@@ -14,9 +14,9 @@ describe 'User Snippets' do
   end
 
   it 'View all of my snippets' do
-    expect(page).to have_content(public_snippet.title)
-    expect(page).to have_content(internal_snippet.title)
-    expect(page).to have_content(private_snippet.title)
+    expect(page).to have_link(public_snippet.title, href: snippet_path(public_snippet))
+    expect(page).to have_link(internal_snippet.title, href: snippet_path(internal_snippet))
+    expect(page).to have_link(private_snippet.title, href: snippet_path(private_snippet))
   end
 
   it 'View my public snippets' do

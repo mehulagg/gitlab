@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Ci::PipelineSchedulePolicy, :models do
-  set(:user) { create(:user) }
-  set(:project) { create(:project, :repository) }
-  set(:pipeline_schedule) { create(:ci_pipeline_schedule, :nightly, project: project) }
+RSpec.describe Ci::PipelineSchedulePolicy, :models do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:pipeline_schedule, reload: true) { create(:ci_pipeline_schedule, :nightly, project: project) }
 
   let(:policy) do
     described_class.new(user, pipeline_schedule)
@@ -43,7 +43,7 @@ describe Ci::PipelineSchedulePolicy, :models do
         let(:tag) { 'v1.0.0' }
 
         before do
-          pipeline_schedule.update(ref: tag)
+          pipeline_schedule.update!(ref: tag)
 
           create(:protected_tag, :no_one_can_create,
                  name: pipeline_schedule.ref, project: project)
@@ -69,7 +69,7 @@ describe Ci::PipelineSchedulePolicy, :models do
     describe 'rules for owner of schedule' do
       before do
         project.add_developer(user)
-        pipeline_schedule.update(owner: user)
+        pipeline_schedule.update!(owner: user)
       end
 
       it 'includes abilities to do all operations on pipeline schedule' do
@@ -97,7 +97,7 @@ describe Ci::PipelineSchedulePolicy, :models do
       before do
         project.add_maintainer(owner)
         project.add_maintainer(user)
-        pipeline_schedule.update(owner: owner)
+        pipeline_schedule.update!(owner: owner)
       end
 
       it 'includes abilities to take ownership' do

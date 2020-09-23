@@ -1,3 +1,10 @@
+---
+stage: Create
+group: Source Code
+info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+type: reference, api
+---
+
 # Branches API
 
 This API operates on [repository branches](../user/project/repository/branches/index.md).
@@ -12,7 +19,7 @@ Get a list of repository branches from a project, sorted by name alphabetically.
 NOTE: **Note:**
 This endpoint can be accessed without authentication if the repository is publicly accessible.
 
-```text
+```plaintext
 GET /projects/:id/repository/branches
 ```
 
@@ -25,8 +32,8 @@ Parameters:
 
 Example request:
 
-```sh
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/repository/branches
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/branches"
 ```
 
 Example response:
@@ -41,6 +48,7 @@ Example response:
     "developers_can_push": false,
     "developers_can_merge": false,
     "can_push": true,
+    "web_url": "http://gitlab.example.com/my-group/my-project/-/tree/master",
     "commit": {
       "author_email": "john@example.com",
       "author_name": "John Smith",
@@ -68,7 +76,7 @@ Get a single project repository branch.
 NOTE: **Note:**
 This endpoint can be accessed without authentication if the repository is publicly accessible.
 
-```text
+```plaintext
 GET /projects/:id/repository/branches/:branch
 ```
 
@@ -81,8 +89,8 @@ Parameters:
 
 Example request:
 
-```sh
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/repository/branches/master
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/branches/master"
 ```
 
 Example response:
@@ -96,6 +104,7 @@ Example response:
   "developers_can_push": false,
   "developers_can_merge": false,
   "can_push": true,
+  "web_url": "http://gitlab.example.com/my-group/my-project/-/tree/master",
   "commit": {
     "author_email": "john@example.com",
     "author_name": "John Smith",
@@ -128,7 +137,7 @@ for information on unprotecting repository branches.
 
 Create a new branch in the repository.
 
-```text
+```plaintext
 POST /projects/:id/repository/branches
 ```
 
@@ -142,8 +151,8 @@ Parameters:
 
 Example request:
 
-```sh
-curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/repository/branches?branch=newbranch&ref=master
+```shell
+curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/branches?branch=newbranch&ref=master"
 ```
 
 Example response:
@@ -171,7 +180,8 @@ Example response:
   "default": false,
   "developers_can_push": false,
   "developers_can_merge": false,
-  "can_push": true
+  "can_push": true,
+  "web_url": "http://gitlab.example.com/my-group/my-project/-/tree/newbranch"
 }
 ```
 
@@ -182,7 +192,7 @@ Delete a branch from the repository.
 NOTE: **Note:**
 In the case of an error, an explanation message is provided.
 
-```text
+```plaintext
 DELETE /projects/:id/repository/branches/:branch
 ```
 
@@ -195,8 +205,8 @@ Parameters:
 
 Example request:
 
-```sh
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/repository/branches/newbranch
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/branches/newbranch"
 ```
 
 ## Delete merged branches
@@ -206,7 +216,7 @@ Will delete all branches that are merged into the project's default branch.
 NOTE: **Note:**
 [Protected branches](../user/project/protected_branches.md) will not be deleted as part of this operation.
 
-```text
+```plaintext
 DELETE /projects/:id/repository/merged_branches
 ```
 
@@ -218,6 +228,6 @@ Parameters:
 
 Example request:
 
-```sh
-curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/5/repository/merged_branches
+```shell
+curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/5/repository/merged_branches"
 ```

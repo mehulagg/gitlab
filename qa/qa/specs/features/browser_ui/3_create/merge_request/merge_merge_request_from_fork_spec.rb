@@ -1,18 +1,16 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Create' do
+  RSpec.describe 'Create' do
     describe 'Merge request creation from fork' do
-      it 'user forks a project, submits a merge request and maintainer merges it' do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
-
-        merge_request = Resource::MergeRequestFromFork.fabricate! do |merge_request|
+      let(:merge_request) do
+        Resource::MergeRequestFromFork.fabricate_via_api! do |merge_request|
           merge_request.fork_branch = 'feature-branch'
         end
+      end
 
-        Page::Main::Menu.perform(&:sign_out)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+      it 'can merge feature branch fork to mainline', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/928' do
+        Flow::Login.sign_in
 
         merge_request.visit!
 

@@ -2,13 +2,12 @@
 
 require 'spec_helper'
 
-describe Clusters::EnvironmentSerializer do
+RSpec.describe Clusters::EnvironmentSerializer do
   include KubernetesHelpers
 
-  set(:user) { create(:user) }
-  set(:project) { create(:project, namespace: user.namespace) }
-  set(:cluster) { create(:cluster) }
-
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, namespace: user.namespace) }
+  let_it_be(:cluster) { create(:cluster) }
   let(:resource) { create(:environment, project: project) }
 
   let(:json_entity) do

@@ -4,7 +4,6 @@ module EE
   module Emails
     module CreateService
       extend ::Gitlab::Utils::Override
-      include ::EE::Emails::BaseService # rubocop: disable Cop/InjectEnterpriseEditionModule
 
       override :execute
       def execute(extra_params = {})

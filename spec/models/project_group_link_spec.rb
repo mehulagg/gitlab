@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProjectGroupLink do
+RSpec.describe ProjectGroupLink do
   describe "Associations" do
     it { is_expected.to belong_to(:group) }
     it { is_expected.to belong_to(:project) }
@@ -32,19 +32,28 @@ describe ProjectGroupLink do
     end
   end
 
-  describe "destroying a record", :delete do
-    it "refreshes group users' authorized projects" do
-      project     = create(:project, :private)
-      group       = create(:group)
-      reporter    = create(:user)
-      group_users = group.users
+  describe 'scopes' do
+    describe '.non_guests' do
+      let!(:project_group_link_reporter) { create :project_group_link, :reporter }
+      let!(:project_group_link_maintainer) { create :project_group_link, :maintainer }
+      let!(:project_group_link_developer) { create :project_group_link }
+      let!(:project_group_link_guest) { create :project_group_link, :guest }
 
-      group.add_reporter(reporter)
-      project.project_group_links.create(group: group)
-      group_users.each { |user| expect(user.authorized_projects).to include(project) }
-
-      project.project_group_links.destroy_all # rubocop: disable DestroyAll
-      group_users.each { |user| expect(user.authorized_projects).not_to include(project) }
+      it 'returns all records which are greater than Guests access' do
+        expect(described_class.non_guests).to match_array([
+                                                           project_group_link_reporter,
+                                                           project_group_link_developer,
+                                                           project_group_link_maintainer
+                                                          ])
+      end
     end
+  end
+
+  describe 'search by group name' do
+    let_it_be(:project_group_link) { create(:project_group_link) }
+    let_it_be(:group) { project_group_link.group }
+
+    it { expect(described_class.search(group.name)).to eq([project_group_link]) }
+    it { expect(described_class.search('not-a-group-name')).to be_empty }
   end
 end

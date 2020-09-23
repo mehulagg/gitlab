@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::LabelReferenceFilter do
+RSpec.describe Banzai::Filter::LabelReferenceFilter do
   include FilterSpecHelper
 
   let(:project)      { create(:project, :public, name: 'sample-project') }
@@ -14,16 +14,28 @@ describe Banzai::Filter::LabelReferenceFilter do
       stub_licensed_features(scoped_labels: true)
     end
 
-    it 'includes link to scoped documentation' do
-      doc = reference_filter("See #{scoped_label.to_reference}")
+    context 'with a scoped label' do
+      let(:doc) { reference_filter("See #{scoped_label.to_reference}") }
 
-      expect(doc.to_html).to match(%r(<a.+><span.+>#{scoped_label.name}</span></a><a.+>.*question-circle.*</a>))
+      it 'renders scoped label' do
+        expect(doc.css('.gl-label-scoped .gl-label-text').map(&:text)).to eq([scoped_label.scoped_label_key, scoped_label.scoped_label_value])
+      end
+
+      it 'renders HTML tooltips' do
+        expect(doc.at_css('.gl-label-scoped a').attr('data-html')).to eq('true')
+      end
     end
 
-    it 'does not include link to scoped documentation for common labels' do
-      doc = reference_filter("See #{label.to_reference}")
+    context 'with a common label' do
+      let(:doc) { reference_filter("See #{label.to_reference}") }
 
-      expect(doc.to_html).to match(%r(<a.+><span.+>#{label.name}</span></a>$))
+      it 'renders common label' do
+        expect(doc.css('.gl-label .gl-label-text').map(&:text)).to eq([label.name])
+      end
+
+      it 'renders non-HTML tooltips' do
+        expect(doc.at_css('.gl-label a').attr('data-html')).to be_nil
+      end
     end
   end
 
@@ -32,10 +44,10 @@ describe Banzai::Filter::LabelReferenceFilter do
       stub_licensed_features(scoped_labels: false)
     end
 
-    it 'does not include link to scoped labels documentation' do
+    it 'renders scoped label as a common label' do
       doc = reference_filter("See #{scoped_label.to_reference}")
 
-      expect(doc.to_html).to match(%r(<a.+><span.+>#{scoped_label.name}</span></a>$))
+      expect(doc.css('.gl-label .gl-label-text').map(&:text)).to eq([scoped_label.name])
     end
   end
 end

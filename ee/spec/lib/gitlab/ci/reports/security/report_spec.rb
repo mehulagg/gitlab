@@ -2,9 +2,11 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::Security::Report do
-  let(:report) { described_class.new('sast', commit_sha) }
-  let(:commit_sha) { "d8978e74745e18ce44d88814004d4255ac6a65bb" }
+RSpec.describe Gitlab::Ci::Reports::Security::Report do
+  let_it_be(:pipeline) { create(:ci_pipeline) }
+
+  let(:report) { described_class.new('sast', pipeline, created_at) }
+  let(:created_at) { 2.weeks.ago }
 
   it { expect(report.type).to eq('sast') }
 
@@ -40,13 +42,13 @@ describe Gitlab::Ci::Reports::Security::Report do
     end
   end
 
-  describe '#add_occurrence' do
-    let(:occurrence) { create(:ci_reports_security_occurrence) }
+  describe '#add_finding' do
+    let(:finding) { create(:ci_reports_security_finding) }
 
-    it 'enriches given occurrence and stores it in the collection' do
-      report.add_occurrence(occurrence)
+    it 'enriches given finding and stores it in the collection' do
+      report.add_finding(finding)
 
-      expect(report.occurrences).to eq([occurrence])
+      expect(report.findings).to eq([finding])
     end
   end
 
@@ -54,18 +56,19 @@ describe Gitlab::Ci::Reports::Security::Report do
     let(:report) do
       create(
         :ci_reports_security_report,
-        occurrences: [create(:ci_reports_security_occurrence)],
+        findings: [create(:ci_reports_security_finding)],
         scanners: [create(:ci_reports_security_scanner)],
         identifiers: [create(:ci_reports_security_identifier)]
       )
     end
 
-    it 'creates a blank report with copied type and commit SHA' do
+    it 'creates a blank report with copied type and pipeline' do
       clone = report.clone_as_blank
 
       expect(clone.type).to eq(report.type)
-      expect(clone.commit_sha).to eq(report.commit_sha)
-      expect(clone.occurrences).to eq([])
+      expect(clone.pipeline).to eq(report.pipeline)
+      expect(clone.created_at).to eq(report.created_at)
+      expect(clone.findings).to eq([])
       expect(clone.scanners).to eq({})
       expect(clone.identifiers).to eq({})
     end
@@ -75,15 +78,16 @@ describe Gitlab::Ci::Reports::Security::Report do
     let(:report) do
       create(
         :ci_reports_security_report,
-        occurrences: [create(:ci_reports_security_occurrence)],
+        findings: [create(:ci_reports_security_finding)],
         scanners: [create(:ci_reports_security_scanner)],
         identifiers: [create(:ci_reports_security_identifier)]
       )
     end
+
     let(:other_report) do
       create(
         :ci_reports_security_report,
-        occurrences: [create(:ci_reports_security_occurrence, compare_key: 'other_occurrence')],
+        findings: [create(:ci_reports_security_finding, compare_key: 'other_finding')],
         scanners: [create(:ci_reports_security_scanner, external_id: 'other_scanner', name: 'Other Scanner')],
         identifiers: [create(:ci_reports_security_identifier, external_id: 'other_id', name: 'other_scanner')]
       )
@@ -94,7 +98,7 @@ describe Gitlab::Ci::Reports::Security::Report do
     end
 
     it 'replaces report contents with other reports contents' do
-      expect(report.occurrences).to eq(other_report.occurrences)
+      expect(report.findings).to eq(other_report.findings)
       expect(report.scanners).to eq(other_report.scanners)
       expect(report.identifiers).to eq(other_report.identifiers)
     end
@@ -111,71 +115,12 @@ describe Gitlab::Ci::Reports::Security::Report do
       allow(report).to receive(:replace_with!)
     end
 
-    subject { report.merge!(described_class.new('sast', commit_sha)) }
+    subject { report.merge!(described_class.new('sast', pipeline, created_at)) }
 
     it 'invokes the merge with other report and then replaces this report contents by merge result' do
       subject
 
       expect(report).to have_received(:replace_with!).with(merged_report)
-    end
-  end
-
-  describe "#safe?" do
-    subject { described_class.new('sast', commit_sha) }
-
-    context "when the sast report has an unsafe vulnerability" do
-      where(severity: %w[unknown Unknown high High critical Critical])
-      with_them do
-        let(:occurrence) { build(:ci_reports_security_occurrence, severity: severity) }
-
-        before do
-          subject.add_occurrence(occurrence)
-        end
-
-        it { expect(subject.unsafe_severity?).to be(true) }
-        it { expect(subject).not_to be_safe }
-      end
-    end
-
-    context "when the sast report has a medium to low severity vulnerability" do
-      where(severity: %w[medium Medium low Low])
-      with_them do
-        let(:occurrence) { build(:ci_reports_security_occurrence, severity: severity) }
-
-        before do
-          subject.add_occurrence(occurrence)
-        end
-
-        it { expect(subject.unsafe_severity?).to be(false) }
-        it { expect(subject).to be_safe }
-      end
-    end
-
-    context "when the sast report has a vulnerability with a `nil` severity" do
-      let(:occurrence) { build(:ci_reports_security_occurrence, severity: nil) }
-
-      before do
-        subject.add_occurrence(occurrence)
-      end
-
-      it { expect(subject.unsafe_severity?).to be(false) }
-      it { expect(subject).to be_safe }
-    end
-
-    context "when the sast report has a vulnerability with a blank severity" do
-      let(:occurrence) { build(:ci_reports_security_occurrence, severity: '') }
-
-      before do
-        subject.add_occurrence(occurrence)
-      end
-
-      it { expect(subject.unsafe_severity?).to be(false) }
-      it { expect(subject).to be_safe }
-    end
-
-    context "when the sast report has zero vulnerabilities" do
-      it { expect(subject.unsafe_severity?).to be(false) }
-      it { expect(subject).to be_safe }
     end
   end
 end

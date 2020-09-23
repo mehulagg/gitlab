@@ -25,5 +25,15 @@ module EE
 
       clean_params
     end
+
+    # Part of an experiment to build a new sign up flow. Will be resolved
+    # with https://gitlab.com/gitlab-org/growth/engineering/issues/64
+    def choose_layout
+      if %w(welcome update_registration).include?(action_name)
+        'checkout'
+      else
+        super
+      end
+    end
   end
 end

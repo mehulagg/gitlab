@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::DeployKeysController do
+RSpec.describe Projects::DeployKeysController do
   let(:project) { create(:project, :repository) }
   let(:user) { create(:user) }
 
@@ -55,7 +55,7 @@ describe Projects::DeployKeysController do
       it 'returns 404' do
         put :enable, params: { id: 0, namespace_id: project.namespace, project_id: project }
 
-        expect(response).to have_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end
@@ -64,7 +64,7 @@ describe Projects::DeployKeysController do
     let(:deploy_key) { create(:deploy_key) }
     let!(:deploy_key_project) { create(:deploy_keys_project, project: project, deploy_key: deploy_key) }
 
-    context 'with admin' do
+    context 'with admin', :enable_admin_mode do
       before do
         sign_in(create(:admin))
       end

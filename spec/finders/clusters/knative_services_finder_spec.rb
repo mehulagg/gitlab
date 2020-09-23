@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Clusters::KnativeServicesFinder do
+RSpec.describe Clusters::KnativeServicesFinder do
   include KubernetesHelpers
   include ReactiveCachingHelpers
 
-  let(:cluster) { create(:cluster, :project, :provided_by_gcp) }
+  let(:project) { create(:project, :repository) }
+  let(:cluster) { create(:cluster, :project, :provided_by_gcp, projects: [project]) }
   let(:service) { environment.deployment_platform }
-  let(:project) { cluster.cluster_project.project }
   let(:environment) { create(:environment, project: project) }
   let!(:deployment) { create(:deployment, :success, environment: environment, cluster: cluster) }
   let(:namespace) do

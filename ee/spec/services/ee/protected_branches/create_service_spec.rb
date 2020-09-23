@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe ProtectedBranches::CreateService do
+RSpec.describe ProtectedBranches::CreateService do
   include ProjectForksHelper
 
   let(:source_project) { create(:project) }
@@ -89,14 +89,14 @@ describe ProtectedBranches::CreateService do
     end
 
     it 'adds a security audit event entry' do
-      expect { service.execute }.to change(::SecurityEvent, :count).by(1)
+      expect { service.execute }.to change(::AuditEvent, :count).by(1)
     end
 
     context 'with invalid params' do
       let(:params) { nil }
 
       it "doesn't add a security audit event entry" do
-        expect { service.execute }.not_to change(::SecurityEvent, :count)
+        expect { service.execute }.not_to change(::AuditEvent, :count)
       end
     end
   end

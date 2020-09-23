@@ -22,7 +22,11 @@ module FakeBlobHelpers
     alias_method :name, :path
 
     def id
-      0
+      "00000000"
+    end
+
+    def commit_id
+      "11111111"
     end
 
     def binary_in_repo?
@@ -37,6 +41,8 @@ module FakeBlobHelpers
   end
 
   def fake_blob(**kwargs)
-    Blob.decorate(FakeBlob.new(**kwargs), project)
+    container = kwargs.delete(:container) || project
+
+    Blob.decorate(FakeBlob.new(**kwargs), container)
   end
 end

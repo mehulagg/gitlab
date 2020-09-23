@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Kubernetes do
+RSpec.describe Gitlab::Kubernetes do
   include KubernetesHelpers
   include described_class
 
@@ -27,6 +27,7 @@ describe Gitlab::Kubernetes do
 
     context 'with a path prefix in the API URL' do
       let(:api_url) { 'https://example.com/prefix/' }
+
       it { expect(result.path).to eq('/prefix/api/v1/namespaces/default/pods/pod1/exec') }
     end
 

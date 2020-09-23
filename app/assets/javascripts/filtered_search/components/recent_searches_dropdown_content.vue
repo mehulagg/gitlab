@@ -20,8 +20,18 @@ export default {
     },
   },
   computed: {
+    /**
+     * Both Epic and Roadmap pages share same recents store
+     * and with https://gitlab.com/gitlab-org/gitlab/-/merge_requests/36421
+     * Roadmap started using `GlFilteredSearch` which is not compatible
+     * with string tokens stored in recents, so this is a temporary
+     * fix by ignoring non-string recents while in Epic page.
+     */
+    compatibleItems() {
+      return this.items.filter(item => typeof item === 'string');
+    },
     processedItems() {
-      return this.items.map(item => {
+      return this.compatibleItems.map(item => {
         const { tokens, searchToken } = FilteredSearchTokenizer.processTokens(
           item,
           this.allowedKeys,
@@ -29,6 +39,7 @@ export default {
 
         const resultantTokens = tokens.map(token => ({
           prefix: `${token.key}:`,
+          operator: token.operator,
           suffix: `${token.symbol}${token.value}`,
         }));
 
@@ -40,7 +51,7 @@ export default {
       });
     },
     hasItems() {
-      return this.items.length > 0;
+      return this.compatibleItems.length > 0;
     },
   },
   methods: {
@@ -58,34 +69,38 @@ export default {
 </script>
 <template>
   <div>
-    <div v-if="!isLocalStorageAvailable" class="dropdown-info-note">
+    <div v-if="!isLocalStorageAvailable" ref="localStorageNote" class="dropdown-info-note">
       {{ __('This feature requires local storage to be enabled') }}
     </div>
     <ul v-else-if="hasItems">
-      <li v-for="(item, index) in processedItems" :key="`processed-items-${index}`">
+      <li
+        v-for="(item, index) in processedItems"
+        ref="dropdownItem"
+        :key="`processed-items-${index}`"
+      >
         <button
           type="button"
-          class="filtered-search-history-dropdown-item"
+          class="filtered-search-history-dropdown-item js-dropdown-button"
           @click="onItemActivated(item.text)"
         >
           <span>
             <span
               v-for="(token, tokenIndex) in item.tokens"
               :key="`dropdown-token-${tokenIndex}`"
-              class="filtered-search-history-dropdown-token"
+              class="filtered-search-history-dropdown-token js-dropdown-token"
             >
               <span class="name">{{ token.prefix }}</span>
+              <span class="name">{{ token.operator }}</span>
               <span class="value">{{ token.suffix }}</span>
             </span>
           </span>
-          <span class="filtered-search-history-dropdown-search-token">
-            {{ item.searchToken }}
-          </span>
+          <span class="filtered-search-history-dropdown-search-token">{{ item.searchToken }}</span>
         </button>
       </li>
       <li class="divider"></li>
       <li>
         <button
+          ref="clearButton"
           type="button"
           class="filtered-search-history-clear-button"
           @click="onRequestClearRecentSearches($event)"
@@ -94,6 +109,8 @@ export default {
         </button>
       </li>
     </ul>
-    <div v-else class="dropdown-info-note">{{ __("You don't have any recent searches") }}</div>
+    <div v-else ref="dropdownNote" class="dropdown-info-note">
+      {{ __("You don't have any recent searches") }}
+    </div>
   </div>
 </template>

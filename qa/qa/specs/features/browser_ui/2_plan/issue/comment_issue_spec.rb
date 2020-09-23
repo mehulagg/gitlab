@@ -1,19 +1,15 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Plan' do
+  RSpec.describe 'Plan', :reliable do
     describe 'Issue comments' do
       before do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+        Flow::Login.sign_in
 
-        issue = Resource::Issue.fabricate_via_api! do |issue|
-          issue.title = 'issue title'
-        end
-        issue.visit!
+        Resource::Issue.fabricate_via_api!.visit!
       end
 
-      it 'user comments on an issue and edits the comment' do
+      it 'comments on an issue and edits the comment', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/450' do
         Page::Project::Issue::Show.perform do |show|
           first_version_of_comment = 'First version of the comment'
           second_version_of_comment = 'Second version of the comment'

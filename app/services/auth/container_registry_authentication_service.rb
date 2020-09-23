@@ -3,11 +3,23 @@
 module Auth
   class ContainerRegistryAuthenticationService < BaseService
     AUDIENCE = 'container_registry'
+    REGISTRY_LOGIN_ABILITIES = [
+      :read_container_image,
+      :create_container_image,
+      :destroy_container_image,
+      :update_container_image,
+      :admin_container_image,
+      :build_read_container_image,
+      :build_create_container_image,
+      :build_destroy_container_image
+    ].freeze
 
     def execute(authentication_abilities:)
       @authentication_abilities = authentication_abilities
 
       return error('UNAVAILABLE', status: 404, message: 'registry not enabled') unless registry.enabled
+
+      return error('DENIED', status: 403, message: 'access forbidden') unless has_registry_ability?
 
       unless scopes.any? || current_user || project
         return error('DENIED', status: 403, message: 'access forbidden')
@@ -40,7 +52,7 @@ module Auth
     end
 
     def self.token_expire_at
-      Time.now + Gitlab::CurrentSettings.container_registry_token_expire_delay.minutes
+      Time.current + Gitlab::CurrentSettings.container_registry_token_expire_delay.minutes
     end
 
     private
@@ -91,17 +103,19 @@ module Auth
 
       return unless requested_project
 
-      actions = actions.select do |action|
+      authorized_actions = actions.select do |action|
         can_access?(requested_project, action)
       end
 
-      return unless actions.present?
+      log_if_actions_denied(type, requested_project, actions, authorized_actions)
+
+      return unless authorized_actions.present?
 
       # At this point user/build is already authenticated.
       #
-      ensure_container_repository!(path, actions)
+      ensure_container_repository!(path, authorized_actions)
 
-      { type: type, name: path.to_s, actions: actions }
+      { type: type, name: path.to_s, actions: authorized_actions }
     end
 
     ##
@@ -118,12 +132,13 @@ module Auth
 
     def can_access?(requested_project, requested_action)
       return false unless requested_project.container_registry_enabled?
+      return false if requested_project.repository_access_level == ::ProjectFeature::DISABLED
 
       case requested_action
       when 'pull'
         build_can_pull?(requested_project) || user_can_pull?(requested_project) || deploy_token_can_pull?(requested_project)
       when 'push'
-        build_can_push?(requested_project) || user_can_push?(requested_project)
+        build_can_push?(requested_project) || user_can_push?(requested_project) || deploy_token_can_push?(requested_project)
       when 'delete'
         build_can_delete?(requested_project) || user_can_admin?(requested_project)
       when '*'
@@ -173,6 +188,13 @@ module Auth
         current_user.read_registry?
     end
 
+    def deploy_token_can_push?(requested_project)
+      has_authentication_ability?(:create_container_image) &&
+        current_user.is_a?(DeployToken) &&
+        current_user.has_access_to?(requested_project) &&
+        current_user.write_registry?
+    end
+
     ##
     # We still support legacy pipeline triggers which do not have associated
     # actor. New permissions model and new triggers are always associated with
@@ -196,6 +218,29 @@ module Auth
 
     def has_authentication_ability?(capability)
       @authentication_abilities.to_a.include?(capability)
+    end
+
+    def has_registry_ability?
+      @authentication_abilities.any? do |ability|
+        REGISTRY_LOGIN_ABILITIES.include?(ability)
+      end
+    end
+
+    def log_if_actions_denied(type, requested_project, requested_actions, authorized_actions)
+      return if requested_actions == authorized_actions
+
+      log_info = {
+        message: "Denied container registry permissions",
+        scope_type: type,
+        requested_project_path: requested_project.full_path,
+        requested_actions: requested_actions,
+        authorized_actions: authorized_actions,
+        username: current_user&.username,
+        user_id: current_user&.id,
+        project_path: project&.full_path
+      }.compact
+
+      Gitlab::AuthLogger.warn(log_info)
     end
   end
 end

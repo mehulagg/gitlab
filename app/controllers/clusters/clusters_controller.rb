@@ -2,50 +2,44 @@
 
 class Clusters::ClustersController < Clusters::BaseController
   include RoutableActions
+  include Metrics::Dashboard::PrometheusApiProxy
+  include MetricsDashboard
 
-  before_action :cluster, except: [:index, :new, :create_gcp, :create_user, :authorize_aws_role]
+  before_action :cluster, only: [:cluster_status, :show, :update, :destroy, :clear_cache]
   before_action :generate_gcp_authorize_url, only: [:new]
   before_action :validate_gcp_token, only: [:new]
   before_action :gcp_cluster, only: [:new]
   before_action :user_cluster, only: [:new]
   before_action :authorize_create_cluster!, only: [:new, :authorize_aws_role]
   before_action :authorize_update_cluster!, only: [:update]
-  before_action :authorize_admin_cluster!, only: [:destroy]
+  before_action :authorize_admin_cluster!, only: [:destroy, :clear_cache]
   before_action :update_applications_status, only: [:cluster_status]
-  before_action only: [:new, :create_gcp] do
-    push_frontend_feature_flag(:create_eks_clusters)
-  end
-  before_action only: [:show] do
-    push_frontend_feature_flag(:enable_cluster_application_elastic_stack)
-  end
 
   helper_method :token_in_session
 
   STATUS_POLLING_INTERVAL = 10_000
 
   def index
-    finder = ClusterAncestorsFinder.new(clusterable.subject, current_user)
-    clusters = finder.execute
+    @clusters = cluster_list
 
-    # Note: We are paginating through an array here but this should OK as:
-    #
-    # In CE, we can have a maximum group nesting depth of 21, so including
-    # project cluster, we can have max 22 clusters for a group hierarchy.
-    # In EE (Premium) we can have any number, as multiple clusters are
-    # supported, but the number of clusters are fairly low currently.
-    #
-    # See https://gitlab.com/gitlab-org/gitlab-foss/issues/55260 also.
-    @clusters = Kaminari.paginate_array(clusters).page(params[:page]).per(20)
+    respond_to do |format|
+      format.html
+      format.json do
+        Gitlab::PollingInterval.set_header(response, interval: STATUS_POLLING_INTERVAL)
+        serializer = ClusterSerializer.new(current_user: current_user)
 
-    @has_ancestor_clusters = finder.has_ancestor_clusters?
+        render json: {
+          clusters: serializer.with_pagination(request, response).represent_list(@clusters),
+          has_ancestor_clusters: @has_ancestor_clusters
+        }
+      end
+    end
   end
 
   def new
-    return unless Feature.enabled?(:create_eks_clusters)
-
     if params[:provider] == 'aws'
-      @aws_role = current_user.aws_role || Aws::Role.new
-      @aws_role.ensure_role_external_id!
+      @aws_role = Aws::Role.create_or_find_by!(user: current_user)
+      @instance_types = load_instance_types.to_json
 
     elsif params[:provider] == 'gcp'
       redirect_to @authorize_url if @authorize_url && !@valid_gcp_token
@@ -112,8 +106,22 @@ class Clusters::ClustersController < Clusters::BaseController
       generate_gcp_authorize_url
       validate_gcp_token
       user_cluster
+      params[:provider] = 'gcp'
 
       render :new, locals: { active_tab: 'create' }
+    end
+  end
+
+  def create_aws
+    @aws_cluster = ::Clusters::CreateService
+      .new(current_user, create_aws_cluster_params)
+      .execute
+      .present(current_user: current_user)
+
+    if @aws_cluster.persisted?
+      head :created, location: @aws_cluster.show_path
+    else
+      render status: :unprocessable_entity, json: @aws_cluster.errors
     end
   end
 
@@ -135,19 +143,41 @@ class Clusters::ClustersController < Clusters::BaseController
   end
 
   def authorize_aws_role
-    role = current_user.build_aws_role(create_role_params)
+    response = Clusters::Aws::AuthorizeRoleService.new(
+      current_user,
+      params: aws_role_params
+    ).execute
 
-    role.save ? respond_201 : respond_422
+    render json: response.body, status: response.status
+  end
+
+  def clear_cache
+    cluster.delete_cached_resources!
+
+    redirect_to cluster.show_path, notice: _('Cluster cache cleared.')
   end
 
   private
 
-  def destroy_params
-    # To be uncomented on https://gitlab.com/gitlab-org/gitlab/merge_requests/16954
-    # This MR got split into other since it was too big.
+  def cluster_list
+    finder = ClusterAncestorsFinder.new(clusterable.subject, current_user)
+    clusters = finder.execute
+
+    @has_ancestor_clusters = finder.has_ancestor_clusters?
+
+    # Note: We are paginating through an array here but this should OK as:
     #
-    # params.permit(:cleanup)
-    {}
+    # In CE, we can have a maximum group nesting depth of 21, so including
+    # project cluster, we can have max 22 clusters for a group hierarchy.
+    # In EE (Premium) we can have any number, as multiple clusters are
+    # supported, but the number of clusters are fairly low currently.
+    #
+    # See https://gitlab.com/gitlab-org/gitlab-foss/issues/55260 also.
+    Kaminari.paginate_array(clusters).page(params[:page]).per(20)
+  end
+
+  def destroy_params
+    params.permit(:cleanup)
   end
 
   def update_params
@@ -200,6 +230,29 @@ class Clusters::ClustersController < Clusters::BaseController
       )
   end
 
+  def create_aws_cluster_params
+    params.require(:cluster).permit(
+      :enabled,
+      :name,
+      :environment_scope,
+      :managed,
+      provider_aws_attributes: [
+        :kubernetes_version,
+        :key_name,
+        :role_arn,
+        :region,
+        :vpc_id,
+        :instance_type,
+        :num_nodes,
+        :security_group_id,
+        subnet_ids: []
+      ]).merge(
+        provider_type: :aws,
+        platform_type: :kubernetes,
+        clusterable: clusterable.subject
+      )
+  end
+
   def create_user_cluster_params
     params.require(:cluster).permit(
       :enabled,
@@ -219,13 +272,12 @@ class Clusters::ClustersController < Clusters::BaseController
       )
   end
 
-  def create_role_params
-    params.require(:cluster).permit(:role_arn, :role_external_id)
+  def aws_role_params
+    params.require(:cluster).permit(:role_arn)
   end
 
   def generate_gcp_authorize_url
-    params = Feature.enabled?(:create_eks_clusters) ? { provider: :gke } : {}
-    state = generate_session_key_redirect(clusterable.new_path(params).to_s)
+    state = generate_session_key_redirect(clusterable.new_path(provider: :gcp).to_s)
 
     @authorize_url = GoogleApi::CloudPlatform::Client.new(
       nil, callback_google_api_auth_url,
@@ -238,6 +290,29 @@ class Clusters::ClustersController < Clusters::BaseController
     cluster = Clusters::BuildService.new(clusterable.subject).execute
     cluster.build_provider_gcp
     @gcp_cluster = cluster.present(current_user: current_user)
+  end
+
+  def proxyable
+    cluster.cluster
+  end
+
+  # During first iteration of dashboard variables implementation
+  # cluster health case was omitted. Existing service for now is tied to
+  # environment, which is not always present for cluster health dashboard.
+  # It is planned to break coupling to environment https://gitlab.com/gitlab-org/gitlab/-/issues/213833.
+  # It is also planned to move cluster health to metrics dashboard section https://gitlab.com/gitlab-org/gitlab/-/issues/220214
+  # but for now I've used dummy class to stub variable substitution service, as there are no variables
+  # in cluster health dashboard
+  def proxy_variable_substitution_service
+    @empty_service ||= Class.new(BaseService) do
+      def initialize(proxyable, params)
+        @proxyable, @params = proxyable, params
+      end
+
+      def execute
+        success(params: @params)
+      end
+    end
   end
 
   def user_cluster
@@ -264,6 +339,19 @@ class Clusters::ClustersController < Clusters::BaseController
     GoogleApi::CloudPlatform::Client.new_session_key_for_redirect_uri do |key|
       session[key] = uri
     end
+  end
+
+  ##
+  # Unfortunately the EC2 API doesn't provide a list of
+  # possible instance types. There is a workaround, using
+  # the Pricing API, but instead of requiring the
+  # user to grant extra permissions for this we use the
+  # values that validate the CloudFormation template.
+  def load_instance_types
+    stack_template = File.read(Rails.root.join('vendor', 'aws', 'cloudformation', 'eks_cluster.yaml'))
+    instance_types = YAML.safe_load(stack_template).dig('Parameters', 'NodeInstanceType', 'AllowedValues')
+
+    instance_types.map { |type| Hash(name: type, value: type) }
   end
 
   def update_applications_status

@@ -2,18 +2,22 @@
 
 require 'spec_helper'
 
-describe Banzai::Filter::MarkdownFilter do
+RSpec.describe Banzai::Filter::MarkdownFilter do
   include FilterSpecHelper
 
   describe 'markdown engine from context' do
     it 'defaults to CommonMark' do
-      expect_any_instance_of(Banzai::Filter::MarkdownEngines::CommonMark).to receive(:render).and_return('test')
+      expect_next_instance_of(Banzai::Filter::MarkdownEngines::CommonMark) do |instance|
+        expect(instance).to receive(:render).and_return('test')
+      end
 
       filter('test')
     end
 
     it 'uses CommonMark' do
-      expect_any_instance_of(Banzai::Filter::MarkdownEngines::CommonMark).to receive(:render).and_return('test')
+      expect_next_instance_of(Banzai::Filter::MarkdownEngines::CommonMark) do |instance|
+        expect(instance).to receive(:render).and_return('test')
+      end
 
       filter('test', { markdown_engine: :common_mark })
     end

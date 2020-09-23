@@ -2,14 +2,16 @@
 
 require 'spec_helper'
 
-describe PathLocks::UnlockService do
+RSpec.describe PathLocks::UnlockService do
   let(:path_lock)    { create :path_lock }
   let(:current_user) { path_lock.user }
   let(:project)      { path_lock.project }
   let(:path)         { path_lock.path }
 
   it 'unlocks path' do
-    allow_any_instance_of(described_class).to receive(:can?).and_return(true)
+    allow_next_instance_of(described_class) do |instance|
+      allow(instance).to receive(:can?).and_return(true)
+    end
     described_class.new(project, current_user).execute(path_lock)
 
     expect(project.path_locks.find_by(path: path)).to be_falsey

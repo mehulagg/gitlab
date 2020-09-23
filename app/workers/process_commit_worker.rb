@@ -11,20 +11,22 @@ class ProcessCommitWorker
   include ApplicationWorker
 
   feature_category :source_code_management
-  latency_sensitive_worker!
+  urgency :high
+  weight 3
+  idempotent!
+  loggable_arguments 2, 3
 
   # project_id - The ID of the project this commit belongs to.
   # user_id - The ID of the user that pushed the commit.
   # commit_hash - Hash containing commit details to use for constructing a
   #               Commit object without having to use the Git repository.
   # default - The data was pushed to the default branch.
-  # rubocop: disable CodeReuse/ActiveRecord
   def perform(project_id, user_id, commit_hash, default = false)
-    project = Project.find_by(id: project_id)
+    project = Project.id_in(project_id).first
 
     return unless project
 
-    user = User.find_by(id: user_id)
+    user = User.id_in(user_id).first
 
     return unless user
 
@@ -34,12 +36,11 @@ class ProcessCommitWorker
     process_commit_message(project, commit, user, author, default)
     update_issue_metrics(commit, author)
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   def process_commit_message(project, commit, user, author, default = false)
     # Ignore closing references from GitLab-generated commit messages.
     find_closing_issues = default && !commit.merged_merge_request?(user)
-    closed_issues = find_closing_issues ? commit.closes_issues(user) : []
+    closed_issues = find_closing_issues ? issues_to_close(project, commit, user) : []
 
     close_issues(project, user, author, commit, closed_issues) if closed_issues.any?
     commit.create_cross_references!(author, closed_issues)
@@ -55,16 +56,21 @@ class ProcessCommitWorker
     end
   end
 
-  # rubocop: disable CodeReuse/ActiveRecord
+  def issues_to_close(project, commit, user)
+    Gitlab::ClosingIssueExtractor
+      .new(project, user)
+      .closed_by_message(commit.safe_message)
+  end
+
   def update_issue_metrics(commit, author)
     mentioned_issues = commit.all_references(author).issues
 
     return if mentioned_issues.empty?
 
-    Issue::Metrics.where(issue_id: mentioned_issues.map(&:id), first_mentioned_in_commit_at: nil)
+    Issue::Metrics.for_issues(mentioned_issues)
+      .with_first_mention_not_earlier_than(commit.committed_date)
       .update_all(first_mentioned_in_commit_at: commit.committed_date)
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 
   def build_commit(project, hash)
     date_suffix = '_date'
@@ -74,7 +80,7 @@ class ProcessCommitWorker
     # manually parse these values.
     hash.each do |key, value|
       if key.to_s.end_with?(date_suffix) && value.is_a?(String)
-        hash[key] = Time.parse(value)
+        hash[key] = Time.zone.parse(value)
       end
     end
 

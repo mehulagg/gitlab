@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Projects::ApproverGroupsController do
+RSpec.describe Projects::ApproverGroupsController do
   describe '#destroy' do
     let(:user) { create(:user) }
     let(:project) { create(:project) }
@@ -33,7 +33,7 @@ describe Projects::ApproverGroupsController do
         it 'returns a 404' do
           destroy_merge_request_approver_group
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
 
         it 'does not destroy any approver groups' do
@@ -51,7 +51,7 @@ describe Projects::ApproverGroupsController do
         it 'returns a 404' do
           destroy_merge_request_approver_group
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
 
         it 'does not destroy any approver groups' do
@@ -88,7 +88,7 @@ describe Projects::ApproverGroupsController do
         it 'returns a 404' do
           destroy_project_approver_group
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
 
         it 'does not destroy any approver groups' do

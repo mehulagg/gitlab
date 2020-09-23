@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupsController do
+RSpec.describe GroupsController do
   include ExternalAuthorizationServiceHelpers
 
   let(:user) { create(:user) }
@@ -80,6 +80,7 @@ describe GroupsController do
     let(:guest_user) { identity.user }
 
     before do
+      stub_licensed_features(group_saml: true)
       group.add_guest(guest_user)
       sign_in(guest_user)
     end
@@ -88,7 +89,7 @@ describe GroupsController do
       it 'prevents access to group resources' do
         get :show, params: { id: group }
 
-        expect(response).to have_gitlab_http_status(302)
+        expect(response).to have_gitlab_http_status(:found)
         expect(response.location).to match(/groups\/#{group.to_param}\/-\/saml\/sso\?redirect=.+&token=/)
       end
     end
@@ -103,7 +104,7 @@ describe GroupsController do
       it 'allows access to group resources' do
         get :show, params: { id: group }
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
   end

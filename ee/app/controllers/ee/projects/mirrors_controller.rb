@@ -41,7 +41,7 @@ module EE
           project.update_remote_mirrors
           flash[:notice] = _('The remote repository is being updated...')
         else
-          project.import_state.force_import_job!
+          StartPullMirroringService.new(project, current_user, pause_on_hard_failure: false).execute
           flash[:notice] = _('The repository is being updated...')
         end
 
@@ -59,16 +59,10 @@ module EE
       private
 
       def mirror_params_attributes_ee
-        [
-          :mirror,
-          :import_url,
-          :username_only_import_url,
-          :mirror_user_id,
-          :mirror_trigger_builds,
-          :only_mirror_protected_branches,
-          :mirror_overwrites_diverged_branches,
-          :pull_mirror_branch_prefix,
-
+        attrs = Projects::UpdateService::PULL_MIRROR_ATTRIBUTES.dup
+        attrs.delete(:mirror_user_id) # Cannot be set by the frontend
+        attrs.delete(:import_data_attributes) # We need more detail here
+        attrs.push(
           import_data_attributes: %i[
             id
             auth_method
@@ -76,7 +70,7 @@ module EE
             ssh_known_hosts
             regenerate_ssh_private_key
           ]
-        ]
+        )
       end
 
       def safe_mirror_params
@@ -90,7 +84,7 @@ module EE
 
           # If the known hosts data is being set, store details about who and when
           if import_data[:ssh_known_hosts].present?
-            import_data[:ssh_known_hosts_verified_at] = Time.now
+            import_data[:ssh_known_hosts_verified_at] = Time.current
             import_data[:ssh_known_hosts_verified_by_id] = current_user.id
           end
         end

@@ -2,97 +2,67 @@
 
 require 'spec_helper'
 
-describe Projects::Alerting::NotifyService do
-  set(:project) { create(:project) }
-
-  before do
-    # We use `set(:project)` so we make sure to clear caches
-    project.clear_memoization(:licensed_feature_available)
-  end
-
-  shared_examples 'processes incident issues' do |amount|
-    let(:create_incident_service) { spy }
-
-    it 'processes issues', :sidekiq do
-      expect(IncidentManagement::ProcessAlertWorker)
-        .to receive(:perform_async)
-        .with(project.id, kind_of(Hash))
-        .exactly(amount).times
-
-      Sidekiq::Testing.inline! do
-        expect(subject.status).to eq(:success)
-      end
-    end
-  end
-
-  shared_examples 'does not process incident issues' do |http_status:|
-    it 'does not process issues' do
-      expect(IncidentManagement::ProcessAlertWorker)
-        .not_to receive(:perform_async)
-
-      expect(subject.status).to eq(:error)
-      expect(subject.http_status).to eq(http_status)
-    end
-  end
+RSpec.describe Projects::Alerting::NotifyService do
+  let_it_be(:project, refind: true) { create(:project) }
 
   describe '#execute' do
-    let(:token) { 'invalid-token' }
-    let(:starts_at) { Time.now.change(usec: 0) }
     let(:service) { described_class.new(project, nil, payload) }
-    let(:payload_raw) do
+    let(:token) { alerts_service.token }
+    let(:payload) do
       {
-        'title' => 'alert title',
-        'start_time' => starts_at.rfc3339
+        'title' => 'Test alert title'
       }
     end
-    let(:payload) { ActionController::Parameters.new(payload_raw).permit! }
+
+    let(:alerts_service) { create(:alerts_service, project: project) }
 
     subject { service.execute(token) }
 
-    context 'with license' do
+    context 'existing alert with same payload fingerprint' do
+      let(:existing_alert) { create(:alert_management_alert, :from_payload, project: project, payload: payload) }
+
       before do
-        stub_licensed_features(incident_management: true)
+        stub_licensed_features(generic_alert_fingerprinting: fingerprinting_enabled)
+        existing_alert # create existing alert after enabling flag
       end
 
-      context 'with activated Alerts Service' do
-        let!(:alerts_service) { create(:alerts_service, project: project) }
+      context 'generic fingerprinting license not enabled' do
+        let(:fingerprinting_enabled) { false }
 
-        context 'with valid token' do
-          let(:token) { alerts_service.token }
-
-          context 'with a valid payload' do
-            it_behaves_like 'processes incident issues', 1
-          end
-
-          context 'with an invalid payload' do
-            before do
-              allow(Gitlab::Alerting::NotificationPayloadParser)
-                .to receive(:call)
-                .and_raise(Gitlab::Alerting::NotificationPayloadParser::BadPayloadError)
-            end
-
-            it_behaves_like 'does not process incident issues', http_status: 400
-          end
+        it 'creates AlertManagement::Alert' do
+          expect { subject }.to change(AlertManagement::Alert, :count)
         end
 
-        context 'with invalid token' do
-          it_behaves_like 'does not process incident issues', http_status: 401
+        it 'does not increment the existing alert count' do
+          expect { subject }.not_to change { existing_alert.reload.events }
         end
       end
 
-      context 'with deactivated Alerts Service' do
-        let!(:alerts_service) { create(:alerts_service, :inactive, project: project) }
+      context 'generic fingerprinting license enabled' do
+        let(:fingerprinting_enabled) { true }
 
-        it_behaves_like 'does not process incident issues', http_status: 403
+        it 'does not create AlertManagement::Alert' do
+          expect { subject }.not_to change(AlertManagement::Alert, :count)
+        end
+
+        it 'increments the existing alert count' do
+          expect { subject }.to change { existing_alert.reload.events }.from(1).to(2)
+        end
+
+        context 'end_time provided for subsequent alert' do
+          let(:existing_alert) { create(:alert_management_alert, :from_payload, project: project, payload: payload.except('end_time')) }
+          let(:payload) { { 'title' => 'title', 'end_time' => Time.current.change(usec: 0).iso8601 } }
+
+          it 'does not create AlertManagement::Alert' do
+            expect { subject }.not_to change(AlertManagement::Alert, :count)
+          end
+
+          it 'resolves the existing alert', :aggregate_failures do
+            expect { subject }.to change { existing_alert.reload.resolved? }.from(false).to(true)
+            expect(existing_alert.ended_at).to eq(payload['end_time'])
+          end
+        end
       end
-    end
-
-    context 'without license' do
-      before do
-        stub_licensed_features(incident_management: false)
-      end
-
-      it_behaves_like 'does not process incident issues', http_status: 403
     end
   end
 end

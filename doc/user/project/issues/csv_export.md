@@ -1,6 +1,7 @@
-# Export Issues to CSV **(STARTER)**
+# Export Issues to CSV
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/1126) in [GitLab Starter 9.0](https://about.gitlab.com/blog/2017/03/22/gitlab-9-0-released/#export-issues-ees-eep).
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/1126) in [GitLab Starter 9.0](https://about.gitlab.com/releases/2017/03/22/gitlab-9-0-released/#export-issues-ees-eep).
+> - Moved to GitLab Core in GitLab 12.10.
 
 Issues can be exported as CSV from GitLab and are sent to your default notification email as an attachment.
 
@@ -30,7 +31,7 @@ Among numerous use cases for exporting issues for CSV, we can name a few:
 
 After selecting a project, from the issues page you can narrow down which issues to export using the search bar, along with the All/Open/Closed tabs. All issues returned will be exported, including those not shown on the first page.
 
-![CSV export button](img/csv_export_button.png)
+![CSV export button](img/csv_export_button_v12_9.png)
 
 You will be asked to confirm the number of issues and email address for the export, after which the email will begin being prepared.
 
@@ -42,9 +43,9 @@ Exported issues are always sorted by `Issue ID`.
 
 ## Format
 
-> **Time Estimate** and **Time Spent** columns were [introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/2627) in GitLab Starter 10.0.
+> **Time Estimate** and **Time Spent** columns were [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/2627) in GitLab Starter 10.0.
 >
-> **Weight** and **Locked** columns were [introduced](https://gitlab.com/gitlab-org/gitlab/merge_requests/5300) in GitLab Starter 10.8.
+> **Weight** and **Locked** columns were [introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/5300) in GitLab Starter 10.8.
 
 Data will be encoded with a comma as the column delimiter, with `"` used to quote fields if needed, and newlines to separate rows. The first row will be the headers, which are listed in the following table along with a description of the values:
 
@@ -61,14 +62,16 @@ Data will be encoded with a comma as the column delimiter, with `"` used to quot
 | Assignee Username | Username of the author, with the `@` symbol omitted |
 | Confidential | `Yes` or `No` |
 | Locked | `Yes` or `No` |
-| Due Date | Formated as `YYYY-MM-DD` |
-| Created At (UTC) | Formated as `YYYY-MM-DD HH:MM:SS` |
-| Updated At (UTC) | Formated as `YYYY-MM-DD HH:MM:SS` |
+| Due Date | Formatted as `YYYY-MM-DD` |
+| Created At (UTC) | Formatted as `YYYY-MM-DD HH:MM:SS` |
+| Updated At (UTC) | Formatted as `YYYY-MM-DD HH:MM:SS` |
 | Milestone | Title of the issue milestone |
 | Weight | Issue weight |
 | Labels | Title of any labels joined with a `,` |
 | Time Estimate | [Time estimate](../time_tracking.md#estimates) in seconds |
 | Time Spent | [Time spent](../time_tracking.md#time-spent) in seconds |
+| Epic ID | ID of the parent epic **(ULTIMATE)**, introduced in 12.7 |
+| Epic Title | Title of the parent epic **(ULTIMATE)**, introduced in 12.7 |
 
 ## Limitations
 

@@ -7,6 +7,10 @@ import ModeChanged from './viewers/mode_changed.vue';
 
 export default {
   props: {
+    diffFile: {
+      type: Object,
+      required: true,
+    },
     diffMode: {
       type: String,
       required: true,
@@ -23,6 +27,11 @@ export default {
       type: String,
       required: true,
     },
+    newSize: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
     oldPath: {
       type: String,
       required: true,
@@ -30,6 +39,11 @@ export default {
     oldSha: {
       type: String,
       required: true,
+    },
+    oldSize: {
+      type: Number,
+      required: false,
+      default: 0,
     },
     projectPath: {
       type: String,
@@ -69,10 +83,10 @@ export default {
       return this.projectPath.indexOf('/') === 0 ? '' : `${gon.relative_url_root}/`;
     },
     fullOldPath() {
-      return `${this.basePath}${this.projectPath}/raw/${this.oldSha}/${this.oldPath}`;
+      return `${this.basePath}${this.projectPath}/-/raw/${this.oldSha}/${this.oldPath}`;
     },
     fullNewPath() {
-      return `${this.basePath}${this.projectPath}/raw/${this.newSha}/${this.newPath}`;
+      return `${this.basePath}${this.projectPath}/-/raw/${this.newSha}/${this.newPath}`;
     },
   },
 };
@@ -82,9 +96,12 @@ export default {
   <div v-if="viewer" class="diff-file preview-container">
     <component
       :is="viewer"
+      :diff-file="diffFile"
       :diff-mode="diffMode"
       :new-path="fullNewPath"
       :old-path="fullOldPath"
+      :old-size="oldSize"
+      :new-size="newSize"
       :project-path="projectPath"
       :a-mode="aMode"
       :b-mode="bMode"

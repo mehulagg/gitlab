@@ -1,14 +1,12 @@
-import { joinPaths } from '~/lib/utils/url_utility';
-import { normalizeHeaders } from '~/lib/utils/common_utils';
+import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
 import { __ } from '~/locale';
 import eventHub from '../../eventhub';
 import service from '../../services';
 import * as types from '../mutation_types';
-import router from '../../ide_router';
-import { setPageTitle, replaceFileUrl, addFinalNewlineIfNeeded } from '../utils';
+import { setPageTitleForFile } from '../utils';
 import { viewerTypes, stageKeys } from '../../constants';
 
-export const closeFile = ({ commit, state, dispatch }, file) => {
+export const closeFile = ({ commit, state, dispatch, getters }, file) => {
   const { path } = file;
   const indexOfClosedFile = state.openFiles.findIndex(f => f.key === file.key);
   const fileWasActive = file.active;
@@ -31,10 +29,12 @@ export const closeFile = ({ commit, state, dispatch }, file) => {
         keyPrefix: nextFileToOpen.staged ? 'staged' : 'unstaged',
       });
     } else {
-      router.push(`/project${nextFileToOpen.url}`);
+      dispatch('router/push', getters.getUrlForPath(nextFileToOpen.path), { root: true });
     }
   } else if (!state.openFiles.length) {
-    router.push(`/project/${file.projectId}/tree/${file.branchId}/`);
+    dispatch('router/push', `/project/${state.currentProjectId}/tree/${state.currentBranchId}/`, {
+      root: true,
+    });
   }
 
   eventHub.$emit(`editor.update.model.dispose.${file.key}`);
@@ -58,39 +58,48 @@ export const setFileActive = ({ commit, state, getters, dispatch }, path) => {
 };
 
 export const getFileData = (
-  { state, commit, dispatch },
+  { state, commit, dispatch, getters },
   { path, makeFileActive = true, openFile = makeFileActive },
 ) => {
   const file = state.entries[path];
+  const fileDeletedAndReadded = getters.isFileDeletedAndReadded(path);
 
-  if (file.raw || (file.tempFile && !file.prevPath)) return Promise.resolve();
+  if (file.raw || (file.tempFile && !file.prevPath && !fileDeletedAndReadded))
+    return Promise.resolve();
 
-  commit(types.TOGGLE_LOADING, { entry: file });
+  commit(types.TOGGLE_LOADING, { entry: file, forceValue: true });
 
-  const url = file.prevPath ? replaceFileUrl(file.url, file.path, file.prevPath) : file.url;
+  const url = joinPaths(
+    gon.relative_url_root || '/',
+    state.currentProjectId,
+    '-',
+    file.type,
+    getters.lastCommit && getters.lastCommit.id,
+    escapeFileUrl(file.prevPath || file.path),
+  );
 
   return service
-    .getFileData(joinPaths(gon.relative_url_root || '', url.replace('/-/', '/')))
-    .then(({ data, headers }) => {
-      const normalizedHeaders = normalizeHeaders(headers);
-      let title = normalizedHeaders['PAGE-TITLE'];
-      title = file.prevPath ? title.replace(file.prevPath, file.path) : title;
-      setPageTitle(decodeURI(title));
-
+    .getFileData(url)
+    .then(({ data }) => {
       if (data) commit(types.SET_FILE_DATA, { data, file });
       if (openFile) commit(types.TOGGLE_FILE_OPEN, path);
-      if (makeFileActive) dispatch('setFileActive', path);
-      commit(types.TOGGLE_LOADING, { entry: file });
+
+      if (makeFileActive) {
+        setPageTitleForFile(state, file);
+        dispatch('setFileActive', path);
+      }
     })
     .catch(() => {
-      commit(types.TOGGLE_LOADING, { entry: file });
       dispatch('setErrorMessage', {
-        text: __('An error occurred whilst loading the file.'),
+        text: __('An error occurred while loading the file.'),
         action: payload =>
           dispatch('getFileData', payload).then(() => dispatch('setErrorMessage', null)),
         actionText: __('Please try again'),
         actionPayload: { path, makeFileActive },
       });
+    })
+    .finally(() => {
+      commit(types.TOGGLE_LOADING, { entry: file, forceValue: false });
     });
 };
 
@@ -100,71 +109,64 @@ export const setFileMrChange = ({ commit }, { file, mrChange }) => {
 
 export const getRawFileData = ({ state, commit, dispatch, getters }, { path }) => {
   const file = state.entries[path];
-  return new Promise((resolve, reject) => {
-    service
-      .getRawFileData(file)
-      .then(raw => {
-        if (!(file.tempFile && !file.prevPath)) commit(types.SET_FILE_RAW_DATA, { file, raw });
-        if (file.mrChange && file.mrChange.new_file === false) {
-          const baseSha =
-            (getters.currentMergeRequest && getters.currentMergeRequest.baseCommitSha) || '';
+  const stagedFile = state.stagedFiles.find(f => f.path === path);
 
-          service
-            .getBaseRawFileData(file, baseSha)
-            .then(baseRaw => {
-              commit(types.SET_FILE_BASE_RAW_DATA, {
-                file,
-                baseRaw,
-              });
-              resolve(raw);
-            })
-            .catch(e => {
-              reject(e);
-            });
-        } else {
-          resolve(raw);
-        }
-      })
-      .catch(() => {
-        dispatch('setErrorMessage', {
-          text: __('An error occurred whilst loading the file content.'),
-          action: payload =>
-            dispatch('getRawFileData', payload).then(() => dispatch('setErrorMessage', null)),
-          actionText: __('Please try again'),
-          actionPayload: { path },
+  const fileDeletedAndReadded = getters.isFileDeletedAndReadded(path);
+  commit(types.TOGGLE_LOADING, { entry: file, forceValue: true });
+  return service
+    .getRawFileData(fileDeletedAndReadded ? stagedFile : file)
+    .then(raw => {
+      if (!(file.tempFile && !file.prevPath && !fileDeletedAndReadded))
+        commit(types.SET_FILE_RAW_DATA, { file, raw, fileDeletedAndReadded });
+
+      if (file.mrChange && file.mrChange.new_file === false) {
+        const baseSha =
+          (getters.currentMergeRequest && getters.currentMergeRequest.baseCommitSha) || '';
+
+        return service.getBaseRawFileData(file, state.currentProjectId, baseSha).then(baseRaw => {
+          commit(types.SET_FILE_BASE_RAW_DATA, {
+            file,
+            baseRaw,
+          });
+          return raw;
         });
-        reject();
+      }
+      return raw;
+    })
+    .catch(e => {
+      dispatch('setErrorMessage', {
+        text: __('An error occurred while loading the file content.'),
+        action: payload =>
+          dispatch('getRawFileData', payload).then(() => dispatch('setErrorMessage', null)),
+        actionText: __('Please try again'),
+        actionPayload: { path },
       });
-  });
+      throw e;
+    })
+    .finally(() => {
+      commit(types.TOGGLE_LOADING, { entry: file, forceValue: false });
+    });
 };
 
-export const changeFileContent = ({ commit, dispatch, state }, { path, content }) => {
+export const changeFileContent = ({ commit, state, getters }, { path, content }) => {
   const file = state.entries[path];
   commit(types.UPDATE_FILE_CONTENT, {
     path,
-    content: addFinalNewlineIfNeeded(content),
+    content,
   });
 
   const indexOfChangedFile = state.changedFiles.findIndex(f => f.path === path);
 
   if (file.changed && indexOfChangedFile === -1) {
-    commit(types.ADD_FILE_TO_CHANGED, path);
-  } else if (!file.changed && indexOfChangedFile !== -1) {
+    commit(types.STAGE_CHANGE, { path, diffInfo: getters.getDiffInfo(path) });
+  } else if (!file.changed && !file.tempFile && indexOfChangedFile !== -1) {
     commit(types.REMOVE_FILE_FROM_CHANGED, path);
   }
-
-  dispatch('burstUnusedSeal', {}, { root: true });
 };
 
 export const setFileLanguage = ({ getters, commit }, { fileLanguage }) => {
   if (getters.activeFile) {
     commit(types.SET_FILE_LANGUAGE, { file: getters.activeFile, fileLanguage });
-  }
-};
-
-export const setFileEOL = ({ getters, commit }, { eol }) => {
-  if (getters.activeFile) {
-    commit(types.SET_FILE_EOL, { file: getters.activeFile, eol });
   }
 };
 
@@ -182,50 +184,69 @@ export const setFileViewMode = ({ commit }, { file, viewMode }) => {
   commit(types.SET_FILE_VIEWMODE, { file, viewMode });
 };
 
-export const discardFileChanges = ({ dispatch, state, commit, getters }, path) => {
+export const restoreOriginalFile = ({ dispatch, state, commit }, path) => {
   const file = state.entries[path];
+  const isDestructiveDiscard = file.tempFile || file.prevPath;
 
   if (file.deleted && file.parentPath) {
     dispatch('restoreTree', file.parentPath);
   }
 
-  commit(types.DISCARD_FILE_CHANGES, path);
-  commit(types.REMOVE_FILE_FROM_CHANGED, path);
-
-  if (file.prevPath) {
-    dispatch('discardFileChanges', file.prevPath);
+  if (isDestructiveDiscard) {
+    dispatch('closeFile', file);
   }
 
-  if (file.tempFile && file.opened) {
-    commit(types.TOGGLE_FILE_OPEN, path);
-  } else if (getters.activeFile && file.path === getters.activeFile.path) {
+  if (file.tempFile) {
+    dispatch('deleteEntry', file.path);
+  } else {
+    commit(types.DISCARD_FILE_CHANGES, file.path);
+  }
+
+  if (file.prevPath) {
+    dispatch('renameEntry', {
+      path: file.path,
+      name: file.prevName,
+      parentPath: file.prevParentPath,
+    });
+  }
+};
+
+export const discardFileChanges = ({ dispatch, state, commit, getters }, path) => {
+  const file = state.entries[path];
+  const isDestructiveDiscard = file.tempFile || file.prevPath;
+
+  dispatch('restoreOriginalFile', path);
+
+  if (!isDestructiveDiscard && file.path === getters.activeFile?.path) {
     dispatch('updateDelayViewerUpdated', true)
       .then(() => {
-        router.push(`/project${file.url}`);
+        dispatch('router/push', getters.getUrlForPath(file.path), { root: true });
       })
       .catch(e => {
         throw e;
       });
   }
 
+  commit(types.REMOVE_FILE_FROM_CHANGED, path);
+
   eventHub.$emit(`editor.update.model.new.content.${file.key}`, file.content);
   eventHub.$emit(`editor.update.model.dispose.unstaged-${file.key}`, file.content);
 };
 
-export const stageChange = ({ commit, state, dispatch }, path) => {
-  const stagedFile = state.stagedFiles.find(f => f.path === path);
-  const openFile = state.openFiles.find(f => f.path === path);
+export const stageChange = ({ commit, dispatch, getters }, path) => {
+  const stagedFile = getters.getStagedFile(path);
+  const openFile = getters.getOpenFile(path);
 
-  commit(types.STAGE_CHANGE, path);
+  commit(types.STAGE_CHANGE, { path, diffInfo: getters.getDiffInfo(path) });
   commit(types.SET_LAST_COMMIT_MSG, '');
 
   if (stagedFile) {
     eventHub.$emit(`editor.update.model.new.content.staged-${stagedFile.key}`, stagedFile.content);
   }
 
-  if (openFile && openFile.active) {
-    const file = state.stagedFiles.find(f => f.path === path);
+  const file = getters.getStagedFile(path);
 
+  if (openFile && openFile.active && file) {
     dispatch('openPendingTab', {
       file,
       keyPrefix: stageKeys.staged,
@@ -233,14 +254,14 @@ export const stageChange = ({ commit, state, dispatch }, path) => {
   }
 };
 
-export const unstageChange = ({ commit, dispatch, state }, path) => {
-  const openFile = state.openFiles.find(f => f.path === path);
+export const unstageChange = ({ commit, dispatch, getters }, path) => {
+  const openFile = getters.getOpenFile(path);
 
-  commit(types.UNSTAGE_CHANGE, path);
+  commit(types.UNSTAGE_CHANGE, { path, diffInfo: getters.getDiffInfo(path) });
 
-  if (openFile && openFile.active) {
-    const file = state.changedFiles.find(f => f.path === path);
+  const file = getters.getChangedFile(path);
 
+  if (openFile && openFile.active && file) {
     dispatch('openPendingTab', {
       file,
       keyPrefix: stageKeys.unstaged,
@@ -248,14 +269,16 @@ export const unstageChange = ({ commit, dispatch, state }, path) => {
   }
 };
 
-export const openPendingTab = ({ commit, getters, state }, { file, keyPrefix }) => {
+export const openPendingTab = ({ commit, dispatch, getters, state }, { file, keyPrefix }) => {
   if (getters.activeFile && getters.activeFile.key === `${keyPrefix}-${file.key}`) return false;
 
   state.openFiles.forEach(f => eventHub.$emit(`editor.update.model.dispose.${f.key}`));
 
   commit(types.ADD_PENDING_TAB, { file, keyPrefix });
 
-  router.push(`/project/${file.projectId}/tree/${state.currentBranchId}/`);
+  dispatch('router/push', `/project/${state.currentProjectId}/tree/${state.currentBranchId}/`, {
+    root: true,
+  });
 
   return true;
 };

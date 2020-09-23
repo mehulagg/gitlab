@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'SAML provider settings' do
+RSpec.describe 'SAML provider settings' do
   include CookieHelper
 
   let(:user) { create(:user) }
@@ -24,7 +24,7 @@ describe 'SAML provider settings' do
   end
 
   def test_sso
-    click_link('Test SAML SSO')
+    click_link('Verify SAML Configuration')
   end
 
   def stub_saml_config
@@ -60,7 +60,7 @@ describe 'SAML provider settings' do
     it 'allows creation of new provider' do
       visit group_saml_providers_path(group)
 
-      fill_in 'Identity provider single sign on URL', with: 'https://localhost:9999/adfs/ls'
+      fill_in 'Identity provider single sign-on URL', with: 'https://localhost:9999/adfs/ls'
       fill_in 'Certificate fingerprint', with: 'aa:bb:cc:dd:ee:ff:11:22:33:44:55:66:77:88:99:0a:1b:2c:3d:00'
 
       expect { submit }.to change(SamlProvider, :count).by(1)
@@ -75,7 +75,7 @@ describe 'SAML provider settings' do
     end
 
     context 'with existing SAML provider' do
-      let!(:saml_provider) { create(:saml_provider, group: group) }
+      let!(:saml_provider) { create(:saml_provider, group: group, prohibited_outer_forks: false) }
 
       it 'allows provider to be disabled', :js do
         visit group_saml_providers_path(group)
@@ -88,38 +88,27 @@ describe 'SAML provider settings' do
       it 'displays user login URL' do
         visit group_saml_providers_path(group)
 
-        login_url = find('label', text: 'GitLab single sign on URL').find('~* a').text
+        login_url = find('label', text: 'GitLab single sign-on URL').find('~* a').text
 
         expect(login_url).to include "/groups/#{group.full_path}/-/saml/sso"
         expect(login_url).to end_with "?token=#{group.reload.saml_discovery_token}"
       end
 
-      context 'enforced sso enabled', :js do
-        it 'updates the flag' do
-          stub_feature_flags(enforced_sso: true)
+      it 'updates the enforced sso setting', :js do
+        visit group_saml_providers_path(group)
 
-          visit group_saml_providers_path(group)
+        find('.js-group-saml-enforced-sso-toggle').click
 
-          find('.js-group-saml-enforced-sso-toggle').click
-
-          expect { submit }.to change { saml_provider.reload.enforced_sso }.to(true)
-        end
-      end
-
-      context 'enforced sso disabled' do
-        it 'does not update the flag' do
-          stub_feature_flags(enforced_sso: false)
-
-          visit group_saml_providers_path(group)
-
-          expect(page).not_to have_selector('.js-group-saml-enforced-sso-toggle')
-        end
+        expect { submit }.to change { saml_provider.reload.enforced_sso }.to(true)
       end
 
       context 'enforced_group_managed_accounts enabled', :js do
-        it 'updates the flag' do
+        before do
+          create(:group_saml_identity, saml_provider: saml_provider, user: user)
           stub_feature_flags(group_managed_accounts: true)
+        end
 
+        it 'updates the enforced_group_managed_accounts flag' do
           visit group_saml_providers_path(group)
 
           find('.js-group-saml-enforced-sso-toggle').click
@@ -127,33 +116,65 @@ describe 'SAML provider settings' do
 
           expect { submit }.to change { saml_provider.reload.enforced_group_managed_accounts }.to(true)
         end
+
+        it 'updates the prohibited_outer_forks flag' do
+          visit group_saml_providers_path(group)
+
+          find('.js-group-saml-enforced-sso-toggle').click
+          find('.js-group-saml-enforced-group-managed-accounts-toggle').click
+          find('.js-group-saml-prohibited-outer-forks-toggle').click
+
+          expect { submit }.to change { saml_provider.reload.prohibited_outer_forks }.to(true)
+        end
       end
 
       context 'enforced_group_managed_accounts disabled' do
-        it 'does not update the flag' do
+        it 'does not render toggles' do
           stub_feature_flags(group_managed_accounts: false)
 
           visit group_saml_providers_path(group)
 
           expect(page).not_to have_selector('.js-group-saml-enforced-group-managed-accounts-toggle')
+          expect(page).not_to have_selector('.js-group-saml-prohibited-outer-forks-toggle')
         end
       end
     end
 
     describe 'test button' do
       let!(:saml_provider) { create(:saml_provider, group: group) }
+      let(:raw_saml_response) do
+        fixture = File.read('ee/spec/fixtures/saml/response.xml')
+        Base64.encode64(fixture)
+      end
 
       before do
         mock_group_saml(uid: '123')
+
+        allow_any_instance_of(Gitlab::Auth::GroupSaml::ResponseStore).to receive(:get_raw).and_return(raw_saml_response)
+
+        allow_any_instance_of(OmniAuth::Strategies::GroupSaml).to receive(:mock_callback_call) do
+          response = Rack::Response.new
+          response.redirect(group_saml_providers_path(group))
+          response.finish
+        end
       end
 
-      it 'POSTs to the SSO path for the group' do
+      it 'displays XML validation errors' do
         visit group_saml_providers_path(group)
 
         test_sso
 
         expect(current_path).to eq group_saml_providers_path(group)
-        expect(page).to have_content("SAML for #{group.name} was added to your connected accounts")
+        expect(page).to have_content("Fingerprint mismatch")
+        expect(page).to have_content("The attributes have expired, based on the SessionNotOnOrAfter")
+      end
+
+      it 'displays SAML Response XML' do
+        visit group_saml_providers_path(group)
+
+        test_sso
+
+        expect(page).to have_content("<saml:Issuer>")
       end
     end
   end
@@ -230,6 +251,37 @@ describe 'SAML provider settings' do
 
             expect(current_path).to eq group_path(group)
             expect(page).to have_content('Already signed in')
+          end
+        end
+      end
+
+      context 'when user has access locked' do
+        before do
+          user.lock_access!
+          identity = create(:group_saml_identity, saml_provider: saml_provider, user: user)
+          mock_group_saml(uid: identity.extern_uid)
+        end
+
+        it 'warns user that their account is locked' do
+          visit sso_group_saml_providers_path(group)
+
+          click_link 'Sign in with Single Sign-On'
+
+          expect(page).to have_content('Your account is locked.')
+        end
+
+        context 'with 2FA' do
+          before do
+            user.update!(otp_required_for_login: true)
+          end
+
+          it 'warns user their account is locked' do
+            visit sso_group_saml_providers_path(group)
+
+            click_link 'Sign in with Single Sign-On'
+
+            expect(page).to have_content('Your account is locked.')
+            expect(current_path).to eq sso_group_saml_providers_path(group)
           end
         end
       end

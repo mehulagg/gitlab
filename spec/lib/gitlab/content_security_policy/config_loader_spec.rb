@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::ContentSecurityPolicy::ConfigLoader do
+RSpec.describe Gitlab::ContentSecurityPolicy::ConfigLoader do
   let(:policy) { ActionDispatch::ContentSecurityPolicy.new }
   let(:csp_config) do
     {
@@ -19,7 +19,7 @@ describe Gitlab::ContentSecurityPolicy::ConfigLoader do
     }
   end
 
-  context '.default_settings_hash' do
+  describe '.default_settings_hash' do
     it 'returns empty defaults' do
       settings = described_class.default_settings_hash
 
@@ -33,7 +33,7 @@ describe Gitlab::ContentSecurityPolicy::ConfigLoader do
     end
   end
 
-  context '#load' do
+  describe '#load' do
     subject { described_class.new(csp_config[:directives]) }
 
     def expected_config(directive)

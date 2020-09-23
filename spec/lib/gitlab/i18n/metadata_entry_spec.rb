@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::I18n::MetadataEntry do
+RSpec.describe Gitlab::I18n::MetadataEntry do
   describe '#expected_forms' do
     it 'returns the number of plurals' do
       data = {

@@ -1,5 +1,8 @@
 ---
 disqus_identifier: 'https://docs.gitlab.com/ee/workflow/notifications.html'
+stage: Plan
+group: Project Management
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 ---
 
 # GitLab Notification Emails
@@ -68,7 +71,7 @@ Notification scope is applied in order of precedence (highest to lowest):
 
 You can select a notification level for each project. This can be useful if you need to closely monitor activity in select projects.
 
-![notification settings](img/notification_project_settings.png)
+![notification settings](img/notification_project_settings_v12_8.png)
 
 To select a notification level for a project, use either of these methods:
 
@@ -77,17 +80,20 @@ To select a notification level for a project, use either of these methods:
 1. Locate the project in the **Projects** section.
 1. Select the desired [notification level](#notification-levels).
 
----
+Or:
 
 1. Navigate to the project's page.
 1. Click the notification dropdown, marked with a bell icon.
 1. Select the desired [notification level](#notification-levels).
 
+<i class="fa fa-youtube-play youtube" aria-hidden="true"></i>
+For a demonstration of how to be notified when a new release is available, see [Notification for releases](https://www.youtube.com/watch?v=qyeNkGgqmH4).
+
 #### Group notifications
 
 You can select a notification level and email address for each group.
 
-![notification settings](img/notification_group_settings.png)
+![notification settings](img/notification_group_settings_v12_8.png)
 
 ##### Group notification level
 
@@ -137,7 +143,9 @@ Users will be notified of the following events:
 | New SSH key added            | User                | Security email, always sent. |
 | New email added              | User                | Security email, always sent. |
 | Email changed                | User                | Security email, always sent. |
-| Password changed             | User                | Security email, always sent. |
+| Password changed             | User                | Security email, always sent when user changes their own password |
+| Password changed by administrator | User | Security email, always sent when an administrator changes the password of another user |
+| Two-factor authentication disabled | User          | Security email, always sent. |
 | New user created             | User                | Sent on user creation, except for OmniAuth (LDAP)|
 | User added to project        | User                | Sent when user is added to project |
 | Project access level changed | User                | Sent when user project access level is changed |
@@ -159,6 +167,9 @@ In most of the below cases, the notification will be sent to:
 - Subscribers: anyone who manually subscribed to the issue, merge request, or epic **(ULTIMATE)**
 - Custom: Users with notification level "custom" who turned on notifications for any of the events present in the table below
 
+NOTE: **Note:**
+To minimize the number of notifications that do not require any action, from [GitLab 12.9 onwards](https://gitlab.com/gitlab-org/gitlab/-/issues/616), eligible approvers are no longer notified for all the activities in their projects. To receive them they have to change their user notification settings to **Watch** instead.
+
 | Event                  | Sent to |
 |------------------------|---------|
 | New issue              |         |
@@ -174,11 +185,13 @@ In most of the below cases, the notification will be sent to:
 | Close merge request    |         |
 | Reopen merge request   |         |
 | Merge merge request    |         |
+| Merge when pipeline succeeds ([Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/211961) in GitLab 13.4) |     |
 | Change milestone merge request | Subscribers, participants mentioned, and Custom notification level with this event selected |
 | Remove milestone merge request | Subscribers, participants mentioned, and Custom notification level with this event selected |
 | New comment            | The above, plus anyone mentioned by `@username` in the comment, with notification level "Mention" or higher |
 | Failed pipeline        | The author of the pipeline |
-| Successful pipeline    | The author of the pipeline, if they have the custom notification setting for successful pipelines set |
+| Fixed pipeline    | The author of the pipeline. Enabled by default. [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/24309) in GitLab 13.1. |
+| Successful pipeline    | The author of the pipeline, if they have the custom notification setting for successful pipelines set. If the pipeline failed previously, a `Fixed pipeline` message will be sent for the first successful pipeline after the failure, then a `Successful pipeline` message for any further successful pipelines. |
 | New epic **(ULTIMATE)** |        |
 | Close epic **(ULTIMATE)** |      |
 | Reopen epic **(ULTIMATE)** |     |
@@ -196,36 +209,38 @@ If an open merge request becomes unmergeable due to conflict, its author will be
 If a user has also set the merge request to automatically merge once pipeline succeeds,
 then that user will also be notified.
 
-## Email Headers
+## Filtering email
 
-Notification emails include headers that provide extra content about the notification received:
+Notification email messages include GitLab-specific headers. You can filter the notification emails based on the content of these headers to better manage your notifications. For example, you could filter all emails for a specific project where you are being assigned either a merge request or issue.
+
+The following table lists all GitLab-specific email headers:
 
 | Header                      | Description                                                             |
-|-----------------------------|-------------------------------------------------------------------------|
-| X-GitLab-Project            | The name of the project the notification belongs to                     |
-| X-GitLab-Project-Id         | The ID of the project                                                   |
-| X-GitLab-Project-Path       | The path of the project                                                 |
-| X-GitLab-(Resource)-ID      | The ID of the resource the notification is for, where resource is `Issue`, `MergeRequest`, `Commit`, etc|
-| X-GitLab-Discussion-ID      | Only in comment emails, the ID of the thread the comment is from    |
-| X-GitLab-Pipeline-Id        | Only in pipeline emails, the ID of the pipeline the notification is for |
-| X-GitLab-Reply-Key          | A unique token to support reply by email                                |
-| X-GitLab-NotificationReason | The reason for being notified. "mentioned", "assigned", etc             |
-| List-Id                     | The path of the project in a RFC 2919 mailing list identifier useful for email organization, for example, with Gmail filters |
+|------------------------------------|-------------------------------------------------------------------------|
+| `X-GitLab-Group-Id` **(PREMIUM)**    | The group's ID. Only present on notification emails for epics.         |
+| `X-GitLab-Group-Path` **(PREMIUM)**  | The group's path. Only present on notification emails for epics.       |
+| `X-GitLab-Project`                   | The name of the project the notification belongs to.                     |
+| `X-GitLab-Project-Id`                | The project's ID.                                                   |
+| `X-GitLab-Project-Path`              | The project's path.                                                 |
+| `X-GitLab-(Resource)-ID`             | The ID of the resource the notification is for. The resource, for example, can be `Issue`, `MergeRequest`, `Commit`, or another such resource. |
+| `X-GitLab-Discussion-ID`             | The ID of the thread the comment belongs to, in notification emails for comments.    |
+| `X-GitLab-Pipeline-Id`               | The ID of the pipeline the notification is for, in notification emails for pipelines. |
+| `X-GitLab-Reply-Key`                 | A unique token to support reply by email.                                |
+| `X-GitLab-NotificationReason`        | The reason for the notification. This can be `mentioned`, `assigned`, or `own_activity`. |
+| `List-Id`                            | The path of the project in an RFC 2919 mailing list identifier. This is useful for email organization with filters, for example. |
 
 ### X-GitLab-NotificationReason
 
-This header holds the reason for the notification to have been sent out,
-where reason can be `mentioned`, `assigned`, `own_activity`, etc.
-Only one reason is sent out according to its priority:
+The `X-GitLab-NotificationReason` header contains the reason for the notification. The value is one of the following, in order of priority:
 
 - `own_activity`
 - `assigned`
 - `mentioned`
 
-The reason in this header will also be shown in the footer of the notification email. For example an email with the
+The reason for the notification is also included in the footer of the notification email. For example an email with the
 reason `assigned` will have this sentence in the footer:
-`"You are receiving this email because you have been assigned an item on {configured GitLab hostname}"`
+
+- `You are receiving this email because you have been assigned an item on <configured GitLab hostname>.`
 
 NOTE: **Note:**
-Only reasons listed above have been implemented so far.
-Further implementation is [being discussed](https://gitlab.com/gitlab-org/gitlab/issues/20689).
+Notification of other events is being considered for inclusion in the `X-GitLab-NotificationReason` header. For details, see this [related issue](https://gitlab.com/gitlab-org/gitlab/-/issues/20689).

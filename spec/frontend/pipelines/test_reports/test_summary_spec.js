@@ -1,9 +1,14 @@
-import Summary from '~/pipelines/components/test_reports/test_summary.vue';
 import { mount } from '@vue/test-utils';
-import { testSuites } from './mock_data';
+import { getJSONFixture } from 'helpers/fixtures';
+import Summary from '~/pipelines/components/test_reports/test_summary.vue';
+import { formattedTime } from '~/pipelines/stores/test_reports/utils';
 
 describe('Test reports summary', () => {
   let wrapper;
+
+  const {
+    test_suites: [testSuite],
+  } = getJSONFixture('pipelines/test_report.json');
 
   const backButton = () => wrapper.find('.js-back-button');
   const totalTests = () => wrapper.find('.js-total-tests');
@@ -13,7 +18,7 @@ describe('Test reports summary', () => {
   const duration = () => wrapper.find('.js-duration');
 
   const defaultProps = {
-    report: testSuites[0],
+    report: testSuite,
     showBack: false,
   };
 
@@ -56,7 +61,7 @@ describe('Test reports summary', () => {
     });
 
     it('displays the correct total', () => {
-      expect(totalTests().text()).toBe('4 jobs');
+      expect(totalTests().text()).toBe('4 tests');
     });
 
     it('displays the correct failure count', () => {
@@ -72,7 +77,30 @@ describe('Test reports summary', () => {
     });
 
     it('displays the correctly formatted duration', () => {
-      expect(duration().text()).toBe('00:01:00');
+      expect(duration().text()).toBe(formattedTime(testSuite.total_time));
+    });
+  });
+
+  describe('success percentage calculation', () => {
+    it.each`
+      name                                     | successCount | totalCount | skippedCount | result
+      ${'displays 0 when there are no tests'}  | ${0}         | ${0}       | ${0}         | ${'0'}
+      ${'displays whole number when possible'} | ${10}        | ${50}      | ${0}         | ${'20'}
+      ${'excludes skipped tests from total'}   | ${10}        | ${50}      | ${5}         | ${'22.22'}
+      ${'rounds to 0.01'}                      | ${1}         | ${16604}   | ${0}         | ${'0.01'}
+      ${'correctly rounds to 50'}              | ${8302}      | ${16604}   | ${0}         | ${'50'}
+      ${'rounds down for large close numbers'} | ${16603}     | ${16604}   | ${0}         | ${'99.99'}
+      ${'correctly displays 100'}              | ${16604}     | ${16604}   | ${0}         | ${'100'}
+    `('$name', ({ successCount, totalCount, skippedCount, result }) => {
+      createComponent({
+        report: {
+          success_count: successCount,
+          skipped_count: skippedCount,
+          total_count: totalCount,
+        },
+      });
+
+      expect(successRate().text()).toBe(`${result}% success rate`);
     });
   });
 });

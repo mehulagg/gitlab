@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Ci::BuildPresenter do
+RSpec.describe Ci::BuildPresenter do
   subject(:presenter) { described_class.new(build) }
 
   describe '#callout_failure_message' do

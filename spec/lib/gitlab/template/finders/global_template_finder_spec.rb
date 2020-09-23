@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Template::Finders::GlobalTemplateFinder do
+RSpec.describe Gitlab::Template::Finders::GlobalTemplateFinder do
   let(:base_dir) { Dir.mktmpdir }
 
   def create_template!(name_with_category)
@@ -15,23 +15,98 @@ describe Gitlab::Template::Finders::GlobalTemplateFinder do
     FileUtils.rm_rf(base_dir)
   end
 
-  subject(:finder) { described_class.new(base_dir, '', 'Foo' => '', 'Bar' => 'bar') }
+  subject(:finder) { described_class.new(base_dir, '', { 'General' => '', 'Bar' => 'Bar' }, excluded_patterns: excluded_patterns) }
+
+  let(:excluded_patterns) { [] }
 
   describe '.find' do
-    it 'finds a template in the Foo category' do
-      create_template!('test-template')
+    context 'with a non-prefixed General template' do
+      before do
+        create_template!('test-template')
+      end
 
-      expect(finder.find('test-template')).to be_present
+      it 'finds the template with no prefix' do
+        expect(finder.find('test-template')).to be_present
+      end
+
+      it 'does not find a prefixed template' do
+        expect(finder.find('Bar/test-template')).to be_nil
+      end
+
+      it 'does not permit path traversal requests' do
+        expect { finder.find('../foo') }.to raise_error(/Invalid path/)
+      end
+
+      context 'while listed as an exclusion' do
+        let(:excluded_patterns) { [%r{^test-template$}] }
+
+        it 'does not find the template without a prefix' do
+          expect(finder.find('test-template')).to be_nil
+        end
+
+        it 'does not find the template with a prefix' do
+          expect(finder.find('Bar/test-template')).to be_nil
+        end
+
+        it 'finds another prefixed template with the same name' do
+          create_template!('Bar/test-template')
+
+          expect(finder.find('test-template')).to be_nil
+          expect(finder.find('Bar/test-template')).to be_present
+        end
+      end
     end
 
-    it 'finds a template in the Bar category' do
-      create_template!('bar/test-template')
+    context 'with a prefixed template' do
+      before do
+        create_template!('Bar/test-template')
+      end
 
-      expect(finder.find('test-template')).to be_present
-    end
+      it 'finds the template with a prefix' do
+        expect(finder.find('Bar/test-template')).to be_present
+      end
 
-    it 'does not permit path traversal requests' do
-      expect { finder.find('../foo') }.to raise_error(/Invalid path/)
+      # NOTE: This spec fails, the template Bar/test-template is found
+      # See Gitlab issue: https://gitlab.com/gitlab-org/gitlab/issues/205719
+      xit 'does not find the template without a prefix' do
+        expect(finder.find('test-template')).to be_nil
+      end
+
+      it 'does not permit path traversal requests' do
+        expect { finder.find('../foo') }.to raise_error(/Invalid path/)
+      end
+
+      context 'while listed as an exclusion' do
+        let(:excluded_patterns) { [%r{^Bar/test-template$}] }
+
+        it 'does not find the template with a prefix' do
+          expect(finder.find('Bar/test-template')).to be_nil
+        end
+
+        # NOTE: This spec fails, the template Bar/test-template is found
+        # See Gitlab issue: https://gitlab.com/gitlab-org/gitlab/issues/205719
+        xit 'does not find the template without a prefix' do
+          expect(finder.find('test-template')).to be_nil
+        end
+
+        it 'finds another non-prefixed template with the same name' do
+          create_template!('Bar/test-template')
+
+          expect(finder.find('test-template')).to be_present
+          expect(finder.find('Bar/test-template')).to be_nil
+        end
+      end
+
+      context 'while listed as an exclusion' do
+        let(:excluded_patterns) { [%r{\.latest$}] }
+
+        it 'excludes the template matched the pattern' do
+          create_template!('test-template.latest')
+
+          expect(finder.find('test-template')).to be_present
+          expect(finder.find('test-template.latest')).to be_nil
+        end
+      end
     end
   end
 end

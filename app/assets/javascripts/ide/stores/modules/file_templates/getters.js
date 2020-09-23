@@ -1,4 +1,4 @@
-import { activityBarViews } from '../../../constants';
+import { leftSidebarViews } from '../../../constants';
 import { __ } from '~/locale';
 
 export const templateTypes = () => [
@@ -18,10 +18,12 @@ export const templateTypes = () => [
     name: __('Dockerfile'),
     key: 'dockerfiles',
   },
+  {
+    name: '.metrics-dashboard.yml',
+    key: 'metrics_dashboard_ymls',
+  },
 ];
 
 export const showFileTemplatesBar = (_, getters, rootState) => name =>
   getters.templateTypes.find(t => t.name === name) &&
-  rootState.currentActivityView === activityBarViews.edit;
-
-export default () => {};
+  rootState.currentActivityView === leftSidebarViews.edit.name;

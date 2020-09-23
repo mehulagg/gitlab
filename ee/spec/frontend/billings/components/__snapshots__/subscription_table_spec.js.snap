@@ -46,11 +46,11 @@ Array [
 
 exports[`SubscriptionTable component when created matches the snapshot 1`] = `
 <div>
-  <glloadingicon-stub
-    class="prepend-top-10 append-bottom-10"
+  <gl-loading-icon-stub
+    class="gl-mt-3 gl-mb-3"
     color="orange"
     label="Loading subscriptions"
-    size="3"
+    size="lg"
   />
 </div>
 `;

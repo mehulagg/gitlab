@@ -4,10 +4,11 @@ comments: false
 
 # Upgrading from Community Edition to Enterprise Edition from source
 
-NOTE: **NOTE** In the past we used separate documents for upgrading from
+NOTE: **Note:**
+In the past we used separate documents for upgrading from
 Community Edition to Enterprise Edition. These documents can be found in the
 [`doc/update` directory of Enterprise Edition's source
-code][old-ee-upgrade-docs].
+code](https://gitlab.com/gitlab-org/gitlab/tree/11-8-stable-ee/doc/update).
 
 If you want to upgrade the version only, for example 11.8 to 11.9, *without* changing the
 GitLab edition you are using (Community or Enterprise), see the
@@ -32,7 +33,7 @@ use the following branches:
 
 Make a backup just in case something goes wrong:
 
-```sh
+```shell
 cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:backup:create RAILS_ENV=production
 ```
@@ -42,45 +43,48 @@ privileges to the GitLab user on the database version.
 
 ### 1. Stop server
 
-```sh
+```shell
 sudo service gitlab stop
 ```
 
 ### 2. Get the EE code
 
-```sh
+```shell
 cd /home/git/gitlab
 sudo -u git -H git remote add -f ee https://gitlab.com/gitlab-org/gitlab.git
 sudo -u git -H git checkout EE_BRANCH
 ```
 
-### 3. Install libs, migrations, etc
+### 3. Install libraries, migrations, etc
 
-```sh
+```shell
 cd /home/git/gitlab
 
-# MySQL installations (note: the line below states '--without postgres')
-sudo -u git -H bundle install --without postgres development test --deployment
+sudo -u git -H bundle install --deployment --without development test mysql aws kerberos
 
-# PostgreSQL installations (note: the line below states '--without mysql')
-sudo -u git -H bundle install --without mysql development test --deployment
+# Optional: clean up old gems
+sudo -u git -H bundle clean
 
 # Run database migrations
 sudo -u git -H bundle exec rake db:migrate RAILS_ENV=production
 
-# Clean up assets and cache
-sudo -u git -H bundle exec rake assets:clean assets:precompile cache:clear RAILS_ENV=production
+# Compile GetText PO files
+sudo -u git -H bundle exec rake gettext:compile RAILS_ENV=production
+
+# Update node dependencies and recompile assets
+sudo -u git -H bundle exec rake yarn:install gitlab:assets:clean gitlab:assets:compile RAILS_ENV=production NODE_ENV=production NODE_OPTIONS="--max_old_space_size=4096"
+
+# Clean up cache
+sudo -u git -H bundle exec rake cache:clear RAILS_ENV=production
 ```
 
-### 4. Install `gitlab-elasticsearch-indexer` (optional) **(STARTER ONLY)**
+### 4. Install `gitlab-elasticsearch-indexer` **(STARTER ONLY)**
 
-If you're interested in using GitLab's new [Elasticsearch repository indexer](../integration/elasticsearch.md)
-(currently in beta) please follow the instructions on the
-document linked above and enable the indexer usage in the GitLab admin settings.
+Please follow the [install instruction](../integration/elasticsearch.md#installing-elasticsearch).
 
 ### 5. Start application
 
-```sh
+```shell
 sudo service gitlab start
 sudo service nginx restart
 ```
@@ -89,13 +93,13 @@ sudo service nginx restart
 
 Check if GitLab and its environment are configured correctly:
 
-```sh
+```shell
 sudo -u git -H bundle exec rake gitlab:env:info RAILS_ENV=production
 ```
 
 To make sure you didn't miss anything run a more thorough check with:
 
-```sh
+```shell
 sudo -u git -H bundle exec rake gitlab:check RAILS_ENV=production
 ```
 
@@ -105,14 +109,14 @@ If all items are green, then congratulations upgrade complete!
 
 ### 1. Revert the code to the previous version
 
-```sh
+```shell
 cd /home/git/gitlab
 sudo -u git -H git checkout CE_BRANCH
 ```
 
 ### 2. Restore from the backup
 
-```sh
+```shell
 cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:backup:restore RAILS_ENV=production
 ```
@@ -130,5 +134,3 @@ Example:
 
 Additional instructions here.
 -->
-
-[old-ee-upgrade-docs]: https://gitlab.com/gitlab-org/gitlab/tree/11-8-stable-ee/doc/update

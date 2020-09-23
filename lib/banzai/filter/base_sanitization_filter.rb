@@ -7,6 +7,7 @@ module Banzai
     #
     # - Banzai::Filter::SanitizationFilter (Markdown)
     # - Banzai::Filter::AsciiDocSanitizationFilter (AsciiDoc/Asciidoctor)
+    # - Banzai::Filter::BroadcastMessageSanitizationFilter (Markdown with styled links and line breaks)
     #
     # Extends HTML::Pipeline::SanitizationFilter with common rules.
     class BaseSanitizationFilter < HTML::Pipeline::SanitizationFilter
@@ -24,7 +25,7 @@ module Banzai
 
           # Allow data-math-style attribute in order to support LaTeX formatting
           whitelist[:attributes]['code'] = %w(data-math-style)
-          whitelist[:attributes]['pre'] = %w(data-math-style)
+          whitelist[:attributes]['pre'] = %w(data-math-style data-mermaid-style)
 
           # Allow html5 details/summary elements
           whitelist[:elements].push('details')

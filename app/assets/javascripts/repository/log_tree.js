@@ -1,25 +1,15 @@
+import produce from 'immer';
+import { normalizeData } from 'ee_else_ce/repository/utils/commit';
 import axios from '~/lib/utils/axios_utils';
-import getCommits from './queries/getCommits.query.graphql';
-import getProjectPath from './queries/getProjectPath.query.graphql';
-import getRef from './queries/getRef.query.graphql';
+import commitsQuery from './queries/commits.query.graphql';
+import projectPathQuery from './queries/project_path.query.graphql';
+import refQuery from './queries/ref.query.graphql';
 
-let fetchpromise;
-let resolvers = [];
+const fetchpromises = {};
+const resolvers = {};
 
-export function normalizeData(data) {
-  return data.map(d => ({
-    sha: d.commit.id,
-    message: d.commit.message,
-    committedDate: d.commit.committed_date,
-    commitPath: d.commit_path,
-    fileName: d.file_name,
-    type: d.type,
-    __typename: 'LogTreeCommit',
-  }));
-}
-
-export function resolveCommit(commits, { resolve, entry }) {
-  const commit = commits.find(c => c.fileName === entry.name && c.type === entry.type);
+export function resolveCommit(commits, path, { resolve, entry }) {
+  const commit = commits.find(c => c.filePath === `${path}/${entry.name}` && c.type === entry.type);
 
   if (commit) {
     resolve(commit);
@@ -28,37 +18,48 @@ export function resolveCommit(commits, { resolve, entry }) {
 
 export function fetchLogsTree(client, path, offset, resolver = null) {
   if (resolver) {
-    resolvers.push(resolver);
+    if (!resolvers[path]) {
+      resolvers[path] = [resolver];
+    } else {
+      resolvers[path].push(resolver);
+    }
   }
 
-  if (fetchpromise) return fetchpromise;
+  if (fetchpromises[path]) return fetchpromises[path];
 
-  const { projectPath } = client.readQuery({ query: getProjectPath });
-  const { ref } = client.readQuery({ query: getRef });
+  const { projectPath } = client.readQuery({ query: projectPathQuery });
+  const { escapedRef } = client.readQuery({ query: refQuery });
 
-  fetchpromise = axios
-    .get(`${gon.gitlab_url}/${projectPath}/refs/${ref}/logs_tree/${path.replace(/^\//, '')}`, {
-      params: { format: 'json', offset },
-    })
-    .then(({ data, headers }) => {
+  fetchpromises[path] = axios
+    .get(
+      `${gon.relative_url_root}/${projectPath}/-/refs/${escapedRef}/logs_tree/${encodeURIComponent(
+        path.replace(/^\//, ''),
+      )}`,
+      {
+        params: { format: 'json', offset },
+      },
+    )
+    .then(({ data: newData, headers }) => {
       const headerLogsOffset = headers['more-logs-offset'];
-      const { commits } = client.readQuery({ query: getCommits });
-      const newCommitData = [...commits, ...normalizeData(data)];
+      const sourceData = client.readQuery({ query: commitsQuery });
+      const data = produce(sourceData, draftState => {
+        draftState.commits.push(...normalizeData(newData, path));
+      });
       client.writeQuery({
-        query: getCommits,
-        data: { commits: newCommitData },
+        query: commitsQuery,
+        data,
       });
 
-      resolvers.forEach(r => resolveCommit(newCommitData, r));
+      resolvers[path].forEach(r => resolveCommit(data.commits, path, r));
 
-      fetchpromise = null;
+      delete fetchpromises[path];
 
       if (headerLogsOffset) {
         fetchLogsTree(client, path, headerLogsOffset);
       } else {
-        resolvers = [];
+        delete resolvers[path];
       }
     });
 
-  return fetchpromise;
+  return fetchpromises[path];
 }

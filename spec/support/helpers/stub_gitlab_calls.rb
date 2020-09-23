@@ -18,18 +18,25 @@ module StubGitlabCalls
     stub_ci_pipeline_yaml_file(gitlab_ci_yaml)
   end
 
-  def stub_ci_pipeline_yaml_file(ci_yaml)
-    allow_any_instance_of(Ci::Pipeline).to receive(:ci_yaml_file) { ci_yaml }
+  def stub_ci_pipeline_yaml_file(ci_yaml_content)
+    allow_any_instance_of(Repository)
+      .to receive(:gitlab_ci_yml_for)
+      .and_return(ci_yaml_content)
+
+    # Ensure we don't hit auto-devops when config not found in repository
+    unless ci_yaml_content
+      allow_any_instance_of(Project).to receive(:auto_devops_enabled?).and_return(false)
+    end
+
+    # Stub the first call to `include:[local: .gitlab-ci.yml]` when
+    # evaluating the CI root config content.
+    allow_any_instance_of(Gitlab::Ci::Config::External::File::Local)
+      .to receive(:content)
+      .and_return(ci_yaml_content)
   end
 
   def stub_pipeline_modified_paths(pipeline, modified_paths)
     allow(pipeline).to receive(:modified_paths).and_return(modified_paths)
-  end
-
-  def stub_repository_ci_yaml_file(sha:, path: '.gitlab-ci.yml')
-    allow_any_instance_of(Repository)
-      .to receive(:gitlab_ci_yml_for).with(sha, path)
-      .and_return(gitlab_ci_yaml)
   end
 
   def stub_ci_builds_disabled
@@ -79,7 +86,7 @@ module StubGitlabCalls
   def stub_container_registry_tag_manifest_content
     fixture_path = 'spec/fixtures/container_registry/tag_manifest.json'
 
-    JSON.parse(File.read(Rails.root + fixture_path))
+    Gitlab::Json.parse(File.read(Rails.root + fixture_path))
   end
 
   def stub_container_registry_blob_content
@@ -106,12 +113,12 @@ module StubGitlabCalls
 
   def stub_project_8
     data = File.read(Rails.root.join('spec/support/gitlab_stubs/project_8.json'))
-    allow_any_instance_of(Network).to receive(:project).and_return(JSON.parse(data))
+    allow_any_instance_of(Network).to receive(:project).and_return(Gitlab::Json.parse(data))
   end
 
   def stub_project_8_hooks
     data = File.read(Rails.root.join('spec/support/gitlab_stubs/project_8_hooks.json'))
-    allow_any_instance_of(Network).to receive(:project_hooks).and_return(JSON.parse(data))
+    allow_any_instance_of(Network).to receive(:project_hooks).and_return(Gitlab::Json.parse(data))
   end
 
   def stub_projects
@@ -134,9 +141,15 @@ module StubGitlabCalls
       .to_return(status: 200, body: "", headers: {})
   end
 
+  def stub_webide_config_file(content, sha: anything)
+    allow_any_instance_of(Repository)
+      .to receive(:blob_data_at).with(sha, '.gitlab/.gitlab-webide.yml')
+      .and_return(content)
+  end
+
   def project_hash_array
     f = File.read(Rails.root.join('spec/support/gitlab_stubs/projects.json'))
-    JSON.parse f
+    Gitlab::Json.parse(f)
   end
 end
 

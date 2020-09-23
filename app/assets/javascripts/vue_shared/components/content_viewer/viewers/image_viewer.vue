@@ -1,5 +1,5 @@
 <script>
-import _ from 'underscore';
+import { throttle } from 'lodash';
 import { numberToHumanSize } from '../../../../lib/utils/number_utils';
 
 export default {
@@ -16,6 +16,7 @@ export default {
     renderInfo: {
       type: Boolean,
       default: true,
+      required: false,
     },
     innerCssClasses: {
       type: [Array, Object, String],
@@ -47,7 +48,7 @@ export default {
   mounted() {
     // The onImgLoad may have happened before the control was actually mounted
     this.onImgLoad();
-    this.resizeThrottled = _.throttle(this.onImgLoad, 400);
+    this.resizeThrottled = throttle(this.onImgLoad, 400);
     window.addEventListener('resize', this.resizeThrottled, false);
   },
   methods: {

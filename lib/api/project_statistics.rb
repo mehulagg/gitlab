@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectStatistics < Grape::API
+  class ProjectStatistics < Grape::API::Instance
     before do
       authenticate!
-      not_found! unless user_project.daily_statistics_enabled?
       authorize! :daily_statistics, user_project
     end
 

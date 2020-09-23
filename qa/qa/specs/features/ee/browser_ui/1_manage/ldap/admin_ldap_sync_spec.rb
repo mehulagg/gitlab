@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module QA
-  context 'Manage', :orchestrated, :ldap_no_server do
+  RSpec.describe 'Manage', :orchestrated, :ldap_no_server do
     describe 'LDAP admin sync' do
       before do
         run_ldap_service_with_user_as('admin')
@@ -10,9 +10,9 @@ module QA
         login_with_ldap_admin_user
       end
 
-      it 'sets and removes user\'s admin status' do
+      it 'sets and removes user\'s admin status', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/672' do
         Page::Main::Menu.perform do |menu|
-          admin_synchronised = menu.wait(max: 80, interval: 1, reload: true) do
+          admin_synchronised = menu.wait_until(max_duration: 80, sleep_interval: 1, reload: true) do
             menu.has_admin_area_link?
           end
 
@@ -26,7 +26,7 @@ module QA
         login_with_ldap_admin_user
 
         Page::Main::Menu.perform do |menu|
-          admin_removed = menu.wait(max: 80, interval: 1, reload: true) do
+          admin_removed = menu.wait_until(max_duration: 160, sleep_interval: 1, reload: true) do
             menu.has_no_admin_area_link?
           end
 
@@ -53,7 +53,7 @@ module QA
         Page::Main::Login.perform do |login_page|
           user = Struct.new(:ldap_username, :ldap_password).new('adminuser1', 'password')
 
-          QA::Support::Retrier.retry_until(exit_on_failure: true, sleep_interval: 3, max_attempts: 5) do
+          QA::Support::Retrier.retry_until(raise_on_failure: true, sleep_interval: 3, max_attempts: 5) do
             login_page.sign_in_using_ldap_credentials(user: user)
           end
         end

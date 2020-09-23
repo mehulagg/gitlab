@@ -1,11 +1,14 @@
 require_relative 'boot'
 
-# Based on https://github.com/rails/rails/blob/v5.2.3/railties/lib/rails/all.rb
+# Based on https://github.com/rails/rails/blob/v6.0.1/railties/lib/rails/all.rb
 # Only load the railties we need instead of loading everything
+require 'rails'
+
 require 'active_record/railtie'
 require 'action_controller/railtie'
 require 'action_view/railtie'
 require 'action_mailer/railtie'
+require 'action_cable/engine'
 require 'rails/test_unit/railtie'
 
 Bundler.require(*Rails.groups)
@@ -14,14 +17,17 @@ module Gitlab
   class Application < Rails::Application
     require_dependency Rails.root.join('lib/gitlab')
     require_dependency Rails.root.join('lib/gitlab/utils')
+    require_dependency Rails.root.join('lib/gitlab/action_cable/config')
     require_dependency Rails.root.join('lib/gitlab/redis/wrapper')
     require_dependency Rails.root.join('lib/gitlab/redis/cache')
     require_dependency Rails.root.join('lib/gitlab/redis/queues')
     require_dependency Rails.root.join('lib/gitlab/redis/shared_state')
-    require_dependency Rails.root.join('lib/gitlab/request_context')
     require_dependency Rails.root.join('lib/gitlab/current_settings')
     require_dependency Rails.root.join('lib/gitlab/middleware/read_only')
     require_dependency Rails.root.join('lib/gitlab/middleware/basic_health_check')
+    require_dependency Rails.root.join('lib/gitlab/middleware/same_site_cookies')
+    require_dependency Rails.root.join('lib/gitlab/middleware/handle_ip_spoof_attack_error')
+    require_dependency Rails.root.join('lib/gitlab/runtime')
 
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
@@ -43,7 +49,8 @@ module Gitlab
                                      #{config.root}/app/models/members
                                      #{config.root}/app/models/project_services
                                      #{config.root}/app/graphql/resolvers/concerns
-                                     #{config.root}/app/graphql/mutations/concerns])
+                                     #{config.root}/app/graphql/mutations/concerns
+                                     #{config.root}/app/graphql/types/concerns])
 
     config.generators.templates.push("#{config.root}/generator_templates")
 
@@ -52,6 +59,8 @@ module Gitlab
         ee_path = config.root.join('ee', Pathname.new(path).relative_path_from(config.root))
         memo << ee_path.to_s
       end
+
+      ee_paths << "#{config.root}/ee/app/replicators"
 
       # Eager load should load CE first
       config.eager_load_paths.push(*ee_paths)
@@ -125,6 +134,7 @@ module Gitlab
       encrypted_key
       hook
       import_url
+      elasticsearch_url
       otp_attempt
       sentry_dsn
       trace
@@ -139,7 +149,7 @@ module Gitlab
     # Use SQL instead of Active Record's schema dumper when creating the database.
     # This is necessary if your schema can't be completely dumped by the schema dumper,
     # like if you have constraints or database-specific column types
-    # config.active_record.schema_format = :sql
+    config.active_record.schema_format = :sql
 
     # Configure webpack
     config.webpack.config_file = "config/webpack.config.js"
@@ -149,6 +159,8 @@ module Gitlab
     # Webpack dev server configuration is handled in initializers/static_files.rb
     config.webpack.dev_server.enabled = false
 
+    config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
+
     # Enable the asset pipeline
     config.assets.enabled = true
 
@@ -156,18 +168,30 @@ module Gitlab
     config.assets.paths << Gemojione.images_path
     config.assets.paths << "#{config.root}/vendor/assets/fonts"
 
+    config.assets.precompile << "application_dark.css"
+
+    config.assets.precompile << "startup/*.css"
+
     config.assets.precompile << "print.css"
+    config.assets.precompile << "mailer.css"
+    config.assets.precompile << "mailer_client_specific.css"
     config.assets.precompile << "notify.css"
     config.assets.precompile << "mailers/*.css"
+    config.assets.precompile << "page_bundles/_mixins_and_variables_and_functions.css"
     config.assets.precompile << "page_bundles/ide.css"
+    config.assets.precompile << "page_bundles/jira_connect.css"
+    config.assets.precompile << "page_bundles/todos.css"
     config.assets.precompile << "page_bundles/xterm.css"
     config.assets.precompile << "performance_bar.css"
     config.assets.precompile << "lib/ace.js"
-    config.assets.precompile << "test.css"
+    config.assets.precompile << "disable_animations.css"
     config.assets.precompile << "snippets.css"
     config.assets.precompile << "locale/**/app.js"
     config.assets.precompile << "emoji_sprites.css"
     config.assets.precompile << "errors.css"
+    config.assets.precompile << "jira_connect.js"
+
+    config.assets.precompile << "themes/*.css"
 
     config.assets.precompile << "highlight/themes/*.css"
 
@@ -177,15 +201,19 @@ module Gitlab
     config.assets.precompile << "icons.json"
     config.assets.precompile << "illustrations/*.svg"
 
+    # Import Fontawesome fonts
+    config.assets.paths << "#{config.root}/node_modules/font-awesome/fonts"
+    config.assets.precompile << "fontawesome-webfont.woff2"
+    config.assets.precompile << "fontawesome-webfont.woff"
+
     # Import css for xterm
     config.assets.paths << "#{config.root}/node_modules/xterm/src/"
     config.assets.precompile << "xterm.css"
 
+    # Add EE assets
     if Gitlab.ee?
       %w[images javascripts stylesheets].each do |path|
         config.assets.paths << "#{config.root}/ee/app/assets/#{path}"
-        config.assets.precompile << "jira_connect.js"
-        config.assets.precompile << "pages/jira_connect.css"
       end
     end
 
@@ -224,15 +252,21 @@ module Gitlab
 
     config.middleware.insert_after Warden::Manager, Rack::Attack
 
+    config.middleware.insert_before ActionDispatch::Cookies, ::Gitlab::Middleware::SameSiteCookies
+
+    config.middleware.insert_before ActionDispatch::RemoteIp, ::Gitlab::Middleware::HandleIpSpoofAttackError
+
     # Allow access to GitLab API from other domains
     config.middleware.insert_before Warden::Manager, Rack::Cors do
+      headers_to_expose = %w[Link X-Total X-Total-Pages X-Per-Page X-Page X-Next-Page X-Prev-Page X-Gitlab-Blob-Id X-Gitlab-Commit-Id X-Gitlab-Content-Sha256 X-Gitlab-Encoding X-Gitlab-File-Name X-Gitlab-File-Path X-Gitlab-Last-Commit-Id X-Gitlab-Ref X-Gitlab-Size]
+
       allow do
         origins Gitlab.config.gitlab.url
         resource '/api/*',
           credentials: true,
           headers: :any,
           methods: :any,
-          expose: ['Link', 'X-Total', 'X-Total-Pages', 'X-Per-Page', 'X-Page', 'X-Next-Page', 'X-Prev-Page']
+          expose: headers_to_expose
       end
 
       # Cross-origin requests must not have the session cookie available
@@ -242,21 +276,18 @@ module Gitlab
           credentials: false,
           headers: :any,
           methods: :any,
-          expose: ['Link', 'X-Total', 'X-Total-Pages', 'X-Per-Page', 'X-Page', 'X-Next-Page', 'X-Prev-Page']
+          expose: headers_to_expose
       end
     end
 
     # Use caching across all environments
     # Full list of options:
     # https://api.rubyonrails.org/classes/ActiveSupport/Cache/RedisCacheStore.html#method-c-new
-    caching_config_hash = Gitlab::Redis::Cache.params
-    caching_config_hash[:compress] = false
+    caching_config_hash = {}
+    caching_config_hash[:redis] = Gitlab::Redis::Cache.pool
+    caching_config_hash[:compress] = Gitlab::Utils.to_boolean(ENV.fetch('ENABLE_REDIS_CACHE_COMPRESSION', '1'))
     caching_config_hash[:namespace] = Gitlab::Redis::Cache::CACHE_NAMESPACE
     caching_config_hash[:expires_in] = 2.weeks # Cache should not grow forever
-    if Sidekiq.server? # threaded context
-      caching_config_hash[:pool_size] = Sidekiq.options[:concurrency] + 5
-      caching_config_hash[:pool_timeout] = 1
-    end
 
     config.cache_store = :redis_cache_store, caching_config_hash
 
@@ -273,8 +304,25 @@ module Gitlab
       g.factory_bot false
     end
 
+    # This empty initializer forces the :let_zeitwerk_take_over initializer to run before we load
+    # initializers in config/initializers. This is done because autoloading before Zeitwerk takes
+    # over is deprecated but our initializers do a lot of autoloading.
+    # See https://gitlab.com/gitlab-org/gitlab/issues/197346 for more details
+    initializer :move_initializers, before: :load_config_initializers, after: :let_zeitwerk_take_over do
+    end
+
+    # We need this for initializers that need to be run before Zeitwerk is loaded
+    initializer :before_zeitwerk, before: :let_zeitwerk_take_over, after: :prepend_helpers_path do
+      Dir[Rails.root.join('config/initializers_before_autoloader/*.rb')].sort.each do |initializer|
+        load_config_initializer(initializer)
+      end
+    end
+
     config.after_initialize do
-      Rails.application.reload_routes!
+      # Devise (see initializers/8_devise.rb) already reloads routes if
+      # eager loading is enabled, so don't do this twice since it's
+      # expensive.
+      Rails.application.reload_routes! unless config.eager_load
 
       project_url_helpers = Module.new do
         extend ActiveSupport::Concern
@@ -292,7 +340,7 @@ module Gitlab
       # conflict with the methods defined in `project_url_helpers`, and we want
       # these methods available in the same places.
       Gitlab::Routing.add_helpers(project_url_helpers)
-      Gitlab::Routing.add_helpers(MilestonesRoutingHelper)
+      Gitlab::Routing.add_helpers(TimeboxesRoutingHelper)
     end
   end
 end

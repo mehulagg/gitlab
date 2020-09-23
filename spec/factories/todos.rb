@@ -12,6 +12,10 @@ FactoryBot.define do
       action { Todo::ASSIGNED }
     end
 
+    trait :review_requested do
+      action { Todo::REVIEW_REQUESTED }
+    end
+
     trait :mentioned do
       action { Todo::MENTIONED }
     end
@@ -46,7 +50,7 @@ FactoryBot.define do
     end
   end
 
-  factory :on_commit_todo, class: Todo do
+  factory :on_commit_todo, class: 'Todo' do
     project
     author
     user

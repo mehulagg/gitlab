@@ -2,12 +2,11 @@
 
 require 'spec_helper'
 
-describe 'Trial Sign Up', :js do
+RSpec.describe 'Trial Sign Up', :js do
   let(:user_attrs) { attributes_for(:user, first_name: 'GitLab', last_name: 'GitLab') }
 
   describe 'on GitLab.com' do
     before do
-      stub_feature_flags(improved_trial_signup: true)
       allow(Gitlab).to receive(:com?).and_return(true).at_least(:once)
     end
 
@@ -45,8 +44,12 @@ describe 'Trial Sign Up', :js do
 
         wait_for_requests
 
+        select 'Software Developer', from: 'user_role'
+        choose 'user_setup_for_company_true'
+        click_button 'Continue'
+
         expect(current_path).to eq(new_trial_path)
-        expect(page).to have_content('Start a Free Trial')
+        expect(page).to have_content('Start your Free Gold Trial')
       end
     end
 

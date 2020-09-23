@@ -7,11 +7,11 @@ module Gitlab
         include LogHelpers
         include Gitlab::Utils::StrongMemoize
 
-        attr_reader :object_db_id, :message
+        attr_reader :object_db_id, :extra_params
 
-        def initialize(object_db_id, message)
+        def initialize(object_db_id, extra_params)
           @object_db_id = object_db_id
-          @message = message
+          @extra_params = extra_params
         end
 
         private

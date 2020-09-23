@@ -1,11 +1,18 @@
-- page_title "Audit Events"
+- page_title _("Audit Events")
 - feature_available = @project.feature_available?(:audit_events)
 
-- if !feature_available && show_promotions?
-  = render 'shared/promotions/promote_audit_events'
-
-%h3.page-title Project Audit Events
-%p.light Events in #{@project.full_path}
-
 - if feature_available
-  = render 'shared/audit_events/event_table', events: @events
+  %h3.page-title
+    = _('Project Audit Events')
+  %p.light
+    = _('Events in %{project_path}') % { project_path: @project.full_path }
+
+  #js-project-audit-events-app{ data: { form_path: project_audit_events_path(@project),
+  events: @events.to_json,
+  is_last_page: @is_last_page.to_json,
+  filter_qa_selector: 'project_audit_log_filter',
+  table_qa_selector: 'project_audit_log_table',
+  filter_token_options: project_audit_event_tokens(@project.full_path).to_json } }
+
+- elsif show_promotions?
+  = render 'shared/promotions/promote_audit_events'

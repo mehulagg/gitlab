@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::LDAP::Adapter do
+RSpec.describe Gitlab::Auth::Ldap::Adapter do
   include LdapHelpers
 
   let(:ldap) { double(:ldap) }
@@ -128,7 +128,7 @@ describe Gitlab::Auth::LDAP::Adapter do
       before do
         allow(adapter).to receive(:renew_connection_adapter).and_return(ldap)
         allow(ldap).to receive(:search) { raise Net::LDAP::Error, "some error" }
-        allow(Rails.logger).to receive(:warn)
+        allow(Gitlab::AppLogger).to receive(:warn)
       end
 
       context 'retries the operation' do
@@ -138,7 +138,7 @@ describe Gitlab::Auth::LDAP::Adapter do
 
         it 'as many times as MAX_SEARCH_RETRIES' do
           expect(ldap).to receive(:search).exactly(3).times
-          expect { subject }.to raise_error(Gitlab::Auth::LDAP::LDAPConnectionError)
+          expect { subject }.to raise_error(Gitlab::Auth::Ldap::LdapConnectionError)
         end
 
         context 'when no more retries' do
@@ -147,12 +147,12 @@ describe Gitlab::Auth::LDAP::Adapter do
           end
 
           it 'raises the exception' do
-            expect { subject }.to raise_error(Gitlab::Auth::LDAP::LDAPConnectionError)
+            expect { subject }.to raise_error(Gitlab::Auth::Ldap::LdapConnectionError)
           end
 
           it 'logs the error' do
-            expect { subject }.to raise_error(Gitlab::Auth::LDAP::LDAPConnectionError)
-            expect(Rails.logger).to have_received(:warn).with(
+            expect { subject }.to raise_error(Gitlab::Auth::Ldap::LdapConnectionError)
+            expect(Gitlab::AppLogger).to have_received(:warn).with(
               "LDAP search raised exception Net::LDAP::Error: some error")
           end
         end
@@ -161,6 +161,6 @@ describe Gitlab::Auth::LDAP::Adapter do
   end
 
   def ldap_attributes
-    Gitlab::Auth::LDAP::Person.ldap_attributes(Gitlab::Auth::LDAP::Config.new('ldapmain'))
+    Gitlab::Auth::Ldap::Person.ldap_attributes(Gitlab::Auth::Ldap::Config.new('ldapmain'))
   end
 end

@@ -1,14 +1,12 @@
 <script>
 import { GlLink } from '@gitlab/ui';
 import UserAvatarImage from '~/vue_shared/components/user_avatar/user_avatar_image.vue';
-import LimitWarning from './limit_warning_component.vue';
 import TotalTime from './total_time_component.vue';
 
 export default {
   components: {
     GlLink,
     UserAvatarImage,
-    LimitWarning,
     TotalTime,
   },
   props: {

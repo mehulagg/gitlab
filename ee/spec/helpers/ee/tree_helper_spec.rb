@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe TreeHelper do
+RSpec.describe TreeHelper do
   let(:project) { create(:project, :repository) }
 
   describe '#tree_content_data' do
@@ -24,7 +24,7 @@ describe TreeHelper do
       end
     end
 
-    context 'when file lock is not avaiable' do
+    context 'when file lock is not available' do
       it 'returns the path information' do
         stub_licensed_features(file_locks: false)
 

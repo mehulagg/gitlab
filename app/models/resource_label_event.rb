@@ -1,21 +1,16 @@
 # frozen_string_literal: true
 
-class ResourceLabelEvent < ApplicationRecord
-  include Importable
-  include Gitlab::Utils::StrongMemoize
+class ResourceLabelEvent < ResourceEvent
   include CacheMarkdownField
+  include IssueResourceEvent
+  include MergeRequestResourceEvent
 
   cache_markdown_field :reference
 
-  belongs_to :user
-  belongs_to :issue
-  belongs_to :merge_request
   belongs_to :label
 
-  scope :created_after, ->(time) { where('created_at > ?', time) }
   scope :inc_relations, -> { includes(:label, :user) }
 
-  validates :user, presence: { unless: :importing? }, on: :create
   validates :label, presence: { unless: :importing? }, on: :create
   validate :exactly_one_issuable
 
@@ -44,12 +39,6 @@ class ResourceLabelEvent < ApplicationRecord
     issue || merge_request
   end
 
-  def discussion_id(resource = nil)
-    strong_memoize(:discussion_id) do
-      Digest::SHA1.hexdigest(discussion_id_key.join("-"))
-    end
-  end
-
   def project
     issuable.project
   end
@@ -65,7 +54,7 @@ class ResourceLabelEvent < ApplicationRecord
   end
 
   def banzai_render_context(field)
-    super.merge(pipeline: 'label', only_path: true)
+    super.merge(pipeline: :label, only_path: true)
   end
 
   def refresh_invalid_reference
@@ -82,6 +71,14 @@ class ResourceLabelEvent < ApplicationRecord
     end
   end
 
+  def self.visible_to_user?(user, events)
+    ResourceLabelEvent.preload_label_subjects(events)
+
+    events.select do |event|
+      Ability.allowed?(user, :read_label, event)
+    end
+  end
+
   private
 
   def label_reference
@@ -92,22 +89,6 @@ class ResourceLabelEvent < ApplicationRecord
     else
       label.to_reference(resource_parent, format: :id)
     end
-  end
-
-  def exactly_one_issuable
-    issuable_count = self.class.issuable_attrs.count { |attr| self["#{attr}_id"] }
-
-    return true if issuable_count == 1
-
-    # if none of issuable IDs is set, check explicitly if nested issuable
-    # object is set, this is used during project import
-    if issuable_count == 0 && importing?
-      issuable_count = self.class.issuable_attrs.count { |attr| self.public_send(attr) } # rubocop:disable GitlabSecurity/PublicSend
-
-      return true if issuable_count == 1
-    end
-
-    errors.add(:base, "Exactly one of #{self.class.issuable_attrs.join(', ')} is required")
   end
 
   def expire_etag_cache

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EpicNoteEntity do
+RSpec.describe EpicNoteEntity do
   include Gitlab::Routing
 
   let(:request) { double('request', current_user: user, noteable: note.noteable) }
@@ -11,6 +11,7 @@ describe EpicNoteEntity do
   let(:epic) { create(:epic, author: user) }
   let(:note) { create(:note, noteable: epic, author: user) }
   let(:user) { create(:user) }
+
   subject { entity.as_json }
 
   it_behaves_like 'note entity'

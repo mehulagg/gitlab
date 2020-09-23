@@ -2,7 +2,7 @@
 
 The global time zone configuration parameter can be changed in `config/gitlab.yml`:
 
-```text
+```plaintext
 # time_zone: 'UTC'
 ```
 
@@ -15,7 +15,7 @@ To see all available time zones, run `bundle exec rake time:zones:all`.
 For Omnibus installations, run `gitlab-rake time:zones:all`.
 
 NOTE: **Note:**
-Currently, this rake task does not list timezones in TZInfo format required by GitLab Omnibus during a reconfigure: [#58672](https://gitlab.com/gitlab-org/gitlab-foss/issues/58672).
+Currently, this Rake task does not list timezones in TZInfo format required by Omnibus GitLab during a reconfigure: [#27209](https://gitlab.com/gitlab-org/gitlab/-/issues/27209).
 
 ## Changing time zone in Omnibus installations
 
@@ -31,7 +31,7 @@ gitlab_rails['time_zone'] = 'America/New_York'
 
 After adding the configuration parameter, reconfigure and restart your GitLab instance:
 
-```sh
+```shell
 gitlab-ctl reconfigure
 gitlab-ctl restart
 ```

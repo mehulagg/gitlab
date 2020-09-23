@@ -3,10 +3,12 @@
 require 'mime/types'
 
 module API
-  class Branches < Grape::API
+  class Branches < Grape::API::Instance
     include PaginationParams
 
     BRANCH_ENDPOINT_REQUIREMENTS = API::NAMESPACE_OR_PROJECT_REQUIREMENTS.merge(branch: API::NO_SLASH_URL_PART_REGEX)
+
+    after_validation { content_type "application/json" }
 
     before do
       require_repository_enabled!
@@ -30,14 +32,17 @@ module API
       params do
         use :pagination
         use :filter_params
+
+        optional :page_token, type: String, desc: 'Name of branch to start the paginaition from'
       end
       get ':id/repository/branches' do
-        Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42329')
+        user_project.preload_protected_branches
 
         repository = user_project.repository
 
-        branches = BranchesFinder.new(repository, declared_params(include_missing: false)).execute
-        branches = paginate(::Kaminari.paginate_array(branches))
+        branches_finder = BranchesFinder.new(repository, declared_params(include_missing: false))
+        branches = Gitlab::Pagination::GitalyKeysetPager.new(self, user_project).paginate(branches_finder)
+
         merged_branch_names = repository.merged_branch_names(branches.map(&:name))
 
         present(
@@ -57,7 +62,7 @@ module API
           requires :branch, type: String, desc: 'The name of the branch'
         end
         head do
-          user_project.repository.branch_exists?(params[:branch]) ? status(204) : status(404)
+          user_project.repository.branch_exists?(params[:branch]) ? no_content! : not_found!
         end
         get do
           branch = find_branch!(params[:branch])
@@ -137,7 +142,7 @@ module API
       post ':id/repository/branches' do
         authorize_push_project
 
-        result = CreateBranchService.new(user_project, current_user)
+        result = ::Branches::CreateService.new(user_project, current_user)
                  .execute(params[:branch], params[:ref])
 
         if result[:status] == :success
@@ -162,7 +167,7 @@ module API
         commit = user_project.repository.commit(branch.dereferenced_target)
 
         destroy_conditionally!(commit, last_updated: commit.authored_date) do
-          result = DeleteBranchService.new(user_project, current_user)
+          result = ::Branches::DeleteService.new(user_project, current_user)
                     .execute(params[:branch])
 
           if result.error?
@@ -173,7 +178,7 @@ module API
 
       desc 'Delete all merged branches'
       delete ':id/repository/merged_branches' do
-        DeleteMergedBranchesService.new(user_project, current_user).async_execute
+        ::Branches::DeleteMergedService.new(user_project, current_user).async_execute
 
         accepted!
       end

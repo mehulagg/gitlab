@@ -45,7 +45,7 @@ module Gitlab
           target_branch: merge_request.target_branch,
           target_project_id: merge_request.target_project_id,
           state: merge_request.state,
-          merge_status: merge_request.merge_status,
+          merge_status: merge_request.public_merge_status,
           url: Gitlab::UrlBuilder.build(merge_request)
         }
       end
@@ -61,6 +61,7 @@ module Gitlab
           finished_at: build.finished_at,
           when: build.when,
           manual: build.action?,
+          allow_failure: build.allow_failure,
           user: build.user.try(:hook_attrs),
           runner: build.runner && runner_hook_attrs(build.runner),
           artifacts_file: {

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe DroneCiService, :use_clean_rails_memory_store_caching do
+RSpec.describe DroneCiService, :use_clean_rails_memory_store_caching do
   include ReactiveCachingHelpers
 
   describe 'associations' do
@@ -86,7 +86,7 @@ describe DroneCiService, :use_clean_rails_memory_store_caching do
   describe '#calculate_reactive_cache' do
     include_context :drone_ci_service
 
-    context '#commit_status' do
+    describe '#commit_status' do
       subject { drone.calculate_reactive_cache(sha, branch)[:commit_status] }
 
       it 'sets commit status to :error when status is 500' do
@@ -105,6 +105,10 @@ describe DroneCiService, :use_clean_rails_memory_store_caching do
         it "sets commit status to :error with a #{http_error.name} error" do
           WebMock.stub_request(:get, commit_status_path)
             .to_raise(http_error)
+
+          expect(Gitlab::ErrorTracking)
+            .to receive(:log_exception)
+            .with(instance_of(http_error), project_id: project.id)
 
           is_expected.to eq(:error)
         end

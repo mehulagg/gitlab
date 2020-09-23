@@ -1,12 +1,12 @@
 %li{ data: { qa_selector: 'locked_file_content' } }
   %div
     %span.item-title{ data: { qa_selector: 'locked_file_title_content' } }
-      = icon('lock')
+      = sprite_icon('lock', size: 14, css_class: 'gl-mr-1 gl-vertical-align-middle')
       = path_lock.path
 
     .controls
       - if can_unlock?(path_lock)
-        = link_to project_path_lock_path(@project, path_lock), class: 'btn btn-grouped btn-sm btn-remove remove-row has-tooltip', title: _("Unlock"), method: :delete, data: { confirm: _("Are you sure you want to unlock %{path_lock_path}?") % { path_lock_path: path_lock.path }, container: 'body', qa_selector: 'unlock_button' }, remote: true do
-          = icon("trash-o")
+        = link_to project_path_lock_path(@project, path_lock), class: 'btn', title: _("Unlock"), method: :delete, data: { confirm: _("Are you sure you want to unlock %{path_lock_path}?") % { path_lock_path: path_lock.path }, container: 'body', qa_selector: 'unlock_button' }, remote: true do
+          = _('Unlock')
 
   = _("locked by %{path_lock_user_name} %{created_at}").html_safe % { path_lock_user_name: path_lock.user.name, created_at: time_ago_with_tooltip(path_lock.created_at) }

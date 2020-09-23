@@ -97,7 +97,7 @@ pre.code,
 &,
 pre.code,
 .line_holder .line_content {
-  background-color: $white-light;
+  background-color: $white;
   color: $white-code-color;
 }
 
@@ -151,6 +151,7 @@ pre.code,
   &:not(.diff-expanded) + .diff-expanded,
   &.diff-expanded + .line_holder:not(.diff-expanded) {
     > .diff-line-num,
+    > .line-coverage,
     > .line_content {
       border-top: 1px solid $white-expanded-border;
     }
@@ -158,6 +159,7 @@ pre.code,
 
   &.diff-expanded {
     > .diff-line-num,
+    > .line-coverage,
     > .line_content {
       background: $white-expanded-bg;
       border-color: $white-expanded-bg;
@@ -197,6 +199,22 @@ pre.code,
       background-color: $line-select-yellow;
     }
   }
+
+  .line-coverage {
+    @include line-coverage-border-color($green-500, $orange-500);
+
+    &.old {
+      background-color: $line-removed;
+    }
+
+    &.new {
+      background-color: $line-added;
+    }
+
+    &.hll:not(.empty-cell) {
+      background-color: $line-select-yellow;
+    }
+  }
 }
 
 // highlight line via anchor
@@ -207,6 +225,11 @@ pre .hll {
 // Search result highlight
 span.highlight_word {
   background-color: $white-highlight !important;
+}
+
+// Links to URLs, emails, or dependencies
+.line a {
+  color: $white-nb;
 }
 
 .hll { background-color: $white-hll-bg; }

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Mirror do
+RSpec.describe Gitlab::Mirror do
   before do
     Sidekiq::Logging.logger = nil
   end

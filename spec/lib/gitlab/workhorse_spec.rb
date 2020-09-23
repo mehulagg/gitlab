@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe Gitlab::Workhorse do
-  set(:project)    { create(:project, :repository) }
+RSpec.describe Gitlab::Workhorse do
+  let_it_be(:project) { create(:project, :repository) }
   let(:repository) { project.repository }
 
   def decode_workhorse_header(array)
     key, value = array
     command, encoded_params = value.split(":")
-    params = JSON.parse(Base64.urlsafe_decode64(encoded_params))
+    params = Gitlab::Json.parse(Base64.urlsafe_decode64(encoded_params))
 
     [key, command, params]
   end
@@ -24,7 +24,7 @@ describe Gitlab::Workhorse do
     let(:ref) { 'master' }
     let(:format) { 'zip' }
     let(:storage_path) { Gitlab.config.gitlab.repository_downloads_path }
-    let(:path) { 'some/path' if Feature.enabled?(:git_archive_path, default_enabled: true) }
+    let(:path) { 'some/path' }
     let(:metadata) { repository.archive_metadata(ref, storage_path, format, append_sha: nil, path: path) }
     let(:cache_disabled) { false }
 
@@ -36,76 +36,42 @@ describe Gitlab::Workhorse do
       allow(described_class).to receive(:git_archive_cache_disabled?).and_return(cache_disabled)
     end
 
-    context 'feature flag disabled' do
-      before do
-        stub_feature_flags(git_archive_path: false)
-      end
+    it 'sets the header correctly' do
+      key, command, params = decode_workhorse_header(subject)
 
-      it 'sets the header correctly' do
-        key, command, params = decode_workhorse_header(subject)
-
-        expected_params = metadata.merge(
-          'GitalyRepository' => repository.gitaly_repository.to_h,
-          'GitalyServer' => {
-            features: { 'gitaly-feature-foobar' => 'true' },
-            address: Gitlab::GitalyClient.address(project.repository_storage),
-            token: Gitlab::GitalyClient.token(project.repository_storage)
-          }
+      expect(key).to eq('Gitlab-Workhorse-Send-Data')
+      expect(command).to eq('git-archive')
+      expect(params).to eq({
+        'GitalyServer' => {
+          features: { 'gitaly-feature-foobar' => 'true' },
+          address: Gitlab::GitalyClient.address(project.repository_storage),
+          token: Gitlab::GitalyClient.token(project.repository_storage)
+        },
+        'ArchivePath' => metadata['ArchivePath'],
+        'GetArchiveRequest' => Base64.encode64(
+          Gitaly::GetArchiveRequest.new(
+            repository: repository.gitaly_repository,
+            commit_id: metadata['CommitId'],
+            prefix: metadata['ArchivePrefix'],
+            format: Gitaly::GetArchiveRequest::Format::ZIP,
+            path: path
+          ).to_proto
         )
-
-        expect(key).to eq('Gitlab-Workhorse-Send-Data')
-        expect(command).to eq('git-archive')
-        expect(params).to eq(expected_params.deep_stringify_keys)
-      end
-
-      context 'when archive caching is disabled' do
-        let(:cache_disabled) { true }
-
-        it 'tells workhorse not to use the cache' do
-          _, _, params = decode_workhorse_header(subject)
-          expect(params).to include({ 'DisableCache' => true })
-        end
-      end
+      }.deep_stringify_keys)
     end
 
-    context 'feature flag enabled' do
-      it 'sets the header correctly' do
-        key, command, params = decode_workhorse_header(subject)
+    context 'when archive caching is disabled' do
+      let(:cache_disabled) { true }
 
-        expect(key).to eq('Gitlab-Workhorse-Send-Data')
-        expect(command).to eq('git-archive')
-        expect(params).to eq({
-          'GitalyServer' => {
-            features: { 'gitaly-feature-foobar' => 'true' },
-            address: Gitlab::GitalyClient.address(project.repository_storage),
-            token: Gitlab::GitalyClient.token(project.repository_storage)
-          },
-          'ArchivePath' => metadata['ArchivePath'],
-          'GetArchiveRequest' => Base64.encode64(
-            Gitaly::GetArchiveRequest.new(
-              repository: repository.gitaly_repository,
-              commit_id: metadata['CommitId'],
-              prefix: metadata['ArchivePrefix'],
-              format: Gitaly::GetArchiveRequest::Format::ZIP,
-              path: path
-            ).to_proto
-          )
-        }.deep_stringify_keys)
-      end
-
-      context 'when archive caching is disabled' do
-        let(:cache_disabled) { true }
-
-        it 'tells workhorse not to use the cache' do
-          _, _, params = decode_workhorse_header(subject)
-          expect(params).to include({ 'DisableCache' => true })
-        end
+      it 'tells workhorse not to use the cache' do
+        _, _, params = decode_workhorse_header(subject)
+        expect(params).to include({ 'DisableCache' => true })
       end
     end
 
     context "when the repository doesn't have an archive file path" do
       before do
-        allow(project.repository).to receive(:archive_metadata).and_return(Hash.new)
+        allow(project.repository).to receive(:archive_metadata).and_return({})
       end
 
       it "raises an error" do
@@ -116,6 +82,7 @@ describe Gitlab::Workhorse do
 
   describe '.send_git_patch' do
     let(:diff_refs) { double(base_sha: "base", head_sha: "head") }
+
     subject { described_class.send_git_patch(repository, diff_refs) }
 
     it 'sets the header correctly' do
@@ -178,6 +145,7 @@ describe Gitlab::Workhorse do
 
   describe '.send_git_diff' do
     let(:diff_refs) { double(base_sha: "base", head_sha: "head") }
+
     subject { described_class.send_git_diff(repository, diff_refs) }
 
     it 'sets the header correctly' do
@@ -449,6 +417,26 @@ describe Gitlab::Workhorse do
       expect(params).to eq({
         'URL' => url,
         'AllowRedirects' => false
+      }.deep_stringify_keys)
+    end
+  end
+
+  describe '.send_scaled_image' do
+    let(:location) { 'http://example.com/avatar.png' }
+    let(:width) { '150' }
+    let(:content_type) { 'image/png' }
+
+    subject { described_class.send_scaled_image(location, width, content_type) }
+
+    it 'sets the header correctly' do
+      key, command, params = decode_workhorse_header(subject)
+
+      expect(key).to eq("Gitlab-Workhorse-Send-Data")
+      expect(command).to eq("send-scaled-img")
+      expect(params).to eq({
+        'Location' => location,
+        'Width' => width,
+        'ContentType' => content_type
       }.deep_stringify_keys)
     end
   end

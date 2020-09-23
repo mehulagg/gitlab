@@ -18,7 +18,7 @@ a database schema.
 
 Adding a `:migration` tag to a test signature enables some custom RSpec
 `before` and `after` hooks in our
-[`spec_helper.rb`](https://gitlab.com/gitlab-org/gitlab/blob/3b29908a64ff729c0cf6d93452fe00ab23079c75/spec%2Fspec_helper.rb#L259)
+[`spec/support/migration.rb`](https://gitlab.com/gitlab-org/gitlab/-/blob/f81fa6ab1dd788b70ef44b85aaba1f31ffafae7d/spec/support/migration.rb)
 to run.
 
 A `before` hook will revert all migrations to the point that a migration
@@ -37,19 +37,41 @@ ensures proper isolation.
 
 To test an `ActiveRecord::Migration` class (i.e., a
 regular migration `db/migrate` or a post-migration `db/post_migrate`), you
-will need to manually `require` the migration file because it is not
-autoloaded with Rails. Example:
+will need to load the migration file by using the `require_migration!` helper
+method because it is not autoloaded by Rails.
+
+Example:
 
 ```ruby
-require Rails.root.join('db', 'post_migrate', '20170526185842_migrate_pipeline_stages.rb')
+require 'spec_helper'
+
+require_migration!
+
+RSpec.describe ...
 ```
 
 ### Test helpers
 
+#### `require_migration!`
+
+Since the migration files are not autoloaded by Rails, you will need to manually
+load the migration file. To do so, you can use the `require_migration!` helper method
+which can automatically load the correct migration file based on the spec file name.
+
+For example, if your spec file is named as `populate_foo_column_spec.rb` then the
+helper method will try to load `${schema_version}_populate_foo_column.rb` migration file.
+
+In case there is no pattern between your spec file and the actual migration file,
+you can provide the migration file name without the schema version, like so:
+
+```ruby
+require_migration!('populate_foo_column')
+```
+
 #### `table`
 
 Use the `table` helper to create a temporary `ActiveRecord::Base`-derived model
-for a table. [FactoryBot](https://docs.gitlab.com/ee/development/testing_guide/best_practices.html#factories)
+for a table. [FactoryBot](best_practices.md#factories)
 **should not** be used to create data for migration specs. For example, to
 create a record in the `projects` table:
 
@@ -59,7 +81,7 @@ project = table(:projects).create!(id: 1, name: 'gitlab1', path: 'gitlab1')
 
 #### `migrate!`
 
-Use the `migrate!` helper to run the migration that is under test.  It will not only
+Use the `migrate!` helper to run the migration that is under test. It will not only
 run the migration, but will also bump the schema version in the `schema_migrations`
 table. It is necessary because in the `after` hook we trigger the rest of
 the migrations, and we need to know where to start. Example:
@@ -104,15 +126,16 @@ end
 ### Example database migration test
 
 This spec tests the
-[`db/post_migrate/20170526185842_migrate_pipeline_stages.rb`](https://gitlab.com/gitlab-org/gitlab/blob/v11.6.5/db/post_migrate/20170526185842_migrate_pipeline_stages.rb)
+[`db/post_migrate/20170526185842_migrate_pipeline_stages.rb`](https://gitlab.com/gitlab-org/gitlab-foss/blob/v11.6.5/db/post_migrate/20170526185842_migrate_pipeline_stages.rb)
 migration. You can find the complete spec in
-[`spec/migrations/migrate_pipeline_stages_spec.rb`](https://gitlab.com/gitlab-org/gitlab/blob/v11.6.5/spec/migrations/migrate_pipeline_stages_spec.rb).
+[`spec/migrations/migrate_pipeline_stages_spec.rb`](https://gitlab.com/gitlab-org/gitlab-foss/blob/v11.6.5/spec/migrations/migrate_pipeline_stages_spec.rb).
 
 ```ruby
 require 'spec_helper'
-require Rails.root.join('db', 'post_migrate', '20170526185842_migrate_pipeline_stages.rb')
 
-describe MigratePipelineStages, :migration do
+require_migration!
+
+RSpec.describe MigratePipelineStages do
   # Create test data - pipeline and CI/CD jobs.
   let(:jobs) { table(:ci_builds) }
   let(:stages) { table(:ci_stages) }
@@ -158,12 +181,14 @@ end
 
 To test a non-`ActiveRecord::Migration` test (a background migration),
 you will need to manually provide a required schema version. Please add a
-schema tag to a context that you want to switch the database schema within.
+`schema` tag to a context that you want to switch the database schema within.
+
+If not set, `schema` defaults to `:latest`.
 
 Example:
 
 ```ruby
-describe SomeClass, :migration, schema: 20170608152748 do
+describe SomeClass, schema: 20170608152748 do
   # ...
 end
 ```
@@ -171,14 +196,14 @@ end
 ### Example background migration test
 
 This spec tests the
-[`lib/gitlab/background_migration/archive_legacy_traces.rb`](https://gitlab.com/gitlab-org/gitlab/blob/v11.6.5/lib/gitlab/background_migration/archive_legacy_traces.rb)
+[`lib/gitlab/background_migration/archive_legacy_traces.rb`](https://gitlab.com/gitlab-org/gitlab-foss/blob/v11.6.5/lib/gitlab/background_migration/archive_legacy_traces.rb)
 background migration. You can find the complete spec on
-[`spec/lib/gitlab/background_migration/archive_legacy_traces_spec.rb`](https://gitlab.com/gitlab-org/gitlab/blob/v11.6.5/spec/lib/gitlab/background_migration/archive_legacy_traces_spec.rb)
+[`spec/lib/gitlab/background_migration/archive_legacy_traces_spec.rb`](https://gitlab.com/gitlab-org/gitlab-foss/blob/v11.6.5/spec/lib/gitlab/background_migration/archive_legacy_traces_spec.rb)
 
 ```ruby
 require 'spec_helper'
 
-describe Gitlab::BackgroundMigration::ArchiveLegacyTraces, :migration, schema: 20180529152628 do
+describe Gitlab::BackgroundMigration::ArchiveLegacyTraces, schema: 20180529152628 do
   include TraceHelpers
 
   let(:namespaces) { table(:namespaces) }

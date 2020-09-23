@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::LDAP::Adapter do
+RSpec.describe Gitlab::Auth::Ldap::Adapter do
   include LdapHelpers
 
   let(:adapter) { ldap_adapter('ldapmain') }
 
   it 'includes the EE module' do
-    expect(described_class).to include_module(EE::Gitlab::Auth::LDAP::Adapter)
+    expect(described_class).to include_module(EE::Gitlab::Auth::Ldap::Adapter)
   end
 
   describe '#groups' do
@@ -36,7 +36,7 @@ describe Gitlab::Auth::LDAP::Adapter do
 
       results = adapter.groups('group1')
 
-      expect(results.first).to be_a(EE::Gitlab::Auth::LDAP::Group)
+      expect(results.first).to be_a(EE::Gitlab::Auth::Ldap::Group)
       expect(results.first.cn).to eq('group1')
       expect(results.first.member_dns).to match_array(%w(uid=john uid=mary))
     end
@@ -77,7 +77,7 @@ describe Gitlab::Auth::LDAP::Adapter do
       end
 
       it 'returns a person object' do
-        expect(subject).to be_a(::EE::Gitlab::Auth::LDAP::Person)
+        expect(subject).to be_a(::EE::Gitlab::Auth::Ldap::Person)
       end
 
       it 'returns correct attributes' do

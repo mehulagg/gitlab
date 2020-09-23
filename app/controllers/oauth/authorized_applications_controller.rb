@@ -5,15 +5,22 @@ class Oauth::AuthorizedApplicationsController < Doorkeeper::AuthorizedApplicatio
 
   layout 'profile'
 
+  def index
+    respond_to do |format|
+      format.html { render "errors/not_found", layout: "errors", status: :not_found }
+      format.json { render json: "", status: :not_found }
+    end
+  end
+
   def destroy
     if params[:token_id].present?
       current_resource_owner.oauth_authorized_tokens.find(params[:token_id]).revoke
     else
-      Doorkeeper::AccessToken.revoke_all_for(params[:id], current_resource_owner)
+      Doorkeeper::Application.revoke_tokens_and_grants_for(params[:id], current_resource_owner)
     end
 
     redirect_to applications_profile_url,
-                status: 302,
+                status: :found,
                 notice: I18n.t(:notice, scope: [:doorkeeper, :flash, :authorized_applications, :destroy])
   end
 end

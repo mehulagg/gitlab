@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe EE::Gitlab::Auth::LDAP::Sync::Groups do
+RSpec.describe EE::Gitlab::Auth::Ldap::Sync::Groups do
   include LdapHelpers
 
   let(:adapter) { ldap_adapter }
@@ -10,11 +10,11 @@ describe EE::Gitlab::Auth::LDAP::Sync::Groups do
 
   describe '#update_permissions' do
     before do
-      allow(EE::Gitlab::Auth::LDAP::Sync::Group).to receive(:execute)
-      allow(EE::Gitlab::Auth::LDAP::Sync::AdminUsers).to receive(:execute)
-      allow(EE::Gitlab::Auth::LDAP::Sync::ExternalUsers).to receive(:execute)
+      allow(EE::Gitlab::Auth::Ldap::Sync::Group).to receive(:execute)
+      allow(EE::Gitlab::Auth::Ldap::Sync::AdminUsers).to receive(:execute)
+      allow(EE::Gitlab::Auth::Ldap::Sync::ExternalUsers).to receive(:execute)
 
-      2.times { create(:group_with_ldap_group_link) }
+      create_list(:group_with_ldap_group_link, 2)
     end
 
     after do
@@ -26,12 +26,12 @@ describe EE::Gitlab::Auth::LDAP::Sync::Groups do
         stub_ldap_config(group_base: nil)
       end
 
-      it 'does not call EE::Gitlab::Auth::LDAP::Sync::AdminUsers#execute' do
-        expect(EE::Gitlab::Auth::LDAP::Sync::AdminUsers).not_to receive(:execute)
+      it 'does not call EE::Gitlab::Auth::Ldap::Sync::AdminUsers#execute' do
+        expect(EE::Gitlab::Auth::Ldap::Sync::AdminUsers).not_to receive(:execute)
       end
 
-      it 'does not call EE::Gitlab::Auth::LDAP::Sync::ExternalUsers#execute' do
-        expect(EE::Gitlab::Auth::LDAP::Sync::ExternalUsers).not_to receive(:execute)
+      it 'does not call EE::Gitlab::Auth::Ldap::Sync::ExternalUsers#execute' do
+        expect(EE::Gitlab::Auth::Ldap::Sync::ExternalUsers).not_to receive(:execute)
       end
     end
 
@@ -41,16 +41,16 @@ describe EE::Gitlab::Auth::LDAP::Sync::Groups do
           stub_ldap_config(group_base: 'dc=example,dc=com')
         end
 
-        it 'calls EE::Gitlab::Auth::LDAP::Sync::Group#execute' do
-          expect(EE::Gitlab::Auth::LDAP::Sync::Group).to receive(:execute).twice
+        it 'calls EE::Gitlab::Auth::Ldap::Sync::Group#execute' do
+          expect(EE::Gitlab::Auth::Ldap::Sync::Group).to receive(:execute).twice
         end
 
-        it 'does not call EE::Gitlab::Auth::LDAP::Sync::AdminUsers#execute' do
-          expect(EE::Gitlab::Auth::LDAP::Sync::AdminUsers).not_to receive(:execute)
+        it 'does not call EE::Gitlab::Auth::Ldap::Sync::AdminUsers#execute' do
+          expect(EE::Gitlab::Auth::Ldap::Sync::AdminUsers).not_to receive(:execute)
         end
 
-        it 'does not call EE::Gitlab::Auth::LDAP::Sync::ExternalUsers#execute' do
-          expect(EE::Gitlab::Auth::LDAP::Sync::ExternalUsers).not_to receive(:execute)
+        it 'does not call EE::Gitlab::Auth::Ldap::Sync::ExternalUsers#execute' do
+          expect(EE::Gitlab::Auth::Ldap::Sync::ExternalUsers).not_to receive(:execute)
         end
       end
 
@@ -62,16 +62,16 @@ describe EE::Gitlab::Auth::LDAP::Sync::Groups do
           )
         end
 
-        it 'calls EE::Gitlab::Auth::LDAP::Sync::Group#execute' do
-          expect(EE::Gitlab::Auth::LDAP::Sync::Group).to receive(:execute).twice
+        it 'calls EE::Gitlab::Auth::Ldap::Sync::Group#execute' do
+          expect(EE::Gitlab::Auth::Ldap::Sync::Group).to receive(:execute).twice
         end
 
-        it 'does not call EE::Gitlab::Auth::LDAP::Sync::AdminUsers#execute' do
-          expect(EE::Gitlab::Auth::LDAP::Sync::AdminUsers).to receive(:execute).once
+        it 'does not call EE::Gitlab::Auth::Ldap::Sync::AdminUsers#execute' do
+          expect(EE::Gitlab::Auth::Ldap::Sync::AdminUsers).to receive(:execute).once
         end
 
-        it 'does not call EE::Gitlab::Auth::LDAP::Sync::ExternalUsers#execute' do
-          expect(EE::Gitlab::Auth::LDAP::Sync::ExternalUsers).not_to receive(:execute)
+        it 'does not call EE::Gitlab::Auth::Ldap::Sync::ExternalUsers#execute' do
+          expect(EE::Gitlab::Auth::Ldap::Sync::ExternalUsers).not_to receive(:execute)
         end
       end
 
@@ -83,16 +83,16 @@ describe EE::Gitlab::Auth::LDAP::Sync::Groups do
           )
         end
 
-        it 'calls EE::Gitlab::Auth::LDAP::Sync::Group#execute' do
-          expect(EE::Gitlab::Auth::LDAP::Sync::Group).to receive(:execute).twice
+        it 'calls EE::Gitlab::Auth::Ldap::Sync::Group#execute' do
+          expect(EE::Gitlab::Auth::Ldap::Sync::Group).to receive(:execute).twice
         end
 
-        it 'does not call EE::Gitlab::Auth::LDAP::Sync::AdminUsers#execute' do
-          expect(EE::Gitlab::Auth::LDAP::Sync::AdminUsers).not_to receive(:execute)
+        it 'does not call EE::Gitlab::Auth::Ldap::Sync::AdminUsers#execute' do
+          expect(EE::Gitlab::Auth::Ldap::Sync::AdminUsers).not_to receive(:execute)
         end
 
-        it 'does not call EE::Gitlab::Auth::LDAP::Sync::ExternalUsers#execute' do
-          expect(EE::Gitlab::Auth::LDAP::Sync::ExternalUsers).to receive(:execute).once
+        it 'does not call EE::Gitlab::Auth::Ldap::Sync::ExternalUsers#execute' do
+          expect(EE::Gitlab::Auth::Ldap::Sync::ExternalUsers).to receive(:execute).once
         end
       end
     end

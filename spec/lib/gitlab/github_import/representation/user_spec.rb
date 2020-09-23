@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GithubImport::Representation::User do
+RSpec.describe Gitlab::GithubImport::Representation::User do
   shared_examples 'a User' do
     it 'returns an instance of User' do
       expect(user).to be_an_instance_of(described_class)

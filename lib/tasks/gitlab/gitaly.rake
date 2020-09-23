@@ -1,6 +1,6 @@
 namespace :gitlab do
   namespace :gitaly do
-    desc "GitLab | Install or upgrade gitaly"
+    desc 'GitLab | Gitaly | Install or upgrade gitaly'
     task :install, [:dir, :storage_path, :repo] => :gitlab_environment do |t, args|
       warn_user_is_not_gitlab
 
@@ -13,12 +13,11 @@ Usage: rake "gitlab:gitaly:install[/installation/dir,/storage/path]")
 
       version = Gitlab::GitalyClient.expected_server_version
 
-      checkout_or_clone_version(version: version, repo: args.repo, target_dir: args.dir)
+      checkout_or_clone_version(version: version, repo: args.repo, target_dir: args.dir, clone_opts: %w[--depth 1])
 
-      command = %w[/usr/bin/env -u RUBYOPT -u BUNDLE_GEMFILE]
-
+      command = []
       _, status = Gitlab::Popen.popen(%w[which gmake])
-      command << (status.zero? ? 'gmake' : 'make')
+      command << (status == 0 ? 'gmake' : 'make')
 
       if Rails.env.test?
         command.push(
@@ -27,11 +26,11 @@ Usage: rake "gitlab:gitaly:install[/installation/dir,/storage/path]")
       end
 
       storage_paths = { 'default' => args.storage_path }
-      Gitlab::SetupHelper.create_gitaly_configuration(args.dir, storage_paths)
+      Gitlab::SetupHelper::Gitaly.create_configuration(args.dir, storage_paths)
       Dir.chdir(args.dir) do
         # In CI we run scripts/gitaly-test-build instead of this command
         unless ENV['CI'].present?
-          Bundler.with_original_env { run_command!(command) }
+          Bundler.with_original_env { Gitlab::Popen.popen(command, nil, { "RUBYOPT" => nil, "BUNDLE_GEMFILE" => nil }) }
         end
       end
     end

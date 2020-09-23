@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Config::Required::Processor do
+RSpec.describe Gitlab::Ci::Config::Required::Processor do
   subject { described_class.new(config).perform }
 
   let(:config) { { image: 'ruby:2.5.3' } }

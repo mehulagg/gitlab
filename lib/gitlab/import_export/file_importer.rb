@@ -5,6 +5,8 @@ module Gitlab
     class FileImporter
       include Gitlab::ImportExport::CommandLineUtil
 
+      ImporterError = Class.new(StandardError)
+
       MAX_RETRIES = 8
       IGNORED_FILENAMES = %w(. ..).freeze
 
@@ -12,8 +14,8 @@ module Gitlab
         new(*args).import
       end
 
-      def initialize(project:, archive_file:, shared:)
-        @project = project
+      def initialize(importable:, archive_file:, shared:)
+        @importable = importable
         @archive_file = archive_file
         @shared = shared
       end
@@ -26,6 +28,9 @@ module Gitlab
         copy_archive
 
         wait_for_archived_file do
+          # Disable archive validation by default
+          # See: https://gitlab.com/gitlab-org/gitlab/-/issues/235949
+          validate_decompressed_archive_size if Feature.enabled?(:validate_import_decompressed_archive_size)
           decompress_archive
         end
       rescue => e
@@ -52,7 +57,7 @@ module Gitlab
       def decompress_archive
         result = untar_zxf(archive: @archive_file, dir: @shared.export_path)
 
-        raise Projects::ImportService::Error.new("Unable to decompress #{@archive_file} into #{@shared.export_path}") unless result
+        raise ImporterError.new("Unable to decompress #{@archive_file} into #{@shared.export_path}") unless result
 
         result
       end
@@ -60,9 +65,9 @@ module Gitlab
       def copy_archive
         return if @archive_file
 
-        @archive_file = File.join(@shared.archive_path, Gitlab::ImportExport.export_filename(project: @project))
+        @archive_file = File.join(@shared.archive_path, Gitlab::ImportExport.export_filename(exportable: @importable))
 
-        download_or_copy_upload(@project.import_export_upload.import_file, @archive_file)
+        download_or_copy_upload(@importable.import_export_upload.import_file, @archive_file)
       end
 
       def remove_symlinks
@@ -79,6 +84,14 @@ module Gitlab
 
       def extracted_files
         Dir.glob("#{@shared.export_path}/**/*", File::FNM_DOTMATCH).reject { |f| IGNORED_FILENAMES.include?(File.basename(f)) }
+      end
+
+      def validate_decompressed_archive_size
+        raise ImporterError.new(size_validator.error) unless size_validator.valid?
+      end
+
+      def size_validator
+        @size_validator ||= DecompressedArchiveSizeValidator.new(archive_path: @archive_file)
       end
     end
   end

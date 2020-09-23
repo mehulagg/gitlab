@@ -3,6 +3,8 @@
 module API
   module Helpers
     module Runner
+      include Gitlab::Utils::StrongMemoize
+
       prepend_if_ee('EE::API::Helpers::Runner') # rubocop: disable Cop/InjectEnterpriseEditionModule
 
       JOB_TOKEN_HEADER = 'HTTP_JOB_TOKEN'
@@ -16,7 +18,7 @@ module API
         forbidden! unless current_runner
 
         current_runner
-          .update_cached_info(get_runner_details_from_request)
+          .heartbeat(get_runner_details_from_request)
       end
 
       def get_runner_details_from_request
@@ -31,37 +33,40 @@ module API
       end
 
       def current_runner
-        @runner ||= ::Ci::Runner.find_by_token(params[:token].to_s)
+        strong_memoize(:current_runner) do
+          ::Ci::Runner.find_by_token(params[:token].to_s)
+        end
       end
 
-      def validate_job!(job)
+      def authenticate_job!(require_running: true)
+        job = current_job
+
         not_found! unless job
+        forbidden! unless job_token_valid?(job)
 
-        yield if block_given?
-
-        project = job.project
-        forbidden!('Project has been deleted!') if project.nil? || project.pending_delete?
+        forbidden!('Project has been deleted!') if job.project.nil? || job.project.pending_delete?
         forbidden!('Job has been erased!') if job.erased?
-      end
 
-      def authenticate_job!
-        job = Ci::Build.find_by_id(params[:id])
+        if require_running
+          job_forbidden!(job, 'Job is not running') unless job.running?
+        end
 
-        validate_job!(job) do
-          forbidden! unless job_token_valid?(job)
+        if Gitlab::Ci::Features.job_heartbeats_runner?(job.project)
+          job.runner&.heartbeat(get_runner_ip)
         end
 
         job
       end
 
+      def current_job
+        strong_memoize(:current_job) do
+          ::Ci::Build.find_by_id(params[:id])
+        end
+      end
+
       def job_token_valid?(job)
         token = (params[JOB_TOKEN_PARAM] || env[JOB_TOKEN_HEADER]).to_s
         token && job.valid_token?(token)
-      end
-
-      def max_artifacts_size(job)
-        max_size = job.project.closest_setting(:max_artifacts_size)
-        max_size.megabytes.to_i
       end
 
       def job_forbidden!(job, reason)

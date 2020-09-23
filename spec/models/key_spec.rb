@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Key, :mailer do
+RSpec.describe Key, :mailer do
   describe "Associations" do
     it { is_expected.to belong_to(:user) }
   end
@@ -25,6 +25,7 @@ describe Key, :mailer do
 
   describe "Methods" do
     let(:user) { create(:user) }
+
     it { is_expected.to respond_to :projects }
     it { is_expected.to respond_to :publishable_key }
 
@@ -46,6 +47,32 @@ describe Key, :mailer do
         expect(service).to receive(:execute)
 
         key.update_last_used_at
+      end
+    end
+  end
+
+  describe 'scopes' do
+    describe '.for_user' do
+      let(:user_1) { create(:user) }
+      let(:key_of_user_1) { create(:personal_key, user: user_1) }
+
+      before do
+        create_list(:personal_key, 2, user: create(:user))
+      end
+
+      it 'returns keys of the specified user only' do
+        expect(described_class.for_user(user_1)).to contain_exactly(key_of_user_1)
+      end
+    end
+
+    describe '.order_last_used_at_desc' do
+      it 'sorts by last_used_at descending, with null values at last' do
+        key_1 = create(:personal_key, last_used_at: 7.days.ago)
+        key_2 = create(:personal_key, last_used_at: nil)
+        key_3 = create(:personal_key, last_used_at: 2.days.ago)
+
+        expect(described_class.order_last_used_at_desc)
+          .to eq([key_3, key_1, key_2])
       end
     end
   end
@@ -92,6 +119,7 @@ describe Key, :mailer do
     with_them do
       let!(:key) { create(factory) }
       let!(:original_fingerprint) { key.fingerprint }
+      let!(:original_fingerprint_sha256) { key.fingerprint_sha256 }
 
       it 'accepts a key with blank space characters after stripping them' do
         modified_key = key.key.insert(100, chars.first).insert(40, chars.last)
@@ -104,6 +132,8 @@ describe Key, :mailer do
 
         expect(content).not_to match(/\s/)
         expect(original_fingerprint).to eq(key.fingerprint)
+        expect(original_fingerprint).to eq(key.fingerprint_md5)
+        expect(original_fingerprint_sha256).to eq(key.fingerprint_sha256)
       end
     end
   end
@@ -151,16 +181,49 @@ describe Key, :mailer do
   end
 
   context 'callbacks' do
-    it 'adds new key to authorized_file' do
-      key = build(:personal_key, id: 7)
-      expect(GitlabShellWorker).to receive(:perform_async).with(:add_key, key.shell_id, key.key)
-      key.save!
+    let(:key) { build(:personal_key) }
+
+    context 'authorized keys file is enabled' do
+      before do
+        stub_application_setting(authorized_keys_enabled: true)
+      end
+
+      it 'adds new key to authorized_file' do
+        allow(AuthorizedKeysWorker).to receive(:perform_async)
+
+        key.save!
+
+        # Check after the fact so we have access to Key#id
+        expect(AuthorizedKeysWorker).to have_received(:perform_async).with(:add_key, key.shell_id, key.key)
+      end
+
+      it 'removes key from authorized_file' do
+        key.save!
+
+        expect(AuthorizedKeysWorker).to receive(:perform_async).with(:remove_key, key.shell_id)
+
+        key.destroy
+      end
     end
 
-    it 'removes key from authorized_file' do
-      key = create(:personal_key)
-      expect(GitlabShellWorker).to receive(:perform_async).with(:remove_key, key.shell_id, key.key)
-      key.destroy
+    context 'authorized_keys file is disabled' do
+      before do
+        stub_application_setting(authorized_keys_enabled: false)
+      end
+
+      it 'does not add the key on creation' do
+        expect(AuthorizedKeysWorker).not_to receive(:perform_async)
+
+        key.save!
+      end
+
+      it 'does not remove the key on destruction' do
+        key.save!
+
+        expect(AuthorizedKeysWorker).not_to receive(:perform_async)
+
+        key.destroy
+      end
     end
   end
 

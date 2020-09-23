@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 class Member < ApplicationRecord
+  include EachBatch
   include AfterCommitQueue
   include Sortable
   include Importable
@@ -9,6 +10,7 @@ class Member < ApplicationRecord
   include Presentable
   include Gitlab::Utils::StrongMemoize
   include FromUnion
+  include UpdateHighestRole
 
   attr_accessor :raw_invite_token
 
@@ -23,7 +25,6 @@ class Member < ApplicationRecord
   validates :user_id, uniqueness: { scope: [:source_type, :source_id],
                                     message: "already exists in source",
                                     allow_nil: true }
-  validates :access_level, inclusion: { in: Gitlab::Access.all_values }, presence: true
   validate :higher_access_level_than_group, unless: :importing?
   validates :invite_email,
     presence: {
@@ -36,6 +37,11 @@ class Member < ApplicationRecord
       scope: [:source_type, :source_id],
       allow_nil: true
     }
+  validates :user_id,
+    uniqueness: {
+      message: _('project bots cannot be added to other groups / projects')
+    },
+    if: :project_bot?
 
   # This scope encapsulates (most of) the conditions a row in the member table
   # must satisfy if it is a valid permission. Of particular note:
@@ -53,6 +59,7 @@ class Member < ApplicationRecord
     left_join_users
       .where(user_ok)
       .where(requested_at: nil)
+      .non_minimal_access
       .reorder(nil)
   end
 
@@ -61,6 +68,8 @@ class Member < ApplicationRecord
     left_join_users
       .where(users: { state: 'active' })
       .non_request
+      .non_invite
+      .non_minimal_access
       .reorder(nil)
   end
 
@@ -69,19 +78,23 @@ class Member < ApplicationRecord
   scope :request, -> { where.not(requested_at: nil) }
   scope :non_request, -> { where(requested_at: nil) }
 
+  scope :not_accepted_invitations_by_user, -> (user) { invite.where(invite_accepted_at: nil, created_by: user) }
+
   scope :has_access, -> { active.where('access_level > 0') }
 
   scope :guests, -> { active.where(access_level: GUEST) }
   scope :reporters, -> { active.where(access_level: REPORTER) }
   scope :developers, -> { active.where(access_level: DEVELOPER) }
   scope :maintainers, -> { active.where(access_level: MAINTAINER) }
-  scope :masters, -> { maintainers } # @deprecated
-  scope :owners,  -> { active.where(access_level: OWNER) }
+  scope :non_guests, -> { where('members.access_level > ?', GUEST) }
+  scope :non_minimal_access, -> { where('members.access_level > ?', MINIMAL_ACCESS) }
+  scope :owners, -> { active.where(access_level: OWNER) }
   scope :owners_and_maintainers, -> { active.where(access_level: [OWNER, MAINTAINER]) }
-  scope :owners_and_masters,  -> { owners_and_maintainers } # @deprecated
   scope :with_user, -> (user) { where(user: user) }
+  scope :preload_user_and_notification_settings, -> { preload(user: :notification_settings) }
 
   scope :with_source_id, ->(source_id) { where(source_id: source_id) }
+  scope :including_source, -> { includes(:source) }
 
   scope :order_name_asc, -> { left_join_users.reorder(Gitlab::Database.nulls_last_order('users.name', 'ASC')) }
   scope :order_name_desc, -> { left_join_users.reorder(Gitlab::Database.nulls_last_order('users.name', 'DESC')) }
@@ -151,8 +164,8 @@ class Member < ApplicationRecord
       where(user_id: user_ids).has_access.pluck(:user_id, :access_level).to_h
     end
 
-    def find_by_invite_token(invite_token)
-      invite_token = Devise.token_generator.digest(self, :invite_token, invite_token)
+    def find_by_invite_token(raw_invite_token)
+      invite_token = Devise.token_generator.digest(self, :invite_token, raw_invite_token)
       find_by(invite_token: invite_token)
     end
 
@@ -256,7 +269,9 @@ class Member < ApplicationRecord
     def retrieve_user(user)
       return user if user.is_a?(User)
 
-      User.find_by(id: user) || User.find_by(email: user) || user
+      return User.find_by(id: user) if user.is_a?(Integer)
+
+      User.find_by(email: user) || user
     end
 
     def retrieve_member(source, user, existing_members)
@@ -316,7 +331,7 @@ class Member < ApplicationRecord
     return false unless invite?
 
     self.invite_token = nil
-    self.invite_accepted_at = Time.now.utc
+    self.invite_accepted_at = Time.current.utc
 
     self.user = new_user
 
@@ -372,7 +387,7 @@ class Member < ApplicationRecord
     # always notify when there isn't a user yet
     return true if user.blank?
 
-    NotificationRecipientService.notifiable?(user, type, notifiable_options.merge(opts))
+    NotificationRecipients::BuildService.notifiable?(user, type, notifiable_options.merge(opts))
   end
   # rubocop: enable CodeReuse/ServiceClass
 
@@ -383,6 +398,10 @@ class Member < ApplicationRecord
 
       GroupMember.where(source: source.ancestors, user_id: user_id).order(:access_level).last
     end
+  end
+
+  def invite_to_unknown_user?
+    invite? && user_id.nil?
   end
 
   private
@@ -458,6 +477,20 @@ class Member < ApplicationRecord
 
       errors.add(:access_level, s_("should be greater than or equal to %{access} inherited membership from group %{group_name}") % error_parameters)
     end
+  end
+
+  def update_highest_role?
+    return unless user_id.present?
+
+    previous_changes[:access_level].present?
+  end
+
+  def update_highest_role_attribute
+    user_id
+  end
+
+  def project_bot?
+    user&.project_bot?
   end
 end
 

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe UsernamesController do
+RSpec.describe UsernamesController do
   describe 'GET #suggest' do
     context 'namespace does not exist' do
       it 'returns JSON with the suggested username' do
@@ -30,7 +30,7 @@ describe UsernamesController do
       it 'returns bad request response' do
         get :suggest
 
-        expect(response.status).to eq(400)
+        expect(response).to have_gitlab_http_status(:bad_request)
       end
     end
   end

@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::HookData::BaseBuilder do
+RSpec.describe Gitlab::HookData::BaseBuilder do
   describe '#absolute_image_urls' do
     let(:subclass) do
       Class.new(described_class) do
@@ -13,6 +15,7 @@ describe Gitlab::HookData::BaseBuilder do
     context 'with an upload prefix specified' do
       let(:project_with_path) { double(full_path: 'baz/bar') }
       let(:object_with_project) { double(project: project_with_path) }
+
       subject { subclass.new(object_with_project) }
 
       where do

@@ -48,7 +48,11 @@ module Gitlab
           # Wrap this with the connection to make it possible to reconnect if
           # PGbouncer dies: https://github.com/rails/rails/issues/29189
           ActiveRecord::Base.connection_pool.with_connection do
-            LogCursor::EventLogs.new.fetch_in_batches { |batch, last_id| handle_events(batch, last_id) }
+            LogCursor::EventLogs.new.fetch_in_batches do |batch, last_id|
+              break if exit?
+
+              handle_events(batch, last_id)
+            end
           end
         end
 
@@ -114,7 +118,7 @@ module Gitlab
         end
 
         def event_klass_for(event)
-          event_klass_name = event.class.name.demodulize
+          event_klass_name = event.consumer_klass_name
           current_namespace = self.class.name.deconstantize
           Object.const_get("#{current_namespace}::Events::#{event_klass_name}", false)
         end
@@ -182,7 +186,7 @@ module Gitlab
         end
 
         def log_level
-          debug_logging? ? :debug : Rails.logger.level # rubocop:disable Gitlab/RailsLogger
+          debug_logging? ? :debug : Rails.logger.level
         end
 
         def debug_logging?

@@ -1,6 +1,6 @@
 <script>
+import { GlDeprecatedBadge as GlBadge } from '@gitlab/ui';
 import { __ } from '~/locale';
-import { GlBadge } from '@gitlab/ui';
 
 export default {
   name: 'MetricsReportsIssueBody',

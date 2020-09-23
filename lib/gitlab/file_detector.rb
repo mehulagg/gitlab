@@ -8,7 +8,7 @@ module Gitlab
   module FileDetector
     PATTERNS = {
       # Project files
-      readme: /\A(#{Regexp.union(*Gitlab::MarkupHelper::PLAIN_FILENAMES).source})(\.(#{Regexp.union(*Gitlab::MarkupHelper::EXTENSIONS).source}))?\z/i,
+      readme: /\A(#{Regexp.union(*Gitlab::MarkupHelper::PLAIN_FILENAMES).source})(\.(txt|#{Regexp.union(*Gitlab::MarkupHelper::EXTENSIONS).source}))?\z/i,
       changelog: %r{\A(changelog|history|changes|news)[^/]*\z}i,
       license: %r{\A((un)?licen[sc]e|copying)(\.[^/]+)?\z}i,
       contributing: %r{\Acontributing[^/]*\z}i,
@@ -25,18 +25,24 @@ module Gitlab
       route_map: '.gitlab/route-map.yml',
 
       # Dependency files
+      cargo_toml: 'Cargo.toml',
       cartfile: %r{\ACartfile[^/]*\z},
       composer_json: 'composer.json',
       gemfile: /\A(Gemfile|gems\.rb)\z/,
       gemfile_lock: 'Gemfile.lock',
       gemspec: %r{\A[^/]*\.gemspec\z},
       godeps_json: 'Godeps.json',
+      go_mod: 'go.mod',
+      go_sum: 'go.sum',
       package_json: 'package.json',
       podfile: 'Podfile',
       podspec_json: %r{\A[^/]*\.podspec\.json\z},
       podspec: %r{\A[^/]*\.podspec\z},
       requirements_txt: %r{\A[^/]*requirements\.txt\z},
-      yarn_lock: 'yarn.lock'
+      yarn_lock: 'yarn.lock',
+
+      # OpenAPI Specification files
+      openapi: %r{[^/]*(openapi|swagger)[^/]*\.(yaml|yml|json)\z}i
     }.freeze
 
     # Returns an Array of file types based on the given paths.

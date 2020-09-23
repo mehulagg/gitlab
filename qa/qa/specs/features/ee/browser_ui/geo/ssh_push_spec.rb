@@ -1,38 +1,28 @@
 # frozen_string_literal: true
 
 module QA
-  context 'Geo', :orchestrated, :geo do
+  RSpec.describe 'Geo', :orchestrated, :geo do
     describe 'GitLab SSH push' do
       let(:file_name) { 'README.md' }
 
-      after do
-        # Log out so subsequent tests can start unauthenticated
-        Runtime::Browser.visit(:geo_secondary, QA::Page::Dashboard::Projects)
-        Page::Main::Menu.perform do |menu|
-          menu.sign_out if menu.has_personal_area?(wait: 0)
-        end
-      end
-
       context 'regular git commit' do
-        it "is replicated to the secondary" do
-          key_title = "key for ssh tests #{Time.now.to_f}"
-          file_content = 'This is a Geo project!  Commit from primary.'
+        it "is replicated to the secondary", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/686' do
+          key_title = "Geo SSH #{Time.now.to_f}"
+          file_content = 'This is a Geo project! Commit from primary.'
           project = nil
           key = nil
 
-          Runtime::Browser.visit(:geo_primary, QA::Page::Main::Login) do
-            # Visit the primary node and login
-            Page::Main::Login.perform(&:sign_in_using_credentials)
-
+          QA::Flow::Login.while_signed_in(address: :geo_primary) do
             # Create a new SSH key for the user
-            key = Resource::SSHKey.fabricate! do |resource|
+            key = Resource::SSHKey.fabricate_via_api! do |resource|
               resource.title = key_title
+              resource.expires_at = Date.today + 2
             end
 
             # Create a new Project
-            project = Resource::Project.fabricate! do |project|
+            project = Resource::Project.fabricate_via_api! do |project|
               project.name = 'geo-project'
-              project.description = 'Geo test project'
+              project.description = 'Geo test project for SSH push'
             end
 
             # Perform a git push over SSH directly to the primary
@@ -53,20 +43,12 @@ module QA
             end
           end
 
-          Runtime::Browser.visit(:geo_secondary, QA::Page::Main::Login) do
-            # Visit the secondary node and login
-            Page::Main::Login.perform(&:sign_in_using_credentials)
+          QA::Runtime::Logger.debug('*****Visiting the secondary geo node*****')
 
+          QA::Flow::Login.while_signed_in(address: :geo_secondary) do
             EE::Page::Main::Banner.perform do |banner|
               expect(banner).to have_secondary_read_only_banner
             end
-
-            # Ensure the SSH key has replicated
-            Page::Main::Menu.act { click_settings_link }
-            Page::Profile::Menu.act { click_ssh_keys }
-
-            expect(page).to have_content(key_title)
-            expect(page).to have_content(key.fingerprint)
 
             # Ensure project has replicated
             Page::Main::Menu.perform { |menu| menu.go_to_projects }
@@ -87,25 +69,22 @@ module QA
       end
 
       context 'git-lfs commit' do
-        it "is replicated to the secondary" do
-          key_title = "key for ssh tests #{Time.now.to_f}"
+        it "is replicated to the secondary", testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/687' do
+          key_title = "Geo SSH LFS #{Time.now.to_f}"
           file_content = 'The rendered file could not be displayed because it is stored in LFS.'
           project = nil
           key = nil
 
-          Runtime::Browser.visit(:geo_primary, QA::Page::Main::Login) do
-            # Visit the primary node and login
-            Page::Main::Login.perform(&:sign_in_using_credentials)
-
+          QA::Flow::Login.while_signed_in(address: :geo_primary) do
             # Create a new SSH key for the user
-            key = Resource::SSHKey.fabricate! do |resource|
+            key = Resource::SSHKey.fabricate_via_api! do |resource|
               resource.title = key_title
             end
 
             # Create a new Project
-            project = Resource::Project.fabricate! do |project|
+            project = Resource::Project.fabricate_via_api! do |project|
               project.name = 'geo-project'
-              project.description = 'Geo test project'
+              project.description = 'Geo test project for SSH LFS push'
             end
 
             # Perform a git push over SSH directly to the primary
@@ -130,20 +109,12 @@ module QA
             end
           end
 
-          Runtime::Browser.visit(:geo_secondary, QA::Page::Main::Login) do
-            # Visit the secondary node and login
-            Page::Main::Login.perform(&:sign_in_using_credentials)
+          QA::Runtime::Logger.debug('*****Visiting the secondary geo node*****')
 
+          QA::Flow::Login.while_signed_in(address: :geo_secondary) do
             EE::Page::Main::Banner.perform do |banner|
               expect(banner).to have_secondary_read_only_banner
             end
-
-            # Ensure the SSH key has replicated
-            Page::Main::Menu.act { click_settings_link }
-            Page::Profile::Menu.act { click_ssh_keys }
-
-            expect(page).to have_content(key_title)
-            expect(page).to have_content(key.fingerprint)
 
             # Ensure project has replicated
             Page::Main::Menu.perform { |menu| menu.go_to_projects }

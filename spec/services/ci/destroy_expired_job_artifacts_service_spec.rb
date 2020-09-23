@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared_state do
+RSpec.describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared_state do
   include ExclusiveLeaseHelpers
 
   describe '.execute' do
@@ -11,8 +11,30 @@ describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared_state
     let(:service) { described_class.new }
     let!(:artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
 
-    it 'destroys expired job artifacts' do
-      expect { subject }.to change { Ci::JobArtifact.count }.by(-1)
+    before do
+      artifact.job.pipeline.unlocked!
+    end
+
+    context 'when artifact is expired' do
+      context 'when artifact is not locked' do
+        before do
+          artifact.job.pipeline.unlocked!
+        end
+
+        it 'destroys job artifact' do
+          expect { subject }.to change { Ci::JobArtifact.count }.by(-1)
+        end
+      end
+
+      context 'when artifact is locked' do
+        before do
+          artifact.job.pipeline.artifacts_locked!
+        end
+
+        it 'does not destroy job artifact' do
+          expect { subject }.not_to change { Ci::JobArtifact.count }
+        end
+      end
     end
 
     context 'when artifact is not expired' do
@@ -70,9 +92,11 @@ describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared_state
       before do
         stub_const('Ci::DestroyExpiredJobArtifactsService::LOOP_LIMIT', 1)
         stub_const('Ci::DestroyExpiredJobArtifactsService::BATCH_SIZE', 1)
+
+        second_artifact.job.pipeline.unlocked!
       end
 
-      let!(:artifact) { create_list(:ci_job_artifact, 2, expire_at: 1.day.ago) }
+      let!(:second_artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
 
       it 'raises an error and does not continue destroying' do
         is_expected.to be_falsy
@@ -84,7 +108,9 @@ describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared_state
     end
 
     context 'when there are no artifacts' do
-      let!(:artifact) { }
+      before do
+        artifact.destroy!
+      end
 
       it 'does not raise error' do
         expect { subject }.not_to raise_error
@@ -94,12 +120,54 @@ describe Ci::DestroyExpiredJobArtifactsService, :clean_gitlab_redis_shared_state
     context 'when there are artifacts more than batch sizes' do
       before do
         stub_const('Ci::DestroyExpiredJobArtifactsService::BATCH_SIZE', 1)
+
+        second_artifact.job.pipeline.unlocked!
       end
 
-      let!(:artifact) { create_list(:ci_job_artifact, 2, expire_at: 1.day.ago) }
+      let!(:second_artifact) { create(:ci_job_artifact, expire_at: 1.day.ago) }
 
       it 'destroys all expired artifacts' do
         expect { subject }.to change { Ci::JobArtifact.count }.by(-2)
+      end
+    end
+
+    context 'when artifact is a pipeline artifact' do
+      context 'when artifacts are expired' do
+        let!(:pipeline_artifact_1) { create(:ci_pipeline_artifact, expire_at: 1.week.ago) }
+        let!(:pipeline_artifact_2) { create(:ci_pipeline_artifact, expire_at: 1.week.ago) }
+
+        before do
+          [pipeline_artifact_1, pipeline_artifact_2].each { |pipeline_artifact| pipeline_artifact.pipeline.unlocked! }
+        end
+
+        it 'destroys pipeline artifacts' do
+          expect { subject }.to change { Ci::PipelineArtifact.count }.by(-2)
+        end
+      end
+
+      context 'when artifacts are not expired' do
+        let!(:pipeline_artifact_1) { create(:ci_pipeline_artifact, expire_at: 2.days.from_now) }
+        let!(:pipeline_artifact_2) { create(:ci_pipeline_artifact, expire_at: 2.days.from_now) }
+
+        before do
+          [pipeline_artifact_1, pipeline_artifact_2].each { |pipeline_artifact| pipeline_artifact.pipeline.unlocked! }
+        end
+
+        it 'does not destroy pipeline artifacts' do
+          expect { subject }.not_to change { Ci::PipelineArtifact.count }
+        end
+      end
+    end
+
+    context 'when some artifacts are locked' do
+      before do
+        pipeline = create(:ci_pipeline, locked: :artifacts_locked)
+        job = create(:ci_build, pipeline: pipeline)
+        create(:ci_job_artifact, expire_at: 1.day.ago, job: job)
+      end
+
+      it 'destroys only unlocked artifacts' do
+        expect { subject }.to change { Ci::JobArtifact.count }.by(-1)
       end
     end
   end

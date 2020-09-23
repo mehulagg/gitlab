@@ -1,12 +1,13 @@
 # frozen_string_literal: true
 
-class BuildFinishedWorker
+class BuildFinishedWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
   include PipelineQueue
 
   queue_namespace :pipeline_processing
-  latency_sensitive_worker!
+  urgency :high
   worker_resource_boundary :cpu
+  tags :requires_disk_io
 
   # rubocop: disable CodeReuse/ActiveRecord
   def perform(build_id)
@@ -28,11 +29,12 @@ class BuildFinishedWorker
     # We execute these in sync to reduce IO.
     BuildTraceSectionsWorker.new.perform(build.id)
     BuildCoverageWorker.new.perform(build.id)
+    Ci::BuildReportResultWorker.new.perform(build.id)
 
     # We execute these async as these are independent operations.
     BuildHooksWorker.perform_async(build.id)
     ArchiveTraceWorker.perform_async(build.id)
-    ExpirePipelineCacheWorker.perform_async(build.pipeline_id)
+    ExpirePipelineCacheWorker.perform_async(build.pipeline_id) if build.pipeline.cacheable?
     ChatNotificationWorker.perform_async(build.id) if build.pipeline.chat?
   end
 end

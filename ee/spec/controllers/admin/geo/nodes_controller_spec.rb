@@ -1,14 +1,10 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Admin::Geo::NodesController do
+RSpec.describe Admin::Geo::NodesController do
   shared_examples 'unlicensed geo action' do
-    it 'redirects to the license page' do
-      expect(response).to redirect_to(admin_license_path)
-    end
-
-    it 'displays a flash message' do
-      expect(controller).to set_flash[:alert].to('You need a different license to use Geo replication.')
+    it 'redirects to the 403 page' do
+      expect(response).to have_gitlab_http_status(:forbidden)
     end
   end
 
@@ -42,41 +38,32 @@ describe Admin::Geo::NodesController do
       get :index
     end
 
-    context 'with add-on license available' do
+    context 'with valid license' do
       before do
         allow(Gitlab::Geo).to receive(:license_allows?).and_return(true)
+        go
       end
 
-      it_behaves_like 'no flash message', :alert
+      it 'does not show license alert' do
+        expect(response).to render_template(partial: '_license_alert')
+        expect(response.body).not_to include('Geo is only available for users who have at least a Premium license.')
+      end
     end
 
-    context 'without add-on license available' do
+    context 'without valid license' do
       before do
         allow(Gitlab::Geo).to receive(:license_allows?).and_return(false)
-      end
-
-      it_behaves_like 'with flash message', :alert, 'You need a different license to use Geo replication'
-
-      it 'does not redirects to the license page' do
         go
-        expect(response).not_to redirect_to(admin_license_path)
-      end
-    end
-
-    context 'with Postgres 9.6 or greater' do
-      before do
-        allow(Gitlab::Database).to receive(:postgresql_minimum_supported_version?).and_return(true)
       end
 
-      it_behaves_like 'no flash message', :warning
-    end
-
-    context 'without Postgres 9.6 or greater' do
-      before do
-        allow(Gitlab::Database).to receive(:postgresql_minimum_supported_version?).and_return(false)
+      it 'does show license alert' do
+        expect(response).to render_template(partial: '_license_alert')
+        expect(response.body).to include('Geo is only available for users who have at least a Premium license.')
       end
 
-      it_behaves_like 'with flash message', :warning, 'Please upgrade PostgreSQL to version 9.6 or greater.'
+      it 'does not redirects to the 403 page' do
+        expect(response).not_to redirect_to(:forbidden)
+      end
     end
   end
 

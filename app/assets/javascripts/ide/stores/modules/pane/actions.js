@@ -1,17 +1,17 @@
 import * as types from './mutation_types';
 
-export const toggleOpen = ({ dispatch, state }, view) => {
+export const toggleOpen = ({ dispatch, state }) => {
   if (state.isOpen) {
     dispatch('close');
   } else {
-    dispatch('open', view);
+    dispatch('open');
   }
 };
 
-export const open = ({ commit }, view) => {
+export const open = ({ state, commit }, view) => {
   commit(types.SET_OPEN, true);
 
-  if (view) {
+  if (view && view.name !== state.currentView) {
     const { name, keepAlive } = view;
 
     commit(types.SET_CURRENT_VIEW, name);
@@ -25,6 +25,3 @@ export const open = ({ commit }, view) => {
 export const close = ({ commit }) => {
   commit(types.SET_OPEN, false);
 };
-
-// prevent babel-plugin-rewire from generating an invalid default during karma tests
-export default () => {};

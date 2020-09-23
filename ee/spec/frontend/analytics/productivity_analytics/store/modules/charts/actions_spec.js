@@ -252,14 +252,26 @@ describe('Productivity analytics chart actions', () => {
   });
 
   describe('updateSelectedItems', () => {
+    it('should commit selected chart item and dispatch fetchSecondaryChartData and setPage', done => {
+      testAction(
+        actions.updateSelectedItems,
+        { chartKey, item: 5 },
+        mockedContext.state,
+        [{ type: types.UPDATE_SELECTED_CHART_ITEMS, payload: { chartKey, item: 5 } }],
+        [{ type: 'fetchSecondaryChartData' }, { type: 'table/setPage', payload: 0 }],
+        done,
+      );
+    });
+  });
+
+  describe('resetMainChartSelection', () => {
     describe('when skipReload is false (by default)', () => {
-      const item = 5;
       it('should commit selected chart item and dispatch fetchSecondaryChartData and setPage', done => {
         testAction(
-          actions.updateSelectedItems,
-          { chartKey, item },
+          actions.resetMainChartSelection,
+          null,
           mockedContext.state,
-          [{ type: types.UPDATE_SELECTED_CHART_ITEMS, payload: { chartKey, item } }],
+          [{ type: types.UPDATE_SELECTED_CHART_ITEMS, payload: { chartKey, item: null } }],
           [{ type: 'fetchSecondaryChartData' }, { type: 'table/setPage', payload: 0 }],
           done,
         );
@@ -269,8 +281,8 @@ describe('Productivity analytics chart actions', () => {
     describe('when skipReload is true', () => {
       it('should commit selected chart and it should not dispatch any further actions', done => {
         testAction(
-          actions.updateSelectedItems,
-          { chartKey, item: null, skipReload: true },
+          actions.resetMainChartSelection,
+          true,
           mockedContext.state,
           [
             {

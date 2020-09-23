@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe 'Scoped issue boards', :js do
+RSpec.describe 'Scoped issue boards', :js do
   include FilteredSearchHelpers
+  include MobileHelpers
 
   let(:user) { create(:user) }
   let(:group) { create(:group, :public) }
@@ -34,8 +35,14 @@ describe 'Scoped issue boards', :js do
 
       login_as(user)
 
+      # ensure there is enough vertical space for create/edit board modal
+      resize_window(1920, 1080)
       visit project_boards_path(project)
       wait_for_requests
+    end
+
+    after do
+      restore_window_size
     end
 
     context 'new board' do
@@ -48,15 +55,15 @@ describe 'Scoped issue boards', :js do
           expect(page).to have_selector('.board-card', count: 1)
         end
 
-        it 'creates board filtering by No Milestone' do
-          create_board_milestone('No Milestone')
+        it 'creates board filtering by No milestone' do
+          create_board_milestone('No milestone')
 
           expect(find('.tokens-container')).to have_content("")
           expect(page).to have_selector('.board-card', count: 2)
         end
 
-        it 'creates board filtering by Any Milestone' do
-          create_board_milestone('Any Milestone')
+        it 'creates board filtering by Any milestone' do
+          create_board_milestone('Any milestone')
 
           expect(find('.tokens-container')).to have_content("")
           expect(page).to have_selector('.board-card', count: 3)
@@ -132,8 +139,8 @@ describe 'Scoped issue boards', :js do
           filtered_search.click
 
           page.within('#js-dropdown-hint') do
-            expect(page).to have_content('label')
-            expect(page).not_to have_content('assignee')
+            expect(page).to have_content('Label')
+            expect(page).not_to have_content('Assignee')
           end
         end
 
@@ -153,6 +160,8 @@ describe 'Scoped issue boards', :js do
 
       context 'weight' do
         let!(:issue_weight_1) { create(:issue, project: project, weight: 1) }
+        let!(:issue_weight_0) { create(:issue, project: project, weight: 0) }
+        let!(:issue_weight_none) { create(:issue, project: project, weight: nil) }
 
         it 'creates board filtering by weight' do
           create_board_weight(1)
@@ -164,15 +173,27 @@ describe 'Scoped issue boards', :js do
           filtered_search.click
 
           page.within('#js-dropdown-hint') do
-            expect(page).to have_content('label')
-            expect(page).not_to have_content('weight')
+            expect(page).to have_content('Label')
+            expect(page).not_to have_content('Weight')
           end
         end
 
         it 'creates board filtering by "Any" weight' do
           create_board_weight('Any')
 
+          expect(page).to have_selector('.board-card', count: 6)
+        end
+
+        it 'creates board filtering by "None" weight' do
+          create_board_weight('None')
+
           expect(page).to have_selector('.board-card', count: 4)
+        end
+
+        it 'creates board filtering by "0" weight' do
+          create_board_weight(0)
+
+          expect(page).to have_selector('.board-card', count: 1)
         end
 
         it 'displays dot highlight and tooltip' do
@@ -218,7 +239,7 @@ describe 'Scoped issue boards', :js do
         end
 
         it 'sets board to any milestone' do
-          update_board_milestone('Any Milestone')
+          update_board_milestone('Any milestone')
 
           expect(find('.tokens-container')).not_to have_content(milestone.title)
 
@@ -244,8 +265,8 @@ describe 'Scoped issue boards', :js do
           filtered_search.click
 
           page.within('#js-dropdown-hint') do
-            expect(page).to have_content('label')
-            expect(page).not_to have_content('milestone')
+            expect(page).to have_content('Label')
+            expect(page).not_to have_content('Milestone')
           end
         end
       end
@@ -293,7 +314,7 @@ describe 'Scoped issue boards', :js do
 
           update_board_label(label_title)
 
-          input_filtered_search("label:~#{label_2_title}")
+          input_filtered_search("label=~#{label_2_title}")
 
           expect(page).to have_selector('.board-card', count: 0)
         end
@@ -338,8 +359,8 @@ describe 'Scoped issue boards', :js do
           filtered_search.click
 
           page.within('#js-dropdown-hint') do
-            expect(page).to have_content('label')
-            expect(page).not_to have_content('assignee')
+            expect(page).to have_content('Label')
+            expect(page).not_to have_content('Assignee')
           end
         end
       end
@@ -365,8 +386,8 @@ describe 'Scoped issue boards', :js do
           filtered_search.click
 
           page.within('#js-dropdown-hint') do
-            expect(page).to have_content('label')
-            expect(page).not_to have_content('weight')
+            expect(page).to have_content('Label')
+            expect(page).not_to have_content('Weight')
           end
         end
       end
@@ -377,7 +398,7 @@ describe 'Scoped issue boards', :js do
       let!(:list) { create(:list, board: board, label: project_label, position: 0) }
 
       it 'removes issues milestone when removing from the board' do
-        board.update(milestone: milestone, assignee: user)
+        board.update!(milestone: milestone, assignee: user)
         visit project_boards_path(project)
         wait_for_requests
 
@@ -508,6 +529,10 @@ describe 'Scoped issue boards', :js do
 
       if value.is_a?(Array)
         value.each { |value| click_link value }
+      elsif filter == 'weight'
+        page.within(".dropdown-menu") do
+          click_button value
+        end
       else
         click_link value
       end
@@ -536,7 +561,10 @@ describe 'Scoped issue boards', :js do
 
     page.within(".#{filter}") do
       click_button 'Edit'
-      click_link value
+
+      page.within(".dropdown-menu") do
+        filter == 'weight' ? click_button(value) : click_link(value)
+      end
     end
 
     click_on_board_modal

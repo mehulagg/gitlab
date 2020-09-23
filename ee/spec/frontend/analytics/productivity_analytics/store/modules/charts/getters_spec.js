@@ -303,4 +303,16 @@ describe('Productivity analytics chart getters', () => {
       expect(getters.isChartEnabled(state)(chartKey)).toBe(false);
     });
   });
+
+  describe('isFilteringByDaysToMerge', () => {
+    it('returns true if there are items selected on the main chart', () => {
+      state.charts[chartKeys.main].selected = [1, 2];
+      expect(getters.isFilteringByDaysToMerge(state)).toBe(true);
+    });
+
+    it('returns false if there are no items selected on the main chart', () => {
+      state.charts[chartKeys.main].selected = [];
+      expect(getters.isFilteringByDaysToMerge(state)).toBe(false);
+    });
+  });
 });

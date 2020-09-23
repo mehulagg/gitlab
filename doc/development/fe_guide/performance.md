@@ -41,9 +41,9 @@ But in general it should be handled automatically through a `MutationObserver` i
 
 Only animate `opacity` & `transform` properties. Other properties (such as `top`, `left`, `margin`, and `padding`) all cause
 Layout to be recalculated, which is much more expensive. For details on this, see "Styles that Affect Layout" in
-[High Performance Animations][high-perf-animations].
+[High Performance Animations](https://www.html5rocks.com/en/tutorials/speed/high-performance-animations/).
 
-If you _do_ need to change layout (e.g. a sidebar that pushes main content over), prefer [FLIP][flip] to change expensive
+If you _do_ need to change layout (e.g. a sidebar that pushes main content over), prefer [FLIP](https://aerotwist.com/blog/flip-your-animations/) to change expensive
 properties once, and handle the actual animation with transforms.
 
 ## Reducing Asset Footprint
@@ -65,7 +65,7 @@ within the `pages` directory correspond to Rails controllers and actions. These
 auto-generated bundles will be automatically included on the corresponding
 pages.
 
-For example, if you were to visit <https://gitlab.com/gitlab-org/gitlab/issues>,
+For example, if you were to visit <https://gitlab.com/gitlab-org/gitlab/-/issues>,
 you would be accessing the `app/controllers/projects/issues_controller.rb`
 controller with the `index` action. If a corresponding file exists at
 `pages/projects/issues/index/index.js`, it will be compiled into a webpack
@@ -85,15 +85,15 @@ browser's developer console while on any page within GitLab.
 #### Important Considerations
 
 - **Keep Entry Points Lite:**
-  Page-specific JavaScript entry points should be as lite as possible.  These
+  Page-specific JavaScript entry points should be as lite as possible. These
   files are exempt from unit tests, and should be used primarily for
   instantiation and dependency injection of classes and methods that live in
-  modules outside of the entry point script.  Just import, read the DOM,
+  modules outside of the entry point script. Just import, read the DOM,
   instantiate, and nothing else.
 
 - **Entry Points May Be Asynchronous:**
   _DO NOT ASSUME_ that the DOM has been fully loaded and available when an
-  entry point script is run.  If you require that some code be run after the
+  entry point script is run. If you require that some code be run after the
   DOM has loaded, you should attach an event handler to the `DOMContentLoaded`
   event with:
 
@@ -113,7 +113,7 @@ browser's developer console while on any page within GitLab.
     with a relative path (e.g. `import initMyWidget from './my_widget';`).
   - If a class or module is _used by multiple routes_, place it within a
     shared directory at the closest common parent directory for the entry
-    points that import it.  For example, if `my_widget.js` is imported within
+    points that import it. For example, if `my_widget.js` is imported within
     both `pages/widget/show/index.js` and `pages/widget/run/index.js`, then
     place the module at `pages/widget/shared/my_widget.js` and import it with
     a relative path if possible (e.g. `../shared/my_widget`).
@@ -122,7 +122,7 @@ browser's developer console while on any page within GitLab.
   For GitLab Enterprise Edition, page-specific entry points will override their
   Community Edition counterparts with the same name, so if
   `ee/app/assets/javascripts/pages/foo/bar/index.js` exists, it will take
-  precedence over `app/assets/javascripts/pages/foo/bar/index.js`.  If you want
+  precedence over `app/assets/javascripts/pages/foo/bar/index.js`. If you want
   to minimize duplicate code, you can import one entry point from the other.
   This is not done automatically to allow for flexibility in overriding
   functionality.
@@ -131,7 +131,7 @@ browser's developer console while on any page within GitLab.
 
 For any code that does not need to be run immediately upon page load, (e.g.
 modals, dropdowns, and other behaviors that can be lazy-loaded), you can split
-your module into asynchronous chunks with dynamic import statements.  These
+your module into asynchronous chunks with dynamic import statements. These
 imports return a Promise which will be resolved once the script has loaded:
 
 ```javascript
@@ -160,18 +160,13 @@ General tips:
 - If some functionality can reasonably be achieved without adding extra libraries, avoid them.
 - Use page-specific JavaScript as described above to load libraries that are only needed on certain pages.
 - Use code-splitting dynamic imports wherever possible to lazy-load code that is not needed initially.
-- [High Performance Animations][high-perf-animations]
+- [High Performance Animations](https://www.html5rocks.com/en/tutorials/speed/high-performance-animations/)
 
 ---
 
 ## Additional Resources
 
 - [WebPage Test](https://www.webpagetest.org) for testing site loading time and size.
-- [Google PageSpeed Insights][pagespeed-insights] grades web pages and provides feedback to improve the page.
+- [Google PageSpeed Insights](https://developers.google.com/speed/pagespeed/insights/) grades web pages and provides feedback to improve the page.
 - [Profiling with Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools/)
-- [Browser Diet][browser-diet] is a community-built guide that catalogues practical tips for improving web page performance.
-
-[pagespeed-insights]: https://developers.google.com/speed/pagespeed/insights/
-[browser-diet]: https://browserdiet.com/
-[high-perf-animations]: https://www.html5rocks.com/en/tutorials/speed/high-performance-animations/
-[flip]: https://aerotwist.com/blog/flip-your-animations/
+- [Browser Diet](https://browserdiet.com/) is a community-built guide that catalogues practical tips for improving web page performance.

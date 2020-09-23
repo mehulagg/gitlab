@@ -1,14 +1,14 @@
 <script>
+import { GlIcon } from '@gitlab/ui';
 import RequestWarning from './request_warning.vue';
 
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
-import Icon from '~/vue_shared/components/icon.vue';
 
 export default {
   components: {
     RequestWarning,
     GlModal: DeprecatedModal2,
-    Icon,
+    GlIcon,
   },
   props: {
     currentRequest: {
@@ -39,6 +39,11 @@ export default {
     metricDetails() {
       return this.currentRequest.details[this.metric];
     },
+    metricDetailsLabel() {
+      return this.metricDetails.duration
+        ? `${this.metricDetails.duration} / ${this.metricDetails.calls}`
+        : this.metricDetails.calls;
+    },
     detailsList() {
       return this.metricDetails.details;
     },
@@ -59,7 +64,8 @@ export default {
   <div
     v-if="currentRequest.details && metricDetails"
     :id="`peek-view-${metric}`"
-    class="view qa-performance-bar-detailed-metric"
+    class="view"
+    data-qa-selector="detailed_metric_content"
   >
     <button
       :data-target="`#modal-peek-${metric}-details`"
@@ -67,7 +73,7 @@ export default {
       type="button"
       data-toggle="modal"
     >
-      {{ metricDetails.duration }} / {{ metricDetails.calls }}
+      {{ metricDetailsLabel }}
     </button>
     <gl-modal
       :id="`modal-peek-${metric}-details`"
@@ -79,7 +85,9 @@ export default {
         <template v-if="detailsList.length">
           <tr v-for="(item, index) in detailsList" :key="index">
             <td>
-              <span>{{ sprintf(__('%{duration}ms'), { duration: item.duration }) }}</span>
+              <span v-if="item.duration">{{
+                sprintf(__('%{duration}ms'), { duration: item.duration })
+              }}</span>
             </td>
             <td>
               <div class="js-toggle-container">
@@ -96,7 +104,7 @@ export default {
                     type="button"
                     :aria-label="__('Toggle backtrace')"
                   >
-                    <icon :size="12" name="ellipsis_h" />
+                    <gl-icon :size="12" name="ellipsis_h" />
                   </button>
                 </div>
                 <pre v-if="item.backtrace" class="backtrace-row js-toggle-content mt-2">{{
@@ -115,7 +123,9 @@ export default {
         </template>
       </table>
 
-      <div slot="footer"></div>
+      <template #footer>
+        <div></div>
+      </template>
     </gl-modal>
     {{ title }}
     <request-warning :html-id="htmlId" :warnings="warnings" />

@@ -1,7 +1,7 @@
 <script>
-import _ from 'underscore';
+import { GlSprintf } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
-import createFlash from '~/flash';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
 import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import { s__, sprintf } from '~/locale';
 import { visitUrl } from '~/lib/utils/url_utility';
@@ -10,6 +10,7 @@ import eventHub from '../event_hub';
 export default {
   components: {
     GlModal: DeprecatedModal2,
+    GlSprintf,
   },
   props: {
     url: {
@@ -37,25 +38,12 @@ export default {
     text() {
       return sprintf(
         s__(`Labels|Promoting %{labelTitle} will make it available for all projects inside %{groupName}.
-        Existing project labels with the same title will be merged. This action cannot be reversed.`),
+        Existing project labels with the same title will be merged. If a group label with the same title exists,
+        it will also be merged. This action cannot be reversed.`),
         {
           labelTitle: this.labelTitle,
           groupName: this.groupName,
         },
-      );
-    },
-    title() {
-      const label = `<span
-          class="label color-label"
-          style="background-color: ${this.labelColor}; color: ${this.labelTextColor};"
-        >${_.escape(this.labelTitle)}</span>`;
-
-      return sprintf(
-        s__('Labels|<span>Promote label</span> %{labelTitle} <span>to Group Label?</span>'),
-        {
-          labelTitle: label,
-        },
-        false,
       );
     },
   },
@@ -89,7 +77,27 @@ export default {
     footer-primary-button-variant="warning"
     @submit="onSubmit"
   >
-    <div slot="title" class="modal-title-with-label" v-html="title">{{ title }}</div>
+    <div slot="title" class="modal-title-with-label">
+      <gl-sprintf
+        :message="
+          s__(
+            'Labels|%{spanStart}Promote label%{spanEnd} %{labelTitle} %{spanStart}to Group Label?%{spanEnd}',
+          )
+        "
+      >
+        <template #labelTitle>
+          <span
+            class="label color-label"
+            :style="`background-color: ${labelColor}; color: ${labelTextColor};`"
+          >
+            {{ labelTitle }}
+          </span>
+        </template>
+        <template #span="{ content }"
+          ><span>{{ content }}</span></template
+        >
+      </gl-sprintf>
+    </div>
 
     {{ text }}
   </gl-modal>

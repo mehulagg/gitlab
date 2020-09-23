@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe CreateGithubWebhookWorker do
+RSpec.describe CreateGithubWebhookWorker do
   include GrapePathHelpers::NamedRouteMatcher
 
   let(:project) do
@@ -23,21 +23,23 @@ describe CreateGithubWebhookWorker do
     end
 
     it 'creates the webhook' do
-      expect_any_instance_of(Gitlab::LegacyGithubImport::Client).to receive(:create_hook)
-        .with(
-          'foo/bar',
-          'web',
-          {
-            url: "http://localhost#{api_v4_projects_mirror_pull_path(id: project.id)}",
-            content_type: 'json',
-            secret: project.external_webhook_token,
-            insecure_ssl: 1
-          },
-          {
-            events: %w[push pull_request],
-            active: true
-          }
-        )
+      expect_next_instance_of(Gitlab::LegacyGithubImport::Client) do |instance|
+        expect(instance).to receive(:create_hook)
+          .with(
+            'foo/bar',
+            'web',
+            {
+              url: "http://localhost#{api_v4_projects_mirror_pull_path(id: project.id)}",
+              content_type: 'json',
+              secret: project.external_webhook_token,
+              insecure_ssl: 1
+            },
+            {
+              events: %w[push pull_request],
+              active: true
+            }
+          )
+      end
 
       subject.perform(project.id)
     end

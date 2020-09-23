@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Projects::FeatureFlagsClientsController do
+RSpec.describe Projects::FeatureFlagsClientsController do
   include Gitlab::Routing
 
-  set(:project) { create(:project) }
-  set(:user) { create(:user) }
+  let_it_be(:project) { create(:project) }
+  let_it_be(:user) { create(:user) }
 
   describe 'POST reset_token.json' do
     subject(:reset_token) do
@@ -16,7 +16,6 @@ describe Projects::FeatureFlagsClientsController do
     end
 
     before do
-      stub_licensed_features(feature_flags: true)
       sign_in(user)
     end
 
@@ -38,7 +37,7 @@ describe Projects::FeatureFlagsClientsController do
         it 'returns 404' do
           reset_token
 
-          expect(response).to have_gitlab_http_status(404)
+          expect(response).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -51,7 +50,7 @@ describe Projects::FeatureFlagsClientsController do
       it 'returns 404' do
         reset_token
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
   end

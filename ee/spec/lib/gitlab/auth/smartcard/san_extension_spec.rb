@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Smartcard::SANExtension do
+RSpec.describe Gitlab::Auth::Smartcard::SANExtension do
   let(:fqdn) { 'gitlab.example.com' }
   let(:extension_factory) { OpenSSL::X509::ExtensionFactory.new(nil, cert) }
-  let(:san_extension) { described_class.new(cert, fqdn)}
+  let(:san_extension) { described_class.new(cert, fqdn) }
 
   let(:cert) do
     key = OpenSSL::PKey::RSA.new 2048
@@ -53,9 +53,9 @@ describe Gitlab::Auth::Smartcard::SANExtension do
 
         it {
           is_expected.to match([{
-                                      described_class::EMAIL_TAG => email,
-                                      described_class::URI_TAG => uri
-                                    }])
+                                  described_class::EMAIL_TAG => email,
+                                  described_class::URI_TAG => uri
+                                }])
         }
       end
 
@@ -69,42 +69,51 @@ describe Gitlab::Auth::Smartcard::SANExtension do
   end
 
   describe '#email_identity' do
-    let(:san_email) { 'newemail@some.domain' }
-    let(:san_uri) { "https://#{fqdn}" }
+    let(:san_single_email) { 'singleEntryEmail@some.domain' }
 
     before do
       allow(Gitlab.config.gitlab).to receive(:host).and_return(fqdn)
+      add_san_entry "email:#{san_single_email}"
     end
 
     subject { san_extension.email_identity }
 
-    describe 'alternate name email for GitLab defined in the certificate' do
+    it { is_expected.to eq san_single_email }
+
+    context 'multiple email identity SAN entries' do
+      let(:san_email) { 'newemail@some.domain' }
+      let(:san_uri) { 'not.yourdomain.com' }
+
       before do
         add_san_entry "email:#{san_email},URI:#{san_uri}"
       end
 
-      it { is_expected.to eq san_email }
+      describe 'alternate name email for GitLab defined in the certificate' do
+        let(:san_uri) { "https://#{fqdn}" }
 
-      describe 'inappropriate URI format' do
-        let(:san_uri) { 'an invalid uri' }
+        it { is_expected.to eq san_email }
+
+        context 'inappropriate URI format' do
+          let(:san_uri) { 'an invalid uri' }
+
+          it { is_expected.to be_nil }
+        end
+      end
+
+      context 'no alternate name defined to use with GitLab' do
+        it { is_expected.to be_nil }
+      end
+
+      context 'when the host is partially matched to the URI' do
+        let(:uri) { "https://#{fqdn}.anotherdomain.com" }
+        let(:identity) { 'user@email.com' }
+
+        before do
+          add_san_entry "email:#{identity},URI:#{uri}"
+        end
 
         it { is_expected.to be_nil }
       end
-    end
-
-    describe 'no alternate name defined to use with GitLab' do
-      it { is_expected.to be_nil }
-    end
-
-    context 'when the host is partially matched to the URI' do
-      let(:forged_uri) { "https://#{fqdn}.anotherdomain.com" }
-      let(:forged_identity) { 'hacker@email.com' }
-
-      before do
-        add_san_entry "email:#{forged_identity},URI:#{forged_uri}"
-      end
-
-      it { is_expected.to be_nil }
     end
   end
 end

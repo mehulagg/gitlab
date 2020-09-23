@@ -3,22 +3,11 @@
 class Admin::Geo::NodesController < Admin::Geo::ApplicationController
   before_action :check_license!, except: :index
   before_action :load_node, only: [:edit, :update]
-  before_action only: [:index] do
-    push_frontend_feature_flag(:enable_geo_design_sync)
-  end
 
   # rubocop: disable CodeReuse/ActiveRecord
   def index
     @nodes = GeoNode.all.order(:id)
     @node = GeoNode.new
-
-    unless Gitlab::Geo.license_allows?
-      flash.now[:alert] = _('You need a different license to use Geo replication.')
-    end
-
-    unless Gitlab::Database.postgresql_minimum_supported_version?
-      flash.now[:warning] = _('Please upgrade PostgreSQL to version 9.6 or greater. The status of the replication cannot be determined reliably with the current version.')
-    end
   end
   # rubocop: enable CodeReuse/ActiveRecord
 
@@ -26,23 +15,31 @@ class Admin::Geo::NodesController < Admin::Geo::ApplicationController
     @node = ::Geo::NodeCreateService.new(geo_node_params).execute
 
     if @node.persisted?
-      redirect_to admin_geo_nodes_path, notice: _('Node was successfully created.')
+      flash[:toast] = _('Node was successfully created.')
+      redirect_to admin_geo_nodes_path
     else
       @nodes = GeoNode.all
 
-      render :new
+      render :form
     end
   end
 
   def new
-    @node = GeoNode.new
+    @form_title = _('Add New Node')
+    render :form
+  end
+
+  def edit
+    @form_title = _('Edit Geo Node')
+    render :form
   end
 
   def update
     if ::Geo::NodeUpdateService.new(@node, geo_node_params).execute
-      redirect_to admin_geo_nodes_path, notice: _('Node was successfully updated.')
+      flash[:toast] = _('Node was successfully updated.')
+      redirect_to admin_geo_nodes_path
     else
-      render :edit
+      render :form
     end
   end
 
@@ -68,5 +65,6 @@ class Admin::Geo::NodesController < Admin::Geo::ApplicationController
 
   def load_node
     @node = GeoNode.find(params[:id])
+    @serialized_node = GeoNodeSerializer.new.represent(@node).to_json
   end
 end

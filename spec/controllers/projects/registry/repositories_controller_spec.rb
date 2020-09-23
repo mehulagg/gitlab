@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe Projects::Registry::RepositoriesController do
-  let(:user)    { create(:user) }
-  let(:project) { create(:project, :private) }
+RSpec.describe Projects::Registry::RepositoriesController do
+  let_it_be(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :private) }
 
   before do
     sign_in(user)
@@ -16,7 +16,23 @@ describe Projects::Registry::RepositoriesController do
       project.add_developer(user)
     end
 
-    describe 'GET index' do
+    shared_examples 'with name parameter' do
+      let_it_be(:repo) { create(:container_repository, project: project, name: 'my_searched_image') }
+      let_it_be(:another_repo) { create(:container_repository, project: project, name: 'bar') }
+
+      it 'returns the searched repo' do
+        go_to_index(format: :json, params: { name: 'my_searched_image' })
+
+        expect(response).to have_gitlab_http_status(:ok)
+        expect(json_response.length).to eq 1
+        expect(json_response.first).to include(
+          'id' => repo.id,
+          'name' => repo.name
+        )
+      end
+    end
+
+    shared_examples 'renders a list of repositories' do
       context 'when root container repository exists' do
         before do
           create(:container_repository, :root, project: project)
@@ -30,11 +46,13 @@ describe Projects::Registry::RepositoriesController do
       context 'when root container repository is not created' do
         context 'when there are tags for this repository' do
           before do
-            stub_container_registry_tags(repository: project.full_path,
+            stub_container_registry_tags(repository: :any,
                                          tags: %w[rc1 latest])
           end
 
           it 'successfully renders container repositories' do
+            expect(Gitlab::Tracking).not_to receive(:event)
+
             go_to_index
 
             expect(response).to have_gitlab_http_status(:ok)
@@ -43,7 +61,7 @@ describe Projects::Registry::RepositoriesController do
           it 'tracks the event' do
             expect(Gitlab::Tracking).to receive(:event).with(anything, 'list_repositories', {})
 
-            go_to_index
+            go_to_index(format: :json)
           end
 
           it 'creates a root container repository' do
@@ -56,7 +74,10 @@ describe Projects::Registry::RepositoriesController do
 
             expect(response).to have_gitlab_http_status(:ok)
             expect(response).to match_response_schema('registry/repositories')
+            expect(response).to include_pagination_headers
           end
+
+          it_behaves_like 'with name parameter'
         end
 
         context 'when there are no tags for this repository' do
@@ -84,7 +105,15 @@ describe Projects::Registry::RepositoriesController do
       end
     end
 
-    describe 'DELETE destroy' do
+    describe 'GET #index' do
+      it_behaves_like 'renders a list of repositories'
+    end
+
+    describe 'GET #show' do
+      it_behaves_like 'renders a list of repositories'
+    end
+
+    describe 'DELETE #destroy' do
       context 'when root container repository exists' do
         let!(:repository) do
           create(:container_repository, :root, project: project)
@@ -99,6 +128,7 @@ describe Projects::Registry::RepositoriesController do
 
           delete_repository(repository)
 
+          expect(repository.reload).to be_delete_scheduled
           expect(response).to have_gitlab_http_status(:no_content)
         end
 
@@ -113,7 +143,7 @@ describe Projects::Registry::RepositoriesController do
   end
 
   context 'when user does not have access to registry' do
-    describe 'GET index' do
+    describe 'GET #index' do
       it 'responds with 404' do
         go_to_index
 
@@ -126,11 +156,11 @@ describe Projects::Registry::RepositoriesController do
     end
   end
 
-  def go_to_index(format: :html)
-    get :index, params: {
+  def go_to_index(format: :html, params: {} )
+    get :index, params: params.merge({
                   namespace_id: project.namespace,
                   project_id: project
-                },
+                }),
                 format: format
   end
 

@@ -5,7 +5,7 @@ module Clusters
     class Prometheus < ApplicationRecord
       include PrometheusAdapter
 
-      VERSION = '6.7.3'
+      VERSION = '10.4.1'
 
       self.table_name = 'clusters_applications_prometheus'
 
@@ -13,17 +13,41 @@ module Clusters
       include ::Clusters::Concerns::ApplicationStatus
       include ::Clusters::Concerns::ApplicationVersion
       include ::Clusters::Concerns::ApplicationData
+      include AfterCommitQueue
 
       default_value_for :version, VERSION
 
-      after_destroy :disable_prometheus_integration
+      scope :preload_cluster_platform, -> { preload(cluster: [:platform_kubernetes]) }
+      scope :with_clusters_with_cilium, -> { joins(:cluster).merge(Clusters::Cluster.with_available_cilium) }
+
+      attr_encrypted :alert_manager_token,
+        mode: :per_attribute_iv,
+        key: Settings.attr_encrypted_db_key_base_truncated,
+        algorithm: 'aes-256-gcm'
+
+      after_destroy do
+        run_after_commit do
+          disable_prometheus_integration
+        end
+      end
 
       state_machine :status do
         after_transition any => [:installed] do |application|
-          application.cluster.projects.each do |project|
-            project.find_or_initialize_service('prometheus').update!(active: true)
+          application.run_after_commit do
+            Clusters::Applications::ActivateServiceWorker
+              .perform_async(application.cluster_id, ::PrometheusService.to_param) # rubocop:disable CodeReuse/ServiceClass
           end
         end
+
+        after_transition any => :updating do |application|
+          application.update(last_update_started_at: Time.current)
+        end
+      end
+
+      def updated_since?(timestamp)
+        last_update_started_at &&
+          last_update_started_at > timestamp &&
+          !update_errored?
       end
 
       def chart
@@ -49,10 +73,10 @@ module Clusters
         )
       end
 
-      def upgrade_command(values)
-        ::Gitlab::Kubernetes::Helm::InstallCommand.new(
+      def patch_command(values)
+        ::Gitlab::Kubernetes::Helm::PatchCommand.new(
           name: name,
-          version: VERSION,
+          version: version,
           rbac: cluster.platform_kubernetes_rbac?,
           chart: chart,
           files: files_with_replaced_values(values)
@@ -82,21 +106,38 @@ module Clusters
         proxy_url = kube_client.proxy_url('service', service_name, service_port, Gitlab::Kubernetes::Helm::NAMESPACE)
 
         # ensures headers containing auth data are appended to original k8s client options
-        options = kube_client.rest_client.options.merge(headers: kube_client.headers)
+        options = kube_client.rest_client.options
+          .merge(prometheus_client_default_options)
+          .merge(headers: kube_client.headers)
         Gitlab::PrometheusClient.new(proxy_url, options)
-      rescue Kubeclient::HttpError
+      rescue Kubeclient::HttpError, Errno::ECONNRESET, Errno::ECONNREFUSED, Errno::ENETUNREACH
         # If users have mistakenly set parameters or removed the depended clusters,
         # `proxy_url` could raise an exception because gitlab can not communicate with the cluster.
         # Since `PrometheusAdapter#can_query?` is eargely loaded on environement pages in gitlab,
         # we need to silence the exceptions
       end
 
+      def configured?
+        kube_client.present? && available?
+      rescue Gitlab::UrlBlocker::BlockedUrlError
+        false
+      end
+
+      def generate_alert_manager_token!
+        unless alert_manager_token.present?
+          update!(alert_manager_token: generate_token)
+        end
+      end
+
       private
 
+      def generate_token
+        SecureRandom.hex
+      end
+
       def disable_prometheus_integration
-        cluster.projects.each do |project|
-          project.prometheus_service&.update!(active: false)
-        end
+        ::Clusters::Applications::DeactivateServiceWorker
+          .perform_async(cluster_id, ::PrometheusService.to_param) # rubocop:disable CodeReuse/ServiceClass
       end
 
       def kube_client
@@ -122,5 +163,3 @@ module Clusters
     end
   end
 end
-
-Clusters::Applications::Prometheus.prepend_if_ee('EE::Clusters::Applications::Prometheus')

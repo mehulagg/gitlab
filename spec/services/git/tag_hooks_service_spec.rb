@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Git::TagHooksService, :service do
+RSpec.describe Git::TagHooksService, :service do
   let(:user) { create(:user) }
   let(:project) { create(:project, :repository) }
 
@@ -107,6 +107,7 @@ describe Git::TagHooksService, :service do
                Gitlab.config.gitlab.url,
                project.namespace.to_param,
                project.to_param,
+               '-',
                'commit',
                commit.id
               ].join('/')

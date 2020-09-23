@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Merge request > User merges when pipeline succeeds', :js do
+RSpec.describe 'Merge request > User merges when pipeline succeeds', :js do
   let(:project) { create(:project, :public, :repository) }
   let(:user) { project.creator }
   let(:merge_request) do
@@ -11,6 +11,7 @@ describe 'Merge request > User merges when pipeline succeeds', :js do
                                       title: 'Bug NS-04',
                                       merge_params: { force_remove_source_branch: '1' })
   end
+
   let(:pipeline) do
     create(:ci_pipeline, project: project,
                          sha: merge_request.diff_head_sha,
@@ -64,6 +65,10 @@ describe 'Merge request > User merges when pipeline succeeds', :js do
         before do
           click_button "Merge when pipeline succeeds"
           click_link "Cancel automatic merge"
+
+          wait_for_requests
+
+          expect(page).to have_content 'Merge when pipeline succeeds', wait: 0
         end
 
         it_behaves_like 'Merge when pipeline succeeds activator'
@@ -111,6 +116,7 @@ describe 'Merge request > User merges when pipeline succeeds', :js do
         merge_user: user,
         title: 'MepMep')
     end
+
     let!(:build) do
       create(:ci_build, pipeline: pipeline)
     end
@@ -150,9 +156,9 @@ describe 'Merge request > User merges when pipeline succeeds', :js do
 
     context 'view merge request with MWPS enabled but automatically merge fails' do
       before do
-        merge_request.update(
+        merge_request.update!(
           merge_user: merge_request.author,
-          merge_error: 'Something went wrong'
+          merge_error: 'Something went wrong.'
         )
         refresh
       end
@@ -162,16 +168,16 @@ describe 'Merge request > User merges when pipeline succeeds', :js do
         wait_for_requests
 
         page.within('.mr-section-container') do
-          expect(page).to have_content('Merge failed: Something went wrong')
+          expect(page).to have_content('Merge failed: Something went wrong. Please try again.')
         end
       end
     end
 
     context 'view merge request with MWPS enabled but automatically merge fails' do
       before do
-        merge_request.update(
+        merge_request.update!(
           merge_user: merge_request.author,
-          merge_error: 'Something went wrong'
+          merge_error: 'Something went wrong.'
         )
         refresh
       end
@@ -181,7 +187,7 @@ describe 'Merge request > User merges when pipeline succeeds', :js do
         wait_for_requests
 
         page.within('.mr-section-container') do
-          expect(page).to have_content('Merge failed: Something went wrong')
+          expect(page).to have_content('Merge failed: Something went wrong. Please try again.')
         end
       end
     end

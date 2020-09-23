@@ -1,9 +1,9 @@
 <script>
-import icon from '~/vue_shared/components/icon.vue';
+import { GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    icon,
+    GlIcon,
   },
   props: {
     buttonTitle: {
@@ -31,8 +31,8 @@ export default {
 </script>
 
 <template>
-  <button class="btn-link btn-show-section" type="button" @click="onClickButton">
-    <icon :size="16" :name="toggleButtonIcon" />
-    <span class="prepend-left-8">{{ buttonTitle }}</span>
+  <button class="btn-link d-flex align-items-center" type="button" @click="onClickButton">
+    <gl-icon :size="16" :name="toggleButtonIcon" />
+    <span class="gl-ml-3">{{ buttonTitle }}</span>
   </button>
 </template>

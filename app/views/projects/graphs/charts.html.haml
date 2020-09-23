@@ -1,23 +1,34 @@
-- page_title _("Contribution Charts")
+- page_title _("Repository Analytics")
+
+.mb-3
+  %h3
+    = _("Repository Analytics")
 
 .repo-charts
   %h4.sub-header
     = _("Programming languages used in this repository")
 
-  .row
-    .col-md-4
-      %ul.bordered-list
-        - @languages.each do |language|
-          %li
-            %span{ style: "color: #{language[:color]}" }
-              = icon('circle')
-            &nbsp;
-            = language[:label]
-            .float-right
-              = language[:value]
-              \%
-    .col-md-8
-      %canvas#languages-chart{ height: 400 }
+  %p
+    = _("Measured in bytes of code. Excludes generated and vendored code.")
+
+  #js-languages-chart{ data: { chart_data: @languages.to_json.html_safe } }
+
+- if defined?(@daily_coverage_options)
+  .repo-charts.my-5
+    .sub-header-block.border-top
+    .d-flex.justify-content-between.align-items-center
+      %h4.sub-header.m-0
+        - start_date = capture do
+          #{@daily_coverage_options[:base_params][:start_date].strftime('%b %d')}
+        - end_date = capture do
+          #{@daily_coverage_options[:base_params][:end_date].strftime('%b %d')}
+        = (_("Code coverage statistics for master %{start_date} - %{end_date}") % {start_date: start_date, end_date: end_date})
+      - download_path = capture do
+        #{@daily_coverage_options[:download_path]}
+      %a.btn.btn-sm{ href: "#{download_path}?#{@daily_coverage_options[:base_params].to_query}" }
+        %small
+          = _("Download raw data (.csv)")
+    #js-code-coverage-chart{ data: { graph_endpoint: "#{@daily_coverage_options[:graph_api_path]}?#{@daily_coverage_options[:base_params].to_query}" } }
 
 .repo-charts
   .sub-header-block.border-top
@@ -30,6 +41,7 @@
         - end_time = capture do
           #{@commits_graph.end_date.strftime('%b %d')}
         = (_("Commit statistics for %{ref} %{start_time} - %{end_time}") % { ref: "<strong>#{h @ref}</strong>", start_time: start_time, end_time: end_time }).html_safe
+      = _("Excluding merge commits. Limited to %{limit} commits.") % {limit: number_with_delimiter(@commits_limit, delimiter: ',')}
 
     .col-md-6
       .tree-ref-container
@@ -57,27 +69,18 @@
       %p.slead
         = _("Commits per day of month")
       %div
-        %canvas#month-chart
+        #js-month-chart{ data: { chart_data: @commits_per_month.to_json.html_safe } }
   .row
     .col-md-6
     .col-md-6
       %p.slead
         = _("Commits per weekday")
       %div
-        %canvas#weekday-chart
+        #js-weekday-chart{ data: { chart_data: @commits_per_week_days.to_json.html_safe } }
   .row
     .col-md-6
     .col-md-6
       %p.slead
         = _("Commits per day hour (UTC)")
       %div
-        %canvas#hour-chart
-
--# haml-lint:disable InlineJavaScript
-%script#projectChartData{ type: "application/json" }
-  - projectChartData = {};
-  - projectChartData['hour'] = @commits_per_time
-  - projectChartData['weekDays'] = @commits_per_week_days
-  - projectChartData['month'] = @commits_per_month
-  - projectChartData['languages'] = @languages
-  = projectChartData.to_json.html_safe
+        #js-hour-chart{ data: { chart_data: @commits_per_time.to_json.html_safe } }

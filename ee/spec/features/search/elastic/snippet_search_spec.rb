@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Snippet elastic search', :js, :elastic, :aggregate_failures, :sidekiq_might_not_need_inline do
+RSpec.describe 'Snippet elastic search', :js, :elastic, :aggregate_failures, :sidekiq_might_not_need_inline do
   let(:public_project) { create(:project, :public) }
   let(:authorized_user) { create(:user) }
   let(:authorized_project) { create(:project, namespace: authorized_user.namespace) }
@@ -12,105 +12,134 @@ describe 'Snippet elastic search', :js, :elastic, :aggregate_failures, :sidekiq_
 
     authorized_project.add_maintainer(authorized_user)
 
-    create(:personal_snippet, :public, content: 'public personal snippet')
-    create(:project_snippet, :public, content: 'public project snippet', project: public_project)
+    create(:personal_snippet, :public, title: 'public personal snippet', description: 'a public personal snippet description')
+    create(:project_snippet, :public, title: 'public project snippet', description: 'a public project snippet description', project: public_project)
 
-    create(:personal_snippet, :internal, content: 'internal personal snippet')
-    create(:project_snippet, :internal, content: 'internal project snippet', project: public_project)
+    create(:personal_snippet, :internal, title: 'internal personal snippet', description: 'a internal personal snippet description')
+    create(:project_snippet, :internal, title: 'internal project snippet', description: 'a internal project snippet description', project: public_project)
 
-    create(:personal_snippet, :private, content: 'private personal snippet')
-    create(:project_snippet, :private, content: 'private project snippet', project: public_project)
+    create(:personal_snippet, :private, title: 'private personal snippet', description: 'a private personal snippet description')
+    create(:project_snippet, :private, title: 'private project snippet', description: 'a private project snippet description', project: public_project)
 
-    create(:personal_snippet, :private, content: 'authorized personal snippet', author: authorized_user)
-    create(:project_snippet, :private, content: 'authorized project snippet', project: authorized_project)
+    create(:personal_snippet, :private, title: 'authorized personal snippet', description: 'an authorized personal snippet description', author: authorized_user)
+    create(:project_snippet, :private, title: 'authorized project snippet', description: 'an authorized project snippet description', project: authorized_project)
 
-    Gitlab::Elastic::Helper.refresh_index
+    ensure_elasticsearch_index!
 
     sign_in(current_user) if current_user
     visit explore_snippets_path
-    submit_search('snippet')
   end
 
   # TODO: Reenable support for public/internal project snippets
   # https://gitlab.com/gitlab-org/gitlab/issues/35760
 
-  context 'as anonymous user' do
-    let(:current_user) { nil }
+  shared_examples 'expected snippet search results' do
+    context 'as anonymous user' do
+      let(:current_user) { nil }
 
-    it 'finds only public snippets' do
-      within('.results') do
-        expect(page).to have_content('public personal snippet')
-        expect(page).not_to have_content('public project snippet')
+      context 'when block_anonymous_global_searches is enabled' do
+        it 'redirects to login page' do
+          expect(page).to have_content('You must be logged in to search across all of GitLab')
+        end
+      end
 
-        expect(page).not_to have_content('internal personal snippet')
-        expect(page).not_to have_content('internal project snippet')
+      context 'when block_anonymous_global_searches is disabled' do
+        before(:context) do
+          stub_feature_flags(block_anonymous_global_searches: false)
+        end
 
-        expect(page).not_to have_content('authorized personal snippet')
-        expect(page).not_to have_content('authorized project snippet')
+        it 'finds only public snippets' do
+          within('.results') do
+            expect(page).to have_content('public personal snippet')
+            expect(page).not_to have_content('public project snippet')
 
-        expect(page).not_to have_content('private personal snippet')
-        expect(page).not_to have_content('private project snippet')
+            expect(page).not_to have_content('internal personal snippet')
+            expect(page).not_to have_content('internal project snippet')
+
+            expect(page).not_to have_content('authorized personal snippet')
+            expect(page).not_to have_content('authorized project snippet')
+
+            expect(page).not_to have_content('private personal snippet')
+            expect(page).not_to have_content('private project snippet')
+          end
+        end
+      end
+    end
+
+    context 'as logged in user' do
+      let(:current_user) { create(:user) }
+
+      it 'finds only public and internal snippets' do
+        within('.results') do
+          expect(page).to have_content('public personal snippet')
+          expect(page).not_to have_content('public project snippet')
+
+          expect(page).to have_content('internal personal snippet')
+          expect(page).not_to have_content('internal project snippet')
+
+          expect(page).not_to have_content('private personal snippet')
+          expect(page).not_to have_content('private project snippet')
+
+          expect(page).not_to have_content('authorized personal snippet')
+          expect(page).not_to have_content('authorized project snippet')
+        end
+      end
+    end
+
+    context 'as authorized user' do
+      let(:current_user) { authorized_user }
+
+      it 'finds only public, internal, and authorized private snippets' do
+        within('.results') do
+          expect(page).to have_content('public personal snippet')
+          expect(page).not_to have_content('public project snippet')
+
+          expect(page).to have_content('internal personal snippet')
+          expect(page).not_to have_content('internal project snippet')
+
+          expect(page).not_to have_content('private personal snippet')
+          expect(page).not_to have_content('private project snippet')
+
+          expect(page).to have_content('authorized personal snippet')
+          expect(page).to have_content('authorized project snippet')
+        end
+      end
+    end
+
+    context 'as administrator' do
+      let(:current_user) { create(:admin) }
+
+      it 'finds all snippets' do
+        within('.results') do
+          expect(page).to have_content('public personal snippet')
+          expect(page).to have_content('public project snippet')
+
+          expect(page).to have_content('internal personal snippet')
+          expect(page).to have_content('internal project snippet')
+
+          expect(page).to have_content('private personal snippet')
+          expect(page).to have_content('private project snippet')
+
+          expect(page).to have_content('authorized personal snippet')
+          expect(page).to have_content('authorized project snippet')
+        end
       end
     end
   end
 
-  context 'as logged in user' do
-    let(:current_user) { create(:user) }
-
-    it 'finds only public and internal snippets' do
-      within('.results') do
-        expect(page).to have_content('public personal snippet')
-        expect(page).not_to have_content('public project snippet')
-
-        expect(page).to have_content('internal personal snippet')
-        expect(page).not_to have_content('internal project snippet')
-
-        expect(page).not_to have_content('private personal snippet')
-        expect(page).not_to have_content('private project snippet')
-
-        expect(page).not_to have_content('authorized personal snippet')
-        expect(page).not_to have_content('authorized project snippet')
-      end
+  context 'when searching titles' do
+    before do
+      submit_search('snippet')
     end
+
+    it_behaves_like 'expected snippet search results'
   end
 
-  context 'as authorized user' do
-    let(:current_user) { authorized_user }
-
-    it 'finds only public, internal, and authorized private snippets' do
-      within('.results') do
-        expect(page).to have_content('public personal snippet')
-        expect(page).not_to have_content('public project snippet')
-
-        expect(page).to have_content('internal personal snippet')
-        expect(page).not_to have_content('internal project snippet')
-
-        expect(page).not_to have_content('private personal snippet')
-        expect(page).not_to have_content('private project snippet')
-
-        expect(page).to have_content('authorized personal snippet')
-        expect(page).to have_content('authorized project snippet')
-      end
+  context 'when searching descriptions' do
+    before do
+      submit_search('snippet description')
     end
-  end
 
-  context 'as administrator' do
-    let(:current_user) { create(:admin) }
-
-    it 'finds all snippets' do
-      within('.results') do
-        expect(page).to have_content('public personal snippet')
-        expect(page).to have_content('public project snippet')
-
-        expect(page).to have_content('internal personal snippet')
-        expect(page).to have_content('internal project snippet')
-
-        expect(page).to have_content('private personal snippet')
-        expect(page).to have_content('private project snippet')
-
-        expect(page).to have_content('authorized personal snippet')
-        expect(page).to have_content('authorized project snippet')
-      end
-    end
+    it_behaves_like 'expected snippet search results'
   end
 end

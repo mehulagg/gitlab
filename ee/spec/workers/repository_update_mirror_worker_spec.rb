@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe RepositoryUpdateMirrorWorker do
+RSpec.describe RepositoryUpdateMirrorWorker do
   describe '#perform' do
     let(:jid) { '12345678' }
     let!(:project) { create(:project) }
@@ -13,13 +13,17 @@ describe RepositoryUpdateMirrorWorker do
     end
 
     it 'sets status as finished when update mirror service executes successfully' do
-      expect_any_instance_of(Projects::UpdateMirrorService).to receive(:execute).and_return(status: :success)
+      expect_next_instance_of(Projects::UpdateMirrorService) do |instance|
+        expect(instance).to receive(:execute).and_return(status: :success)
+      end
 
       expect { subject.perform(project.id) }.to change { import_state.reload.status }.to('finished')
     end
 
     it 'sets status as failed when update mirror service executes with errors' do
-      allow_any_instance_of(Projects::UpdateMirrorService).to receive(:execute).and_return(status: :error, message: 'error')
+      allow_next_instance_of(Projects::UpdateMirrorService) do |instance|
+        allow(instance).to receive(:execute).and_return(status: :error, message: 'error')
+      end
 
       expect { subject.perform(project.id) }.to raise_error(RepositoryUpdateMirrorWorker::UpdateError, 'error')
       expect(project.reload.import_status).to eq('failed')
@@ -34,7 +38,9 @@ describe RepositoryUpdateMirrorWorker do
     end
 
     it 'marks mirror as failed when an error occurs' do
-      allow_any_instance_of(Projects::UpdateMirrorService).to receive(:execute).and_raise(RuntimeError)
+      allow_next_instance_of(Projects::UpdateMirrorService) do |instance|
+        allow(instance).to receive(:execute).and_raise(RuntimeError)
+      end
 
       expect { subject.perform(project.id) }.to raise_error(RepositoryUpdateMirrorWorker::UpdateError)
       expect(import_state.reload.status).to eq('failed')
@@ -45,7 +51,9 @@ describe RepositoryUpdateMirrorWorker do
       let(:import_state) { create(:import_state, :mirror, :started, project: started_project, jid: jid) }
 
       it 'sets status as finished when update mirror service executes successfully' do
-        expect_any_instance_of(Projects::UpdateMirrorService).to receive(:execute).and_return(status: :success)
+        expect_next_instance_of(Projects::UpdateMirrorService) do |instance|
+          expect(instance).to receive(:execute).and_return(status: :success)
+        end
 
         expect { subject.perform(started_project.id) }.to change { import_state.reload.status }.to('finished')
       end

@@ -4,6 +4,8 @@ import { GlButton, GlLoadingIcon } from '@gitlab/ui';
 
 import TreeDragAndDropMixin from '../mixins/tree_dd_mixin';
 
+import { ChildType } from '../constants';
+
 export default {
   components: {
     GlButton,
@@ -34,7 +36,7 @@ export default {
     },
   },
   methods: {
-    ...mapActions(['fetchNextPageItems', 'reorderItem']),
+    ...mapActions(['fetchNextPageItems', 'reorderItem', 'moveItem', 'toggleItem']),
     handleShowMoreClick() {
       this.fetchInProgress = true;
       this.fetchNextPageItems({
@@ -47,6 +49,14 @@ export default {
           this.fetchInProgress = false;
         });
     },
+    onMove(e) {
+      const item = e.relatedContext.element;
+      if (item?.type === ChildType.Epic)
+        this.toggleItem({
+          parentItem: item,
+          isDragging: true,
+        });
+    },
   },
 };
 </script>
@@ -56,6 +66,7 @@ export default {
     :is="treeRootWrapper"
     v-bind="treeRootOptions"
     class="list-unstyled related-items-list tree-root"
+    :move="onMove"
     @start="handleDragOnStart"
     @end="handleDragOnEnd"
   >

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'User browses a job', :js do
+RSpec.describe 'User browses a job', :js do
   let(:user) { create(:user) }
   let(:user_access_level) { :developer }
   let(:project) { create(:project, :repository, namespace: user.namespace) }
@@ -10,8 +10,6 @@ describe 'User browses a job', :js do
   let!(:build) { create(:ci_build, :success, :trace_artifact, :coverage, pipeline: pipeline) }
 
   before do
-    stub_feature_flags(job_log_json: false)
-
     project.add_maintainer(user)
     project.enable_ci
 
@@ -24,11 +22,11 @@ describe 'User browses a job', :js do
     wait_for_requests
 
     expect(page).to have_content("Job ##{build.id}")
-    expect(page).to have_css('.js-build-trace')
+    expect(page).to have_css('.job-log')
 
     # scroll to the top of the page first
     execute_script "window.scrollTo(0,0)"
-    accept_confirm { find('.js-erase-link').click }
+    accept_confirm { find('[data-testid="job-log-erase-link"]').click }
 
     expect(page).to have_no_css('.artifacts')
     expect(build).not_to have_trace

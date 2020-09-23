@@ -6,7 +6,7 @@ RSpec.describe Geo::Batch::ProjectRegistrySchedulerWorker do
   include ExclusiveLeaseHelpers
   include ::EE::GeoHelpers
 
-  set(:secondary) { create(:geo_node) }
+  let_it_be(:secondary) { create(:geo_node) }
   let(:lease_key) { subject.lease_key }
   let(:lease_timeout) { 2.minutes }
 
@@ -16,17 +16,6 @@ RSpec.describe Geo::Batch::ProjectRegistrySchedulerWorker do
   end
 
   describe '#perform' do
-    context 'when operation is :recheck_repositories' do
-      let!(:registry) { create(:geo_project_registry, :repository_verified) }
-
-      it 'schedules batches of repositories for reverify' do
-        Sidekiq::Testing.fake! do
-          expect { subject.perform(:recheck_repositories) }.to change(Geo::Batch::ProjectRegistryWorker.jobs, :size).by(1)
-          expect(Geo::Batch::ProjectRegistryWorker.jobs.last['args']).to include('reverify_repositories')
-        end
-      end
-    end
-
     context 'when operation is :reverify_repositories' do
       let!(:registry) { create(:geo_project_registry, :repository_verified) }
 

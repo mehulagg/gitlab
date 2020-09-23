@@ -15,7 +15,18 @@ module MembersHelper
       elsif member.invite?
         "revoke the invitation for #{member.invite_email} to join"
       else
-        "remove #{member.user.name} from"
+        if member.user
+          "remove #{member.user.name} from"
+        else
+          e = RuntimeError.new("Data integrity error: no associated user for member ID #{member.id}")
+          Gitlab::ErrorTracking.track_exception(e,
+            member_id: member.id,
+            invite_email: member.invite_email,
+            invite_accepted_at: member.invite_accepted_at,
+            source_id: member.source_id,
+            source_type: member.source_type)
+          "remove this orphaned member from"
+        end
       end
 
     "#{text} #{action} the #{member.source.human_name} #{source_text(member)}?"
@@ -35,6 +46,14 @@ module MembersHelper
   def filter_group_project_member_path(options = {})
     options = params.slice(:search, :sort).merge(options).permit!
     "#{request.path}?#{options.to_param}"
+  end
+
+  def member_path(member)
+    if member.is_a?(GroupMember)
+      group_group_member_path(member.source, member)
+    else
+      project_project_member_path(member.source, member)
+    end
   end
 
   private

@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GitalyClient::ConflictsService do
+RSpec.describe Gitlab::GitalyClient::ConflictsService do
   let(:project) { create(:project, :repository) }
   let(:target_project) { create(:project, :repository) }
   let(:source_repository) { project.repository.raw }
@@ -33,6 +35,7 @@ describe Gitlab::GitalyClient::ConflictsService do
     let(:files) do
       [{ old_path: 'some/path', new_path: 'some/path', content: '' }]
     end
+
     let(:source_branch) { 'master' }
     let(:target_branch) { 'feature' }
     let(:commit_message) { 'Solving conflicts\n\nTést' }

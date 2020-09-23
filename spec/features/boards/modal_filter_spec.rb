@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'Issue Boards add issue modal filtering', :js do
+RSpec.describe 'Issue Boards add issue modal filtering', :js do
   let(:project) { create(:project, :public) }
   let(:board) { create(:board, project: project) }
   let(:planning) { create(:label, project: project, name: 'Planning') }
@@ -211,7 +211,7 @@ describe 'Issue Boards add issue modal filtering', :js do
   end
 
   def set_filter(type, text = '')
-    find('.add-issues-modal .filtered-search').native.send_keys("#{type}:#{text}")
+    find('.add-issues-modal .filtered-search').native.send_keys("#{type}:=#{text}")
   end
 
   def submit_filter

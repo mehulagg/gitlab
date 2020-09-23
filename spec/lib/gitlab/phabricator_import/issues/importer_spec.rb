@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe Gitlab::PhabricatorImport::Issues::Importer do
+RSpec.describe Gitlab::PhabricatorImport::Issues::Importer do
   let(:project) { create(:project) }
 
   let(:response) do
     Gitlab::PhabricatorImport::Conduit::TasksResponse.new(
       Gitlab::PhabricatorImport::Conduit::Response
-        .new(JSON.parse(fixture_file('phabricator_responses/maniphest.search.json')))
+        .new(Gitlab::Json.parse(fixture_file('phabricator_responses/maniphest.search.json')))
     )
   end
 

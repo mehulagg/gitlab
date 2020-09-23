@@ -1,3 +1,4 @@
-- if project.above_size_limit?
+- size_checker = project.repository_size_checker
+- if size_checker.above_size_limit?
   .alert.alert-warning.d-none.d-sm-block
-    = project_above_size_limit_message
+    = size_checker.error_message.above_size_limit_message

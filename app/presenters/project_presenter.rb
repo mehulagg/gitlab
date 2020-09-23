@@ -7,6 +7,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   include StorageHelper
   include TreeHelper
   include IconsHelper
+  include BlobHelper
   include ChecksCollaboration
   include Gitlab::Utils::StrongMemoize
 
@@ -16,22 +17,24 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   MAX_TOPICS_TO_SHOW = 3
 
   def statistic_icon(icon_name = 'plus-square-o')
-    sprite_icon(icon_name, size: 16, css_class: 'icon append-right-4')
+    sprite_icon(icon_name, css_class: 'icon gl-mr-2')
   end
 
   def statistics_anchors(show_auto_devops_callout:)
     [
-      license_anchor_data,
       commits_anchor_data,
       branches_anchor_data,
       tags_anchor_data,
-      files_anchor_data
+      files_anchor_data,
+      storage_anchor_data,
+      releases_anchor_data
     ].compact.select(&:is_link)
   end
 
   def statistics_buttons(show_auto_devops_callout:)
     [
       readme_anchor_data,
+      license_anchor_data,
       changelog_anchor_data,
       contribution_guide_anchor_data,
       autodevops_anchor_data(show_auto_devops_callout: show_auto_devops_callout),
@@ -41,15 +44,14 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def empty_repo_statistics_anchors
-    [
-      license_anchor_data
-    ].compact.select { |item| item.is_link }
+    []
   end
 
   def empty_repo_statistics_buttons
     [
       new_file_anchor_data,
       readme_anchor_data,
+      license_anchor_data,
       changelog_anchor_data,
       contribution_guide_anchor_data,
       gitlab_ci_anchor_data
@@ -113,7 +115,11 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def add_ci_yml_path
-    add_special_file_path(file_name: '.gitlab-ci.yml')
+    add_special_file_path(file_name: ci_config_path_or_default)
+  end
+
+  def add_ci_yml_ide_path
+    ide_edit_path(project, default_branch_or_master, ci_config_path_or_default)
   end
 
   def add_readme_path
@@ -154,6 +160,33 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
                    empty_repo? ? nil : project_tree_path(project))
   end
 
+  def storage_anchor_data
+    AnchorData.new(true,
+                   statistic_icon('disk') +
+                   _('%{strong_start}%{human_size}%{strong_end} Storage').html_safe % {
+                     human_size: storage_counter(statistics.storage_size),
+                     strong_start: '<strong class="project-stat-value">'.html_safe,
+                     strong_end: '</strong>'.html_safe
+                   },
+                   empty_repo? ? nil : project_tree_path(project))
+  end
+
+  def releases_anchor_data
+    return unless can?(current_user, :read_release, project)
+
+    releases_count = project.releases.count
+    return if releases_count < 1
+
+    AnchorData.new(true,
+                   statistic_icon('rocket') +
+                   n_('%{strong_start}%{release_count}%{strong_end} Release', '%{strong_start}%{release_count}%{strong_end} Releases', releases_count).html_safe % {
+                     release_count: number_with_delimiter(releases_count),
+                     strong_start: '<strong class="project-stat-value">'.html_safe,
+                     strong_end: '</strong>'.html_safe
+                   },
+                  project_releases_path(project))
+  end
+
   def commits_anchor_data
     AnchorData.new(true,
                    statistic_icon('commit') +
@@ -191,8 +224,8 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     if current_user && can_current_user_push_to_default_branch?
       AnchorData.new(false,
                      statistic_icon + _('New file'),
-                     project_new_blob_path(project, default_branch || 'master'),
-                     'success')
+                     project_new_blob_path(project, default_branch_or_master),
+                     'missing')
     end
   end
 
@@ -227,17 +260,18 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     icon = statistic_icon('scale')
 
     if repository.license_blob.present?
-      AnchorData.new(true,
-                     icon + content_tag(:strong, license_short_name, class: 'project-stat-value'),
-                     license_path)
+      AnchorData.new(false,
+                     icon + content_tag(:span, license_short_name, class: 'project-stat-value'),
+                     license_path,
+                     'default')
     else
       if current_user && can_current_user_push_to_default_branch?
-        AnchorData.new(true,
-                       content_tag(:span, icon + _('Add license'), class: 'add-license-link d-flex'),
+        AnchorData.new(false,
+                       content_tag(:span, statistic_icon + _('Add LICENSE'), class: 'add-license-link d-flex'),
                        add_license_path)
       else
-        AnchorData.new(true,
-                       icon + content_tag(:strong, _('No license. All rights reserved'), class: 'project-stat-value'),
+        AnchorData.new(false,
+                       icon + content_tag(:span, _('No license. All rights reserved'), class: 'project-stat-value'),
                        nil)
       end
     end
@@ -276,8 +310,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def kubernetes_cluster_anchor_data
-    if current_user && can?(current_user, :create_cluster, project)
-
+    if can_instantiate_cluster?
       if clusters.empty?
         AnchorData.new(false,
                        statistic_icon + _('Add Kubernetes cluster'),
@@ -286,7 +319,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
         cluster_link = clusters.count == 1 ? project_cluster_path(project, clusters.first) : project_clusters_path(project)
 
         AnchorData.new(false,
-                       _('Kubernetes configured'),
+                       _('Kubernetes'),
                        cluster_link,
                       'default')
       end
@@ -294,10 +327,10 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
   end
 
   def gitlab_ci_anchor_data
-    if current_user && can_current_user_push_code? && repository.gitlab_ci_yml.blank? && !auto_devops_enabled?
+    if cicd_missing?
       AnchorData.new(false,
                      statistic_icon + _('Set up CI/CD'),
-                     add_ci_yml_path)
+                     add_ci_yml_ide_path)
     elsif repository.gitlab_ci_yml.present?
       AnchorData.new(false,
                      statistic_icon('doc-text') + _('CI/CD configuration'),
@@ -326,7 +359,27 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     count_of_extra_topics_not_shown > 0
   end
 
+  def can_setup_review_app?
+    strong_memoize(:can_setup_review_app) do
+      (can_instantiate_cluster? && all_clusters_empty?) || cicd_missing?
+    end
+  end
+
+  def all_clusters_empty?
+    strong_memoize(:all_clusters_empty) do
+      project.all_clusters.empty?
+    end
+  end
+
   private
+
+  def cicd_missing?
+    current_user && can_current_user_push_code? && repository.gitlab_ci_yml.blank? && !auto_devops_enabled?
+  end
+
+  def can_instantiate_cluster?
+    current_user && can?(current_user, :create_cluster, project)
+  end
 
   def filename_path(filename)
     if blob = repository.public_send(filename) # rubocop:disable GitlabSecurity/PublicSend
@@ -349,7 +402,7 @@ class ProjectPresenter < Gitlab::View::Presenter::Delegated
     commit_message ||= s_("CommitMessage|Add %{file_name}") % { file_name: file_name }
     project_new_blob_path(
       project,
-      project.default_branch || 'master',
+      default_branch_or_master,
       file_name:      file_name,
       commit_message: commit_message,
       branch_name:    branch_name

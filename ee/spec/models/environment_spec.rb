@@ -2,10 +2,10 @@
 
 require 'spec_helper'
 
-describe Environment, :use_clean_rails_memory_store_caching do
+RSpec.describe Environment, :use_clean_rails_memory_store_caching do
   include ReactiveCachingHelpers
 
-  let(:project) { create(:project, :stubbed_repository) }
+  let(:project) { create(:project, :repository) }
   let(:environment) { create(:environment, project: project) }
 
   describe '.deployed_to_cluster' do
@@ -53,31 +53,6 @@ describe Environment, :use_clean_rails_memory_store_caching do
 
       it 'returns nothing' do
         expect(described_class.deployed_to_cluster(cluster)).to be_empty
-      end
-    end
-  end
-
-  describe '#pod_names' do
-    context 'when environment does not have a rollout status' do
-      it 'returns an empty array' do
-        expect(environment.pod_names).to eq([])
-      end
-    end
-
-    context 'when environment has a rollout status' do
-      let(:pod_name) { 'pod_1' }
-      let(:rollout_status) { instance_double(::Gitlab::Kubernetes::RolloutStatus, instances: [{ pod_name: pod_name }]) }
-
-      before do
-        create(:cluster, :provided_by_gcp, environment_scope: '*', projects: [project])
-        create(:deployment, :success, environment: environment)
-      end
-
-      it 'returns the pod_names' do
-        allow(environment).to receive(:rollout_status_with_reactive_cache)
-          .and_return(rollout_status)
-
-        expect(environment.pod_names).to eq([pod_name])
       end
     end
   end
@@ -211,10 +186,9 @@ describe Environment, :use_clean_rails_memory_store_caching do
   end
 
   describe '#rollout_status' do
-    let(:cluster) { create(:cluster, :project, :provided_by_user) }
-    let(:project) { cluster.project }
-    let(:environment) { create(:environment, project: project) }
-    let!(:deployment) { create(:deployment, :success, environment: environment) }
+    let!(:cluster) { create(:cluster, :project, :provided_by_user, projects: [project]) }
+    let!(:environment) { create(:environment, project: project) }
+    let!(:deployment) { create(:deployment, :success, environment: environment, project: project) }
 
     subject { environment.rollout_status }
 

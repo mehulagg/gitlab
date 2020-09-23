@@ -20,8 +20,8 @@ changes are reviewed, take the following steps:
 
 1. Ensure the merge request has ~database and ~"database::review pending" labels.
    If the merge request modifies database files, Danger will do this for you.
-1. Use the [Database changes checklist](https://gitlab.com/gitlab-org/gitlab-foss/blob/master/.gitlab/merge_request_templates/Database%20changes.md)
-   template or add the appropriate items to the MR description.
+1. Prepare your MR for database review according to the
+   [docs](https://docs.gitlab.com/ee/development/database_review.html#how-to-prepare-the-merge-request-for-a-database-review).
 1. Assign and mention the database reviewer suggested by Reviewer Roulette.
 MSG
 
@@ -29,7 +29,9 @@ DB_FILES_MESSAGE = <<~MSG
 The following files require a review from the Database team:
 MSG
 
-non_geo_db_schema_updated = !git.modified_files.grep(%r{\Adb/schema\.rb}).empty?
+DATABASE_APPROVED_LABEL = 'database::approved'
+
+non_geo_db_schema_updated = !git.modified_files.grep(%r{\Adb/structure\.sql}).empty?
 geo_db_schema_updated = !git.modified_files.grep(%r{\Aee/db/geo/schema\.rb}).empty?
 
 non_geo_migration_created = !git.added_files.grep(%r{\A(db/(post_)?migrate)/}).empty?
@@ -38,7 +40,7 @@ geo_migration_created = !git.added_files.grep(%r{\Aee/db/geo/(post_)?migrate/}).
 format_str = gitlab_danger.ci? ? SCHEMA_NOT_UPDATED_MESSAGE_FULL : SCHEMA_NOT_UPDATED_MESSAGE_SHORT
 
 if non_geo_migration_created && !non_geo_db_schema_updated
-  warn format(format_str, migrations: 'migrations', schema: gitlab_danger.html_link("db/schema.rb"))
+  warn format(format_str, migrations: 'migrations', schema: gitlab_danger.html_link("db/structure.sql"))
 end
 
 if geo_migration_created && !geo_db_schema_updated
@@ -46,6 +48,7 @@ if geo_migration_created && !geo_db_schema_updated
 end
 
 return unless gitlab_danger.ci?
+return if gitlab.mr_labels.include?(DATABASE_APPROVED_LABEL)
 
 db_paths_to_review = helper.changes_by_category[:database]
 
@@ -56,11 +59,9 @@ if gitlab.mr_labels.include?('database') || db_paths_to_review.any?
   markdown(DB_MESSAGE)
   markdown(DB_FILES_MESSAGE + helper.markdown_list(db_paths_to_review)) if db_paths_to_review.any?
 
-  database_labels = helper.missing_database_labels(gitlab.mr_labels)
-
-  if database_labels.any?
+  unless helper.has_database_scoped_labels?(gitlab.mr_labels)
     gitlab.api.update_merge_request(gitlab.mr_json['project_id'],
-                                        gitlab.mr_json['iid'],
-                                        labels: (gitlab.mr_labels + database_labels).join(','))
+                                    gitlab.mr_json['iid'],
+                                    add_labels: 'database::review pending')
   end
 end

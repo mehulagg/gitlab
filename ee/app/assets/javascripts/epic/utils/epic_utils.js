@@ -3,10 +3,18 @@ import Cookies from 'js-cookie';
 
 import { __, s__, sprintf } from '~/locale';
 
+import createGqClient, { fetchPolicies } from '~/lib/graphql';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import { dateInWords, parsePikadayDate } from '~/lib/utils/datetime_utility';
 
 import { dateTypes } from '../constants';
+
+const gqClient = createGqClient(
+  {},
+  {
+    fetchPolicy: fetchPolicies.NO_CACHE,
+  },
+);
 
 const triggerDocumentEvent = (eventName, eventParam) => {
   $(document).trigger(eventName, eventParam);
@@ -84,12 +92,8 @@ const getDateFromMilestonesTooltip = ({
   );
 };
 
-// This is for mocking methods from this
-// file within tests using `spyOnDependency`
-// which requires first param to always
-// be default export of dependency as per
-// https://gitlab.com/help/development/testing_guide/frontend_testing.md#stubbing-and-mocking
 const epicUtils = {
+  gqClient,
   triggerDocumentEvent,
   bindDocumentEvent,
   toggleContainerClass,

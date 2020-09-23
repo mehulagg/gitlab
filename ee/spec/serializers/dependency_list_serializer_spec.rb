@@ -2,9 +2,9 @@
 
 require 'spec_helper'
 
-describe DependencyListSerializer do
-  set(:project) { create(:project, :repository, :private) }
-  set(:user) { create(:user) }
+RSpec.describe DependencyListSerializer do
+  let_it_be(:project) { create(:project, :repository, :private) }
+  let_it_be(:user) { create(:user) }
   let(:ci_build) { create(:ee_ci_build, :success) }
   let(:dependencies) { [build(:dependency, :with_vulnerabilities, :with_licenses)] }
 
@@ -13,7 +13,7 @@ describe DependencyListSerializer do
   end
 
   before do
-    stub_licensed_features(security_dashboard: true, license_management: true)
+    stub_licensed_features(security_dashboard: true, license_scanning: true)
     project.add_developer(user)
   end
 

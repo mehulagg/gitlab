@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
 module Geo
-  class FileDownloadDispatchWorker
-    class AttachmentJobFinder < JobFinder
-      EXCEPT_RESOURCE_IDS_KEY = :except_file_ids
+  class FileDownloadDispatchWorker # rubocop:disable Scalability/IdempotentWorker
+    class AttachmentJobFinder < JobFinder # rubocop:disable Scalability/IdempotentWorker
+      EXCEPT_RESOURCE_IDS_KEY = :except_ids
 
       def registry_finder
-        @registry_finder ||= Geo::AttachmentRegistryFinder.new(current_node_id: Gitlab::Geo.current_node.id)
+        @registry_finder ||= Geo::AttachmentRegistryFinder.new
       end
 
       private

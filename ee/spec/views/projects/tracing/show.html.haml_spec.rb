@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'projects/tracings/show' do
+RSpec.describe 'projects/tracings/show' do
   let(:project) { create(:project, :repository) }
   let(:error_tracking_setting) { create(:project_error_tracking_setting, project: project) }
 

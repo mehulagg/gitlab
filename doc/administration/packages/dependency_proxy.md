@@ -1,6 +1,12 @@
+---
+stage: Package
+group: Package
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # GitLab Dependency Proxy administration **(PREMIUM ONLY)**
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/7934) in [GitLab Premium](https://about.gitlab.com/pricing/) 11.11.
 
 GitLab can be utilized as a dependency proxy for a variety of common package managers.
 
@@ -11,9 +17,8 @@ dependency proxies, see the [user guide](../../user/group/dependency_proxy/index
 
 NOTE: **Note:**
 Dependency proxy requires the Puma web server to be enabled.
-Puma support is EXPERIMENTAL at this time.
 
-To enable the Dependency proxy feature:
+To enable the dependency proxy feature:
 
 **Omnibus GitLab installations**
 
@@ -37,7 +42,9 @@ To enable the Dependency proxy feature:
    ```
 
 1. [Restart GitLab](../restart_gitlab.md#installations-from-source "How to restart GitLab") for the changes to take effect.
-1. Enable the [Puma web server](../../install/installation.md#using-puma).
+
+Since Puma is already the default web server for installations from source as of GitLab 12.9,
+no further changes are needed.
 
 ## Changing the storage path
 
@@ -76,7 +83,14 @@ To change the local storage path:
 ### Using object storage
 
 Instead of relying on the local storage, you can use an object storage to
-upload the blobs of the dependency proxy:
+store the blobs of the dependency proxy.
+
+[Read more about using object storage with GitLab](../object_storage.md).
+
+NOTE: **Note:**
+In GitLab 13.2 and later, we recommend using the
+[consolidated object storage settings](../object_storage.md#consolidated-object-storage-configuration).
+This section describes the earlier configuration format.
 
 **Omnibus GitLab installations**
 

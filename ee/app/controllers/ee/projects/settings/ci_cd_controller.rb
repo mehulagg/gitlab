@@ -8,14 +8,14 @@ module EE
         extend ActiveSupport::Concern
 
         prepended do
-          before_action :assign_variables_to_gon, only: :show
-          before_action :define_protected_env_variables, only: :show
+          before_action :assign_variables_to_gon, only: [:show]
+          before_action :define_protected_env_variables, only: [:show]
         end
 
         # rubocop:disable Gitlab/ModuleWithInstanceVariables
         override :show
         def show
-          if project.feature_available?(:license_management)
+          if project.feature_available?(:license_scanning)
             @license_management_url = expose_url(api_v4_projects_managed_licenses_path(id: @project.id))
           end
 

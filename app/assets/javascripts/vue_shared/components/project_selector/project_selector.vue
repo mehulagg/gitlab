@@ -1,6 +1,7 @@
 <script>
-import _ from 'underscore';
-import { GlLoadingIcon, GlSearchBoxByType } from '@gitlab/ui';
+import { debounce } from 'lodash';
+import { GlLoadingIcon, GlSearchBoxByType, GlInfiniteScroll } from '@gitlab/ui';
+import { __, n__, sprintf } from '~/locale';
 import ProjectListItem from './project_list_item.vue';
 
 const SEARCH_INPUT_TIMEOUT_MS = 500;
@@ -10,6 +11,7 @@ export default {
   components: {
     GlLoadingIcon,
     GlSearchBoxByType,
+    GlInfiniteScroll,
     ProjectListItem,
   },
   props: {
@@ -23,23 +25,24 @@ export default {
     },
     showNoResultsMessage: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     showMinimumSearchQueryMessage: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     showLoadingIndicator: {
       type: Boolean,
-      required: false,
-      default: false,
+      required: true,
     },
     showSearchErrorMessage: {
       type: Boolean,
+      required: true,
+    },
+    totalResults: {
+      type: Number,
       required: false,
-      default: false,
+      default: 0,
     },
   },
   data() {
@@ -47,14 +50,31 @@ export default {
       searchQuery: '',
     };
   },
+  computed: {
+    legendText() {
+      const count = this.projectSearchResults.length;
+      const total = this.totalResults;
+
+      if (total > 0) {
+        return sprintf(__('Showing %{count} of %{total} projects'), { count, total });
+      }
+
+      return sprintf(n__('Showing %{count} project', 'Showing %{count} projects', count), {
+        count,
+      });
+    },
+  },
   methods: {
     projectClicked(project) {
       this.$emit('projectClicked', project);
     },
-    isSelected(project) {
-      return Boolean(_.find(this.selectedProjects, { id: project.id }));
+    bottomReached() {
+      this.$emit('bottomReached');
     },
-    onInput: _.debounce(function debouncedOnInput() {
+    isSelected(project) {
+      return this.selectedProjects.some(({ id }) => project.id === id);
+    },
+    onInput: debounce(function debouncedOnInput() {
       this.$emit('searched', this.searchQuery);
     }, SEARCH_INPUT_TIMEOUT_MS),
   },
@@ -68,21 +88,36 @@ export default {
       type="search"
       class="mb-3"
       autofocus
+      data-qa-selector="project_search_field"
       @input="onInput"
     />
     <div class="d-flex flex-column">
-      <gl-loading-icon v-if="showLoadingIndicator" :size="2" class="py-2 px-4" />
-      <div v-if="!showLoadingIndicator" class="d-flex flex-column">
-        <project-list-item
-          v-for="project in projectSearchResults"
-          :key="project.id"
-          :selected="isSelected(project)"
-          :project="project"
-          :matcher="searchQuery"
-          class="js-project-list-item"
-          @click="projectClicked(project)"
-        />
-      </div>
+      <gl-loading-icon v-if="showLoadingIndicator" size="sm" class="py-2 px-4" />
+      <gl-infinite-scroll
+        :max-list-height="402"
+        :fetched-items="projectSearchResults.length"
+        :total-items="totalResults"
+        @bottomReached="bottomReached"
+      >
+        <template v-if="!showLoadingIndicator" #items>
+          <div class="gl-display-flex gl-flex-direction-column gl-p-3">
+            <project-list-item
+              v-for="project in projectSearchResults"
+              :key="project.id"
+              :selected="isSelected(project)"
+              :project="project"
+              :matcher="searchQuery"
+              class="js-project-list-item"
+              data-qa-selector="project_list_item"
+              @click="projectClicked(project)"
+            />
+          </div>
+        </template>
+
+        <template #default>
+          {{ legendText }}
+        </template>
+      </gl-infinite-scroll>
       <div v-if="showNoResultsMessage" class="text-muted ml-2 js-no-results-message">
         {{ __('Sorry, no projects matched your search') }}
       </div>

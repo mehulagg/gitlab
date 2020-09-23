@@ -1,5 +1,16 @@
 import axios from '~/lib/utils/axios_utils';
+import { joinPaths, escapeFileUrl } from '~/lib/utils/url_utility';
 import Api from '~/api';
+import getUserPermissions from '../queries/getUserPermissions.query.graphql';
+import { query } from './gql';
+
+const fetchApiProjectData = projectPath => Api.project(projectPath).then(({ data }) => data);
+
+const fetchGqlProjectData = projectPath =>
+  query({
+    query: getUserPermissions,
+    variables: { projectPath },
+  }).then(({ data }) => data.project);
 
 export default {
   getFileData(endpoint) {
@@ -12,7 +23,7 @@ export default {
       return Promise.resolve(file.content);
     }
 
-    if (file.raw) {
+    if (file.raw || !file.rawPath) {
       return Promise.resolve(file.raw);
     }
 
@@ -22,23 +33,40 @@ export default {
       })
       .then(({ data }) => data);
   },
-  getBaseRawFileData(file, sha) {
-    if (file.tempFile) {
-      return Promise.resolve(file.baseRaw);
-    }
+  getBaseRawFileData(file, projectId, ref) {
+    if (file.tempFile || file.baseRaw) return Promise.resolve(file.baseRaw);
 
-    if (file.baseRaw) {
-      return Promise.resolve(file.baseRaw);
-    }
+    // if files are renamed, their base path has changed
+    const filePath =
+      file.mrChange && file.mrChange.renamed_file ? file.mrChange.old_path : file.path;
 
     return axios
-      .get(file.rawPath.replace(`/raw/${file.branchId}/${file.path}`, `/raw/${sha}/${file.path}`), {
-        transformResponse: [f => f],
-      })
+      .get(
+        joinPaths(
+          gon.relative_url_root || '/',
+          projectId,
+          '-',
+          'raw',
+          ref,
+          escapeFileUrl(filePath),
+        ),
+        {
+          transformResponse: [f => f],
+        },
+      )
       .then(({ data }) => data);
   },
   getProjectData(namespace, project) {
-    return Api.project(`${namespace}/${project}`);
+    const projectPath = `${namespace}/${project}`;
+
+    return Promise.all([fetchApiProjectData(projectPath), fetchGqlProjectData(projectPath)]).then(
+      ([apiProjectData, gqlProjectData]) => ({
+        data: {
+          ...apiProjectData,
+          ...gqlProjectData,
+        },
+      }),
+    );
   },
   getProjectMergeRequests(projectId, params = {}) {
     return Api.projectMergeRequests(projectId, params);
@@ -58,12 +86,16 @@ export default {
   commit(projectId, payload) {
     return Api.commitMultiple(projectId, payload);
   },
-  getFiles(projectUrl, branchId) {
-    const url = `${projectUrl}/files/${branchId}`;
+  getFiles(projectPath, ref) {
+    const url = `${gon.relative_url_root}/${projectPath}/-/files/${ref}`;
     return axios.get(url, { params: { format: 'json' } });
   },
   lastCommitPipelines({ getters }) {
     const commitSha = getters.lastCommit.id;
     return Api.commitPipelines(getters.currentProject.path_with_namespace, commitSha);
+  },
+  pingUsage(projectPath) {
+    const url = `${gon.relative_url_root}/${projectPath}/usage_ping/web_ide_pipelines_count`;
+    return axios.post(url);
   },
 };

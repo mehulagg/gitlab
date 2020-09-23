@@ -1,11 +1,10 @@
 <script>
 import { mapState, mapGetters } from 'vuex';
 
-import { PathIdSeparator } from 'ee/related_issues/constants';
+import { PathIdSeparator } from '~/related_issues/constants';
 
 import IssuableBody from '~/issue_show/components/app.vue';
 import IssuableSidebar from '~/issuable_sidebar/components/sidebar_app.vue';
-import RelatedItems from 'ee/related_issues/components/related_issues_root.vue';
 
 import EpicSidebar from './epic_sidebar.vue';
 
@@ -14,7 +13,6 @@ export default {
   components: {
     IssuableBody,
     IssuableSidebar,
-    RelatedItems,
     EpicSidebar,
   },
   computed: {
@@ -46,8 +44,8 @@ export default {
 </script>
 
 <template>
-  <div class="issuable-details content-block">
-    <div class="detail-page-description">
+  <div>
+    <div class="issuable-details detail-page-description content-block">
       <issuable-body
         :endpoint="endpoint"
         :update-endpoint="updateEndpoint"

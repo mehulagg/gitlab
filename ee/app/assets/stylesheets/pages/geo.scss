@@ -1,0 +1,30 @@
+.project-card-errors {
+  .btn-card-header {
+    &.collapsed {
+      .card-collapse-icon {
+        display: none;
+      }
+
+      .card-expand-icon {
+        display: block;
+      }
+    }
+  }
+}
+
+// Overrides for the generalized `shared/projects/search_form` used in Geo
+.replicable-search {
+  #project-filter-form-field {
+    width: 100%;
+    padding-left: 1.75rem;
+  }
+}
+
+// Overrides max-width from `app/assets/stylesheets/framework/dropdowns.scss`
+.geo-node-form-container {
+  #node-synchronization-shards-field {
+    .dropdown-menu {
+      width: auto;
+    }
+  }
+}

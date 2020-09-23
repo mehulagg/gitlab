@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 # Placeholder class for model that is implemented in EE
-# It reserves '&' as a reference prefix, but the table does not exists in CE
+# It reserves '&' as a reference prefix, but the table does not exist in FOSS
 class Epic < ApplicationRecord
+  include IgnorableColumns
+
   def self.link_reference_pattern
     nil
   end

@@ -1,6 +1,7 @@
-/* eslint-disable func-names, no-var, no-else-return, consistent-return, one-var, no-return-assign, no-unused-expressions, no-sequences */
+/* eslint-disable func-names, consistent-return, one-var, no-return-assign */
 
 import $ from 'jquery';
+import 'jquery.waitforimages';
 
 // Width where images must fits in, for 2-up this gets divided by 2
 const availWidth = 900;
@@ -9,40 +10,29 @@ const viewModes = ['two-up', 'swipe'];
 export default class ImageFile {
   constructor(file) {
     this.file = file;
-    this.requestImageInfo(
-      $('.two-up.view .frame.deleted img', this.file),
-      (function(_this) {
-        return function() {
-          return _this.requestImageInfo($('.two-up.view .frame.added img', _this.file), () => {
-            _this.initViewModes();
+    this.requestImageInfo($('.two-up.view .frame.deleted img', this.file), () =>
+      this.requestImageInfo($('.two-up.view .frame.added img', this.file), () => {
+        this.initViewModes();
 
-            // Load two-up view after images are loaded
-            // so that we can display the correct width and height information
-            const $images = $('.two-up.view img', _this.file);
+        // Load two-up view after images are loaded
+        // so that we can display the correct width and height information
+        const $images = $('.two-up.view img', this.file);
 
-            $images.waitForImages(() => {
-              _this.initView('two-up');
-            });
-          });
-        };
-      })(this),
+        $images.waitForImages(() => {
+          this.initView('two-up');
+        });
+      }),
     );
   }
 
   initViewModes() {
     const viewMode = viewModes[0];
     $('.view-modes', this.file).removeClass('hide');
-    $('.view-modes-menu', this.file).on(
-      'click',
-      'li',
-      (function(_this) {
-        return function(event) {
-          if (!$(event.currentTarget).hasClass('active')) {
-            return _this.activateViewMode(event.currentTarget.className);
-          }
-        };
-      })(this),
-    );
+    $('.view-modes-menu', this.file).on('click', 'li', event => {
+      if (!$(event.currentTarget).hasClass('active')) {
+        return this.activateViewMode(event.currentTarget.className);
+      }
+    });
     return this.activateViewMode(viewMode);
   }
 
@@ -51,15 +41,13 @@ export default class ImageFile {
       .removeClass('active')
       .filter(`.${viewMode}`)
       .addClass('active');
-    return $(`.view:visible:not(.${viewMode})`, this.file).fadeOut(
-      200,
-      (function(_this) {
-        return function() {
-          $(`.view.${viewMode}`, _this.file).fadeIn(200);
-          return _this.initView(viewMode);
-        };
-      })(this),
-    );
+
+    // eslint-disable-next-line no-jquery/no-fade
+    return $(`.view:visible:not(.${viewMode})`, this.file).fadeOut(200, () => {
+      // eslint-disable-next-line no-jquery/no-fade
+      $(`.view.${viewMode}`, this.file).fadeIn(200);
+      return this.initView(viewMode);
+    });
   }
 
   initView(viewMode) {
@@ -67,7 +55,7 @@ export default class ImageFile {
   }
   // eslint-disable-next-line class-methods-use-this
   initDraggable($el, padding, callback) {
-    var dragging = false;
+    let dragging = false;
     const $body = $('body');
     const $offsetEl = $el.parent();
     const dragStart = function() {
@@ -103,22 +91,16 @@ export default class ImageFile {
       .on('touchmove', dragMove);
   }
 
-  prepareFrames(view) {
-    var maxHeight, maxWidth;
-    maxWidth = 0;
-    maxHeight = 0;
+  static prepareFrames(view) {
+    let maxWidth = 0;
+    let maxHeight = 0;
     $('.frame', view)
-      .each(
-        (function() {
-          return function(index, frame) {
-            var height, width;
-            width = $(frame).width();
-            height = $(frame).height();
-            maxWidth = width > maxWidth ? width : maxWidth;
-            return (maxHeight = height > maxHeight ? height : maxHeight);
-          };
-        })(this),
-      )
+      .each((index, frame) => {
+        const width = $(frame).width();
+        const height = $(frame).height();
+        maxWidth = width > maxWidth ? width : maxWidth;
+        return (maxHeight = height > maxHeight ? height : maxHeight);
+      })
       .css({
         width: maxWidth,
         height: maxHeight,
@@ -128,104 +110,90 @@ export default class ImageFile {
 
   views = {
     'two-up': function() {
-      return $('.two-up.view .wrap', this.file).each(
-        (function(_this) {
-          return function(index, wrap) {
-            $('img', wrap).each(function() {
-              var currentWidth;
-              currentWidth = $(this).width();
-              if (currentWidth > availWidth / 2) {
-                return $(this).width(availWidth / 2);
-              }
-            });
-            return _this.requestImageInfo($('img', wrap), (width, height) => {
-              $('.image-info .meta-width', wrap).text(`${width}px`);
-              $('.image-info .meta-height', wrap).text(`${height}px`);
-              return $('.image-info', wrap).removeClass('hide');
-            });
-          };
-        })(this),
-      );
+      return $('.two-up.view .wrap', this.file).each((index, wrap) => {
+        $('img', wrap).each(function() {
+          const currentWidth = $(this).width();
+          if (currentWidth > availWidth / 2) {
+            return $(this).width(availWidth / 2);
+          }
+        });
+        return this.requestImageInfo($('img', wrap), (width, height) => {
+          $('.image-info .meta-width', wrap).text(`${width}px`);
+          $('.image-info .meta-height', wrap).text(`${height}px`);
+          return $('.image-info', wrap).removeClass('hide');
+        });
+      });
     },
     swipe() {
-      var maxHeight, maxWidth;
-      maxWidth = 0;
-      maxHeight = 0;
-      return $('.swipe.view', this.file).each(
-        (function(_this) {
-          return function(index, view) {
-            var $swipeWrap, $swipeBar, $swipeFrame, wrapPadding, ref;
-            (ref = _this.prepareFrames(view)), ([maxWidth, maxHeight] = ref);
-            $swipeFrame = $('.swipe-frame', view);
-            $swipeWrap = $('.swipe-wrap', view);
-            $swipeBar = $('.swipe-bar', view);
+      let maxWidth = 0;
+      let maxHeight = 0;
+      return $('.swipe.view', this.file).each((index, view) => {
+        const ref = ImageFile.prepareFrames(view);
+        [maxWidth, maxHeight] = ref;
+        const $swipeFrame = $('.swipe-frame', view);
+        const $swipeWrap = $('.swipe-wrap', view);
+        const $swipeBar = $('.swipe-bar', view);
 
-            $swipeFrame.css({
-              width: maxWidth + 16,
-              height: maxHeight + 28,
-            });
-            $swipeWrap.css({
-              width: maxWidth + 1,
-              height: maxHeight + 2,
-            });
-            // Set swipeBar left position to match image frame
-            $swipeBar.css({
-              left: 1,
-            });
+        $swipeFrame.css({
+          width: maxWidth + 16,
+          height: maxHeight + 28,
+        });
+        $swipeWrap.css({
+          width: maxWidth + 1,
+          height: maxHeight + 2,
+        });
+        // Set swipeBar left position to match image frame
+        $swipeBar.css({
+          left: 1,
+        });
 
-            wrapPadding = parseInt($swipeWrap.css('right').replace('px', ''), 10);
+        const wrapPadding = parseInt($swipeWrap.css('right').replace('px', ''), 10);
 
-            _this.initDraggable($swipeBar, wrapPadding, (e, left) => {
-              if (left > 0 && left < $swipeFrame.width() - wrapPadding * 2) {
-                $swipeWrap.width(maxWidth + 1 - left);
-                $swipeBar.css('left', left);
-              }
-            });
-          };
-        })(this),
-      );
+        this.initDraggable($swipeBar, wrapPadding, (e, left) => {
+          if (left > 0 && left < $swipeFrame.width() - wrapPadding * 2) {
+            $swipeWrap.width(maxWidth + 1 - left);
+            $swipeBar.css('left', left);
+          }
+        });
+      });
     },
     'onion-skin': function() {
-      var dragTrackWidth, maxHeight, maxWidth;
+      let maxHeight, maxWidth;
       maxWidth = 0;
       maxHeight = 0;
-      dragTrackWidth = $('.drag-track', this.file).width() - $('.dragger', this.file).width();
-      return $('.onion-skin.view', this.file).each(
-        (function(_this) {
-          return function(index, view) {
-            var $frame, $track, $dragger, $frameAdded, framePadding, ref;
-            (ref = _this.prepareFrames(view)), ([maxWidth, maxHeight] = ref);
-            $frame = $('.onion-skin-frame', view);
-            $frameAdded = $('.frame.added', view);
-            $track = $('.drag-track', view);
-            $dragger = $('.dragger', $track);
+      const dragTrackWidth = $('.drag-track', this.file).width() - $('.dragger', this.file).width();
+      return $('.onion-skin.view', this.file).each((index, view) => {
+        const ref = ImageFile.prepareFrames(view);
+        [maxWidth, maxHeight] = ref;
+        const $frame = $('.onion-skin-frame', view);
+        const $frameAdded = $('.frame.added', view);
+        const $track = $('.drag-track', view);
+        const $dragger = $('.dragger', $track);
 
-            $frame.css({
-              width: maxWidth + 16,
-              height: maxHeight + 28,
-            });
-            $('.swipe-wrap', view).css({
-              width: maxWidth + 1,
-              height: maxHeight + 2,
-            });
-            $dragger.css({
-              left: dragTrackWidth,
-            });
+        $frame.css({
+          width: maxWidth + 16,
+          height: maxHeight + 28,
+        });
+        $('.swipe-wrap', view).css({
+          width: maxWidth + 1,
+          height: maxHeight + 2,
+        });
+        $dragger.css({
+          left: dragTrackWidth,
+        });
 
-            $frameAdded.css('opacity', 1);
-            framePadding = parseInt($frameAdded.css('right').replace('px', ''), 10);
+        $frameAdded.css('opacity', 1);
+        const framePadding = parseInt($frameAdded.css('right').replace('px', ''), 10);
 
-            _this.initDraggable($dragger, framePadding, (e, left) => {
-              var opacity = left / dragTrackWidth;
+        this.initDraggable($dragger, framePadding, (e, left) => {
+          const opacity = left / dragTrackWidth;
 
-              if (opacity >= 0 && opacity <= 1) {
-                $dragger.css('left', left);
-                $frameAdded.css('opacity', opacity);
-              }
-            });
-          };
-        })(this),
-      );
+          if (opacity >= 0 && opacity <= 1) {
+            $dragger.css('left', left);
+            $frameAdded.css('opacity', opacity);
+          }
+        });
+      });
     },
   };
 
@@ -234,16 +202,8 @@ export default class ImageFile {
     if (domImg) {
       if (domImg.complete) {
         return callback.call(this, domImg.naturalWidth, domImg.naturalHeight);
-      } else {
-        return img.on(
-          'load',
-          (function(_this) {
-            return function() {
-              return callback.call(_this, domImg.naturalWidth, domImg.naturalHeight);
-            };
-          })(this),
-        );
       }
+      return img.on('load', () => callback.call(this, domImg.naturalWidth, domImg.naturalHeight));
     }
   }
 }

@@ -1,0 +1,12 @@
+mutation updateRequirement($updateRequirementInput: UpdateRequirementInput!) {
+  updateRequirement(input: $updateRequirementInput) {
+    clientMutationId
+    errors
+    requirement {
+      iid
+      title
+      state
+      updatedAt
+    }
+  }
+}

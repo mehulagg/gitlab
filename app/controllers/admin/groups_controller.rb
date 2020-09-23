@@ -6,8 +6,7 @@ class Admin::GroupsController < Admin::ApplicationController
   before_action :group, only: [:edit, :update, :destroy, :project_update, :members_update]
 
   def index
-    @groups = Group.with_statistics.with_route
-    @groups = @groups.sort_by_attribute(@sort = params[:sort])
+    @groups = groups.sort_by_attribute(@sort = params[:sort])
     @groups = @groups.search(params[:name]) if params[:name].present?
     @groups = @groups.page(params[:page])
   end
@@ -20,7 +19,7 @@ class Admin::GroupsController < Admin::ApplicationController
     # the Group with statistics).
     @group = Group.with_statistics.find(group&.id)
     @members = present_members(
-      @group.members.order("access_level DESC").page(params[:members_page]))
+      group_members.order("access_level DESC").page(params[:members_page]))
     @requesters = present_members(
       AccessRequestsFinder.new(@group).execute(current_user))
     @projects = @group.projects.with_statistics.page(params[:projects_page])
@@ -69,14 +68,22 @@ class Admin::GroupsController < Admin::ApplicationController
     Groups::DestroyService.new(@group, current_user).async_execute
 
     redirect_to admin_groups_path,
-                status: 302,
+                status: :found,
                 alert: _('Group %{group_name} was scheduled for deletion.') % { group_name: @group.name }
   end
 
   private
 
+  def groups
+    Group.with_statistics.with_route
+  end
+
   def group
     @group ||= Group.find_by_full_path(params[:id])
+  end
+
+  def group_members
+    @group.members
   end
 
   def group_params

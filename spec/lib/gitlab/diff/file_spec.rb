@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Diff::File do
+RSpec.describe Gitlab::Diff::File do
   include RepoHelpers
 
   let(:project) { create(:project, :repository) }
@@ -169,18 +169,18 @@ describe Gitlab::Diff::File do
     end
   end
 
-  describe '#old_blob' do
-    it 'returns blob of commit of base commit' do
+  describe '#old_blob and #new_blob' do
+    it 'returns blob of base commit and the new commit' do
+      items = [
+        [diff_file.new_content_sha, diff_file.new_path], [diff_file.old_content_sha, diff_file.old_path]
+      ]
+
+      expect(project.repository).to receive(:blobs_at).with(items, blob_size_limit: 10.megabytes).and_call_original
+
       old_data = diff_file.old_blob.data
-
-      expect(old_data).to include('raise "System commands must be given as an array of strings"')
-    end
-  end
-
-  describe '#new_blob' do
-    it 'returns blob of new commit' do
       data = diff_file.new_blob.data
 
+      expect(old_data).to include('raise "System commands must be given as an array of strings"')
       expect(data).to include('raise RuntimeError, "System commands must be given as an array of strings"')
     end
   end
@@ -282,6 +282,18 @@ describe Gitlab::Diff::File do
     end
   end
 
+  describe '#file_hash' do
+    it 'returns a hash of file_path' do
+      expect(diff_file.file_hash).to eq(Digest::SHA1.hexdigest(diff_file.file_path))
+    end
+  end
+
+  describe '#file_identifier_hash' do
+    it 'returns a hash of file_identifier' do
+      expect(diff_file.file_identifier_hash).to eq(Digest::SHA1.hexdigest(diff_file.file_identifier))
+    end
+  end
+
   context 'diff file stats' do
     let(:diff_file) do
       described_class.new(diff,
@@ -347,6 +359,16 @@ describe Gitlab::Diff::File do
   end
 
   describe '#simple_viewer' do
+    context 'when the file is collapsed' do
+      before do
+        allow(diff_file).to receive(:collapsed?).and_return(true)
+      end
+
+      it 'returns a Collapsed viewer' do
+        expect(diff_file.simple_viewer).to be_a(DiffViewer::Collapsed)
+      end
+    end
+
     context 'when the file is not diffable' do
       before do
         allow(diff_file).to receive(:diffable?).and_return(false)
@@ -557,6 +579,61 @@ describe Gitlab::Diff::File do
     end
   end
 
+  describe '#alternate_viewer' do
+    subject { diff_file.alternate_viewer }
+
+    where(:viewer_class) do
+      [
+        DiffViewer::Image,
+        DiffViewer::Collapsed,
+        DiffViewer::NotDiffable,
+        DiffViewer::Text,
+        DiffViewer::NoPreview,
+        DiffViewer::Added,
+        DiffViewer::Deleted,
+        DiffViewer::ModeChanged,
+        DiffViewer::ModeChanged,
+        DiffViewer::NoPreview
+      ]
+    end
+
+    with_them do
+      let(:viewer) { viewer_class.new(diff_file) }
+
+      before do
+        allow(diff_file).to receive(:viewer).and_return(viewer)
+      end
+
+      it { is_expected.to be_nil }
+    end
+
+    context 'when viewer is DiffViewer::Renamed' do
+      let(:viewer) { DiffViewer::Renamed.new(diff_file) }
+
+      before do
+        allow(diff_file).to receive(:viewer).and_return(viewer)
+      end
+
+      context 'when it can be rendered as text' do
+        it { is_expected.to be_a(DiffViewer::Text) }
+      end
+
+      context 'when it can be rendered as image' do
+        let(:commit) { project.commit('2f63565e7aac07bcdadb654e253078b727143ec4') }
+        let(:diff_file) { commit.diffs.diff_file_with_new_path('files/images/6049019_460s.jpg') }
+
+        it { is_expected.to be_a(DiffViewer::Image) }
+      end
+
+      context 'when it is something else' do
+        let(:commit) { project.commit('ae73cb07c9eeaf35924a10f713b364d32b2dd34f') }
+        let(:diff_file) { commit.diffs.diff_file_with_new_path('Gemfile.zip') }
+
+        it { is_expected.to be_nil }
+      end
+    end
+  end
+
   describe '#rendered_as_text?' do
     context 'when the simple viewer is text-based' do
       let(:commit) { project.commit('570e7b2abdd848b95f2f578043fc23bd6f6fd24d') }
@@ -723,6 +800,7 @@ describe Gitlab::Diff::File do
     let(:project) do
       create(:project, :custom_repo, files: {})
     end
+
     let(:branch_name) { 'master' }
 
     context 'when empty file is created' do
@@ -765,6 +843,7 @@ describe Gitlab::Diff::File do
     let(:project) do
       create(:project, :custom_repo, files: {})
     end
+
     let(:branch_name) { 'master' }
 
     context 'when empty file is created' do

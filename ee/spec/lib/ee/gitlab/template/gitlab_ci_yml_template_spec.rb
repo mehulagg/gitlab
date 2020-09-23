@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Template::GitlabCiYmlTemplate do
+RSpec.describe Gitlab::Template::GitlabCiYmlTemplate do
   describe '.all' do
     let(:templates) { described_class.all.map(&:name) }
 
@@ -14,8 +14,9 @@ describe Gitlab::Template::GitlabCiYmlTemplate do
       expect(templates).to include('SAST')
     end
 
-    it 'finds the Verify templates' do
+    it 'finds all the Verify templates' do
       expect(templates).to include('Browser-Performance')
+      expect(templates).to include('Accessibility')
     end
   end
 end

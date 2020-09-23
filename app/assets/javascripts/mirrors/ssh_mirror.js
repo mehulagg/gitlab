@@ -1,8 +1,8 @@
 import $ from 'jquery';
-import _ from 'underscore';
+import { escape } from 'lodash';
 import { __ } from '~/locale';
 import axios from '~/lib/utils/axios_utils';
-import Flash from '~/flash';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import { backOff } from '~/lib/utils/common_utils';
 import AUTH_METHOD from './constants';
 
@@ -22,7 +22,6 @@ export default class SSHMirror {
     this.$dropdownAuthType = this.$form.find('.js-mirror-auth-type');
     this.$hiddenAuthType = this.$form.find('.js-hidden-mirror-auth-type');
 
-    this.$wellAuthTypeChanging = this.$form.find('.js-well-changing-auth');
     this.$wellPasswordAuth = this.$form.find('.js-well-password-auth');
   }
 
@@ -162,7 +161,7 @@ export default class SSHMirror {
     const $fingerprintsList = this.$hostKeysInformation.find('.js-fingerprints-list');
     let fingerprints = '';
     sshHostKeys.fingerprints.forEach(fingerprint => {
-      const escFingerprints = _.escape(fingerprint.fingerprint);
+      const escFingerprints = escape(fingerprint.fingerprint);
       fingerprints += `<code>${escFingerprints}</code>`;
     });
 

@@ -3,6 +3,10 @@ Doorkeeper.configure do
   # Currently supported options are :active_record, :mongoid2, :mongoid3, :mongo_mapper
   orm :active_record
 
+  # Restore to pre-5.1 generator due to breaking change.
+  # See https://gitlab.com/gitlab-org/gitlab/-/issues/244371
+  default_generator_method :hex
+
   # This block will be called to check whether the resource owner is authenticated or not.
   resource_owner_authenticator do
     # Put your resource owner authentication logic here.
@@ -17,7 +21,7 @@ Doorkeeper.configure do
   end
 
   resource_owner_from_credentials do |routes|
-    user = Gitlab::Auth.find_with_user_password(params[:username], params[:password])
+    user = Gitlab::Auth.find_with_user_password(params[:username], params[:password], increment_failed_attempts: true)
     user unless user.try(:two_factor_enabled?)
   end
 
@@ -79,13 +83,6 @@ Doorkeeper.configure do
   # Check out the wiki for more information on customization
   access_token_methods :from_access_token_param, :from_bearer_authorization, :from_bearer_param
 
-  # Change the native redirect uri for client apps
-  # When clients register with the following redirect uri, they won't be redirected to any server and the authorization code will be displayed within the provider
-  # The value can be any string. Use nil to disable this feature. When disabled, clients must provide a valid URL
-  # (Similar behaviour: https://developers.google.com/accounts/docs/OAuth2InstalledApp#choosingredirecturi)
-  #
-  native_redirect_uri nil # 'urn:ietf:wg:oauth:2.0:oob'
-
   # Specify what grant flows are enabled in array of Strings. The valid
   # strings and the flows they enable are:
   #
@@ -106,60 +103,5 @@ Doorkeeper.configure do
   # WWW-Authenticate Realm (default "Doorkeeper").
   # realm "Doorkeeper"
 
-  # Allow dynamic query parameters (disabled by default)
-  # Some applications require dynamic query parameters on their request_uri
-  # set to true if you want this to be allowed
-  # wildcard_redirect_uri false
-
   base_controller '::Gitlab::BaseDoorkeeperController'
-end
-
-# Monkey patch to avoid creating new applications if the scope of the
-# app created does not match the complete list of scopes of the configured app.
-# It also prevents the OAuth authorize application window to appear every time.
-
-# Remove after we upgrade the doorkeeper gem from version 4.3.2
-if Doorkeeper.gem_version > Gem::Version.new('4.3.2')
-  raise "Doorkeeper was upgraded, please remove the monkey patch in #{__FILE__}"
-end
-
-module Doorkeeper
-  module AccessTokenMixin
-    module ClassMethods
-      def matching_token_for(application, resource_owner_or_id, scopes)
-        resource_owner_id =
-          if resource_owner_or_id.respond_to?(:to_key)
-            resource_owner_or_id.id
-          else
-            resource_owner_or_id
-          end
-
-        tokens = authorized_tokens_for(application.try(:id), resource_owner_id)
-        tokens.detect do |token|
-          scopes_match?(token.scopes, scopes, application.try(:scopes))
-        end
-      end
-
-      def scopes_match?(token_scopes, param_scopes, app_scopes)
-        return true if token_scopes.empty? && param_scopes.empty?
-
-        (token_scopes.sort == param_scopes.sort) &&
-          Doorkeeper::OAuth::Helpers::ScopeChecker.valid?(
-            param_scopes.to_s,
-            Doorkeeper.configuration.scopes,
-            app_scopes)
-      end
-
-      def authorized_tokens_for(application_id, resource_owner_id)
-        ordered_by(:created_at, :desc)
-          .where(application_id: application_id,
-                 resource_owner_id: resource_owner_id,
-                 revoked_at: nil)
-      end
-
-      def last_authorized_token_for(application_id, resource_owner_id)
-        authorized_tokens_for(application_id, resource_owner_id).first
-      end
-    end
-  end
 end

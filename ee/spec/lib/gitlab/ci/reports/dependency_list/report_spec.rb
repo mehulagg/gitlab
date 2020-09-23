@@ -1,12 +1,23 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'benchmark/ips'
 
-describe Gitlab::Ci::Reports::DependencyList::Report do
+RSpec.describe Gitlab::Ci::Reports::DependencyList::Report do
   let(:report) { described_class.new }
 
   describe '#add_dependency' do
-    let(:dependency) { { name: 'gitlab', version: '12.0' } }
+    let(:dependency) do
+      {
+        name: 'gitlab',
+        packager: '',
+        package_manager: 'bundler',
+        location: { blob_path: '', path: 'Gemfile' },
+        version: '0.2.10',
+        vulnerabilities: [],
+        licenses: []
+      }
+    end
 
     subject { report.add_dependency(dependency) }
 
@@ -14,6 +25,33 @@ describe Gitlab::Ci::Reports::DependencyList::Report do
       subject
 
       expect(report.dependencies).to eq([dependency])
+    end
+
+    it 'does not duplicate same dependency' do
+      report.add_dependency(dependency)
+      report.add_dependency(dependency.dup)
+
+      expect(report.dependencies.first).to eq(dependency)
+    end
+
+    it 'does not duplicate same vulnerability for dependency' do
+      vulnerabilities = [{ name: 'problem', severity: 'high' }, { name: 'problem2', severity: 'medium' }]
+      dependency[:vulnerabilities] = [vulnerabilities.first]
+      with_extra_vuln_from_another_report = dependency.dup.merge(vulnerabilities: vulnerabilities)
+
+      report.add_dependency(dependency)
+      report.add_dependency(with_extra_vuln_from_another_report)
+      expect(report.dependencies.first.dig(:vulnerabilities)).to eq(vulnerabilities)
+    end
+
+    it 'updates dependency' do
+      dependency[:packager] = 'Ruby (Bundler)'
+      dependency[:vulnerabilities] = [{ name: 'abc', severity: 'high' }]
+
+      report.add_dependency(dependency)
+      expect(report.dependencies.size).to eq(1)
+      expect(report.dependencies.first[:packager]).to eq('Ruby (Bundler)')
+      expect(report.dependencies.first[:vulnerabilities]).to eq([{ name: 'abc', severity: 'high' }])
     end
   end
 

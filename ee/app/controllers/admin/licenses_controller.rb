@@ -1,16 +1,18 @@
 # frozen_string_literal: true
 
 class Admin::LicensesController < Admin::ApplicationController
+  include Admin::LicenseRequest
+
   before_action :license, only: [:show, :download, :destroy]
   before_action :require_license, only: [:download, :destroy]
 
   respond_to :html
 
   def show
-    if @license.blank?
-      render :missing
+    if @license.present? || License.future_dated_only?
+      @licenses = License.history
     else
-      @previous_licenses = License.previous
+      render :missing
     end
   end
 
@@ -35,7 +37,15 @@ class Admin::LicensesController < Admin::ApplicationController
 
     respond_with(@license, location: admin_license_path) do
       if @license.save
-        flash[:notice] = _('The license was successfully uploaded and is now active. You can see the details below.')
+        @license.update_trial_setting
+
+        notice = if @license.started?
+                   _('The license was successfully uploaded and is now active. You can see the details below.')
+                 else
+                   _('The license was successfully uploaded and will be active from %{starts_at}. You can see the details below.' % { starts_at: @license.starts_at })
+                 end
+
+        flash[:notice] = notice
       end
     end
   end
@@ -53,20 +63,6 @@ class Admin::LicensesController < Admin::ApplicationController
   end
 
   private
-
-  def license
-    @license ||= begin
-      License.reset_current
-      License.current
-    end
-  end
-
-  def require_license
-    return if license
-
-    flash.keep
-    redirect_to new_admin_license_path
-  end
 
   def build_license
     @license ||= License.new(data: params[:trial_key])

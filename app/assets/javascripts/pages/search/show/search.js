@@ -1,13 +1,15 @@
 import $ from 'jquery';
-import '~/gl_dropdown';
-import Flash from '~/flash';
+import initDeprecatedJQueryDropdown from '~/deprecated_jquery_dropdown';
+import { deprecatedCreateFlash as Flash } from '~/flash';
 import Api from '~/api';
 import { __ } from '~/locale';
 import Project from '~/pages/projects/project';
 import refreshCounts from './refresh_counts';
+import setHighlightClass from './highlight_blob_search_result';
 
 export default class Search {
   constructor() {
+    setHighlightClass();
     const $groupDropdown = $('.js-search-group-dropdown');
     const $projectDropdown = $('.js-search-project-dropdown');
 
@@ -18,7 +20,7 @@ export default class Search {
     this.eventListeners();
     refreshCounts();
 
-    $groupDropdown.glDropdown({
+    initDeprecatedJQueryDropdown($groupDropdown, {
       selectable: true,
       filterable: true,
       filterRemote: true,
@@ -44,7 +46,7 @@ export default class Search {
       clicked: () => Search.submitSearch(),
     });
 
-    $projectDropdown.glDropdown({
+    initDeprecatedJQueryDropdown($projectDropdown, {
       selectable: true,
       filterable: true,
       filterRemote: true,

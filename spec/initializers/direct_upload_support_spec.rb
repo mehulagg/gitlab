@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe 'Direct upload support' do
+RSpec.describe 'Direct upload support' do
   subject do
     load Rails.root.join('config/initializers/direct_upload_support.rb')
   end
 
   where(:config_name) do
-    %w(lfs artifacts uploads)
+    %w(artifacts lfs uploads)
   end
 
   with_them do
@@ -52,11 +52,19 @@ describe 'Direct upload support' do
           end
         end
 
+        context 'when provider is AzureRM' do
+          let(:provider) { 'AzureRM' }
+
+          it 'succeeds' do
+            expect { subject }.not_to raise_error
+          end
+        end
+
         context 'when connection is empty' do
           let(:connection) { nil }
 
           it 'raises an error' do
-            expect { subject }.to raise_error /are supported as a object storage provider when 'direct_upload' is used/
+            expect { subject }.to raise_error "No provider configured for '#{config_name}'. Only Google, AWS, and AzureRM are supported."
           end
         end
 
@@ -64,7 +72,20 @@ describe 'Direct upload support' do
           let(:provider) { 'Rackspace' }
 
           it 'raises an error' do
-            expect { subject }.to raise_error /are supported as a object storage provider when 'direct_upload' is used/
+            expect { subject }.to raise_error /Object storage provider '#{provider}' is not supported when 'direct_upload' is used for '#{config_name}'/
+          end
+        end
+
+        context 'when connection is omitted' do
+          let(:object_store) do
+            {
+              enabled: enabled,
+              direct_upload: direct_upload
+            }
+          end
+
+          it 'raises an error' do
+            expect { subject }.to raise_error /the 'connection' section is missing/
           end
         end
       end

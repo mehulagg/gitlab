@@ -2,8 +2,9 @@
 
 require 'spec_helper'
 
-describe Gitlab::IpAddressState do
+RSpec.describe Gitlab::IpAddressState do
   let(:address) { '1.1.1.1' }
+
   describe '.with' do
     it 'saves IP address' do
       described_class.with(address) do

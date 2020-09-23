@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BitbucketServer::Representation::Repo do
+RSpec.describe BitbucketServer::Representation::Repo do
   let(:sample_data) do
     <<~DATA
     {
@@ -50,7 +50,7 @@ describe BitbucketServer::Representation::Repo do
     DATA
   end
 
-  subject { described_class.new(JSON.parse(sample_data)) }
+  subject { described_class.new(Gitlab::Json.parse(sample_data)) }
 
   describe '#project_key' do
     it { expect(subject.project_key).to eq('TEST') }

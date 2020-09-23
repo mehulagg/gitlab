@@ -6,7 +6,7 @@ module EE
     extend ::Gitlab::Utils::Override
 
     prepended do
-      rule { auditor }.enable :read_project_snippet
+      rule { auditor }.enable :read_snippet
     end
   end
 end

@@ -3,10 +3,10 @@
 class MergeRequestPollCachedWidgetEntity < IssuableEntity
   expose :auto_merge_enabled
   expose :state
-  expose :merge_commit_sha
-  expose :short_merge_commit_sha
+  expose :merged_commit_sha
+  expose :short_merged_commit_sha
   expose :merge_error
-  expose :merge_status
+  expose :public_merge_status, as: :merge_status
   expose :merge_user_id
   expose :source_branch
   expose :source_project_id
@@ -15,7 +15,7 @@ class MergeRequestPollCachedWidgetEntity < IssuableEntity
   expose :target_project_id
   expose :squash
   expose :rebase_in_progress?, as: :rebase_in_progress
-  expose :default_squash_commit_message
+  expose :default_squash_commit_message, if: -> (merge_request, _) { merge_request.mergeable? }
   expose :commits_count
   expose :merge_ongoing?, as: :merge_ongoing
   expose :work_in_progress?, as: :work_in_progress
@@ -25,8 +25,9 @@ class MergeRequestPollCachedWidgetEntity < IssuableEntity
   expose :source_branch_exists?, as: :source_branch_exists
   expose :branch_missing?, as: :branch_missing
 
-  expose :commits_without_merge_commits, using: MergeRequestWidgetCommitEntity do |merge_request|
-    merge_request.commits.without_merge_commits
+  expose :commits_without_merge_commits, using: MergeRequestWidgetCommitEntity,
+    if: -> (merge_request, _) { merge_request.mergeable? } do |merge_request|
+    merge_request.recent_commits.without_merge_commits
   end
   expose :diff_head_sha do |merge_request|
     merge_request.diff_head_sha.presence
@@ -55,9 +56,9 @@ class MergeRequestPollCachedWidgetEntity < IssuableEntity
     presenter(merge_request).target_branch_tree_path
   end
 
-  expose :merge_commit_path do |merge_request|
-    if merge_request.merge_commit_sha
-      project_commit_path(merge_request.project, merge_request.merge_commit_sha)
+  expose :merged_commit_path do |merge_request|
+    if sha = merge_request.merged_commit_sha
+      project_commit_path(merge_request.project, sha)
     end
   end
 
@@ -67,6 +68,34 @@ class MergeRequestPollCachedWidgetEntity < IssuableEntity
 
   expose :source_branch_with_namespace_link do |merge_request|
     presenter(merge_request).source_branch_with_namespace_link
+  end
+
+  expose :diffs_path do |merge_request|
+    diffs_project_merge_request_path(merge_request.project, merge_request)
+  end
+
+  expose :squash_enabled_by_default do |merge_request|
+    presenter(merge_request).project.squash_enabled_by_default?
+  end
+
+  expose :squash_readonly do |merge_request|
+    presenter(merge_request).project.squash_readonly?
+  end
+
+  expose :squash_on_merge do |merge_request|
+    presenter(merge_request).squash_on_merge?
+  end
+
+  expose :api_approvals_path do |merge_request|
+    presenter(merge_request).api_approvals_path
+  end
+
+  expose :api_approve_path do |merge_request|
+    presenter(merge_request).api_approve_path
+  end
+
+  expose :api_unapprove_path do |merge_request|
+    presenter(merge_request).api_unapprove_path
   end
 
   private
@@ -101,3 +130,5 @@ class MergeRequestPollCachedWidgetEntity < IssuableEntity
                               merged_by: merge_event&.author)
   end
 end
+
+MergeRequestPollCachedWidgetEntity.prepend_if_ee('EE::MergeRequestPollCachedWidgetEntity')

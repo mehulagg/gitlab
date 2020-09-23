@@ -2,78 +2,49 @@
 
 module Suggestions
   class ApplyService < ::BaseService
-    def initialize(current_user)
+    def initialize(current_user, *suggestions)
       @current_user = current_user
+      @suggestion_set = Gitlab::Suggestions::SuggestionSet.new(suggestions)
     end
 
-    def execute(suggestion)
-      unless suggestion.appliable?(cached: false)
-        return error('Suggestion is not appliable')
+    def execute
+      if suggestion_set.valid?
+        result
+      else
+        error(suggestion_set.error_message)
       end
-
-      unless latest_source_head?(suggestion)
-        return error('The file has been changed')
-      end
-
-      diff_file = suggestion.diff_file
-
-      unless diff_file
-        return error('The file was not found')
-      end
-
-      params = file_update_params(suggestion, diff_file)
-      result = ::Files::UpdateService.new(suggestion.project, @current_user, params).execute
-
-      if result[:status] == :success
-        suggestion.update(commit_id: result[:result], applied: true)
-      end
-
-      result
-    rescue Files::UpdateService::FileChangedError
-      error('The file has been changed')
     end
 
     private
 
-    # Checks whether the latest source branch HEAD matches with
-    # the position HEAD we're using to update the file content. Since
-    # the persisted HEAD is updated async (for MergeRequest),
-    # it's more consistent to fetch this data directly from the
-    # repository.
-    def latest_source_head?(suggestion)
-      suggestion.position.head_sha == suggestion.noteable.source_branch_sha
+    attr_reader :current_user, :suggestion_set
+
+    def result
+      multi_service.execute.tap do |result|
+        update_suggestions(result)
+      end
     end
 
-    def file_update_params(suggestion, diff_file)
-      blob = diff_file.new_blob
-      file_path = suggestion.file_path
-      branch_name = suggestion.branch
-      file_content = new_file_content(suggestion, blob)
-      commit_message = "Apply suggestion to #{file_path}"
+    def update_suggestions(result)
+      return unless result[:status] == :success
 
-      file_last_commit =
-        Gitlab::Git::Commit.last_for_path(suggestion.project.repository,
-                                          blob.commit_id,
-                                          blob.path)
+      Suggestion.id_in(suggestion_set.suggestions)
+        .update_all(commit_id: result[:result], applied: true)
+    end
 
-      {
-        file_path: file_path,
-        branch_name: branch_name,
-        start_branch: branch_name,
+    def multi_service
+      params = {
         commit_message: commit_message,
-        file_content: file_content,
-        last_commit_sha: file_last_commit&.id
+        branch_name: suggestion_set.branch,
+        start_branch: suggestion_set.branch,
+        actions: suggestion_set.actions
       }
+
+      ::Files::MultiService.new(suggestion_set.project, current_user, params)
     end
 
-    def new_file_content(suggestion, blob)
-      range = suggestion.from_line_index..suggestion.to_line_index
-
-      blob.load_all_data!
-      content = blob.data.lines
-      content[range] = suggestion.to_content
-
-      content.join
+    def commit_message
+      Gitlab::Suggestions::CommitMessage.new(current_user, suggestion_set).message
     end
   end
 end

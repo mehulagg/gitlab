@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GitlabSchema.types['EpicState'] do
+RSpec.describe GitlabSchema.types['EpicState'] do
   it { expect(described_class.graphql_name).to eq('EpicState') }
 
   it 'exposes all the existing epic states' do

@@ -1,9 +1,9 @@
 import { shallowMount, createLocalVue } from '@vue/test-utils';
 import Vuex from 'vuex';
+import { GlLoadingIcon } from '@gitlab/ui';
 import List from '~/ide/components/merge_requests/list.vue';
 import Item from '~/ide/components/merge_requests/item.vue';
 import TokenedInput from '~/ide/components/shared/tokened_input.vue';
-import { GlLoadingIcon } from '@gitlab/ui';
 import { mergeRequests as mergeRequestsMock } from '../../mock_data';
 
 const localVue = createLocalVue();
@@ -42,7 +42,6 @@ describe('IDE merge requests list', () => {
     wrapper = shallowMount(List, {
       store: fakeStore,
       localVue,
-      sync: false,
     });
   };
 
@@ -57,14 +56,10 @@ describe('IDE merge requests list', () => {
 
   it('calls fetch on mounted', () => {
     createComponent();
-    expect(fetchMergeRequestsMock).toHaveBeenCalledWith(
-      expect.any(Object),
-      {
-        search: '',
-        type: '',
-      },
-      undefined,
-    );
+    expect(fetchMergeRequestsMock).toHaveBeenCalledWith(expect.any(Object), {
+      search: '',
+      type: '',
+    });
   });
 
   it('renders loading icon when merge request is loading', () => {
@@ -96,14 +91,10 @@ describe('IDE merge requests list', () => {
         const searchType = wrapper.vm.$options.searchTypes[0];
 
         expect(findTokenedInput().props('tokens')).toEqual([searchType]);
-        expect(fetchMergeRequestsMock).toHaveBeenCalledWith(
-          expect.any(Object),
-          {
-            type: searchType.type,
-            search: '',
-          },
-          undefined,
-        );
+        expect(fetchMergeRequestsMock).toHaveBeenCalledWith(expect.any(Object), {
+          type: searchType.type,
+          search: '',
+        });
       });
   });
 
@@ -135,18 +126,12 @@ describe('IDE merge requests list', () => {
         createComponent(defaultStateWithMergeRequests);
         const input = findTokenedInput();
         input.vm.$emit('input', 'something');
-        fetchMergeRequestsMock.mockClear();
 
-        jest.runAllTimers();
         return wrapper.vm.$nextTick().then(() => {
-          expect(fetchMergeRequestsMock).toHaveBeenCalledWith(
-            expect.any(Object),
-            {
-              search: 'something',
-              type: '',
-            },
-            undefined,
-          );
+          expect(fetchMergeRequestsMock).toHaveBeenCalledWith(expect.any(Object), {
+            search: 'something',
+            type: '',
+          });
         });
       });
     });

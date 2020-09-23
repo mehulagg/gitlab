@@ -13,8 +13,8 @@ module Gitlab
 
       def initialize(root, max_size: DEFAULT_MAX_SIZE, max_depth: DEFAULT_MAX_DEPTH)
         @root = root
-        @max_size = max_size
-        @max_depth = max_depth
+        @max_size = max_size || DEFAULT_MAX_SIZE
+        @max_depth = max_depth || DEFAULT_MAX_DEPTH
         @size = 0
         @depth = 0
 
@@ -23,6 +23,10 @@ module Gitlab
 
       def valid?
         !too_big? && !too_deep?
+      end
+
+      def self.human_default_max_size
+        ActiveSupport::NumberHelper.number_to_human_size(DEFAULT_MAX_SIZE)
       end
 
       private

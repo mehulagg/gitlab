@@ -22,7 +22,7 @@ class UnsubscribesController < ApplicationController
   # rubocop: disable CodeReuse/ActiveRecord
   def get_user
     @email = Base64.urlsafe_decode64(params[:email])
-    User.where(email: @email).first
+    User.find_by(email: @email)
   end
   # rubocop: enable CodeReuse/ActiveRecord
 end

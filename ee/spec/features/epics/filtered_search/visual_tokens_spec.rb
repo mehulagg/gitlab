@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'epics list', :js do
+RSpec.describe 'epics list', :js do
   include FilteredSearchHelpers
 
   let(:user) { create(:user) }
@@ -24,7 +24,7 @@ describe 'epics list', :js do
 
   context 'editing author token' do
     before do
-      input_filtered_search('author:@root', submit: false)
+      input_filtered_search('author:=@root', submit: false)
       first('.tokens-container .filtered-search-token').click
     end
 
@@ -52,7 +52,7 @@ describe 'epics list', :js do
 
   context 'editing label token' do
     before do
-      input_filtered_search("label:~#{label.title}", submit: false)
+      input_filtered_search("label:=~#{label.title}", submit: false)
       first('.tokens-container .filtered-search-token').click
     end
 

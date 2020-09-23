@@ -6,6 +6,8 @@ module IconsHelper
   extend self
   include FontAwesome::Rails::IconHelper
 
+  DEFAULT_ICON_SIZE = 16
+
   # Creates an icon tag given icon name(s) and possible icon modifiers.
   #
   # Right now this method simply delegates directly to `fa_icon` from the
@@ -21,17 +23,19 @@ module IconsHelper
     options.include?(:base) ? fa_stacked_icon(names, options) : fa_icon(names, options)
   end
 
-  def custom_icon(icon_name, size: 16)
+  def custom_icon(icon_name, size: DEFAULT_ICON_SIZE)
     # We can't simply do the below, because there are some .erb SVGs.
     #  File.read(Rails.root.join("app/views/shared/icons/_#{icon_name}.svg")).html_safe
     render "shared/icons/#{icon_name}.svg", size: size
   end
 
   def sprite_icon_path
-    # SVG Sprites currently don't work across domains, so in the case of a CDN
-    # we have to set the current path deliberately to prevent addition of asset_host
-    sprite_base_url = Gitlab.config.gitlab.url if ActionController::Base.asset_host
-    ActionController::Base.helpers.image_path('icons.svg', host: sprite_base_url)
+    @sprite_icon_path ||= begin
+      # SVG Sprites currently don't work across domains, so in the case of a CDN
+      # we have to set the current path deliberately to prevent addition of asset_host
+      sprite_base_url = Gitlab.config.gitlab.url if ActionController::Base.asset_host
+      ActionController::Base.helpers.image_path('icons.svg', host: sprite_base_url)
+    end
   end
 
   def sprite_file_icons_path
@@ -41,18 +45,31 @@ module IconsHelper
     ActionController::Base.helpers.image_path('file_icons.svg', host: sprite_base_url)
   end
 
-  def sprite_icon(icon_name, size: nil, css_class: nil)
-    if Gitlab::Sentry.should_raise_for_dev?
-      unless known_sprites.include?(icon_name)
-        exception = ArgumentError.new("#{icon_name} is not a known icon in @gitlab-org/gitlab-svg")
-        raise exception
-      end
+  def sprite_icon(icon_name, size: DEFAULT_ICON_SIZE, css_class: nil)
+    if known_sprites&.exclude?(icon_name)
+      exception = ArgumentError.new("#{icon_name} is not a known icon in @gitlab-org/gitlab-svg")
+      Gitlab::ErrorTracking.track_and_raise_for_dev_exception(exception)
     end
 
     css_classes = []
     css_classes << "s#{size}" if size
     css_classes << "#{css_class}" unless css_class.blank?
-    content_tag(:svg, content_tag(:use, "", { "xlink:href" => "#{sprite_icon_path}##{icon_name}" } ), class: css_classes.empty? ? nil : css_classes.join(' '))
+
+    content_tag(
+      :svg,
+      content_tag(:use, '', { 'xlink:href' => "#{sprite_icon_path}##{icon_name}" } ),
+      class: css_classes.empty? ? nil : css_classes.join(' '),
+      data: { testid: "#{icon_name}-icon" }
+    )
+  end
+
+  def loading_icon(container: false, color: 'orange', size: 'sm', css_class: nil)
+    css_classes = ['gl-spinner', "gl-spinner-#{color}", "gl-spinner-#{size}"]
+    css_classes << "#{css_class}" unless css_class.blank?
+
+    spinner = content_tag(:span, "", { class: css_classes.join(' '), aria: { label: _('Loading') } })
+
+    container == true ? content_tag(:div, spinner, { class: 'gl-spinner-container' }) : spinner
   end
 
   def external_snippet_icon(name)
@@ -83,13 +100,13 @@ module IconsHelper
 
   def boolean_to_icon(value)
     if value
-      icon('circle', class: 'cgreen')
+      sprite_icon('check', css_class: 'cgreen')
     else
-      icon('power-off', class: 'clgray')
+      sprite_icon('power', css_class: 'clgray')
     end
   end
 
-  def visibility_level_icon(level, fw: true, options: {})
+  def visibility_level_icon(level, options: {})
     name =
       case level
       when Gitlab::VisibilityLevel::PRIVATE
@@ -97,13 +114,12 @@ module IconsHelper
       when Gitlab::VisibilityLevel::INTERNAL
         'shield'
       else # Gitlab::VisibilityLevel::PUBLIC
-        'globe'
+        'earth'
       end
 
-    name = [name]
-    name << "fw" if fw
+    css_class = options.delete(:class)
 
-    icon(name.join(' '), options)
+    sprite_icon(name, size: DEFAULT_ICON_SIZE, css_class: css_class)
   end
 
   def file_type_icon_class(type, mode, name)
@@ -158,6 +174,8 @@ module IconsHelper
   private
 
   def known_sprites
-    @known_sprites ||= JSON.parse(File.read(Rails.root.join('node_modules/@gitlab/svgs/dist/icons.json')))['icons']
+    return if Rails.env.production?
+
+    @known_sprites ||= Gitlab::Json.parse(File.read(Rails.root.join('node_modules/@gitlab/svgs/dist/icons.json')))['icons']
   end
 end

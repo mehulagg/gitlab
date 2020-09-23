@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::CreateService, '#execute' do
+RSpec.describe Groups::CreateService, '#execute' do
   let!(:user) { create(:user) }
   let!(:group_params) { { path: "group_path", visibility_level: Gitlab::VisibilityLevel::PUBLIC } }
 
@@ -21,6 +21,27 @@ describe Groups::CreateService, '#execute' do
       end
 
       it { is_expected.not_to be_persisted }
+    end
+  end
+
+  context 'creating a group with `default_branch_protection` attribute' do
+    let(:params) { group_params.merge(default_branch_protection: Gitlab::Access::PROTECTION_NONE) }
+    let(:service) { described_class.new(user, params) }
+    let(:created_group) { service.execute }
+
+    context 'for users who have the ability to create a group with `default_branch_protection`' do
+      it 'creates group with the specified branch protection level' do
+        expect(created_group.default_branch_protection).to eq(Gitlab::Access::PROTECTION_NONE)
+      end
+    end
+
+    context 'for users who do not have the ability to create a group with `default_branch_protection`' do
+      it 'does not create the group with the specified branch protection level' do
+        allow(Ability).to receive(:allowed?).and_call_original
+        allow(Ability).to receive(:allowed?).with(user, :create_group_with_default_branch_protection) { false }
+
+        expect(created_group.default_branch_protection).not_to eq(Gitlab::Access::PROTECTION_NONE)
+      end
     end
   end
 
@@ -60,7 +81,7 @@ describe Groups::CreateService, '#execute' do
       it 'does not save group and returns an error' do
         is_expected.not_to be_persisted
 
-        expect(subject.errors[:parent_id].first).to eq('You don’t have permission to create a subgroup in this group.')
+        expect(subject.errors[:parent_id].first).to eq(s_('CreateGroup|You don’t have permission to create a subgroup in this group.'))
         expect(subject.parent_id).to be_nil
       end
     end
@@ -106,6 +127,15 @@ describe Groups::CreateService, '#execute' do
         .and_return({ 'name' => 'tanuki', 'id' => 'lskdjfwlekfjsdifjj' })
 
       expect { subject }.to change { ChatTeam.count }.from(0).to(1)
+    end
+  end
+
+  describe 'creating a setting record' do
+    let(:service) { described_class.new(user, group_params) }
+
+    it 'create the settings record connected to the group' do
+      group = subject
+      expect(group.namespace_settings).to be_persisted
     end
   end
 end

@@ -1,0 +1,15 @@
+query epicDetails($fullPath: ID!, $iid: ID!) {
+  group(fullPath: $fullPath) {
+    epic(iid: $iid) {
+      participants {
+        edges {
+          node {
+            name
+            avatarUrl
+            webUrl
+          }
+        }
+      }
+    }
+  }
+}

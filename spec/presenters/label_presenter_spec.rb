@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe LabelPresenter do
+RSpec.describe LabelPresenter do
   include Gitlab::Routing.url_helpers
 
-  set(:group) { create(:group) }
-  set(:project) { create(:project, group: group) }
+  let_it_be(:group) { create(:group) }
+  let_it_be(:project) { create(:project, group: group) }
   let(:label) { build_stubbed(:label, project: project).present(issuable_subject: project) }
   let(:group_label) { build_stubbed(:group_label, group: group).present(issuable_subject: project) }
 
@@ -41,6 +41,7 @@ describe LabelPresenter do
   describe '#filter_path' do
     context 'with group as context subject' do
       let(:label_in_group) { build_stubbed(:label, project: project).present(issuable_subject: group) }
+
       subject { label_in_group.filter_path }
 
       it { is_expected.to eq(issues_group_path(group, label_name: [label_in_group.title])) }

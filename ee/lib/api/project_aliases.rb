@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectAliases < Grape::API
+  class ProjectAliases < Grape::API::Instance
     include PaginationParams
 
     before { check_feature_availability }
@@ -58,7 +58,7 @@ module API
       delete ':name' do
         project_alias.destroy
 
-        status 204
+        no_content!
       end
     end
   end

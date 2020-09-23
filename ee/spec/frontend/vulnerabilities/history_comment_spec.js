@@ -1,0 +1,271 @@
+import { mount } from '@vue/test-utils';
+import MockAdapter from 'axios-mock-adapter';
+import HistoryComment from 'ee/vulnerabilities/components/history_comment.vue';
+import HistoryCommentEditor from 'ee/vulnerabilities/components/history_comment_editor.vue';
+import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
+import { deprecatedCreateFlash as createFlash } from '~/flash';
+import axios from '~/lib/utils/axios_utils';
+
+const mockAxios = new MockAdapter(axios);
+jest.mock('~/flash');
+
+describe('History Comment', () => {
+  let wrapper;
+
+  const createWrapper = comment => {
+    wrapper = mount(HistoryComment, {
+      propsData: {
+        comment,
+        notesUrl: '/notes',
+      },
+    });
+  };
+
+  const comment = {
+    id: 'id',
+    note: 'note',
+    note_html: '<p>note</p>',
+    author: {},
+    updated_at: new Date().toISOString(),
+    current_user: {
+      can_edit: true,
+    },
+  };
+
+  const addCommentButton = () => wrapper.find({ ref: 'addCommentButton' });
+  const commentEditor = () => wrapper.find(HistoryCommentEditor);
+  const eventItem = () => wrapper.find(EventItem);
+  const editButton = () => wrapper.find('[title="Edit Comment"]');
+  const deleteButton = () => wrapper.find('[title="Delete Comment"]');
+  const confirmDeleteButton = () => wrapper.find({ ref: 'confirmDeleteButton' });
+  const cancelDeleteButton = () => wrapper.find({ ref: 'cancelDeleteButton' });
+
+  // Check that the passed-in elements exist, and that everything else does not exist.
+  const expectExists = (...expectedElements) => {
+    const set = new Set(expectedElements);
+
+    expect(addCommentButton().exists()).toBe(set.has(addCommentButton));
+    expect(commentEditor().exists()).toBe(set.has(commentEditor));
+    expect(eventItem().exists()).toBe(set.has(eventItem));
+    expect(editButton().exists()).toBe(set.has(editButton));
+    expect(deleteButton().exists()).toBe(set.has(deleteButton));
+    expect(confirmDeleteButton().exists()).toBe(set.has(confirmDeleteButton));
+    expect(cancelDeleteButton().exists()).toBe(set.has(cancelDeleteButton));
+  };
+
+  const expectAddCommentView = () => expectExists(addCommentButton);
+  const expectExistingCommentView = () => expectExists(eventItem, editButton, deleteButton);
+  const expectEditCommentView = () => expectExists(commentEditor);
+  const expectDeleteConfirmView = () => {
+    expectExists(eventItem, confirmDeleteButton, cancelDeleteButton);
+  };
+
+  // Either the add comment button or the edit button will exist, but not both at the same time, so we'll just find
+  // whichever one exists and click it to show the editor.
+  const showEditView = () => {
+    if (addCommentButton().exists()) {
+      addCommentButton().trigger('click');
+    } else {
+      editButton().vm.$emit('click');
+    }
+
+    return wrapper.vm.$nextTick();
+  };
+
+  afterEach(() => {
+    wrapper.destroy();
+    mockAxios.reset();
+    createFlash.mockReset();
+  });
+
+  describe(`when there's no existing comment`, () => {
+    beforeEach(() => createWrapper());
+
+    it('shows the add comment button', () => {
+      expectAddCommentView();
+    });
+
+    it('shows the comment editor when the add comment button is clicked', () => {
+      return showEditView().then(() => {
+        expectEditCommentView();
+        expect(commentEditor().props('initialComment')).toBeFalsy();
+      });
+    });
+
+    it('shows the add comment button when the cancel button is clicked in the comment editor', () => {
+      return showEditView()
+        .then(() => {
+          commentEditor().vm.$emit('onCancel');
+          return wrapper.vm.$nextTick();
+        })
+        .then(expectAddCommentView);
+    });
+
+    it('saves the comment when the save button is clicked on the comment editor', () => {
+      mockAxios.onPost().replyOnce(200, comment);
+
+      return showEditView()
+        .then(() => {
+          commentEditor().vm.$emit('onSave', 'new comment');
+          return wrapper.vm.$nextTick();
+        })
+        .then(() => {
+          expect(commentEditor().props('isSaving')).toBe(true);
+          return axios.waitForAll();
+        })
+        .then(() => {
+          expect(mockAxios.history.post).toHaveLength(1);
+          expect(wrapper.emitted().onCommentAdded).toBeTruthy();
+          expect(wrapper.emitted().onCommentAdded[0][0]).toEqual(comment);
+        });
+    });
+
+    it('shows an error message and continues showing the comment editor when the comment cannot be saved', () => {
+      mockAxios.onPost().replyOnce(500);
+
+      return showEditView()
+        .then(() => {
+          commentEditor().vm.$emit('onSave', 'new comment');
+          return axios.waitForAll();
+        })
+        .then(() => {
+          expect(mockAxios.history.post).toHaveLength(1);
+          expect(createFlash).toHaveBeenCalledTimes(1);
+          expect(commentEditor().exists()).toBe(true);
+        });
+    });
+  });
+
+  describe(`when there's an existing comment`, () => {
+    beforeEach(() => createWrapper(comment));
+
+    it('shows the comment with the correct user author and timestamp and the edit/delete buttons', () => {
+      expectExistingCommentView();
+      expect(eventItem().props('author')).toBe(comment.author);
+      expect(eventItem().props('createdAt')).toBe(comment.updated_at);
+      expect(eventItem().element.innerHTML).toContain(comment.note_html);
+    });
+
+    it('shows the comment editor when the edit button is clicked', () => {
+      return showEditView().then(() => {
+        expectEditCommentView();
+        expect(commentEditor().props('initialComment')).toBe(comment.note);
+      });
+    });
+
+    it('shows the comment when the cancel button is clicked in the comment editor', () => {
+      return showEditView()
+        .then(() => {
+          commentEditor().vm.$emit('onCancel');
+          return wrapper.vm.$nextTick();
+        })
+        .then(() => {
+          expectExistingCommentView();
+          expect(eventItem().element.innerHTML).toContain(comment.note_html);
+        });
+    });
+
+    it('shows the delete confirmation buttons when the delete button is clicked', () => {
+      deleteButton().trigger('click');
+
+      return wrapper.vm.$nextTick().then(expectDeleteConfirmView);
+    });
+
+    it('shows the comment when the cancel button is clicked on the delete confirmation', () => {
+      deleteButton().trigger('click');
+
+      return wrapper.vm
+        .$nextTick()
+        .then(() => {
+          cancelDeleteButton().trigger('click');
+          return wrapper.vm.$nextTick();
+        })
+        .then(() => {
+          expectExistingCommentView();
+          expect(eventItem().element.innerHTML).toContain(comment.note_html);
+        });
+    });
+
+    it('deletes the comment when the confirm delete button is clicked', () => {
+      mockAxios.onDelete().replyOnce(200);
+      deleteButton().trigger('click');
+
+      return wrapper.vm
+        .$nextTick()
+        .then(() => {
+          confirmDeleteButton().trigger('click');
+          return wrapper.vm.$nextTick();
+        })
+        .then(() => {
+          expect(confirmDeleteButton().props('loading')).toBe(true);
+          expect(cancelDeleteButton().props('disabled')).toBe(true);
+          return axios.waitForAll();
+        })
+        .then(() => {
+          expect(mockAxios.history.delete).toHaveLength(1);
+          expect(wrapper.emitted().onCommentDeleted).toBeTruthy();
+          expect(wrapper.emitted().onCommentDeleted[0][0]).toEqual(comment);
+        });
+    });
+
+    it('shows an error message when the comment cannot be deleted', () => {
+      mockAxios.onDelete().replyOnce(500);
+      deleteButton().trigger('click');
+
+      return wrapper.vm
+        .$nextTick()
+        .then(() => {
+          confirmDeleteButton().trigger('click');
+          return axios.waitForAll();
+        })
+        .then(() => {
+          expect(mockAxios.history.delete).toHaveLength(1);
+          expect(createFlash).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    it('saves the comment when the save button is clicked on the comment editor', () => {
+      const responseData = { ...comment, note: 'new comment' };
+      mockAxios.onPut().replyOnce(200, responseData);
+
+      return showEditView()
+        .then(() => {
+          commentEditor().vm.$emit('onSave', responseData.note);
+          return wrapper.vm.$nextTick();
+        })
+        .then(() => {
+          expect(commentEditor().props('isSaving')).toBe(true);
+          return axios.waitForAll();
+        })
+        .then(() => {
+          expect(mockAxios.history.put).toHaveLength(1);
+          expect(wrapper.emitted().onCommentUpdated).toBeTruthy();
+          expect(wrapper.emitted().onCommentUpdated[0][0]).toEqual(responseData);
+          expect(wrapper.emitted().onCommentUpdated[0][1]).toEqual(comment);
+        });
+    });
+
+    it('shows an error message when the comment cannot be saved', () => {
+      mockAxios.onPut().replyOnce(500);
+
+      return showEditView()
+        .then(() => {
+          commentEditor().vm.$emit('onSave', 'some comment');
+          return axios.waitForAll();
+        })
+        .then(() => {
+          expect(mockAxios.history.put).toHaveLength(1);
+          expect(createFlash).toHaveBeenCalledTimes(1);
+        });
+    });
+  });
+
+  describe('no permission to edit existing comment', () => {
+    it('does not show the edit/delete buttons if the current user has no edit permissions', () => {
+      createWrapper({ ...comment, current_user: { can_edit: false } });
+
+      expect(editButton().exists()).toBe(false);
+      expect(deleteButton().exists()).toBe(false);
+    });
+  });
+});

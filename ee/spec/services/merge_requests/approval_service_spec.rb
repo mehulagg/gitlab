@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe MergeRequests::ApprovalService do
+RSpec.describe MergeRequests::ApprovalService do
   describe '#execute' do
     let(:user)          { create(:user) }
     let(:merge_request) { create(:merge_request) }
@@ -10,6 +10,10 @@ describe MergeRequests::ApprovalService do
     let!(:todo)         { create(:todo, user: user, project: project, target: merge_request) }
 
     subject(:service) { described_class.new(project, user) }
+
+    before do
+      project.add_developer(user)
+    end
 
     context 'with invalid approval' do
       before do
@@ -52,6 +56,15 @@ describe MergeRequests::ApprovalService do
         service.execute(merge_request)
       end
 
+      it 'creates approve MR event' do
+        expect_next_instance_of(EventCreateService) do |instance|
+          expect(instance).to receive(:approve_mr)
+            .with(merge_request, user)
+        end
+
+        service.execute(merge_request)
+      end
+
       context 'with remaining approvals' do
         it 'fires an approval webhook' do
           expect(merge_request).to receive(:approvals_left).and_return(5)
@@ -89,16 +102,43 @@ describe MergeRequests::ApprovalService do
           service.execute(merge_request)
         end
       end
+
+      context 'approvals metrics calculation' do
+        context 'when code_review_analytics project feature is available' do
+          before do
+            stub_licensed_features(code_review_analytics: true)
+          end
+
+          it 'schedules RefreshApprovalsData' do
+            expect(::Analytics::RefreshApprovalsData)
+              .to receive_message_chain(:new, :execute)
+
+            service.execute(merge_request)
+          end
+        end
+
+        context 'when code_review_analytics is not available' do
+          before do
+            stub_licensed_features(code_review_analytics: false)
+          end
+
+          it 'does not schedule for RefreshApprovalsData' do
+            expect(::Analytics::RefreshApprovalsData).not_to receive(:new)
+
+            service.execute(merge_request)
+          end
+        end
+      end
     end
 
     context 'when project requires force auth for approval' do
       before do
-        project.update(require_password_to_approve: true)
-        user.update(password: 'password')
+        project.update!(require_password_to_approve: true)
+        user.update!(password: 'password')
       end
       context 'when password not specified' do
-        it 'raises an error' do
-          expect { service.execute(merge_request) }.to raise_error(::MergeRequests::ApprovalService::IncorrectApprovalPasswordError)
+        it 'does not update the approvals' do
+          expect { service.execute(merge_request) }.not_to change { merge_request.approvals.size }
         end
       end
 
@@ -106,9 +146,11 @@ describe MergeRequests::ApprovalService do
         let(:params) do
           { approval_password: 'incorrect' }
         end
-        it 'raises an error' do
+
+        it 'does not update the approvals' do
           service_with_params = described_class.new(project, user, params)
-          expect { service_with_params.execute(merge_request) }.to raise_error(::MergeRequests::ApprovalService::IncorrectApprovalPasswordError)
+
+          expect { service_with_params.execute(merge_request) }.not_to change { merge_request.approvals.size }
         end
       end
 
@@ -116,9 +158,11 @@ describe MergeRequests::ApprovalService do
         let(:params) do
           { approval_password: 'password' }
         end
-        it 'does not raise an error' do
+
+        it 'approves the merge request' do
           service_with_params = described_class.new(project, user, params)
-          expect { service_with_params.execute(merge_request) }.not_to raise_error(::MergeRequests::ApprovalService::IncorrectApprovalPasswordError)
+
+          expect { service_with_params.execute(merge_request) }.to change { merge_request.approvals.size }
         end
       end
     end

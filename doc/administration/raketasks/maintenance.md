@@ -1,86 +1,135 @@
-# Maintenance Rake Tasks
+# Maintenance Rake tasks **(CORE ONLY)**
 
-## Gather information about GitLab and the system it runs on
+GitLab provides Rake tasks for general maintenance.
 
-This command gathers information about your GitLab installation and the System it runs on. These may be useful when asking for help or reporting issues.
+## Gather GitLab and system information
+
+This command gathers information about your GitLab installation and the system it runs on.
+These may be useful when asking for help or reporting issues.
 
 **Omnibus Installation**
 
-```
+```shell
 sudo gitlab-rake gitlab:env:info
 ```
 
 **Source Installation**
 
-```
+```shell
 bundle exec rake gitlab:env:info RAILS_ENV=production
 ```
 
 Example output:
 
-```
+```plaintext
 System information
-System:           Debian 7.8
-Current User:     git
-Using RVM:        no
-Ruby Version:     2.1.5p273
-Gem Version:      2.4.3
-Bundler Version:  1.7.6
-Rake Version:     10.3.2
-Redis Version:    3.2.5
-Sidekiq Version:  2.17.8
+System:         Ubuntu 20.04
+Proxy:          no
+Current User:   git
+Using RVM:      no
+Ruby Version:   2.6.6p146
+Gem Version:    2.7.10
+Bundler Version:1.17.3
+Rake Version:   12.3.3
+Redis Version:  5.0.9
+Git Version:    2.27.0
+Sidekiq Version:5.2.9
+Go Version:     unknown
 
 GitLab information
-Version:          7.7.1
-Revision:         41ab9e1
-Directory:        /home/git/gitlab
-DB Adapter:       postgresql
-URL:              https://gitlab.example.com
-HTTP Clone URL:   https://gitlab.example.com/some-project.git
-SSH Clone URL:    git@gitlab.example.com:some-project.git
-Using LDAP:       no
-Using Omniauth:   no
+Version:        13.2.2-ee
+Revision:       618883a1f9d
+Directory:      /opt/gitlab/embedded/service/gitlab-rails
+DB Adapter:     PostgreSQL
+DB Version:     11.7
+URL:            http://gitlab.example.com
+HTTP Clone URL: http://gitlab.example.com/some-group/some-project.git
+SSH Clone URL:  git@gitlab.example.com:some-group/some-project.git
+Elasticsearch:  no
+Geo:            no
+Using LDAP:     no
+Using Omniauth: yes
+Omniauth Providers:
 
 GitLab Shell
-Version:          2.4.1
-Repositories:     /home/git/repositories/
-Hooks:            /home/git/gitlab-shell/hooks/
-Git:              /usr/bin/git
+Version:    13.3.0
+Repository storage paths:
+- default:  /var/opt/gitlab/git-data/repositories
+GitLab Shell path:      /opt/gitlab/embedded/service/gitlab-shell
+```
+
+## Show GitLab license information **(STARTER ONLY)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/20501) in GitLab Starter 12.6.
+
+This command shows information about your [GitLab license](../../user/admin_area/license.md) and
+how many seats are used. It is only available on GitLab Enterprise
+installations: a license cannot be installed into GitLab Community Edition.
+
+These may be useful when raising tickets with Support, or for programmatically
+checking your license parameters.
+
+**Omnibus Installation**
+
+```shell
+sudo gitlab-rake gitlab:license:info
+```
+
+**Source Installation**
+
+```shell
+bundle exec rake gitlab:license:info RAILS_ENV=production
+```
+
+Example output:
+
+```plaintext
+Today's Date: 2020-02-29
+Current User Count: 30
+Max Historical Count: 30
+Max Users in License: 40
+License valid from: 2019-11-29 to 2020-11-28
+Email associated with license: user@example.com
 ```
 
 ## Check GitLab configuration
 
-Runs the following rake tasks:
+The `gitlab:check` Rake task runs the following Rake tasks:
 
 - `gitlab:gitlab_shell:check`
 - `gitlab:gitaly:check`
 - `gitlab:sidekiq:check`
 - `gitlab:app:check`
 
-It will check that each component was set up according to the installation guide and suggest fixes for issues found.
+It will check that each component was set up according to the installation guide and suggest fixes
+for issues found. This command must be run from your application server and will not work correctly on
+component servers like [Gitaly](../gitaly/index.md#run-gitaly-on-its-own-server).
 
-You may also have a look at our Troubleshooting Guides:
+You may also have a look at our troubleshooting guides for:
 
-- [Troubleshooting Guide (GitLab)](../index.md#troubleshooting)
-- [Troubleshooting Guide (Omnibus GitLab)](https://docs.gitlab.com/omnibus/README.html#troubleshooting)
+- [GitLab](../index.md#troubleshooting)
+- [Omnibus GitLab](https://docs.gitlab.com/omnibus/README.html#troubleshooting)
+
+To run `gitlab:check`, run:
 
 **Omnibus Installation**
 
-```
+```shell
 sudo gitlab-rake gitlab:check
 ```
 
 **Source Installation**
 
-```
+```shell
 bundle exec rake gitlab:check RAILS_ENV=production
 ```
 
-NOTE: Use `SANITIZE=true` for `gitlab:check` if you want to omit project names from the output.
+NOTE: **Note:**
+Use `SANITIZE=true` for `gitlab:check` if you want to omit project names from the output.
 
 Example output:
 
-```
+```plaintext
 Checking Environment ...
 
 Git configured for git user? ... yes
@@ -125,22 +174,24 @@ Checking GitLab ... Finished
 
 ## Rebuild authorized_keys file
 
-In some case it is necessary to rebuild the `authorized_keys` file.
+In some case it is necessary to rebuild the `authorized_keys` file. To do this, run:
 
 **Omnibus Installation**
 
-```
+```shell
 sudo gitlab-rake gitlab:shell:setup
 ```
 
 **Source Installation**
 
-```
+```shell
 cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:shell:setup RAILS_ENV=production
 ```
 
-```
+Example output:
+
+```plaintext
 This will rebuild an authorized_keys file.
 You will lose any data stored in authorized_keys file.
 Do you want to continue (yes/no)? yes
@@ -148,18 +199,18 @@ Do you want to continue (yes/no)? yes
 
 ## Clear Redis cache
 
-If for some reason the dashboard shows wrong information you might want to
-clear Redis' cache.
+If for some reason the dashboard displays the wrong information, you might want to
+clear Redis' cache. To do this, run:
 
 **Omnibus Installation**
 
-```
+```shell
 sudo gitlab-rake cache:clear
 ```
 
 **Source Installation**
 
-```
+```shell
 cd /home/git/gitlab
 sudo -u git -H bundle exec rake cache:clear RAILS_ENV=production
 ```
@@ -169,12 +220,12 @@ sudo -u git -H bundle exec rake cache:clear RAILS_ENV=production
 Sometimes during version upgrades you might end up with some wrong CSS or
 missing some icons. In that case, try to precompile the assets again.
 
-Note that this only applies to source installations and does NOT apply to
+This only applies to source installations and does NOT apply to
 Omnibus packages.
 
 **Source Installation**
 
-```
+```shell
 cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:assets:compile RAILS_ENV=production
 ```
@@ -186,40 +237,21 @@ production machine after installing the package, there should be no reason to re
 `rake gitlab:assets:compile` on the production machine. If you suspect that assets
 have been corrupted, you should reinstall the omnibus package.
 
-## Tracking Deployments
-
-GitLab provides a Rake task that lets you track deployments in GitLab
-Performance Monitoring. This Rake task simply stores the current GitLab version
-in the GitLab Performance Monitoring database.
-
-**Omnibus Installation**
-
-```
-sudo gitlab-rake gitlab:track_deployment
-```
-
-**Source Installation**
-
-```
-cd /home/git/gitlab
-sudo -u git -H bundle exec rake gitlab:track_deployment RAILS_ENV=production
-```
-
 ## Check TCP connectivity to a remote site
 
 Sometimes you need to know if your GitLab installation can connect to a TCP
-service on another machine - perhaps a PostgreSQL or HTTPS server. A rake task
+service on another machine - perhaps a PostgreSQL or HTTPS server. A Rake task
 is included to help you with this:
 
 **Omnibus Installation**
 
-```
+```shell
 sudo gitlab-rake gitlab:tcp_check[example.com,80]
 ```
 
 **Source Installation**
 
-```
+```shell
 cd /home/git/gitlab
 sudo -u git -H bundle exec rake gitlab:tcp_check[example.com,80] RAILS_ENV=production
 ```
@@ -235,16 +267,16 @@ clear it.
 
 To clear all exclusive leases:
 
-DANGER: **DANGER**:
+DANGER: **Danger:**
 Don't run it while GitLab or Sidekiq is running
 
-```bash
+```shell
 sudo gitlab-rake gitlab:exclusive_lease:clear
 ```
 
 To specify a lease `type` or lease `type + id`, specify a scope:
 
-```bash
+```shell
 # to clear all leases for repository garbage collection:
 sudo gitlab-rake gitlab:exclusive_lease:clear[project_housekeeping:*]
 
@@ -254,19 +286,48 @@ sudo gitlab-rake gitlab:exclusive_lease:clear[project_housekeeping:4]
 
 ## Display status of database migrations
 
-To check the status of migrations, you can use the following rake task:
+See the [upgrade documentation](../../update/README.md#checking-for-background-migrations-before-upgrading)
+for how to check that migrations are complete when upgrading GitLab.
 
-```bash
+To check the status of specific migrations, you can use the following Rake task:
+
+```shell
 sudo gitlab-rake db:migrate:status
 ```
 
 This will output a table with a `Status` of `up` or `down` for
 each Migration ID.
 
-```bash
+```shell
 database: gitlabhq_production
 
  Status   Migration ID    Migration Name
 --------------------------------------------------
    up     migration_id    migration_name
+```
+
+## Run incomplete database migrations
+
+Database migrations can be stuck in an incomplete state. That is, they'll have a `down`
+status in the output of the `sudo gitlab-rake db:migrate:status` command.
+
+To complete these migrations, use the following Rake task:
+
+```shell
+sudo gitlab-rake db:migrate
+```
+
+After the command completes, run `sudo gitlab-rake db:migrate:status` to check if all
+migrations are completed (have an `up` status).
+
+## Import common metrics
+
+Sometimes you may need to re-import the common metrics that power the Metrics dashboards.
+
+This could be as a result of [updating existing metrics](../../development/prometheus_metrics.md#update-existing-metrics), or as a [troubleshooting measure](../../operations/metrics/dashboards/index.md#troubleshooting).
+
+To re-import the metrics you can run:
+
+```shell
+sudo gitlab-rake metrics:setup_common_metrics
 ```

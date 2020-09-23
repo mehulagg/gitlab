@@ -19,6 +19,11 @@ class GroupClusterablePresenter < ClusterablePresenter
     update_applications_group_cluster_path(clusterable, cluster, application)
   end
 
+  override :clear_cluster_cache_path
+  def clear_cluster_cache_path(cluster)
+    clear_cache_group_cluster_path(clusterable, cluster)
+  end
+
   override :cluster_path
   def cluster_path(cluster, params = {})
     group_cluster_path(clusterable, cluster, params)
@@ -37,6 +42,10 @@ class GroupClusterablePresenter < ClusterablePresenter
   override :learn_more_link
   def learn_more_link
     link_to(s_('ClusterIntegration|Learn more about group Kubernetes clusters'), help_page_path('user/group/clusters/index'), target: '_blank', rel: 'noopener noreferrer')
+  end
+
+  def metrics_dashboard_path(cluster)
+    metrics_dashboard_group_cluster_path(clusterable, cluster)
   end
 end
 

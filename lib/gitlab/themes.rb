@@ -23,7 +23,8 @@ module Gitlab
       Theme.new(9, 'Red', 'ui-red'),
       Theme.new(10, 'Light Red', 'ui-light-red'),
       Theme.new(2, 'Dark', 'ui-dark'),
-      Theme.new(3, 'Light', 'ui-light')
+      Theme.new(3, 'Light', 'ui-light'),
+      Theme.new(11, 'Dark Mode (alpha)', 'gl-dark')
     ].freeze
 
     # Convenience method to get a space-separated String of all the theme
@@ -75,6 +76,10 @@ module Gitlab
       else
         default
       end
+    end
+
+    def self.valid_ids
+      THEMES.map(&:id)
     end
 
     private

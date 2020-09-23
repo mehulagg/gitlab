@@ -27,15 +27,15 @@ module Banzai
         ref_pattern = Project.markdown_reference_pattern
         ref_pattern_start = /\A#{ref_pattern}\z/
 
-        nodes.each do |node|
+        nodes.each_with_index do |node, index|
           if text_node?(node)
-            replace_text_when_pattern_matches(node, ref_pattern) do |content|
+            replace_text_when_pattern_matches(node, index, ref_pattern) do |content|
               project_link_filter(content)
             end
           elsif element_node?(node)
             yield_valid_link(node) do |link, inner_html|
               if link =~ ref_pattern_start
-                replace_link_node_with_href(node, link) do
+                replace_link_node_with_href(node, index, link) do
                   project_link_filter(link, link_content: inner_html)
                 end
               end
@@ -104,7 +104,7 @@ module Banzai
       def link_to_project(project, link_content: nil)
         url = urls.project_url(project, only_path: context[:only_path])
         data = data_attribute(project: project.id)
-        content = link_content || project.to_reference_with_postfix
+        content = link_content || project.to_reference
 
         link_tag(url, data, content, project.name)
       end

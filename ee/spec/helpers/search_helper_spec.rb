@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe SearchHelper do
+RSpec.describe SearchHelper do
   describe '#search_filter_input_options' do
     let(:options) { helper.search_filter_input_options(:issues) }
 
@@ -51,64 +51,18 @@ describe SearchHelper do
     end
   end
 
-  describe '#parse_search_result with elastic enabled', :elastic do
+  describe '#project_autocomplete' do
     let(:user) { create(:user) }
 
     before do
+      @project = create(:project, :repository)
       allow(self).to receive(:current_user).and_return(user)
-      stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
     end
 
-    it "returns parsed result", :sidekiq_might_not_need_inline do
-      project = create :project, :repository
-
-      project.repository.index_commits_and_blobs
-      Gitlab::Elastic::Helper.refresh_index
-
-      result = project.repository.search(
-        'def popen',
-        type: :blob,
-        options: { highlight: true }
-      )[:blobs][:results][0]
-
-      parsed_result = helper.parse_search_result(result)
-
-      expect(parsed_result.ref). to eq('b83d6e391c22777fca1ed3012fce84f633d7fed0')
-      expect(parsed_result.path).to eq('files/ruby/popen.rb')
-      expect(parsed_result.startline).to eq(2)
-      expect(parsed_result.data).to include("Popen")
-    end
-  end
-
-  describe '#blob_projects', :elastic do
-    let(:user) { create(:user) }
-
-    before do
-      allow(self).to receive(:current_user).and_return(user)
-      stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
-    end
-
-    def es_blob_search
-      Repository.search(
-        'def popen',
-        type: :blob,
-        options: { highlight: true }
-      )[:blobs][:results]
-    end
-
-    it 'returns all projects in the result page without causing an N+1', :sidekiq_might_not_need_inline do
-      control_count = ActiveRecord::QueryRecorder.new { blob_projects(es_blob_search) }.count
-
-      projects = create_list :project, 3, :repository, :public
-      projects.each { |project| project.repository.index_commits_and_blobs }
-
-      Gitlab::Elastic::Helper.refresh_index
-
-      # So we can access it outside the following block
-      result_projects = nil
-
-      expect { result_projects = blob_projects(es_blob_search) }.not_to exceed_query_limit(control_count)
-      expect(result_projects).to match_array(projects)
+    context 'with a licensed user' do
+      it "does include feature flags" do
+        expect(project_autocomplete.find { |i| i[:label] == 'Feature Flags' }).to be_present
+      end
     end
   end
 
@@ -119,7 +73,7 @@ describe SearchHelper do
     let(:show_snippets) { true }
     let(:collection) { Kaminari.paginate_array([:foo]).page(1).per(10) }
     let(:user) { create(:user) }
-    let(:message) { "Showing %{count} %{scope} for \"%{term}\"" }
+    let(:message) { "Showing %{count} %{scope} for%{term_element}" }
     let(:new_message) { message + " in your personal and project snippets" }
 
     subject { search_entries_info_template(collection) }
@@ -180,6 +134,7 @@ describe SearchHelper do
     let(:use_elasticsearch) { true }
     let(:scope) { 'commits' }
     let(:search_service) { instance_double(Search::GlobalService, use_elasticsearch?: use_elasticsearch, scope: scope) }
+
     subject { show_switch_to_basic_search?(search_service) }
 
     before do

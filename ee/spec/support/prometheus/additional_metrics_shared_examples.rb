@@ -14,7 +14,7 @@ RSpec.shared_examples 'additional custom metrics query' do
 
   let(:client) { double('prometheus_client') }
   let(:query_result) { described_class.new(client).query(*query_params) }
-  let(:project) { create(:project) }
+  let(:project) { create(:project, :repository) }
   let(:environment) { create(:environment, slug: 'environment-slug', project: project) }
 
   before do
@@ -24,6 +24,7 @@ RSpec.shared_examples 'additional custom metrics query' do
 
   context 'with custom metrics' do
     let!(:metric) { create(:prometheus_metric, project: project) }
+
     before do
       allow(client).to receive(:query_range).with('avg(metric)', any_args).and_return(query_range_result)
     end

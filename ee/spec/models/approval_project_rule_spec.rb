@@ -2,11 +2,13 @@
 
 require 'spec_helper'
 
-describe ApprovalProjectRule do
+RSpec.describe ApprovalProjectRule do
   subject { create(:approval_project_rule) }
 
   describe 'validations' do
-    it { is_expected.to validate_uniqueness_of(:name).scoped_to(:project_id) }
+    it 'is invalid when name not unique within rule type and project' do
+      is_expected.to validate_uniqueness_of(:name).scoped_to([:project_id, :rule_type])
+    end
   end
 
   describe '.regular' do
@@ -18,7 +20,19 @@ describe ApprovalProjectRule do
     end
   end
 
-  describe '.code_ownerscope' do
+  describe '.regular_or_any_approver scope' do
+    it 'returns regular or any-approver rules' do
+      any_approver_rule = create(:approval_project_rule, rule_type: :any_approver)
+      regular_rule = create(:approval_project_rule)
+      create(:approval_project_rule, :security_report)
+
+      expect(described_class.regular_or_any_approver).to(
+        contain_exactly(any_approver_rule, regular_rule)
+      )
+    end
+  end
+
+  describe '.code_owner scope' do
     it 'returns nothing' do
       create_list(:approval_project_rule, 2)
 
@@ -92,7 +106,7 @@ describe ApprovalProjectRule do
 
   describe "validation" do
     let(:project_approval_rule) { create(:approval_project_rule) }
-    let(:license_compliance_rule) { create(:approval_project_rule, :license_management) }
+    let(:license_compliance_rule) { create(:approval_project_rule, :license_scanning) }
     let(:vulnerability_check_rule) { create(:approval_project_rule, :security) }
 
     context "when creating a new rule" do
@@ -129,10 +143,76 @@ describe ApprovalProjectRule do
     let(:project) { create(:project) }
     let(:rule) { build(:approval_project_rule, project: project, rule_type: :any_approver) }
 
-    it 'creating more than one any_approver rule raises an error' do
+    it 'creating only one any_approver rule is allowed' do
       create(:approval_project_rule, project: project, rule_type: :any_approver)
 
-      expect { rule.save }.to raise_error(ActiveRecord::RecordNotUnique)
+      expect(rule).not_to be_valid
+      expect(rule.errors.messages).to eq(rule_type: ['any-approver for the project already exists'])
+      expect { rule.save(validate: false) }.to raise_error(ActiveRecord::RecordNotUnique)
+    end
+  end
+
+  describe 'callbacks', :request_store do
+    let_it_be(:user) { create(:user, name: 'Batman') }
+    let_it_be(:group) { create(:group, name: 'Justice League') }
+
+    let_it_be(:new_user) { create(:user, name: 'Spiderman') }
+    let_it_be(:new_group) { create(:group, name: 'Avengers') }
+
+    let_it_be(:rule, reload: true) { create(:approval_project_rule, name: 'Security', users: [user], groups: [group]) }
+
+    shared_examples 'auditable' do
+      context 'when audit event queue is active' do
+        before do
+          allow(::Gitlab::Audit::EventQueue).to receive(:active?).and_return(true)
+        end
+
+        it 'adds message to audit event queue' do
+          action!
+
+          expect(::Gitlab::Audit::EventQueue.current).to contain_exactly(message)
+        end
+      end
+
+      context 'when audit event queue is not active' do
+        before do
+          allow(::Gitlab::Audit::EventQueue).to receive(:active?).and_return(false)
+        end
+
+        it 'does not add message to audit event queue' do
+          action!
+
+          expect(::Gitlab::Audit::EventQueue.current).to be_empty
+        end
+      end
+    end
+
+    describe '#audit_add users after :add' do
+      let(:action!) { rule.update(users: [user, new_user]) }
+      let(:message) { 'Added User Spiderman to approval group on Security rule' }
+
+      it_behaves_like 'auditable'
+    end
+
+    describe '#audit_remove users after :remove' do
+      let(:action!) { rule.update(users: []) }
+      let(:message) { 'Removed User Batman from approval group on Security rule' }
+
+      it_behaves_like 'auditable'
+    end
+
+    describe '#audit_add groups after :add' do
+      let(:action!) { rule.update(groups: [group, new_group]) }
+      let(:message) { 'Added Group Avengers to approval group on Security rule' }
+
+      it_behaves_like 'auditable'
+    end
+
+    describe '#audit_remove groups after :remove' do
+      let(:action!) { rule.update(groups: []) }
+      let(:message) { 'Removed Group Justice League from approval group on Security rule' }
+
+      it_behaves_like 'auditable'
     end
   end
 end

@@ -2,13 +2,12 @@
 
 require 'spec_helper'
 
-describe Ci::CompareLicenseScanningReportsService do
-  let(:current_user) { project.users.take }
-  let(:service) { described_class.new(project, current_user) }
-  let(:project) { create(:project, :repository) }
+RSpec.describe Ci::CompareLicenseScanningReportsService do
+  let_it_be(:project) { create(:project, :repository) }
+  let(:service) { described_class.new(project, nil) }
 
   before do
-    stub_licensed_features(license_management: true)
+    stub_licensed_features(license_scanning: true)
   end
 
   describe '#execute' do
@@ -16,7 +15,7 @@ describe Ci::CompareLicenseScanningReportsService do
 
     context 'when head pipeline has license scanning reports' do
       let!(:base_pipeline) { nil }
-      let!(:head_pipeline) { create(:ee_ci_pipeline, :with_license_management_report, project: project) }
+      let!(:head_pipeline) { create(:ee_ci_pipeline, :with_license_scanning_report, project: project) }
 
       it 'reports new licenses' do
         expect(subject[:status]).to eq(:parsed)
@@ -26,8 +25,8 @@ describe Ci::CompareLicenseScanningReportsService do
     end
 
     context 'when base and head pipelines have test reports' do
-      let!(:base_pipeline) { create(:ee_ci_pipeline, :with_license_management_report, project: project) }
-      let!(:head_pipeline) { create(:ee_ci_pipeline, :with_license_management_feature_branch, project: project) }
+      let!(:base_pipeline) { create(:ee_ci_pipeline, :with_license_scanning_report, project: project) }
+      let!(:head_pipeline) { create(:ee_ci_pipeline, :with_license_scanning_feature_branch, project: project) }
 
       it 'reports status as parsed' do
         expect(subject[:status]).to eq(:parsed)
@@ -50,19 +49,19 @@ describe Ci::CompareLicenseScanningReportsService do
     end
 
     context 'when head pipeline has corrupted license scanning reports' do
-      let!(:base_pipeline) { create(:ee_ci_pipeline, :with_corrupted_license_management_report, project: project) }
-      let!(:head_pipeline) { create(:ee_ci_pipeline, :with_corrupted_license_management_report, project: project) }
+      let!(:base_pipeline) { build(:ee_ci_pipeline, :with_corrupted_license_scanning_report, project: project) }
+      let!(:head_pipeline) { build(:ee_ci_pipeline, :with_corrupted_license_scanning_report, project: project) }
 
-      it 'returns status and error message' do
-        expect(subject[:status]).to eq(:error)
-        expect(subject[:status_reason]).to include('JSON parsing failed')
+      it 'does not expose parser errors' do
+        expect(subject[:status]).to eq(:parsed)
       end
 
-      it 'returns status and error message when pipeline is nil' do
-        result = service.execute(nil, head_pipeline)
+      context "when the base pipeline is nil" do
+        subject { service.execute(nil, head_pipeline) }
 
-        expect(result[:status]).to eq(:error)
-        expect(result[:status_reason]).to include('JSON parsing failed')
+        it 'does not expose parser errors' do
+          expect(subject[:status]).to eq(:parsed)
+        end
       end
     end
   end

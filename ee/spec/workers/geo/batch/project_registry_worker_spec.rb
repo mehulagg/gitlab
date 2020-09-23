@@ -5,7 +5,7 @@ require 'spec_helper'
 RSpec.describe Geo::Batch::ProjectRegistryWorker do
   include ::EE::GeoHelpers
 
-  set(:secondary) { create(:geo_node) }
+  let_it_be(:secondary) { create(:geo_node) }
 
   before do
     stub_current_geo_node(secondary)
@@ -13,18 +13,6 @@ RSpec.describe Geo::Batch::ProjectRegistryWorker do
 
   describe '#perform' do
     let(:range) { [0, registry.id] }
-
-    context 'when operation is :recheck_repositories' do
-      let!(:registry) { create(:geo_project_registry, :repository_verified) }
-
-      it 'flags repositories for reverify' do
-        Sidekiq::Testing.inline! do
-          subject.perform(:recheck_repositories, range)
-        end
-
-        expect(registry.reload.repository_verification_pending?).to be_truthy
-      end
-    end
 
     context 'when operation is :reverify_repositories' do
       let!(:registry) { create(:geo_project_registry, :repository_verified) }

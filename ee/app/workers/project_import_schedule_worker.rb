@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProjectImportScheduleWorker
+class ProjectImportScheduleWorker # rubocop:disable Scalability/IdempotentWorker
   ImportStateNotFound = Class.new(StandardError)
 
   include ApplicationWorker
@@ -8,15 +8,16 @@ class ProjectImportScheduleWorker
 
   feature_category :importers
   sidekiq_options retry: false
+  loggable_arguments 1 # For the job waiter key
 
-  # rubocop: disable CodeReuse/ActiveRecord
   def perform(project_id)
     return if Gitlab::Database.read_only?
 
-    import_state = ProjectImportState.find_by(project_id: project_id)
-    raise ImportStateNotFound unless import_state
+    project = Project.with_route.with_import_state.with_namespace.find_by_id(project_id)
+    raise ImportStateNotFound unless project&.import_state
 
-    import_state.schedule
+    with_context(project: project) do
+      project.import_state.schedule
+    end
   end
-  # rubocop: enable CodeReuse/ActiveRecord
 end

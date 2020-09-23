@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Groups::SsoController do
+RSpec.describe Groups::SsoController do
   let(:user) { create(:user) }
   let(:group) { create(:group, :private, name: 'our-group', saml_discovery_token: 'test-token') }
 
@@ -18,13 +18,13 @@ describe Groups::SsoController do
     it 'has status 200' do
       get :saml, params: { group_id: group }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
     end
 
     it 'malicious redirect parameter falls back to group_path' do
       get :saml, params: { group_id: group, redirect: '///malicious-url' }
 
-      expect(response).to have_gitlab_http_status(200)
+      expect(response).to have_gitlab_http_status(:ok)
       expect(assigns[:redirect_path]).to eq(group_path(group))
     end
 
@@ -50,7 +50,7 @@ describe Groups::SsoController do
       it 'renders 404' do
         get :saml, params: { group_id: group }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
 
       it 'still allows account unlinking' do
@@ -59,6 +59,25 @@ describe Groups::SsoController do
         expect do
           delete :unlink, params: { group_id: group }
         end.to change(Identity, :count).by(-1)
+      end
+    end
+
+    context 'when SAML trial has expired' do
+      before do
+        create(:group_saml_identity, saml_provider: saml_provider, user: user)
+        stub_licensed_features(group_saml: false)
+      end
+
+      it 'DELETE /unlink still allows account unlinking' do
+        expect do
+          delete :unlink, params: { group_id: group }
+        end.to change(Identity, :count).by(-1)
+      end
+
+      it 'GET /saml renders 404' do
+        get :saml, params: { group_id: group }
+
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -73,7 +92,7 @@ describe Groups::SsoController do
     end
 
     context 'when group has moved' do
-      let(:redirect_route) { group.redirect_routes.create(path: 'old-path') }
+      let(:redirect_route) { group.redirect_routes.create!(path: 'old-path') }
 
       it 'redirects to new location' do
         get :saml, params: { group_id: redirect_route.path }
@@ -88,7 +107,7 @@ describe Groups::SsoController do
       it 'renders 404' do
         get :saml, params: { group_id: group }
 
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
@@ -115,7 +134,7 @@ describe Groups::SsoController do
     it 'renders 404' do
       get :saml, params: { group_id: 'not-a-group' }
 
-      expect(response).to have_gitlab_http_status(404)
+      expect(response).to have_gitlab_http_status(:not_found)
     end
 
     context 'when user is not signed in' do
@@ -147,7 +166,7 @@ describe Groups::SsoController do
           let(:oauth_data) { { "info" => { name: 'Test', email: 'testuser@email.com' } } }
 
           it 'has status 200' do
-            expect(subject).to have_gitlab_http_status(200)
+            expect(subject).to have_gitlab_http_status(:ok)
           end
 
           it 'suggests first available username automatically' do
@@ -162,23 +181,23 @@ describe Groups::SsoController do
             let(:oauth_group_id) { group.id + 1 }
 
             it 'renders 404' do
-              expect(subject).to have_gitlab_http_status(404)
+              expect(subject).to have_gitlab_http_status(:not_found)
             end
           end
         end
 
         it 'renders 404' do
-          expect(subject).to have_gitlab_http_status(404)
+          expect(subject).to have_gitlab_http_status(:not_found)
         end
       end
 
       context 'and group managed accounts enforcing is disabled' do
         before do
-          saml_provider.update(enforced_group_managed_accounts: false)
+          saml_provider.update!(enforced_group_managed_accounts: false)
         end
 
         it 'renders 404' do
-          expect(subject).to have_gitlab_http_status(404)
+          expect(subject).to have_gitlab_http_status(:not_found)
         end
       end
     end
@@ -242,6 +261,48 @@ describe Groups::SsoController do
           subject
 
           expect(request.env['warden']).not_to be_authenticated
+        end
+      end
+    end
+  end
+
+  describe 'POST authorize_managed_account' do
+    subject do
+      post :authorize_managed_account,
+           params: { group_id: group },
+           session: session
+    end
+
+    let(:session) { { "oauth_data" => oauth_data, "oauth_group_id" => group.id } }
+    let(:oauth_data) { { "info" => { name: 'Test', email: 'testuser@email.com' } } }
+    let!(:saml_provider) { create(:saml_provider, :enforced_group_managed_accounts, group: group) }
+    let(:transfer_membership_service_spy) { spy('GroupSaml::GroupManagedAccounts::TransferMembershipService') }
+
+    before do
+      allow(GroupSaml::GroupManagedAccounts::TransferMembershipService)
+        .to receive(:new).with(user, group, hash_including(session)).and_return(transfer_membership_service_spy)
+    end
+
+    context 'when user is already signed in' do
+      context 'when service succeeds' do
+        before do
+          allow(transfer_membership_service_spy).to receive(:execute).and_return(true)
+        end
+
+        it 'redirects to group' do
+          subject
+
+          expect(response).to redirect_to group_url(group)
+        end
+      end
+
+      context 'when service fails' do
+        before do
+          allow(transfer_membership_service_spy).to receive(:execute).and_return(nil)
+        end
+
+        it 'renders the form' do
+          expect(subject).to render_template :sign_up_form
         end
       end
     end

@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 import BlockingMrInputRoot from 'ee/projects/merge_requests/blocking_mr_input_root.vue';
-import RelatedIssuableInput from 'ee/related_issues/components/related_issuable_input.vue';
+import RelatedIssuableInput from '~/related_issues/components/related_issuable_input.vue';
 
 describe('blocking mr input root', () => {
   let wrapper;
@@ -90,14 +90,18 @@ describe('blocking mr input root', () => {
         createComponent({ existingRefs: ['!1'] });
         removeRef(0);
 
-        expectShouldUpdateRefsToBe(true);
+        return wrapper.vm.$nextTick().then(() => {
+          expectShouldUpdateRefsToBe(true);
+        });
       });
 
       it('is true after a ref is added', () => {
         createComponent();
         addTokenizedInput('foo');
 
-        expectShouldUpdateRefsToBe(true);
+        return wrapper.vm.$nextTick(() => {
+          expectShouldUpdateRefsToBe(true);
+        });
       });
     });
 
@@ -129,7 +133,9 @@ describe('blocking mr input root', () => {
         makeComponentWithHiddenMrs();
         removeRef(2);
 
-        expectRemoveHiddenBlockingMergeRequestsToBe(true);
+        return wrapper.vm.$nextTick().then(() => {
+          expectRemoveHiddenBlockingMergeRequestsToBe(true);
+        });
       });
     });
   });

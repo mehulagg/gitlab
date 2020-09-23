@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe 'layouts/nav/sidebar/_push_rules_link' do
+RSpec.describe 'layouts/nav/sidebar/_push_rules_link' do
   context 'license includes push rules feature' do
     it 'shows the link' do
       stub_licensed_features(push_rules: true)

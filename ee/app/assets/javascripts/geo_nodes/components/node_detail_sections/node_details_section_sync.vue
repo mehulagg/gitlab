@@ -4,8 +4,6 @@ import { parseSeconds, stringifyTime } from '~/lib/utils/datetime_utility';
 
 import { VALUE_TYPE, CUSTOM_TYPE } from '../../constants';
 
-import DetailsSectionMixin from '../../mixins/details_section_mixin';
-
 import GeoNodeDetailItem from '../geo_node_detail_item.vue';
 import SectionRevealButton from './section_reveal_button.vue';
 
@@ -14,8 +12,11 @@ export default {
     SectionRevealButton,
     GeoNodeDetailItem,
   },
-  mixins: [DetailsSectionMixin],
   props: {
+    node: {
+      type: Object,
+      required: true,
+    },
     nodeDetails: {
       type: Object,
       required: true,
@@ -31,42 +32,7 @@ export default {
           itemValueType: VALUE_TYPE.CUSTOM,
           customType: CUSTOM_TYPE.SYNC,
         },
-        {
-          itemTitle: s__('GeoNodes|Repositories'),
-          itemValue: this.nodeDetails.repositories,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
-        {
-          itemTitle: s__('GeoNodes|Wikis'),
-          itemValue: this.nodeDetails.wikis,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
-        {
-          itemTitle: s__('GeoNodes|Local LFS objects'),
-          itemValue: this.nodeDetails.lfs,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
-        {
-          itemTitle: s__('GeoNodes|Local attachments'),
-          itemValue: this.nodeDetails.attachments,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
-        {
-          itemTitle: s__('GeoNodes|Local job artifacts'),
-          itemValue: this.nodeDetails.jobArtifacts,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
-        {
-          itemTitle: s__('GeoNodes|Local container repositories'),
-          itemValue: this.nodeDetails.containerRepositories,
-          itemValueType: VALUE_TYPE.GRAPH,
-        },
-        {
-          itemTitle: s__('GeoNodes|Design repositories'),
-          itemValue: this.nodeDetails.designRepositories,
-          itemValueType: VALUE_TYPE.GRAPH,
-          featureDisabled: !gon.features.enableGeoDesignSync,
-        },
+        ...this.nodeDetails.syncStatuses,
         {
           itemTitle: s__('GeoNodes|Data replication lag'),
           itemValue: this.dbReplicationLag(),
@@ -125,34 +91,46 @@ export default {
     handleSectionToggle(toggleState) {
       this.showSectionItems = toggleState;
     },
+    detailsPath(nodeDetailItem) {
+      if (!nodeDetailItem.secondaryView) {
+        return '';
+      }
+
+      // This is due to some legacy coding patterns on the GeoNodeStatus API.
+      // This will be fixed as part of https://gitlab.com/gitlab-org/gitlab/-/issues/228718
+
+      if (nodeDetailItem.itemName === 'repositories') {
+        return `${this.node.url}admin/geo/replication/projects`;
+      } else if (nodeDetailItem.itemName === 'attachments') {
+        return `${this.node.url}admin/geo/replication/uploads`;
+      }
+
+      return `${this.node.url}admin/geo/replication/${nodeDetailItem.itemName}`;
+    },
   },
 };
 </script>
 
 <template>
-  <div class="row-fluid clearfix node-detail-section sync-section">
+  <div class="row-fluid clearfix py-3 border-top border-color-default sync-section">
     <div class="col-md-12">
       <section-reveal-button
         :button-title="__('Sync information')"
         @toggleButton="handleSectionToggle"
       />
     </div>
-    <div
-      v-show="showSectionItems"
-      class="col-md-6 prepend-left-15 prepend-top-10 section-items-container"
-    >
+    <div v-if="showSectionItems" class="col-md-6 ml-2 mt-2 section-items-container">
       <geo-node-detail-item
         v-for="(nodeDetailItem, index) in nodeDetailItems"
         :key="index"
         :css-class="nodeDetailItem.cssClass"
+        :item-enabled="nodeDetailItem.itemEnabled"
         :item-title="nodeDetailItem.itemTitle"
         :item-value="nodeDetailItem.itemValue"
         :item-value-type="nodeDetailItem.itemValueType"
-        :item-value-stale="statusInfoStale"
-        :item-value-stale-tooltip="statusInfoStaleMessage"
         :custom-type="nodeDetailItem.customType"
         :event-type-log-status="nodeDetailItem.eventTypeLogStatus"
-        :feature-disabled="nodeDetailItem.featureDisabled"
+        :details-path="detailsPath(nodeDetailItem)"
       />
     </div>
   </div>

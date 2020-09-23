@@ -2,11 +2,11 @@
 
 require 'spec_helper'
 
-describe Projects::MirrorsController do
+RSpec.describe Projects::MirrorsController do
   include ReactiveCachingHelpers
 
   describe 'setting up a remote mirror' do
-    set(:project) { create(:project, :repository) }
+    let_it_be(:project) { create(:project, :repository) }
     let(:url) { 'http://foo.com' }
 
     context 'when the current project is a mirror' do
@@ -30,33 +30,29 @@ describe Projects::MirrorsController do
         sign_in(project.owner)
       end
 
-      context 'when trying to create a mirror with the same URL' do
-        it 'does not set up the mirror' do
-          do_put(project, mirror: true, import_url: remote_mirror.url)
+      context 'mirror_user is unset' do
+        it 'sets up a pull mirror with the mirror user set to the signed-in user' do
+          expect(project.mirror_user).to be_nil
 
-          expect(project.reload.mirror).to be_falsey
-          expect(project.reload.import_url).to be_blank
+          do_put(project, mirror: true, import_url: 'http://local.dev')
+          project.reload
+
+          expect(project.mirror).to eq(true)
+          expect(project.import_url).to eq('http://local.dev')
+          expect(project.mirror_user).to eq(project.owner)
         end
       end
 
-      context 'when trying to create a mirror with a different URL' do
-        it 'sets up the mirror' do
-          do_put(project, mirror: true, mirror_user_id: project.owner.id, import_url: 'http://local.dev')
+      context 'mirror_user is not the current user' do
+        it 'sets up a pull mirror with the mirror user set to the signed-in user' do
+          new_user = create(:user)
+          project.add_maintainer(new_user)
 
-          expect(project.reload.mirror).to eq(true)
-          expect(project.reload.import_url).to eq('http://local.dev')
-        end
+          do_put(project, mirror: true, mirror_user_id: new_user.id, import_url: 'http://local.dev')
 
-        context 'mirror user is not the current user' do
-          it 'does not set up the mirror' do
-            new_user = create(:user)
-            project.add_maintainer(new_user)
-
-            do_put(project, mirror: true, mirror_user_id: new_user.id, import_url: 'http://local.dev')
-
-            expect(project.reload.mirror).to be_falsey
-            expect(project.reload.import_url).to be_blank
-          end
+          expect(project.mirror).to eq(true)
+          expect(project.import_url).to eq('http://local.dev')
+          expect(project.mirror_user).to eq(project.owner)
         end
       end
     end
@@ -71,14 +67,14 @@ describe Projects::MirrorsController do
         stub_application_setting(mirror_available: false)
       end
 
-      context 'when user is admin' do
+      context 'when user is admin', :enable_admin_mode do
         let(:admin) { create(:user, :admin) }
 
         it 'creates a new mirror' do
           sign_in(admin)
 
           expect do
-            do_put(project, mirror: true, mirror_user_id: admin.id, import_url: url)
+            do_put(project, mirror: true, import_url: url)
           end.to change { Project.mirror.count }.to(1)
         end
       end
@@ -88,7 +84,7 @@ describe Projects::MirrorsController do
           sign_in(project.owner)
 
           expect do
-            do_put(project, mirror: true, mirror_user_id: project.owner.id, import_url: url)
+            do_put(project, mirror: true, import_url: url)
           end.not_to change { Project.mirror.count }
         end
       end
@@ -122,9 +118,11 @@ describe Projects::MirrorsController do
       project = create(:project, :mirror)
       sign_in(project.owner)
 
-      expect_any_instance_of(EE::ProjectImportState).to receive(:force_import_job!)
-
-      put :update_now, params: { namespace_id: project.namespace.to_param, project_id: project.to_param }
+      Sidekiq::Testing.fake! do
+        expect { put :update_now, params: { namespace_id: project.namespace.to_param, project_id: project.to_param } }
+          .to change { UpdateAllMirrorsWorker.jobs.size }
+          .by(1)
+      end
     end
   end
 
@@ -144,14 +142,14 @@ describe Projects::MirrorsController do
       it 'processes a successful update' do
         do_put(project, { import_url: 'https://updated.example.com' }, format: :json)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['import_url']).to eq('https://updated.example.com')
       end
 
       it 'processes an unsuccessful update' do
         do_put(project, { import_url: 'ftp://invalid.invalid' }, format: :json)
 
-        expect(response).to have_gitlab_http_status(422)
+        expect(response).to have_gitlab_http_status(:unprocessable_entity)
         expect(json_response['import_url'].first).to match /is blocked/
       end
 
@@ -160,17 +158,17 @@ describe Projects::MirrorsController do
 
         do_put(project, { import_data_attributes: { password: 'update' } }, format: :json)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(project.reload_import_data.id).to eq(import_data_id)
       end
 
       it 'sets ssh_known_hosts_verified_at and verified_by when the update sets known hosts' do
         do_put(project, { import_data_attributes: { ssh_known_hosts: 'update' } }, format: :json)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
 
         import_data = project.reload_import_data
-        expect(import_data.ssh_known_hosts_verified_at).to be_within(1.minute).of(Time.now)
+        expect(import_data.ssh_known_hosts_verified_at).to be_within(1.minute).of(Time.current)
         expect(import_data.ssh_known_hosts_verified_by).to eq(project.owner)
       end
 
@@ -179,7 +177,7 @@ describe Projects::MirrorsController do
 
         do_put(project, { import_data_attributes: { ssh_known_hosts: '' } }, format: :json)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
 
         import_data = project.reload_import_data
         expect(import_data.ssh_known_hosts_verified_at).to be_nil
@@ -192,8 +190,7 @@ describe Projects::MirrorsController do
 
         do_put(project, { mirror_user_id: other_user.id }, format: :json)
 
-        expect(response).to have_gitlab_http_status(422)
-        expect(json_response['mirror_user_id'].first).to eq("is invalid")
+        expect(project.reload.mirror_user).to eq(project.owner)
       end
     end
 

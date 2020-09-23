@@ -1,8 +1,15 @@
+---
+stage: Monitor
+group: APM
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Monitoring NGINX Ingress Controller
 
-> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/merge_requests/22133) in GitLab 11.7.
+> [Introduced](https://gitlab.com/gitlab-org/gitlab-foss/-/merge_requests/22133) in GitLab 11.7.
 
-NOTE: **Note:** NGINX Ingress versions prior to 0.16.0 offer an included [VTS Prometheus metrics exporter](nginx_ingress_vts.md), which exports metrics different than the built-in metrics.
+NOTE: **Note:**
+NGINX Ingress versions prior to 0.16.0 offer an included [VTS Prometheus metrics exporter](nginx_ingress_vts.md), which exports metrics different than the built-in metrics.
 
 GitLab has support for automatically detecting and monitoring the Kubernetes NGINX Ingress controller. This is provided by leveraging the built-in Prometheus metrics included with Kubernetes NGINX Ingress controller [version 0.16.0](https://github.com/kubernetes/ingress-nginx/blob/master/Changelog.md#0160) onward.
 
@@ -55,4 +62,4 @@ Managing these settings depends on how NGINX Ingress has been deployed. If you h
 
 In order to isolate and only display relevant metrics for a given environment, GitLab needs a method to detect which labels are associated. To do this, GitLab will search for metrics with appropriate labels. In this case, the `ingress` label must `<CI_ENVIRONMENT_SLUG>`.
 
-If you have used [Auto Deploy](../../../../topics/autodevops/index.md#auto-deploy) to deploy your app, this format will be used automatically and metrics will be detected with no action on your part.
+If you have used [Auto Deploy](../../../../topics/autodevops/stages.md#auto-deploy) to deploy your app, this format will be used automatically and metrics will be detected with no action on your part.

@@ -43,6 +43,7 @@ module Gitlab
         import_pull_requests
         delete_temp_branches
         handle_errors
+        metrics.track_finished_import
 
         log_info(stage: "complete")
 
@@ -60,17 +61,18 @@ module Gitlab
         }.to_json)
       end
 
-      def gitlab_user_id(email)
-        find_user_id(email) || project.creator_id
-      end
+      def find_user_id(by:, value:)
+        return unless value
 
-      def find_user_id(email)
-        return unless email
+        return users[value] if users.key?(value)
 
-        return users[email] if users.key?(email)
+        user = if by == :email
+                 User.find_by_any_email(value, confirmed: true)
+               else
+                 User.find_by_username(value)
+               end
 
-        user = User.find_by_any_email(email, confirmed: true)
-        users[email] = user&.id
+        users[value] = user&.id
 
         user&.id
       end
@@ -133,7 +135,10 @@ module Gitlab
 
         log_info(stage: 'import_repository', message: 'finished import')
       rescue Gitlab::Shell::Error => e
-        log_error(stage: 'import_repository', message: 'failed import', error: e.message)
+        Gitlab::ErrorTracking.log_exception(
+          e,
+          stage: 'import_repository', message: 'failed import', error: e.message
+        )
 
         # Expire cache to prevent scenarios such as:
         # 1. First import failed, but the repo was imported successfully, so +exists?+ returns true
@@ -164,9 +169,12 @@ module Gitlab
           batch.each do |pull_request|
             import_bitbucket_pull_request(pull_request)
           rescue StandardError => e
-            backtrace = Gitlab::Profiler.clean_backtrace(e.backtrace)
-            log_error(stage: 'import_pull_requests', iid: pull_request.iid, error: e.message, backtrace: backtrace)
+            Gitlab::ErrorTracking.log_exception(
+              e,
+              stage: 'import_pull_requests', iid: pull_request.iid, error: e.message
+            )
 
+            backtrace = Gitlab::BacktraceCleaner.clean_backtrace(e.backtrace)
             errors << { type: :pull_request, iid: pull_request.iid, errors: e.message, backtrace: backtrace.join("\n"), raw_response: pull_request.raw }
           end
         end
@@ -177,7 +185,11 @@ module Gitlab
           client.delete_branch(project_key, repository_slug, branch.name, branch.sha)
           project.repository.delete_branch(branch.name)
         rescue BitbucketServer::Connection::ConnectionError => e
-          log_error(stage: 'delete_temp_branches', branch: branch.name, error: e.message)
+          Gitlab::ErrorTracking.log_exception(
+            e,
+            stage: 'delete_temp_branches', branch: branch.name, error: e.message
+          )
+
           @errors << { type: :delete_temp_branches, branch_name: branch.name, errors: e.message }
         end
       end
@@ -186,9 +198,8 @@ module Gitlab
         log_info(stage: 'import_bitbucket_pull_requests', message: 'starting', iid: pull_request.iid)
 
         description = ''
-        description += @formatter.author_line(pull_request.author) unless find_user_id(pull_request.author_email)
+        description += author_line(pull_request)
         description += pull_request.description if pull_request.description
-        author_id = gitlab_user_id(pull_request.author_email)
 
         attributes = {
           iid: pull_request.iid,
@@ -200,10 +211,8 @@ module Gitlab
           target_project_id: project.id,
           target_branch: Gitlab::Git.ref_name(pull_request.target_branch_name),
           target_branch_sha: pull_request.target_branch_sha,
-          state: pull_request.state,
           state_id: MergeRequest.available_states[pull_request.state],
-          author_id: author_id,
-          assignee_id: nil,
+          author_id: author_id(pull_request),
           created_at: pull_request.created_at,
           updated_at: pull_request.updated_at
         }
@@ -211,7 +220,11 @@ module Gitlab
         creator = Gitlab::Import::MergeRequestCreator.new(project)
         merge_request = creator.execute(attributes)
 
-        import_pull_request_comments(pull_request, merge_request) if merge_request.persisted?
+        if merge_request.persisted?
+          import_pull_request_comments(pull_request, merge_request)
+
+          metrics.merge_requests_counter.increment
+        end
 
         log_info(stage: 'import_bitbucket_pull_requests', message: 'finished', iid: pull_request.iid)
       end
@@ -241,7 +254,7 @@ module Gitlab
 
         committer = merge_event.committer_email
 
-        user_id = gitlab_user_id(committer)
+        user_id = find_user_id(by: :email, value: committer) || project.creator_id
         timestamp = merge_event.merge_timestamp
         merge_request.update({ merge_commit_sha: merge_event.merge_commit })
         metric = MergeRequest::Metrics.find_or_initialize_by(merge_request: merge_request)
@@ -289,7 +302,11 @@ module Gitlab
         # a regular note.
         create_fallback_diff_note(merge_request, comment, position)
       rescue StandardError => e
-        log_error(stage: 'create_diff_note', comment_id: comment.id, error: e.message)
+        Gitlab::ErrorTracking.log_exception(
+          e,
+          stage: 'create_diff_note', comment_id: comment.id, error: e.message
+        )
+
         errors << { type: :pull_request, id: comment.id, errors: e.message }
         nil
       end
@@ -326,13 +343,17 @@ module Gitlab
             merge_request.notes.create!(pull_request_comment_attributes(replies))
           end
         rescue StandardError => e
-          log_error(stage: 'import_standalone_pr_comments', merge_request_id: merge_request.id, comment_id: comment.id, error: e.message)
+          Gitlab::ErrorTracking.log_exception(
+            e,
+            stage: 'import_standalone_pr_comments', merge_request_id: merge_request.id, comment_id: comment.id, error: e.message
+          )
+
           errors << { type: :pull_request, comment_id: comment.id, errors: e.message }
         end
       end
 
       def pull_request_comment_attributes(comment)
-        author = find_user_id(comment.author_email)
+        author = uid(comment)
         note = ''
 
         unless author
@@ -361,10 +382,6 @@ module Gitlab
         logger.info(log_base_data.merge(details))
       end
 
-      def log_error(details)
-        logger.error(log_base_data.merge(details))
-      end
-
       def log_warn(details)
         logger.warn(log_base_data.merge(details))
       end
@@ -375,6 +392,27 @@ module Gitlab
           project_id: project.id,
           project_path: project.full_path
         }
+      end
+
+      def metrics
+        @metrics ||= Gitlab::Import::Metrics.new(:bitbucket_server_importer, @project)
+      end
+
+      def author_line(rep_object)
+        return '' if uid(rep_object)
+
+        @formatter.author_line(rep_object.author)
+      end
+
+      def author_id(rep_object)
+        uid(rep_object) || project.creator_id
+      end
+
+      def uid(rep_object)
+        find_user_id(by: :email, value: rep_object.author_email) unless Feature.enabled?(:bitbucket_server_user_mapping_by_username)
+
+        find_user_id(by: :username, value: rep_object.author_username) ||
+          find_user_id(by: :email, value: rep_object.author_email)
       end
     end
   end

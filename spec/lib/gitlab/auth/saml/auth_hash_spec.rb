@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Auth::Saml::AuthHash do
+RSpec.describe Gitlab::Auth::Saml::AuthHash do
   include LoginHelpers
 
   let(:raw_info_attr) { { 'groups' => %w(Developers Freelancers) } }
@@ -92,6 +92,17 @@ describe Gitlab::Auth::Saml::AuthHash do
 
       it 'can extract authn_context' do
         expect(saml_auth_hash.authn_context).to eq 'urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport'
+      end
+    end
+
+    context 'with ADFS SAML response_object' do
+      before do
+        auth_hash_data[:extra][:response_object] = { document:
+                                                         saml_xml(File.read('spec/fixtures/authentication/adfs_saml_response.xml')) }
+      end
+
+      it 'can extract authn_context' do
+        expect(saml_auth_hash.authn_context).to eq 'urn:federation:authentication:windows'
       end
     end
 

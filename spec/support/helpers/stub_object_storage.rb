@@ -1,8 +1,20 @@
 # frozen_string_literal: true
 
 module StubObjectStorage
+  def stub_dependency_proxy_object_storage(**params)
+    stub_object_storage_uploader(config: ::Gitlab.config.dependency_proxy.object_store,
+                                  uploader: ::DependencyProxy::FileUploader,
+                                  remote_directory: 'dependency_proxy',
+                                  **params)
+  end
+
+  def stub_object_storage_pseudonymizer
+    stub_object_storage(connection_params: Pseudonymizer::Uploader.object_store_credentials,
+                        remote_directory: Pseudonymizer::Uploader.remote_directory)
+  end
+
   def stub_object_storage_uploader(
-        config:,
+    config:,
         uploader:,
         remote_directory:,
         enabled: true,
@@ -25,7 +37,7 @@ module StubObjectStorage
     Fog.mock!
 
     ::Fog::Storage.new(connection_params).tap do |connection|
-      connection.directories.create(key: remote_directory)
+      connection.directories.create(key: remote_directory) # rubocop:disable Rails/SaveBang
 
       # Cleanup remaining files
       connection.directories.each do |directory|
@@ -35,9 +47,9 @@ module StubObjectStorage
     end
   end
 
-  def stub_artifacts_object_storage(**params)
+  def stub_artifacts_object_storage(uploader = JobArtifactUploader, **params)
     stub_object_storage_uploader(config: Gitlab.config.artifacts.object_store,
-                                 uploader: JobArtifactUploader,
+                                 uploader: uploader,
                                  remote_directory: 'artifacts',
                                  **params)
   end
@@ -45,7 +57,7 @@ module StubObjectStorage
   def stub_external_diffs_object_storage(uploader = described_class, **params)
     stub_object_storage_uploader(config: Gitlab.config.external_diffs.object_store,
                                  uploader: uploader,
-                                 remote_directory: 'external_diffs',
+                                 remote_directory: 'external-diffs',
                                  **params)
   end
 
@@ -56,10 +68,24 @@ module StubObjectStorage
                                  **params)
   end
 
+  def stub_package_file_object_storage(**params)
+    stub_object_storage_uploader(config: Gitlab.config.packages.object_store,
+                                 uploader: ::Packages::PackageFileUploader,
+                                 remote_directory: 'packages',
+                                 **params)
+  end
+
   def stub_uploads_object_storage(uploader = described_class, **params)
     stub_object_storage_uploader(config: Gitlab.config.uploads.object_store,
                                  uploader: uploader,
                                  remote_directory: 'uploads',
+                                 **params)
+  end
+
+  def stub_terraform_state_object_storage(uploader = described_class, **params)
+    stub_object_storage_uploader(config: Gitlab.config.terraform_state.object_store,
+                                 uploader: uploader,
+                                 remote_directory: 'terraform',
                                  **params)
   end
 
@@ -75,8 +101,3 @@ module StubObjectStorage
       EOS
   end
 end
-
-require_relative '../../../ee/spec/support/helpers/ee/stub_object_storage' if
-  Dir.exist?("#{__dir__}/../../../ee")
-
-StubObjectStorage.prepend_if_ee('EE::StubObjectStorage')

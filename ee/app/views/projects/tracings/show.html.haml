@@ -26,7 +26,7 @@
         %p
           - jaeger_help_url = "https://www.jaegertracing.io/docs/1.7/getting-started/"
           - link_start_tag = '<a href="%{url}" target="_blank" rel="noopener noreferrer">'.html_safe % { url: jaeger_help_url }
-          - link_end_tag = "#{sprite_icon('external-link', size: 16, css_class: 'ml-1 vertical-align-middle')}</a>".html_safe
+          - link_end_tag = "#{sprite_icon('external-link', css_class: 'ml-1 vertical-align-middle')}</a>".html_safe
           = _('To get started, link this page to your Jaeger server, or find out how to %{link_start_tag}install Jaeger%{link_end_tag}').html_safe % { link_start_tag: link_start_tag, link_end_tag: link_end_tag }
 
           .text-center

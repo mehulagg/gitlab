@@ -2,14 +2,14 @@
 
 require 'spec_helper'
 
-describe SoftwareLicensePolicy do
+RSpec.describe SoftwareLicensePolicy do
   subject { build(:software_license_policy) }
 
   describe 'validations' do
     it { is_expected.to include_module(Presentable) }
     it { is_expected.to validate_presence_of(:software_license) }
     it { is_expected.to validate_presence_of(:project) }
-    it { is_expected.to validate_presence_of(:approval_status) }
+    it { is_expected.to validate_presence_of(:classification) }
     it { is_expected.to validate_uniqueness_of(:software_license).scoped_to(:project_id).with_message(/has already been taken/) }
   end
 
@@ -47,5 +47,35 @@ describe SoftwareLicensePolicy do
 
   describe "#name" do
     specify { expect(subject.name).to eql(subject.software_license.name) }
+  end
+
+  describe "#approval_status" do
+    where(:classification, :approval_status) do
+      [
+        %w[allowed approved],
+        %w[denied blacklisted]
+      ]
+    end
+
+    with_them do
+      subject { build(:software_license_policy, classification: classification) }
+
+      it { expect(subject.approval_status).to eql(approval_status) }
+    end
+  end
+
+  describe ".to_classification" do
+    where(:approval_status, :classification) do
+      [
+        %w[approved allowed],
+        %w[blacklisted denied]
+      ]
+    end
+
+    with_them do
+      subject { described_class.to_classification(approval_status) }
+
+      it { expect(subject).to eql(classification) }
+    end
   end
 end

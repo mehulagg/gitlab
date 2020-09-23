@@ -19,6 +19,10 @@ module Elastic
       self.project&.use_elasticsearch?
     end
 
+    def maintaining_elasticsearch?
+      Gitlab::CurrentSettings.elasticsearch_indexing? && self.searchable?
+    end
+
     def es_type
       self.class.es_type
     end
@@ -33,35 +37,23 @@ module Elastic
       # Add to the registry if it's a class (and not in intermediate module)
       Elasticsearch::Model::Registry.add(self) if self.is_a?(Class)
 
-      after_commit on: :create do
-        if Gitlab::CurrentSettings.elasticsearch_indexing? && self.searchable?
-          ElasticIndexerWorker.perform_async(:index, self.class.to_s, self.id, self.es_id)
-        end
+      if self < ActiveRecord::Base
+        after_commit :maintain_elasticsearch_create, on: :create, if: :maintaining_elasticsearch?
+        after_commit :maintain_elasticsearch_update, on: :update, if: :maintaining_elasticsearch?
+        after_commit :maintain_elasticsearch_destroy, on: :destroy, if: :maintaining_elasticsearch?
       end
+    end
 
-      after_commit on: :update do
-        if Gitlab::CurrentSettings.elasticsearch_indexing? && self.searchable?
-          ElasticIndexerWorker.perform_async(
-            :update,
-            self.class.to_s,
-            self.id,
-            self.es_id,
-            changed_fields: self.previous_changes.keys
-          )
-        end
-      end
+    def maintain_elasticsearch_create
+      ::Elastic::ProcessBookkeepingService.track!(self)
+    end
 
-      after_commit on: :destroy do
-        if Gitlab::CurrentSettings.elasticsearch_indexing? && self.searchable?
-          ElasticIndexerWorker.perform_async(
-            :delete,
-            self.class.to_s,
-            self.id,
-            self.es_id,
-            es_parent: self.es_parent
-          )
-        end
-      end
+    def maintain_elasticsearch_update
+      ::Elastic::ProcessBookkeepingService.track!(self)
+    end
+
+    def maintain_elasticsearch_destroy
+      ::Elastic::ProcessBookkeepingService.track!(self)
     end
 
     class_methods do

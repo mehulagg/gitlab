@@ -2,21 +2,24 @@
 
 require 'spec_helper'
 
-describe Projects::Serverless::FunctionsController do
+RSpec.describe Projects::Serverless::FunctionsController do
   include KubernetesHelpers
   include ReactiveCachingHelpers
 
   let(:user) { create(:user) }
-  let(:cluster) { create(:cluster, :project, :provided_by_gcp) }
+  let(:project) { create(:project, :repository) }
+  let(:cluster) { create(:cluster, :project, :provided_by_gcp, projects: [project]) }
   let(:service) { cluster.platform_kubernetes }
-  let(:project) { cluster.project }
   let(:environment) { create(:environment, project: project) }
   let!(:deployment) { create(:deployment, :success, environment: environment, cluster: cluster) }
   let(:knative_services_finder) { environment.knative_services_finder }
   let(:function_description) { 'A serverless function' }
+  let(:function_name) { 'some-function-name' }
   let(:knative_stub_options) do
-    { namespace: namespace.namespace, name: cluster.project.name, description: function_description }
+    { namespace: namespace.namespace, name: function_name, description: function_description }
   end
+
+  let(:knative) { create(:clusters_applications_knative, :installed, cluster: cluster) }
 
   let(:namespace) do
     create(:cluster_kubernetes_namespace,
@@ -51,7 +54,7 @@ describe Projects::Serverless::FunctionsController do
         expect(json_response).to eq expected_json
       end
 
-      it { expect(response).to have_gitlab_http_status(200) }
+      it { expect(response).to have_gitlab_http_status(:ok) }
     end
 
     context 'when cache is ready' do
@@ -83,45 +86,120 @@ describe Projects::Serverless::FunctionsController do
           expect(json_response).to eq expected_json
         end
 
-        it { expect(response).to have_gitlab_http_status(200) }
+        it { expect(response).to have_gitlab_http_status(:ok) }
       end
 
       context 'when functions were found' do
-        let(:functions) { ["asdf"] }
+        let(:functions) { [{}, {}] }
 
         before do
-          stub_kubeclient_knative_services(namespace: namespace.namespace)
-          get :index, params: params({ format: :json })
+          stub_kubeclient_knative_services(namespace: namespace.namespace, cluster_id: cluster.id, name: function_name)
         end
 
         it 'returns functions' do
+          get :index, params: params({ format: :json })
           expect(json_response["functions"]).not_to be_empty
         end
 
-        it { expect(response).to have_gitlab_http_status(200) }
+        it 'filters out the functions whose cluster the user does not have permission to read' do
+          allow(controller).to receive(:can?).and_return(true)
+          expect(controller).to receive(:can?).with(user, :read_cluster, cluster).and_return(false)
+
+          get :index, params: params({ format: :json })
+
+          expect(json_response["functions"]).to be_empty
+        end
+
+        it 'returns a successful response status' do
+          get :index, params: params({ format: :json })
+          expect(response).to have_gitlab_http_status(:ok)
+        end
+
+        context 'when there is serverless domain for a cluster' do
+          let!(:serverless_domain_cluster) do
+            create(:serverless_domain_cluster, clusters_applications_knative_id: knative.id)
+          end
+
+          it 'returns JSON with function details with serverless domain URL' do
+            get :index, params: params({ format: :json })
+            expect(response).to have_gitlab_http_status(:ok)
+
+            expect(json_response["functions"]).not_to be_empty
+
+            expect(json_response["functions"]).to all(
+              include(
+                'url' => "https://#{function_name}-#{serverless_domain_cluster.uuid[0..1]}a1#{serverless_domain_cluster.uuid[2..-3]}f2#{serverless_domain_cluster.uuid[-2..-1]}#{"%x" % environment.id}-#{environment.slug}.#{serverless_domain_cluster.domain}"
+              )
+            )
+          end
+        end
+
+        context 'when there is no serverless domain for a cluster' do
+          it 'keeps function URL as it was' do
+            expect(::Serverless::Domain).not_to receive(:new)
+
+            get :index, params: params({ format: :json })
+            expect(response).to have_gitlab_http_status(:ok)
+          end
+        end
       end
     end
   end
 
   describe 'GET #show' do
-    context 'invalid data' do
-      it 'has a bad function name' do
+    context 'with function that does not exist' do
+      it 'returns 404' do
         get :show, params: params({ format: :json, environment_id: "*", id: "foo" })
-        expect(response).to have_gitlab_http_status(404)
+        expect(response).to have_gitlab_http_status(:not_found)
       end
     end
 
     context 'with valid data', :use_clean_rails_memory_store_caching do
       shared_examples 'GET #show with valid data' do
-        it 'has a valid function name' do
-          get :show, params: params({ format: :json, environment_id: "*", id: cluster.project.name })
-          expect(response).to have_gitlab_http_status(200)
+        context 'when there is serverless domain for a cluster' do
+          let!(:serverless_domain_cluster) do
+            create(:serverless_domain_cluster, clusters_applications_knative_id: knative.id)
+          end
+
+          it 'returns JSON with function details with serverless domain URL' do
+            get :show, params: params({ format: :json, environment_id: "*", id: function_name })
+            expect(response).to have_gitlab_http_status(:ok)
+
+            expect(json_response).to include(
+              'url' => "https://#{function_name}-#{serverless_domain_cluster.uuid[0..1]}a1#{serverless_domain_cluster.uuid[2..-3]}f2#{serverless_domain_cluster.uuid[-2..-1]}#{"%x" % environment.id}-#{environment.slug}.#{serverless_domain_cluster.domain}"
+            )
+          end
+
+          it 'returns 404 when user does not have permission to read the cluster' do
+            allow(controller).to receive(:can?).and_return(true)
+            expect(controller).to receive(:can?).with(user, :read_cluster, cluster).and_return(false)
+
+            get :show, params: params({ format: :json, environment_id: "*", id: function_name })
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+
+        context 'when there is no serverless domain for a cluster' do
+          it 'keeps function URL as it was' do
+            get :show, params: params({ format: :json, environment_id: "*", id: function_name })
+            expect(response).to have_gitlab_http_status(:ok)
+
+            expect(json_response).to include(
+              'url' => "http://#{function_name}.#{namespace.namespace}.example.com"
+            )
+          end
+        end
+
+        it 'return json with function details' do
+          get :show, params: params({ format: :json, environment_id: "*", id: function_name })
+          expect(response).to have_gitlab_http_status(:ok)
 
           expect(json_response).to include(
-            'name' => project.name,
-            'url' => "http://#{project.name}.#{namespace.namespace}.example.com",
+            'name' => function_name,
+            'url' => "http://#{function_name}.#{namespace.namespace}.example.com",
             'description' => function_description,
-            'podcount' => 1
+            'podcount' => 0
           )
         end
       end
@@ -149,6 +227,14 @@ describe Projects::Serverless::FunctionsController do
 
         include_examples 'GET #show with valid data'
       end
+
+      context 'on Knative 0.9.0' do
+        before do
+          prepare_knative_stubs(knative_09_service(knative_stub_options))
+        end
+
+        include_examples 'GET #show with valid data'
+      end
     end
   end
 
@@ -156,7 +242,7 @@ describe Projects::Serverless::FunctionsController do
     context 'invalid data' do
       it 'has a bad function name' do
         get :metrics, params: params({ format: :json, environment_id: "*", id: "foo" })
-        expect(response).to have_gitlab_http_status(204)
+        expect(response).to have_gitlab_http_status(:no_content)
       end
     end
   end
@@ -166,14 +252,14 @@ describe Projects::Serverless::FunctionsController do
       it 'has data' do
         get :index, params: params({ format: :json })
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
 
         expect(json_response).to match({
                                          'knative_installed' => 'checking',
                                          'functions' => [
                                            a_hash_including(
-                                             'name' => project.name,
-                                             'url' => "http://#{project.name}.#{namespace.namespace}.example.com",
+                                             'name' => function_name,
+                                             'url' => "http://#{function_name}.#{namespace.namespace}.example.com",
                                              'description' => function_description
                                            )
                                          ]
@@ -183,7 +269,7 @@ describe Projects::Serverless::FunctionsController do
       it 'has data in html' do
         get :index, params: params
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
       end
     end
 
@@ -206,6 +292,14 @@ describe Projects::Serverless::FunctionsController do
     context 'on Knative 0.7.0' do
       before do
         prepare_knative_stubs(knative_07_service(knative_stub_options))
+      end
+
+      include_examples 'GET #index with data'
+    end
+
+    context 'on Knative 0.9.0' do
+      before do
+        prepare_knative_stubs(knative_09_service(knative_stub_options))
       end
 
       include_examples 'GET #index with data'

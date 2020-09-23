@@ -2,9 +2,8 @@
 
 module RuboCop
   module Cop
-    # Cop that blacklists the injecting of EE specific modules anywhere but on
-    # the last line of a file. Injecting a module in the middle of a file will
-    # cause merge conflicts, while placing it on the last line will not.
+    # Cop that blacklists the injecting of EE specific modules before any lines which are not already injecting another module.
+    # It allows multiple module injections as long as they're all at the end.
     class InjectEnterpriseEditionModule < RuboCop::Cop::Cop
       INVALID_LINE = 'Injecting EE modules must be done on the last line of this file' \
           ', outside of any class or module definitions'
@@ -18,6 +17,10 @@ module RuboCop
         Set.new(%i[include_if_ee extend_if_ee prepend_if_ee]).freeze
 
       DISALLOW_METHODS = Set.new(%i[include extend prepend]).freeze
+
+      COMMENT_OR_EMPTY_LINE = /^\s*(#.*|$)/.freeze
+
+      CHECK_LINE_METHODS_REGEXP = Regexp.union((CHECK_LINE_METHODS + DISALLOW_METHODS).map(&:to_s) + [COMMENT_OR_EMPTY_LINE]).freeze
 
       def ee_const?(node)
         line = node.location.expression.source_line
@@ -42,13 +45,15 @@ module RuboCop
         line = node.location.line
         buffer = node.location.expression.source_buffer
         last_line = buffer.last_line
+        lines = buffer.source.split("\n")
+        # We allow multiple includes, extends and prepends as long as they're all at the end.
+        allowed_line = (line...last_line).all? { |i| CHECK_LINE_METHODS_REGEXP.match?(lines[i - 1]) }
 
-        # Parser treats the final newline (if present) as a separate line,
-        # meaning that a simple `line < last_line` would yield true even though
-        # the expression is the last line _of code_.
-        last_line -= 1 if buffer.source.end_with?("\n")
-
-        add_offense(node, message: INVALID_LINE) if line < last_line
+        if allowed_line
+          ignore_node(node)
+        elsif line < last_line
+          add_offense(node, message: INVALID_LINE)
+        end
       end
 
       def verify_argument_type(node)

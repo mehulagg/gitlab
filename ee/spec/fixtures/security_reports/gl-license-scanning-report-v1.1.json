@@ -1,0 +1,94 @@
+{
+  "version": "1.1",
+  "licenses": [
+    {
+      "count": 2,
+      "name": "MIT"
+    },
+    {
+      "count": 2,
+      "name": "BSD"
+    },
+    {
+      "count": 1,
+      "name": "unknown"
+    }
+  ],
+  "dependencies": [
+    {
+      "licenses": [
+        {
+          "name": "MIT",
+          "url": "http://opensource.org/licenses/mit-license"
+        }
+      ],
+      "license": {
+        "name": "MIT",
+        "url": "http://opensource.org/licenses/mit-license"
+      },
+      "dependency": {
+        "name": "a",
+        "url": "https://example.org/a",
+        "description": "Dependency A.",
+        "pathes": [ "." ]
+      }
+    },
+    {
+      "licenses": [
+        {
+          "name": "BSD",
+          "url": "http://spdx.org/licenses/BSD-4-Clause.json"
+        }
+      ],
+      "license": {
+        "name": "BSD",
+        "url": "http://spdx.org/licenses/BSD-4-Clause.json"
+      },
+      "dependency": {
+        "name": "b",
+        "url": "https://example.org/b",
+        "description": "Dependency B.",
+        "pathes": [ "." ]
+      }
+    },
+    {
+      "licenses": [
+        {
+          "name": "MIT",
+          "url": "http://opensource.org/licenses/mit-license"
+        },
+        {
+          "name": "BSD",
+          "url": "http://spdx.org/licenses/BSD-4-Clause.json"
+        }
+      ],
+      "license": {
+        "name": "MIT, BSD",
+        "url": "http://opensource.org/licenses/mit-license"
+      },
+      "dependency": {
+        "name": "c",
+        "url": "https://example.org/c",
+        "description": "Dependency C.",
+        "pathes": [ "." ]
+      }
+    },
+    {
+      "licenses": [
+        {
+          "name": "unknown",
+          "url": ""
+        }
+      ],
+      "license": {
+        "name": "unknown"
+      },
+      "dependency": {
+        "name": "d",
+        "url": "https://example.org/d",
+        "description": "Dependency D.",
+        "pathes": [ "." ]
+      }
+    }
+  ]
+}

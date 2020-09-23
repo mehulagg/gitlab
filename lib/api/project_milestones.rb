@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
 module API
-  class ProjectMilestones < Grape::API
+  class ProjectMilestones < Grape::API::Instance
     include PaginationParams
     include MilestoneResponses
 
-    before do
-      authenticate!
-    end
+    before { authenticate! }
 
     params do
       requires :id, type: String, desc: 'The ID of a project'
@@ -69,7 +67,7 @@ module API
         milestone = user_project.milestones.find(params[:milestone_id])
         Milestones::DestroyService.new(user_project, current_user).execute(milestone)
 
-        status(204)
+        no_content!
       end
 
       desc 'Get all issues for a single project milestone' do

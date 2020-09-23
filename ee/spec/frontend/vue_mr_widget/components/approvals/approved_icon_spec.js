@@ -1,22 +1,19 @@
-import { createLocalVue, shallowMount } from '@vue/test-utils';
-import Icon from '~/vue_shared/components/icon.vue';
+import { shallowMount } from '@vue/test-utils';
 import ApprovedIcon from 'ee/vue_merge_request_widget/components/approvals/approved_icon.vue';
+import { GlIcon } from '@gitlab/ui';
 
-const localVue = createLocalVue();
 const EXPECTED_SIZE = 16;
 
 describe('EE MRWidget approved icon', () => {
   let wrapper;
 
   const createComponent = (props = {}) => {
-    wrapper = shallowMount(localVue.extend(ApprovedIcon), {
+    wrapper = shallowMount(ApprovedIcon, {
       propsData: props,
-      localVue,
-      sync: false,
     });
   };
 
-  const findIcon = () => wrapper.find(Icon);
+  const findIcon = () => wrapper.find(GlIcon);
   const findSquare = () => wrapper.find('.square');
 
   afterEach(() => {
@@ -34,7 +31,7 @@ describe('EE MRWidget approved icon', () => {
 
       expect(icon.exists()).toBe(true);
       expect(icon.props()).toEqual(
-        jasmine.objectContaining({
+        expect.objectContaining({
           size: EXPECTED_SIZE,
           name: 'mobile-issue-close',
         }),

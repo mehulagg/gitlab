@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Ci::Reports::LicenseScanning::ReportsComparer do
+RSpec.describe Gitlab::Ci::Reports::LicenseScanning::ReportsComparer do
   let(:report_1) { build :ci_reports_license_scanning_report, :report_1 }
   let(:report_2) { build :ci_reports_license_scanning_report, :report_2 }
   let(:report_comparer) { described_class.new(report_1, report_2) }

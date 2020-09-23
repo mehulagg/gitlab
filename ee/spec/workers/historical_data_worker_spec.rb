@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe HistoricalDataWorker do
+RSpec.describe HistoricalDataWorker do
   subject { described_class.new }
 
   describe '#perform' do
@@ -32,7 +32,7 @@ describe HistoricalDataWorker do
 
     context 'when there is not a license key' do
       it 'does not track historical data' do
-        License.destroy_all # rubocop: disable DestroyAll
+        License.destroy_all # rubocop: disable Cop/DestroyAll
 
         expect(HistoricalData).not_to receive(:track!)
 

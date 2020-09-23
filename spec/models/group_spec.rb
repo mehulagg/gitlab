@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Group do
+RSpec.describe Group do
   let!(:group) { create(:group) }
 
   describe 'associations' do
@@ -24,10 +24,15 @@ describe Group do
     it { is_expected.to have_many(:cluster_groups).class_name('Clusters::Group') }
     it { is_expected.to have_many(:clusters).class_name('Clusters::Cluster') }
     it { is_expected.to have_many(:container_repositories) }
+    it { is_expected.to have_many(:milestones) }
+    it { is_expected.to have_many(:iterations) }
+    it { is_expected.to have_many(:group_deploy_keys) }
+    it { is_expected.to have_many(:services) }
 
     describe '#members & #requesters' do
       let(:requester) { create(:user) }
       let(:developer) { create(:user) }
+
       before do
         group.request_access(requester)
         group.add_developer(developer)
@@ -47,6 +52,9 @@ describe Group do
 
   describe 'validations' do
     it { is_expected.to validate_presence_of :name }
+    it { is_expected.to allow_value('group test_4').for(:name) }
+    it { is_expected.not_to allow_value('test/../foo').for(:name) }
+    it { is_expected.not_to allow_value('<script>alert("Attack!")</script>').for(:name) }
     it { is_expected.to validate_presence_of :path }
     it { is_expected.not_to validate_presence_of :owner }
     it { is_expected.to validate_presence_of :two_factor_grace_period }
@@ -103,6 +111,11 @@ describe Group do
 
       let(:group_notification_email) { 'user+group@example.com' }
       let(:subgroup_notification_email) { 'user+subgroup@example.com' }
+
+      before do
+        create(:email, :confirmed, user: user, email: group_notification_email)
+        create(:email, :confirmed, user: user, email: subgroup_notification_email)
+      end
 
       subject { subgroup.notification_email_for(user) }
 
@@ -549,75 +562,72 @@ describe Group do
                                     group_access: GroupMember::DEVELOPER })
       end
 
-      context 'when feature flag share_group_with_group is enabled' do
-        before do
-          stub_feature_flags(share_group_with_group: true)
+      context 'with user in the group' do
+        let(:user) { group_user }
+
+        it 'returns correct access level' do
+          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::DEVELOPER)
+          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::DEVELOPER)
         end
 
-        context 'with user in the group' do
-          let(:user) { group_user }
+        context 'with lower group access level than max access level for share' do
+          let(:user) { create(:user) }
 
           it 'returns correct access level' do
+            group.add_reporter(user)
+
             expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::DEVELOPER)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::DEVELOPER)
-          end
-        end
-
-        context 'with user in the parent group' do
-          let(:user) { parent_group_user }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          end
-        end
-
-        context 'with user in the child group' do
-          let(:user) { child_group_user }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::REPORTER)
+            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::REPORTER)
           end
         end
       end
 
-      context 'when feature flag share_group_with_group is disabled' do
+      context 'with user in the parent group' do
+        let(:user) { parent_group_user }
+
+        it 'returns correct access level' do
+          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+        end
+      end
+
+      context 'with user in the child group' do
+        let(:user) { child_group_user }
+
+        it 'returns correct access level' do
+          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+        end
+      end
+
+      context 'unrelated project owner' do
+        let(:common_id) { [Project.maximum(:id).to_i, Namespace.maximum(:id).to_i].max + 999 }
+        let!(:group) { create(:group, id: common_id) }
+        let!(:unrelated_project) { create(:project, id: common_id) }
+        let(:user) { unrelated_project.owner }
+
+        it 'returns correct access level' do
+          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+        end
+      end
+
+      context 'user without accepted access request' do
+        let!(:user) { create(:user) }
+
         before do
-          stub_feature_flags(share_group_with_group: false)
+          create(:group_member, :developer, :access_request, user: user, group: group)
         end
 
-        context 'with user in the group' do
-          let(:user) { group_user }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          end
-        end
-
-        context 'with user in the parent group' do
-          let(:user) { parent_group_user }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          end
-        end
-
-        context 'with user in the child group' do
-          let(:user) { child_group_user }
-
-          it 'returns correct access level' do
-            expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-            expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
-          end
+        it 'returns correct access level' do
+          expect(shared_group_parent.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
+          expect(shared_group_child.max_member_access_for_user(user)).to eq(Gitlab::Access::NO_ACCESS)
         end
       end
     end
@@ -629,8 +639,6 @@ describe Group do
       let(:shared_group) { create(:group, :private, parent: shared_group_parent) }
 
       before do
-        stub_feature_flags(share_group_with_group: true)
-
         group.add_owner(user)
 
         create(:group_group_link, { shared_with_group: group,
@@ -645,6 +653,19 @@ describe Group do
         expect(shared_group.max_member_access_for_user(user)).to eq(Gitlab::Access::MAINTAINER)
       end
     end
+
+    context 'evaluating admin access level' do
+      let_it_be(:admin) { create(:admin) }
+
+      it 'returns OWNER by default' do
+        expect(group.max_member_access_for_user(admin)).to eq(Gitlab::Access::OWNER)
+      end
+
+      it 'returns NO_ACCESS when only concrete membership should be considered' do
+        expect(group.max_member_access_for_user(admin, only_concrete_membership: true))
+          .to eq(Gitlab::Access::NO_ACCESS)
+      end
+    end
   end
 
   describe '#members_with_parents' do
@@ -655,6 +676,56 @@ describe Group do
     it 'returns parents members' do
       expect(group.members_with_parents).to include(developer)
       expect(group.members_with_parents).to include(maintainer)
+    end
+
+    context 'group sharing' do
+      let!(:shared_group) { create(:group) }
+
+      before do
+        create(:group_group_link, shared_group: shared_group, shared_with_group: group)
+      end
+
+      it 'returns shared with group members' do
+        expect(shared_group.members_with_parents).to(
+          include(developer))
+      end
+    end
+  end
+
+  describe '#members_from_self_and_ancestors_with_effective_access_level' do
+    let!(:group_parent) { create(:group, :private) }
+    let!(:group) { create(:group, :private, parent: group_parent) }
+    let!(:group_child) { create(:group, :private, parent: group) }
+
+    let!(:user) { create(:user) }
+
+    let(:parent_group_access_level) { Gitlab::Access::REPORTER }
+    let(:group_access_level) { Gitlab::Access::DEVELOPER }
+    let(:child_group_access_level) { Gitlab::Access::MAINTAINER }
+
+    before do
+      create(:group_member, user: user, group: group_parent, access_level: parent_group_access_level)
+      create(:group_member, user: user, group: group, access_level: group_access_level)
+      create(:group_member, :minimal_access, user: create(:user), source: group)
+      create(:group_member, user: user, group: group_child, access_level: child_group_access_level)
+    end
+
+    it 'returns effective access level for user' do
+      expect(group_parent.members_from_self_and_ancestors_with_effective_access_level.as_json).to(
+        contain_exactly(
+          hash_including('user_id' => user.id, 'access_level' => parent_group_access_level)
+        )
+      )
+      expect(group.members_from_self_and_ancestors_with_effective_access_level.as_json).to(
+        contain_exactly(
+          hash_including('user_id' => user.id, 'access_level' => group_access_level)
+        )
+      )
+      expect(group_child.members_from_self_and_ancestors_with_effective_access_level.as_json).to(
+        contain_exactly(
+          hash_including('user_id' => user.id, 'access_level' => child_group_access_level)
+        )
+      )
     end
   end
 
@@ -757,6 +828,22 @@ describe Group do
 
       expect(group.user_ids_for_project_authorizations)
         .to include(maintainer.id, developer.id)
+    end
+
+    context 'group sharing' do
+      let_it_be(:group) { create(:group) }
+      let_it_be(:group_user) { create(:user) }
+      let_it_be(:shared_group) { create(:group) }
+
+      before do
+        group.add_developer(group_user)
+        create(:group_group_link, shared_group: shared_group, shared_with_group: group)
+      end
+
+      it 'returns the user IDs for shared with group members' do
+        expect(shared_group.user_ids_for_project_authorizations).to(
+          include(group_user.id))
+      end
     end
   end
 
@@ -910,6 +997,16 @@ describe Group do
 
     subject { group.ci_variables_for('ref', project) }
 
+    it 'memoizes the result by ref', :request_store do
+      expect(project).to receive(:protected_for?).with('ref').once.and_return(true)
+      expect(project).to receive(:protected_for?).with('other').once.and_return(false)
+
+      2.times do
+        expect(group.ci_variables_for('ref', project)).to contain_exactly(ci_variable, protected_variable)
+        expect(group.ci_variables_for('other', project)).to contain_exactly(ci_variable)
+      end
+    end
+
     shared_examples 'ref is protected' do
       it 'contains all the variables' do
         is_expected.to contain_exactly(ci_variable, protected_variable)
@@ -998,6 +1095,57 @@ describe Group do
 
       it 'returns the group member with the highest access level' do
         expect(highest_group_member.access_level).to eq(Gitlab::Access::OWNER)
+      end
+    end
+  end
+
+  describe '#related_group_ids' do
+    let(:nested_group) { create(:group, parent: group) }
+    let(:shared_with_group) { create(:group, parent: group) }
+
+    before do
+      create(:group_group_link, shared_group: nested_group,
+                                shared_with_group: shared_with_group)
+    end
+
+    subject(:related_group_ids) { nested_group.related_group_ids }
+
+    it 'returns id' do
+      expect(related_group_ids).to include(nested_group.id)
+    end
+
+    it 'returns ancestor id' do
+      expect(related_group_ids).to include(group.id)
+    end
+
+    it 'returns shared with group id' do
+      expect(related_group_ids).to include(shared_with_group.id)
+    end
+
+    context 'with more than one ancestor group' do
+      let(:ancestor_group) { create(:group) }
+
+      before do
+        group.update(parent: ancestor_group)
+      end
+
+      it 'returns all ancestor group ids' do
+        expect(related_group_ids).to(
+          include(group.id, ancestor_group.id))
+      end
+    end
+
+    context 'with more than one shared with group' do
+      let(:another_shared_with_group) { create(:group, parent: group) }
+
+      before do
+        create(:group_group_link, shared_group: nested_group,
+               shared_with_group: another_shared_with_group)
+      end
+
+      it 'returns all shared with group ids' do
+        expect(related_group_ids).to(
+          include(shared_with_group.id, another_shared_with_group.id))
       end
     end
   end
@@ -1179,6 +1327,277 @@ describe Group do
       groups = described_class.groups_including_descendants_by([parent_group2.id, parent_group1.id])
 
       expect(groups).to contain_exactly(parent_group1, parent_group2, child_group1, child_group2, child_group3)
+    end
+  end
+
+  describe '#shared_runners_allowed?' do
+    using RSpec::Parameterized::TableSyntax
+
+    where(:shared_runners_enabled, :allow_descendants_override, :expected_shared_runners_allowed) do
+      true  | false | true
+      true  | true  | true
+      false | false | false
+      false | true  | true
+    end
+
+    with_them do
+      let!(:group) { create(:group, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override) }
+
+      it 'returns the expected result' do
+        expect(group.shared_runners_allowed?).to eq(expected_shared_runners_allowed)
+      end
+    end
+  end
+
+  describe '#parent_allows_shared_runners?' do
+    context 'when parent group is present' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:shared_runners_enabled, :allow_descendants_override, :expected_shared_runners_allowed) do
+        true  | false | true
+        true  | true  | true
+        false | false | false
+        false | true  | true
+      end
+
+      with_them do
+        let!(:parent_group) { create(:group, shared_runners_enabled: shared_runners_enabled, allow_descendants_override_disabled_shared_runners: allow_descendants_override) }
+        let!(:group) { create(:group, parent: parent_group) }
+
+        it 'returns the expected result' do
+          expect(group.parent_allows_shared_runners?).to eq(expected_shared_runners_allowed)
+        end
+      end
+    end
+
+    context 'when parent group is missing' do
+      let!(:group) { create(:group) }
+
+      it 'returns true' do
+        expect(group.parent_allows_shared_runners?).to be_truthy
+      end
+    end
+  end
+
+  describe '#parent_enabled_shared_runners?' do
+    subject { group.parent_enabled_shared_runners? }
+
+    context 'when parent group is present' do
+      context 'When shared Runners are disabled' do
+        let!(:parent_group) { create(:group, :shared_runners_disabled) }
+        let!(:group) { create(:group, parent: parent_group) }
+
+        it { is_expected.to be_falsy }
+      end
+
+      context 'When shared Runners are enabled' do
+        let!(:parent_group) { create(:group) }
+        let!(:group) { create(:group, parent: parent_group) }
+
+        it { is_expected.to be_truthy }
+      end
+    end
+
+    context 'when parent group is missing' do
+      let!(:group) { create(:group) }
+
+      it { is_expected.to be_truthy }
+    end
+  end
+
+  describe '#enable_shared_runners!' do
+    subject { group.enable_shared_runners! }
+
+    context 'group that its ancestors have shared runners disabled' do
+      let_it_be(:parent) { create(:group, :shared_runners_disabled) }
+      let_it_be(:group) { create(:group, :shared_runners_disabled, parent: parent) }
+      let_it_be(:project) { create(:project, shared_runners_enabled: false, group: group) }
+
+      it 'raises error and does not enable shared Runners' do
+        expect { subject }
+          .to raise_error(described_class::UpdateSharedRunnersError, 'Shared Runners disabled for the parent group')
+          .and not_change { parent.reload.shared_runners_enabled }
+          .and not_change { group.reload.shared_runners_enabled }
+          .and not_change { project.reload.shared_runners_enabled }
+      end
+    end
+
+    context 'root group with shared runners disabled' do
+      let_it_be(:group) { create(:group, :shared_runners_disabled) }
+      let_it_be(:sub_group) { create(:group, :shared_runners_disabled, parent: group) }
+      let_it_be(:project) { create(:project, shared_runners_enabled: false, group: sub_group) }
+
+      it 'enables shared Runners only for itself' do
+        expect { subject }
+          .to change { group.reload.shared_runners_enabled }.from(false).to(true)
+          .and not_change { sub_group.reload.shared_runners_enabled }
+          .and not_change { project.reload.shared_runners_enabled }
+      end
+    end
+  end
+
+  describe '#disable_shared_runners!' do
+    let_it_be(:group) { create(:group) }
+    let_it_be(:sub_group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners, parent: group) }
+    let_it_be(:sub_group_2) { create(:group, parent: group) }
+    let_it_be(:project) { create(:project, group: group, shared_runners_enabled: true) }
+    let_it_be(:project_2) { create(:project, group: sub_group_2, shared_runners_enabled: true) }
+
+    subject { group.disable_shared_runners! }
+
+    it 'disables shared Runners for all descendant groups and projects' do
+      expect { subject }
+        .to change { group.reload.shared_runners_enabled }.from(true).to(false)
+        .and not_change { group.reload.allow_descendants_override_disabled_shared_runners }
+        .and not_change { sub_group.reload.shared_runners_enabled }
+        .and not_change { sub_group.reload.allow_descendants_override_disabled_shared_runners }
+        .and change { sub_group_2.reload.shared_runners_enabled }.from(true).to(false)
+        .and not_change { sub_group_2.reload.allow_descendants_override_disabled_shared_runners }
+        .and change { project.reload.shared_runners_enabled }.from(true).to(false)
+        .and change { project_2.reload.shared_runners_enabled }.from(true).to(false)
+    end
+  end
+
+  describe '#allow_descendants_override_disabled_shared_runners!' do
+    subject { group.allow_descendants_override_disabled_shared_runners! }
+
+    context 'top level group' do
+      let_it_be(:group) { create(:group, :shared_runners_disabled) }
+      let_it_be(:sub_group) { create(:group, :shared_runners_disabled, parent: group) }
+      let_it_be(:project) { create(:project, shared_runners_enabled: false, group: sub_group) }
+
+      it 'enables allow descendants to override only for itself' do
+        expect { subject }
+          .to change { group.reload.allow_descendants_override_disabled_shared_runners }.from(false).to(true)
+          .and not_change { group.reload.shared_runners_enabled }
+          .and not_change { sub_group.reload.allow_descendants_override_disabled_shared_runners }
+          .and not_change { sub_group.reload.shared_runners_enabled }
+          .and not_change { project.reload.shared_runners_enabled }
+      end
+    end
+
+    context 'group that its ancestors have shared Runners disabled but allows to override' do
+      let_it_be(:parent) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners) }
+      let_it_be(:group) { create(:group, :shared_runners_disabled, parent: parent) }
+      let_it_be(:project) { create(:project, shared_runners_enabled: false, group: group) }
+
+      it 'enables allow descendants to override' do
+        expect { subject }
+          .to not_change { parent.reload.allow_descendants_override_disabled_shared_runners }
+          .and not_change { parent.reload.shared_runners_enabled }
+          .and change { group.reload.allow_descendants_override_disabled_shared_runners }.from(false).to(true)
+          .and not_change { group.reload.shared_runners_enabled }
+          .and not_change { project.reload.shared_runners_enabled }
+      end
+    end
+
+    context 'when parent does not allow' do
+      let_it_be(:parent) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false ) }
+      let_it_be(:group) { create(:group, :shared_runners_disabled, allow_descendants_override_disabled_shared_runners: false, parent: parent) }
+
+      it 'raises error and does not allow descendants to override' do
+        expect { subject }
+          .to raise_error(described_class::UpdateSharedRunnersError, 'Group level shared Runners not allowed')
+          .and not_change { parent.reload.allow_descendants_override_disabled_shared_runners }
+          .and not_change { parent.reload.shared_runners_enabled }
+          .and not_change { group.reload.allow_descendants_override_disabled_shared_runners }
+          .and not_change { group.reload.shared_runners_enabled }
+      end
+    end
+
+    context 'top level group that has shared Runners enabled' do
+      let_it_be(:group) { create(:group, shared_runners_enabled: true) }
+      let_it_be(:sub_group) { create(:group, :shared_runners_disabled, parent: group) }
+      let_it_be(:project) { create(:project, shared_runners_enabled: false, group: sub_group) }
+
+      it 'raises error and does not change config' do
+        expect { subject }
+          .to raise_error(described_class::UpdateSharedRunnersError, 'Shared Runners enabled')
+          .and not_change { group.reload.allow_descendants_override_disabled_shared_runners }
+          .and not_change { group.reload.shared_runners_enabled }
+          .and not_change { sub_group.reload.allow_descendants_override_disabled_shared_runners }
+          .and not_change { sub_group.reload.shared_runners_enabled }
+          .and not_change { project.reload.shared_runners_enabled }
+      end
+    end
+  end
+
+  describe '#disallow_descendants_override_disabled_shared_runners!' do
+    subject { group.disallow_descendants_override_disabled_shared_runners! }
+
+    context 'top level group' do
+      let_it_be(:group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners ) }
+      let_it_be(:sub_group) { create(:group, :shared_runners_disabled, :allow_descendants_override_disabled_shared_runners, parent: group) }
+      let_it_be(:project) { create(:project, shared_runners_enabled: true, group: sub_group) }
+
+      it 'disables allow project to override for descendants and disables project shared Runners' do
+        expect { subject }
+          .to not_change { group.reload.shared_runners_enabled }
+          .and change { group.reload.allow_descendants_override_disabled_shared_runners }.from(true).to(false)
+          .and not_change { sub_group.reload.shared_runners_enabled }
+          .and change { sub_group.reload.allow_descendants_override_disabled_shared_runners }.from(true).to(false)
+          .and change { project.reload.shared_runners_enabled }.from(true).to(false)
+      end
+    end
+
+    context 'top level group that has shared Runners enabled' do
+      let_it_be(:group) { create(:group, shared_runners_enabled: true) }
+      let_it_be(:sub_group) { create(:group, :shared_runners_disabled, parent: group) }
+      let_it_be(:project) { create(:project, shared_runners_enabled: false, group: sub_group) }
+
+      it 'results error and does not change config' do
+        expect { subject }
+          .to raise_error(described_class::UpdateSharedRunnersError, 'Shared Runners enabled')
+          .and not_change { group.reload.allow_descendants_override_disabled_shared_runners }
+          .and not_change { group.reload.shared_runners_enabled }
+          .and not_change { sub_group.reload.allow_descendants_override_disabled_shared_runners }
+          .and not_change { sub_group.reload.shared_runners_enabled }
+          .and not_change { project.reload.shared_runners_enabled }
+      end
+    end
+  end
+
+  describe '#default_owner' do
+    let(:group) { build(:group) }
+
+    context 'the group has owners' do
+      before do
+        group.add_owner(create(:user))
+        group.add_owner(create(:user))
+      end
+
+      it 'is the first owner' do
+        expect(group.default_owner)
+          .to eq(group.owners.first)
+          .and be_a(User)
+      end
+    end
+
+    context 'the group has a parent' do
+      let(:parent) { build(:group) }
+
+      before do
+        group.parent = parent
+        parent.add_owner(create(:user))
+      end
+
+      it 'is the first owner of the parent' do
+        expect(group.default_owner)
+          .to eq(parent.default_owner)
+          .and be_a(User)
+      end
+    end
+
+    context 'we fallback to group.owner' do
+      before do
+        group.owner = build(:user)
+      end
+
+      it 'is the group.owner' do
+        expect(group.default_owner)
+          .to eq(group.owner)
+          .and be_a(User)
+      end
     end
   end
 end

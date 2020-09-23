@@ -2,9 +2,9 @@
 
 # Worker for storing security reports into the database.
 #
-class StoreSecurityReportsWorker
+class StoreSecurityReportsWorker # rubocop:disable Scalability/IdempotentWorker
   include ApplicationWorker
-  include PipelineQueue
+  include SecurityScansQueue
 
   def perform(pipeline_id)
     Ci::Pipeline.find(pipeline_id).try do |pipeline|

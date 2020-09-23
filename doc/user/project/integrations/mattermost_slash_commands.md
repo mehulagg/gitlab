@@ -1,3 +1,9 @@
+---
+stage: Create
+group: Ecosystem
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Mattermost slash commands
 
 > Introduced in GitLab 8.14
@@ -15,23 +21,23 @@ Mattermost 3.4 and up is required.
 
 If you have the Omnibus GitLab package installed, Mattermost is already bundled
 in it. All you have to do is configure it. Read more in the
-[Omnibus GitLab Mattermost documentation][omnimmdocs].
+[Omnibus GitLab Mattermost documentation](https://docs.gitlab.com/omnibus/gitlab-mattermost/).
 
-## Automated Configuration
+## Automated configuration
 
 If Mattermost is installed on the same server as GitLab, the configuration process can be
 done for you by GitLab.
 
 Go to the Mattermost Slash Command service on your project and click the 'Add to Mattermost' button.
 
-## Manual Configuration
+## Manual configuration
 
 The configuration consists of two parts. First you need to enable the slash
 commands in Mattermost and then enable the service in GitLab.
 
 ### Step 1. Enable custom slash commands in Mattermost
 
-This step is only required when using a source install, omnibus installs will be
+This step is only required when using a source install, Omnibus installs will be
 preconfigured with the right settings.
 
 The first thing to do in Mattermost is to enable custom slash commands from
@@ -42,9 +48,9 @@ the administrator console.
 
    ![Mattermost go to console](img/mattermost_goto_console.png)
 
-1. Click **Custom integrations** and set **Enable Custom Slash Commands**,
-   **Enable custom integrations to override usernames**, and **Override
-   custom integrations to override profile picture icons** to true
+1. Click **Integration Management** and set **Enable Custom Slash Commands**,
+   **Enable integrations to override usernames**, and **Enable
+   integrations to override profile picture icons** to true
 
    ![Mattermost console](img/mattermost_console_integrations.png)
 
@@ -53,7 +59,7 @@ the administrator console.
 ### Step 2. Open the Mattermost slash commands service in GitLab
 
 1. Open a new tab for GitLab, go to your project's
-   [Integrations page](project_services.md#accessing-the-project-services)
+   [Integrations page](overview.md#accessing-integrations)
    and select the **Mattermost command** service to configure it.
    A screen will appear with all the values you need to copy in Mattermost as
    described in the next step. Leave the window open.
@@ -103,7 +109,7 @@ in a new slash command.
 ### Step 4. Copy the Mattermost token into the Mattermost slash command service
 
 1. In GitLab, paste the Mattermost token you copied in the previous step and
-   check the **Active** checkbox.
+   ensure that the **Active** toggle is enabled.
 
    ![Mattermost copy token to GitLab](img/mattermost_gitlab_token.png)
 
@@ -133,7 +139,7 @@ The available slash commands are:
 | ------- | ----------- | ------- |
 | <kbd>/&lt;trigger&gt; issue new &lt;title&gt; <kbd>⇧ Shift</kbd>+<kbd>↵ Enter</kbd> &lt;description&gt;</kbd> | Create a new issue in the project that `<trigger>` is tied to. `<description>` is optional. | `/gitlab issue new We need to change the homepage` |
 | <kbd>/&lt;trigger&gt; issue show &lt;issue-number&gt;</kbd> | Show the issue with ID `<issue-number>` from the project that `<trigger>` is tied to. | `/gitlab issue show 42` |
-| <kbd>/&lt;trigger&gt; deploy &lt;environment&gt; to &lt;environment&gt;</kbd> | Start the CI job that deploys from one environment to another, for example `staging` to `production`. CI/CD must be [properly configured][ciyaml]. | `/gitlab deploy staging to production` |
+| <kbd>/&lt;trigger&gt; deploy &lt;environment&gt; to &lt;environment&gt;</kbd> | Start the CI job that deploys from one environment to another, for example `staging` to `production`. CI/CD must be [properly configured](../../../ci/yaml/README.md). | `/gitlab deploy staging to production` |
 
 To see a list of available commands to interact with GitLab, type the
 trigger word followed by <kbd>help</kbd>. Example: `/gitlab help`
@@ -145,11 +151,16 @@ trigger word followed by <kbd>help</kbd>. Example: `/gitlab help`
 The permissions to run the [available commands](#available-slash-commands) derive from
 the [permissions you have on the project](../../permissions.md#project-members-permissions).
 
+## Troubleshooting
+
+If an event is not being triggered, confirm that the channel you're using is a public one, as
+Mattermost webhooks do not have access to private channels.
+
+If a private channel is required, you can edit the webhook's channel in Mattermost and
+select a private channel. It is not possible to use different channels for
+different types of notifications - all events will be sent to the specified channel.
+
 ## Further reading
 
-- [Mattermost slash commands documentation][mmslashdocs]
-- [Omnibus GitLab Mattermost][omnimmdocs]
-
-[omnimmdocs]: https://docs.gitlab.com/omnibus/gitlab-mattermost/
-[mmslashdocs]: https://docs.mattermost.com/developer/slash-commands.html
-[ciyaml]: ../../../ci/yaml/README.md
+- [Mattermost slash commands documentation](https://docs.mattermost.com/developer/slash-commands.html)
+- [Omnibus GitLab Mattermost](https://docs.gitlab.com/omnibus/gitlab-mattermost/)

@@ -1,3 +1,10 @@
+---
+type: reference, howto
+stage: Manage
+group: Import
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
+
 # Project importing from GitLab.com to your private GitLab instance
 
 You can import your existing GitLab.com projects to your GitLab instance, but keep in
@@ -6,7 +13,7 @@ mind that it is possible only if GitLab.com integration is enabled on your GitLa
 
 To get to the importer page you need to go to "New project" page.
 
->**Note:**
+NOTE: **Note:**
 If you are interested in importing Wiki and Merge Request data to your new instance,
 you'll need to follow the instructions for [exporting a project](../settings/import_export.md#exporting-a-project-and-its-data)
 

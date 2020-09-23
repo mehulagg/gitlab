@@ -1,5 +1,5 @@
 import { Range } from 'monaco-editor';
-import { throttle } from 'underscore';
+import { throttle } from 'lodash';
 import DirtyDiffWorker from './diff_worker';
 import Disposable from '../common/disposable';
 
@@ -50,10 +50,15 @@ export default class DirtyDiffController {
   }
 
   computeDiff(model) {
+    const originalModel = model.getOriginalModel();
+    const newModel = model.getModel();
+
+    if (originalModel.isDisposed() || newModel.isDisposed()) return;
+
     this.dirtyDiffWorker.postMessage({
       path: model.path,
-      originalContent: model.getOriginalModel().getValue(),
-      newContent: model.getModel().getValue(),
+      originalContent: originalModel.getValue(),
+      newContent: newModel.getValue(),
     });
   }
 

@@ -15,8 +15,8 @@ module Analytics
         validates :name, exclusion: { in: Gitlab::Analytics::CycleAnalytics::DefaultStages.names }, if: :custom?
         validates :start_event_identifier, presence: true
         validates :end_event_identifier, presence: true
-        validates :start_event_label, presence: true, if: :start_event_label_based?
-        validates :end_event_label, presence: true, if: :end_event_label_based?
+        validates :start_event_label_id, presence: true, if: :start_event_label_based?
+        validates :end_event_label_id, presence: true, if: :end_event_label_based?
         validate :validate_stage_event_pairs
         validate :validate_labels
 
@@ -26,6 +26,7 @@ module Analytics
         alias_attribute :custom_stage?, :custom
         scope :default_stages, -> { where(custom: false) }
         scope :ordered, -> { order(:relative_position, :id) }
+        scope :for_list, -> { includes(:start_event_label, :end_event_label).ordered }
       end
 
       def parent=(_)
@@ -108,8 +109,8 @@ module Analytics
       end
 
       def validate_labels
-        validate_label_within_group(:start_event_label, start_event_label_id) if start_event_label_id_changed?
-        validate_label_within_group(:end_event_label, end_event_label_id) if end_event_label_id_changed?
+        validate_label_within_group(:start_event_label_id, start_event_label_id) if start_event_label_id_changed?
+        validate_label_within_group(:end_event_label_id, end_event_label_id) if end_event_label_id_changed?
       end
 
       def validate_label_within_group(association_name, label_id)
@@ -124,7 +125,7 @@ module Analytics
       def label_available_for_group?(label_id)
         LabelsFinder.new(nil, { group_id: group.id, include_ancestor_groups: true, only_group_labels: true })
           .execute(skip_authorization: true)
-          .by_ids(label_id)
+          .id_in(label_id)
           .exists?
       end
     end

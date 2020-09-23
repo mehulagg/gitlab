@@ -1,25 +1,26 @@
 <script>
+import { GlLoadingIcon } from '@gitlab/ui';
 import { mapState, mapActions } from 'vuex';
-import _ from 'underscore';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 
-import epicsListEmpty from './epics_list_empty.vue';
-import roadmapShell from './roadmap_shell.vue';
+import EpicsListEmpty from './epics_list_empty.vue';
+import RoadmapFilters from './roadmap_filters.vue';
+import RoadmapShell from './roadmap_shell.vue';
+
 import eventHub from '../event_hub';
-
 import { EXTEND_AS } from '../constants';
 
 export default {
   components: {
-    epicsListEmpty,
-    roadmapShell,
+    EpicsListEmpty,
+    GlLoadingIcon,
+    RoadmapFilters,
+    RoadmapShell,
   },
+  mixins: [glFeatureFlagsMixin()],
   props: {
     presetType: {
       type: String,
-      required: true,
-    },
-    hasFiltersApplied: {
-      type: Boolean,
       required: true,
     },
     newEpicEndpoint: {
@@ -31,32 +32,30 @@ export default {
       required: true,
     },
   },
-  data() {
-    const roadmapGraphQL = gon.features && gon.features.roadmapGraphql;
-    return {
-      handleResizeThrottled: {},
-      // TODO
-      // Remove these method alias and call actual
-      // method once feature flag is removed.
-      fetchEpicsFn: roadmapGraphQL ? this.fetchEpicsGQL : this.fetchEpics,
-      fetchEpicsForTimeframeFn: roadmapGraphQL
-        ? this.fetchEpicsForTimeframeGQL
-        : this.fetchEpicsForTimeframe,
-    };
-  },
   computed: {
     ...mapState([
       'currentGroupId',
       'epics',
+      'milestones',
       'timeframe',
       'extendedTimeframe',
-      'windowResizeInProgress',
       'epicsFetchInProgress',
       'epicsFetchForTimeframeInProgress',
       'epicsFetchResultEmpty',
       'epicsFetchFailure',
       'isChildEpics',
+      'hasFiltersApplied',
+      'milestonesFetchFailure',
     ]),
+    showFilteredSearchbar() {
+      if (this.glFeatures.asyncFiltering) {
+        if (this.epicsFetchResultEmpty) {
+          return this.hasFiltersApplied;
+        }
+        return true;
+      }
+      return false;
+    },
     timeframeStart() {
       return this.timeframe[0];
     },
@@ -64,67 +63,20 @@ export default {
       const last = this.timeframe.length - 1;
       return this.timeframe[last];
     },
-    showRoadmap() {
-      return (
-        !this.windowResizeInProgress &&
-        !this.epicsFetchFailure &&
-        !this.epicsFetchInProgress &&
-        !this.epicsFetchResultEmpty
-      );
-    },
-  },
-  watch: {
-    epicsFetchInProgress(value) {
-      if (!value && this.epics.length) {
-        this.$nextTick(() => {
-          eventHub.$emit('refreshTimeline', {
-            todayBarReady: true,
-            initialRender: true,
-          });
-        });
-      }
-    },
   },
   mounted() {
-    this.fetchEpicsFn();
-    this.handleResizeThrottled = _.throttle(this.handleResize, 600);
-    window.addEventListener('resize', this.handleResizeThrottled, false);
-  },
-  beforeDestroy() {
-    window.removeEventListener('resize', this.handleResizeThrottled, false);
+    this.fetchEpics();
+    this.fetchMilestones();
   },
   methods: {
     ...mapActions([
-      'setWindowResizeInProgress',
       'fetchEpics',
-      'fetchEpicsGQL',
       'fetchEpicsForTimeframe',
-      'fetchEpicsForTimeframeGQL',
       'extendTimeframe',
       'refreshEpicDates',
+      'fetchMilestones',
+      'refreshMilestoneDates',
     ]),
-    /**
-     * Roadmap view works with absolute sizing and positioning
-     * of following child components of RoadmapShell;
-     *
-     * - RoadmapTimelineSection
-     * - TimelineTodayIndicator
-     * - EpicItemTimeline
-     *
-     * And hence when window is resized, any size attributes passed
-     * down to child components are no longer valid, so best approach
-     * to refresh entire app is to re-render it on resize, hence
-     * we toggle `windowResizeInProgress` variable which is bound
-     * to `RoadmapShell`.
-     */
-    handleResize() {
-      this.setWindowResizeInProgress(true);
-      // We need to debounce the toggle to make sure loading animation
-      // shows up while app is being rerendered.
-      _.debounce(() => {
-        this.setWindowResizeInProgress(false);
-      }, 200)();
-    },
     /**
      * Once timeline is expanded (either with prepend or append)
      * We need performing following actions;
@@ -154,9 +106,10 @@ export default {
     handleScrollToExtend(roadmapTimelineEl, extendType = EXTEND_AS.PREPEND) {
       this.extendTimeframe({ extendAs: extendType });
       this.refreshEpicDates();
+      this.refreshMilestoneDates();
 
       this.$nextTick(() => {
-        this.fetchEpicsForTimeframeFn({
+        this.fetchEpicsForTimeframe({
           timeframe: this.extendedTimeframe,
         })
           .then(() => {
@@ -177,25 +130,31 @@ export default {
 </script>
 
 <template>
-  <div :class="{ 'overflow-reset': epicsFetchResultEmpty }" class="roadmap-container">
-    <roadmap-shell
-      v-if="showRoadmap"
-      :preset-type="presetType"
-      :epics="epics"
-      :timeframe="timeframe"
-      :current-group-id="currentGroupId"
-      @onScrollToStart="handleScrollToExtend"
-      @onScrollToEnd="handleScrollToExtend"
-    />
-    <epics-list-empty
-      v-if="epicsFetchResultEmpty"
-      :preset-type="presetType"
-      :timeframe-start="timeframeStart"
-      :timeframe-end="timeframeEnd"
-      :has-filters-applied="hasFiltersApplied"
-      :new-epic-endpoint="newEpicEndpoint"
-      :empty-state-illustration-path="emptyStateIllustrationPath"
-      :is-child-epics="isChildEpics"
-    />
+  <div class="roadmap-app-container gl-h-full">
+    <roadmap-filters v-if="showFilteredSearchbar" />
+    <div :class="{ 'overflow-reset': epicsFetchResultEmpty }" class="roadmap-container">
+      <gl-loading-icon v-if="epicsFetchInProgress" class="gl-mt-5" size="md" />
+      <epics-list-empty
+        v-else-if="epicsFetchResultEmpty"
+        :preset-type="presetType"
+        :timeframe-start="timeframeStart"
+        :timeframe-end="timeframeEnd"
+        :has-filters-applied="hasFiltersApplied"
+        :new-epic-endpoint="newEpicEndpoint"
+        :empty-state-illustration-path="emptyStateIllustrationPath"
+        :is-child-epics="isChildEpics"
+      />
+      <roadmap-shell
+        v-else-if="!epicsFetchFailure"
+        :preset-type="presetType"
+        :epics="epics"
+        :milestones="milestones"
+        :timeframe="timeframe"
+        :current-group-id="currentGroupId"
+        :has-filters-applied="hasFiltersApplied"
+        @onScrollToStart="handleScrollToExtend"
+        @onScrollToEnd="handleScrollToExtend"
+      />
+    </div>
   </div>
 </template>

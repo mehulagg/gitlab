@@ -5,6 +5,10 @@
 module Metrics
   module Dashboard
     class BaseEmbedService < ::Metrics::Dashboard::BaseService
+      def self.embedded?(embed_param)
+        ActiveModel::Type::Boolean.new.cast(embed_param)
+      end
+
       def cache_key
         "dynamic_metrics_dashboard_#{identifiers}"
       end
@@ -13,7 +17,7 @@ module Metrics
 
       def dashboard_path
         params[:dashboard_path].presence ||
-          ::Metrics::Dashboard::SystemDashboardService::SYSTEM_DASHBOARD_PATH
+          ::Metrics::Dashboard::SystemDashboardService::DASHBOARD_PATH
       end
 
       def group

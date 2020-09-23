@@ -1,10 +1,11 @@
 <script>
-import Icon from '~/vue_shared/components/icon.vue';
+/* eslint-disable vue/no-v-html */
 import iconCycleAnalyticsSplash from 'icons/_icon_cycle_analytics_splash.svg';
+import { GlIcon } from '@gitlab/ui';
 
 export default {
   components: {
-    Icon,
+    GlIcon,
   },
   props: {
     documentationLink: {
@@ -27,19 +28,19 @@ export default {
 <template>
   <div class="landing content-block">
     <button
-      :aria-label="__('Dismiss Cycle Analytics introduction box')"
+      :aria-label="__('Dismiss Value Stream Analytics introduction box')"
       class="js-ca-dismiss-button dismiss-button"
       type="button"
       @click="dismissOverviewDialog"
     >
-      <icon name="close" />
+      <gl-icon name="close" />
     </button>
     <div class="svg-container" v-html="iconCycleAnalyticsSplash"></div>
     <div class="inner-content">
-      <h4>{{ __('Introducing Cycle Analytics') }}</h4>
+      <h4>{{ __('Introducing Value Stream Analytics') }}</h4>
       <p>
         {{
-          __(`Cycle Analytics gives an overview
+          __(`Value Stream Analytics gives an overview
 of how much time it takes to go from idea to production in your project.`)
         }}
       </p>

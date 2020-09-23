@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::ExternalAuthorization::Logger do
+RSpec.describe Gitlab::ExternalAuthorization::Logger do
   let(:request_time) { Time.parse('2018-03-26 20:22:15') }
 
   def fake_access(has_access, user, load_type = :request)

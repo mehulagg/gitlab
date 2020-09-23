@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe GroupMemberPresenter do
+RSpec.describe GroupMemberPresenter do
   let(:user) { double(:user) }
   let(:group) { double(:group) }
   let(:group_member) { double(:group_member, source: group, user: user) }
@@ -16,6 +16,28 @@ describe GroupMemberPresenter do
       expect(user).to receive(:group_sso?).with(group).and_return(true)
 
       expect(presenter.group_sso?).to eq true
+    end
+  end
+
+  describe '#group_managed_account?' do
+    context 'when user is part of the group managed account' do
+      before do
+        expect(user).to receive(:group_managed_account?).and_return(true)
+      end
+
+      it 'returns `true`' do
+        expect(presenter.group_managed_account?).to eq true
+      end
+    end
+
+    context 'when user is not part of the group managed account' do
+      before do
+        expect(user).to receive(:group_managed_account?).and_return(false)
+      end
+
+      it 'returns `false`' do
+        expect(presenter.group_managed_account?).to eq false
+      end
     end
   end
 

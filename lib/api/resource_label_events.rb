@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class ResourceLabelEvents < Grape::API
+  class ResourceLabelEvents < Grape::API::Instance
     include PaginationParams
     helpers ::API::Helpers::NotesHelpers
 
@@ -25,12 +25,11 @@ module API
         end
 
         get ":id/#{eventables_str}/:eventable_id/resource_label_events" do
-          eventable = find_noteable(parent_type, params[:id], eventable_type, params[:eventable_id])
+          eventable = find_noteable(eventable_type, params[:eventable_id])
 
-          opts = { page: params[:page], per_page: params[:per_page] }
-          events = ResourceLabelEventFinder.new(current_user, eventable, opts).execute
+          events = eventable.resource_label_events.inc_relations
 
-          present paginate(events), with: Entities::ResourceLabelEvent
+          present ResourceLabelEvent.visible_to_user?(current_user, paginate(events)), with: Entities::ResourceLabelEvent
         end
 
         desc "Get a single #{eventable_type.to_s.downcase} resource label event" do
@@ -42,7 +41,8 @@ module API
           requires :eventable_id, types: [Integer, String], desc: 'The ID of the eventable'
         end
         get ":id/#{eventables_str}/:eventable_id/resource_label_events/:event_id" do
-          eventable = find_noteable(parent_type, params[:id], eventable_type, params[:eventable_id])
+          eventable = find_noteable(eventable_type, params[:eventable_id])
+
           event = eventable.resource_label_events.find(params[:event_id])
 
           not_found!('ResourceLabelEvent') unless can?(current_user, :read_resource_label_event, event)

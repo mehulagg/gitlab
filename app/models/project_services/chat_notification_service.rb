@@ -59,11 +59,11 @@ class ChatNotificationService < Service
 
   def default_fields
     [
-      { type: 'text', name: 'webhook', placeholder: "e.g. #{webhook_placeholder}", required: true },
-      { type: 'text', name: 'username', placeholder: 'e.g. GitLab' },
-      { type: 'checkbox', name: 'notify_only_broken_pipelines' },
-      { type: 'select', name: 'branches_to_be_notified', choices: BRANCH_CHOICES }
-    ]
+      { type: 'text', name: 'webhook', placeholder: "e.g. #{webhook_placeholder}", required: true }.freeze,
+      { type: 'text', name: 'username', placeholder: 'e.g. GitLab' }.freeze,
+      { type: 'checkbox', name: 'notify_only_broken_pipelines' }.freeze,
+      { type: 'select', name: 'branches_to_be_notified', choices: branch_choices }.freeze
+    ].freeze
   end
 
   def execute(data)
@@ -84,10 +84,11 @@ class ChatNotificationService < Service
 
     event_type = data[:event_type] || object_kind
 
-    channel_name = get_channel_field(event_type).presence || channel
+    channel_names = get_channel_field(event_type).presence || channel.presence
+    channels = channel_names&.split(',')&.map(&:strip)
 
     opts = {}
-    opts[:channel] = channel_name if channel_name
+    opts[:channel] = channels if channels.present?
     opts[:username] = username if username
 
     return false unless notify(message, opts)
@@ -113,12 +114,9 @@ class ChatNotificationService < Service
 
   private
 
+  # every notifier must implement this independently
   def notify(message, opts)
-    Slack::Notifier.new(webhook, opts).ping(
-      message.pretext,
-      attachments: message.attachments,
-      fallback: message.fallback
-    )
+    raise NotImplementedError
   end
 
   def custom_data(data)
@@ -160,7 +158,7 @@ class ChatNotificationService < Service
   end
 
   def project_name
-    project.full_name.gsub(/\s/, '')
+    project.full_name
   end
 
   def project_url

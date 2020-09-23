@@ -1,8 +1,7 @@
 <script>
-import { sprintf, s__ } from '~/locale';
 import { mapState, mapActions, mapGetters } from 'vuex';
-import { GlLoadingIcon } from '@gitlab/ui';
-import FunctionRow from './function_row.vue';
+import { GlLink, GlLoadingIcon, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
+import { sprintf, s__ } from '~/locale';
 import EnvironmentRow from './environment_row.vue';
 import EmptyState from './empty_state.vue';
 import { CHECKING_INSTALLED } from '../constants';
@@ -10,26 +9,15 @@ import { CHECKING_INSTALLED } from '../constants';
 export default {
   components: {
     EnvironmentRow,
-    FunctionRow,
     EmptyState,
+    GlLink,
     GlLoadingIcon,
   },
-  props: {
-    clustersPath: {
-      type: String,
-      required: true,
-    },
-    helpPath: {
-      type: String,
-      required: true,
-    },
-    statusPath: {
-      type: String,
-      required: true,
-    },
+  directives: {
+    SafeHtml,
   },
   computed: {
-    ...mapState(['installed', 'isLoading', 'hasFunctionData']),
+    ...mapState(['installed', 'isLoading', 'hasFunctionData', 'helpPath', 'statusPath']),
     ...mapGetters(['getFunctions']),
 
     checkingInstalled() {
@@ -44,12 +32,14 @@ export default {
           'Serverless|Your repository does not have a corresponding %{startTag}serverless.yml%{endTag} file.',
         ),
         { startTag: '<code>', endTag: '</code>' },
+        false,
       );
     },
     noGitlabYamlConfigured() {
       return sprintf(
         s__('Serverless|Your %{startTag}.gitlab-ci.yml%{endTag} file is not properly configured.'),
         { startTag: '<code>', endTag: '</code>' },
+        false,
       );
     },
     mismatchedServerlessFunctions() {
@@ -58,6 +48,7 @@ export default {
           "Serverless|The functions listed in the %{startTag}serverless.yml%{endTag} file don't match the namespace of your cluster.",
         ),
         { startTag: '<code>', endTag: '</code>' },
+        false,
       );
     },
   },
@@ -73,12 +64,8 @@ export default {
 </script>
 
 <template>
-  <section id="serverless-functions">
-    <gl-loading-icon
-      v-if="checkingInstalled"
-      :size="2"
-      class="prepend-top-default append-bottom-default"
-    />
+  <section id="serverless-functions" class="flex-grow">
+    <gl-loading-icon v-if="checkingInstalled" size="lg" class="gl-mt-3 gl-mb-3" />
 
     <div v-else-if="isInstalled">
       <div v-if="hasFunctionData">
@@ -94,11 +81,7 @@ export default {
             </ul>
           </div>
         </template>
-        <gl-loading-icon
-          v-if="isLoading"
-          :size="2"
-          class="prepend-top-default append-bottom-default js-functions-loader"
-        />
+        <gl-loading-icon v-if="isLoading" size="lg" class="gl-mt-3 gl-mb-3 js-functions-loader" />
       </div>
       <div v-else class="empty-state js-empty-state">
         <div class="text-content">
@@ -111,15 +94,9 @@ export default {
             }}
           </p>
           <ul>
-            <li>
-              {{ noServerlessConfigFile }}
-            </li>
-            <li>
-              {{ noGitlabYamlConfigured }}
-            </li>
-            <li>
-              {{ mismatchedServerlessFunctions }}
-            </li>
+            <li v-safe-html="noServerlessConfigFile"></li>
+            <li v-safe-html="noGitlabYamlConfigured"></li>
+            <li v-safe-html="mismatchedServerlessFunctions"></li>
             <li>{{ s__('Serverless|The deploy job has not finished.') }}</li>
           </ul>
 
@@ -131,14 +108,14 @@ export default {
             }}
           </p>
           <div class="text-center">
-            <a :href="helpPath" class="btn btn-success">
-              {{ s__('Serverless|Learn more about Serverless') }}
-            </a>
+            <gl-link :href="helpPath" class="btn btn-success">{{
+              s__('Serverless|Learn more about Serverless')
+            }}</gl-link>
           </div>
         </div>
       </div>
     </div>
 
-    <empty-state v-else :clusters-path="clustersPath" :help-path="helpPath" />
+    <empty-state v-else />
   </section>
 </template>

@@ -3,22 +3,102 @@
 Sometimes things don't work the way they should. Here are some tips on debugging issues out
 in production.
 
+## Starting a Rails console session
+
+Troubleshooting and debugging your GitLab instance often requires a
+[Rails console](https://guides.rubyonrails.org/command_line.html#rails-console).
+See also:
+
+- [GitLab Rails Console Cheat Sheet](gitlab_rails_cheat_sheet.md).
+- [Navigating GitLab via Rails console](navigating_gitlab_via_rails_console.md).
+
+**For Omnibus installations**
+
+```shell
+sudo gitlab-rails console
+```
+
+**For installations from source**
+
+```shell
+sudo -u git -H bundle exec rails console -e production
+```
+
+Kubernetes: the console is in the task-runner pod, refer to our [Kubernetes cheat sheet](kubernetes_cheat_sheet.md#gitlab-specific-kubernetes-information) for details.
+
+### Enabling Active Record logging
+
+You can enable output of Active Record debug logging in the Rails console
+session by running:
+
+```ruby
+ActiveRecord::Base.logger = Logger.new(STDOUT)
+```
+
+This will show information about database queries triggered by any Ruby code
+you may run in the console. To turn off logging again, run:
+
+```ruby
+ActiveRecord::Base.logger = nil
+```
+
+### Disabling database statement timeout
+
+You can disable the PostgreSQL statement timeout for the current Rails console
+session by running:
+
+```ruby
+ActiveRecord::Base.connection.execute('SET statement_timeout TO 0')
+```
+
+Note that this change only affects the current Rails console session and will
+not be persisted in the GitLab production environment or in the next Rails
+console session.
+
+### Output Rails console session history
+
+If you'd like to output your Rails console command history in a format that's
+easy to copy and save for future reference, you can run:
+
+```ruby
+puts Readline::HISTORY.to_a
+```
+
+## Using the Rails runner
+
+If you need to run some Ruby code in the context of your GitLab production
+environment, you can do so using the [Rails runner](https://guides.rubyonrails.org/command_line.html#rails-runner). When executing a script file, the script must be accessible by the `git` user.
+
+**For Omnibus installations**
+
+```shell
+sudo gitlab-rails runner "RAILS_COMMAND"
+
+# Example with a two-line Ruby script
+sudo gitlab-rails runner "user = User.first; puts user.username"
+
+# Example with a ruby script file (make sure to use the full path)
+sudo gitlab-rails runner /path/to/script.rb
+```
+
+**For installations from source**
+
+```shell
+sudo -u git -H bundle exec rails runner -e production "RAILS_COMMAND"
+
+# Example with a two-line Ruby script
+sudo -u git -H bundle exec rails runner -e production "user = User.first; puts user.username"
+
+# Example with a ruby script file (make sure to use the full path)
+sudo -u git -H bundle exec rails runner -e production /path/to/script.rb
+```
+
 ## Mail not working
 
 A common problem is that mails are not being sent for some reason. Suppose you configured
 an SMTP server, but you're not seeing mail delivered. Here's how to check the settings:
 
-1. Run a Rails console:
-
-   ```sh
-   sudo gitlab-rails console production
-   ```
-
-   or for source installs:
-
-   ```sh
-   bundle exec rails console production
-   ```
+1. Run a [Rails console](#starting-a-rails-console-session).
 
 1. Look at the ActionMailer `delivery_method` to make sure it matches what you
    intended. If you configured SMTP, it should say `:smtp`. If you're using
@@ -33,7 +113,7 @@ an SMTP server, but you're not seeing mail delivered. Here's how to check the se
 
    ```ruby
    irb(main):002:0> ActionMailer::Base.smtp_settings
-   => {:address=>"localhost", :port=>25, :domain=>"localhost.localdomain", :user_name=>nil, :password=>nil, :authentication=>nil, :enable_starttls_auto=>true}```
+   => {:address=>"localhost", :port=>25, :domain=>"localhost.localdomain", :user_name=>nil, :password=>nil, :authentication=>nil, :enable_starttls_auto=>true}
    ```
 
    In the example above, the SMTP server is configured for the local machine. If this is intended, you may need to check your local mail
@@ -56,13 +136,13 @@ For more advanced issues, `gdb` is a must-have tool for debugging issues.
 
 To install on Ubuntu/Debian:
 
-```
+```shell
 sudo apt-get install gdb
 ```
 
 On CentOS:
 
-```
+```shell
 sudo yum install gdb
 ```
 
@@ -103,14 +183,14 @@ downtime. Otherwise skip to the next section.
 1. Run `sudo gdb -p <PID>` to attach to the Unicorn process.
 1. In the gdb window, type:
 
-   ```
+   ```plaintext
    call (void) rb_backtrace()
    ```
 
 1. This forces the process to generate a Ruby backtrace. Check
-   `/var/log/gitlab/unicorn/unicorn_stderr.log` for the backtace. For example, you may see:
+   `/var/log/gitlab/unicorn/unicorn_stderr.log` for the backtrace. For example, you may see:
 
-   ```ruby
+   ```plaintext
    from /opt/gitlab/embedded/service/gitlab-rails/lib/gitlab/metrics/sampler.rb:33:in `block in start'
    from /opt/gitlab/embedded/service/gitlab-rails/lib/gitlab/metrics/sampler.rb:33:in `loop'
    from /opt/gitlab/embedded/service/gitlab-rails/lib/gitlab/metrics/sampler.rb:36:in `block (2 levels) in start'
@@ -124,13 +204,13 @@ downtime. Otherwise skip to the next section.
 
 1. To see the current threads, run:
 
-   ```
+   ```plaintext
    thread apply all bt
    ```
 
 1. Once you're done debugging with `gdb`, be sure to detach from the process and exit:
 
-   ```
+   ```plaintext
    detach
    exit
    ```
@@ -146,9 +226,7 @@ unicorn['worker_timeout'] = 300
 
 For source installations, edit `config/unicorn.rb`.
 
-[Reconfigure] GitLab for the changes to take effect.
-
-[Reconfigure]: ../restart_gitlab.md#omnibus-gitlab-reconfigure
+[Reconfigure](../restart_gitlab.md#omnibus-gitlab-reconfigure) GitLab for the changes to take effect.
 
 #### Troubleshooting without affecting other users
 
@@ -160,25 +238,20 @@ separate Rails process to debug the issue:
 1. Log in to your GitLab account.
 1. Copy the URL that is causing problems (e.g. `https://gitlab.com/ABC`).
 1. Create a Personal Access Token for your user (Profile Settings -> Access Tokens).
-1. Bring up the GitLab Rails console. For omnibus users, run:
-
-   ```
-   sudo gitlab-rails console
-   ```
-
+1. Bring up the [GitLab Rails console.](#starting-a-rails-console-session)
 1. At the Rails console, run:
 
    ```ruby
-   [1] pry(main)> app.get '<URL FROM STEP 2>/?private_token=<TOKEN FROM STEP 3>'
+   app.get '<URL FROM STEP 2>/?private_token=<TOKEN FROM STEP 3>'
    ```
 
    For example:
 
    ```ruby
-   [1] pry(main)> app.get 'https://gitlab.com/gitlab-org/gitlab-foss/issues/1?private_token=123456'
+   app.get 'https://gitlab.com/gitlab-org/gitlab-foss/-/issues/1?private_token=123456'
    ```
 
-1. In a new window, run `top`. It should show this ruby process using 100% CPU. Write down the PID.
+1. In a new window, run `top`. It should show this Ruby process using 100% CPU. Write down the PID.
 1. Follow step 2 from the previous section on using gdb.
 
 ### GitLab: API is not accessible
@@ -196,7 +269,7 @@ is a Unicorn worker that is spinning via `top`. Try to use the `gdb`
 techniques above. In addition, using `strace` may help isolate issues:
 
 ```shell
-strace -tt -T -f -s 1024 -p <PID of unicorn worker> -o /tmp/unicorn.txt
+strace -ttTfyyy -s 1024 -p <PID of unicorn worker> -o /tmp/unicorn.txt
 ```
 
 If you cannot isolate which Unicorn worker is the issue, try to run `strace`
@@ -204,7 +277,7 @@ on all the Unicorn workers to see where the `/internal/allowed` endpoint gets
 stuck:
 
 ```shell
-ps auwx | grep unicorn | awk '{ print " -p " $2}' | xargs strace -tt -T -f -s 1024 -o /tmp/unicorn.txt
+ps auwx | grep unicorn | awk '{ print " -p " $2}' | xargs  strace -ttTfyyy -s 1024 -o /tmp/unicorn.txt
 ```
 
 The output in `/tmp/unicorn.txt` may help diagnose the root cause.
@@ -212,4 +285,4 @@ The output in `/tmp/unicorn.txt` may help diagnose the root cause.
 ## More information
 
 - [Debugging Stuck Ruby Processes](https://blog.newrelic.com/engineering/debugging-stuck-ruby-processes-what-to-do-before-you-kill-9/)
-- [Cheatsheet of using gdb and ruby processes](gdb-stuck-ruby.txt)
+- [Cheatsheet of using gdb and Ruby processes](gdb-stuck-ruby.txt)

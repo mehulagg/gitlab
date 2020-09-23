@@ -2,13 +2,13 @@
 
 require 'spec_helper'
 
-describe PipelineScheduleWorker do
+RSpec.describe PipelineScheduleWorker do
   include ExclusiveLeaseHelpers
 
   subject { described_class.new.perform }
 
-  set(:project) { create(:project, :repository) }
-  set(:user) { create(:user) }
+  let_it_be(:project) { create(:project, :repository) }
+  let_it_be(:user) { create(:user) }
 
   let!(:pipeline_schedule) do
     create(:ci_pipeline_schedule, :nightly, project: project, owner: user)
@@ -33,7 +33,7 @@ describe PipelineScheduleWorker do
           expect(Ci::Pipeline.last).to be_schedule
 
           pipeline_schedule.reload
-          expect(pipeline_schedule.next_run_at).to be > Time.now
+          expect(pipeline_schedule.next_run_at).to be > Time.current
           expect(pipeline_schedule).to eq(project.ci_pipelines.last.pipeline_schedule)
           expect(pipeline_schedule).to be_active
         end

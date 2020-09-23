@@ -3,15 +3,16 @@
 class ApprovalMergeRequestRule < ApplicationRecord
   include Gitlab::Utils::StrongMemoize
   include ApprovalRuleLike
+  include UsageStatistics
 
   scope :not_matching_pattern, -> (pattern) { code_owner.where.not(name: pattern) }
   scope :matching_pattern, -> (pattern) { code_owner.where(name: pattern) }
 
   scope :from_project_rule, -> (project_rule) do
     joins(:approval_merge_request_rule_source)
-    .where(
-      approval_merge_request_rule_sources: { approval_project_rule_id: project_rule.id }
-    )
+      .where(
+        approval_merge_request_rule_sources: { approval_project_rule_id: project_rule.id }
+      )
   end
   scope :for_unmerged_merge_requests, -> (merge_requests = nil) do
     query = joins(:merge_request).where.not(merge_requests: { state_id: MergeRequest.available_states[:merged] })
@@ -22,13 +23,13 @@ class ApprovalMergeRequestRule < ApplicationRecord
       query
     end
   end
+  scope :code_owner_approval_optional, -> { code_owner.where(approvals_required: 0) }
+  scope :code_owner_approval_required, -> { code_owner.where('approvals_required > 0') }
+  scope :with_added_approval_rules, -> { left_outer_joins(:approval_merge_request_rule_source).where(approval_merge_request_rule_sources: { approval_merge_request_rule_id: nil }) }
 
-  validates :name, uniqueness: { scope: [:merge_request, :code_owner] }
+  validates :name, uniqueness: { scope: [:merge_request_id, :rule_type, :section] }
+  validates :rule_type, uniqueness: { scope: :merge_request_id, message: proc { _('any-approver for the merge request already exists') } }, if: :any_approver?
   validates :report_type, presence: true, if: :report_approver?
-  # Temporary validations until `code_owner` can be dropped in favor of `rule_type`
-  # To be removed with https://gitlab.com/gitlab-org/gitlab/issues/11834
-  validates :code_owner, inclusion: { in: [true], if: :code_owner? }
-  validates :code_owner, inclusion: { in: [false], if: :regular? }
 
   belongs_to :merge_request, inverse_of: :approval_rules
 
@@ -47,45 +48,40 @@ class ApprovalMergeRequestRule < ApplicationRecord
     any_approver: 4
   }
 
+  alias_method :regular, :regular?
+  alias_method :code_owner, :code_owner?
+
   enum report_type: {
     security: 1,
-    license_management: 2
+    license_scanning: 2
   }
 
-  # Deprecated scope until code_owner column has been migrated to rule_type
-  # To be removed with https://gitlab.com/gitlab-org/gitlab/issues/11834
-  scope :code_owner, -> { where(code_owner: true).or(where(rule_type: :code_owner)) }
   scope :security_report, -> { report_approver.where(report_type: :security) }
-  scope :license_compliance, -> { report_approver.where(report_type: :license_management) }
+  scope :license_compliance, -> { report_approver.where(report_type: :license_scanning) }
   scope :with_head_pipeline, -> { includes(merge_request: [:head_pipeline]) }
   scope :open_merge_requests, -> { merge(MergeRequest.opened) }
   scope :for_checks_that_can_be_refreshed, -> { license_compliance.open_merge_requests.with_head_pipeline }
 
-  def self.find_or_create_code_owner_rule(merge_request, pattern)
-    merge_request.approval_rules.code_owner.where(name: pattern).first_or_create do |rule|
+  def self.find_or_create_code_owner_rule(merge_request, entry)
+    merge_request.approval_rules.code_owner.where(name: entry.pattern).where(section: entry.section).first_or_create do |rule|
       rule.rule_type = :code_owner
-      rule.code_owner = true # deprecated, replaced with `rule_type: :code_owner`
     end
   rescue ActiveRecord::RecordNotUnique
     retry
   end
 
+  def audit_add(_model)
+    # no-op
+    # only audit on project rule
+  end
+
+  def audit_remove(_model)
+    # no-op
+    # only audit on project rule
+  end
+
   def project
     merge_request.target_project
-  end
-
-  # ApprovalRuleLike interface
-  # Temporary override to handle legacy records that have not yet been migrated
-  # To be removed with https://gitlab.com/gitlab-org/gitlab/issues/11834
-  def regular?
-    read_attribute(:rule_type) == 'regular' || (!report_approver? && !code_owner && !any_approver?)
-  end
-  alias_method :regular, :regular?
-
-  # Temporary override to handle legacy records that have not yet been migrated
-  # To be removed with https://gitlab.com/gitlab-org/gitlab/issues/11834
-  def code_owner?
-    read_attribute(:rule_type) == 'code_owner' || code_owner
   end
 
   def approval_project_rule_id=(approval_project_rule_id)
@@ -116,13 +112,15 @@ class ApprovalMergeRequestRule < ApplicationRecord
     # Before being merged, approved_approvers are dynamically calculated in ApprovalWrappedRule instead of being persisted.
     return unless merge_request.merged?
 
-    self.approved_approver_ids = merge_request.approvals.map(&:user_id) & approvers.map(&:id)
+    approvers = ApprovalWrappedRule.wrap(merge_request, self).approved_approvers
+
+    self.approved_approver_ids = approvers.map(&:id)
   end
 
   def refresh_required_approvals!(project_approval_rule)
     return unless report_approver?
 
-    refresh_license_management_approvals(project_approval_rule) if license_management?
+    refresh_license_scanning_approvals(project_approval_rule) if license_scanning?
   end
 
   private
@@ -134,7 +132,7 @@ class ApprovalMergeRequestRule < ApplicationRecord
     errors.add(:approval_project_rule, 'must be for the same project')
   end
 
-  def refresh_license_management_approvals(project_approval_rule)
+  def refresh_license_scanning_approvals(project_approval_rule)
     license_report = merge_request.head_pipeline&.license_scanning_report
     return if license_report.blank?
 

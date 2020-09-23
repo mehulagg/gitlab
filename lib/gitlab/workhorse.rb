@@ -22,18 +22,16 @@ module Gitlab
       def git_http_ok(repository, repo_type, user, action, show_all_refs: false)
         raise "Unsupported action: #{action}" unless ALLOWED_GIT_HTTP_ACTIONS.include?(action.to_s)
 
-        project = repository.project
-
         attrs = {
           GL_ID: Gitlab::GlId.gl_id(user),
-          GL_REPOSITORY: repo_type.identifier_for_subject(project),
+          GL_REPOSITORY: repo_type.identifier_for_container(repository.container),
           GL_USERNAME: user&.username,
           ShowAllRefs: show_all_refs,
           Repository: repository.gitaly_repository.to_h,
           GitConfigOptions: [],
           GitalyServer: {
-            address: Gitlab::GitalyClient.address(project.repository_storage),
-            token: Gitlab::GitalyClient.token(project.repository_storage),
+            address: Gitlab::GitalyClient.address(repository.storage),
+            token: Gitlab::GitalyClient.token(repository.storage),
             features: Feature::Gitaly.server_feature_flags
           }
         }
@@ -64,9 +62,6 @@ module Gitlab
       end
 
       def send_git_archive(repository, ref:, format:, append_sha:, path: nil)
-        path_enabled = Feature.enabled?(:git_archive_path, default_enabled: true)
-        path = nil unless path_enabled
-
         format ||= 'tar.gz'
         format = format.downcase
 
@@ -80,12 +75,7 @@ module Gitlab
 
         raise "Repository or ref not found" if metadata.empty?
 
-        params =
-          if path_enabled
-            send_git_archive_params(repository, metadata, path, archive_format(format))
-          else
-            metadata
-          end
+        params = send_git_archive_params(repository, metadata, path, archive_format(format))
 
         # If present, DisableCache must be a Boolean. Otherwise
         # workhorse ignores it.
@@ -140,8 +130,7 @@ module Gitlab
         ]
       end
 
-      def send_artifacts_entry(build, entry)
-        file = build.artifacts_file
+      def send_artifacts_entry(file, entry)
         archive = file.file_storage? ? file.path : file.url
 
         params = {
@@ -164,6 +153,19 @@ module Gitlab
         [
           SEND_DATA_HEADER,
           "send-url:#{encode(params)}"
+        ]
+      end
+
+      def send_scaled_image(location, width, content_type)
+        params = {
+          'Location' => location,
+          'Width' => width,
+          'ContentType' => content_type
+        }
+
+        [
+          SEND_DATA_HEADER,
+          "send-scaled-img:#{encode(params)}"
         ]
       end
 
@@ -215,7 +217,7 @@ module Gitlab
       # This is the outermost encoding of a senddata: header. It is safe for
       # inclusion in HTTP response headers
       def encode(hash)
-        Base64.urlsafe_encode64(JSON.dump(hash))
+        Base64.urlsafe_encode64(Gitlab::Json.dump(hash))
       end
 
       # This is for encoding individual fields inside the senddata JSON that
@@ -227,8 +229,8 @@ module Gitlab
 
       def gitaly_server_hash(repository)
         {
-          address: Gitlab::GitalyClient.address(repository.project.repository_storage),
-          token: Gitlab::GitalyClient.token(repository.project.repository_storage),
+          address: Gitlab::GitalyClient.address(repository.shard),
+          token: Gitlab::GitalyClient.token(repository.shard),
           features: Feature::Gitaly.server_feature_flags
         }
       end

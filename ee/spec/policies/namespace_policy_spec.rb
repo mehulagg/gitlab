@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe NamespacePolicy do
+RSpec.describe NamespacePolicy do
   let(:owner) { build_stubbed(:user) }
   let(:namespace) { build_stubbed(:namespace, owner: owner) }
   let(:owner_permissions) { [:create_projects, :admin_namespace, :read_namespace] }
@@ -23,23 +23,25 @@ describe NamespacePolicy do
     end
   end
 
-  describe 'create_jira_connect_subscription' do
-    context 'admin' do
-      let(:current_user) { build_stubbed(:admin) }
+  context ':over_storage_limit' do
+    let(:current_user) { owner }
 
-      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+    before do
+      allow(namespace).to receive(:over_storage_limit?).and_return(over_storage_limit)
     end
 
-    context 'owner' do
-      let(:current_user) { owner }
+    context 'when the namespace has exceeded its storage limit' do
+      let(:over_storage_limit) { true }
 
-      it { is_expected.to be_allowed(:create_jira_connect_subscription) }
+      it { is_expected.to(be_disallowed(:create_projects)) }
     end
 
-    context 'other user' do
-      let(:current_user) { build_stubbed(:user) }
+    context 'when the namespace has not exceeded its storage limit' do
+      let(:over_storage_limit) { false }
 
-      it { is_expected.to be_disallowed(:create_jira_connect_subscription) }
+      it { is_expected.to(be_allowed(:create_projects)) }
     end
   end
+
+  it_behaves_like 'update namespace limit policy'
 end

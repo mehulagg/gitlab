@@ -1,7 +1,7 @@
-import { visitUrl } from '../lib/utils/url_utility';
-import Flash from '../flash';
-import Service from './services/sidebar_service';
 import Store from 'ee_else_ce/sidebar/stores/sidebar_store';
+import { visitUrl } from '../lib/utils/url_utility';
+import { deprecatedCreateFlash as Flash } from '../flash';
+import Service from './services/sidebar_service';
 import { __ } from '~/locale';
 
 export default class SidebarMediator {
@@ -19,6 +19,8 @@ export default class SidebarMediator {
       toggleSubscriptionEndpoint: options.toggleSubscriptionEndpoint,
       moveIssueEndpoint: options.moveIssueEndpoint,
       projectsAutocompleteEndpoint: options.projectsAutocompleteEndpoint,
+      fullPath: options.fullPath,
+      iid: options.iid,
     });
     SidebarMediator.singleton = this;
   }
@@ -45,8 +47,8 @@ export default class SidebarMediator {
   fetch() {
     return this.service
       .get()
-      .then(({ data }) => {
-        this.processFetchedData(data);
+      .then(([restResponse, graphQlResponse]) => {
+        this.processFetchedData(restResponse.data, graphQlResponse.data);
       })
       .catch(() => new Flash(__('Error occurred when fetching sidebar data')));
   }

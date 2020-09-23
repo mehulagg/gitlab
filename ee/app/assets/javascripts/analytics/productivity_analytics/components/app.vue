@@ -7,14 +7,19 @@ import {
   GlDropdownItem,
   GlButton,
   GlTooltipDirective,
+  GlIcon,
+  GlAlert,
 } from '@gitlab/ui';
+import dateFormat from 'dateformat';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
 import featureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
-import Icon from '~/vue_shared/components/icon.vue';
+import { beginOfDayTime, endOfDayTime } from '~/lib/utils/datetime_utility';
 import MetricChart from './metric_chart.vue';
 import Scatterplot from '../../shared/components/scatterplot.vue';
 import MergeRequestTable from './mr_table.vue';
 import { chartKeys } from '../constants';
+import { dateFormats } from '../../shared/constants';
+import urlSyncMixin from '../../shared/mixins/url_sync_mixin';
 
 export default {
   components: {
@@ -24,7 +29,8 @@ export default {
     GlDropdownItem,
     GlColumnChart,
     GlButton,
-    Icon,
+    GlIcon,
+    GlAlert,
     MetricChart,
     Scatterplot,
     MergeRequestTable,
@@ -32,12 +38,8 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
-  mixins: [featureFlagsMixin()],
+  mixins: [featureFlagsMixin(), urlSyncMixin],
   props: {
-    endpoint: {
-      type: String,
-      required: true,
-    },
     emptyStateSvgPath: {
       type: String,
       required: true,
@@ -46,6 +48,11 @@ export default {
       type: String,
       required: true,
     },
+    hideGroupDropDown: {
+      type: Boolean,
+      required: false,
+      default: false,
+    },
   },
   data() {
     return {
@@ -53,11 +60,20 @@ export default {
     };
   },
   computed: {
-    ...mapState('filters', ['groupNamespace']),
+    ...mapState('filters', [
+      'groupNamespace',
+      'projectPath',
+      'authorUsername',
+      'labelName',
+      'milestoneTitle',
+      'startDate',
+      'endDate',
+    ]),
     ...mapState('table', ['isLoadingTable', 'mergeRequests', 'pageInfo', 'columnMetric']),
     ...mapGetters(['getMetricTypes']),
     ...mapGetters('charts', [
       'chartLoading',
+      'chartErrorCode',
       'chartHasData',
       'getColumnChartData',
       'getColumnChartDatazoomOption',
@@ -68,6 +84,7 @@ export default {
       'scatterplotYaxisLabel',
       'hasNoAccessError',
       'isChartEnabled',
+      'isFilteringByDaysToMerge',
     ]),
     ...mapGetters('table', [
       'sortFieldDropdownLabel',
@@ -89,20 +106,30 @@ export default {
     showSecondaryCharts() {
       return !this.chartLoading(chartKeys.main) && this.chartHasData(chartKeys.main);
     },
+    query() {
+      return {
+        group_id: !this.hideGroupDropDown ? this.groupNamespace : null,
+        project_id: this.projectPath,
+        author_username: this.authorUsername,
+        'label_name[]': this.labelName,
+        milestone_title: this.milestoneTitle,
+        merged_after: `${dateFormat(this.startDate, dateFormats.isoDate)}${beginOfDayTime}`,
+        merged_before: `${dateFormat(this.endDate, dateFormats.isoDate)}${endOfDayTime}`,
+      };
+    },
   },
   mounted() {
-    this.setEndpoint(this.endpoint);
     this.setChartEnabled({
       chartKey: chartKeys.scatterplot,
       isEnabled: this.isScatterplotFeatureEnabled(),
     });
   },
   methods: {
-    ...mapActions(['setEndpoint']),
     ...mapActions('charts', [
       'fetchChartData',
       'setMetricType',
       'updateSelectedItems',
+      'resetMainChartSelection',
       'setChartEnabled',
     ]),
     ...mapActions('table', ['setSortField', 'setPage', 'toggleSortOrder', 'setColumnMetric']),
@@ -116,6 +143,7 @@ export default {
           axisLabel: {
             formatter: value => value,
           },
+          minInterval: 1,
         },
         ...this.getColumnChartDatazoomOption(chartKey),
       };
@@ -154,7 +182,18 @@ export default {
       "
     />
     <template v-if="showAppContent">
-      <h4>{{ s__('ProductivityAnalytics|Merge Requests') }}</h4>
+      <div class="d-flex justify-content-between">
+        <h4>{{ s__('ProductivityAnalytics|Merge Requests') }}</h4>
+        <gl-button
+          v-if="isFilteringByDaysToMerge"
+          ref="clearChartFiltersBtn"
+          class="btn-link float-right"
+          type="button"
+          variant="default"
+          @click="resetMainChartSelection()"
+          >{{ __('Clear chart filters') }}</gl-button
+        >
+      </div>
       <metric-chart
         ref="mainChart"
         class="mb-4"
@@ -163,6 +202,7 @@ export default {
           __('You can filter by \'days to merge\' by clicking on the columns in the chart.')
         "
         :is-loading="chartLoading(chartKeys.main)"
+        :error-code="chartErrorCode(chartKeys.main)"
         :chart-data="getColumnChartData(chartKeys.main)"
       >
         <gl-column-chart
@@ -275,8 +315,8 @@ export default {
                     @click="setSortField(metric.key)"
                   >
                     <span class="d-flex">
-                      <icon
-                        class="flex-shrink-0 append-right-4"
+                      <gl-icon
+                        class="flex-shrink-0 gl-mr-2"
                         :class="{
                           invisible: !isSelectedSortField(metric.key),
                         }"
@@ -287,7 +327,7 @@ export default {
                   </gl-dropdown-item>
                 </gl-dropdown>
                 <gl-button v-gl-tooltip.hover :title="sortTooltipTitle" @click="toggleSortOrder">
-                  <icon :name="sortIcon" />
+                  <gl-icon :name="sortIcon" />
                 </gl-button>
               </div>
             </div>
@@ -306,9 +346,9 @@ export default {
             @columnMetricChange="setColumnMetric"
             @pageChange="setPage"
           />
-          <div v-if="showMergeRequestTableNoData" class="js-no-data bs-callout bs-callout-info">
+          <gl-alert v-if="showMergeRequestTableNoData" variant="info" :dismissable="false">
             {{ __('There is no data available. Please change your selection.') }}
-          </div>
+          </gl-alert>
         </div>
       </template>
     </template>

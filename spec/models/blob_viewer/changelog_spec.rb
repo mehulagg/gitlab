@@ -2,11 +2,12 @@
 
 require 'spec_helper'
 
-describe BlobViewer::Changelog do
+RSpec.describe BlobViewer::Changelog do
   include FakeBlobHelpers
 
   let(:project) { create(:project, :repository) }
   let(:blob) { fake_blob(path: 'CHANGELOG') }
+
   subject { described_class.new(blob) }
 
   describe '#render_error' do

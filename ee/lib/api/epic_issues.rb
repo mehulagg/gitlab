@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module API
-  class EpicIssues < Grape::API
+  class EpicIssues < Grape::API::Instance
     before do
       authenticate!
       authorize_epics_feature!
@@ -29,7 +29,7 @@ module API
         optional :move_after_id, type: Integer, desc: 'The id of the epic issue association that should be positioned after the actual issue'
       end
       put ':id/(-/)epics/:epic_iid/issues/:epic_issue_id' do
-        authorize_can_admin!
+        authorize_can_admin_epic!
 
         update_params = {
           move_before_id: params[:move_before_id],
@@ -55,12 +55,14 @@ module API
       params do
         requires :epic_iid, type: Integer, desc: 'The iid of the epic'
       end
-      get ':id/(-/)epics/:epic_iid/issues' do
-        authorize_can_read!
+      [':id/epics/:epic_iid/issues', ':id/-/epics/:epic_iid/issues'].each do |path|
+        get path do
+          authorize_can_read!
 
-        present epic.issues_readable_by(current_user),
-          with: EE::API::Entities::EpicIssue,
-          current_user: current_user
+          present epic.issues_readable_by(current_user),
+            with: EE::API::Entities::EpicIssue,
+            current_user: current_user
+        end
       end
 
       desc 'Assign an issue to the epic' do
@@ -71,7 +73,7 @@ module API
       end
       # rubocop: disable CodeReuse/ActiveRecord
       post ':id/(-/)epics/:epic_iid/issues/:issue_id' do
-        authorize_can_admin!
+        authorize_can_admin_epic!
 
         issue = Issue.find(params[:issue_id])
 
@@ -97,7 +99,7 @@ module API
         requires :epic_issue_id, type: Integer, desc: 'The id of the association'
       end
       delete ':id/(-/)epics/:epic_iid/issues/:epic_issue_id' do
-        authorize_can_admin!
+        authorize_can_admin_epic!
 
         result = ::EpicIssues::DestroyService.new(link, current_user).execute
 

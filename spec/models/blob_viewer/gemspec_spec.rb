@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe BlobViewer::Gemspec do
+RSpec.describe BlobViewer::Gemspec do
   include FakeBlobHelpers
 
   let(:project) { build_stubbed(:project) }
@@ -14,7 +14,9 @@ describe BlobViewer::Gemspec do
       end
     SPEC
   end
+
   let(:blob) { fake_blob(path: 'activerecord.gemspec', data: data) }
+
   subject { described_class.new(blob) }
 
   describe '#package_name' do

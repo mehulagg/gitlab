@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::Checks::LfsCheck do
+RSpec.describe Gitlab::Checks::LfsCheck do
   include_context 'change access checks context'
 
   let(:blob_object) { project.repository.blob_at_branch('lfs', 'files/lfs/lfs_object.iso') }
@@ -50,7 +50,7 @@ describe Gitlab::Checks::LfsCheck do
       end
 
       it 'fails if any LFS blobs are missing' do
-        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::UnauthorizedError, /LFS objects are missing/)
+        expect { subject.validate! }.to raise_error(Gitlab::GitAccess::ForbiddenError, /LFS objects are missing/)
       end
 
       it 'succeeds if LFS objects have already been uploaded' do

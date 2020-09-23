@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Gitlab::IpRestriction::Enforcer do
+RSpec.describe Gitlab::IpRestriction::Enforcer do
   describe '#allows_current_ip?' do
     let(:group) { create(:group) }
     let(:current_ip) { '192.168.0.2' }

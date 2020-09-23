@@ -2,8 +2,8 @@
 
 require 'spec_helper'
 
-describe API::ResourceLabelEvents do
-  set(:user) { create(:user) }
+RSpec.describe API::ResourceLabelEvents do
+  let_it_be(:user) { create(:user) }
 
   before do
     parent.add_developer(user)

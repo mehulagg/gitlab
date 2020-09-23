@@ -1,0 +1,254 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MergeRequestTable component template matches the snapshot 1`] = `
+<table
+  aria-busy="false"
+  aria-colcount="7"
+  aria-describedby="__BVID__59__caption_"
+  class="table b-table gl-table my-3 b-table-stacked-sm"
+  id="__BVID__59"
+  role="table"
+>
+  <!---->
+  <!---->
+  <thead
+    class="thead-white border-bottom"
+    role="rowgroup"
+  >
+    <!---->
+    <tr
+      class=""
+      role="row"
+    >
+      <th
+        aria-colindex="1"
+        class="w-30p"
+        role="columnheader"
+        scope="col"
+      >
+        Merge Request
+      </th>
+      <th
+        aria-colindex="2"
+        class="text-right"
+        role="columnheader"
+        scope="col"
+      >
+        Review time
+      </th>
+      <th
+        aria-colindex="3"
+        class=""
+        role="columnheader"
+        scope="col"
+      >
+        Author
+      </th>
+      <th
+        aria-colindex="4"
+        class=""
+        role="columnheader"
+        scope="col"
+      >
+        Approvers
+      </th>
+      <th
+        aria-colindex="5"
+        class="text-right"
+        role="columnheader"
+        scope="col"
+      >
+        Comments
+      </th>
+      <th
+        aria-colindex="6"
+        class="text-right"
+        role="columnheader"
+        scope="col"
+      >
+        Commits
+      </th>
+      <th
+        aria-colindex="7"
+        class="text-right"
+        role="columnheader"
+        scope="col"
+      >
+        Line changes
+      </th>
+    </tr>
+  </thead>
+  <tbody
+    role="rowgroup"
+  >
+    <!---->
+    <tr
+      class=""
+      role="row"
+    >
+      <td
+        aria-colindex="1"
+        class="table-col d-flex align-items-center"
+        data-label="Merge Request"
+        role="cell"
+      >
+        <div>
+          <div
+            class="d-flex flex-column flex-grow align-items-end align-items-sm-start"
+          >
+            <div
+              class="mr-title str-truncated my-2"
+            >
+              <a
+                class="gl-link font-weight-bold text-plain"
+                href="https://gitlab.com/gitlab-org/gitlab/merge_requests/38062"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                This is just a super long merge request title that does not fit into one line so it needs to be truncated
+              </a>
+            </div>
+             
+            <ul
+              class="horizontal-list list-items-separated text-secondary mb-0"
+            >
+              <li>
+                !12345
+              </li>
+               
+              <li>
+                opened just now
+              </li>
+               
+              <li>
+                <span
+                  class="d-flex align-items-center"
+                >
+                  <svg
+                    class="mr-2 gl-icon s16"
+                    data-testid="clock-icon"
+                  >
+                    <use
+                      href="#clock"
+                    />
+                  </svg>
+                  
+            11.1
+          
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </td>
+      <td
+        aria-colindex="2"
+        class="text-right table-col d-flex align-items-center d-sm-table-cell"
+        data-label="Review time"
+        role="cell"
+      >
+        <div>
+          <span>
+            2 days
+          </span>
+        </div>
+      </td>
+      <td
+        aria-colindex="3"
+        class="table-col d-flex align-items-center d-sm-table-cell"
+        data-label="Author"
+        role="cell"
+      >
+        <div>
+          <a
+            class="gl-link gl-avatar-link"
+            href="https://gitlab.com/foo"
+            rel="noopener noreferrer"
+            target="_blank"
+            title="foo"
+          >
+            <div
+              class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s24 gl-avatar-identicon-bg1"
+            >
+              
+  F
+
+            </div>
+          </a>
+        </div>
+      </td>
+      <td
+        aria-colindex="4"
+        class="table-col d-flex align-items-center d-sm-table-cell"
+        data-label="Approvers"
+        role="cell"
+      >
+        <div>
+          <div>
+            <a
+              class="gl-link gl-avatar-link"
+              href="https://gitlab.com/bar"
+              rel="noopener noreferrer"
+              target="_blank"
+              title="bar"
+            >
+              <div
+                class="gl-avatar gl-avatar-identicon gl-avatar-circle gl-avatar-s24 gl-avatar-identicon-bg1"
+              >
+                
+  
+
+              </div>
+            </a>
+          </div>
+        </div>
+      </td>
+      <td
+        aria-colindex="5"
+        class="text-right table-col d-flex align-items-center d-sm-table-cell"
+        data-label="Comments"
+        role="cell"
+      >
+        <div>
+          21
+        </div>
+      </td>
+      <td
+        aria-colindex="6"
+        class="text-right table-col d-flex align-items-center d-sm-table-cell"
+        data-label="Commits"
+        role="cell"
+      >
+        <div>
+          <span>
+            7
+          </span>
+        </div>
+      </td>
+      <td
+        aria-colindex="7"
+        class="text-right table-col d-flex align-items-center d-sm-table-cell"
+        data-label="Line changes"
+        role="cell"
+      >
+        <div>
+          <span
+            class="font-weight-bold cgreen"
+          >
+             +504 
+          </span>
+           
+          <span
+            class="font-weight-bold cred"
+          >
+             -10 
+          </span>
+        </div>
+      </td>
+    </tr>
+    <!---->
+    <!---->
+  </tbody>
+  <!---->
+</table>
+`;

@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Ci::ArchiveTracesCronWorker do
+RSpec.describe Ci::ArchiveTracesCronWorker do
   subject { described_class.new.perform }
 
   let(:finished_at) { 1.day.ago }
@@ -35,8 +35,9 @@ describe Ci::ArchiveTracesCronWorker do
     it_behaves_like 'archives trace'
 
     it 'executes service' do
-      expect_any_instance_of(Ci::ArchiveTraceService)
-        .to receive(:execute).with(build, anything)
+      expect_next_instance_of(Ci::ArchiveTraceService) do |instance|
+        expect(instance).to receive(:execute).with(build, anything)
+      end
 
       subject
     end
@@ -63,8 +64,10 @@ describe Ci::ArchiveTracesCronWorker do
       let!(:build) { create(:ci_build, :success, :trace_live, finished_at: finished_at) }
 
       before do
-        allow(Gitlab::Sentry).to receive(:track_exception)
-        allow_any_instance_of(Gitlab::Ci::Trace).to receive(:archive!).and_raise('Unexpected error')
+        allow(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
+        allow_next_instance_of(Gitlab::Ci::Trace) do |instance|
+          allow(instance).to receive(:archive!).and_raise('Unexpected error')
+        end
       end
 
       it 'puts a log' do

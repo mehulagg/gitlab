@@ -1,27 +1,47 @@
 <script>
-import { s__ } from '~/locale';
 import { mapGetters, mapActions, mapState } from 'vuex';
 import { engineeringNotation, sum, average } from '@gitlab/ui/src/utils/number_utils';
-import { GlLoadingIcon } from '@gitlab/ui';
-import { GlColumnChart, GlChartLegend } from '@gitlab/ui/charts';
+import { GlLoadingIcon, GlEmptyState } from '@gitlab/ui';
+import { GlColumnChart, GlChartLegend } from '@gitlab/ui/dist/charts';
+import { s__ } from '~/locale';
 import { getMonthNames } from '~/lib/utils/datetime_utility';
 import { getSvgIconPathContent } from '~/lib/utils/icon_utils';
-import EmptyState from './empty_state.vue';
+import { mergeUrlParams } from '~/lib/utils/url_utility';
+import IssuesAnalyticsTable from './issues_analytics_table.vue';
+import FilteredSearchIssueAnalytics from '../filtered_search_issues_analytics';
+import { transformFilters } from '../utils';
 
 export default {
   components: {
-    EmptyState,
     GlLoadingIcon,
+    GlEmptyState,
     GlColumnChart,
     GlChartLegend,
+    IssuesAnalyticsTable,
   },
   props: {
     endpoint: {
       type: String,
       required: true,
     },
+    issuesApiEndpoint: {
+      type: String,
+      required: true,
+    },
+    issuesPageEndpoint: {
+      type: String,
+      required: true,
+    },
     filterBlockEl: {
       type: HTMLDivElement,
+      required: true,
+    },
+    noDataEmptyStateSvgPath: {
+      type: String,
+      required: true,
+    },
+    filtersEmptyStateSvgPath: {
+      type: String,
       required: true,
     },
   },
@@ -32,7 +52,7 @@ export default {
       seriesInfo: [
         {
           type: 'solid',
-          name: s__('IssuesAnalytics|Issues created'),
+          name: s__('IssuesAnalytics|Issues opened'),
           color: '#1F78D1',
         },
       ],
@@ -72,15 +92,21 @@ export default {
     showFiltersEmptyState() {
       return !this.loading && !this.showChart && this.hasFilters;
     },
+    dataZoomConfig() {
+      const config = {
+        type: 'slider',
+        startValue: 0,
+      };
+
+      if (this.svgs['scroll-handle']) {
+        return { ...config, handleIcon: this.svgs['scroll-handle'] };
+      }
+
+      return config;
+    },
     chartOptions() {
       return {
-        dataZoom: [
-          {
-            type: 'slider',
-            startValue: 0,
-            handleIcon: this.svgs['scroll-handle'],
-          },
-        ],
+        dataZoom: [this.dataZoomConfig],
       };
     },
     series() {
@@ -91,6 +117,17 @@ export default {
     },
     seriesTotal() {
       return engineeringNotation(sum(...this.series));
+    },
+    issuesTableEndpoints() {
+      const publicApiFilters = transformFilters(this.appliedFilters);
+
+      return {
+        api: mergeUrlParams(publicApiFilters, this.issuesApiEndpoint),
+        issuesPage: this.issuesPageEndpoint,
+      };
+    },
+    filterString() {
+      return JSON.stringify(this.appliedFilters);
     },
   },
   watch: {
@@ -104,6 +141,9 @@ export default {
     },
   },
   created() {
+    this.filterManager = new FilteredSearchIssueAnalytics(this.appliedFilters);
+    this.filterManager.setup();
+
     this.setSvg('scroll-handle');
   },
   mounted() {
@@ -135,18 +175,16 @@ export default {
 </script>
 <template>
   <div class="issues-analytics-wrapper" data-qa-selector="issues_analytics_wrapper">
-    <div v-if="loading" class="issues-analytics-loading text-center">
-      <gl-loading-icon :inline="true" :size="4" />
-    </div>
+    <gl-loading-icon v-if="loading" size="md" class="mt-8" />
 
     <div v-if="showChart" class="issues-analytics-chart">
-      <h4 class="chart-title">{{ s__('IssuesAnalytics|Issues created per month') }}</h4>
+      <h4 class="chart-title">{{ s__('IssuesAnalytics|Issues opened per month') }}</h4>
 
       <gl-column-chart
         data-qa-selector="issues_analytics_graph"
         :data="{ Full: data }"
         :option="chartOptions"
-        :y-axis-title="s__('IssuesAnalytics|Issues created')"
+        :y-axis-title="s__('IssuesAnalytics|Issues opened')"
         :x-axis-title="s__('IssuesAnalytics|Last 12 months') + ' (' + chartDateRange + ')'"
         x-axis-type="category"
         @created="onCreated"
@@ -161,26 +199,28 @@ export default {
       </div>
     </div>
 
-    <empty-state
+    <issues-analytics-table :key="filterString" class="mt-8" :endpoints="issuesTableEndpoints" />
+
+    <gl-empty-state
       v-if="showFiltersEmptyState"
-      image="illustrations/issues.svg"
       :title="s__('IssuesAnalytics|Sorry, your filter produced no results')"
-      :summary="
+      :description="
         s__(
           'IssuesAnalytics|To widen your search, change or remove filters in the filter bar above',
         )
       "
+      :svg-path="filtersEmptyStateSvgPath"
     />
 
-    <empty-state
+    <gl-empty-state
       v-if="showNoDataEmptyState"
-      image="illustrations/monitoring/getting_started.svg"
       :title="s__('IssuesAnalytics|There are no issues for the projects in your group')"
-      :summary="
+      :description="
         s__(
           'IssuesAnalytics|After you begin creating issues for your projects, we can start tracking and displaying metrics for them',
         )
       "
+      :svg-path="noDataEmptyStateSvgPath"
     />
   </div>
 </template>

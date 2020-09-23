@@ -32,7 +32,11 @@ module Gitlab
       end
 
       def map_from(license_hash)
-        ::Gitlab::SPDX::License.new(id: license_hash[:licenseId], name: license_hash[:name])
+        ::Gitlab::SPDX::License.new(
+          id: license_hash[:licenseId],
+          name: license_hash[:name],
+          deprecated: license_hash[:isDeprecatedLicenseId]
+        )
       end
     end
   end

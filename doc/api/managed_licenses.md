@@ -4,7 +4,7 @@
 
 Get all managed licenses for a given project.
 
-```
+```plaintext
 GET /projects/:id/managed_licenses
 ```
 
@@ -12,8 +12,8 @@ GET /projects/:id/managed_licenses
 | --------- | ------- | -------- | --------------------- |
 | `id`      | integer/string    | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) |
 
-```bash
-curl --header "PRIVATE-TOKEN: <your_access_token>" https://gitlab.example.com/api/v4/projects/1/managed_licenses
+```shell
+curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/managed_licenses"
 ```
 
 Example response:
@@ -37,7 +37,7 @@ Example response:
 
 Shows an existing managed license.
 
-```
+```plaintext
 GET /projects/:id/managed_licenses/:managed_license_id
 ```
 
@@ -46,7 +46,7 @@ GET /projects/:id/managed_licenses/:managed_license_id
 | `id`      | integer/string    | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `managed_license_id`      | integer/string    | yes      | The ID or URL-encoded name of the license belonging to the project |
 
-```bash
+```shell
 curl --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/managed_licenses/6"
 ```
 
@@ -64,7 +64,7 @@ Example response:
 
 Creates a new managed license for the given project with the given name and approval status.
 
-```
+```plaintext
 POST /projects/:id/managed_licenses
 ```
 
@@ -74,7 +74,7 @@ POST /projects/:id/managed_licenses
 | `name`        | string  | yes      | The name of the managed license        |
 | `approval_status`       | string  | yes      | The approval status. "approved" or "blacklisted" |
 
-```bash
+```shell
 curl --data "name=MIT&approval_status=blacklisted" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/managed_licenses"
 ```
 
@@ -90,9 +90,9 @@ Example response:
 
 ## Delete a managed license
 
-Deletes a managed license with a given id.
+Deletes a managed license with a given ID.
 
-```
+```plaintext
 DELETE /projects/:id/managed_licenses/:managed_license_id
 ```
 
@@ -101,7 +101,7 @@ DELETE /projects/:id/managed_licenses/:managed_license_id
 | `id`      | integer/string    | yes      | The ID or [URL-encoded path of the project](README.md#namespaced-path-encoding) owned by the authenticated user |
 | `managed_license_id`      | integer/string    | yes      | The ID or URL-encoded name of the license belonging to the project |
 
-```bash
+```shell
 curl --request DELETE --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/managed_licenses/4"
 ```
 
@@ -111,7 +111,7 @@ When successful, it replies with an HTTP 204 response.
 
 Updates an existing managed license with a new approval status.
 
-```
+```plaintext
 PATCH /projects/:id/managed_licenses/:managed_license_id
 ```
 
@@ -121,7 +121,7 @@ PATCH /projects/:id/managed_licenses/:managed_license_id
 | `managed_license_id`      | integer/string    | yes      | The ID or URL-encoded name of the license belonging to the project |
 | `approval_status`       | string  | yes      | The approval status. "approved" or "blacklisted" |
 
-```bash
+```shell
 curl --request PATCH --data "approval_status=blacklisted" --header "PRIVATE-TOKEN: <your_access_token>" "https://gitlab.example.com/api/v4/projects/1/managed_licenses/6"
 ```
 

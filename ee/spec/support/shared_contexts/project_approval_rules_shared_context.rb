@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-shared_context 'project with approval rules' do
+RSpec.shared_context 'project with approval rules' do
   let(:approver) { create(:user) }
   let(:author) { create(:user) }
   let(:project) { create(:project, :public, :repository) }

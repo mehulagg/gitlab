@@ -17,6 +17,8 @@ module Groups
 
       return false unless valid_share_with_group_lock_change?
 
+      return false unless valid_path_change_with_npm_packages?
+
       before_assignment_hook(group, params)
 
       group.assign_attributes(params)
@@ -35,6 +37,20 @@ module Groups
     end
 
     private
+
+    def valid_path_change_with_npm_packages?
+      return true unless group.packages_feature_enabled?
+      return true if params[:path].blank?
+      return true if !group.has_parent? && group.path == params[:path]
+
+      npm_packages = ::Packages::GroupPackagesFinder.new(current_user, group, package_type: :npm).execute
+      if npm_packages.exists?
+        group.errors.add(:path, s_('GroupSettings|cannot change when group contains projects with NPM packages'))
+        return
+      end
+
+      true
+    end
 
     def before_assignment_hook(group, params)
       # overridden in EE
@@ -66,6 +82,7 @@ module Groups
     # overridden in EE
     def remove_unallowed_params
       params.delete(:emails_disabled) unless can?(current_user, :set_emails_disabled, group)
+      params.delete(:default_branch_protection) unless can?(current_user, :update_default_branch_protection, group)
     end
 
     def valid_share_with_group_lock_change?

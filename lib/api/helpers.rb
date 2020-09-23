@@ -4,11 +4,14 @@ module API
   module Helpers
     include Gitlab::Utils
     include Helpers::Pagination
+    include Helpers::PaginationStrategies
 
     SUDO_HEADER = "HTTP_SUDO"
     GITLAB_SHARED_SECRET_HEADER = "Gitlab-Shared-Secret"
     SUDO_PARAM = :sudo
     API_USER_ENV = 'gitlab.api.user'
+    API_EXCEPTION_ENV = 'gitlab.api.exception'
+    API_RESPONSE_STATUS_CODE = 'gitlab.api.response_status_code'
 
     def declared_params(options = {})
       options = { include_parent_namespaces: false }.merge(options)
@@ -29,12 +32,23 @@ module API
       check_unmodified_since!(last_updated)
 
       status 204
+      body false
 
       if block_given?
         yield resource
       else
         resource.destroy
       end
+    end
+
+    def job_token_authentication?
+      initial_current_user && @current_authenticated_job.present? # rubocop:disable Gitlab/ModuleWithInstanceVariables
+    end
+
+    # Returns the job associated with the token provided for
+    # authentication, if any
+    def current_authenticated_job
+      @current_authenticated_job
     end
 
     # rubocop:disable Gitlab/ModuleWithInstanceVariables
@@ -73,12 +87,6 @@ module API
 
     def user_project
       @project ||= find_project!(params[:id])
-    end
-
-    def wiki_page
-      page = ProjectWiki.new(user_project, current_user).find_page(params[:slug])
-
-      page || not_found!('Wiki Page')
     end
 
     def available_labels_for(label_parent, include_ancestor_groups: true)
@@ -139,6 +147,12 @@ module API
       end
     end
 
+    def check_namespace_access(namespace)
+      return namespace if can?(current_user, :read_namespace, namespace)
+
+      not_found!('Namespace')
+    end
+
     # rubocop: disable CodeReuse/ActiveRecord
     def find_namespace(id)
       if id.to_s =~ /^\d+$/
@@ -150,13 +164,15 @@ module API
     # rubocop: enable CodeReuse/ActiveRecord
 
     def find_namespace!(id)
-      namespace = find_namespace(id)
+      check_namespace_access(find_namespace(id))
+    end
 
-      if can?(current_user, :read_namespace, namespace)
-        namespace
-      else
-        not_found!('Namespace')
-      end
+    def find_namespace_by_path(path)
+      Namespace.find_by_full_path(path)
+    end
+
+    def find_namespace_by_path!(path)
+      check_namespace_access(find_namespace_by_path(path))
     end
 
     def find_branch!(branch_name)
@@ -167,9 +183,19 @@ module API
       end
     end
 
+    def find_tag!(tag_name)
+      if Gitlab::GitRefValidator.validate(tag_name)
+        user_project.repository.find_tag(tag_name) || not_found!('Tag')
+      else
+        render_api_error!('The tag refname is invalid', 400)
+      end
+    end
+
     # rubocop: disable CodeReuse/ActiveRecord
-    def find_project_issue(iid)
-      IssuesFinder.new(current_user, project_id: user_project.id).find_by!(iid: iid)
+    def find_project_issue(iid, project_id = nil)
+      project = project_id ? find_project!(project_id) : user_project
+
+      ::IssuesFinder.new(current_user, project_id: project.id).find_by!(iid: iid)
     end
     # rubocop: enable CodeReuse/ActiveRecord
 
@@ -212,9 +238,9 @@ module API
       unauthorized! unless Devise.secure_compare(secret_token, input)
     end
 
-    def authenticated_with_full_private_access!
+    def authenticated_with_can_read_all_resources!
       authenticate!
-      forbidden! unless current_user.full_private_access?
+      forbidden! unless current_user.can_read_all_resources?
     end
 
     def authenticated_as_admin!
@@ -238,6 +264,10 @@ module API
       authorize! :admin_project, user_project
     end
 
+    def authorize_admin_group
+      authorize! :admin_group, user_group
+    end
+
     def authorize_read_builds!
       authorize! :read_build, user_project
     end
@@ -255,9 +285,19 @@ module API
     end
 
     def require_gitlab_workhorse!
+      verify_workhorse_api!
+
       unless env['HTTP_GITLAB_WORKHORSE'].present?
         forbidden!('Request should be executed via GitLab Workhorse')
       end
+    end
+
+    def verify_workhorse_api!
+      Gitlab::Workhorse.verify_api_request!(request.headers)
+    rescue => e
+      Gitlab::ErrorTracking.track_exception(e)
+
+      forbidden!
     end
 
     def require_pages_enabled!
@@ -313,7 +353,7 @@ module API
 
     def order_options_with_tie_breaker
       order_options = { params[:order_by] => params[:sort] }
-      order_options['id'] ||= 'desc'
+      order_options['id'] ||= params[:sort] || 'asc'
       order_options
     end
 
@@ -338,6 +378,12 @@ module API
       render_api_error!(message.join(' '), 404)
     end
 
+    def check_sha_param!(params, merge_request)
+      if params[:sha] && merge_request.diff_head_sha != params[:sha]
+        render_api_error!("SHA does not match HEAD of source branch: #{merge_request.diff_head_sha}", 409)
+      end
+    end
+
     def unauthorized!
       render_api_error!('401 Unauthorized', 401)
     end
@@ -346,8 +392,20 @@ module API
       render_api_error!('405 Method Not Allowed', 405)
     end
 
+    def not_acceptable!
+      render_api_error!('406 Not Acceptable', 406)
+    end
+
+    def service_unavailable!
+      render_api_error!('503 Service Unavailable', 503)
+    end
+
     def conflict!(message = nil)
       render_api_error!(message || '409 Conflict', 409)
+    end
+
+    def unprocessable_entity!(message = nil)
+      render_api_error!(message || '422 Unprocessable Entity', :unprocessable_entity)
     end
 
     def file_too_large!
@@ -362,14 +420,22 @@ module API
       render_api_error!('204 No Content', 204)
     end
 
+    def created!
+      render_api_error!('201 Created', 201)
+    end
+
     def accepted!
       render_api_error!('202 Accepted', 202)
     end
 
     def render_validation_error!(model)
       if model.errors.any?
-        render_api_error!(model.errors.messages || '400 Bad Request', 400)
+        render_api_error!(model_error_messages(model) || '400 Bad Request', 400)
       end
+    end
+
+    def model_error_messages(model)
+      model.errors.messages
     end
 
     def render_spam_error!
@@ -377,15 +443,24 @@ module API
     end
 
     def render_api_error!(message, status)
+      # grape-logging doesn't pass the status code, so this is a
+      # workaround for getting that information in the loggers:
+      # https://github.com/aserafin/grape_logging/issues/71
+      env[API_RESPONSE_STATUS_CODE] = Rack::Utils.status_code(status)
+
       error!({ 'message' => message }, status, header)
     end
 
     def handle_api_exception(exception)
       if report_exception?(exception)
         define_params_for_grape_middleware
-        Gitlab::Sentry.context(current_user)
-        Gitlab::Sentry.track_acceptable_exception(exception, extra: params)
+        Gitlab::ErrorTracking.with_context(current_user) do
+          Gitlab::ErrorTracking.track_exception(exception)
+        end
       end
+
+      # This is used with GrapeLogging::Loggers::ExceptionLogger
+      env[API_EXCEPTION_ENV] = exception
 
       # lifted from https://github.com/rails/rails/blob/master/actionpack/lib/action_dispatch/middleware/debug_exceptions.rb#L60
       trace = exception.backtrace
@@ -423,7 +498,7 @@ module API
 
     def present_disk_file!(path, filename, content_type = 'application/octet-stream')
       filename ||= File.basename(path)
-      header['Content-Disposition'] = ::Gitlab::ContentDisposition.format(disposition: 'attachment', filename: filename)
+      header['Content-Disposition'] = ActionDispatch::Http::ContentDisposition.format(disposition: 'attachment', filename: filename)
       header['Content-Transfer-Encoding'] = 'binary'
       content_type content_type
 
@@ -433,7 +508,7 @@ module API
         header['X-Sendfile'] = path
         body
       else
-        file path
+        sendfile path
       end
     end
 
@@ -451,19 +526,61 @@ module API
       end
     end
 
+    def track_event(action = action_name, **args)
+      category = args.delete(:category) || self.options[:for].name
+      raise "invalid category" unless category
+
+      ::Gitlab::Tracking.event(category, action.to_s, **args)
+    rescue => error
+      Gitlab::AppLogger.warn(
+        "Tracking event failed for action: #{action}, category: #{category}, message: #{error.message}"
+      )
+    end
+
+    # @param event_name [String] the event name
+    # @param values [Array|String] the values counted
+    def increment_unique_values(event_name, values)
+      return unless values.present?
+
+      feature_name = "usage_data_#{event_name}"
+      return unless Feature.enabled?(feature_name)
+
+      Gitlab::UsageDataCounters::HLLRedisCounter.track_event(values, event_name)
+    rescue => error
+      Gitlab::AppLogger.warn("Redis tracking event failed for event: #{event_name}, message: #{error.message}")
+    end
+
+    def with_api_params(&block)
+      yield({ api: true, request: request })
+    end
+
     protected
 
-    def project_finder_params_ce
-      finder_params = { without_deleted: true }
+    def project_finder_params_visibility_ce
+      finder_params = {}
+      finder_params[:min_access_level] = params[:min_access_level] if params[:min_access_level]
+      finder_params[:visibility_level] = Gitlab::VisibilityLevel.level_value(params[:visibility]) if params[:visibility]
       finder_params[:owned] = true if params[:owned].present?
       finder_params[:non_public] = true if params[:membership].present?
       finder_params[:starred] = true if params[:starred].present?
-      finder_params[:visibility_level] = Gitlab::VisibilityLevel.level_value(params[:visibility]) if params[:visibility]
       finder_params[:archived] = archived_param unless params[:archived].nil?
+      finder_params
+    end
+
+    def project_finder_params_ce
+      finder_params = project_finder_params_visibility_ce
+      finder_params[:with_issues_enabled] = true if params[:with_issues_enabled].present?
+      finder_params[:with_merge_requests_enabled] = true if params[:with_merge_requests_enabled].present?
+      finder_params[:without_deleted] = true
       finder_params[:search] = params[:search] if params[:search]
+      finder_params[:search_namespaces] = true if params[:search_namespaces].present?
       finder_params[:user] = params.delete(:user) if params[:user]
       finder_params[:custom_attributes] = params[:custom_attributes] if params[:custom_attributes]
-      finder_params[:min_access_level] = params[:min_access_level] if params[:min_access_level]
+      finder_params[:id_after] = sanitize_id_param(params[:id_after]) if params[:id_after]
+      finder_params[:id_before] = sanitize_id_param(params[:id_before]) if params[:id_before]
+      finder_params[:last_activity_after] = params[:last_activity_after] if params[:last_activity_after]
+      finder_params[:last_activity_before] = params[:last_activity_before] if params[:last_activity_before]
+      finder_params[:repository_storage] = params[:repository_storage] if params[:repository_storage]
       finder_params
     end
 
@@ -518,7 +635,7 @@ module API
     def send_git_blob(repository, blob)
       env['api.format'] = :txt
       content_type 'text/plain'
-      header['Content-Disposition'] = ::Gitlab::ContentDisposition.format(disposition: 'inline', filename: blob.name)
+      header['Content-Disposition'] = ActionDispatch::Http::ContentDisposition.format(disposition: 'inline', filename: blob.name)
 
       # Let Workhorse examine the content and determine the better content disposition
       header[Gitlab::Workhorse::DETECT_HEADER] = "true"
@@ -530,8 +647,8 @@ module API
       header(*Gitlab::Workhorse.send_git_archive(repository, **kwargs))
     end
 
-    def send_artifacts_entry(build, entry)
-      header(*Gitlab::Workhorse.send_artifacts_entry(build, entry))
+    def send_artifacts_entry(file, entry)
+      header(*Gitlab::Workhorse.send_artifacts_entry(file, entry))
     end
 
     # The Grape Error Middleware only has access to `env` but not `params` nor
@@ -558,6 +675,10 @@ module API
 
     def ip_address
       env["action_dispatch.remote_ip"].to_s || request.ip
+    end
+
+    def sanitize_id_param(id)
+      id.present? ? id.to_i : nil
     end
   end
 end

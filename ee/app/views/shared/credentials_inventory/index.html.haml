@@ -1,0 +1,25 @@
+- page_title _("Credentials")
+
+.top-area.scrolling-tabs-container.inner-page-scroll-tabs
+  .fade-left
+    = sprite_icon('chevron-lg-left', size: 12)
+  .fade-right
+    = sprite_icon('chevron-lg-right', size: 12)
+  %ul.nav-links.nav.nav-tabs.scrolling-tabs
+    = nav_link(html_options: { class: active_when(show_personal_access_tokens?) }) do
+      = link_to credentials_inventory_path(filter: 'personal_access_tokens') do
+        = s_('CredentialsInventory|Personal Access Tokens')
+    = nav_link(html_options: { class: active_when(show_ssh_keys?) }) do
+      = link_to credentials_inventory_path(filter: 'ssh_keys') do
+        = s_('CredentialsInventory|SSH Keys')
+
+- if @credentials.empty?
+  .nothing-here-block.border-top-0
+    = s_('CredentialsInventory|No credentials found')
+- else
+  - if show_personal_access_tokens?
+    = render 'shared/credentials_inventory/personal_access_tokens', credentials: @credentials
+  - elsif show_ssh_keys?
+    = render 'shared/credentials_inventory/ssh_keys', credentials: @credentials
+
+= paginate_without_count @credentials

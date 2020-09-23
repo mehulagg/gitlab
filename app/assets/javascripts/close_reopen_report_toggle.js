@@ -2,7 +2,7 @@ import DropLab from './droplab/drop_lab';
 import ISetter from './droplab/plugins/input_setter';
 
 // Todo: Remove this when fixing issue in input_setter plugin
-const InputSetter = Object.assign({}, ISetter);
+const InputSetter = { ...ISetter };
 
 class CloseReopenReportToggle {
   constructor(opts = {}) {
@@ -80,12 +80,7 @@ class CloseReopenReportToggle {
         {
           input: this.button,
           valueAttribute: 'data-url',
-          inputAttribute: 'href',
-        },
-        {
-          input: this.button,
-          valueAttribute: 'data-method',
-          inputAttribute: 'data-method',
+          inputAttribute: 'data-endpoint',
         },
       ],
     };

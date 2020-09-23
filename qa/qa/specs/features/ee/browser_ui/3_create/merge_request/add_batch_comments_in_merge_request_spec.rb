@@ -8,6 +8,7 @@ module QA
           project.name = 'project-with-merge-request'
         end
       end
+
       let(:merge_request) do
         Resource::MergeRequest.fabricate_via_api! do |merge_request|
           merge_request.title = 'This is a merge request'
@@ -16,61 +17,37 @@ module QA
         end
       end
 
-      it 'user submits, discards batch comments' do
-        Runtime::Browser.visit(:gitlab, Page::Main::Login)
-        Page::Main::Login.perform(&:sign_in_using_credentials)
+      it 'user submits a non-diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/637' do
+        Flow::Login.sign_in
 
         merge_request.visit!
 
         Page::MergeRequest::Show.perform do |show|
           show.click_discussions_tab
 
+          # You can't start a review immediately, so we have to add a
+          # comment (or start a thread) first
           show.start_discussion("I'm starting a new discussion")
-          expect(show).to have_content("I'm starting a new discussion")
-
-          show.type_reply_to_discussion("Could you please check this?")
-          show.comment_now
-          expect(show).to have_content("Could you please check this?")
-          expect(show).to have_content("0/1 thread resolved")
-
-          show.type_reply_to_discussion("Could you also check that?")
-          show.resolve_review_discussion
+          show.type_reply_to_discussion(1, "Could you please check this?")
           show.start_review
-          expect(show).to have_content("Could you also check that?")
-          expect(show).to have_content("Finish review 1")
-
-          show.click_diffs_tab
-
-          show.add_comment_to_diff("Can you check this line of code?")
-          show.comment_now
-          expect(show).to have_content("Can you check this line of code?")
-
-          show.type_reply_to_discussion("And this syntax as well?")
-          show.resolve_review_discussion
-          show.start_review
-          expect(show).to have_content("And this syntax as well?")
-          expect(show).to have_content("Finish review 2")
-
           show.submit_pending_reviews
-          expect(show).to have_content("2/2 threads resolved")
 
-          show.toggle_comments
-          show.type_reply_to_discussion("Unresolving this discussion")
-          show.unresolve_review_discussion
-          show.comment_now
-          expect(show).to have_content("1/2 threads resolved")
+          expect(show).to have_content("I'm starting a new discussion")
+          expect(show).to have_content("Could you please check this?")
+          expect(show).to have_content("1 unresolved thread")
         end
+      end
+
+      it 'user submits a diff review', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/638' do
+        Flow::Login.sign_in
+
+        merge_request.visit!
 
         Page::MergeRequest::Show.perform do |show|
-          show.click_discussions_tab
-
-          show.type_reply_to_discussion("Planning to discard this comment")
+          show.click_diffs_tab
+          show.add_comment_to_diff("Can you check this line of code?")
           show.start_review
-
-          expect(show).to have_content("Finish review 1")
-          show.discard_pending_reviews
-
-          expect(show).not_to have_content("Planning to discard this comment")
+          show.submit_pending_reviews
         end
 
         # Overwrite the added file to create a system note as required to
@@ -83,7 +60,7 @@ module QA
           commit.update_files(
             [
               {
-                file_path: 'added_file.txt',
+                file_path: merge_request.file_name,
                 content: "File updated"
               }
             ]
@@ -91,11 +68,12 @@ module QA
         end
         project.wait_for_push(commit_message)
 
-        merge_request.visit!
         Page::MergeRequest::Show.perform do |show|
-          show.resolve_discussion_at_index(1)
+          show.click_discussions_tab
+          show.resolve_discussion_at_index(0)
 
-          expect(show).to have_content("2/2 threads resolved")
+          expect(show).to have_content("Can you check this line of code?")
+          expect(show).to have_content("All threads resolved")
         end
       end
     end

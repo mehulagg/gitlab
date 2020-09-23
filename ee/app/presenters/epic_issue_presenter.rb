@@ -11,10 +11,6 @@ class EpicIssuePresenter < Gitlab::View::Presenter::Delegated
 
   private
 
-  def url_builder
-    @url_builder ||= Gitlab::UrlBuilder.new(issue)
-  end
-
   def can_admin_issue_link?(current_user)
     Ability.allowed?(current_user, :admin_epic_issue, issue) && Ability.allowed?(current_user, :admin_epic, issue.epic)
   end

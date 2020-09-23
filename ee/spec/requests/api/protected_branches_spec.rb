@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe API::ProtectedBranches do
+RSpec.describe API::ProtectedBranches do
   let(:user) { create(:user) }
   let!(:project) { create(:project, :repository) }
   let(:protected_name) { 'feature' }
@@ -18,7 +18,7 @@ describe API::ProtectedBranches do
       it 'returns the protected branch' do
         get api(route, user)
 
-        expect(response).to have_gitlab_http_status(200)
+        expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['unprotect_access_levels']).to eq([])
       end
 
@@ -43,7 +43,7 @@ describe API::ProtectedBranches do
           merge_group_ids = json_response['merge_access_levels'].map {|level| level['group_id']}
           unprotect_group_ids = json_response['unprotect_access_levels'].map {|level| level['group_id']}
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(push_user_ids).to include(push_user.id)
           expect(merge_group_ids).to include(merge_group.id)
           expect(unprotect_group_ids).to include(unprotect_group.id)
@@ -100,7 +100,7 @@ describe API::ProtectedBranches do
             patch api(route, user), params: { code_owner_approval_required: true }
           end.to change { protected_branch.reload.code_owner_approval_required }
 
-          expect(response).to have_gitlab_http_status(200)
+          expect(response).to have_gitlab_http_status(:ok)
           expect(json_response['code_owner_approval_required']).to eq(true)
         end
       end
@@ -115,7 +115,7 @@ describe API::ProtectedBranches do
             patch api(route, user), params: { code_owner_approval_required: true }
           end.not_to change { protected_branch.reload.code_owner_approval_required }
 
-          expect(response).to have_gitlab_http_status(403)
+          expect(response).to have_gitlab_http_status(:forbidden)
         end
       end
     end
@@ -128,7 +128,7 @@ describe API::ProtectedBranches do
       it "returns a 403 response" do
         patch api(route, user)
 
-        expect(response).to have_gitlab_http_status(403)
+        expect(response).to have_gitlab_http_status(:forbidden)
       end
     end
   end
@@ -138,7 +138,7 @@ describe API::ProtectedBranches do
     let(:post_endpoint) { api("/projects/#{project.id}/protected_branches", user) }
 
     def expect_protection_to_be_successful
-      expect(response).to have_gitlab_http_status(201)
+      expect(response).to have_gitlab_http_status(:created)
       expect(json_response['name']).to eq(branch_name)
     end
 
@@ -150,14 +150,14 @@ describe API::ProtectedBranches do
       it 'protects a single branch' do
         post post_endpoint, params: { name: branch_name }
 
-        expect(response).to have_gitlab_http_status(201)
+        expect(response).to have_gitlab_http_status(:created)
         expect(json_response['unprotect_access_levels'][0]['access_level']).to eq(Gitlab::Access::MAINTAINER)
       end
 
       it 'protects a single branch and only admins can unprotect' do
         post post_endpoint, params: { name: branch_name, unprotect_access_level: Gitlab::Access::ADMIN }
 
-        expect(response).to have_gitlab_http_status(201)
+        expect(response).to have_gitlab_http_status(:created)
         expect(json_response['name']).to eq(branch_name)
         expect(json_response['push_access_levels'][0]['access_level']).to eq(Gitlab::Access::MAINTAINER)
         expect(json_response['merge_access_levels'][0]['access_level']).to eq(Gitlab::Access::MAINTAINER)
@@ -175,7 +175,7 @@ describe API::ProtectedBranches do
 
             post post_endpoint, params: { name: branch_name, code_owner_approval_required: true }
 
-            expect(response).to have_gitlab_http_status(201)
+            expect(response).to have_gitlab_http_status(:created)
             expect(json_response["code_owner_approval_required"]).to eq(true)
 
             new_branch = project.protected_branches.find_by_name(branch_name)
@@ -188,7 +188,7 @@ describe API::ProtectedBranches do
 
             post post_endpoint, params: { name: branch_name, code_owner_approval_required: false }
 
-            expect(response).to have_gitlab_http_status(201)
+            expect(response).to have_gitlab_http_status(:created)
             expect(json_response["code_owner_approval_required"]).to eq(false)
 
             new_branch = project.protected_branches.find_by_name(branch_name)
@@ -203,7 +203,7 @@ describe API::ProtectedBranches do
 
             post post_endpoint, params: { name: branch_name, code_owner_approval_required: true }
 
-            expect(response).to have_gitlab_http_status(201)
+            expect(response).to have_gitlab_http_status(:created)
             expect(json_response["code_owner_approval_required"]).to eq(false)
 
             new_branch = project.protected_branches.find_by_name(branch_name)
@@ -281,7 +281,7 @@ describe API::ProtectedBranches do
 
           post post_endpoint, params: { name: branch_name, allowed_to_merge: [{ user_id: push_user.id }] }
 
-          expect(response).to have_gitlab_http_status(422)
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
           expect(json_response['message'][0]).to match(/is not a member of the project/)
         end
 
@@ -290,7 +290,7 @@ describe API::ProtectedBranches do
 
           post post_endpoint, params: { name: branch_name, allowed_to_merge: [{ group_id: merge_group.id }] }
 
-          expect(response).to have_gitlab_http_status(422)
+          expect(response).to have_gitlab_http_status(:unprocessable_entity)
           expect(json_response['message'][0]).to match(/does not have access to the project/)
         end
 
@@ -299,7 +299,7 @@ describe API::ProtectedBranches do
 
           post post_endpoint, params: { name: branch_name, allowed_to_push: [{ user_id: push_user.id }] }
 
-          expect(response).to have_gitlab_http_status(201)
+          expect(response).to have_gitlab_http_status(:created)
           expect(json_response['push_access_levels'].count).to eq(1)
           expect(json_response['merge_access_levels'].count).to eq(1)
           expect(json_response['push_access_levels'][0]['user_id']).to eq(push_user.id)

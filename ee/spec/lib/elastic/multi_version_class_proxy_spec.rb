@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Elastic::MultiVersionClassProxy do
+RSpec.describe Elastic::MultiVersionClassProxy do
   subject { described_class.new(ProjectSnippet) }
 
   describe '#version' do
@@ -11,6 +11,20 @@ describe Elastic::MultiVersionClassProxy do
 
       expect(result).to be_a(Elastic::V12p1::SnippetClassProxy)
       expect(result.target).to eq(ProjectSnippet)
+    end
+
+    context 'repository' do
+      it 'returns class proxy in specified version' do
+        repository_proxy = described_class.new(Repository)
+        repository_result = repository_proxy.version('V12p1')
+        wiki_proxy = described_class.new(ProjectWiki)
+        wiki_result = wiki_proxy.version('V12p1')
+
+        expect(repository_result).to be_a(Elastic::V12p1::RepositoryClassProxy)
+        expect(repository_result.target).to eq(Repository)
+        expect(wiki_result).to be_a(Elastic::V12p1::ProjectWikiClassProxy)
+        expect(wiki_result.target).to eq(ProjectWiki)
+      end
     end
   end
 

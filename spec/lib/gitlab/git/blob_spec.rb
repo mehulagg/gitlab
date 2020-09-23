@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require "spec_helper"
 
-describe Gitlab::Git::Blob, :seed_helper do
+RSpec.describe Gitlab::Git::Blob, :seed_helper do
   let(:repository) { Gitlab::Git::Repository.new('default', TEST_REPO_PATH, '', 'group/project') }
   let(:rugged) do
     Rugged::Repository.new(File.join(TestEnv.repos_path, TEST_REPO_PATH))
@@ -10,9 +12,33 @@ describe Gitlab::Git::Blob, :seed_helper do
     let(:blob) { Gitlab::Git::Blob.new(name: 'test') }
 
     it 'handles nil data' do
+      expect(described_class).not_to receive(:gitlab_blob_size)
+
       expect(blob.name).to eq('test')
       expect(blob.size).to eq(nil)
       expect(blob.loaded_size).to eq(nil)
+    end
+
+    it 'records blob size' do
+      expect(described_class).to receive(:gitlab_blob_size).and_call_original
+
+      Gitlab::Git::Blob.new(name: 'test', size: 4, data: 'abcd')
+    end
+
+    context 'when untruncated' do
+      it 'attempts to record gitlab_blob_truncated_false' do
+        expect(described_class).to receive(:gitlab_blob_truncated_false).and_call_original
+
+        Gitlab::Git::Blob.new(name: 'test', size: 4, data: 'abcd')
+      end
+    end
+
+    context 'when truncated' do
+      it 'attempts to record gitlab_blob_truncated_true' do
+        expect(described_class).to receive(:gitlab_blob_truncated_true).and_call_original
+
+        Gitlab::Git::Blob.new(name: 'test', size: 40, data: 'abcd')
+      end
     end
   end
 
@@ -132,7 +158,9 @@ describe Gitlab::Git::Blob, :seed_helper do
 
   describe '.find with Rugged enabled', :enable_rugged do
     it 'calls out to the Rugged implementation' do
-      allow_any_instance_of(Rugged).to receive(:rev_parse).with(SeedRepo::Commit::ID).and_call_original
+      allow_next_instance_of(Rugged) do |instance|
+        allow(instance).to receive(:rev_parse).with(SeedRepo::Commit::ID).and_call_original
+      end
 
       described_class.find(repository, SeedRepo::Commit::ID, 'files/images/6049019_460s.jpg')
     end
@@ -240,6 +268,47 @@ describe Gitlab::Git::Blob, :seed_helper do
         end
       end
     end
+
+    context 'when large number of blobs requested' do
+      let(:first_batch) do
+        [
+          [SeedRepo::Commit::ID, 'files/ruby/popen.rb'],
+          [SeedRepo::Commit::ID, 'six']
+        ]
+      end
+
+      let(:second_batch) do
+        [
+          [SeedRepo::Commit::ID, 'some'],
+          [SeedRepo::Commit::ID, 'other']
+        ]
+      end
+
+      let(:third_batch) do
+        [
+          [SeedRepo::Commit::ID, 'files']
+        ]
+      end
+
+      let(:blob_references) do
+        first_batch + second_batch + third_batch
+      end
+
+      let(:client) { repository.gitaly_blob_client }
+      let(:limit) { 10.megabytes }
+
+      before do
+        stub_const('Gitlab::Git::Blob::BATCH_SIZE', 2)
+      end
+
+      it 'fetches the blobs in batches' do
+        expect(client).to receive(:get_blobs).with(first_batch, limit).ordered
+        expect(client).to receive(:get_blobs).with(second_batch, limit).ordered
+        expect(client).to receive(:get_blobs).with(third_batch, limit).ordered
+
+        subject
+      end
+    end
   end
 
   describe '.batch_metadata' do
@@ -326,37 +395,43 @@ describe Gitlab::Git::Blob, :seed_helper do
     end
   end
 
-  describe 'encoding' do
+  describe 'encoding', :aggregate_failures do
     context 'file with russian text' do
       let(:blob) { Gitlab::Git::Blob.find(repository, SeedRepo::Commit::ID, "encoding/russian.rb") }
 
-      it { expect(blob.name).to eq("russian.rb") }
-      it { expect(blob.data.lines.first).to eq("Хороший файл") }
-      it { expect(blob.size).to eq(23) }
-      it { expect(blob.truncated?).to be_falsey }
-      # Run it twice since data is encoded after the first run
-      it { expect(blob.truncated?).to be_falsey }
-      it { expect(blob.mode).to eq("100755") }
+      it 'has the correct blob attributes' do
+        expect(blob.name).to eq("russian.rb")
+        expect(blob.data.lines.first).to eq("Хороший файл")
+        expect(blob.size).to eq(23)
+        expect(blob.truncated?).to be_falsey
+        # Run it twice since data is encoded after the first run
+        expect(blob.truncated?).to be_falsey
+        expect(blob.mode).to eq("100755")
+      end
     end
 
     context 'file with Japanese text' do
       let(:blob) { Gitlab::Git::Blob.find(repository, SeedRepo::Commit::ID, "encoding/テスト.txt") }
 
-      it { expect(blob.name).to eq("テスト.txt") }
-      it { expect(blob.data).to include("これはテスト") }
-      it { expect(blob.size).to eq(340) }
-      it { expect(blob.mode).to eq("100755") }
-      it { expect(blob.truncated?).to be_falsey }
+      it 'has the correct blob attributes' do
+        expect(blob.name).to eq("テスト.txt")
+        expect(blob.data).to include("これはテスト")
+        expect(blob.size).to eq(340)
+        expect(blob.mode).to eq("100755")
+        expect(blob.truncated?).to be_falsey
+      end
     end
 
     context 'file with ISO-8859 text' do
       let(:blob) { Gitlab::Git::Blob.find(repository, SeedRepo::LastCommit::ID, "encoding/iso8859.txt") }
 
-      it { expect(blob.name).to eq("iso8859.txt") }
-      it { expect(blob.loaded_size).to eq(4) }
-      it { expect(blob.size).to eq(4) }
-      it { expect(blob.mode).to eq("100644") }
-      it { expect(blob.truncated?).to be_falsey }
+      it 'has the correct blob attributes' do
+        expect(blob.name).to eq("iso8859.txt")
+        expect(blob.loaded_size).to eq(4)
+        expect(blob.size).to eq(4)
+        expect(blob.mode).to eq("100644")
+        expect(blob.truncated?).to be_falsey
+      end
     end
   end
 
@@ -526,6 +601,66 @@ describe Gitlab::Git::Blob, :seed_helper do
         subject
 
         expect(blob.data).to eq(full_data)
+      end
+    end
+  end
+
+  describe '#truncated?' do
+    context 'when blob.size is nil' do
+      let(:nil_size_blob) { Gitlab::Git::Blob.new(name: 'test', data: 'abcd') }
+
+      it 'returns false' do
+        expect(nil_size_blob.truncated?).to be_falsey
+      end
+    end
+
+    context 'when blob.data is missing' do
+      let(:nil_data_blob) { Gitlab::Git::Blob.new(name: 'test', size: 4) }
+
+      it 'returns false' do
+        expect(nil_data_blob.truncated?).to be_falsey
+      end
+    end
+
+    context 'when the blob is truncated' do
+      let(:truncated_blob) { Gitlab::Git::Blob.new(name: 'test', size: 40, data: 'abcd') }
+
+      it 'returns true' do
+        expect(truncated_blob.truncated?).to be_truthy
+      end
+    end
+
+    context 'when the blob is untruncated' do
+      let(:untruncated_blob) { Gitlab::Git::Blob.new(name: 'test', size: 4, data: 'abcd') }
+
+      it 'returns false' do
+        expect(untruncated_blob.truncated?).to be_falsey
+      end
+    end
+  end
+
+  describe 'metrics' do
+    it 'defines :gitlab_blob_truncated_true counter' do
+      expect(described_class).to respond_to(:gitlab_blob_truncated_true)
+    end
+
+    it 'defines :gitlab_blob_truncated_false counter' do
+      expect(described_class).to respond_to(:gitlab_blob_truncated_false)
+    end
+
+    it 'defines :gitlab_blob_size histogram' do
+      expect(described_class).to respond_to(:gitlab_blob_size)
+    end
+  end
+
+  describe '#lines' do
+    context 'when the encoding cannot be detected' do
+      it 'successfully splits the data' do
+        data = "test\nblob"
+        blob = Gitlab::Git::Blob.new(name: 'test', size: data.bytesize, data: data)
+        expect(blob).to receive(:ruby_encoding) { nil }
+
+        expect(blob.lines).to eq(data.split("\n"))
       end
     end
   end

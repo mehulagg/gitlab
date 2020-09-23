@@ -1,44 +1,51 @@
-import Vue from 'vue';
-import timeagoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import { shallowMount } from '@vue/test-utils';
+
 import { formatDate, getTimeago } from '~/lib/utils/datetime_utility';
+import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 
 describe('Time ago with tooltip component', () => {
-  let TimeagoTooltip;
   let vm;
 
-  beforeEach(() => {
-    TimeagoTooltip = Vue.extend(timeagoTooltip);
-  });
+  const buildVm = (propsData = {}, scopedSlots = {}) => {
+    vm = shallowMount(TimeAgoTooltip, {
+      propsData,
+      scopedSlots,
+    });
+  };
+  const timestamp = '2017-05-08T14:57:39.781Z';
+  const timeAgoTimestamp = getTimeago().format(timestamp);
 
   afterEach(() => {
-    vm.$destroy();
+    vm.destroy();
   });
 
   it('should render timeago with a bootstrap tooltip', () => {
-    vm = new TimeagoTooltip({
-      propsData: {
-        time: '2017-05-08T14:57:39.781Z',
-      },
-    }).$mount();
+    buildVm({
+      time: timestamp,
+    });
 
-    expect(vm.$el.tagName).toEqual('TIME');
-    expect(vm.$el.getAttribute('data-original-title')).toEqual(
-      formatDate('2017-05-08T14:57:39.781Z'),
-    );
-
-    const timeago = getTimeago();
-
-    expect(vm.$el.textContent.trim()).toEqual(timeago.format('2017-05-08T14:57:39.781Z'));
+    expect(vm.attributes('title')).toEqual(formatDate(timestamp));
+    expect(vm.text()).toEqual(timeAgoTimestamp);
   });
 
   it('should render provided html class', () => {
-    vm = new TimeagoTooltip({
-      propsData: {
-        time: '2017-05-08T14:57:39.781Z',
-        cssClass: 'foo',
-      },
-    }).$mount();
+    buildVm({
+      time: timestamp,
+      cssClass: 'foo',
+    });
 
-    expect(vm.$el.classList.contains('foo')).toEqual(true);
+    expect(vm.classes()).toContain('foo');
+  });
+
+  it('should render with the datetime attribute', () => {
+    buildVm({ time: timestamp });
+
+    expect(vm.attributes('datetime')).toEqual(timestamp);
+  });
+
+  it('should render provided scope content with the correct timeAgo string', () => {
+    buildVm({ time: timestamp }, { default: `<span>The time is {{ props.timeAgo }}</span>` });
+
+    expect(vm.text()).toEqual(`The time is ${timeAgoTimestamp}`);
   });
 });

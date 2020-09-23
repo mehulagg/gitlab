@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 require 'spec_helper'
 
-describe 'Project settings > [EE] Merge Requests', :js do
+RSpec.describe 'Project settings > [EE] Merge Requests', :js do
   include GitlabRoutingHelper
   include FeatureApprovalHelper
 
   let(:user) { create(:user) }
-  let(:project) { create(:project, approvals_before_merge: 1) }
+  let(:project) { create(:project) }
   let(:group) { create(:group) }
   let(:group_member) { create(:user) }
   let(:non_member) { create(:user) }
@@ -23,7 +23,7 @@ describe 'Project settings > [EE] Merge Requests', :js do
   it 'adds approver' do
     visit edit_project_path(project)
 
-    open_modal
+    open_modal(text: 'Add approval rule')
     open_approver_select
 
     expect(find('.select2-results')).to have_content(user.name)
@@ -39,7 +39,9 @@ describe 'Project settings > [EE] Merge Requests', :js do
     expect(find('.select2-results')).not_to have_content(user.name)
 
     close_approver_select
-    click_button 'Update approval rule'
+    within('.modal-content') do
+      click_button 'Add approval rule'
+    end
     wait_for_requests
 
     expect_avatar(find('.js-members'), user)
@@ -48,7 +50,7 @@ describe 'Project settings > [EE] Merge Requests', :js do
   it 'adds approver group' do
     visit edit_project_path(project)
 
-    open_modal
+    open_modal(text: 'Add approval rule')
     open_approver_select
 
     expect(find('.select2-results')).to have_content(group.name)
@@ -58,7 +60,9 @@ describe 'Project settings > [EE] Merge Requests', :js do
 
     expect(find('.content-list')).to have_content(group.name)
 
-    click_button 'Update approval rule'
+    within('.modal-content') do
+      click_button 'Add approval rule'
+    end
     wait_for_requests
 
     expect_avatar(find('.js-members'), group.users)
@@ -100,7 +104,7 @@ describe 'Project settings > [EE] Merge Requests', :js do
     it "does not mention the merge request template in the section's description text" do
       visit edit_project_path(project)
 
-      expect(page).to have_content('Choose your merge method, merge options, and merge checks.')
+      expect(page).to have_content('Choose your merge method, merge options, merge checks, and merge suggestions.')
     end
   end
 
@@ -118,7 +122,7 @@ describe 'Project settings > [EE] Merge Requests', :js do
     it "mentions the merge request template in the section's description text" do
       visit edit_project_path(project)
 
-      expect(page).to have_content('Choose your merge method, merge options, merge checks, and set up a default description template for merge requests.')
+      expect(page).to have_content('Choose your merge method, merge options, merge checks, merge suggestions, and set up a default description template for merge requests.')
     end
   end
 end

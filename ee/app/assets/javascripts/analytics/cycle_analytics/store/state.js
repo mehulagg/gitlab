@@ -1,10 +1,5 @@
 export default () => ({
-  endpoints: {
-    cycleAnalyticsData: null,
-    stageData: null,
-    cycleAnalyticsStagesAndEvents: null,
-    summaryData: null,
-  },
+  featureFlags: {},
 
   startDate: null,
   endDate: null,
@@ -15,17 +10,26 @@ export default () => ({
   isEmptyStage: false,
   errorCode: null,
 
-  isAddingCustomStage: false,
+  isSavingStageOrder: false,
+  errorSavingStageOrder: false,
 
-  selectedGroup: null,
-  selectedProjectIds: [],
-  selectedStageId: null,
+  currentGroup: null,
+  selectedProjects: [],
+  selectedStage: null,
+  selectedValueStream: null,
 
   currentStageEvents: [],
 
-  stages: [],
-  summary: [],
-  labels: [],
+  isLoadingValueStreams: false,
+  isCreatingValueStream: false,
+  isDeletingValueStream: false,
 
-  customStageFormEvents: [],
+  createValueStreamErrors: {},
+  deleteValueStreamError: null,
+
+  stages: [],
+  selectedStageError: '',
+  summary: [],
+  medians: {},
+  valueStreams: [],
 });

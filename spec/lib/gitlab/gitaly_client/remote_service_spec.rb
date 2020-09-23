@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
-describe Gitlab::GitalyClient::RemoteService do
+RSpec.describe Gitlab::GitalyClient::RemoteService do
   let(:project) { create(:project) }
   let(:storage_name) { project.repository_storage }
   let(:relative_path) { project.disk_path + '.git' }
@@ -32,19 +34,6 @@ describe Gitlab::GitalyClient::RemoteService do
     end
   end
 
-  describe '#fetch_internal_remote' do
-    let(:remote_repository) { Gitlab::Git::Repository.new('default', TEST_MUTABLE_REPO_PATH, '', 'group/project') }
-
-    it 'sends an fetch_internal_remote message and returns the result value' do
-      expect_any_instance_of(Gitaly::RemoteService::Stub)
-        .to receive(:fetch_internal_remote)
-        .with(gitaly_request_with_path(storage_name, relative_path), kind_of(Hash))
-        .and_return(double(result: true))
-
-      expect(client.fetch_internal_remote(remote_repository)).to be(true)
-    end
-  end
-
   describe '#find_remote_root_ref' do
     it 'sends an find_remote_root_ref message and returns the root ref' do
       expect_any_instance_of(Gitaly::RemoteService::Stub)
@@ -67,7 +56,7 @@ describe Gitlab::GitalyClient::RemoteService do
 
   describe '#update_remote_mirror' do
     let(:ref_name) { 'remote_mirror_1' }
-    let(:only_branches_matching) { ['my-branch', 'master'] }
+    let(:only_branches_matching) { %w[my-branch master] }
     let(:ssh_key) { 'KEY' }
     let(:known_hosts) { 'KNOWN HOSTS' }
 
@@ -77,15 +66,18 @@ describe Gitlab::GitalyClient::RemoteService do
         .with(kind_of(Enumerator), kind_of(Hash))
         .and_return(double(:update_remote_mirror_response))
 
-      client.update_remote_mirror(ref_name, only_branches_matching, ssh_key: ssh_key, known_hosts: known_hosts)
+      client.update_remote_mirror(ref_name, only_branches_matching, ssh_key: ssh_key, known_hosts: known_hosts, keep_divergent_refs: true)
     end
   end
 
   describe '.exists?' do
     context "when the remote doesn't exist" do
       let(:url) { 'https://gitlab.com/gitlab-org/ik-besta-niet-of-ik-word-geplaagd.git' }
+      let(:storage_name) { 'default' }
 
       it 'returns false' do
+        expect(Gitaly::FindRemoteRepositoryRequest).to receive(:new).with(remote: url, storage_name: storage_name).and_call_original
+
         expect(described_class.exists?(url)).to be(false)
       end
     end

@@ -1,4 +1,13 @@
+import sidebarDetailsQuery from 'ee_else_ce/sidebar/queries/sidebarDetails.query.graphql';
 import axios from '~/lib/utils/axios_utils';
+import createGqClient, { fetchPolicies } from '~/lib/graphql';
+
+export const gqClient = createGqClient(
+  {},
+  {
+    fetchPolicy: fetchPolicies.NO_CACHE,
+  },
+);
 
 export default class SidebarService {
   constructor(endpointMap) {
@@ -7,6 +16,8 @@ export default class SidebarService {
       this.toggleSubscriptionEndpoint = endpointMap.toggleSubscriptionEndpoint;
       this.moveIssueEndpoint = endpointMap.moveIssueEndpoint;
       this.projectsAutocompleteEndpoint = endpointMap.projectsAutocompleteEndpoint;
+      this.fullPath = endpointMap.fullPath;
+      this.iid = endpointMap.iid;
 
       SidebarService.singleton = this;
     }
@@ -15,11 +26,31 @@ export default class SidebarService {
   }
 
   get() {
-    return axios.get(this.endpoint);
+    return Promise.all([
+      axios.get(this.endpoint),
+      gqClient.query({
+        query: sidebarDetailsQuery,
+        variables: {
+          fullPath: this.fullPath,
+          iid: this.iid.toString(),
+        },
+      }),
+    ]);
   }
 
   update(key, data) {
     return axios.put(this.endpoint, { [key]: data });
+  }
+
+  updateWithGraphQl(mutation, variables) {
+    return gqClient.mutate({
+      mutation,
+      variables: {
+        ...variables,
+        projectPath: this.fullPath,
+        iid: this.iid.toString(),
+      },
+    });
   }
 
   getProjectsAutocomplete(searchTerm) {

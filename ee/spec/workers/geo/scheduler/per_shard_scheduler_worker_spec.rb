@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-describe Geo::Scheduler::PerShardSchedulerWorker do
+RSpec.describe Geo::Scheduler::PerShardSchedulerWorker do
   it 'includes ApplicationWorker' do
     expect(described_class).to include_module(ApplicationWorker)
   end
