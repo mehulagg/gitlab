@@ -18777,7 +18777,7 @@ type Vulnerability {
   severity: VulnerabilitySeverity
 
   """
-  State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED)
+  State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED)
   """
   state: VulnerabilityState
 

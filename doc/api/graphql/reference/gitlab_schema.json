@@ -54946,7 +54946,7 @@
             },
             {
               "name": "state",
-              "description": "State of the vulnerability (DETECTED, CONFIRMED, RESOLVED, DISMISSED)",
+              "description": "State of the vulnerability (DETECTED, DISMISSED, RESOLVED, CONFIRMED)",
               "args": [
 
               ],
@@ -56814,7 +56814,7 @@
               "deprecationReason": null
             },
             {
-              "name": "CONFIRMED",
+              "name": "DISMISSED",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
@@ -56826,7 +56826,7 @@
               "deprecationReason": null
             },
             {
-              "name": "DISMISSED",
+              "name": "CONFIRMED",
               "description": null,
               "isDeprecated": false,
               "deprecationReason": null
