@@ -25,41 +25,15 @@
   }
 }
 
-.pipelines {
-  .stage {
-    max-width: 90px;
-    width: 90px;
-    text-align: center;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .table-holder {
-    overflow: unset;
-    width: 100%;
-  }
-
-  .commit-title {
-    margin: 0;
-    white-space: normal;
-
-    @include media-breakpoint-down(sm) {
-      justify-content: flex-end;
-    }
-  }
-
-  .ci-table {
+[data-page='projects:pipelines:index'],
+[data-page='projects:commit:pipelines'],
+[data-page='projects:merge_requests:show'],
+[data-page='projects:merge_requests:creations:new'] {
+  .pipelines {
+    // Entry point for these styles:
+    // - app/assets/javascripts/commit/pipelines/pipelines_table.vue
     .badge {
       margin-bottom: 3px;
-    }
-
-    .pipeline-id {
-      color: $black;
-    }
-
-    .pipelines-time-ago {
-      text-align: right;
     }
 
     .pipeline-actions {
@@ -327,10 +301,6 @@
 }
 
 // Pipeline visualization
-.pipeline-actions {
-  border-bottom: 0;
-}
-
 [data-page='projects:pipelines:show'] {
   .tab-pane {
     .ci-table {
