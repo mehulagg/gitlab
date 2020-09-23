@@ -14424,6 +14424,25 @@ CREATE VIEW postgres_indexes AS
      JOIN pg_namespace ON ((pg_class.relnamespace = pg_namespace.oid)))
      JOIN pg_indexes ON ((pg_class.relname = pg_indexes.indexname)));
 
+CREATE TABLE postgres_reindex_actions (
+    id bigint NOT NULL,
+    reindex_start timestamp with time zone NOT NULL,
+    reindex_end timestamp with time zone,
+    ondisk_size_bytes_start bigint NOT NULL,
+    ondisk_size_bytes_end bigint,
+    index_identifier text NOT NULL,
+    CONSTRAINT check_f12527622c CHECK ((char_length(index_identifier) <= 255))
+);
+
+CREATE SEQUENCE postgres_reindex_actions_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER SEQUENCE postgres_reindex_actions_id_seq OWNED BY postgres_reindex_actions.id;
+
 CREATE TABLE programming_languages (
     id integer NOT NULL,
     name character varying NOT NULL,
@@ -17536,6 +17555,8 @@ ALTER TABLE ONLY plans ALTER COLUMN id SET DEFAULT nextval('plans_id_seq'::regcl
 
 ALTER TABLE ONLY pool_repositories ALTER COLUMN id SET DEFAULT nextval('pool_repositories_id_seq'::regclass);
 
+ALTER TABLE ONLY postgres_reindex_actions ALTER COLUMN id SET DEFAULT nextval('postgres_reindex_actions_id_seq'::regclass);
+
 ALTER TABLE ONLY product_analytics_events_experimental ALTER COLUMN id SET DEFAULT nextval('product_analytics_events_experimental_id_seq'::regclass);
 
 ALTER TABLE ONLY programming_languages ALTER COLUMN id SET DEFAULT nextval('programming_languages_id_seq'::regclass);
@@ -18750,6 +18771,9 @@ ALTER TABLE ONLY plans
 
 ALTER TABLE ONLY pool_repositories
     ADD CONSTRAINT pool_repositories_pkey PRIMARY KEY (id);
+
+ALTER TABLE ONLY postgres_reindex_actions
+    ADD CONSTRAINT postgres_reindex_actions_pkey PRIMARY KEY (id);
 
 ALTER TABLE ONLY programming_languages
     ADD CONSTRAINT programming_languages_pkey PRIMARY KEY (id);
@@ -20771,6 +20795,8 @@ CREATE UNIQUE INDEX index_pool_repositories_on_disk_path ON pool_repositories US
 CREATE INDEX index_pool_repositories_on_shard_id ON pool_repositories USING btree (shard_id);
 
 CREATE UNIQUE INDEX index_pool_repositories_on_source_project_id_and_shard_id ON pool_repositories USING btree (source_project_id, shard_id);
+
+CREATE INDEX index_postgres_reindex_actions_on_index_identifier ON postgres_reindex_actions USING btree (index_identifier);
 
 CREATE UNIQUE INDEX index_programming_languages_on_name ON programming_languages USING btree (name);
 

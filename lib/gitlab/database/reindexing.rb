@@ -7,7 +7,9 @@ module Gitlab
         indexes = [index_selector].flatten
 
         indexes.each do |index|
-          ConcurrentReindex.new(index).perform
+          ReindexAction.keep_track_of(index) do
+            ConcurrentReindex.new(index).perform
+          end
         end
       end
     end
