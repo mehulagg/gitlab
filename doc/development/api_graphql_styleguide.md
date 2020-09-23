@@ -783,7 +783,7 @@ see [`ResolvesMergeRequests`](https://gitlab.com/gitlab-org/gitlab/-/blob/master
 ### Negated arguments
 
 Some resources can be filtered by negated filters (e.g. find all issues which
-have `bug` label, but don't have label `bug2` assigned).  The preferred syntax
+have `bug` label, but don't have label `bug2` assigned). The preferred syntax
 to pass negated arguments is usage of `not` argument:
 
 ```graphql
@@ -795,33 +795,8 @@ issues(labelName: "bug", not: {labelName: "bug2"}) {
 }
 ```
 
-To avoid duplicated argument definitions, these arguments can be placed into a reusable module:
-
-```ruby
-module NegatableIssueArguments
-  extend ActiveSupport::Concern
-
-  included do
-    argument :label_name, GraphQL::STRING_TYPE.to_list_type,
-              required: false,
-              description: 'Labels applied to this issue'
-  end
-end
-
-class NegatedIssueArguments < Types::BaseInputObject
-  include NegatableIssueArguments
-end
-
-class IssuesResolver < BaseResolver
-  include NegatableIssueArguments
-
-  argument :not, NegatedIssueArguments,
-           required: false,
-           description: 'Negated issue arguments'
-
-  # additional not negatable arguments
-end
-```
+To avoid duplicated argument definitions, these arguments can be placed into a reusable module
+(or class if arguments are nested).
 
 Or you can use a more elegant approach by adding `negatable_arguments` method
 to the BaseResolver as suggested in [this
