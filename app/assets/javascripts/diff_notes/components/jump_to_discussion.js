@@ -2,11 +2,11 @@
 /* global CommentsStore */
 
 import $ from 'jquery';
-import 'vendor/jquery.scrollTo';
 import Vue from 'vue';
 import { __ } from '~/locale';
 
 import DiscussionMixins from '../mixins/discussion';
+import { scrollToElement } from '~/lib/utils/common_utils';
 
 const JumpToDiscussion = Vue.extend({
   mixins: [DiscussionMixins],
@@ -55,6 +55,8 @@ const JumpToDiscussion = Vue.extend({
   },
   created() {
     this.discussion = this.discussions[this.discussionId];
+    // eslint-disable-next-line @gitlab/require-i18n-strings
+    throw new Error('WHAT BREAKS?')
   },
   methods: {
     jumpToNextUnresolvedDiscussion() {
@@ -200,7 +202,7 @@ const JumpToDiscussion = Vue.extend({
         }
       }
 
-      $.scrollTo($target, {
+      scrollToElement($target, {
         offset: -150,
       });
     },

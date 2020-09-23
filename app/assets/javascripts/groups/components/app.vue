@@ -1,8 +1,6 @@
 <script>
 /* global Flash */
 
-import $ from 'jquery';
-import 'vendor/jquery.scrollTo';
 import { GlLoadingIcon } from '@gitlab/ui';
 import { s__, sprintf } from '~/locale';
 import DeprecatedModal from '~/vue_shared/components/deprecated_modal.vue';
@@ -100,7 +98,7 @@ export default {
         })
         .catch(() => {
           this.isLoading = false;
-          $.scrollTo(0);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
 
           Flash(COMMON_STR.FAILURE);
         });
@@ -135,7 +133,7 @@ export default {
         updatePagination: true,
       }).then(res => {
         this.isLoading = false;
-        $.scrollTo(0);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         const currentPath = mergeUrlParams({ page }, window.location.href);
         window.history.replaceState(
@@ -189,7 +187,7 @@ export default {
       this.service
         .leaveGroup(this.targetGroup.leavePath)
         .then(res => {
-          $.scrollTo(0);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
           this.store.removeGroup(this.targetGroup, this.targetParentGroup);
           Flash(res.data.notice, 'notice');
         })

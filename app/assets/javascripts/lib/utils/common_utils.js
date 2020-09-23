@@ -245,14 +245,14 @@ export const scrollToElement = (element, options = {}) => {
     $el = $(element);
   }
   const { top } = $el.offset();
-  const { offset = 0 } = options;
+  const { offset = 0, duration = 200 } = options;
 
   // eslint-disable-next-line no-jquery/no-animate
   return $('body, html').animate(
     {
       scrollTop: top - contentTop() + offset,
     },
-    200,
+    duration,
   );
 };
 

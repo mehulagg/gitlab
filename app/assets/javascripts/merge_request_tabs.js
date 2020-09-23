@@ -1,7 +1,6 @@
 /* eslint-disable no-new, class-methods-use-this */
 
 import $ from 'jquery';
-import 'vendor/jquery.scrollTo';
 import { GlBreakpointInstance as bp } from '@gitlab/ui/dist/utils';
 import Cookies from 'js-cookie';
 import createEventHub from '~/helpers/event_hub_factory';
@@ -14,6 +13,7 @@ import {
   handleLocationHash,
   isMetaClick,
   parseBoolean,
+  scrollToElement,
 } from './lib/utils/common_utils';
 import { isInVueNoteablePage } from './lib/utils/dom_utils';
 import { getLocationHash } from './lib/utils/url_utility';
@@ -257,10 +257,10 @@ export default class MergeRequestTabs {
 
   scrollToElement(container) {
     if (location.hash) {
-      const offset = 0 - ($('.navbar-gitlab').outerHeight() + $('.js-tabs-affix').outerHeight());
       const $el = $(`${container} ${location.hash}:not(.match)`);
+
       if ($el.length) {
-        $.scrollTo($el[0], { offset });
+        scrollToElement($el[0]);
       }
     }
   }
