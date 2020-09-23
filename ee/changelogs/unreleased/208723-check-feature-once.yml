@@ -1,0 +1,5 @@
+---
+title: Perform license_scanning feature check once
+merge_request: 43200
+author:
+type: fixed
