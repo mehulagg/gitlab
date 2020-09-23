@@ -39,7 +39,7 @@ This process does not migrate or import any types of groups or organizations fro
 
 The steps you take depend on whether you are importing from GitHub.com or GitHub Enterprise, as well as whether you are importing to GitLab.com or self-managed GitLab instance.
 
-- If you're using GitLab.com, you can alternatively import GitHub repositories
+- If you're importing to GitLab.com, you can alternatively import GitHub repositories
   using a [personal access token](#using-a-github-token). We do not recommend
   this method, as it does not associate all user activity (such as issues and
   pull requests) with matching GitLab users.
