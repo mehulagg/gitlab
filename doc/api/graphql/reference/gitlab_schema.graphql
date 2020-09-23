@@ -2914,6 +2914,11 @@ input CreateRequirementInput {
   clientMutationId: String
 
   """
+  The description of the requirement
+  """
+  description: String
+
+  """
   The project full path the requirement is associated with
   """
   projectPath: ID!
@@ -2921,7 +2926,7 @@ input CreateRequirementInput {
   """
   Title of the requirement
   """
-  title: String!
+  title: String
 }
 
 """
@@ -14907,6 +14912,16 @@ type Requirement {
   createdAt: Time!
 
   """
+  Description of the requirement
+  """
+  description: String
+
+  """
+  The GitLab Flavored Markdown rendering of `description`
+  """
+  descriptionHtml: String
+
+  """
   ID of the requirement
   """
   id: ID!
@@ -14965,6 +14980,11 @@ type Requirement {
   Title of the requirement
   """
   title: String
+
+  """
+  The GitLab Flavored Markdown rendering of `title`
+  """
+  titleHtml: String
 
   """
   Timestamp of when the requirement was last updated
@@ -18008,6 +18028,11 @@ input UpdateRequirementInput {
   A unique identifier for the client performing the mutation.
   """
   clientMutationId: String
+
+  """
+  The description of the requirement
+  """
+  description: String
 
   """
   The iid of the requirement to update

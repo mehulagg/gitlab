@@ -2050,12 +2050,15 @@ Represents a requirement.
 | ----- | ---- | ----------- |
 | `author` | User! | Author of the requirement |
 | `createdAt` | Time! | Timestamp of when the requirement was created |
+| `description` | String | Description of the requirement |
+| `descriptionHtml` | String | The GitLab Flavored Markdown rendering of `description` |
 | `id` | ID! | ID of the requirement |
 | `iid` | ID! | Internal ID of the requirement |
 | `lastTestReportState` | TestReportState | Latest requirement test report state |
 | `project` | Project! | Project to which the requirement belongs |
 | `state` | RequirementState! | State of the requirement |
 | `title` | String | Title of the requirement |
+| `titleHtml` | String | The GitLab Flavored Markdown rendering of `title` |
 | `updatedAt` | Time! | Timestamp of when the requirement was last updated |
 | `userPermissions` | RequirementPermissions! | Permissions for the current user on the resource |
 
