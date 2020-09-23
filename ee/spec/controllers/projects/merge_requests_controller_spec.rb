@@ -801,9 +801,9 @@ RSpec.describe Projects::MergeRequestsController do
       end
     end
 
-    context "when authorizing access to license scan reports" do
-      it_behaves_like 'authorize read pipeline'
-    end
+    context "when a user is authorized to read the licenses"
+    context "when a user is authorized to read licenses on a forked project"
+    context "when a user is NOT authorized to read licenses on a project"
   end
 
   describe 'GET #metrics_reports' do
