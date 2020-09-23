@@ -9,16 +9,16 @@ module Mutations
 
       field :vulnerability, Types::VulnerabilityType,
             null: true,
-            description: 'The vulnerability after revert.'
+            description: 'The vulnerability after revert'
 
       argument :id,
                GraphQL::ID_TYPE,
                required: true,
-               description: 'ID of the vulnerability to be reverted.'
+               description: 'ID of the vulnerability to be reverted'
 
       def resolve(id:)
         vulnerability = authorized_find!(id: id)
-        result = revert_vulnerability_to_detected(vulnerability)
+        result = ::Vulnerabilities::RevertToDetectedService.new(current_user, vulnerability).execute
 
         {
           vulnerability: result,
@@ -27,10 +27,6 @@ module Mutations
       end
 
       private
-
-      def revert_vulnerability_to_detected(vulnerability)
-        ::Vulnerabilities::RevertToDetectedService.new(current_user, vulnerability).execute
-      end
 
       def find_object(id:)
         GitlabSchema.object_from_id(id)

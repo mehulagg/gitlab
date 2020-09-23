@@ -15098,7 +15098,7 @@ input RevertVulnerabilityToDetectedInput {
   clientMutationId: String
 
   """
-  ID of the vulnerability to be reverted.
+  ID of the vulnerability to be reverted
   """
   id: ID!
 }
@@ -15118,7 +15118,7 @@ type RevertVulnerabilityToDetectedPayload {
   errors: [String!]!
 
   """
-  The vulnerability after revert.
+  The vulnerability after revert
   """
   vulnerability: Vulnerability
 }

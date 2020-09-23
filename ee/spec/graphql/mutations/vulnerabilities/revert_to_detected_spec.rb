@@ -4,6 +4,8 @@ require 'spec_helper'
 RSpec.describe Mutations::Vulnerabilities::RevertToDetected do
   let(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
+  specify { expect(described_class).to require_graphql_authorizations(:admin_vulnerability) }
+
   describe '#resolve' do
     let_it_be(:vulnerability) { create(:vulnerability, :dismissed, :with_findings) }
     let_it_be(:user) { create(:user) }
