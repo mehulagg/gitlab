@@ -22106,6 +22106,9 @@ msgstr ""
 msgid "SSL Verification:"
 msgstr ""
 
+msgid "Sample Data"
+msgstr ""
+
 msgid "Saturday"
 msgstr ""
 
@@ -25055,6 +25058,9 @@ msgstr[1] ""
 msgid "Test settings"
 msgstr ""
 
+msgid "Test template for Demo Templates."
+msgstr ""
+
 msgid "TestCases|New Test Case"
 msgstr ""
 
@@ -25074,9 +25080,6 @@ msgid "TestCases|Something went wrong while fetching test cases list."
 msgstr ""
 
 msgid "TestCases|Submit test case"
-msgstr ""
-
-msgid "Test template for Demo Templates."
 msgstr ""
 
 msgid "TestHooks|Ensure one of your projects has merge requests."
