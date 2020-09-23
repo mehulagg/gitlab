@@ -26869,9 +26869,6 @@ msgstr ""
 msgid "Toggle navigation"
 msgstr ""
 
-msgid "Toggle project"
-msgstr ""
-
 msgid "Toggle sidebar"
 msgstr ""
 
