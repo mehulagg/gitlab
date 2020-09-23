@@ -758,4 +758,16 @@ RSpec.describe Issue do
       it { is_expected.to eq(supports_iterations) }
     end
   end
+
+  describe '#issue_type_supports?' do
+    let_it_be(:issue) { create(:issue) }
+    let_it_be(:test_case) { create(:quality_test_case) }
+    let_it_be(:incident) { create(:incident) }
+
+    it do
+      expect(issue.issue_type_supports?(:epics)).to be(true)
+      expect(test_case.issue_type_supports?(:epics)).to be(false)
+      expect(incident.issue_type_supports?(:epics)).to be(false)
+    end
+  end
 end
