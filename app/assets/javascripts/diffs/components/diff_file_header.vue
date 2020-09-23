@@ -269,10 +269,10 @@ export default {
 
     <div
       v-if="!diffFile.submodule && addMergeRequestButtons"
-      class="file-actions d-none d-sm-flex align-items-center flex-wrap"
+      class="file-actions d-flex align-items-center flex-wrap"
     >
       <diff-stats :added-lines="diffFile.added_lines" :removed-lines="diffFile.removed_lines" />
-      <gl-button-group>
+      <gl-button-group class="gl-pt-0!">
         <gl-button
           v-if="diffFile.external_url"
           ref="externalLink"
@@ -289,6 +289,7 @@ export default {
           v-gl-tooltip.hover.focus="__('More actions')"
           right
           toggle-class="btn-icon js-diff-more-actions"
+          class="gl-pt-0!"
           @show="setMoreActionsShown(true)"
           @hidden="setMoreActionsShown(false)"
         >

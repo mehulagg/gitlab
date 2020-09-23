@@ -17,6 +17,17 @@
       cursor: auto;
     }
 
+    @media (max-width: map-get($grid-breakpoints, sm)-1) {
+      .file-header-content {
+        width: 0;
+        flex: 1;   
+      }
+
+      .file-actions {
+        margin-left: $gl-spacing-scale-2;
+      }
+    }
+
     @media (min-width: map-get($grid-breakpoints, md)) {
       // The `+11` is to ensure the file header border shows when scrolled -
       // the bottom of the compare-versions header and the top of the file header
