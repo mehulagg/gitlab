@@ -30,7 +30,7 @@ repository is too large the import can timeout.
 
 There is also the option of [connecting your external repository to get CI/CD benefits](../../../ci/ci_cd_for_external_repos/index.md). **(PREMIUM)**
 
-NOTE: **LFS authentication**
+## LFS authentication
 When importing a project that contains LFS objects, if the project have a
 `.lfsconfig` file with the user/password set on the URL, this authentication
 information will have precedence over the import authentication data.
