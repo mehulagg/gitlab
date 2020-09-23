@@ -56,7 +56,7 @@ export default {
           class="gl-mr-3"
           variant="default"
           icon="pencil"
-          :size="16"
+          size="medium"
           :aria-label="__('Edit')"
           @click="editBadge(badge)"
         />
@@ -66,7 +66,7 @@ export default {
           data-toggle="modal"
           data-target="#delete-badge-modal"
           icon="remove"
-          :size="16"
+          size="medium"
           :aria-label="__('Delete')"
           @click="updateBadgeInModal(badge)"
         />
