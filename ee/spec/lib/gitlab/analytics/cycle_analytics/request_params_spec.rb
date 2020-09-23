@@ -168,6 +168,26 @@ RSpec.describe Gitlab::Analytics::CycleAnalytics::RequestParams do
     end
   end
 
+  describe 'optional `value_stream_id`' do
+    context 'when `value_stream_id` is not empty' do
+      let(:value_stream_id) { 3 }
+
+      before do
+        params[:value_stream] = value_stream_id
+      end
+
+      it { expect(subject.value_stream).to eq(value_stream_id) }
+    end
+
+    context 'when `value_stream_id` is nil' do
+      before do
+        params[:value_stream] = nil
+      end
+
+      it { expect(subject.value_stream).to eq(nil) }
+    end
+  end
+
   describe 'issuable filter params' do
     before do
       params.merge!(

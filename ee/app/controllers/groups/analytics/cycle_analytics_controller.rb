@@ -10,6 +10,7 @@ class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::Applicati
 
   before_action :load_group, only: :show
   before_action :load_project, only: :show
+  before_action :load_value_stream, only: :show
   before_action :request_params, only: :show
 
   before_action do
@@ -28,6 +29,14 @@ class Groups::Analytics::CycleAnalyticsController < Groups::Analytics::Applicati
 
   override :all_cycle_analytics_params
   def all_cycle_analytics_params
-    super.merge({ group: @group })
+    super.merge({ group: @group, value_stream: @value_stream })
+  end
+
+  def load_value_stream
+    return unless @group && params[:value_stream_id]
+
+    if params[:value_stream_id] != ::Analytics::CycleAnalytics::Stages::BaseService::DEFAULT_VALUE_STREAM_NAME
+      @value_stream = @group.value_streams.find(params[:value_stream_id])
+    end
   end
 end

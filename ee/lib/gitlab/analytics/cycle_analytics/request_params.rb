@@ -34,6 +34,7 @@ module Gitlab
         attribute :created_before, :datetime
         attribute :group
         attribute :current_user
+        attribute :value_stream
 
         FINDER_PARAM_NAMES.each do |param_name|
           attribute param_name
@@ -68,6 +69,7 @@ module Gitlab
         def to_data_attributes
           {}.tap do |attrs|
             attrs[:group] = group_data_attributes if group
+            attrs[:value_stream] = value_stream_data_attributes if value_stream
             attrs[:created_after] = created_after.to_date.iso8601
             attrs[:created_before] = created_before.to_date.iso8601
             attrs[:projects] = group_projects(project_ids) if group && project_ids.present?
@@ -87,6 +89,12 @@ module Gitlab
             parent_id: group.parent_id,
             full_path: group.full_path,
             avatar_url: group.avatar_url
+          }
+        end
+
+        def value_stream_data_attributes
+          {
+            id: value_stream.id
           }
         end
 
