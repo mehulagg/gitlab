@@ -41,13 +41,7 @@ module Gitlab
     private
 
     def writing(contents)
-      tmp_file = "#{Process.pid}.#{content_path.basename.to_s.chomp('.enc')}"
-      tmp_path = Pathname.new File.join(Dir.tmpdir, tmp_file)
-      tmp_path.binwrite contents
-
-      yield tmp_path
-
-      updated_contents = tmp_path.binread
+      updated_contents = yield contents
 
       write(updated_contents) if updated_contents != contents
     ensure

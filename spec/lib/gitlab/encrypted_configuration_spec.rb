@@ -54,9 +54,9 @@ RSpec.describe Gitlab::EncryptedConfiguration do
         config = described_class.new(content_path: credentials_config_path, key: credentials_key)
 
         config.write({ foo: { bar: true } }.to_yaml)
-        config.change do |unencrypted_file|
-          contents = YAML.safe_load(unencrypted_file.read, [Symbol])
-          unencrypted_file.write contents.merge(beef: "stew").to_yaml
+        config.change do |unencrypted_contents|
+          contents = YAML.safe_load(unencrypted_contents, [Symbol])
+          contents.merge(beef: "stew").to_yaml
         end
         expect(config.foo[:bar]).to be true
         expect(config.beef).to eq('stew')
