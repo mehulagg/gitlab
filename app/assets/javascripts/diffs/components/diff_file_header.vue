@@ -2,7 +2,7 @@
 import { escape } from 'lodash';
 import { mapActions, mapGetters } from 'vuex';
 import {
-  GlDeprecatedButton,
+  GlButton,
   GlTooltipDirective,
   GlSafeHtmlDirective,
   GlLoadingIcon,
@@ -21,7 +21,7 @@ import { scrollToElement } from '~/lib/utils/common_utils';
 export default {
   components: {
     GlLoadingIcon,
-    GlDeprecatedButton,
+    GlButton,
     ClipboardButton,
     EditButton,
     GlIcon,
@@ -261,7 +261,7 @@ export default {
       <div class="btn-group" role="group">
         <template v-if="diffFile.blob && diffFile.blob.readable_text">
           <span v-gl-tooltip.hover :title="s__('MergeRequests|Toggle comments for this file')">
-            <gl-deprecated-button
+            <gl-button
               ref="toggleDiscussionsButton"
               :disabled="!diffHasDiscussions(diffFile)"
               :class="{ active: diffHasExpandedDiscussions(diffFile) }"
@@ -274,7 +274,7 @@ export default {
               @click="toggleFileDiscussionWrappers(diffFile)"
             >
               <gl-icon name="comment" />
-            </gl-deprecated-button>
+            </gl-button>
           </span>
 
           <edit-button
@@ -300,7 +300,7 @@ export default {
           class="btn view-file"
         >
         </a>
-        <gl-deprecated-button
+        <gl-button
           v-if="!diffFile.is_fully_expanded"
           ref="expandDiffToFullFileButton"
           v-gl-tooltip.hover
@@ -314,8 +314,8 @@ export default {
           <gl-loading-icon v-if="diffFile.isLoadingFullFile" color="dark" inline />
           <gl-icon v-else-if="diffFile.isShowingFullFile" name="doc-changes" />
           <gl-icon v-else name="doc-expand" />
-        </gl-deprecated-button>
-        <gl-deprecated-button
+        </gl-button>
+        <gl-button
           ref="viewButton"
           v-gl-tooltip.hover
           :href="diffFile.view_path"
@@ -327,7 +327,7 @@ export default {
           :title="viewFileButtonText"
         >
           <gl-icon name="doc-text" />
-        </gl-deprecated-button>
+        </gl-button>
 
         <a
           v-if="diffFile.external_url"
