@@ -687,7 +687,7 @@ const Api = {
     return axios.post(url, freezePeriod);
   },
 
-  trackRedisHllEvent(event) {
+  trackRedisHllUserEvent(event) {
     if (!gon.features?.usageDataApi) {
       return null;
     }

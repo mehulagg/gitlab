@@ -1153,7 +1153,7 @@ describe('Api', () => {
     });
   });
 
-  describe('trackRedisHllEvent', () => {
+  describe('trackRedisHllUserEvent', () => {
     const expectedUrl = `${dummyUrlRoot}/api/${dummyApiVersion}/usage_data/increment_unique_users`;
 
     const event = 'dummy_event';
@@ -1168,7 +1168,7 @@ describe('Api', () => {
       });
 
       it('returns null', () => {
-        expect(Api.trackRedisHllEvent(event)).toEqual(null);
+        expect(Api.trackRedisHllUserEvent(event)).toEqual(null);
       });
     });
 
@@ -1181,7 +1181,7 @@ describe('Api', () => {
         jest.spyOn(axios, 'post');
         mock.onPost(expectedUrl, { event }).replyOnce(httpStatus.OK, true);
 
-        return Api.trackRedisHllEvent(event).then(({ data }) => {
+        return Api.trackRedisHllUserEvent(event).then(({ data }) => {
           expect(data).toEqual(true);
           expect(axios.post).toHaveBeenCalledWith(expectedUrl, postData, { headers });
         });
