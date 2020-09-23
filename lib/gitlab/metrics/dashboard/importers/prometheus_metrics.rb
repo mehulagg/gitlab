@@ -13,7 +13,7 @@ module Gitlab
             @dashboard_hash = dashboard_hash
             @project = project
             @dashboard_path = dashboard_path
-            @affected_metric_ids = []
+            @affected_environment_ids = []
           end
 
           def execute
@@ -33,18 +33,22 @@ module Gitlab
           def import
             delete_stale_metrics
             create_or_update_metrics
-            update_prometheus_alerts
+            update_prometheus_environments
           end
 
           # rubocop: disable CodeReuse/ActiveRecord
           def create_or_update_metrics
             # TODO: use upsert and worker for callbacks?
+
+            affected_metric_ids = []
             prometheus_metrics_attributes.each do |attributes|
               prometheus_metric = PrometheusMetric.find_or_initialize_by(attributes.slice(:dashboard_path, :identifier, :project))
               prometheus_metric.update!(attributes.slice(*ALLOWED_ATTRIBUTES))
 
-              @affected_metric_ids << prometheus_metric.id
+              affected_metric_ids << prometheus_metric.id
             end
+
+            @affected_environment_ids += find_alerts(affected_metric_ids).pluck(:environment_id)
           end
           # rubocop: enable CodeReuse/ActiveRecord
 
@@ -60,13 +64,20 @@ module Gitlab
 
             delete_stale_alerts(stale_metrics)
             stale_metrics.each_batch { |batch| batch.delete_all }
-
-            @affected_metric_ids << stale_metrics.map(&:id)
           end
 
+          # rubocop: disable CodeReuse/ActiveRecord
           def delete_stale_alerts(stale_metrics)
             stale_alerts = Projects::Prometheus::AlertsFinder.new(project: project, metric: stale_metrics).execute
+
+            @affected_environment_ids += stale_alerts.pluck(:environment_id)
+
             stale_alerts.each_batch { |batch| batch.delete_all }
+          end
+          # rubocop: enable CodeReuse/ActiveRecord
+
+          def find_alerts(metrics)
+            Projects::Prometheus::AlertsFinder.new(project: project, metric: metrics).execute
           end
 
           def prometheus_metrics_attributes
@@ -80,17 +91,15 @@ module Gitlab
           end
 
           # rubocop: disable CodeReuse/ActiveRecord
-          def update_prometheus_alerts
-            affected_alerts = PrometheusAlert.includes(:environment, :project)
-              .for_metric(@affected_metric_ids.flatten.uniq)
-              .distinct_project_and_environment
+          def update_prometheus_environments
+            affected_environments = ::Environment.where(id: @affected_environment_ids.flatten.uniq, project: project)
 
-            return unless affected_alerts.present?
+            return unless affected_environments.present?
 
-            affected_alerts.each do |affected_alert|
+            affected_environments.each do |affected_environment|
               ::Clusters::Applications::ScheduleUpdateService.new(
-                affected_alert.environment.cluster_prometheus_adapter,
-                affected_alert.project
+                affected_environment.cluster_prometheus_adapter,
+                project
               ).execute
             end
           end
