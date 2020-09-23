@@ -17,13 +17,13 @@ However, it's helpful to include examples on how to use GraphQL for different
 This section describes the steps required to add your GraphQL examples to
 GitLab documentation.
 
-### Add a dedicated GraphQL page
+## Add a dedicated GraphQL page
 
 To create a dedicated GraphQL page, create a new `.md` file in the
 `doc/api/graphql/` directory. Give that file a functional name, such as
 `import_from_specific_location.md`.
 
-### Start the page with an explanation
+## Start the page with an explanation
 
 Include a page title that describes the GraphQL functionality in a few words,
 such as:
@@ -35,7 +35,7 @@ such as:
 Describe the search. One sentence may be all you need. More information may
 help readers learn how to use the example for their GitLab deployments.
 
-### Include a procedure using the GraphiQL explorer
+## Include a procedure using the GraphiQL explorer
 
 The GraphiQL explorer can help readers test queries with working deployments.
 Set up the section with the following:
@@ -71,7 +71,7 @@ Set up the section with the following:
   example is something that readers can do on their own deployments.
 - Include a link to the [GraphQL API resources](../../api/graphql/reference/index.md).
 
-### Add the GraphQL example to the Table of Contents
+## Add the GraphQL example to the Table of Contents
 
 You'll need to open a second MR, against the [GitLab documentation repository](https://gitlab.com/gitlab-org/gitlab-docs/).
 
