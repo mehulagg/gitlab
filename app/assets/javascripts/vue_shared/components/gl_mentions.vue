@@ -12,6 +12,8 @@ const AutoComplete = {
   MergeRequests: 'mergeRequests',
 };
 
+const groupType = 'Group'; // eslint-disable-line @gitlab/require-i18n-strings
+
 function doesCurrentLineStartWith(searchString, fullText, selectionStart) {
   const currentLineNumber = fullText.slice(0, selectionStart).split('\n').length;
   const currentLine = fullText.split('\n')[currentLineNumber - 1];
@@ -82,13 +84,14 @@ const autoCompleteMap = {
         : `<div class="${noAvatarClasses}" aria-hidden="true">
             ${original.username.charAt(0).toUpperCase()}</div>`;
 
-      const splitName = original.name.split(' / ');
+      let displayName = original.name;
+      let parentGroupOrUsername = `@${original.username}`;
 
-      const displayName =
-        original.type === 'Group' ? splitName[splitName.length - 1] : original.name;
-
-      const parentGroupOrUsername =
-        original.type === 'Group' ? splitName[splitName.length - 2] : `@${original.username}`;
+      if (original.type === groupType) {
+        const splitName = original.name.split(' / ');
+        displayName = splitName.pop();
+        parentGroupOrUsername = splitName.pop();
+      }
 
       const count = original.count && !original.mentionsDisabled ? ` (${original.count})` : '';
 
@@ -143,7 +146,7 @@ export default {
           trigger: '@',
           fillAttr: 'username',
           lookup: value =>
-            value.type === 'Group' ? last(value.name.split(' / ')) : value.name + value.username,
+            value.type === groupType ? last(value.name.split(' / ')) : value.name + value.username,
           menuItemTemplate: autoCompleteMap[AutoComplete.Members].menuItemTemplate,
           values: this.getValues(AutoComplete.Members),
         },
