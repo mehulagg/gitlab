@@ -41,7 +41,7 @@ the `author` field. GitLab team members **should not**.
   also require a changelog entry.
 - _Any_ contribution from a community member, no matter how small, **may** have
   a changelog entry regardless of these guidelines if the contributor wants one.
-  Example: "Fixed a typo on the search results page."
+  Example: “Fixed a typo on the search results page.”
 - Any docs-only changes **should not** have a changelog entry.
 - Any change behind a disabled feature flag **should not** have a changelog entry.
 - Any change behind an enabled feature flag **should** have a changelog entry.
