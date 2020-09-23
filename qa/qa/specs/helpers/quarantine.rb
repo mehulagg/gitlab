@@ -20,7 +20,7 @@ module QA
               Quarantine.skip_or_run_quarantined_tests_or_contexts(config.inclusion_filter.rules, example)
 
               if example.metadata.key?(:only_run_in_pipeline)
-                skip('Test is not compatible with this pipeline') unless Runtime::Env.ci_project_name == example.metadata[:only_run_in_pipeline].to_s
+                skip('Test is not compatible with this pipeline') unless Runtime::Env.ci_project_name.downcase == example.metadata[:only_run_in_pipeline].to_s.downcase
               end
               
               if example.metadata.key?(:only)

@@ -401,4 +401,20 @@ describe QA::Specs::Helpers::Quarantine do
       expect(group.examples.first.execution_result.pending_message).to match(/[Tt]est.*not compatible.*environment/)
     end
   end
+
+  describe 'with pipeline constraints' do
+    before do
+      QA::Runtime::Scenario.define(:ci_project_name, 'nightly')
+    end
+
+    it 'runs on nightly pipeline' do
+      group = describe_successfully do
+        it('runs on nightly', only_run_in_pipeline: :nightly ) {}
+        it('does not run in not_nightly', only_run_in_pipeline: :not_nightly ) {}
+      end
+
+      expect(group.examples[0].execution_result.status).to eq(:passed)
+      expect(group.examples[1].execution_result.status).to eq(:pending)
+    end
+  end
 end
