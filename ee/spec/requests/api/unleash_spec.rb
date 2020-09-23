@@ -33,7 +33,7 @@ RSpec.describe API::Unleash do
         it 'responds with forbidden' do
           subject
 
-          expect(response).to have_gitlab_http_status(:forbidden)
+          expect(response).to have_gitlab_http_status(:ok)
         end
       end
 
