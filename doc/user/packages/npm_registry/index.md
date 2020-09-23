@@ -288,7 +288,9 @@ Administrators can disable this behavior in the [Continuous Integration settings
 
 ### Installing packages from other organizations
 
-If you'd like to route package requests to multiple organizations and users, you can add additional lines to your `.npmrc` file, replacing `my-org` with the namespace or group name that owns the repository containing your project. Please note that the namespace or group name is case-sensitive and must match exactly the name of your group or namespace. 
+You can route package requests to organizations and users outside of GitLab.
+
+To do this, add lines to your `.npmrc` file, replacing `my-org` with the namespace or group that owns your project's repository. The name is case-sensitive and must match the name of your group or namespace exactly. 
 
 ```shell
 @foo:registry=https://gitlab.com/api/v4/packages/npm/
