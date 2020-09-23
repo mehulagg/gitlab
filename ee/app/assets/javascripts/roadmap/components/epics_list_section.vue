@@ -165,16 +165,15 @@ export default {
 
 <template>
   <div :style="sectionContainerStyles" class="epics-list-section">
-    <template v-if="glFeatures.roadmapBufferedRendering && !emptyRowContainerVisible">
+    <template v-if="true">
       <virtual-list
         v-if="displayedEpics.length"
-        :size="$options.epicItemHeight"
-        :remain="bufferSize"
-        :bench="bufferSize"
-        :scrollelement="roadmapShellEl"
-        :item="$options.EpicItem"
-        :itemcount="displayedEpics.length"
-        :itemprops="getEpicItemProps"
+        :estimate-size="$options.epicItemHeight"
+        :keeps="bufferSize"
+        :data-key="generateKey"
+        :data-sources="displayedEpics"
+        :data-component="$options.EpicItem"
+        :extra-props="getEpicItemProps"
       />
     </template>
     <template v-else>
