@@ -166,14 +166,14 @@ vulnerabilities for the projects defined in the **Security Dashboard**,
 as filters don't apply to the export function.
 
 The fields in the export include:
-* Scanner Type
-* Scanner Name
-* Status
-* Name
-* Details
-* Severity
-* [CVE](https://cve.mitre.org/)
-* Additional Info
+- Scanner Type
+- Scanner Name
+- Status
+- Name
+- Details
+- Severity
+- [CVE](https://cve.mitre.org/)
+- Additional Info
 
 ![Export vulnerabilities](img/instance_security_dashboard_export_csv_v13_4.png)
 
