@@ -76,10 +76,10 @@ module EE
       end
 
       def collect_license_scanning_reports!(license_scanning_report)
+        return license_scanning_report unless project.feature_available?(:license_scanning)
+
         each_report(::Ci::JobArtifact::LICENSE_SCANNING_REPORT_FILE_TYPES) do |file_type, blob|
           next if ::Feature.disabled?(:parse_license_management_reports, default_enabled: true)
-
-          next unless project.feature_available?(:license_scanning)
 
           ::Gitlab::Ci::Parsers.fabricate!(file_type).parse!(blob, license_scanning_report)
         end

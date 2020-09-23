@@ -227,15 +227,32 @@ RSpec.describe Ci::Build do
   describe '#collect_license_scanning_reports!' do
     subject { job.collect_license_scanning_reports!(license_scanning_report) }
 
-    let(:license_scanning_report) { Gitlab::Ci::Reports::LicenseScanning::Report.new }
-
-    before do
-      stub_licensed_features(license_scanning: true)
-    end
+    let(:license_scanning_report) { build(:license_scanning_report) }
 
     it { expect(license_scanning_report.licenses.count).to eq(0) }
 
+    context "when loading the data" do
+      it 'checks the feature flag once' do
+        create(:ee_ci_job_artifact, job: job, project: job.project)
+
+        control_count = ActiveRecord::QueryRecorder.new do
+          job.reload.collect_license_scanning_reports!(license_scanning_report)
+        end.count
+
+        create(:ee_ci_job_artifact, :license_scan, :v2_1, job: job, project: job.project)
+        create(:ee_ci_job_artifact, :license_management, job: job, project: job.project)
+
+        expect do
+          job.reload.collect_license_scanning_reports!(license_scanning_report)
+        end.not_to exceed_query_limit(control_count)
+      end
+    end
+
     context 'when build has a license scanning report' do
+      before do
+        stub_licensed_features(license_scanning: true)
+      end
+
       context 'when there is a new type report' do
         before do
           create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
