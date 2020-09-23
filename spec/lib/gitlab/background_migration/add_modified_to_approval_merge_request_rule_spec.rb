@@ -33,9 +33,9 @@ RSpec.describe Gitlab::BackgroundMigration::AddModifiedToApprovalMergeRequestRul
     sources.create!(approval_project_rule_id: overridden_project_rule.id, approval_merge_request_rule_id: overridden_merge_rule.id)
     sources.create!(approval_project_rule_id: overridden_project_rule_two.id, approval_merge_request_rule_id: overridden_merge_rule_two.id)
 
-    group1 = groups.create!(name: "1", path: "test_group1", type: 'Group')
-    group2 = groups.create!(name: "2", path: "test_group2", type: 'Group')
-    group3 = groups.create!(name: "3", path: "test_group3", type: 'Group')
+    groups.create!(name: "group1", path: "test_group1", type: 'Group')
+    groups.create!(name: "group2", path: "test_group2", type: 'Group')
+    groups.create!(name: "group3", path: "test_group3", type: 'Group')
 
     project_groups.create!(approval_project_rule_id: overridden_project_rule_two.id, group_id: group1.id)
     project_groups.create!(approval_project_rule_id: overridden_project_rule_two.id, group_id: group2.id)
