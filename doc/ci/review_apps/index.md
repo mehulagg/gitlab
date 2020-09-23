@@ -194,7 +194,7 @@ Getting feedback about changes back to a developer in a context that is not lost
 
 ### Using Visual Reviews
 
-After Visual Reviews has been [configured](#configure-review-app-for-visual-reviews) for the
+After Visual Reviews has been [configured](#configure-review-apps-for-visual-reviews) for the
 Review App, the Visual Reviews feedback form is overlaid on the right side of every page.
 
 ![Visual review feedback form](img/toolbar_feedback_form.png)
@@ -206,7 +206,7 @@ To use the feedback form to make a comment in the merge request:
    [Markdown annotations](../../user/markdown.md) that are also available in
    merge request comments.
 1. Enter your personal information:
-   - If [`data-require-auth`](#configure-review-app-for-visual-reviews) is `true`, you must enter your [personal access token](../../user/profile/personal_access_tokens.md).
+   - If [`data-require-auth`](#authentication-for-visual-reviews) is `true`, you must enter your [personal access token](../../user/profile/personal_access_tokens.md).
    - Otherwise, enter your name, and optionally your email.
 1. Click **Send feedback**.
 
@@ -253,7 +253,7 @@ to replace those values at runtime when each review app is created:
 - `data-mr-url` is the URL of the GitLab instance and will be the same for all
   review apps.
 - `data-project-path` is the project's path, which can be found by `CI_PROJECT_PATH`.
-- `data-require-auth` is optional for public projects but required for [private and internal ones](#visual-reviews-in-private-or-internal-projects-and-requiring-authentication). If this is set to `true`, the user will be required to enter their [personal access token](../../user/profile/personal_access_tokens.md) instead of their name and email.
+- `data-require-auth` is optional for public projects but required for [private and internal ones](#authentication-for-visual-reviews). If this is set to `true`, the user will be required to enter their [personal access token](../../user/profile/personal_access_tokens.md) instead of their name and email.
 - `id` is always `review-app-toolbar-script`, you don't need to change that.
 - `src` is the source of the review toolbar script, which resides in the
   respective GitLab instance and will be the same for all review apps.
@@ -310,7 +310,7 @@ Feature.enable(:anonymous_visual_review_feedback)
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/42750#note_317271120) in GitLab 12.10.
 
 To enable visual reviews for private and internal projects, set the
-[`data-require-auth` variable](#configuring-visual-reviews) to `true`. When enabled,
+[`data-require-auth` variable](#enable-or-disable-visual-reviews) to `true`. When enabled,
 the user must enter a [personal access token](../../user/profile/personal_access_tokens.md)
 with `api` scope before submitting feedback.
 
