@@ -250,36 +250,58 @@ describe('ThroughputTable', () => {
         });
 
         describe('approval details', () => {
-          it('displays the approval icon', async () => {
-            const iconName = 'approval';
+          const iconName = 'approval';
+
+          it('does not display by default', async () => {
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+
+            expect(approved.exists()).toBe(false);
+          });
+
+          it('displays the singular when there is a single approval', async () => {
+            additionalData({
+              approvedBy: {
+                nodes: [
+                  {
+                    id: 1,
+                  },
+                ],
+              },
+            });
+
+            await wrapper.vm.$nextTick();
 
             const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
             const icon = approved.find(GlIcon);
 
-            expect(icon.find(GlIcon).exists()).toBe(true);
+            expect(approved.text()).toBe('1 Approval');
+            expect(icon.exists()).toBe(true);
             expect(icon.props('name')).toBe(iconName);
           });
-        });
 
-        it('displays the approved text when approved', async () => {
-          const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+          it('displays the plural when there are multiple approvals', async () => {
+            additionalData({
+              approvedBy: {
+                nodes: [
+                  {
+                    id: 1,
+                  },
+                  {
+                    id: 2,
+                  },
+                ],
+              },
+            });
 
-          expect(approved.text()).toBe('Approved');
-          expect(approved.classes()).toContain('gl-text-green-500');
-        });
+            await wrapper.vm.$nextTick();
 
-        it('displays the remaining approvals count when not approved', async () => {
-          additionalData({
-            approved: false,
-            approvals_left: 1,
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+            const icon = approved.find(GlIcon);
+
+            expect(approved.text()).toBe('2 Approvals');
+            expect(icon.exists()).toBe(true);
+            expect(icon.props('name')).toBe(iconName);
           });
-
-          await wrapper.vm.$nextTick();
-
-          const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
-
-          expect(approved.text()).toBe('1 left');
-          expect(approved.classes()).not.toContain('gl-text-green-500');
         });
       });
 

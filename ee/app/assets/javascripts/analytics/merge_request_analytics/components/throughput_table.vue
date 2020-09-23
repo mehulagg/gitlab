@@ -12,7 +12,7 @@ import {
   GlAlert,
   GlIcon,
 } from '@gitlab/ui';
-import { s__, __, sprintf } from '~/locale';
+import { s__, n__ } from '~/locale';
 import { approximateDuration, differenceInSeconds } from '~/lib/utils/datetime_utility';
 import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { dateFormats } from '../../shared/constants';
@@ -187,10 +187,8 @@ export default {
         ? PIPELINE_STATUS_ICON_CLASSES.default
         : PIPELINE_STATUS_ICON_CLASSES[value];
     },
-    formatApprovalText(approved, approvalsLeft) {
-      return approved
-        ? __('Approved')
-        : sprintf(s__('MergeRequestAnalytics|%{approvalsLeft} left'), { approvalsLeft });
+    formatApprovalText(approvals) {
+      return n__('%d Approval', '%d Approvals', approvals);
     },
   },
   assigneesVisible: ASSIGNEES_VISIBLE,
@@ -242,11 +240,12 @@ export default {
               <gl-icon name="comments" class="gl-mr-2" /><span>{{ item.userNotesCount }}</span>
             </li>
             <li
-              :class="{ 'gl-text-green-500': item.approved }"
+              v-if="item.approvedBy.nodes.length"
+              class="gl-text-green-500"
               :data-testid="$options.testIds.APPROVED"
             >
               <gl-icon name="approval" class="gl-mr-2" /><span>{{
-                formatApprovalText(item.approved, item.approvalsLeft)
+                formatApprovalText(item.approvedBy.nodes.length)
               }}</span>
             </li>
           </ul>
