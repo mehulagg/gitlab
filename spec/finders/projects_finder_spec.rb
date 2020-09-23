@@ -304,9 +304,29 @@ RSpec.describe ProjectsFinder, :do_not_mock_admin_mode do
       end
 
       describe 'sorting' do
-        let(:params) { { sort: 'name_asc' } }
+        context 'when sorting by a field' do
+          let(:params) { { sort: 'name_asc' } }
 
-        it { is_expected.to eq([internal_project, public_project]) }
+          it { is_expected.to eq([internal_project, public_project]) }
+        end
+
+        context 'when sorting by similarity' do
+          let(:params) { { sort: 'similarity', search: 'pro' } }
+
+          let_it_be(:internal_project2) do
+            create(:project, :internal, group: group, name: 'projA', path: 'projA')
+          end
+
+          let_it_be(:internal_project3) do
+            create(:project, :internal, group: group, name: 'projABC', path: 'projABC')
+          end
+
+          let_it_be(:internal_project4) do
+            create(:project, :internal, group: group, name: 'projAB', path: 'projAB')
+          end
+
+          it { is_expected.to eq([internal_project2, internal_project4, internal_project3]) }
+        end
       end
 
       describe 'with admin user' do

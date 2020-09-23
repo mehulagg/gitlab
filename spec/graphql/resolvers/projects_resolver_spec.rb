@@ -15,7 +15,6 @@ RSpec.describe Resolvers::ProjectsResolver do
     let_it_be(:group_project) { create(:project, :public, group: group) }
     let_it_be(:private_project) { create(:project, :private) }
     let_it_be(:other_private_project) { create(:project, :private) }
-    let_it_be(:other_private_project) { create(:project, :private) }
     let_it_be(:private_group_project) { create(:project, :private, group: private_group) }
 
     let_it_be(:user) { create(:user) }
@@ -115,6 +114,18 @@ RSpec.describe Resolvers::ProjectsResolver do
 
           it 'returns matching project' do
             is_expected.to contain_exactly(project)
+          end
+        end
+
+        context 'when sort is similarity' do
+          let_it_be(:named_project1) { create(:project, :public, name: 'projABC', path: 'projABC') }
+          let_it_be(:named_project2) { create(:project, :public, name: 'projA', path: 'projA') }
+          let_it_be(:named_project3) { create(:project, :public, name: 'projAB', path: 'projAB') }
+
+          let(:filters) { { search: 'projA', sort: 'similarity' } }
+
+          it 'returns projects in order of similarity to search' do
+            is_expected.to match_array([named_project2, named_project3, named_project1])
           end
         end
       end

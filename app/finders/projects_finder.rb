@@ -209,7 +209,13 @@ class ProjectsFinder < UnionFinder
   end
 
   def sort(items)
-    params[:sort].present? ? items.sort_by_attribute(params[:sort]) : items.projects_order_id_desc
+    if params[:sort] == 'similarity' && params[:search]
+      items.sorted_by_similarity_desc(params[:search])
+    elsif params[:sort].present?
+      items.sort_by_attribute(params[:sort])
+    else
+      items.projects_order_id_desc
+    end
   end
 
   def by_archived(projects)
