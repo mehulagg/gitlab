@@ -7,6 +7,7 @@ module ApplicationHelper
   include StartupCssHelper
 
   # See https://docs.gitlab.com/ee/development/ee_features.html#code-in-app-views
+  # rubocop: disable CodeReuse/ActiveRecord
   # We allow partial to be nil so that collection views can be passed in
   # `render partial: 'some/view', collection: @some_collection`
   def render_if_exists(partial = nil, **options)
