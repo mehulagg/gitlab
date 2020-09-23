@@ -2504,6 +2504,10 @@ class Project < ApplicationRecord
     GroupDeployKey.for_groups(group.self_and_ancestors_ids)
   end
 
+  def tracing_external_url
+    tracing_setting&.external_url
+  end
+
   private
 
   def find_service(services, name)

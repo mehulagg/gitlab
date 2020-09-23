@@ -232,10 +232,6 @@ module EE
       namespace.store_security_reports_available? || public?
     end
 
-    def tracing_external_url
-      self.tracing_setting.try(:external_url)
-    end
-
     def latest_pipeline_with_security_reports(only_successful: false)
       pipeline_scope = all_pipelines.newest_first(ref: default_branch)
       pipeline_scope = pipeline_scope.success if only_successful
