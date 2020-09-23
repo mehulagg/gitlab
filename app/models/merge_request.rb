@@ -1690,6 +1690,11 @@ class MergeRequest < ApplicationRecord
     Feature.enabled?(:merge_request_reviewers, project)
   end
 
+  def memoize_branch_names
+    source_project.repository.branch_names
+    target_project.repository.branch_names
+  end
+
   private
 
   def with_rebase_lock

@@ -61,6 +61,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
 
   def index
     @merge_requests = @issuables
+    @merge_requests.each(&:memoize_branch_names)
 
     respond_to do |format|
       format.html
