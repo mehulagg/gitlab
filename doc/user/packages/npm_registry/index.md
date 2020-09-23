@@ -293,10 +293,11 @@ You can route package requests to organizations and users outside of GitLab.
 To do this, add lines to your `.npmrc` file, replacing `my-org` with the namespace or group that owns your project's repository. The name is case-sensitive and must match the name of your group or namespace exactly. 
 
 ```shell
-@foo:registry=https://gitlab.com/api/v4/packages/npm/
+@foo:registry=https://gitlab.example.com/api/v4/packages/npm/
 //gitlab.com/api/v4/packages/npm/:_authToken=
 //gitlab.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken= "<your_token>"
-@my-other-org:registry=https://gitlab.com/api/v4/packages/npm/
+
+@my-other-org:registry=https://gitlab.example.com/api/v4/packages/npm/
 //gitlab.com/api/v4/packages/npm/:_authToken=
 //gitlab.com/api/v4/projects/<your_project_id>/packages/npm/:_authToken= "<your_token>"
 ```
