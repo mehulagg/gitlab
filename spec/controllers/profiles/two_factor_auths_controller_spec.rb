@@ -13,10 +13,11 @@ RSpec.describe Profiles::TwoFactorAuthsController do
   describe 'GET show' do
     let(:user) { create(:user) }
 
-    it 'generates otp_secret for user' do
+    it 'generates otp_secret for user and marks it generated in the session' do
       expect(User).to receive(:generate_otp_secret).with(32).and_call_original.once
 
       get :show
+      expect(session[:two_factor_secret_generated]).to be_truthy
     end
 
     it 'assigns qr_code' do
@@ -27,11 +28,12 @@ RSpec.describe Profiles::TwoFactorAuthsController do
       expect(assigns[:qr_code]).to eq code
     end
 
-    it 'generates a unique otp_secret every time the page is loaded' do
+    it 'generates a unique otp_secret if there was not already one created in the session' do
       expect(User).to receive(:generate_otp_secret).with(32).and_call_original.twice
 
       2.times do
         get :show
+        session.delete(:two_factor_secret_generated)
       end
     end
   end
@@ -68,6 +70,14 @@ RSpec.describe Profiles::TwoFactorAuthsController do
         expect(ActiveSession).to receive(:destroy_all_but_current)
 
         go
+      end
+
+      it 'clears the 2fa generated flag from the session' do
+        session[:two_factor_secret_generated] = true
+
+        go
+
+        expect(session[:two_factor_secret_generated]).to be_nil
       end
 
       it 'renders create' do

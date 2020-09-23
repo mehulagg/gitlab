@@ -1,0 +1,5 @@
+---
+title: Prevent 2FA token regeneration in the same session
+merge_request: 43178
+author:
+type: fixed

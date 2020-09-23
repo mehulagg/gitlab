@@ -7,8 +7,9 @@ class Profiles::TwoFactorAuthsController < Profiles::ApplicationController
   end
 
   def show
-    unless current_user.two_factor_enabled?
+    if !current_user.two_factor_enabled? && session[:two_factor_secret_generated].nil?
       current_user.otp_secret = User.generate_otp_secret(32)
+      session[:two_factor_secret_generated] = true
     end
 
     unless current_user.otp_grace_period_started_at && two_factor_grace_period
@@ -47,6 +48,7 @@ class Profiles::TwoFactorAuthsController < Profiles::ApplicationController
   def create
     if current_user.validate_and_consume_otp!(params[:pin_code])
       ActiveSession.destroy_all_but_current(current_user, session)
+      session.delete(:two_factor_secret_generated)
 
       Users::UpdateService.new(current_user, user: current_user, otp_required_for_login: true).execute! do |user|
         @codes = user.generate_otp_backup_codes!
