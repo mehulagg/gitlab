@@ -167,7 +167,7 @@ export default {
           <div class="dropdown-page-one">
             <dropdown-header v-if="showCreate && variant === $options.DropdownVariant.Sidebar" />
             <dropdown-search-input />
-            <div class="dropdown-content" data-qa-selector="labels_dropdown_content"></div>
+            <div class="dropdown-content"></div>
             <div class="dropdown-loading">
               <gl-loading-icon
                 class="gl-display-flex gl-justify-content-center gl-align-items-center gl-h-full"
