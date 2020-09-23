@@ -3578,8 +3578,8 @@ Vulnerability sort values.
 
 | Value | Description |
 | ----- | ----------- |
-| `detected_asc` | Detected At in ascending order |
-| `detected_desc` | Detected At in descending order |
+| `detected_asc` | Detection timestamp in ascending order |
+| `detected_desc` | Detection timestamp in descending order |
 | `severity_asc` | Severity in ascending order |
 | `severity_desc` | Severity in descending order |
 

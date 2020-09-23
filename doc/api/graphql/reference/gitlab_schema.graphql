@@ -19375,12 +19375,12 @@ Vulnerability sort values
 """
 enum VulnerabilitySort {
   """
-  Detected At in ascending order
+  Detection timestamp in ascending order
   """
   detected_asc
 
   """
-  Detected At in descending order
+  Detection timestamp in descending order
   """
   detected_desc
 
