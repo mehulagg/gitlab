@@ -33,6 +33,15 @@ module EE
           filters: { state: params[:state] }
         )
       end
+
+      override :allowed_scopes
+      def allowed_scopes
+        super.tap do |scopes|
+          scopes << 'epics' if ::Feature.enabled?(:epics_search) && ::License.feature_available?(:epics)
+
+          scopes
+        end
+      end
     end
   end
 end
