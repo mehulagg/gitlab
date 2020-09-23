@@ -226,9 +226,7 @@ module DesignManagement
       # Returns all blobs for the designs as a Hash of `{ Blob#commit_id => { Design#filename => Blob } }`
       def blobs
         @blobs ||= begin
-          items = versions.inject([]) do |memo, version|
-            memo + version.designs.map { |d| [version.sha, d.full_path] }
-          end
+          items = versions.flat_map { |v| v.designs.map { |d| [v.sha, d.full_path] } }
 
           repository.blobs_at(items).each_with_object({}) do |blob, h|
             design = designs.find { |d| d.full_path == blob.path }
