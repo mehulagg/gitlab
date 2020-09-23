@@ -24,6 +24,30 @@ export default function setupVueRepositoryList() {
 
   const currentRoutePath = matches ? matches[1] : '';
 
+  apolloProvider.clients.defaultClient.cache.writeData({
+    data: {
+      projectPath,
+      projectShortPath,
+      ref,
+      escapedRef,
+      commits: [],
+    },
+  });
+
+  const initLastCommitApp = () =>
+    new Vue({
+      el: document.getElementById('js-last-commit'),
+      router,
+      apolloProvider,
+      render(h) {
+        return h(LastCommit, {
+          props: {
+            currentPath: this.$route.params.path,
+          },
+        });
+      },
+    });
+
   if (window.gl.startup_graphql_calls) {
     const query = window.gl.startup_graphql_calls.find(
       call => call.operationName === 'pathLastCommit',
@@ -42,32 +66,10 @@ export default function setupVueRepositoryList() {
         });
       })
       .catch(() => {})
-      .finally(() => {
-        // eslint-disable-next-line no-new
-        new Vue({
-          el: document.getElementById('js-last-commit'),
-          router,
-          apolloProvider,
-          render(h) {
-            return h(LastCommit, {
-              props: {
-                currentPath: this.$route.params.path,
-              },
-            });
-          },
-        });
-      });
+      .finally(() => initLastCommitApp());
+  } else {
+    initLastCommitApp();
   }
-
-  apolloProvider.clients.defaultClient.cache.writeData({
-    data: {
-      projectPath,
-      projectShortPath,
-      ref,
-      escapedRef,
-      commits: [],
-    },
-  });
 
   router.afterEach(({ params: { path } }) => {
     setTitle(path, ref, fullName);
