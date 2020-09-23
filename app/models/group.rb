@@ -17,6 +17,7 @@ class Group < Namespace
   include GroupAPICompatibility
 
   ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
+  SHARED_RUNNERS_SETTINGS = %w[disabled disabled_with_override enabled].freeze
 
   has_many :all_group_members, -> { where(requested_at: nil) }, dependent: :destroy, as: :source, class_name: 'GroupMember' # rubocop:disable Cop/ActiveRecordDependent
   has_many :group_members, -> { where(requested_at: nil).where.not(members: { access_level: Gitlab::Access::MINIMAL_ACCESS }) }, dependent: :destroy, as: :source # rubocop:disable Cop/ActiveRecordDependent
@@ -540,38 +541,38 @@ class Group < Namespace
     parent.shared_runners_enabled?
   end
 
-  def enable_shared_runners!
-    update!(shared_runners_enabled: true)
+  def shared_runners_setting
+    if shared_runners_enabled
+      'enabled'
+    else
+      if allow_descendants_override_disabled_shared_runners
+        'disabled_with_override'
+      else
+        'disabled'
+      end
+    end
   end
 
-  def disable_shared_runners!
-    update!(shared_runners_enabled: false)
-
-    group_ids = descendants
-    return if group_ids.empty?
-
-    # note: this skips the validation on descendant groups, but that's ok because
-    # it only triggers in cases where we are setting this to true.
-    Group.by_id(group_ids).update_all(shared_runners_enabled: false)
-
-    all_projects.update_all(shared_runners_enabled: false)
+  def shared_runners_setting_higher_than?(other_setting)
+    if other_setting == 'enabled'
+      false
+    elsif other_setting == 'disabled_with_override'
+      shared_runners_setting == 'enabled'
+    elsif other_setting == 'disabled'
+      shared_runners_setting == 'enabled' || shared_runners_setting == 'disabled_with_override'
+    else
+      raise ArgumentError
+    end
   end
 
-  def allow_descendants_override_disabled_shared_runners!
-    update!(allow_descendants_override_disabled_shared_runners: true)
-  end
+  def update_shared_runners_setting!(state)
+    raise ArgumentError unless SHARED_RUNNERS_SETTINGS.include?(state)
 
-  def disallow_descendants_override_disabled_shared_runners!
-    update!(allow_descendants_override_disabled_shared_runners: false)
-
-    group_ids = descendants
-    return if group_ids.empty?
-
-    # note: this skips the validation on descendant groups, but that's ok because
-    # it only triggers in cases where we are setting this to true.
-    Group.by_id(group_ids).update_all(allow_descendants_override_disabled_shared_runners: false)
-
-    all_projects.update_all(shared_runners_enabled: false)
+    case state
+    when 'disabled' then disable_shared_runners! # also disallows override
+    when 'disabled_with_override' then disable_shared_runners_and_allow_override!
+    when 'enabled' then enable_shared_runners! # set both to true
+    end
   end
 
   def default_owner
@@ -599,9 +600,6 @@ class Group < Namespace
   def changing_shared_runners_enabled_is_allowed
     return unless new_record? || changes.has_key?(:shared_runners_enabled)
 
-    # note: the #disable_shared_runners! methods assumes validation can only trigger when enabling shared_runners_enabled
-    # please remember to update this method if you're changing the validation logic
-
     if shared_runners_enabled && !parent_allows_shared_runners?
       errors.add(:shared_runners_enabled, _('cannot be enabled because parent group has shared Runners disabled.'))
     end
@@ -610,12 +608,8 @@ class Group < Namespace
   def changing_allow_descendants_override_disabled_shared_runners_is_allowed
     return unless new_record? || changes.has_key?(:allow_descendants_override_disabled_shared_runners)
 
-    # note: the #disallow_descendants_override_disabled_shared_runners! methods assumes validation can only trigger
-    # when enabling allow_descendants_override_disabled_shared_runners
-    # please remember to update this method if you're changing the validation logic
-
-    if allow_descendants_override_disabled_shared_runners && shared_runners_enabled
-      errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be enabled if shared runners are enabled.'))
+    if shared_runners_enabled && !new_record?
+      errors.add(:allow_descendants_override_disabled_shared_runners, _('cannot be changed if shared runners are enabled.'))
     end
 
     if allow_descendants_override_disabled_shared_runners && !parent_allows_shared_runners?
@@ -681,6 +675,45 @@ class Group < Namespace
     Gitlab::ObjectHierarchy
       .new(Group.where(id: group_ids))
       .base_and_descendants
+  end
+
+  def disable_shared_runners!
+    update!(
+      shared_runners_enabled: false,
+      allow_descendants_override_disabled_shared_runners: false)
+
+    group_ids = descendants
+    unless group_ids.empty?
+      Group.by_id(group_ids).update_all(
+        shared_runners_enabled: false,
+        allow_descendants_override_disabled_shared_runners: false)
+    end
+
+    all_projects.update_all(shared_runners_enabled: false)
+  end
+
+  def disable_shared_runners_and_allow_override!
+    # enabled -> disabled_with_override
+    if shared_runners_enabled?
+      update!(
+        shared_runners_enabled: false,
+        allow_descendants_override_disabled_shared_runners: true)
+
+      group_ids = descendants
+      unless group_ids.empty?
+        Group.by_id(group_ids).update_all(shared_runners_enabled: false)
+      end
+
+      all_projects.update_all(shared_runners_enabled: false)
+
+    # disabled -> disabled_with_override
+    else
+      update!(allow_descendants_override_disabled_shared_runners: true)
+    end
+  end
+
+  def enable_shared_runners!
+    update!(shared_runners_enabled: true)
   end
 end
 
