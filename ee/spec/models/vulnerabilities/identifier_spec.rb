@@ -3,6 +3,8 @@
 require 'spec_helper'
 
 RSpec.describe Vulnerabilities::Identifier do
+  using RSpec::Parameterized::TableSyntax
+
   describe 'associations' do
     it { is_expected.to have_many(:finding_identifiers).class_name('Vulnerabilities::FindingIdentifier') }
     it { is_expected.to have_many(:findings).class_name('Vulnerabilities::Finding') }
@@ -41,6 +43,60 @@ RSpec.describe Vulnerabilities::Identifier do
       it 'does not select the identifier' do
         is_expected.to be_empty
       end
+    end
+  end
+
+  describe '#cve?' do
+    where(:external_type, :cve?) do
+      'CVE' | true
+      'cve' | true
+      'CWE' | false
+      'cwe' | false
+      'foo' | false
+    end
+
+    with_them do
+      let(:identifier) { build_stubbed(:vulnerabilities_identifier, external_type: external_type) }
+
+      subject { identifier.cve? }
+
+      it { is_expected.to be(cve?) }
+    end
+  end
+
+  describe '#cwe?' do
+    where(:external_type, :cwe?) do
+      'CWE' | true
+      'cwe' | true
+      'CVE' | false
+      'cve' | false
+      'foo' | false
+    end
+
+    with_them do
+      let(:identifier) { build_stubbed(:vulnerabilities_identifier, external_type: external_type) }
+
+      subject { identifier.cwe? }
+
+      it { is_expected.to be(cwe?) }
+    end
+  end
+
+  describe '#other?' do
+    where(:external_type, :other?) do
+      'CWE' | false
+      'cwe' | false
+      'CVE' | false
+      'cve' | false
+      'foo' | true
+    end
+
+    with_them do
+      let(:identifier) { build_stubbed(:vulnerabilities_identifier, external_type: external_type) }
+
+      subject { identifier.other? }
+
+      it { is_expected.to be(other?) }
     end
   end
 end
