@@ -5,7 +5,7 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 type: reference, howto
 ---
 
-# Test Coverage Visualization **(CORE)**
+# Test Coverage Visualization
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/3708) in GitLab 12.9.
 > - [Feature flag enabled](https://gitlab.com/gitlab-org/gitlab/-/issues/211410) in GitLab 13.4.
