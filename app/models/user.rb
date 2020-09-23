@@ -685,6 +685,16 @@ class User < ApplicationRecord
       end
     end
 
+    def security_bot
+      email_pattern = "security-bot%s@#{Settings.gitlab.host}"
+
+      unique_internal(where(user_type: :security-bot), 'security-bot', email_pattern) do |u|
+        u.bio = 'System bot that monitors detected vulnerabilities for solutions and creates merge requests with the fixes.'
+        u.name = 'GitLab Security bot'
+        u.avatar = bot_avatar(image: 'security-bot.png')
+      end
+    end
+
     def support_bot
       email_pattern = "support%s@#{Settings.gitlab.host}"
 
