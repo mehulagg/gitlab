@@ -70,8 +70,9 @@ module Gitlab
           def delete_stale_alerts(stale_metrics)
             stale_alerts = Projects::Prometheus::AlertsFinder.new(project: project, metric: stale_metrics).execute
 
-            @affected_environment_ids += stale_alerts.pluck(:environment_id)
+            return unless stale_alerts.present?
 
+            @affected_environment_ids += stale_alerts.pluck(:environment_id)
             stale_alerts.each_batch { |batch| batch.delete_all }
           end
           # rubocop: enable CodeReuse/ActiveRecord
