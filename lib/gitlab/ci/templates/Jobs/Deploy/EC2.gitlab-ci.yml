@@ -1,0 +1,40 @@
+stages:
+  - review
+  - production
+
+.push-and-deploy:
+  image: 'registry.gitlab.com/ebaque/cloud-deploy/aws:latest'
+  script:
+    - cloudformation create-stack
+    - ec2 push-to-s3
+    - ec2 deploy-to-ec2
+
+review_ec2:
+  extends: .push-and-deploy
+  stage: review
+  environment:
+    name: review/$CI_COMMIT_REF_NAME
+  rules:
+    - if: '$AUTO_DEVOPS_PLATFORM_TARGET != "EC2"'
+      when: never
+    - if: '$CI_KUBERNETES_ACTIVE'
+      when: never
+    - if: '$REVIEW_DISABLED'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
+
+production_ec2:
+  extends: .push-and-deploy
+  stage: production
+  environment:
+    name: production
+  rules:
+    - if: '$AUTO_DEVOPS_PLATFORM_TARGET != "EC2"'
+      when: never
+    - if: '$CI_KUBERNETES_ACTIVE'
+      when: never
+    - if: '$CI_COMMIT_BRANCH != "master"'
+      when: never
+    - if: '$CI_COMMIT_TAG || $CI_COMMIT_BRANCH'
