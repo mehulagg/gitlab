@@ -43,7 +43,7 @@ The steps you take depend on whether you are importing from GitHub.com or GitHub
   using a [personal access token](#using-a-github-token). We do not recommend
   this method, as it does not associate all user activity (such as issues and
   pull requests) with matching GitLab users.
-- If you're using a self-managed GitLab instance, you can alternatively use the
+- If you're importing to a self-managed GitLab instance, you can alternatively use the
   [GitHub Rake task](../../../administration/raketasks/github_import.md) to import
   projects without the constraints of a [Sidekiq](../../../development/sidekiq_style_guide.md) worker.
 - If you're importing from GitHub Enterprise, in all cases, you must first enable
