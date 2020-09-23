@@ -62,6 +62,8 @@ class Project < ApplicationRecord
   SORTING_PREFERENCE_FIELD = :projects_sort
   MAX_BUILD_TIMEOUT = 1.month
 
+  AVATAR_SIZES = [15, 40, 48, 64, 88].freeze
+
   cache_markdown_field :description, pipeline: :description
 
   default_value_for :packages_enabled, true

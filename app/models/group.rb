@@ -18,6 +18,8 @@ class Group < Namespace
 
   ACCESS_REQUEST_APPROVERS_TO_BE_NOTIFIED_LIMIT = 10
 
+  AVATAR_SIZES = [15, 37, 38, 39, 40, 64, 96].freeze
+
   UpdateSharedRunnersError = Class.new(StandardError)
 
   has_many :all_group_members, -> { where(requested_at: nil) }, dependent: :destroy, as: :source, class_name: 'GroupMember' # rubocop:disable Cop/ActiveRecordDependent

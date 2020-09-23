@@ -27,6 +27,7 @@ class User < ApplicationRecord
   include HasUserType
 
   DEFAULT_NOTIFICATION_LEVEL = :participating
+  AVATAR_SIZES = [16, 20, 23, 24, 26, 32, 36, 38, 40, 48, 60, 64, 96, 120, 160].freeze
 
   add_authentication_token_field :incoming_email_token, token_generator: -> { SecureRandom.hex.to_i(16).to_s(36) }
   add_authentication_token_field :feed_token

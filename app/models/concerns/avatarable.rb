@@ -3,16 +3,7 @@
 module Avatarable
   extend ActiveSupport::Concern
 
-  ALLOWED_IMAGE_SCALER_WIDTHS = [
-    400,
-    200,
-    64,
-    48,
-    40,
-    26,
-    20,
-    16
-  ].freeze
+  ALLOWED_IMAGE_SCALER_WIDTHS = (User::AVATAR_SIZES | Project::AVATAR_SIZES | Group::AVATAR_SIZES).freeze
 
   included do
     prepend ShadowMethods
