@@ -141,7 +141,7 @@ module Gitlab
     def check_maintenance_mode!
       return unless Gitlab::CurrentSettings.current_application_settings.maintenance_mode
 
-      raise ForbiddenError, error_message(:maintenance_mode) if cmd == 'git-receive-pack'
+      raise ForbiddenError, error_message(:maintenance_mode) if receive_pack?
     end
 
     def check_container!

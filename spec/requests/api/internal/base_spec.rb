@@ -996,7 +996,7 @@ RSpec.describe API::Internal::Base do
       end
 
       it 'rejects the HTTP push' do
-        push(key, project, protocol: 'http')
+        push(key, project, 'http')
 
         expect(response).to have_gitlab_http_status(:unauthorized)
         expect(json_response['status']).to be_falsey
@@ -1016,7 +1016,7 @@ RSpec.describe API::Internal::Base do
       it 'allows WEB push' do
         stub_application_setting(enabled_git_access_protocol: 'ssh')
         project.add_developer(user)
-        push(key, project, protocol: 'web')
+        push(key, project, 'web')
 
         expect(response).to have_gitlab_http_status(:ok)
         expect(json_response['status']).to be_truthy
@@ -1087,7 +1087,7 @@ RSpec.describe API::Internal::Base do
 
       context 'when action is not git push' do
         it 'returns success' do
-          push(key, project, action: 'git-upload-pack')
+          pull(key, project)
 
           expect(response).to have_gitlab_http_status(:success)
           expect(json_response["status"]).to be_truthy
@@ -1275,24 +1275,23 @@ RSpec.describe API::Internal::Base do
     )
   end
 
-  def push(key, container, action: 'git-receive-pack', protocol: 'ssh', env: nil, changes: nil)
+  def push(key, container, protocol = 'ssh', env: nil, changes: nil)
     push_with_path(key,
                    full_path: full_path_for(container),
-                   action: action,
                    gl_repository: gl_repository_for(container),
                    protocol: protocol,
                    env: env,
                    changes: changes)
   end
 
-  def push_with_path(key, full_path:, action: 'git-receive-pack', gl_repository: nil, protocol: 'ssh', env: nil, changes: nil)
+  def push_with_path(key, full_path:, gl_repository: nil, protocol: 'ssh', env: nil, changes: nil)
     changes ||= 'd14d6c0abdd253381df51a723d58691b2ee1ab08 570e7b2abdd848b95f2f578043fc23bd6f6fd24d refs/heads/master'
 
     params = {
       changes: changes,
       key_id: key.id,
       project: full_path,
-      action: action,
+      action: 'git-receive-pack',
       secret_token: secret_token,
       protocol: protocol,
       env: env
