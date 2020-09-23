@@ -130,6 +130,10 @@ module Gitlab
         end
       end
 
+      def lock(&block)
+        in_write_lock(&block)
+      end
+
       private
 
       def read_stream

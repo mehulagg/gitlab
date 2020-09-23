@@ -135,6 +135,26 @@ RSpec.describe Ci::UpdateBuildStateService do
             .with(operation: :invalid)
         end
       end
+
+      context 'when failed to acquire a build trace lock' do
+        it 'accepts a state update request' do
+          build.trace.lock do
+            result = subject.execute
+
+            expect(result.status).to eq 202
+          end
+        end
+
+        it 'increment locked trace metric' do
+          build.trace.lock do
+            execute_with_stubbed_metrics!
+
+            expect(metrics)
+              .to have_received(:increment_trace_operation)
+              .with(operation: :locked)
+          end
+        end
+      end
     end
 
     context 'when build trace has not been migrated yet' do
