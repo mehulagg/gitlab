@@ -11,7 +11,7 @@ const ItemComponent = {
   template: `<li data-testid="smart-virtual-list-item">{{ index }} - {{ source.text }}</li>`,
 };
 
-describe('Toggle Button', () => {
+describe('Smart virtual scroll list component', () => {
   let wrapper;
 
   const findVirtualList = () => wrapper.find('[data-testid="smart-virtual-list"]');

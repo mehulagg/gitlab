@@ -4,6 +4,12 @@ import VirtualList from 'vue-virtual-scroll-list';
 export default {
   name: 'SmartVirtualList',
   components: { VirtualList },
+  /*
+    The following props map one-to-one to the vue-virtual-scroll-list props.
+    The reason we call out these ones specifically is so that they can be
+    used in our plain item list. See the vue-virtual-scroll-list docs for
+    more props that can be used: https://github.com/tangbc/vue-virtual-scroll-list#props-type
+  */
   props: {
     dataKey: { type: [String, Function], required: true },
     dataSources: { type: Array, required: true },
