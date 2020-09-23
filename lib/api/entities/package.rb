@@ -7,9 +7,19 @@ module API
       extend ::API::Entities::EntityHelpers
 
       expose :id
-      expose :name, unless: ->(package) { package.conan? }
-      expose :conan_recipe, as: :name, if: ->(package) { package.conan? }
-      expose :name, as: :conan_package_name, if: ->(package) { package.conan? }
+
+      expose :name do |package|
+        if package.conan?
+          package.conan_recipe
+        else
+          package.name
+        end
+      end
+
+      expose :conan_package_name, if: ->(package) { package.conan? } do |package|
+        package.name
+      end
+
       expose :version
       expose :package_type
 
