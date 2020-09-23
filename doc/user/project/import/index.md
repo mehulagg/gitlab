@@ -33,7 +33,7 @@ There is also the option of [connecting your external repository to get CI/CD be
 ## LFS authentication
 When importing a project that contains LFS objects, if the project has an
 `.lfsconfig` file with the user/password set on the URL, this authentication
-information will have precedence over the import authentication data.
+information will take precedence over the import authentication data.
 
 ## Migrating from self-managed GitLab to GitLab.com
 
