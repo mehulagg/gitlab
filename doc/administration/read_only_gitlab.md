@@ -1,57 +1,74 @@
-# GitLab read-only
+---
+stage: Enablement
+group: Distribution
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
+---
 
-NOTE: **Note:**
-This document is for temporary solutions only. [This epic](https://gitlab.com/groups/gitlab-org/-/epics/2149) will eventually make this document obsolete.
+# Place GitLab into a read-only state **(CORE ONLY)**
 
-In some cases you might want to place GitLab under a read-only state.
+CAUTION: **Warning:**
+This document should be used as a temporary solution.
+There's work in progress to make this
+[possible with Geo](https://gitlab.com/groups/gitlab-org/-/epics/2149).
+
+In some cases, you might want to place GitLab under a read-only state.
 The configuration for doing so depends on your desired outcome.
 
-## Repository read-only
+## Make the repositories read-only
 
-NOTE: **Note:**
-This section isn't needed if Unicorn/Puma is stopped because the internal API won't be reachable.
+The first thing you'll want to accomplish is to ensure that no changes can be
+made to your repositories. There's two ways you can accomplish that:
 
-The first thing you'll want to accomplish is to ensure that no changes can be made to your repositories.
-Open up rails console with `gitlab-rails console` and execute the following command:
+- Either stop Unicorn/Puma to make the internal API unreachable:
 
-```rb
-Project.all.find_each { |project| project.update!(repository_read_only: true) }
+  ```shell
+  sudo gitlab-ctl stop puma  # or unicorn
+  ```
+
+- Or, open up a Rails console:
+
+  ```shell
+  sudo gitlab-rails console
+  ```
+
+  And set the repositories for all projects read-only:
+
+  ```ruby
+  Project.all.find_each { |project| project.update!(repository_read_only: true) }
+  ```
+
+  When you're ready to revert this, you can do so with the following command:
+
+  ```ruby
+  Project.all.find_each { |project| project.update!(repository_read_only: false) }
+  ```
+
+## Shut down the GitLab UI
+
+If you don't mind shutting down the GitLab UI, then the easiest approach is to
+stop `sidekiq` and `puma`/`unicorn`, and you'll effectively ensure that no
+changes can be made to GitLab:
+
+```shell
+sudo gitlab-ctl stop sidekiq
+sudo gitlab-ctl stop puma  # or unicorn
 ```
 
-When you're ready to revert this, you can do so with the following command:
+When you're ready to revert this:
 
-```rb
-Project.all.each { |project| project.update!(repository_read_only: false) }
+```shell
+sudo gitlab-ctl start sidekiq
+sudo gitlab-ctl start puma  # or unicorn
 ```
 
-## Non-repository read-only
+## Make the database read-only
 
-The next step is determined by what your desired outcome is.
-If you don't mind shutting down the GitLab UI, then the easiest approach is to stop sidekiq and unicorn.
-However, if you want to continue with the GitLab UI, then we'll need to take a few more steps regarding the database configuration
+If you want to allow users to use the GitLab UI, then you'll need to ensure that
+the database is read-only:
 
-### Shutting down GitLab UI
-
-By shutting down the GitLab UI, you'll effectively ensure that no changes can be made to GitLab.
-The only thing you'll need to do is shutting down Sidekiq and Puma (or Unicorn):
-
-```sh
-gitlab-ctl stop sidekiq
-gitlab-ctl stop puma  # or unicorn
-```
-
-When you're ready to revert this, you can do so with
-
-```sh
-gitlab-ctl start sidekiq
-gitlab-ctl stop puma  # or unicorn
-```
-
-### Database read-only
-
-If you want to allow users to use the GitLab UI, then you'll need to follow these steps to ensure that the database is read-only.
-
-1. Enter PostgreSQL on the console as an admin user
+1. Take a [GitLab backup](../raketasks/backup_restore.md#back-up-gitlab)
+   in case things don't go as expected.
+1. Enter PostgreSQL on the console as an admin user:
 
     ```shell
     sudo \
@@ -59,7 +76,8 @@ If you want to allow users to use the GitLab UI, then you'll need to follow thes
         -h /var/opt/gitlab/postgresql gitlabhq_production
     ```
 
-1. Create the read-only user. Note that the password is set to `mypassword`
+1. Create the `gitlab_read_only` user. Note that the password is set to `mypassword`,
+   change that to your liking:
 
     ```sql
     -- NOTE: Use the password defined earlier
@@ -75,14 +93,33 @@ If you want to allow users to use the GitLab UI, then you'll need to follow thes
     ALTER DEFAULT PRIVILEGES FOR USER gitlab IN SCHEMA public GRANT SELECT ON SEQUENCES TO gitlab_read_only;
     ```
 
-1. Run `gitlab-ctl pg-password-md5 gitlab_read_only` and copy the resulting hash.
-1. Edit `/etc/gitlab/gitlab.rb` to add
+1. Get the hashed password of the `gitlab_read_only` user and copy the result:
 
-    ```rb
+   ```shell
+   sudo gitlab-ctl pg-password-md5 gitlab_read_only
+   ```
+
+1. Edit `/etc/gitlab/gitlab.rb` and add the password from the previous step:
+
+    ```ruby
     postgresql['sql_user_password'] = 'a2e20f823772650f039284619ab6f239'
     postgresql['sql_user'] = "gitlab_read_only"
     ```
 
-1. Run `gitlab-ctl reconfigure` and then `gitlab-ctl restart postgresql`
+1. Reconfigure GitLab and restart PostgreSQL:
 
-When you're ready to revert the read-only state, you'll need to comment out the lines from step 3
+   ```shell
+   sudo gitlab-ctl reconfigure
+   sudo gitlab-ctl restart postgresql
+   ```
+
+When you're ready to revert the read-only state, you'll need to remove the added
+lines in `/etc/gitlab/gitlab.rb`, and reconfigure GitLab and restart PostgreSQL:
+
+```shell
+sudo gitlab-ctl reconfigure
+sudo gitlab-ctl restart postgresql
+```
+
+Once you verify all works as expected, you can remove the `gitlab_read_only`
+user from the database.
