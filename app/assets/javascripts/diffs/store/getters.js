@@ -48,8 +48,8 @@ export const diffHasAllCollapsedDiscussions = (state, getters) => diff => {
  */
 export const diffHasExpandedDiscussions = state => diff => {
   const lines = {
-    [INLINE_DIFF_VIEW_TYPE]: diff.highlighted_diff_lines,
-    [PARALLEL_DIFF_VIEW_TYPE]: diff.parallel_diff_lines.reduce((acc, line) => {
+    [INLINE_DIFF_VIEW_TYPE]: diff.highlighted_diff_lines || [],
+    [PARALLEL_DIFF_VIEW_TYPE]: (diff.parallel_diff_lines || []).reduce((acc, line) => {
       if (line.left) {
         acc.push(line.left);
       }
@@ -73,8 +73,8 @@ export const diffHasExpandedDiscussions = state => diff => {
  */
 export const diffHasDiscussions = state => diff => {
   const lines = {
-    [INLINE_DIFF_VIEW_TYPE]: diff.highlighted_diff_lines,
-    [PARALLEL_DIFF_VIEW_TYPE]: diff.parallel_diff_lines.reduce((acc, line) => {
+    [INLINE_DIFF_VIEW_TYPE]: diff.highlighted_diff_lines || [],
+    [PARALLEL_DIFF_VIEW_TYPE]: (diff.parallel_diff_lines || []).reduce((acc, line) => {
       if (line.left) {
         acc.push(line.left);
       }

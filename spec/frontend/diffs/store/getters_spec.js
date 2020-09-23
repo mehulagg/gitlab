@@ -182,19 +182,31 @@ describe('Diffs Module Getters', () => {
 
   describe('diffHasDiscussions', () => {
     it('returns true when getDiffFileDiscussions returns discussions', () => {
-      expect(
-        getters.diffHasDiscussions(localState, {
-          getDiffFileDiscussions: () => [discussionMock],
-        })(diffFileMock),
-      ).toEqual(true);
+      const diffFile = {
+        parallel_diff_lines: [],
+        highlighted_diff_lines: [
+          {
+            discussions: [discussionMock, discussionMock],
+            discussionsExpanded: false,
+          },
+        ],
+      };
+
+      expect(getters.diffHasDiscussions(localState)(diffFile)).toEqual(true);
     });
 
     it('returns false when getDiffFileDiscussions returns no discussions', () => {
-      expect(
-        getters.diffHasDiscussions(localState, {
-          getDiffFileDiscussions: () => [],
-        })(diffFileMock),
-      ).toEqual(false);
+      const diffFile = {
+        parallel_diff_lines: [],
+        highlighted_diff_lines: [
+          {
+            discussions: [],
+            discussionsExpanded: false,
+          },
+        ],
+      };
+
+      expect(getters.diffHasDiscussions(localState)(diffFile)).toEqual(false);
     });
   });
 
