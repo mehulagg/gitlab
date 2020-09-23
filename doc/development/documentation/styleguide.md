@@ -1306,6 +1306,8 @@ the documentation site, but will be displayed on GitLab's `/help`.
   added to code blocks. To make things easier for the user, always add a full
   code block for things that can be useful to copy and paste, as they can easily
   do it with the button on code blocks.
+- HTTP methods (`HTTP POST`) and HTTP status codes, both full (`404 File Not Found`)
+  and abbreviated (`404`), should be wrapped in inline code blocks when used in sentences.
 - Add a blank line above and below code blocks.
 - When providing a shell command and its output, prefix the shell command with `$`
   and leave a blank line between the command and the output.
