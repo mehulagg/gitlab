@@ -69,7 +69,7 @@ RSpec.describe Projects::CreateFromTemplateService do
 
         it 'creates an empty project' do
           expect(::Gitlab::ProjectTemplate).to receive(:find)
-          expect(::Gitlab::DemoTemplate).to receive(:find)
+          expect(::Gitlab::SampleDataTemplate).to receive(:find)
           expect(subject).not_to receive(:find_template_project)
         end
       end
@@ -79,7 +79,7 @@ RSpec.describe Projects::CreateFromTemplateService do
           stub_licensed_features(custom_project_templates: false)
 
           expect(::Gitlab::ProjectTemplate).to receive(:find)
-          expect(::Gitlab::DemoTemplate).to receive(:find)
+          expect(::Gitlab::SampleDataTemplate).to receive(:find)
           expect(subject).not_to receive(:find_template_project)
         end
       end
