@@ -218,6 +218,108 @@ RSpec.describe API::Members do
     end
   end
 
+  describe "GET /groups/:id/billable_members" do
+    let_it_be(:owner) { create(:user) }
+    let_it_be(:group) { create(:group) }
+    let_it_be(:nested_user) { create(:user) }
+    let_it_be(:project_user) { create(:user) }
+    let_it_be(:linked_group) { create(:group) }
+    let_it_be(:linked_group_user) { create(:user) }
+    let_it_be(:project) { create(:project) }
+    let_it_be(:project_group_link) { create(:project_group_link, project: project, group: linked_group) }
+
+    let(:project) do
+      create(:project, :public, group: nested_group) do |project|
+        project.add_developer(project_user)
+      end
+    end
+
+    let(:linked_group) do
+      create(:group) do |linked_group|
+        linked_group.add_developer(linked_group_user)
+      end
+    end
+
+    let(:nested_group) do
+      create(:group, parent: group) do |nested_group|
+        nested_group.add_developer(nested_user)
+      end
+    end
+
+    let(:url) { "/groups/#{group.id}/billable_members" }
+
+    before do
+      group.add_owner(owner)
+    end
+
+    include_context "group managed account with group members"
+    include_context "child group with group managed account members"
+
+    subject do
+      get api(url, owner)
+      json_response
+    end
+
+    it_behaves_like 'members response with exposed emails' do
+      let(:emails) { gma_member.email }
+    end
+
+    it_behaves_like 'members response with hidden emails' do
+      let(:emails) { member.email }
+    end
+
+    it 'returns paginated billable users' do
+      subject
+
+      expect_paginated_array_response(*group.billed_user_ids)
+    end
+
+    context 'when feature is disabled' do
+      before do
+        stub_feature_flags(api_billable_member_list: false)
+      end
+
+      it 'returns error' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context 'with non owner' do
+      it 'returns error' do
+        non_owner = group.members.maintainers.first.user
+
+        get api(url, non_owner)
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
+    end
+
+    context 'when group can not be found' do
+      let(:url) { "/groups/foo/billable_members" }
+
+      it 'returns error' do
+        non_owner = group.members.maintainers.first.user
+
+        get api(url, non_owner)
+
+        expect(response).to have_gitlab_http_status(:not_found)
+        expect(json_response['message']).to eq('404 Group Not Found')
+      end
+    end
+
+    context 'with non-root group' do
+      let(:url) { "/groups/#{nested_group.id}/billable_members" }
+
+      it 'returns error' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:bad_request)
+      end
+    end
+  end
+
   context 'without LDAP' do
     let(:group) { create(:group) }
     let(:owner) { create(:user) }

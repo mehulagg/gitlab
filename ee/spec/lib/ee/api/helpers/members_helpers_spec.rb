@@ -31,4 +31,38 @@ RSpec.describe EE::API::Helpers::MembersHelpers do
       let(:member) { create(:project_member, project: source, user: create(:user)) }
     end
   end
+
+  describe '#paginate_billable_from_user_ids' do
+    subject(:members_helpers) { Class.new.include(described_class, API::Helpers::Pagination).new }
+
+    let_it_be(:users) { create_list(:user, 3) }
+    let(:user_ids) { users.map(&:id) }
+    let(:page) { 1 }
+    let(:per_page) { 2 }
+
+    before do
+      allow(subject).to receive(:params).and_return({ page: page, per_page: per_page })
+      allow(subject).to receive(:header) { }
+      allow(subject).to receive(:request).and_return(double(:request, url: ''))
+    end
+
+    it 'returns paginated User array in asc order' do
+      results = subject.paginate_billable_from_user_ids(user_ids.reverse)
+
+      expect(results).to all be_a(User)
+      expect(results.size).to eq(per_page)
+      expect(results.map { |result| result.id }).to eq(user_ids.first(2))
+    end
+
+    context 'when page is 2' do
+      let(:page) { 2 }
+
+      it 'returns User as paginated array' do
+        results = subject.paginate_billable_from_user_ids(user_ids.reverse)
+
+        expect(results.size).to eq(1)
+        expect(results.map { |result| result.id }).to contain_exactly(user_ids.last)
+      end
+    end
+  end
 end
