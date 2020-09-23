@@ -29,6 +29,24 @@ RSpec.describe InvitesController, :snowplow do
     end
   end
 
+  shared_examples "tracks the 'accepted' event for the invitation reminders experiment" do
+    before do
+      stub_experiment(invitation_reminders: true)
+      allow(Gitlab::Experimentation).to receive(:enabled_for_attribute?).with(:invitation_reminders, member.invite_email).and_return(experimental_group)
+    end
+
+    it "tracks the 'accepted' event" do
+      request
+
+      expect_snowplow_event(
+        category: 'Growth::Acquisition::Experiment::InvitationReminders',
+        label: md5_member_global_id,
+        property: experimental_group ? 'experimental_group' : 'control_group',
+        action: 'accepted'
+      )
+    end
+  end
+
   describe 'GET #show' do
     subject(:request) { get :show, params: params }
 
@@ -86,6 +104,20 @@ RSpec.describe InvitesController, :snowplow do
 
           expect_snowplow_event(snowplow_event.merge(action: 'opened'))
           expect_snowplow_event(snowplow_event.merge(action: 'accepted'))
+        end
+      end
+
+      describe 'tracking for the invitation reminders experiment' do
+        context 'when invite email is in the experimental group' do
+          let(:experimental_group) { true }
+
+          it_behaves_like "tracks the 'accepted' event for the invitation reminders experiment"
+        end
+
+        context 'when invite email is in the control group' do
+          let(:experimental_group) { false }
+
+          it_behaves_like "tracks the 'accepted' event for the invitation reminders experiment"
         end
       end
 
@@ -147,6 +179,20 @@ RSpec.describe InvitesController, :snowplow do
         request
 
         expect_snowplow_event(snowplow_event.merge(action: 'accepted'))
+      end
+    end
+
+    describe 'tracking for the invitation reminders experiment' do
+      context 'when invite email is in the experimental group' do
+        let(:experimental_group) { true }
+
+        it_behaves_like "tracks the 'accepted' event for the invitation reminders experiment"
+      end
+
+      context 'when invite email is in the control group' do
+        let(:experimental_group) { false }
+
+        it_behaves_like "tracks the 'accepted' event for the invitation reminders experiment"
       end
     end
 
