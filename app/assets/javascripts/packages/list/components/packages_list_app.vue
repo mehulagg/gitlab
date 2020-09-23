@@ -32,6 +32,8 @@ export default {
       comingSoon: state => state.config.comingSoon,
       filterQuery: state => state.filterQuery,
       selectedType: state => state.selectedType,
+      packageHelpUrl: state => state.config.packageHelpUrl,
+      packagesCount: state => state.pagination?.total,
     }),
     tabsToRender() {
       return PACKAGE_REGISTRY_TABS;
@@ -92,7 +94,7 @@ export default {
 
 <template>
   <div>
-    <package-title />
+    <package-title :package-help-url="packageHelpUrl" :packages-count="packagesCount" />
 
     <gl-tabs @input="tabChanged">
       <template #tabs-end>

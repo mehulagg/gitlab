@@ -1,5 +1,4 @@
 <script>
-import { mapState } from 'vuex';
 import { n__ } from '~/locale';
 import TitleArea from '~/vue_shared/components/registry/title_area.vue';
 import MetadataItem from '~/vue_shared/components/registry/metadata_item.vue';
@@ -11,13 +10,26 @@ export default {
     TitleArea,
     MetadataItem,
   },
+  props: {
+    packagesCount: {
+      type: Number,
+      required: false,
+      default: null,
+    },
+    packageHelpUrl: {
+      type: String,
+      required: true,
+    },
+  },
   computed: {
-    ...mapState(['pagination', 'config']),
+    showPackageCount() {
+      return this.packagesCount !== null && this.packagesCount !== undefined;
+    },
     packageAmountText() {
-      return n__(`%d Package`, `%d Packages`, this.pagination?.total);
+      return n__(`%d Package`, `%d Packages`, this.packagesCount);
     },
     infoMessages() {
-      return [{ text: LIST_INTRO_TEXT, link: this.config.packageHelpUrl }];
+      return [{ text: LIST_INTRO_TEXT, link: this.packageHelpUrl }];
     },
   },
   i18n: {
@@ -29,7 +41,7 @@ export default {
 <template>
   <title-area :title="$options.i18n.LIST_TITLE_TEXT" :info-messages="infoMessages">
     <template #metadata_amount>
-      <metadata-item icon="package" :text="packageAmountText" />
+      <metadata-item v-if="showPackageCount" icon="package" :text="packageAmountText" />
     </template>
   </title-area>
 </template>
