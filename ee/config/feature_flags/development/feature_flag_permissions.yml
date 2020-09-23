@@ -1,7 +1,7 @@
 ---
 name: feature_flag_permissions
 introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/issues/8239
-rollout_issue_url:
+rollout_issue_url: https://gitlab.com/gitlab-org/gitlab/-/issues/254981
 group: progressive delivery
 type: development
 default_enabled: false
