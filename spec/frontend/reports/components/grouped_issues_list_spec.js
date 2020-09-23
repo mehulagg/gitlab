@@ -1,4 +1,4 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import GroupedIssuesList from '~/reports/components/grouped_issues_list.vue';
 import ReportItem from '~/reports/components/report_item.vue';
 import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
@@ -7,7 +7,7 @@ describe('Grouped Issues List', () => {
   let wrapper;
 
   const createComponent = ({ propsData = {}, stubs = {} } = {}) => {
-    wrapper = shallowMount(GroupedIssuesList, {
+    wrapper = mount(GroupedIssuesList, {
       propsData,
       stubs,
     });

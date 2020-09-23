@@ -1,11 +1,10 @@
 <script>
 import { s__ } from '~/locale';
 import SmartVirtualList from '~/vue_shared/components/smart_virtual_list.vue';
-import ReportItem from '~/reports/components/report_item.vue';
+import GroupedIssuesListRow from './grouped_issues_list_row.vue';
 
 export default {
   components: {
-    ReportItem,
     SmartVirtualList,
   },
   props: {
@@ -35,10 +34,20 @@ export default {
       default: s__('ciReport|New'),
     },
   },
+  data() {
+    return {
+      groupedIssuesListRow: GroupedIssuesListRow,
+    };
+  },
   groups: ['unresolved', 'resolved'],
   typicalReportItemHeight: 32,
   maxShownReportItems: 20,
   computed: {
+    extraPropsForRow() {
+      return {
+        component: this.component,
+      }
+    },
     groups() {
       return this.$options.groups
         .map(group => ({
@@ -64,30 +73,14 @@ export default {
 
 <template>
   <smart-virtual-list
-    :length="listLength"
-    :remain="$options.maxShownReportItems"
-    :size="$options.typicalReportItemHeight"
+    data-key="name"
+    :data-sources="groups"
+    :data-component="groupedIssuesListRow"
+    :extra-props="extraPropsForRow"
+    :remain="$options.maxShowReportItems"
+    :estimate-size="$options.typicalReportItemHeight"
     class="report-block-container"
-    wtag="ul"
-    wclass="report-block-list"
-  >
-    <template v-for="(group, groupIndex) in groups">
-      <h2
-        :key="group.name"
-        :data-testid="`${group.name}Heading`"
-        :class="[groupIndex > 0 ? 'mt-2' : 'mt-0']"
-        class="h5 mb-1"
-      >
-        {{ group.heading }}
-      </h2>
-      <report-item
-        v-for="(issue, issueIndex) in group.issues"
-        :key="`${group.name}-${issue.name}-${group.name}-${issueIndex}`"
-        :issue="issue"
-        :show-report-section-status-icon="false"
-        :component="component"
-        status="none"
-      />
-    </template>
-  </smart-virtual-list>
+    wrap-tag="ul"
+    wrap-class="report-block-list"
+  />
 </template>
