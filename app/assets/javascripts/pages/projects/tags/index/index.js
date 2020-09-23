@@ -5,14 +5,15 @@ import createFlash from '~/flash';
 document.addEventListener('DOMContentLoaded', () => {
   initConfirmModal({
     handleSubmit: (path = '') => {
-      console.log('DELETINGGGGGG', path);
       axios
         .delete(path)
         .then(() => {
-          console.log('DONESKIESSSSS');
+          document
+            .querySelector(`[data-path="${path}"]`)
+            .closest('li.flex-row.allow-wrap')
+            .remove();
         })
         .catch(error => {
-          console.log('FAIL!!!!', error.message);
           createFlash({ message: error });
         });
     },

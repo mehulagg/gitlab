@@ -47,7 +47,6 @@ export default {
     },
     submitModal() {
       if (this.handleSubmit) {
-        console.log('submitModal::PATH', this.path)
         this.handleSubmit(this.path);
       } else {
         this.$refs.form.submit();
