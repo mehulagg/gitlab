@@ -47,11 +47,6 @@ class SearchService
     @show_snippets = params[:snippets] == 'true'
   end
 
-  # overriden in EE
-  def show_epics?
-    false
-  end
-
   def valid_query_length?
     params[:search].length <= SEARCH_CHAR_LIMIT
   end
