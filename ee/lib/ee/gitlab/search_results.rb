@@ -7,13 +7,11 @@ module EE
 
       override :formatted_count
       def formatted_count(scope)
-        count = super
-
-        return count if count
-
         case scope
         when 'epics'
           formatted_limited_count(limited_epics_count)
+        else
+          super
         end
       end
 
@@ -32,13 +30,11 @@ module EE
 
       override :collection_for
       def collection_for(scope)
-        collection = super
-
-        return collection if collection
-
         case scope
         when 'epics'
           epics
+        else
+          super
         end
       end
 
