@@ -372,7 +372,7 @@ w
 
    Example usage for an existing event already defined in  [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml):
 
-   Note that `usage_data_api` and `usage_data_#{event_name}` should be enabled in order to rack events using API.
+   Note that `usage_data_api` and `usage_data_#{event_name}` should be enabled in order to track events using API.
 
    ```javascript
    import api from '~/api';
