@@ -360,7 +360,6 @@ Implemented using Redis methods [PFADD](https://redis.io/commands/pfadd) and [PF
    | `event` | string | yes | The event name it should be tracked |
 
    Response
-w
    Return 200 if tracking failed for any reason.
 
    - `200` if event was tracked or any errors
@@ -368,7 +367,7 @@ w
    - `401 Unauthorized` if user is not authenticated
    - `403 Forbidden` for invalid CSRF token provided
 
-1. Track events using JavaScript/Vue API helper which calls the API above
+1. Track events using JavaScript/Vue API helper which calls the `UsageData` API described above
 
    Example usage for an existing event already defined in  [known events](https://gitlab.com/gitlab-org/gitlab/-/blob/master/lib/gitlab/usage_data_counters/known_events.yml):
 
