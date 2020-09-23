@@ -77,4 +77,24 @@ RSpec.describe 'Project > Tags', :js do
       end
     end
   end
+
+  describe 'deleting a tag' do
+    before do
+      project.repository.add_tag(user, 'fake-tag', 'master')
+
+      visit project_tags_path(project)
+    end
+
+    it 'remove tag button deletes the tag' do
+      expect(page).to have_content 'fake-tag'
+
+      tag = page.all('.flex-row', text: 'fake-tag').first
+      tag.find('.js-remove-tag').click
+      page.find('.modal').find_button('Delete tag').click
+
+      wait_for_requests
+
+      expect(page).not_to have_content 'fake-tag'
+    end
+  end
 end
