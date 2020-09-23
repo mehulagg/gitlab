@@ -193,6 +193,53 @@ RSpec.describe 'gitlab:db namespace rake task' do
     end
   end
 
+  describe 'validate_schema' do
+    let(:task_name) { 'gitlab:db:validate_schema' }
+
+    let(:popen_arguments) do
+      [Gitlab.config.git.bin_path, 'diff', '--', 'db/structure.sql']
+    end
+
+    before do
+      Rake::Task['db:structure:dump'].reenable
+
+      allow(Rake::Task['db:structure:dump']).to receive(:execute)
+    end
+
+    it 'has a prerequisite of db:structure:dump' do
+      expect(Rake::Task[task_name].prerequisites).to contain_exactly('db:structure:dump')
+    end
+
+    context 'when the schema files match' do
+      it 'diffs the files without raising an error' do
+        expect(Rake.application['db:structure:dump']).to receive(:execute)
+        expect(Gitlab::Popen).to receive(:popen).with(popen_arguments).and_return(['', 0])
+
+        expect { run_rake_task(task_name) }.not_to raise_error
+      end
+    end
+
+    context 'when it fails to diff the structure file' do
+      it 'raises an error' do
+        expect(Gitlab::Popen).to receive(:popen).with(popen_arguments).and_return(['', 1])
+
+        expect { run_rake_task(task_name) }.to raise_error(/Failed to compare db\/structure.sql/)
+      end
+    end
+
+    context 'when it finds differences in the structure file' do
+      it 'raises an error with the differences' do
+        expect(Gitlab::Popen).to receive(:popen).with(popen_arguments).and_return(['this is different', 0])
+
+        expect { run_rake_task(task_name) }.to raise_error(<<~MSG.chomp)
+          Differences detected in db/structure.sql:
+
+          this is different
+        MSG
+      end
+    end
+  end
+
   def run_rake_task(task_name, arguments = '')
     Rake::Task[task_name].reenable
     Rake.application.invoke_task("#{task_name}#{arguments}")
