@@ -44036,7 +44036,7 @@
           "inputFields": [
             {
               "name": "id",
-              "description": "ID of the vulnerability to be reverted",
+              "description": "ID of the vulnerability to be reverted.",
               "type": {
                 "kind": "NON_NULL",
                 "name": null,
@@ -44110,7 +44110,7 @@
             },
             {
               "name": "vulnerability",
-              "description": "The vulnerability after revert",
+              "description": "The vulnerability after revert.",
               "args": [
 
               ],
