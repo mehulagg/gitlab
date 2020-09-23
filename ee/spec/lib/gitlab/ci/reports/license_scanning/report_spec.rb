@@ -173,6 +173,22 @@ RSpec.describe Gitlab::Ci::Reports::LicenseScanning::Report do
       licenses.map(&:name)
     end
 
+    context 'when the other report is not available' do
+      subject { base_report.diff_with(nil) }
+
+      let(:base_report) { build(:license_scan_report, :version_2) }
+
+      before do
+        base_report
+          .add_license(id: 'MIT', name: 'MIT License')
+          .add_dependency('rails')
+      end
+
+      specify { expect(names_from(subject[:removed])).to contain_exactly('MIT License') }
+      specify { expect(subject[:added]).to be_empty }
+      specify { expect(subject[:unchanged]).to be_empty }
+    end
+
     context 'when diffing two v1 reports' do
       let(:base_report) { build(:license_scan_report, :version_1) }
       let(:head_report) { build(:license_scan_report, :version_1) }
