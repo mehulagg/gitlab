@@ -33,10 +33,6 @@ module Terraform
       versioning_enabled ? latest_version&.file : file
     end
 
-    def local?
-      file_store == ObjectStorage::Store::LOCAL
-    end
-
     def locked?
       self.lock_xid.present?
     end
@@ -53,5 +49,3 @@ module Terraform
     end
   end
 end
-
-Terraform::State.prepend_if_ee('EE::Terraform::State')
