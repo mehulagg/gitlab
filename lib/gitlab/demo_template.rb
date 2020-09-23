@@ -9,6 +9,10 @@ module Gitlab
     end
 
     class << self
+      def all
+        localized_templates_table
+      end
+
       def archive_directory
         Rails.root.join("vendor/demo_templates")
       end

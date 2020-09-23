@@ -17,6 +17,10 @@
           = _('Group')
           %span.badge.badge-pill.qa-group-template-tab-badge
             = group_project_templates_count(group_id)
+      %li.demo-project-templates-tab
+        %a.nav-link{ href: "#demo-project-templates", data: { toggle: 'tab'} }
+          = _('Sample Data')
+          %span.badge.badge-pill= Gitlab::DemoTemplate.all.count
 
   .tab-content
     .project-templates-buttons.import-buttons.tab-pane.active#built-in
@@ -27,6 +31,8 @@
     .project-templates-buttons.import-buttons.tab-pane.js-custom-group-project-templates-tab-content#custom-group-project-templates{ data: {initial_templates: user_available_group_templates_path(current_user, group_id: group_id)} }
       .text-center.m-4
         = icon("spin spinner 2x")
+    .project-templates-buttons.import-buttons.tab-pane#demo-project-templates
+      = render 'projects/project_templates/demo_templates'
 
   .project-fields-form
     = render 'projects/project_templates/project_fields_form'
