@@ -98,7 +98,7 @@ module Gitlab
         end
 
         def override_due_date_attributes
-          return unless self.class::DUE_DATE_MODELS.include?(@relation_name) && demo_template?
+          return unless self.class::DUE_DATE_MODELS.include?(@relation_name) && sample_data_template?
 
           relation_class.attribute_names.select { |name| name.include?('due_date') }.each do |due_date|
             if @relation_hash[due_date] && @relation_hash[due_date] < Time.current
@@ -107,8 +107,8 @@ module Gitlab
           end
         end
 
-        def demo_template?
-          @importable.import_data.data['template_name'] == 'demo_template'
+        def sample_data_template?
+          @importable.import_data.data['template_name'] == 'sample_data_template'
         end
 
         def update_project_references

@@ -14,7 +14,7 @@ module Projects
     def execute
       return project unless validate_template!
 
-      file = built_in_template&.file || demo_template&.file
+      file = built_in_template&.file || sample_data_template&.file
 
       override_params = params.dup
       params[:file] = file
@@ -27,7 +27,7 @@ module Projects
     private
 
     def validate_template!
-      return true if built_in_template || demo_template
+      return true if built_in_template || sample_data_template
 
       project.errors.add(:template_name, _("'%{template_name}' is unknown or invalid" % { template_name: template_name }))
       false
@@ -39,9 +39,9 @@ module Projects
       end
     end
 
-    def demo_template
-      strong_memoize(:demo_template) do
-        Gitlab::DemoTemplate.find(template_name)
+    def sample_data_template
+      strong_memoize(:sample_data_template) do
+        Gitlab::SampleDataTemplate.find(template_name)
       end
     end
 

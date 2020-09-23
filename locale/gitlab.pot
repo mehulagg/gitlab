@@ -8373,9 +8373,6 @@ msgstr ""
 msgid "Deletion pending. This project will be removed on %{date}. Repository and other project resources are read-only."
 msgstr ""
 
-msgid "Demo"
-msgstr ""
-
 msgid "Denied"
 msgstr ""
 
@@ -20126,9 +20123,6 @@ msgstr ""
 msgid "ProjectTemplates|Android"
 msgstr ""
 
-msgid "ProjectTemplates|Demo Template (test)"
-msgstr ""
-
 msgid "ProjectTemplates|GitLab Cluster Management"
 msgstr ""
 
@@ -20178,6 +20172,9 @@ msgid "ProjectTemplates|Ruby on Rails"
 msgstr ""
 
 msgid "ProjectTemplates|SalesforceDX"
+msgstr ""
+
+msgid "ProjectTemplates|Sample Data (test)"
 msgstr ""
 
 msgid "ProjectTemplates|Serverless Framework/JS"
@@ -25058,7 +25055,7 @@ msgstr[1] ""
 msgid "Test settings"
 msgstr ""
 
-msgid "Test template for Demo Templates."
+msgid "Test template for Sample Data."
 msgstr ""
 
 msgid "TestCases|New Test Case"

@@ -6,16 +6,16 @@
       %a.nav-link.active{ href: "#built-in", data: { toggle: 'tab'} }
         = _('Built-in')
         %span.badge.badge-pill= Gitlab::ProjectTemplate.all.count
-    %li.demo-project-templates-tab
-      %a.nav-link{ href: "#demo-project-templates", data: { toggle: 'tab'} }
-        = _('Demo')
-        %span.badge.badge-pill= Gitlab::DemoTemplate.all.count
+    %li.sample-data-templates-tab
+      %a.nav-link{ href: "#sample-data-templates", data: { toggle: 'tab'} }
+        = _('Sample Data')
+        %span.badge.badge-pill= Gitlab::SampleDataTemplate.all.count
 
 .tab-content
   .project-templates-buttons.import-buttons.tab-pane.active#built-in
     = render 'projects/project_templates/built_in_templates'
-  .project-templates-buttons.import-buttons.tab-pane#demo-project-templates
-    = render 'projects/project_templates/demo_templates'
+  .project-templates-buttons.import-buttons.tab-pane#sample-data-templates
+    = render 'projects/project_templates/sample_data_templates'
 
 .project-fields-form
   = render 'projects/project_templates/project_fields_form'

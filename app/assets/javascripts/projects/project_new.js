@@ -1,6 +1,6 @@
 import $ from 'jquery';
 import DEFAULT_PROJECT_TEMPLATES from 'ee_else_ce/projects/default_project_templates';
-import DEFAULT_DEMO_TEMPLATES from '~/projects/default_demo_templates';
+import DEFAULT_SAMPLE_DATA_TEMPLATES from '~/projects/default_sample_data_templates';
 import { addSelectOnFocusBehaviour } from '../lib/utils/common_utils';
 import {
   convertToTitleCase,
@@ -147,7 +147,7 @@ const bindEvents = () => {
     $selectedIcon.empty();
     const value = $(this).val();
 
-    const selectedTemplate = DEFAULT_PROJECT_TEMPLATES[value] || DEFAULT_DEMO_TEMPLATES[value];
+    const selectedTemplate = DEFAULT_PROJECT_TEMPLATES[value] || DEFAULT_SAMPLE_DATA_TEMPLATES[value];
     $selectedTemplateText.text(selectedTemplate.text);
     $(selectedTemplate.icon)
       .clone()
