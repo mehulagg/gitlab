@@ -248,7 +248,7 @@ RSpec.describe Ci::Build do
       end
     end
 
-    context 'when build has a license scanning report' do
+    context 'when the build has a license scanning report' do
       before do
         stub_licensed_features(license_scanning: true)
       end
@@ -289,19 +289,6 @@ RSpec.describe Ci::Build do
         it 'returns an empty report' do
           expect { subject }.not_to raise_error
           expect(license_scanning_report).to be_empty
-        end
-      end
-
-      context 'when Feature flag is disabled for License Scanning reports parsing' do
-        before do
-          stub_feature_flags(parse_license_management_reports: false)
-          create(:ee_ci_job_artifact, :license_scanning, job: job, project: job.project)
-        end
-
-        it 'does NOT parse license scanning report' do
-          subject
-
-          expect(license_scanning_report.licenses.count).to eq(0)
         end
       end
 
