@@ -80,6 +80,7 @@ export default {
       token: null,
       validationStatus: PENDING,
       validateSite: false,
+      validateSiteTouched: false,
       errorMessage: '',
       errors: [],
     };
@@ -139,7 +140,7 @@ export default {
       );
     },
     validationSectionDescription() {
-      const descriptions = {
+      const description = {
         [PENDING]: { text: s__('DastProfiles|Site must be validated to run an active scan.') },
         [INPROGRESS]: {
           text: s__('DastProfiles|Validation in progress'),
@@ -154,14 +155,16 @@ export default {
         [FAILED]: {
           text: s__('DastProfiles|Validation failed. Please try again.'),
           cssClass: 'gl-text-red-500',
+          dismissed: this.validateSiteTouched,
         },
-      };
+      }[this.validationStatus];
 
-      return descriptions[this.validationStatus] || null;
+      return description && !description.dismissed ? description : {};
     },
   },
   watch: {
     async validateSite(validate) {
+      this.validateSiteTouched = true;
       this.tokenId = null;
       this.token = null;
 
