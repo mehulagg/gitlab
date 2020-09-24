@@ -293,7 +293,7 @@ module QA
         # a temporary directory created in .perform()
         #
         FileUtils.mkdir_p(tmp_home_dir)
-        File.open(netrc_file_path, 'a') { |file| file.puts(netrc_content) }
+        File.open(netrc_file_path, 'w') { |file| file.puts(netrc_content) }
         File.chmod(0600, netrc_file_path)
       end
 
