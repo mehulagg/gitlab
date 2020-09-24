@@ -1,8 +1,7 @@
 <script>
 /* eslint-disable vue/no-v-html */
 import { escape } from 'lodash';
-import { GlButton } from '@gitlab/ui';
-import { GlModal } from 'gitlab/ui';
+import { GlButton , GlModal } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 import { s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
