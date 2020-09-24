@@ -1,0 +1,5 @@
+---
+title: Add `milestone_id` reference to `releases`
+merge_request: 43254
+author:
+type: added

@@ -15268,7 +15268,8 @@ CREATE TABLE releases (
     author_id integer,
     name character varying,
     sha character varying,
-    released_at timestamp with time zone NOT NULL
+    released_at timestamp with time zone NOT NULL,
+    milestone_id bigint
 );
 
 CREATE SEQUENCE releases_id_seq
@@ -21013,6 +21014,8 @@ CREATE UNIQUE INDEX index_release_links_on_release_id_and_url ON release_links U
 
 CREATE INDEX index_releases_on_author_id ON releases USING btree (author_id);
 
+CREATE INDEX index_releases_on_milestone_id ON releases USING btree (milestone_id);
+
 CREATE INDEX index_releases_on_project_id_and_tag ON releases USING btree (project_id, tag);
 
 CREATE INDEX index_remote_mirrors_on_last_successful_update_at ON remote_mirrors USING btree (last_successful_update_at);
@@ -22298,6 +22301,9 @@ ALTER TABLE ONLY packages_maven_metadata
 
 ALTER TABLE ONLY ci_builds
     ADD CONSTRAINT fk_befce0568a FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE;
+
+ALTER TABLE ONLY releases
+    ADD CONSTRAINT fk_bf3ae3304a FOREIGN KEY (milestone_id) REFERENCES milestones(id) ON DELETE SET NULL;
 
 ALTER TABLE ONLY design_management_versions
     ADD CONSTRAINT fk_c1440b4896 FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE SET NULL;
