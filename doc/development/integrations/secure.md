@@ -374,11 +374,16 @@ which is shared by the analyzers that GitLab maintains. You can [contribute](htt
 new generic identifiers to if needed. Analyzers may also produce vendor-specific or product-specific
 identifiers, which don't belong in the [common library](https://gitlab.com/gitlab-org/security-products/analyzers/common).
 
-The first item of the `identifiers` array is called the primary identifier.
+The first item of the `identifiers` array is called the [primary
+identifier](../../user/application_security/terminology/#primary-identifier).
 The primary identifier is particularly important, because it is used to
 [track vulnerabilities](#tracking-and-merging-vulnerabilities) as new commits are pushed to the repository.
 Identifiers are also used to [merge duplicate vulnerabilities](#tracking-and-merging-vulnerabilities)
 reported for the same commit, except for `CWE` and `WASC`.
+
+NOTE: **Note:**
+Not all vulnerabilities have CVEs, and a CVE can be identified multiple times. As a result, the
+primary identifier `primary_identifier` is most stable and should be used to track vulnerabilities.
 
 ### Location
 
