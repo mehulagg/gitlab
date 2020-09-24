@@ -24030,6 +24030,23 @@ type SubmoduleEdge {
   node: Submodule
 }
 
+type Subscription {
+  """
+  Triggered when an issue is updated
+  """
+  issueUpdated(
+    """
+    IID of the issue
+    """
+    iid: String!
+
+    """
+    Project path of the issue
+    """
+    projectPath: ID!
+  ): Issue!
+}
+
 """
 Completion status of tasks
 """

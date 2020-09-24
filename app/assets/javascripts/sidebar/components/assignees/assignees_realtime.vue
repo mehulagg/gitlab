@@ -1,10 +1,8 @@
 <script>
 import { getIdFromGraphQLId } from '~/graphql_shared/utils';
-import query from '~/issuable_sidebar/queries/issue_sidebar.query.graphql';
-import actionCable from '~/actioncable_consumer';
+import query from '~/issuable_sidebar/subscriptions/issue_sidebar.subscription.graphql';
 
 export default {
-  subscription: null,
   name: 'AssigneesRealtime',
   props: {
     mediator: {
@@ -21,43 +19,24 @@ export default {
     },
   },
   apollo: {
-    project: {
-      query,
-      variables() {
-        return {
-          iid: this.issuableIid,
-          fullPath: this.projectPath,
-        };
-      },
-      result(data) {
-        this.handleFetchResult(data);
+    $subscribe: {
+      issue: {
+        query,
+        variables() {
+          return {
+            projectPath: this.projectPath,
+            iid: this.issuableIid,
+          };
+        },
+        result(data) {
+          this.handleFetchResult(data);
+        },
       },
     },
-  },
-  mounted() {
-    this.initActionCablePolling();
-  },
-  beforeDestroy() {
-    this.$options.subscription.unsubscribe();
   },
   methods: {
-    received(data) {
-      if (data.event === 'updated') {
-        this.$apollo.queries.project.refetch();
-      }
-    },
-    initActionCablePolling() {
-      this.$options.subscription = actionCable.subscriptions.create(
-        {
-          channel: 'IssuesChannel',
-          project_path: this.projectPath,
-          iid: this.issuableIid,
-        },
-        { received: this.received },
-      );
-    },
     handleFetchResult({ data }) {
-      const { nodes } = data.project.issue.assignees;
+      const { nodes } = data.issueUpdated.assignees;
 
       const assignees = nodes.map((n) => ({
         ...n,

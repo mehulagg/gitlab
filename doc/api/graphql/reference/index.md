@@ -3523,6 +3523,12 @@ Represents the Geo sync and verification state of a snippet repository.
 | `type` | EntryType! | Type of tree entry |
 | `webUrl` | String | Web URL for the sub-module |
 
+### Subscription
+
+| Field | Type | Description |
+| ----- | ---- | ----------- |
+| `issueUpdated` | Issue! | Triggered when an issue is updated |
+
 ### TaskCompletionStatus
 
 Completion status of tasks.

@@ -90,6 +90,8 @@ class GraphqlController < ApplicationController
     end
   end
 
+  # You may want to keep this in sync with the context in GraphqlChannel so that we
+  # have the same context when executing queries, mutations, and subscriptions
   def context
     @context ||= { current_user: current_user, is_sessionless_user: !!sessionless_user?, request: request }
   end
