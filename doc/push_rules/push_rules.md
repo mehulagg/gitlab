@@ -210,7 +210,7 @@ Example: prevent the specific file named `install.exe` from being pushed to any 
 (^|\/)install\.exe$
 ```
 
-Example: combining all of the above in a single expression. Note that all of the preceding expressions rely on the end of string character `$`, so we can move that part of each expression to the end of the grouped collection of match conditions where it will be appended to all matches.
+Example: combining all of the above in a single expression. Note that all of the preceding expressions rely on the end of string character `$`, so we can move that part of each expression to the end of the grouped collection of match conditions where it will be appended to all matches:
 
 ```plaintext
 (\.exe|^config\.yml|^directory-name\/config\.yml|(^|\/)install\.exe)$
