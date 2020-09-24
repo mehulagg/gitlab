@@ -11,10 +11,12 @@ module Security
       end
 
       def execute
-        result = ::Files::MultiService.new(@project, @current_user, attributes).execute
+        attributes_for_commit = attributes
+        result = ::Files::MultiService.new(@project, @current_user, attributes_for_commit).execute
 
         if result[:status] == :success
           result[:success_path] = successful_change_path
+          track_event(attributes_for_commit)
         else
           result[:errors] = result[:message]
         end
@@ -47,6 +49,14 @@ module Security
         description = _('Set .gitlab-ci.yml to enable or configure SAST security scanning using the GitLab managed template. You can [add variable overrides](https://docs.gitlab.com/ee/user/application_security/sast/#customizing-the-sast-settings) to customize SAST settings.')
         merge_request_params = { source_branch: @branch_name, description: description }
         Gitlab::Routing.url_helpers.project_new_merge_request_url(@project, merge_request: merge_request_params)
+      end
+
+      def track_event(attributes_for_commit)
+        action = attributes_for_commit[:actions].first
+
+        Gitlab::Tracking.event(
+          self.class.to_s, action[:action], { label: action[:default_values_overwritten].to_s }
+        )
       end
     end
   end

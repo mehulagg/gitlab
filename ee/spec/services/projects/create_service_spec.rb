@@ -348,7 +348,7 @@ RSpec.describe Projects::CreateService, '#execute' do
            details: {
              add: 'project',
              author_name: user.name,
-             target_id: @resource.full_path,
+             target_id: @resource.id,
              target_type: 'Project',
              target_details: @resource.full_path
            }

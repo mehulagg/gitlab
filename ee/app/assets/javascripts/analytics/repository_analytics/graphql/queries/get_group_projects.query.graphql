@@ -1,6 +1,6 @@
 query getGroupProjects($groupFullPath: ID!) {
   group(fullPath: $groupFullPath) {
-    projects(includeSubgroups: true) {
+    projects {
       nodes {
         name
         id

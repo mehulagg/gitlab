@@ -1,6 +1,6 @@
 <script>
 import produce from 'immer';
-import { GlAlert, GlButton, GlIntersectionObserver } from '@gitlab/ui';
+import { GlAlert, GlLoadingIcon, GlIntersectionObserver } from '@gitlab/ui';
 import VulnerabilityList from './vulnerability_list.vue';
 import vulnerabilitiesQuery from '../graphql/group_vulnerabilities.graphql';
 import { VULNERABILITIES_PER_PAGE } from '../store/constants';
@@ -9,7 +9,7 @@ import { preparePageInfo } from '../helpers';
 export default {
   components: {
     GlAlert,
-    GlButton,
+    GlLoadingIcon,
     GlIntersectionObserver,
     VulnerabilityList,
   },
@@ -120,9 +120,7 @@ export default {
       class="text-center"
       @appear="fetchNextPage"
     >
-      <gl-button :loading="isLoadingQuery" :disabled="isLoadingQuery" @click="fetchNextPage">{{
-        s__('SecurityReports|Load more vulnerabilities')
-      }}</gl-button>
+      <gl-loading-icon v-if="isLoadingQuery" size="md" />
     </gl-intersection-observer>
   </div>
 </template>

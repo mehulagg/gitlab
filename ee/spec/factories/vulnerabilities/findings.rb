@@ -16,7 +16,8 @@ FactoryBot.define do
         raw_metadata.delete('solution')
         raw_metadata['remediations'] = [
           {
-            summary: evaluator.summary
+            summary: evaluator.summary,
+            diff: Base64.encode64("This ain't a diff")
           }
         ]
         finding.raw_metadata = raw_metadata.to_json
@@ -114,7 +115,8 @@ FactoryBot.define do
         raw_metadata.delete(:solution)
         raw_metadata[:remediations] = [
           {
-            summary: 'Use GCM mode which includes HMAC in the resulting encrypted data, providing integrity of the result.'
+            summary: 'Use GCM mode which includes HMAC in the resulting encrypted data, providing integrity of the result.',
+            diff: Base64.encode64("This is a diff")
           }
         ]
         finding.raw_metadata = raw_metadata.to_json

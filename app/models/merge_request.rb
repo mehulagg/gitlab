@@ -31,6 +31,7 @@ class MergeRequest < ApplicationRecord
   self.reactive_cache_key = ->(model) { [model.project.id, model.iid] }
   self.reactive_cache_refresh_interval = 10.minutes
   self.reactive_cache_lifetime = 10.minutes
+  self.reactive_cache_work_type = :no_dependency
 
   SORTING_PREFERENCE_FIELD = :merge_requests_sort
 
@@ -257,11 +258,7 @@ class MergeRequest < ApplicationRecord
   scope :join_project, -> { joins(:target_project) }
   scope :join_metrics, -> do
     query = joins(:metrics)
-
-    if Feature.enabled?(:improved_mr_merged_at_queries, default_enabled: true)
-      query = query.where(MergeRequest.arel_table[:target_project_id].eq(MergeRequest::Metrics.arel_table[:target_project_id]))
-    end
-
+    query = query.where(MergeRequest.arel_table[:target_project_id].eq(MergeRequest::Metrics.arel_table[:target_project_id]))
     query
   end
   scope :references_project, -> { references(:target_project) }
@@ -1303,6 +1300,14 @@ class MergeRequest < ApplicationRecord
     yield
   ensure
     unlock_mr
+  end
+
+  def update_and_mark_in_progress_merge_commit_sha(commit_id)
+    self.update(in_progress_merge_commit_sha: commit_id)
+    # Since another process checks for matching merge request, we need
+    # to make it possible to detect whether the query should go to the
+    # primary.
+    target_project.mark_primary_write_location
   end
 
   def diverged_commits_count

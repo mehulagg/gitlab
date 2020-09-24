@@ -1,5 +1,6 @@
 <script>
 import { mapActions, mapState, mapGetters } from 'vuex';
+import { GlAlert } from '@gitlab/ui';
 import { __ } from '~/locale';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { dateFormats } from '../../shared/constants';
@@ -9,6 +10,7 @@ import StageDropdownFilter from './stage_dropdown_filter.vue';
 export default {
   name: 'DurationChart',
   components: {
+    GlAlert,
     Scatterplot,
     StageDropdownFilter,
     ChartSkeletonLoader,
@@ -58,8 +60,8 @@ export default {
       :tooltip-date-format="$options.durationChartTooltipDateFormat"
       :scatter-data="durationChartPlottableData"
     />
-    <div v-else class="bs-callout bs-callout-info">
+    <gl-alert v-else variant="info" :dismissible="false" class="gl-mt-3">
       {{ error }}
-    </div>
+    </gl-alert>
   </div>
 </template>

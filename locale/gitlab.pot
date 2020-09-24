@@ -77,6 +77,11 @@ msgstr ""
 msgid "\"el\" parameter is required for createInstance()"
 msgstr ""
 
+msgid "%d Approval"
+msgid_plural "%d Approvals"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%d Scanned URL"
 msgid_plural "%d Scanned URLs"
 msgstr[0] ""
@@ -1009,6 +1014,11 @@ msgid_plural "%d Days"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "1 Issue"
+msgid_plural "%d Issues"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "1 closed issue"
 msgid_plural "%{issues} closed issues"
 msgstr[0] ""
@@ -1021,6 +1031,11 @@ msgstr[1] ""
 
 msgid "1 day"
 msgid_plural "%d days"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "1 deploy key"
+msgid_plural "%d deploy keys"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -1312,7 +1327,13 @@ msgstr ""
 msgid "Access expiration date"
 msgstr ""
 
+msgid "Access expires"
+msgstr ""
+
 msgid "Access forbidden. Check your access level."
+msgstr ""
+
+msgid "Access granted"
 msgstr ""
 
 msgid "Access requests"
@@ -1322,6 +1343,9 @@ msgid "Access to '%{classification_label}' not allowed"
 msgstr ""
 
 msgid "Access to Pages websites are controlled based on the user's membership to a given project. By checking this box, users will be required to be logged in to have access to all Pages websites in your instance."
+msgstr ""
+
+msgid "AccessDropdown|Deploy Keys"
 msgstr ""
 
 msgid "AccessDropdown|Groups"
@@ -2168,6 +2192,9 @@ msgid_plural "Alerts"
 msgstr[0] ""
 msgstr[1] ""
 
+msgid "Alert #%{alertId}"
+msgstr ""
+
 msgid "AlertManagement|Acknowledged"
 msgstr ""
 
@@ -2987,6 +3014,9 @@ msgstr ""
 msgid "An unknown error occurred while loading this graph."
 msgstr ""
 
+msgid "An unknown error occurred."
+msgstr ""
+
 msgid "Analytics"
 msgstr ""
 
@@ -3020,10 +3050,10 @@ msgstr ""
 msgid "Any"
 msgstr ""
 
-msgid "Any Author"
+msgid "Any %{header}"
 msgstr ""
 
-msgid "Any Status"
+msgid "Any Author"
 msgstr ""
 
 msgid "Any branch"
@@ -8845,6 +8875,9 @@ msgstr ""
 msgid "DesignManagement|The maximum number of designs allowed to be uploaded is %{upload_limit}. Please try again."
 msgstr ""
 
+msgid "DesignManagement|There was an error moving your designs. Please upload your designs below."
+msgstr ""
+
 msgid "DesignManagement|To upload designs, you'll need to enable LFS and have admin enable hashed storage. %{requirements_link_start}More information%{requirements_link_end}"
 msgstr ""
 
@@ -8855,6 +8888,9 @@ msgid "DesignManagement|Upload designs"
 msgstr ""
 
 msgid "DesignManagement|Upload skipped."
+msgstr ""
+
+msgid "DesignManagement|Your designs are being copied and are on their way… Please refresh to update."
 msgstr ""
 
 msgid "DesignManagement|and %{moreCount} more."
@@ -10644,6 +10680,9 @@ msgstr ""
 msgid "Failed to load branches. Please try again."
 msgstr ""
 
+msgid "Failed to load deploy keys."
+msgstr ""
+
 msgid "Failed to load emoji list."
 msgstr ""
 
@@ -10657,6 +10696,9 @@ msgid "Failed to load group activity metrics. Please try again."
 msgstr ""
 
 msgid "Failed to load groups & users."
+msgstr ""
+
+msgid "Failed to load groups, users and deploy keys."
 msgstr ""
 
 msgid "Failed to load labels. Please try again."
@@ -10934,6 +10976,9 @@ msgstr ""
 msgid "FeatureFlags|Loading feature flags"
 msgstr ""
 
+msgid "FeatureFlags|Loading user lists"
+msgstr ""
+
 msgid "FeatureFlags|More information"
 msgstr ""
 
@@ -10952,7 +10997,7 @@ msgstr ""
 msgid "FeatureFlags|New feature flag"
 msgstr ""
 
-msgid "FeatureFlags|New list"
+msgid "FeatureFlags|New user list"
 msgstr ""
 
 msgid "FeatureFlags|Percent of users"
@@ -10991,6 +11036,9 @@ msgstr ""
 msgid "FeatureFlags|There was an error fetching the feature flags."
 msgstr ""
 
+msgid "FeatureFlags|There was an error fetching the user lists."
+msgstr ""
+
 msgid "FeatureFlags|There was an error retrieving user lists"
 msgstr ""
 
@@ -11004,6 +11052,9 @@ msgid "FeatureFlags|User IDs"
 msgstr ""
 
 msgid "FeatureFlags|User List"
+msgstr ""
+
+msgid "FeatureFlags|User Lists"
 msgstr ""
 
 msgid "FeatureFlag|List"
@@ -11147,6 +11198,9 @@ msgstr ""
 msgid "Filter by user"
 msgstr ""
 
+msgid "Filter parameters are not valid. Make sure that the end date is after the start date."
+msgstr ""
+
 msgid "Filter pipelines"
 msgstr ""
 
@@ -11171,7 +11225,7 @@ msgstr ""
 msgid "Find File"
 msgstr ""
 
-msgid "Find bugs in your code with coverage-guided fuzzing"
+msgid "Find bugs in your code with coverage-guided fuzzing."
 msgstr ""
 
 msgid "Find by path"
@@ -15079,9 +15133,6 @@ msgstr ""
 msgid "List your Bitbucket Server repositories"
 msgstr ""
 
-msgid "Lists"
-msgstr ""
-
 msgid "Live preview"
 msgstr ""
 
@@ -15449,6 +15500,9 @@ msgid "Max Project Import requests per minute per user"
 msgstr ""
 
 msgid "Max access level"
+msgstr ""
+
+msgid "Max role"
 msgstr ""
 
 msgid "Max size 15 MB"
@@ -16748,6 +16802,9 @@ msgstr ""
 msgid "NetworkPolicies|Name"
 msgstr ""
 
+msgid "NetworkPolicies|Namespace"
+msgstr ""
+
 msgid "NetworkPolicies|Network Policy"
 msgstr ""
 
@@ -16812,6 +16869,9 @@ msgid "NetworkPolicies|Status"
 msgstr ""
 
 msgid "NetworkPolicies|Traffic that does not match any rule will be blocked."
+msgstr ""
+
+msgid "NetworkPolicies|Unable to parse policy"
 msgstr ""
 
 msgid "NetworkPolicies|YAML editor"
@@ -17207,6 +17267,9 @@ msgid "No matching results"
 msgstr ""
 
 msgid "No matching results for \"%{query}\""
+msgstr ""
+
+msgid "No members found"
 msgstr ""
 
 msgid "No merge requests found"
@@ -17644,6 +17707,9 @@ msgstr ""
 msgid "OnDemandScans|Scan mode"
 msgstr ""
 
+msgid "OnDemandScans|Scanner profile"
+msgstr ""
+
 msgid "OnDemandScans|Scanner settings"
 msgstr ""
 
@@ -17651,6 +17717,9 @@ msgid "OnDemandScans|Schedule or run scans immediately against target sites. Cur
 msgstr ""
 
 msgid "OnDemandScans|Select one of the existing profiles"
+msgstr ""
+
+msgid "OnDemandScans|Site profile"
 msgstr ""
 
 msgid "OnDemandScans|Site profiles"
@@ -17907,6 +17976,9 @@ msgstr ""
 msgid "Overwrite diverged branches"
 msgstr ""
 
+msgid "Owned by %{image_tag}"
+msgstr ""
+
 msgid "Owned by anyone"
 msgstr ""
 
@@ -17944,9 +18016,6 @@ msgid "Package type must be NuGet"
 msgstr ""
 
 msgid "Package type must be PyPi"
-msgstr ""
-
-msgid "Package was removed"
 msgstr ""
 
 msgid "PackageRegistry|%{name} version %{version} was created %{datetime}"
@@ -21543,6 +21612,9 @@ msgstr ""
 msgid "Request to link SAML account must be authorized"
 msgstr ""
 
+msgid "Requested"
+msgstr ""
+
 msgid "Requested %{time_ago}"
 msgstr ""
 
@@ -22454,6 +22526,9 @@ msgstr ""
 msgid "SecurityConfiguration|Manage"
 msgstr ""
 
+msgid "SecurityConfiguration|More information"
+msgstr ""
+
 msgid "SecurityConfiguration|Not enabled"
 msgstr ""
 
@@ -22464,9 +22539,6 @@ msgid "SecurityConfiguration|SAST Configuration"
 msgstr ""
 
 msgid "SecurityConfiguration|Security Control"
-msgstr ""
-
-msgid "SecurityConfiguration|See documentation"
 msgstr ""
 
 msgid "SecurityConfiguration|Status"
@@ -22557,9 +22629,6 @@ msgid "SecurityReports|Issues created from a vulnerability cannot be removed."
 msgstr ""
 
 msgid "SecurityReports|Learn more about setting up your dashboard"
-msgstr ""
-
-msgid "SecurityReports|Load more vulnerabilities"
 msgstr ""
 
 msgid "SecurityReports|Monitor vulnerabilities in your code"
@@ -24187,9 +24256,6 @@ msgid "Start a review"
 msgstr ""
 
 msgid "Start and due date"
-msgstr ""
-
-msgid "Start by choosing a group to see how your team is spending time. You can then drill down to the project level."
 msgstr ""
 
 msgid "Start by choosing a group to start exploring the merge requests in that group. You can then proceed to filter by projects, labels, milestones and authors."
@@ -26296,9 +26362,6 @@ msgstr ""
 msgid "ThreatMonitoring|Operations Per Second"
 msgstr ""
 
-msgid "ThreatMonitoring|Overview"
-msgstr ""
-
 msgid "ThreatMonitoring|Packet Activity"
 msgstr ""
 
@@ -26315,6 +26378,9 @@ msgid "ThreatMonitoring|Something went wrong, unable to fetch environments"
 msgstr ""
 
 msgid "ThreatMonitoring|Something went wrong, unable to fetch statistics"
+msgstr ""
+
+msgid "ThreatMonitoring|Statistics"
 msgstr ""
 
 msgid "ThreatMonitoring|The firewall is not installed or has been disabled. To view this data, ensure the web application firewall is installed and enabled for your cluster."
@@ -28425,6 +28491,9 @@ msgstr ""
 msgid "Warning: Displaying this diagram might cause performance issues on this page."
 msgstr ""
 
+msgid "We are currently unable to fetch data for the pipeline header."
+msgstr ""
+
 msgid "We are currently unable to fetch data for this graph."
 msgstr ""
 
@@ -30137,6 +30206,9 @@ msgid "failed"
 msgstr ""
 
 msgid "failed to dismiss associated finding(id=%{finding_id}): %{message}"
+msgstr ""
+
+msgid "failed to revert associated finding(id=%{finding_id}) to detected"
 msgstr ""
 
 msgid "file"

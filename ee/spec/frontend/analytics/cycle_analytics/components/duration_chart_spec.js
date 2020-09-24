@@ -1,6 +1,6 @@
 import Vuex from 'vuex';
-import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import { GlDropdownItem } from '@gitlab/ui';
+import { shallowMount, mount, createLocalVue } from '@vue/test-utils';
 import Scatterplot from 'ee/analytics/shared/components/scatterplot.vue';
 import DurationChart from 'ee/analytics/cycle_analytics/components/duration_chart.vue';
 import StageDropdownFilter from 'ee/analytics/cycle_analytics/components/stage_dropdown_filter.vue';

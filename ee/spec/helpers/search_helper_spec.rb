@@ -68,7 +68,6 @@ RSpec.describe SearchHelper do
 
   describe '#search_entries_info_template' do
     let(:com_value) { true }
-    let(:flag_enabled) { true }
     let(:elasticsearch_enabled) { true }
     let(:show_snippets) { true }
     let(:collection) { Kaminari.paginate_array([:foo]).page(1).per(10) }
@@ -83,7 +82,6 @@ RSpec.describe SearchHelper do
       @current_user = user
 
       allow(Gitlab).to receive(:com?).and_return(com_value)
-      stub_feature_flags(restricted_snippet_scope_search: flag_enabled)
       stub_ee_application_setting(search_using_elasticsearch: elasticsearch_enabled)
     end
 
@@ -101,12 +99,6 @@ RSpec.describe SearchHelper do
 
     context 'when not in Gitlab.com' do
       let(:com_value) { false }
-
-      it_behaves_like 'returns old message'
-    end
-
-    context 'when flag restricted_snippet_scope_search is not enabled' do
-      let(:flag_enabled) { false }
 
       it_behaves_like 'returns old message'
     end

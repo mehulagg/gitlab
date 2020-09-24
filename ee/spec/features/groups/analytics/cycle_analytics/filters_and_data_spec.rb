@@ -77,7 +77,7 @@ RSpec.describe 'Group value stream analytics filters and data', :js do
     it 'displays empty text' do
       [
         'Value Stream Analytics can help you determine your team’s velocity',
-        'Start by choosing a group to see how your team is spending time. You can then drill down to the project level.'
+        'Filter parameters are not valid. Make sure that the end date is after the start date.'
       ].each do |content|
         expect(page).to have_content(content)
       end

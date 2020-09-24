@@ -7,7 +7,7 @@ import * as types from 'ee/analytics/cycle_analytics/store/mutation_types';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import httpStatusCodes from '~/lib/utils/http_status';
 import {
-  selectedGroup,
+  currentGroup,
   allowedStages as stages,
   startDate,
   endDate,
@@ -16,7 +16,7 @@ import {
   valueStreams,
 } from '../mock_data';
 
-const group = { parentId: 'fake_group_parent_id', fullPath: 'fake_group_full_path' };
+const group = { fullPath: 'fake_group_full_path' };
 const milestonesPath = 'fake_milestones_path';
 const labelsPath = 'fake_labels_path';
 
@@ -33,12 +33,12 @@ const selectedStageSlug = selectedStage.slug;
 const [selectedValueStream] = valueStreams;
 
 const mockGetters = {
-  currentGroupPath: () => selectedGroup.fullPath,
+  currentGroupPath: () => currentGroup.fullPath,
   currentValueStreamId: () => selectedValueStream.id,
 };
 
 const stageEndpoint = ({ stageId }) =>
-  `/groups/${selectedGroup.fullPath}/-/analytics/value_stream_analytics/value_streams/${selectedValueStream.id}/stages/${stageId}`;
+  `/groups/${currentGroup.fullPath}/-/analytics/value_stream_analytics/value_streams/${selectedValueStream.id}/stages/${stageId}`;
 
 jest.mock('~/flash');
 
@@ -68,7 +68,7 @@ describe('Cycle analytics actions', () => {
 
   afterEach(() => {
     mock.restore();
-    state = { ...state, selectedGroup: null };
+    state = { ...state, currentGroup: null };
   });
 
   it.each`
@@ -106,87 +106,22 @@ describe('Cycle analytics actions', () => {
   });
 
   describe('setPaths', () => {
-    describe('with endpoint paths provided', () => {
-      it('dispatches the filters/setEndpoints action with enpoints', () => {
-        return testAction(
-          actions.setPaths,
-          { group, milestonesPath, labelsPath },
-          state,
-          [],
-          [
-            {
-              type: 'filters/setEndpoints',
-              payload: {
-                groupEndpoint: 'fake_group_parent_id',
-                labelsEndpoint: 'fake_labels_path.json',
-                milestonesEndpoint: 'fake_milestones_path.json',
-              },
+    it('dispatches the filters/setEndpoints action with enpoints', () => {
+      return testAction(
+        actions.setPaths,
+        { groupPath: group.fullPath, milestonesPath, labelsPath },
+        state,
+        [],
+        [
+          {
+            type: 'filters/setEndpoints',
+            payload: {
+              groupEndpoint: 'fake_group_full_path',
+              labelsEndpoint: 'fake_labels_path.json',
+              milestonesEndpoint: 'fake_milestones_path.json',
             },
-          ],
-        );
-      });
-    });
-
-    describe('without endpoint paths provided', () => {
-      it('dispatches the filters/setEndpoints action and prefers group.parentId', () => {
-        return testAction(
-          actions.setPaths,
-          { group },
-          state,
-          [],
-          [
-            {
-              type: 'filters/setEndpoints',
-              payload: {
-                groupEndpoint: 'fake_group_parent_id',
-                labelsEndpoint: '/groups/fake_group_parent_id/-/labels.json',
-                milestonesEndpoint: '/groups/fake_group_parent_id/-/milestones.json',
-              },
-            },
-          ],
-        );
-      });
-
-      it('dispatches the filters/setEndpoints action and uses group.fullPath', () => {
-        const { fullPath } = group;
-        return testAction(
-          actions.setPaths,
-          { group: { fullPath } },
-          state,
-          [],
-          [
-            {
-              type: 'filters/setEndpoints',
-              payload: {
-                groupEndpoint: 'fake_group_full_path',
-                labelsEndpoint: '/groups/fake_group_full_path/-/labels.json',
-                milestonesEndpoint: '/groups/fake_group_full_path/-/milestones.json',
-              },
-            },
-          ],
-        );
-      });
-
-      it.each([undefined, null, { parentId: null }, { fullPath: null }, {}])(
-        'group=%s will return empty string',
-        value => {
-          return testAction(
-            actions.setPaths,
-            { group: value, milestonesPath, labelsPath },
-            state,
-            [],
-            [
-              {
-                type: 'filters/setEndpoints',
-                payload: {
-                  groupEndpoint: '',
-                  labelsEndpoint: 'fake_labels_path.json',
-                  milestonesEndpoint: 'fake_milestones_path.json',
-                },
-              },
-            ],
-          );
-        },
+          },
+        ],
       );
     });
   });
@@ -205,34 +140,9 @@ describe('Cycle analytics actions', () => {
     });
   });
 
-  describe('setSelectedGroup', () => {
-    const { fullPath } = selectedGroup;
-
-    beforeEach(() => {
-      mock = new MockAdapter(axios);
-    });
-
-    it('commits the setSelectedGroup mutation', () => {
-      return testAction(
-        actions.setSelectedGroup,
-        { full_path: fullPath },
-        state,
-        [{ type: types.SET_SELECTED_GROUP, payload: { full_path: fullPath } }],
-        [
-          {
-            type: 'filters/initialize',
-            payload: {
-              groupPath: fullPath,
-            },
-          },
-        ],
-      );
-    });
-  });
-
   describe('fetchStageData', () => {
     beforeEach(() => {
-      state = { ...state, selectedGroup };
+      state = { ...state, currentGroup };
       mock = new MockAdapter(axios);
       mock.onGet(endpoints.stageData).reply(httpStatusCodes.OK, { events: [] });
     });
@@ -338,7 +248,7 @@ describe('Cycle analytics actions', () => {
     }
 
     beforeEach(() => {
-      state = { ...state, selectedGroup, startDate, endDate };
+      state = { ...state, currentGroup, startDate, endDate };
     });
 
     it(`dispatches actions for required value stream analytics analytics data`, () => {
@@ -713,7 +623,7 @@ describe('Cycle analytics actions', () => {
 
     beforeEach(() => {
       mock.onDelete(stageEndpoint({ stageId })).replyOnce(httpStatusCodes.OK);
-      state = { selectedGroup };
+      state = { currentGroup };
     });
 
     it('dispatches fetchCycleAnalyticsData', () => {
@@ -745,7 +655,7 @@ describe('Cycle analytics actions', () => {
     const fetchMedianResponse = activeStages.map(({ slug: id }) => ({ events: [], id }));
 
     beforeEach(() => {
-      state = { ...state, stages, selectedGroup };
+      state = { ...state, stages, currentGroup };
       mock = new MockAdapter(axios);
       mock.onGet(endpoints.stageMedian).reply(httpStatusCodes.OK, { events: [] });
       mockDispatch = jest.fn();
@@ -846,7 +756,7 @@ describe('Cycle analytics actions', () => {
     let store;
 
     const initialData = {
-      group: selectedGroup,
+      group: currentGroup,
       projectIds: [1, 2],
     };
 
@@ -861,30 +771,29 @@ describe('Cycle analytics actions', () => {
       };
     });
 
-    describe('with no initialData', () => {
-      it('commits "INITIALIZE_CYCLE_ANALYTICS"', () =>
-        actions.initializeCycleAnalytics(store).then(() => {
-          expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', {});
-        }));
+    describe('with only group in initialData', () => {
+      it('commits "INITIALIZE_CYCLE_ANALYTICS"', async () => {
+        await actions.initializeCycleAnalytics(store, { group });
+        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', { group });
+      });
 
-      it('dispatches "initializeCycleAnalyticsSuccess"', () =>
-        actions.initializeCycleAnalytics(store).then(() => {
-          expect(mockDispatch).not.toHaveBeenCalledWith('fetchCycleAnalyticsData');
-          expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
-        }));
+      it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
+        await actions.initializeCycleAnalytics(store, { group });
+        expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');
+      });
     });
 
     describe('with initialData', () => {
-      it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', () =>
-        actions.initializeCycleAnalytics(store, initialData).then(() => {
-          expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');
-          expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
-        }));
+      it('dispatches "fetchCycleAnalyticsData" and "initializeCycleAnalyticsSuccess"', async () => {
+        await actions.initializeCycleAnalytics(store, initialData);
+        expect(mockDispatch).toHaveBeenCalledWith('fetchCycleAnalyticsData');
+        expect(mockDispatch).toHaveBeenCalledWith('initializeCycleAnalyticsSuccess');
+      });
 
-      it('commits "INITIALIZE_CYCLE_ANALYTICS"', () =>
-        actions.initializeCycleAnalytics(store, initialData).then(() => {
-          expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', initialData);
-        }));
+      it('commits "INITIALIZE_CYCLE_ANALYTICS"', async () => {
+        await actions.initializeCycleAnalytics(store, initialData);
+        expect(mockCommit).toHaveBeenCalledWith('INITIALIZE_CYCLE_ANALYTICS', initialData);
+      });
     });
   });
 
@@ -977,7 +886,7 @@ describe('Cycle analytics actions', () => {
     const payload = { name: 'cool value stream' };
 
     beforeEach(() => {
-      state = { selectedGroup };
+      state = { currentGroup };
     });
 
     describe('with no errors', () => {
@@ -1030,7 +939,7 @@ describe('Cycle analytics actions', () => {
     const payload = 'my-fake-value-stream';
 
     beforeEach(() => {
-      state = { selectedGroup };
+      state = { currentGroup };
     });
 
     describe('with no errors', () => {
@@ -1086,7 +995,7 @@ describe('Cycle analytics actions', () => {
       state = {
         ...state,
         stages: [{ slug: selectedStageSlug }],
-        selectedGroup,
+        currentGroup,
         featureFlags: {
           ...state.featureFlags,
           hasCreateMultipleValueStreams: true,
@@ -1175,7 +1084,7 @@ describe('Cycle analytics actions', () => {
       state = {
         ...state,
         stages: [{ slug: selectedStageSlug }],
-        selectedGroup,
+        currentGroup,
         featureFlags: {
           ...state.featureFlags,
           hasCreateMultipleValueStreams: true,

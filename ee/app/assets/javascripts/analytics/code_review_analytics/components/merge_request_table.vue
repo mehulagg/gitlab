@@ -1,8 +1,8 @@
 <script>
 import { escape } from 'lodash';
 import { mapState } from 'vuex';
-import { sanitize } from 'dompurify';
 import { GlTable, GlLink, GlIcon, GlAvatarLink, GlAvatar, GlTooltipDirective } from '@gitlab/ui';
+import { sanitize } from '~/lib/dompurify';
 import { __, sprintf, n__ } from '~/locale';
 import { getTimeago } from '~/lib/utils/datetime_utility';
 import ApproversColumn from './approvers_column.vue';

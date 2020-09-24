@@ -89,7 +89,8 @@ describe('Group repository analytics app', () => {
         });
 
         it('renders primary action as a link with two project IDs as parameters', () => {
-          const expectedPath = `${groupAnalyticsCoverageReportsPathWithDates}&project_ids=${groupProjectsData[0].id}%2C${groupProjectsData[1].id}`;
+          const projectIdsQueryParam = `project_ids%5B%5D=${groupProjectsData[0].id}&project_ids%5B%5D=${groupProjectsData[1].id}`;
+          const expectedPath = `${groupAnalyticsCoverageReportsPathWithDates}&${projectIdsQueryParam}`;
 
           expect(findCodeCoverageDownloadButton().attributes('href')).toBe(expectedPath);
         });
@@ -101,7 +102,8 @@ describe('Group repository analytics app', () => {
         });
 
         it('renders primary action as a link with one project ID as a parameter', () => {
-          const expectedPath = `${groupAnalyticsCoverageReportsPathWithDates}&project_ids=${groupProjectsData[0].id}`;
+          const projectIdsQueryParam = `project_ids%5B%5D=${groupProjectsData[0].id}`;
+          const expectedPath = `${groupAnalyticsCoverageReportsPathWithDates}&${projectIdsQueryParam}`;
 
           expect(findCodeCoverageDownloadButton().attributes('href')).toBe(expectedPath);
         });

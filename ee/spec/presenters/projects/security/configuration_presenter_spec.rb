@@ -250,7 +250,7 @@ RSpec.describe Projects::Security::ConfigurationPresenter do
 
   def configuration_path(type)
     if type === :dast_profiles
-      project_profiles_path(project)
+      project_security_configuration_dast_profiles_path(project)
     elsif type === :sast
       project_security_configuration_sast_path(project)
     else

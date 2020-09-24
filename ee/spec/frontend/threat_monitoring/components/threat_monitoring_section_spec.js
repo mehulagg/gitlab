@@ -32,6 +32,8 @@ describe('ThreatMonitoringSection component', () => {
       ...state,
     });
 
+    jest.spyOn(store, 'dispatch').mockImplementation(() => Promise.resolve());
+
     wrapper = shallowMount(ThreatMonitoringSection, {
       propsData: {
         storeNamespace: 'threatMonitoringWaf',
@@ -108,6 +110,24 @@ describe('ThreatMonitoringSection component', () => {
 
   it('does not show the chart empty state', () => {
     expect(findChartEmptyState().exists()).toBe(false);
+  });
+
+  it('fetches statistics', () => {
+    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
+  });
+
+  it('fetches statistics on environment change', async () => {
+    store.dispatch.mockReset();
+    await store.commit('threatMonitoring/SET_CURRENT_ENVIRONMENT_ID', 2);
+
+    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
+  });
+
+  it('fetches statistics on time window change', async () => {
+    store.dispatch.mockReset();
+    await store.commit('threatMonitoring/SET_CURRENT_TIME_WINDOW', 'hour');
+
+    expect(store.dispatch).toHaveBeenCalledWith('threatMonitoringWaf/fetchStatistics');
   });
 
   describe('given the statistics are loading', () => {

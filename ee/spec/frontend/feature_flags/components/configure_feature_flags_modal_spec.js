@@ -5,10 +5,12 @@ import Callout from '~/vue_shared/components/callout.vue';
 
 describe('Configure Feature Flags Modal', () => {
   const mockEvent = { preventDefault: jest.fn() };
-  const projectName = 'fakeProjectName';
+  const provide = {
+    projectName: 'fakeProjectName',
+    featureFlagsHelpPagePath: '/help/path',
+  };
 
   const propsData = {
-    helpPath: '/help/path',
     helpClientLibrariesPath: '/help/path/#flags',
     helpClientExamplePath: '/feature-flags#clientexample',
     apiUrl: '/api/url',
@@ -21,9 +23,7 @@ describe('Configure Feature Flags Modal', () => {
   let wrapper;
   const factory = (props = {}, { mountFn = shallowMount, ...options } = {}) => {
     wrapper = mountFn(Component, {
-      provide: {
-        projectName,
-      },
+      provide,
       stubs: { GlSprintf },
       propsData: {
         ...propsData,
@@ -61,7 +61,7 @@ describe('Configure Feature Flags Modal', () => {
     });
 
     it('should clear the project name input after generating the token', async () => {
-      findProjectNameInput().vm.$emit('input', projectName);
+      findProjectNameInput().vm.$emit('input', provide.projectName);
       findGlModal().vm.$emit('primary', mockEvent);
       await wrapper.vm.$nextTick();
       expect(findProjectNameInput().attributes('value')).toBe('');
@@ -78,7 +78,9 @@ describe('Configure Feature Flags Modal', () => {
     });
 
     it('should have links to the documentation', () => {
-      expect(wrapper.find('[data-testid="help-link"]').attributes('href')).toBe(propsData.helpPath);
+      expect(wrapper.find('[data-testid="help-link"]').attributes('href')).toBe(
+        provide.featureFlagsHelpPagePath,
+      );
       expect(wrapper.find('[data-testid="help-client-link"]').attributes('href')).toBe(
         propsData.helpClientLibrariesPath,
       );
@@ -91,7 +93,9 @@ describe('Configure Feature Flags Modal', () => {
     });
 
     it('should display a message asking to fill the project name', () => {
-      expect(wrapper.find('[data-testid="prevent-accident-text"]').text()).toMatch(projectName);
+      expect(wrapper.find('[data-testid="prevent-accident-text"]').text()).toMatch(
+        provide.projectName,
+      );
     });
 
     it('should display the api URL in an input box', () => {
@@ -110,7 +114,7 @@ describe('Configure Feature Flags Modal', () => {
     beforeEach(factory);
 
     it('should enable the primary action', async () => {
-      findProjectNameInput().vm.$emit('input', projectName);
+      findProjectNameInput().vm.$emit('input', provide.projectName);
       await wrapper.vm.$nextTick();
       const [{ disabled }] = findPrimaryAction().attributes;
       expect(disabled).toBe(false);

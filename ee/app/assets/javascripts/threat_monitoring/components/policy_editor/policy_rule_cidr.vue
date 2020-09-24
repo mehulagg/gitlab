@@ -17,6 +17,11 @@ export default {
 <template>
   <!-- placeholder is the same in all languages-->
   <!-- eslint-disable @gitlab/vue-require-i18n-attribute-strings -->
-  <gl-form-input placeholder="0.0.0.0/24" :value="value" @input="$emit('input', $event)" />
+  <gl-form-input
+    class="gl-bg-white!"
+    placeholder="0.0.0.0/24"
+    :value="value"
+    @input="$emit('input', $event)"
+  />
   <!-- eslint-enable @gitlab/vue-require-i18n-attribute-strings -->
 </template>

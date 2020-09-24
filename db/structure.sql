@@ -9146,7 +9146,6 @@ CREATE TABLE application_settings (
     snowplow_enabled boolean DEFAULT false NOT NULL,
     snowplow_collector_hostname character varying,
     snowplow_cookie_domain character varying,
-    instance_statistics_visibility_private boolean DEFAULT false NOT NULL,
     web_ide_clientside_preview_enabled boolean DEFAULT false NOT NULL,
     user_show_add_ssh_key_message boolean DEFAULT true NOT NULL,
     custom_project_templates_group_id integer,
@@ -9196,7 +9195,6 @@ CREATE TABLE application_settings (
     throttle_incident_management_notification_enabled boolean DEFAULT false NOT NULL,
     throttle_incident_management_notification_period_in_seconds integer DEFAULT 3600,
     throttle_incident_management_notification_per_period integer DEFAULT 3600,
-    snowplow_iglu_registry_url character varying(255),
     push_event_hooks_limit integer DEFAULT 3 NOT NULL,
     push_event_activities_limit integer DEFAULT 3 NOT NULL,
     custom_http_clone_url_root character varying(511),
@@ -11083,7 +11081,8 @@ CREATE TABLE container_repositories (
     name character varying NOT NULL,
     created_at timestamp without time zone NOT NULL,
     updated_at timestamp without time zone NOT NULL,
-    status smallint
+    status smallint,
+    expiration_policy_started_at timestamp with time zone
 );
 
 CREATE SEQUENCE container_repositories_id_seq
@@ -14123,7 +14122,8 @@ CREATE TABLE packages_package_files (
     verified_at timestamp with time zone,
     verification_failure character varying(255),
     verification_retry_count integer,
-    verification_checksum bytea
+    verification_checksum bytea,
+    CONSTRAINT check_4c5e6bb0b3 CHECK ((file_store IS NOT NULL))
 );
 
 CREATE SEQUENCE packages_package_files_id_seq
@@ -14364,7 +14364,8 @@ CREATE TABLE plan_limits (
     npm_max_file_size bigint DEFAULT 524288000 NOT NULL,
     nuget_max_file_size bigint DEFAULT 524288000 NOT NULL,
     pypi_max_file_size bigint DEFAULT '3221225472'::bigint NOT NULL,
-    generic_packages_max_file_size bigint DEFAULT '5368709120'::bigint NOT NULL
+    generic_packages_max_file_size bigint DEFAULT '5368709120'::bigint NOT NULL,
+    golang_max_file_size bigint DEFAULT 104857600 NOT NULL
 );
 
 CREATE SEQUENCE plan_limits_id_seq
@@ -18083,9 +18084,6 @@ ALTER TABLE design_management_designs
 ALTER TABLE vulnerability_scanners
     ADD CONSTRAINT check_37608c9db5 CHECK ((char_length(vendor) <= 255)) NOT VALID;
 
-ALTER TABLE packages_package_files
-    ADD CONSTRAINT check_4c5e6bb0b3 CHECK ((file_store IS NOT NULL)) NOT VALID;
-
 ALTER TABLE group_import_states
     ADD CONSTRAINT check_cda75c7c3f CHECK ((user_id IS NOT NULL)) NOT VALID;
 
@@ -19789,8 +19787,6 @@ CREATE INDEX index_cluster_agent_tokens_on_agent_id ON cluster_agent_tokens USIN
 
 CREATE UNIQUE INDEX index_cluster_agent_tokens_on_token_encrypted ON cluster_agent_tokens USING btree (token_encrypted);
 
-CREATE INDEX index_cluster_agents_on_project_id ON cluster_agents USING btree (project_id);
-
 CREATE UNIQUE INDEX index_cluster_agents_on_project_id_and_name ON cluster_agents USING btree (project_id, name);
 
 CREATE UNIQUE INDEX index_cluster_groups_on_cluster_id_and_group_id ON cluster_groups USING btree (cluster_id, group_id);
@@ -20683,8 +20679,6 @@ CREATE INDEX index_packages_nuget_dl_metadata_on_dependency_link_id ON packages_
 
 CREATE UNIQUE INDEX index_packages_on_project_id_name_version_unique_when_generic ON packages_packages USING btree (project_id, name, version) WHERE (package_type = 7);
 
-CREATE INDEX index_packages_package_files_file_store_is_null ON packages_package_files USING btree (id) WHERE (file_store IS NULL);
-
 CREATE INDEX index_packages_package_files_on_file_store ON packages_package_files USING btree (file_store);
 
 CREATE INDEX index_packages_package_files_on_package_id_and_file_name ON packages_package_files USING btree (package_id, file_name);
@@ -21336,6 +21330,8 @@ CREATE INDEX index_user_highest_roles_on_user_id_and_highest_access_level ON use
 CREATE UNIQUE INDEX index_user_interacted_projects_on_project_id_and_user_id ON user_interacted_projects USING btree (project_id, user_id);
 
 CREATE INDEX index_user_interacted_projects_on_user_id ON user_interacted_projects USING btree (user_id);
+
+CREATE INDEX index_user_preferences_on_gitpod_enabled ON user_preferences USING btree (gitpod_enabled);
 
 CREATE UNIQUE INDEX index_user_preferences_on_user_id ON user_preferences USING btree (user_id);
 

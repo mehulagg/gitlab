@@ -685,6 +685,7 @@ A collection of designs.
 
 | Field | Type | Description |
 | ----- | ---- | ----------- |
+| `copyState` | DesignCollectionCopyState | Copy state of the design collection |
 | `design` | Design | Find a specific design |
 | `designAtVersion` | DesignAtVersion | Find a design as of a version |
 | `issue` | Issue! | Issue associated with the design collection |
@@ -3027,6 +3028,16 @@ Mode of a commit action.
 | `PASSED_VALIDATION` | Site validation process finished successfully |
 | `PENDING_VALIDATION` | Site validation process has not started |
 
+### DesignCollectionCopyState
+
+Copy state of a DesignCollection.
+
+| Value | Description |
+| ----- | ----------- |
+| `ERROR` | The DesignCollection encountered an error during a copy |
+| `IN_PROGRESS` | The DesignCollection is being copied |
+| `READY` | The DesignCollection has no copy in progress |
+
 ### DesignVersionEvent
 
 Mutation event of a design within a version.
@@ -3279,6 +3290,7 @@ Values for sorting projects.
 | `COMPOSER` | Packages from the composer package manager |
 | `CONAN` | Packages from the conan package manager |
 | `GENERIC` | Packages from the generic package manager |
+| `GOLANG` | Packages from the golang package manager |
 | `MAVEN` | Packages from the maven package manager |
 | `NPM` | Packages from the npm package manager |
 | `NUGET` | Packages from the nuget package manager |
@@ -3580,6 +3592,8 @@ Vulnerability sort values.
 | ----- | ----------- |
 | `severity_asc` | Severity in ascending order |
 | `severity_desc` | Severity in descending order |
+| `title_asc` | Title in ascending order |
+| `title_desc` | Title in descending order |
 
 ### VulnerabilityState
 

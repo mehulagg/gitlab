@@ -63,11 +63,11 @@ describe('Cycle analytics getters', () => {
   });
 
   describe('currentGroupPath', () => {
-    describe('with selectedGroup set', () => {
+    describe('with currentGroup set', () => {
       it('returns the `fullPath` value of the group', () => {
         const fullPath = 'cool-beans';
         state = {
-          selectedGroup: {
+          currentGroup: {
             fullPath,
           },
         };
@@ -76,9 +76,9 @@ describe('Cycle analytics getters', () => {
       });
     });
 
-    describe('without a selectedGroup set', () => {
+    describe('without a currentGroup set', () => {
       it.each([[''], [{}], [null]])('given "%s" will return null', value => {
-        state = { selectedGroup: value };
+        state = { currentGroup: value };
         expect(getters.currentGroupPath(state)).toEqual(null);
       });
     });
@@ -88,7 +88,7 @@ describe('Cycle analytics getters', () => {
     beforeEach(() => {
       const fullPath = 'cool-beans';
       state = {
-        selectedGroup: {
+        currentGroup: {
           fullPath,
         },
         startDate,

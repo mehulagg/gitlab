@@ -2584,4 +2584,12 @@ RSpec.describe Project do
       end
     end
   end
+
+  describe '#mark_primary_write_location' do
+    it 'marks the location with project ID' do
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
+
+      project.mark_primary_write_location
+    end
+  end
 end
