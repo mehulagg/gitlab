@@ -74,7 +74,7 @@ GitLab plans to [include the Agent](https://gitlab.com/gitlab-org/gitlab/-/issue
 in the official Linux Package.
 
 NOTE: **Note:**
-GitLab is working towards adding the Agent server on GitLab.com. Please check back for its availability.
+GitLab is working towards adding the Agent server to GitLab.com.
 
 When installing or upgrading the GitLab Helm chart, consider the following Helm 2 example.
 (If you're using Helm 3, you must modify this example.) You must set `global.kas.enabled=true`
