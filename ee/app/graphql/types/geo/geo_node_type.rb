@@ -25,8 +25,7 @@ module Types
       field :package_file_registries, ::Types::Geo::PackageFileRegistryType.connection_type,
             null: true,
             resolver: ::Resolvers::Geo::PackageFileRegistriesResolver,
-            description: 'Package file registries of the GeoNode',
-            feature_flag: :geo_self_service_framework
+            description: 'Package file registries of the GeoNode'
     end
   end
 end
