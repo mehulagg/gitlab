@@ -192,7 +192,7 @@ Example: prevent pushing any `.exe` files to any location in the repository. Thi
 \.exe$ 
 ```
 
-Example: prevent a specific configuration file in the repository root from being pushed.
+Example: prevent a specific configuration file in the repository root from being pushed:
 
 ```plaintext
 ^config\.yml$
