@@ -18,9 +18,8 @@ module Gitlab
 
           self.table_name = 'epics'
 
-          belongs_to :author, class_name: "User"
-          belongs_to :project
-          belongs_to :group
+          belongs_to :author, class_name: "::Gitlab::BackgroundMigration::UserMentions::Models::User"
+          belongs_to :group, class_name: "::Gitlab::BackgroundMigration::UserMentions::Models::Group"
 
           def self.user_mention_model
             Gitlab::BackgroundMigration::UserMentions::Models::EpicUserMention

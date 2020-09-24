@@ -18,9 +18,9 @@ module Gitlab
 
           self.table_name = 'merge_requests'
 
-          belongs_to :author, class_name: "User"
-          belongs_to :target_project, class_name: "Project"
-          belongs_to :source_project, class_name: "Project"
+          belongs_to :author, class_name: "::Gitlab::BackgroundMigration::UserMentions::Models::User"
+          belongs_to :target_project, class_name: "::Gitlab::BackgroundMigration::UserMentions::Models::Project"
+          belongs_to :source_project, class_name: "::Gitlab::BackgroundMigration::UserMentions::Models::Project"
 
           alias_attribute :project, :target_project
 
