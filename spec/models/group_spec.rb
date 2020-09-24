@@ -230,11 +230,13 @@ RSpec.describe Group do
         end
 
         context 'with shared runners enabled' do
-          let(:group) { build(:group, :allow_descendants_override_disabled_shared_runners) }
+          let(:group) { create(:group) }
 
           it 'is valid' do
+            group.allow_descendants_override_disabled_shared_runners = true
+
             expect(group).to be_invalid
-            expect(group.errors[:allow_descendants_override_disabled_shared_runners]).to include('cannot be enabled if shared runners are enabled.')
+            expect(group.errors[:allow_descendants_override_disabled_shared_runners]).to include('cannot be changed if shared runners are enabled.')
           end
         end
       end

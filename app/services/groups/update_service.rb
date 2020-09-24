@@ -104,7 +104,7 @@ module Groups
     def update_shared_runners
       return true if params[:shared_runners_setting].nil?
 
-      result = Groups::UpdateSharedRunnersService.new(group, current_user, params).execute
+      result = Groups::UpdateSharedRunnersService.new(group, current_user, shared_runners_setting: params.delete(:shared_runners_setting)).execute
 
       return true if result[:status] == :success
 

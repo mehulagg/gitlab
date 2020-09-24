@@ -287,7 +287,7 @@ RSpec.describe Groups::UpdateService do
     let(:group) { create(:group) }
     let(:project) { create(:project, shared_runners_enabled: true, group: group) }
 
-    subject { described_class.new(group, user, shared_runners_enabled: false).execute }
+    subject { described_class.new(group, user, shared_runners_setting: 'disabled').execute }
 
     before do
       group.add_owner(user)
