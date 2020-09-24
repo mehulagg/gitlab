@@ -1,6 +1,6 @@
 <script>
 /* eslint-disable vue/no-v-html */
-import { GlTooltipDirective, GlLink, GlDeprecatedButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
+import { GlTooltipDirective, GlLink, GlButton, GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import defaultAvatarUrl from 'images/no_avatar.png';
 import { sprintf, s__ } from '~/locale';
 import UserAvatarLink from '../../vue_shared/components/user_avatar/user_avatar_link.vue';
@@ -19,7 +19,7 @@ export default {
     ClipboardButton,
     CiIcon,
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
     GlLoadingIcon,
   },
   directives: {
@@ -123,7 +123,7 @@ export default {
             class="commit-row-message item-title"
             v-html="commit.titleHtml"
           />
-          <gl-deprecated-button
+          <gl-button
             v-if="commit.descriptionHtml"
             :class="{ open: showDescription }"
             :aria-label="__('Show commit description')"
@@ -131,7 +131,7 @@ export default {
             @click="toggleShowDescription"
           >
             <gl-icon name="ellipsis_h" :size="10" />
-          </gl-deprecated-button>
+          </gl-button>
           <div class="committer">
             <gl-link
               v-if="commit.author"
