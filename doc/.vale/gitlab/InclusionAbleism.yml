@@ -10,5 +10,5 @@ link: https://docs.gitlab.com/ee/development/documentation/styleguide.html#inclu
 level: suggestion
 ignorecase: true
 swap:
-  sanity check: check for completeness
+  sanity (?:check|test): check for completeness
   dummy: placeholder
