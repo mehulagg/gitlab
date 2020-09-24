@@ -95,12 +95,19 @@ module Clusters
       def pre_entrypoint_script
         return unless registry_ca.present?
 
+        # Based on this comment
+        #
+        #    https://gitlab.com/gitlab-org/charts/gitlab-runner/-/issues/106#note_416885935
+        #
+        # Once the parent issue is resolved, we may be able to switch to a custom config.
+        # See also https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43191#note_418122412
         <<~BASH
           #!/bin/bash
           cat << EOF >> /home/gitlab-runner/.gitlab-runner/config.toml
           [[runners.kubernetes.volumes.config_map]]
             name = "gitlab-registry-ca"
             mount_path = "/etc/docker/certs.d/#{Gitlab.config.registry.host_port}"
+            read_only = true
             [runners.kubernetes.volumes.config_map.items]
               "ca.crt" = "ca.crt"
           EOF
