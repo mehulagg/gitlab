@@ -1,4 +1,4 @@
-/* eslint-disable consistent-return, class-methods-use-this */
+/* eslint-disable consistent-return */
 
 // Zen Mode (full screen) textarea
 //

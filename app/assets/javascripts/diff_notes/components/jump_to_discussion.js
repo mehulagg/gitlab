@@ -56,7 +56,7 @@ const JumpToDiscussion = Vue.extend({
   created() {
     this.discussion = this.discussions[this.discussionId];
     // eslint-disable-next-line @gitlab/require-i18n-strings
-    throw new Error('WHAT BREAKS?')
+    throw new Error('WHAT BREAKS?');
   },
   methods: {
     jumpToNextUnresolvedDiscussion() {
