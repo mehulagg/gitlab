@@ -16,7 +16,30 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
   end
 
   def diff_for_path
-    render_diffs
+    diff_for_path_v2
+  end
+
+  def diff_for_path_v2
+    diffs = @compare.diffs_in_batch(params[:page], params[:per_page], diff_options: diff_options)
+    positions = @merge_request.note_positions_for_paths(diffs.diff_file_paths, current_user)
+    environment = @merge_request.environments_for(current_user, latest: true).last
+
+    diffs.unfold_diff_files(positions.unfoldable)
+    diffs.write_cache
+
+    request = {
+      current_user: current_user,
+      project: @merge_request.project,
+      render: ->(partial, locals) { view_to_html_string(partial, locals) }
+    }
+
+    options = additional_attributes.merge(diff_view: Feature.enabled?(:unified_diff_lines, @merge_request.project) ? "inline" : diff_view)
+
+    if @merge_request.project.context_commits_enabled?
+      options[:context_commits] = @merge_request.recent_context_commits
+    end
+
+    render json: DiffsSerializer.new(request).represent(diffs, options)
   end
 
   def diffs_batch
