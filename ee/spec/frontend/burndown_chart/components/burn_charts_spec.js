@@ -142,11 +142,6 @@ describe('burndown_chart', () => {
       expect(findBurnupChart().props('issuesSelected')).toBe(false);
     });
 
-    it('shows old/new burndown buttons', () => {
-      expect(findOldBurndownChartButton().exists()).toBe(true);
-      expect(findNewBurndownChartButton().exists()).toBe(true);
-    });
-
     it('uses burndown data computed from burnup data', () => {
       createComponent({
         data: {
@@ -162,15 +157,42 @@ describe('burndown_chart', () => {
       expect(openIssuesCount).toEqual([expectedCount]);
       expect(openIssuesWeight).toEqual([expectedWeight]);
     });
+  });
 
-    it('emits fetchLegacyBurndownEvents to trigger fetch, but only once', () => {
-      findOldBurndownChartButton().vm.$emit('click');
+  describe('showNewOldBurndownToggle', () => {
+    it('hides old/new burndown buttons if feature disabled', () => {
+      createComponent({ featureEnabled: false, props: { showNewOldBurndownToggle: true } });
 
-      expect(wrapper.emitted().fetchLegacyBurndownEvents).toHaveLength(1);
+      expect(findOldBurndownChartButton().exists()).toBe(false);
+      expect(findNewBurndownChartButton().exists()).toBe(false);
+    });
 
-      findOldBurndownChartButton().vm.$emit('click');
+    it('hides old/new burndown buttons if props is false', () => {
+      createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: false } });
 
-      expect(wrapper.emitted().fetchLegacyBurndownEvents).toHaveLength(1);
+      expect(findOldBurndownChartButton().exists()).toBe(false);
+      expect(findNewBurndownChartButton().exists()).toBe(false);
+    });
+
+    describe('feature enabled and prop true', () => {
+      beforeEach(() => {
+        createComponent({ featureEnabled: true, props: { showNewOldBurndownToggle: true } });
+      });
+
+      it('shows old/new burndown buttons', () => {
+        expect(findOldBurndownChartButton().exists()).toBe(true);
+        expect(findNewBurndownChartButton().exists()).toBe(true);
+      });
+
+      it('emits fetchLegacyBurndownEvents to trigger fetch, but only once', () => {
+        findOldBurndownChartButton().vm.$emit('click');
+
+        expect(wrapper.emitted().fetchLegacyBurndownEvents).toHaveLength(1);
+
+        findOldBurndownChartButton().vm.$emit('click');
+
+        expect(wrapper.emitted().fetchLegacyBurndownEvents).toHaveLength(1);
+      });
     });
   });
 

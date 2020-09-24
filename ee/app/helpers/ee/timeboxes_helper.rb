@@ -19,11 +19,10 @@ module EE
       milestone.is_a?(EE::Milestone) && !milestone.supports_milestone_charts? && show_promotions?
     end
 
-    def show_burndown_placeholder?(milestone, warning)
-      return false if cookies['hide_burndown_message'].present?
+    def show_burndown_placeholder?(milestone)
       return false unless milestone.supports_milestone_charts?
 
-      warning.nil? && can?(current_user, :admin_milestone, milestone.resource_parent)
+      can?(current_user, :admin_milestone, milestone.resource_parent)
     end
 
     def milestone_weight_tooltip_text(weight)
