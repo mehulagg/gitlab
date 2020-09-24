@@ -76,7 +76,7 @@ export default {
       showAlert: false,
       token: null,
       tokenId: null,
-      validationStatus: DAST_SITE_VALIDATION_STATUS.PENDING_VALIDATION,
+      currentSiteValidationStatus: DAST_SITE_VALIDATION_STATUS.PENDING,
       validateSite: false,
       errorMessage: '',
       errors: [],
@@ -86,15 +86,6 @@ export default {
   computed: {
     isEdit() {
       return Boolean(this.siteProfile?.id);
-    },
-    isSiteValid() {
-      return this.validationStatus === DAST_SITE_VALIDATION_STATUS.PASSED_VALIDATION;
-    },
-    isSiteValidationInProgress() {
-      return this.validationStatus === DAST_SITE_VALIDATION_STATUS.INPROGRESS_VALIDATION;
-    },
-    isSiteValidationWithFailure() {
-      return this.validationStatus === DAST_SITE_VALIDATION_STATUS.FAILED_VALIDATION;
     },
     i18n() {
       const { isEdit } = this;
@@ -132,35 +123,28 @@ export default {
       return Object.values(this.form).some(({ value }) => !value);
     },
     isSubmitDisabled() {
-      return (this.validateSite && !this.isSiteValid) || this.formHasErrors || this.someFieldEmpty;
+      return (
+        (this.validateSite && !this.validationStatusMatches('PASSED')) ||
+        this.formHasErrors ||
+        this.someFieldEmpty ||
+        this.validationStatusMatches('INPROGRESS')
+      );
     },
     showValidationSection() {
       return (
         this.validateSite &&
-        !this.isSiteValid &&
         !this.isValidatingSite &&
-        !this.isSiteValidationInProgress
+        !['INPROGRESS', 'PASSED'].some(this.validationStatusMatches)
       );
     },
   },
   watch: {
-    isSiteValid(newValue) {
-      if (newValue) {
-        this.validateSite = true;
-        this.disableIsValidSiteInput = true;
-      }
-    },
-    isSiteValidationInProgress(newValue) {
-      if (newValue) {
-        this.validateSite = true;
-      }
-    },
     async validateSite(validate) {
       this.tokenId = null;
       this.token = null;
 
-      if (!validate || this.isSiteValidationWithFailure) {
-        this.validationStatus = DAST_SITE_VALIDATION_STATUS.PENDING_VALIDATION;
+      if (!validate || this.validationStatusMatches('FAILED')) {
+        this.currentSiteValidationStatus = DAST_SITE_VALIDATION_STATUS.PENDING;
       } else {
         try {
           this.isValidatingSite = true;
@@ -183,10 +167,17 @@ export default {
 
       if (this.glFeatures.securityOnDemandScansSiteValidation) {
         await this.fetchValidationStatus();
+
+        if (['PASSED', 'INPROGRESS'].some(this.validationStatusMatches)) {
+          this.validateSite = true;
+        }
       }
     }
   },
   methods: {
+    validationStatusMatches(status) {
+      return this.currentSiteValidationStatus === DAST_SITE_VALIDATION_STATUS[status];
+    },
     validateTargetUrl() {
       if (!isAbsolute(this.form.targetUrl.value)) {
         this.form.targetUrl.state = false;
@@ -215,7 +206,7 @@ export default {
             targetUrl: this.form.targetUrl.value,
           },
         });
-        this.validationStatus = status;
+        this.currentSiteValidationStatus = status;
       } catch (exception) {
         this.showErrors({
           message: this.i18n.siteValidation.validationStatusFetchError,
@@ -370,16 +361,19 @@ export default {
     <template v-if="glFeatures.securityOnDemandScansSiteValidation">
       <gl-form-group :label="s__('DastProfiles|Validate target site')">
         <template #description>
-          <p v-if="isSiteValidationInProgress" class="gl-text-green-500 gl-mt-3">
+          <p v-if="validationStatusMatches('INPROGRESS')" class="gl-text-green-500 gl-mt-3">
             {{ s__('DastProfiles|Validation in progress') }}
           </p>
-          <p v-else-if="isSiteValidationWithFailure" class="gl-text-red-500 gl-mt-3">
+          <p
+            v-if="validationStatusMatches('FAILED') && !validateSite"
+            class="gl-text-red-500 gl-mt-3"
+          >
             {{ s__('DastProfiles|Validation failed. Please try again.') }}
           </p>
-          <p v-else-if="!isSiteValid" class="gl-mt-3">
+          <p v-if="validationStatusMatches('PENDING')" class="gl-mt-3">
             {{ s__('DastProfiles|Site must be validated to run an active scan.') }}
           </p>
-          <p v-else class="gl-text-green-500 gl-mt-3">
+          <p v-if="validationStatusMatches('PASSED')" class="gl-text-green-500 gl-mt-3">
             {{
               s__(
                 'DastProfiles|Validation succeeded. Both active and passive scans can be run against the target site.',
@@ -390,7 +384,7 @@ export default {
         <gl-toggle
           v-model="validateSite"
           data-testid="dast-site-validation-toggle"
-          :disabled="!form.targetUrl.state || disableIsValidSiteInput"
+          :disabled="!form.targetUrl.state"
           :is-loading="isFetchingValidationStatus || isValidatingSite"
         />
       </gl-form-group>
