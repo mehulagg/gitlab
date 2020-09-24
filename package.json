@@ -92,6 +92,7 @@
     "fuzzaldrin-plus": "^0.6.0",
     "glob": "^7.1.6",
     "graphql": "^14.7.0",
+    "graphql-ruby-client": "^1.7.11",
     "graphql-tag": "^2.10.1",
     "gray-matter": "^4.0.2",
     "immer": "^7.0.7",

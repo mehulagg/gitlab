@@ -23,7 +23,11 @@ module Issues
 
     def after_update(issue)
       add_incident_label(issue)
-      IssuesChannel.broadcast_to(issue, event: 'updated') if Gitlab::ActionCable::Config.in_app? || Feature.enabled?(:broadcast_issue_updates, issue.project)
+
+      if Gitlab::ActionCable::Config.in_app? || Feature.enabled?(:broadcast_issue_updates, issue.project)
+        IssuesChannel.broadcast_to(issue, event: 'updated')
+        GitlabSchema.subscriptions.trigger('issueUpdated', { project_path: issue.project.full_path, iid: issue.iid }, issue)
+      end
     end
 
     def handle_changes(issue, options)
