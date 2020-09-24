@@ -47,6 +47,9 @@ export default {
           pipeline: pipelines?.length && pipelines[0].node,
         };
       },
+      context: {
+        isSingleRequest: true,
+      },
       error(error) {
         throw error;
       },

@@ -19,7 +19,7 @@ export default function setupVueRepositoryList() {
   const { dataset } = el;
   const { projectPath, projectShortPath, ref, escapedRef, fullName } = dataset;
   const router = createRouter(projectPath, escapedRef);
-  const pathRegex = /-\/tree\/[^\/]+\/(.+$)/;
+  const pathRegex = /-\/tree\/[^/]+\/(.+$)/;
   const matches = window.location.href.match(pathRegex);
 
   const currentRoutePath = matches ? matches[1] : '';
