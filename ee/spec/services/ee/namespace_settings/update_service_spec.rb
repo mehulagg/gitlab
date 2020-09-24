@@ -6,7 +6,7 @@ RSpec.describe EE::NamespaceSettings::UpdateService do
   let(:group) { create(:group) }
   let(:user) { create(:user) }
 
-  subject { described_class.new(user, group, params).execute }
+  subject { NamespaceSettings::UpdateService.new(user, group, params).execute }
 
   describe '#execute' do
     before do
