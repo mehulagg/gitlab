@@ -73,7 +73,7 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
     remove_repository(project)
   end
 
-  describe API::Releases, '(JavaScript fixtures)', type: :request do
+  describe API::Releases, type: :request do
     before(:all) do
       clean_frontend_fixtures('api/releases/')
     end
@@ -87,7 +87,7 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
 
   graphql_query_path = 'releases/queries/all_releases.query.graphql'
 
-  describe "~/#{graphql_query_path} (JavaScript fixtures)", type: :request do
+  describe "~/#{graphql_query_path}", type: :request do
     include GraphqlHelpers
 
     before(:all) do
@@ -95,8 +95,7 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
     end
 
     it "graphql/#{graphql_query_path}.json" do
-      full_path = File.join(File.dirname(__FILE__), '../../../app/assets/javascripts', graphql_query_path)
-      query = File.read(full_path)
+      query = File.read(File.join(Rails.root, '/app/assets/javascripts', graphql_query_path))
 
       post_graphql(query, current_user: admin, variables: { fullPath: project.full_path })
 
