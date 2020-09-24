@@ -198,7 +198,7 @@ Example: prevent a specific configuration file in the repository root from being
 ^config\.yml$
 ```
 
-Example: prevent a specific configuration file in a known directory from being pushed.
+Example: prevent a specific configuration file in a known directory from being pushed:
 
 ```plaintext
 ^directory-name\/config\.yml$
