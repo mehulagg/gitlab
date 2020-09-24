@@ -2,14 +2,14 @@
 /* eslint-disable vue/no-v-html */
 import { escape } from 'lodash';
 import { GlButton } from '@gitlab/ui';
+import { GlModal } from 'gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
-import DeprecatedModal2 from '~/vue_shared/components/deprecated_modal_2.vue';
 import { s__, sprintf } from '~/locale';
 import { deprecatedCreateFlash as Flash } from '~/flash';
 
 export default {
   components: {
-    GlModal: DeprecatedModal2,
+    GlModal,
     GlButton,
   },
   props: {
