@@ -284,7 +284,6 @@ gem 'fast_blank'
 gem 'gitlab-chronic', '~> 0.10.5'
 gem 'gitlab_chronic_duration', '~> 0.10.6.2'
 
-gem 'webpack-rails', '~> 0.9.10'
 gem 'rack-proxy', '~> 0.6.0'
 
 gem 'sassc-rails', '~> 2.1.0'
@@ -330,7 +329,7 @@ group :metrics do
   gem 'method_source', '~> 1.0', require: false
 
   # Prometheus
-  gem 'prometheus-client-mmap', '~> 0.11.0'
+  gem 'prometheus-client-mmap', '~> 0.12.0'
   gem 'raindrops', '~> 0.18'
 end
 

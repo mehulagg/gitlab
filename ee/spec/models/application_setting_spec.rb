@@ -395,18 +395,6 @@ RSpec.describe ApplicationSetting do
 
           expect(setting.elasticsearch_indexes_project?(projects.first)).to be(true)
         end
-
-        context 'when elasticsearch_indexes_project_cache feature flag is disabled' do
-          before do
-            stub_feature_flags(elasticsearch_indexes_project_cache: false)
-          end
-
-          it 'does not use the cache' do
-            expect(::Gitlab::Elastic::ElasticsearchEnabledCache).not_to receive(:fetch)
-
-            expect(setting.elasticsearch_indexes_project?(projects.first)).to be(false)
-          end
-        end
       end
     end
   end

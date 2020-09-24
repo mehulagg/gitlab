@@ -211,7 +211,7 @@ module EE
     end
 
     def generic_alert_with_default_title?
-      title == ::Gitlab::Alerting::NotificationPayloadParser::DEFAULT_TITLE &&
+      title == ::Gitlab::AlertManagement::Payload::Generic::DEFAULT_TITLE &&
         project.alerts_service_activated? &&
         author == ::User.alert_bot
     end

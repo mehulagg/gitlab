@@ -59,7 +59,7 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
           resource :configuration, only: [:show], controller: :configuration do
             post :auto_fix, on: :collection
             resource :sast, only: [:show, :create], controller: :sast_configuration
-            resource :dast_profiles, only: [:show], controller: :dast_profiles do
+            resource :dast_profiles, only: [:show] do
               resources :dast_site_profiles, only: [:new, :edit]
               resources :dast_scanner_profiles, only: [:new, :edit]
             end
@@ -96,11 +96,6 @@ constraints(::Constraints::ProjectUrlConstrainer.new) do
 
         scope :on_demand_scans do
           root 'on_demand_scans#index', as: 'on_demand_scans'
-          scope :profiles do
-            root 'dast_profiles#show', as: 'profiles'
-            resources :dast_site_profiles, only: [:new, :edit]
-            resources :dast_scanner_profiles, only: [:new, :edit]
-          end
         end
 
         namespace :integrations do

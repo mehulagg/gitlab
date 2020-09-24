@@ -11,7 +11,8 @@ import { VULNERABILITY_STATE_OBJECTS, VULNERABILITY_STATES } from 'ee/vulnerabil
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
 import UserAvatarLink from '~/vue_shared/components/user_avatar/user_avatar_link.vue';
 
-const NON_DETECTED_STATES = Object.keys(VULNERABILITY_STATE_OBJECTS);
+const { detected, ...NON_DETECTED_STATE_OBJECTS } = VULNERABILITY_STATE_OBJECTS;
+const NON_DETECTED_STATES = Object.keys(NON_DETECTED_STATE_OBJECTS);
 const ALL_STATES = Object.keys(VULNERABILITY_STATES);
 
 describe('Vulnerability status description component', () => {

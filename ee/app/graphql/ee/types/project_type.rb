@@ -19,7 +19,7 @@ module EE
             resolve: -> (project, _args, _ctx) do
               return DastScannerProfile.none unless ::Feature.enabled?(:security_on_demand_scans_feature_flag, project, default_enabled: true)
 
-              project.dast_scanner_profiles
+              DastScannerProfilesFinder.new(project_ids: [project.id]).execute
             end
 
         field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,

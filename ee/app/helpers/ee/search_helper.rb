@@ -60,23 +60,6 @@ module EE
       Truncato.truncate(search_highlight[issue.id].description.first, count_tags: false, count_tail: false, max_length: 200).html_safe
     end
 
-    def revert_to_basic_search_filter_url
-      search_params = params
-        .permit(::SearchHelper::SEARCH_PERMITTED_PARAMS)
-        .merge(basic_search: true)
-
-      search_path(search_params)
-    end
-
-    def show_switch_to_basic_search?(search_service)
-      return false unless ::Feature.enabled?(:switch_to_basic_search, default_enabled: false)
-      return false unless search_service.use_elasticsearch?
-
-      return true if @project
-
-      search_service.scope.in?(SWITCH_TO_BASIC_SEARCHABLE_TABS)
-    end
-
     private
 
     def search_multiple_assignees?(type)
@@ -90,7 +73,6 @@ module EE
       @current_user &&
         @show_snippets &&
         ::Gitlab.com? &&
-        ::Feature.enabled?(:restricted_snippet_scope_search, default_enabled: true) &&
         ::Gitlab::CurrentSettings.search_using_elasticsearch?(scope: nil)
     end
   end

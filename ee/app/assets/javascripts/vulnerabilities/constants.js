@@ -1,6 +1,13 @@
 import { s__ } from '~/locale';
 
 export const VULNERABILITY_STATE_OBJECTS = {
+  detected: {
+    action: 'revert',
+    state: 'detected',
+    statusBoxStyle: 'expired',
+    displayName: s__('VulnerabilityManagement|Detected'),
+    description: s__('VulnerabilityManagement|Needs triage'),
+  },
   dismissed: {
     action: 'dismiss',
     state: 'dismissed',

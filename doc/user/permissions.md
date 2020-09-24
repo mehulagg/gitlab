@@ -116,6 +116,7 @@ The following table depicts the various user permission levels in a project.
 | Create vulnerability from vulnerability finding **(ULTIMATE)** |   |     | ✓           | ✓        | ✓      |
 | Resolve vulnerability **(ULTIMATE)**              |         |            | ✓           | ✓        | ✓      |
 | Dismiss vulnerability **(ULTIMATE)**              |         |            | ✓           | ✓        | ✓      |
+| Revert vulnerability to detected state **(ULTIMATE)** |     |            | ✓           | ✓        | ✓      |
 | Apply code change suggestions                     |         |            | ✓           | ✓        | ✓      |
 | Create and edit wiki pages                        |         |            | ✓           | ✓        | ✓      |
 | Rewrite/remove Git tags                           |         |            | ✓           | ✓        | ✓      |
@@ -196,7 +197,7 @@ which visibility level you select on project settings.
 
 - Disabled: disabled for everyone
 - Only team members: only team members can see even if your project is public or internal
-- Everyone with access: everyone can see depending on your project visibility level
+- Everyone with access: everyone can see depending on your project's visibility level
 - Everyone: enabled for everyone (only available for GitLab Pages)
 
 ### Protected branches

@@ -68,7 +68,6 @@ RSpec.describe SearchHelper do
 
   describe '#search_entries_info_template' do
     let(:com_value) { true }
-    let(:flag_enabled) { true }
     let(:elasticsearch_enabled) { true }
     let(:show_snippets) { true }
     let(:collection) { Kaminari.paginate_array([:foo]).page(1).per(10) }
@@ -83,7 +82,6 @@ RSpec.describe SearchHelper do
       @current_user = user
 
       allow(Gitlab).to receive(:com?).and_return(com_value)
-      stub_feature_flags(restricted_snippet_scope_search: flag_enabled)
       stub_ee_application_setting(search_using_elasticsearch: elasticsearch_enabled)
     end
 
@@ -105,12 +103,6 @@ RSpec.describe SearchHelper do
       it_behaves_like 'returns old message'
     end
 
-    context 'when flag restricted_snippet_scope_search is not enabled' do
-      let(:flag_enabled) { false }
-
-      it_behaves_like 'returns old message'
-    end
-
     context 'when elastic search is not enabled' do
       let(:elasticsearch_enabled) { false }
 
@@ -127,50 +119,6 @@ RSpec.describe SearchHelper do
       let(:show_snippets) { nil }
 
       it_behaves_like 'returns old message'
-    end
-  end
-
-  describe '#show_switch_to_basic_search?' do
-    let(:use_elasticsearch) { true }
-    let(:scope) { 'commits' }
-    let(:search_service) { instance_double(Search::GlobalService, use_elasticsearch?: use_elasticsearch, scope: scope) }
-
-    subject { show_switch_to_basic_search?(search_service) }
-
-    before do
-      stub_feature_flags(switch_to_basic_search: true)
-    end
-
-    context 'when :switch_to_basic_search feature is disabled' do
-      before do
-        stub_feature_flags(switch_to_basic_search: false)
-      end
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when not currently using elasticsearch' do
-      let(:use_elasticsearch) { false }
-
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when project scope' do
-      before do
-        @project = create(:project)
-      end
-
-      it { is_expected.to eq(true) }
-    end
-
-    context 'when commits tab' do
-      it { is_expected.to eq(false) }
-    end
-
-    context 'when issues tab' do
-      let(:scope) { 'issues' }
-
-      it { is_expected.to eq(true) }
     end
   end
 end
