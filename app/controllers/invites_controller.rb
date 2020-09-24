@@ -28,7 +28,9 @@ class InvitesController < ApplicationController
   end
 
   def decline
-    if member.decline_invite!
+    if true #member.decline_invite!
+      return render layout: 'devise_experimental_onboarding_issues' if member.invite_to_unknown_user?
+
       path =
         if current_user
           dashboard_projects_path

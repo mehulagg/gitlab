@@ -1,0 +1,6 @@
+- page_title _('Invitation declined')
+%h3.page-title= _('You successfully declined the invitation')
+
+%p
+  = _('We will notify %{inviter} that you declined their invitation to join GitLab. You will stop receiving reminders.'.html_safe % { inviter: link_to(@member.created_by.name, user_url(@member.created_by)).html_safe })
+  = _('You can now close this window.')
