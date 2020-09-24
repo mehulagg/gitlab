@@ -801,8 +801,38 @@ RSpec.describe Projects::MergeRequestsController do
       end
     end
 
-    context "when a user is NOT authorized to read licenses on a project"
-    context "when a user is authorized to read the licenses"
+    context "when a user is NOT authorized to read licenses on a project" do
+      let(:project) { create(:project, :repository, :private) }
+      let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
+      let(:viewer) { create(:user) }
+
+      before do
+        stub_licensed_features(license_scanning: true)
+      end
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:not_found)
+      end
+    end
+
+    context "when a user is authorized to read the licenses" do
+      let(:project) { create(:project, :repository, :private) }
+      let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
+      let(:viewer) { create(:user) }
+
+      before do
+        stub_licensed_features(license_scanning: true)
+        project.add_reporter(viewer)
+      end
+
+      it 'returns a report' do
+        subject
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+    end
 
     context "when a maintainer is authorized to read licenses on a merge request from a forked project" do
       let(:upstream) { create(:project, :repository, :public) }
@@ -810,6 +840,7 @@ RSpec.describe Projects::MergeRequestsController do
       let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, target_project: upstream) }
       let(:params) { { namespace_id: upstream.namespace.to_param, project_id: upstream, id: merge_request.iid } }
       let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
+      let(:viewer) { create(:user) }
 
       before do
         stub_licensed_features(license_scanning: true)
