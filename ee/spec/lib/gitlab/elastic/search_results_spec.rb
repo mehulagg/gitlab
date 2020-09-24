@@ -174,7 +174,7 @@ RSpec.describe Gitlab::Elastic::SearchResults, :elastic, :sidekiq_might_not_need
       let!(:confidential_result) { create(:issue, :confidential, project: project, title: 'foo confidential') }
 
       let(:scope) { 'issues' }
-      let(:results) { described_class.new(user, 'foo', [project], filters: filters) }
+      let(:results) { described_class.new(user, 'foo', [project.id], filters: filters) }
 
       before do
         project.add_developer(user)
