@@ -150,7 +150,7 @@ module EE
       scope :with_groups_level_repos_templates, -> { joins("INNER JOIN namespaces ON projects.namespace_id = namespaces.custom_project_templates_group_id") }
       scope :with_designs, -> { where(id: ::DesignManagement::Design.select(:project_id).distinct) }
       scope :with_deleting_user, -> { includes(:deleting_user) }
-      scope :with_compliance_framework_settings, -> { preload(:compliance_framework_setting) }
+      scope :with_compliance_framework_settings, -> { preload(compliance_framework_setting: :framework) }
       scope :has_vulnerabilities, -> { joins(:vulnerabilities).group(:id) }
       scope :has_vulnerability_statistics, -> { joins(:vulnerability_statistic) }
       scope :with_vulnerability_statistics, -> { includes(:vulnerability_statistic) }
@@ -226,8 +226,7 @@ module EE
       strong_memoize(:has_regulated_settings) do
         next false unless compliance_framework_setting
 
-        compliance_framework_id = ::ComplianceManagement::ComplianceFramework::FRAMEWORKS[compliance_framework_setting.framework.to_sym]
-        ::Gitlab::CurrentSettings.current_application_settings.compliance_frameworks.include?(compliance_framework_id)
+        ::Gitlab::CurrentSettings.current_application_settings.compliance_frameworks.include?(compliance_framework_setting.framework)
       end
     end
 

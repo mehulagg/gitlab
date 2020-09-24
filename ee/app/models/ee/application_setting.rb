@@ -92,8 +92,6 @@ module EE
                 allow_blank: true,
                 numericality: { only_integer: true, greater_than: 0, less_than_or_equal_to: 365 }
 
-      validate :allowed_frameworks, if: :compliance_frameworks_changed?
-
       after_commit :update_personal_access_tokens_lifetime, if: :saved_change_to_max_personal_access_token_lifetime?
       after_commit :resume_elasticsearch_indexing
     end
@@ -392,12 +390,6 @@ module EE
       end
     rescue ::Gitlab::UrlBlocker::BlockedUrlError
       errors.add(:elasticsearch_url, "only supports valid HTTP(S) URLs.")
-    end
-
-    def allowed_frameworks
-      if Array.wrap(compliance_frameworks).any? { |value| !::ComplianceManagement::ComplianceFramework::FRAMEWORKS.value?(value) }
-        errors.add(:compliance_frameworks, _('must contain only valid frameworks'))
-      end
     end
   end
 end

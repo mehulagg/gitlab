@@ -384,8 +384,8 @@ RSpec.describe ProjectsController do
     end
 
     context 'compliance framework settings' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.sample }
-      let(:params) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { create(:compliance_framework) }
+      let(:params) { { compliance_framework_setting_attributes: { framework_id: framework.id } } }
 
       context 'when unlicensed' do
         before do

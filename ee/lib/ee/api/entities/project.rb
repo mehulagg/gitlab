@@ -29,7 +29,7 @@ module EE
             project.marked_for_deletion_at
           end
           expose :compliance_frameworks do |project, _|
-            [project.compliance_framework_setting&.framework].compact
+            [project.compliance_framework_setting&.framework&.name].compact
           end
         end
       end

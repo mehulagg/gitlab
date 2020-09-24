@@ -8,13 +8,12 @@ module ComplianceManagement
       self.table_name = 'project_compliance_framework_settings'
       self.primary_key = :project_id
 
-      belongs_to :project
+      delegate :name, to: :framework
 
-      enum framework: ::ComplianceManagement::ComplianceFramework::FRAMEWORKS
+      belongs_to :project
+      belongs_to :framework, class_name: 'ComplianceManagement::Framework'
 
       validates :project, presence: true
-      validates :framework, uniqueness: { scope: [:project_id] }
-      validates :framework, inclusion: { in: self.frameworks.keys }
     end
   end
 end

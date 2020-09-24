@@ -27,13 +27,13 @@ RSpec.describe 'getting a compliance frameworks list for a project' do
 
   context 'when the project has a compliance framework assigned' do
     before do
-      project.update!(compliance_framework_setting: create(:compliance_framework_project_setting, :sox))
+      project.update!(compliance_framework_setting: create(:compliance_framework_project_setting))
     end
 
     it 'includes its name' do
       post_graphql(query, current_user: current_user)
 
-      expect(compliance_frameworks).to contain_exactly('name' => 'sox')
+      expect(compliance_frameworks).to contain_exactly('name' => project.compliance_framework_setting.framework.name)
     end
   end
 end

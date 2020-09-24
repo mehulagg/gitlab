@@ -7,7 +7,9 @@ module Resolvers
     alias_method :project, :object
 
     def resolve(**args)
-      Array.wrap(project.compliance_framework_setting)
+      return ComplianceManagement::Framework.none unless project.compliance_framework_setting
+
+      Array.wrap(project.compliance_framework_setting.framework)
     end
   end
 end

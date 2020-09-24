@@ -267,8 +267,8 @@ RSpec.describe Projects::UpdateService, '#execute' do
     end
 
     context 'when framework is not blank' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.without(project_setting.framework).sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { create(:compliance_framework) }
+      let(:opts) { { compliance_framework_setting_attributes: { framework_id: framework.id } } }
 
       it 'saves the framework' do
         update_project(project, user, opts)
@@ -278,7 +278,7 @@ RSpec.describe Projects::UpdateService, '#execute' do
     end
 
     context 'when framework is blank' do
-      let(:opts) { { compliance_framework_setting_attributes: { framework: '' } } }
+      let(:opts) { { compliance_framework_setting_attributes: { framework_id: '' } } }
 
       it 'removes the framework record' do
         update_project(project, user, opts)
@@ -300,8 +300,8 @@ RSpec.describe Projects::UpdateService, '#execute' do
         project.update!(compliance_framework_setting: project_setting)
       end
 
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.without(project_setting.framework).sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { create(:compliance_framework) }
+      let(:opts) { { compliance_framework_setting_attributes: { framework_id: framework.id } } }
 
       it 'does not save the new framework and retains the old setting' do
         update_project(project, user, opts)
@@ -311,8 +311,8 @@ RSpec.describe Projects::UpdateService, '#execute' do
     end
 
     context 'the project never had the feature' do
-      let(:framework) { ComplianceManagement::ComplianceFramework::ProjectSettings.frameworks.keys.sample }
-      let(:opts) { { compliance_framework_setting_attributes: { framework: framework } } }
+      let(:framework) { create(:compliance_framework) }
+      let(:opts) { { compliance_framework_setting_attributes: { framework_id: framework.id } } }
 
       it 'does not save the framework' do
         update_project(project, user, opts)

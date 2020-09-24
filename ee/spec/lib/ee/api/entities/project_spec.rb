@@ -13,10 +13,10 @@ RSpec.describe ::EE::API::Entities::Project do
 
   context 'compliance_frameworks' do
     context 'when project has a compliance framework' do
-      let(:project) { create(:project, :with_sox_compliance_framework) }
+      let(:project) { create(:project, :with_compliance_framework) }
 
       it 'is an array containing a single compliance framework' do
-        expect(subject[:compliance_frameworks]).to contain_exactly('sox')
+        expect(subject[:compliance_frameworks]).to contain_exactly('gdpr')
       end
     end
 

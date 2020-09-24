@@ -73,7 +73,7 @@ module EE
           return
         end
 
-        settings.merge!(_destroy: settings[:framework].blank?)
+        settings.merge!(_destroy: settings[:framework_id].blank?)
       end
 
       def log_audit_events

@@ -625,15 +625,15 @@ RSpec.describe Project do
   end
 
   describe '#has_regulated_settings?' do
-    let(:framework) { ComplianceManagement::ComplianceFramework::FRAMEWORKS.first }
-    let(:compliance_framework_setting) { build(:compliance_framework_project_setting, framework: framework.first.to_s) }
+    let_it_be(:framework) { create(:compliance_framework) }
+    let(:compliance_framework_setting) { build(:compliance_framework_project_setting, framework: framework) }
     let(:project) { build(:project, compliance_framework_setting: compliance_framework_setting) }
 
     subject { project.has_regulated_settings? }
 
     context 'framework is regulated' do
       before do
-        stub_application_setting(compliance_frameworks: [framework.last])
+        stub_application_setting(compliance_frameworks: [framework])
       end
 
       it { is_expected.to be_truthy }

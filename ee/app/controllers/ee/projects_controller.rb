@@ -136,7 +136,7 @@ module EE
     def compliance_framework_params
       return [] unless current_user.can?(:admin_compliance_framework, project)
 
-      [compliance_framework_setting_attributes: [:framework]]
+      [compliance_framework_setting_attributes: [:framework_id]]
     end
 
     def log_audit_event(message:)

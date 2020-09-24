@@ -42,9 +42,5 @@ FactoryBot.modify do
     trait :with_compliance_framework do
       association :compliance_framework_setting, factory: :compliance_framework_project_setting
     end
-
-    trait :with_sox_compliance_framework do
-      association :compliance_framework_setting, factory: :compliance_framework_project_setting, framework: 'sox'
-    end
   end
 end
