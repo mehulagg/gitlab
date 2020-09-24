@@ -5,7 +5,8 @@ RSpec.shared_examples 'gets registries for' do |args|
   let(:registry_class_name) { args[:registry_class_name] }
   let(:registry_factory) { args[:registry_factory] }
   let(:registry_foreign_key_field_name) { args[:registry_foreign_key_field_name] }
-  let(:feature_flag) { Geo.const_get(registry_class_name, false).replicator_class.replication_enabled_feature_key }
+  let(:replicator_class) { Geo.const_get(registry_class_name, false).replicator_class }
+  let(:feature_flag) { replicator_class.replication_enabled_feature_key }
   let(:registry_foreign_key) { registry_foreign_key_field_name.underscore }
   let(:field_name_sym) { field_name.underscore.to_sym }
 
@@ -108,15 +109,43 @@ RSpec.shared_examples 'gets registries for' do |args|
     end
   end
 
-  context 'when the geo_self_service_framework feature is disabled' do
+  context 'when the feature is enabled by default' do
     before do
-      stub_feature_flags(feature_flag => false)
+      skip "Skipping since #{replicator_class.name} is disabled by default" unless replicator_class.replication_enabled_by_default?
     end
 
-    it 'errors when requesting registries' do
-      post_graphql(query, current_user: current_user)
+    context 'when the feature is disabled' do
+      before do
+        stub_feature_flags(feature_flag => false)
+      end
 
-      expect_graphql_errors_to_include(/Field '#{field_name}' doesn't exist on type 'GeoNode'/)
+      # The purpose of this test is to catch if you forgot to remove the
+      # feature_flag option from the GraphQL field
+      it_behaves_like 'a working graphql query' do
+        before do
+          post_graphql(query, current_user: current_user)
+        end
+      end
+    end
+  end
+
+  context 'when the feature is disabled by default' do
+    before do
+      skip "Skipping since #{replicator_class.name} is enabled by default" if replicator_class.replication_enabled_by_default?
+    end
+
+    context 'when the feature is disabled' do
+      before do
+        stub_feature_flags(feature_flag => false)
+      end
+
+      # This test will also catch if you forgot to add the feature_flag option
+      # on the GraphQL field
+      it 'errors when requesting registries' do
+        post_graphql(query, current_user: current_user)
+
+        expect_graphql_errors_to_include(/Field '#{field_name}' doesn't exist on type 'GeoNode'/)
+      end
     end
   end
 
