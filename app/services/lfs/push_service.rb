@@ -57,10 +57,10 @@ module Lfs
     end
 
     def verify_object!(object, spec)
-      # TODO: the remote has requested that we make another call to verify that
-      # the object has been sent correctly.
-      # https://gitlab.com/gitlab-org/gitlab/-/issues/250654
-      log_error("LFS upload verification requested, but not supported for #{object.oid}")
+      authenticated = spec['authenticated']
+      verify = spec.dig('actions', 'verify')
+
+      lfs_client.verify(object, verify, authenticated: authenticated)
     end
 
     def url
