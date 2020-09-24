@@ -744,9 +744,9 @@ With [GitLab Issue Analytics](issues_analytics/index.md), you can see a bar char
 
 Use GitLab as a [dependency proxy](../packages/dependency_proxy/index.md) for upstream Docker images.
 
-## Group Wikis
+## Group Wikis **(PREMIUM)**
 
-> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13195) in GitLab 13.5.
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/13195) in [GitLab Premium](https://about.gitlab.com/pricing/) 13.5.
 > - It's deployed behind a `group_wiki` feature flag, disabled by default.
 > - It's disabled on GitLab.com.
 > - It's not recommended for production use.
