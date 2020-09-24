@@ -231,7 +231,7 @@ RSpec.describe Ci::Build do
 
     it { expect(license_scanning_report.licenses.count).to eq(0) }
 
-    context "when loading the data" do
+    context 'when loading the data' do
       it 'checks the feature flag once' do
         create(:ee_ci_job_artifact, job: job, project: job.project)
 
