@@ -129,3 +129,10 @@ which indicates that the checkout-SHA is not found in the merge ref.
 
 This behavior was improved at GitLab 12.4 by introducing [Persistent pipeline refs](../../troubleshooting.md#fatal-reference-is-not-a-tree-error).
 You should be able to create pipelines at any timings without concerning the error.
+
+### Dangling commits
+
+These are created by Pipelines for Merged Results in repositories that use this feature, 
+but should get cleaned up by [automatic housekeeping](../../../administration/housekeeping.html).
+If they nevertheless accumulate, use the the Rails console to
+[garbage-collect them](../../../administration/raketasks/check.md#dangling-commits).
