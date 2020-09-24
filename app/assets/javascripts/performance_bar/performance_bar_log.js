@@ -16,6 +16,29 @@ const initVitalsLog = () => {
   getLCP(reportVital);
 };
 
+const logUserTimingMetrics = () => {
+  const metricsProcessor = list => {
+    const entries = list.getEntries();
+    entries.forEach(entry => {
+      const { name, entryType, startTime, duration } = entry;
+      const typeMapper = {
+        mark: String.fromCodePoint(0x1f3af),
+        measure: String.fromCodePoint(0x1f4d0),
+      };
+      console.group(`${typeMapper[entryType]} ${name}`);
+      if (entryType === 'mark') {
+        console.log(`Start time: ${startTime}`);
+      } else if (entryType === 'measure') {
+        console.log(`Duration: ${duration}`);
+      }
+      console.log(entry);
+      console.groupEnd();
+    });
+  };
+  const observer = new PerformanceObserver(metricsProcessor);
+  observer.observe({ entryTypes: ['mark', 'measure'] });
+};
+
 const initPerformanceBarLog = () => {
   console.log(
     `%c ${String.fromCodePoint(0x1f98a)} GitLab performance bar`,
@@ -23,6 +46,7 @@ const initPerformanceBarLog = () => {
   );
 
   initVitalsLog();
+  logUserTimingMetrics();
 };
 
 export default initPerformanceBarLog;
