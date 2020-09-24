@@ -3,8 +3,8 @@
 - warning = data_warning_for(burndown)
 - burndown_endpoint = milestone.group_milestone? ? api_v4_groups_milestones_burndown_events_path(id: milestone.group.id, milestone_id: milestone.id) : api_v4_projects_milestones_burndown_events_path(id: milestone.project.id, milestone_id: milestone.timebox_id)
 - burnup_endpoint = milestone.group_milestone? ? api_v4_groups_milestones_burnup_events_path(id: milestone.group.id, milestone_id: milestone.id) : api_v4_projects_milestones_burnup_events_path(id: milestone.project.id, milestone_id: milestone.timebox_id)
--# don't show new/old burndown chart toggle for milestones created before 13.4 release
-- is_legacy = (milestone.created_at < Date.parse('2020-09-17')).to_s
+-# don't show new/old burndown chart toggle for milestones created before we started event-based tracking
+- is_legacy = (milestone.created_at < ResourceStateEvent.first.created_at).to_s
 
 = warning
 
