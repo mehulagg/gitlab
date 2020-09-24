@@ -495,4 +495,21 @@ RSpec.describe Ci::Pipeline do
       it { is_expected.to eq(:detached) }
     end
   end
+
+  describe '#latest_failed_security_builds' do
+    let(:sast_build) { create(:ee_ci_build, :sast, :failed, pipeline: pipeline) }
+    let(:dast_build) { create(:ee_ci_build, :sast, pipeline: pipeline) }
+    let(:retried_sast_build) { create(:ee_ci_build, :sast, :failed, :retried, pipeline: pipeline) }
+    let(:expected_builds) { [sast_build] }
+
+    before do
+      allow_next_instance_of(Security::SecurityJobsFinder) do |finder|
+        allow(finder).to receive(:execute).and_return([sast_build, dast_build, retried_sast_build])
+      end
+    end
+
+    subject { pipeline.latest_failed_security_builds }
+
+    it { is_expected.to match_array(expected_builds) }
+  end
 end

@@ -160,6 +160,11 @@ module EE
         merge_request_pipeline? && merge_train_ref?
       end
 
+      def latest_failed_security_builds
+        security_builds.select(&:latest?)
+                       .select(&:failed?)
+      end
+
       private
 
       def project_has_subscriptions?
@@ -174,6 +179,10 @@ module EE
       def available_licensed_report_type?(file_type)
         feature_names = REPORT_LICENSED_FEATURES.fetch(file_type)
         feature_names.nil? || feature_names.any? { |feature| project.feature_available?(feature) }
+      end
+
+      def security_builds
+        @security_builds ||= Security::SecurityJobsFinder.new(pipeline: self).execute
       end
     end
   end
