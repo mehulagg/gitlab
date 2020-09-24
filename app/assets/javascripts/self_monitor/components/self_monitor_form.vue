@@ -145,7 +145,8 @@ export default {
       :modal-id="modalId"
       :ok-title="__('Delete project')"
       :cancel-title="__('Cancel')"
-      ok-variant="danger" category="primary"
+      ok-variant="danger"
+      category="primary"
       @ok="deleteProject"
       @cancel="hideSelfMonitorModal"
     >
