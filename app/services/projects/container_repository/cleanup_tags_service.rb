@@ -25,7 +25,7 @@ module Projects
         tag_names = tags.map(&:name)
 
         Projects::ContainerRepository::DeleteTagsService
-          .new(container_repository.project, current_user, tags: tag_names)
+          .new(container_repository.project, current_user, tags: tag_names, run_by_worker: params['container_expiration_policy'])
           .execute(container_repository)
       end
 
