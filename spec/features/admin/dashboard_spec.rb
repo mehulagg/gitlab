@@ -27,11 +27,8 @@ RSpec.describe 'admin visits dashboard' do
   end
 
   describe 'Users statistic' do
-    before do
-      allow(Gitlab).to receive(:ee?).and_return(false)
-    end
-
     let_it_be(:users_statistics) { create(:users_statistics) }
+    let_it_be(:users_count_label) { Gitlab.ee? ? 'Billable users 71' : 'Active users 71' }
 
     it 'shows correct amounts of users', :aggregate_failures do
       visit admin_dashboard_stats_path
@@ -45,7 +42,7 @@ RSpec.describe 'admin visits dashboard' do
       expect(page).to have_content('Bots 2')
       expect(page).to have_content('Blocked users 7')
       expect(page).to have_content('Total users 78')
-      expect(page).to have_content('Active users 71')
+      expect(page).to have_content(users_count_label)
     end
   end
 end

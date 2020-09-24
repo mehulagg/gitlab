@@ -53,10 +53,7 @@
   %tr.bg-gray-light.gl-text-gray-900
     %td.p-3
       %strong
-        - if Gitlab.ee? && License.current&.paid?
-          = s_('AdminArea|Billable users')
-        - else
-          = s_('AdminArea|Active users')
+        = render_if_exists 'admin/dashboard/billable_users_text'
     %td.p-3.text-right
       %strong
         = @users_statistics&.active.to_i
