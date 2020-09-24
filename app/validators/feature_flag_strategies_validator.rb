@@ -1,16 +1,19 @@
 # frozen_string_literal: true
 
 class FeatureFlagStrategiesValidator < ActiveModel::EachValidator
-  STRATEGY_DEFAULT = 'default'.freeze
-  STRATEGY_GRADUALROLLOUTUSERID = 'gradualRolloutUserId'.freeze
-  STRATEGY_USERWITHID = 'userWithId'.freeze
+  STRATEGY_DEFAULT = 'default'
+  STRATEGY_GRADUALROLLOUTUSERID = 'gradualRolloutUserId'
+  STRATEGY_FLEXIBLEROLLOUT = 'flexibleRollout'
+  STRATEGY_USERWITHID = 'userWithId'
   # Order key names alphabetically
   STRATEGIES = {
     STRATEGY_DEFAULT => [].freeze,
     STRATEGY_GRADUALROLLOUTUSERID => %w[groupId percentage].freeze,
+    STRATEGY_FLEXIBLEROLLOUT => %w[groupId rollout stickiness].freeze,
     STRATEGY_USERWITHID => ['userIds'].freeze
   }.freeze
   USERID_MAX_LENGTH = 256
+  STICKINESS_SETTINGS = %w[DEFAULT USERID SESSIONID RANDOM].freeze
 
   def validate_each(record, attribute, value)
     return unless value
@@ -52,6 +55,8 @@ class FeatureFlagStrategiesValidator < ActiveModel::EachValidator
     case strategy['name']
     when STRATEGY_GRADUALROLLOUTUSERID
       gradual_rollout_user_id_parameters_validation(record, attribute, strategy)
+    when STRATEGY_FLEXIBLEROLLOUT
+      flexible_rollout_parameters_validation(record, attribute, strategy)
     when STRATEGY_USERWITHID
       user_with_id_parameters_validation(record, attribute, strategy)
     end
@@ -67,6 +72,25 @@ class FeatureFlagStrategiesValidator < ActiveModel::EachValidator
 
     unless group_id.is_a?(String) && group_id.match(/\A[a-z]{1,32}\z/)
       error(record, attribute, 'groupId parameter is invalid')
+    end
+  end
+
+  def flexible_rollout_parameters_validation(record, attribute, strategy)
+    stickiness = strategy.dig('parameters', 'stickiness')
+    group_id = strategy.dig('parameters', 'groupId')
+    rollout = strategy.dig('parameters', 'rollout')
+
+    unless stickiness.is_a?(String) && STICKINESS_SETTINGS.include?(stickiness)
+      options = "#{[*STICKINESS_SETTINGS[0..-2], 'or ' + STICKINESS_SETTINGS[-1]].join(', ')}"
+      parameters_error("stickiness parameter must be #{options}")
+    end
+
+    unless group_id.is_a?(String) && group_id.match(/\A[a-z]{1,32}\z/)
+      parameters_error('groupId parameter is invalid')
+    end
+
+    unless rollout.is_a?(String) && rollout.match(/\A[1-9]?[0-9]\z|\A100\z/)
+      parameters_error('rollout must be a string between 0 and 100 inclusive')
     end
   end
 

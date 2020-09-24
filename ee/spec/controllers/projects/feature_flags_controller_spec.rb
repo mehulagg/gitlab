@@ -558,6 +558,30 @@ RSpec.describe Projects::FeatureFlagsController do
       end
     end
 
+    context 'when creates additional scope with a flexible rollout' do
+      it 'creates a strategy for the scope' do
+        params = view_params.merge({
+          operations_feature_flag: {
+            name: 'my_feature_flag',
+            active: true,
+            scopes_attributes: [{ environment_scope: '*', active: true },
+                                { environment_scope: 'production', active: false,
+                                  strategies: [{ name: 'flexibleRollout',
+                                                 parameters: { groupId: 'default', rollout: '42', stickiness: 'DEFAULT' } }] }]
+          }
+        })
+
+        post(:create, params: params, format: :json)
+
+        expect(response).to have_gitlab_http_status(:ok)
+        production_strategies_json = json_response['scopes'].second['strategies']
+        expect(production_strategies_json).to eq([{
+          'name' => 'flexibleRollout',
+          'parameters' => { "groupId" => "default", "rollout" => "42", "stickiness" => "DEFAULT" }
+        }])
+      end
+    end
+
     context 'when creates additional scope with a userWithId strategy' do
       it 'creates a strategy for the scope' do
         params = view_params.merge({

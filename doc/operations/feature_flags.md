@@ -103,6 +103,27 @@ CAUTION: **Caution:**
 If this strategy is selected, then the Unleash client **must** be given a user
 ID for the feature to be enabled. See the [Ruby example](#ruby-application-example) below.
 
+### Flexible Percent Rollout
+
+> - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/43340) in GitLab 13.5, API only.
+
+Enables the feature for a percentage of page views based on a chosen stickiness configuration. It uses the
+[`flexibleRollout`](https://unleash.github.io/docs/activation_strategy#flexiblerollout)
+Unleash activation strategy. The rollout can be based on authenticated user IDs, session IDs, completely random,
+or the default which includes all of the above.
+
+For example, set a value of 15% with the default stickiness to enable the feature for 15% of page views. For
+authenticated users this is based on their user ID. For anonymous users with a session ID it would be based on their
+session ID instead as they do not have a user ID. Then if no session ID was provided, it would fallback to being random.
+
+The rollout percentage can be from 0% to 100%.
+
+NOTE: **Note:**
+Choosing a stickiness of User ID provides identical functionality as the [Percent of Users](#percent-of-users) rollout.
+
+CAUTION: **Caution:**
+Choosing a random stickiness provides inconsistent application behavior for an individual user.
+
 ### User IDs
 
 > - [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/8240) in GitLab 12.2.

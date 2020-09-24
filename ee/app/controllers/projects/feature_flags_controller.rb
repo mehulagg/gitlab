@@ -122,17 +122,17 @@ class Projects::FeatureFlagsController < Projects::ApplicationController
     params.require(:operations_feature_flag)
       .permit(:name, :description, :active, :version,
               scopes_attributes: [:environment_scope, :active,
-                                  strategies: [:name, parameters: [:groupId, :percentage, :userIds]]],
-             strategies_attributes: [:name, :user_list_id, parameters: [:groupId, :percentage, :userIds], scopes_attributes: [:environment_scope]])
+                                  strategies: [:name, parameters: [:groupId, :percentage, :userIds, :rollout, :stickiness]]],
+             strategies_attributes: [:name, :user_list_id, parameters: [:groupId, :percentage, :userIds, :rollout, :stickiness], scopes_attributes: [:environment_scope]])
   end
 
   def update_params
     params.require(:operations_feature_flag)
           .permit(:name, :description, :active,
                   scopes_attributes: [:id, :environment_scope, :active, :_destroy,
-                                      strategies: [:name, parameters: [:groupId, :percentage, :userIds]]],
+                                      strategies: [:name, parameters: [:groupId, :percentage, :userIds, :rollout, :stickiness]]],
                  strategies_attributes: [:id, :name, :user_list_id, :_destroy,
-                                         parameters: [:groupId, :percentage, :userIds],
+                                         parameters: [:groupId, :percentage, :userIds, :rollout, :stickiness],
                                          scopes_attributes: [:id, :environment_scope, :_destroy]])
   end
 

@@ -476,6 +476,36 @@ RSpec.describe API::FeatureFlags do
         }])
       end
 
+      it 'creates a new feature flag with flexible rollout strategy with scopes' do
+        params = {
+          name: 'new-feature',
+          version: 'new_version_flag',
+          strategies: [{
+            name: 'flexibleRollout',
+            parameters: { groupId: 'default', rollout: '50', stickiness: 'DEFAULT' },
+            scopes: [{
+              environment_scope: 'staging'
+            }]
+          }]
+        }
+
+        post api("/projects/#{project.id}/feature_flags", user), params: params
+
+        expect(response).to have_gitlab_http_status(:created)
+        expect(response).to match_response_schema('public_api/v4/feature_flag', dir: 'ee')
+
+        feature_flag = project.operations_feature_flags.last
+        expect(feature_flag.name).to eq(params[:name])
+        expect(feature_flag.version).to eq('new_version_flag')
+        expect(feature_flag.strategies.map { |s| s.slice(:name, :parameters).deep_symbolize_keys }).to eq([{
+          name: 'flexibleRollout',
+          parameters: { groupId: 'default', rollout: '50', stickiness: 'DEFAULT' }
+        }])
+        expect(feature_flag.strategies.first.scopes.map { |s| s.slice(:environment_scope).deep_symbolize_keys }).to eq([{
+          environment_scope: 'staging'
+        }])
+      end
+
       it 'returns a 422 when the feature flag is disabled' do
         stub_feature_flags(feature_flags_new_version: false)
         params = {
