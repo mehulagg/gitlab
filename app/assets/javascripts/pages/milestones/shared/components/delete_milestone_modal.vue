@@ -75,12 +75,6 @@ Once deleted, it cannot be undone or recovered.`),
         milestoneTitle: this.milestoneTitle,
       });
     },
-    primaryProps() {
-      return {
-        text: s__('Delete milestone'),
-        attributes: [{ variant: 'danger' }, { category: 'primary' }],
-      };
-    },
   },
   methods: {
     onSubmit() {
@@ -120,6 +114,10 @@ Once deleted, it cannot be undone or recovered.`),
         });
     },
   },
+  primaryProps: {
+    text: s__('Delete milestone'),
+    attributes: [{ variant: 'danger' }, { category: 'primary' }],
+  },
   cancelProps: {
     text: s__('Cancel'),
   },
@@ -130,7 +128,7 @@ Once deleted, it cannot be undone or recovered.`),
   <gl-modal
     modal-id="delete-milestone-modal"
     :title="title"
-    :action-primary="primaryProps"
+    :action-primary="$options.primaryProps"
     :action-cancel="$options.cancelProps"
     @primary="onSubmit"
   >
