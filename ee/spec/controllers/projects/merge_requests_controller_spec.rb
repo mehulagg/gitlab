@@ -801,9 +801,28 @@ RSpec.describe Projects::MergeRequestsController do
       end
     end
 
-    context "when a user is authorized to read the licenses"
-    context "when a user is authorized to read licenses on a forked project"
     context "when a user is NOT authorized to read licenses on a project"
+    context "when a user is authorized to read the licenses"
+
+    context "when a maintainer is authorized to read licenses on a merge request from a forked project" do
+      let(:upstream) { create(:project, :repository, :public) }
+      let(:project) { fork_project(upstream, nil, repository: true) }
+      let(:merge_request) { create(:ee_merge_request, :with_license_scanning_reports, source_project: project, target_project: upstream) }
+      let(:params) { { namespace_id: upstream.namespace.to_param, project_id: upstream, id: merge_request.iid } }
+      let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
+
+      before do
+        stub_licensed_features(license_scanning: true)
+        upstream.add_maintainer(viewer)
+        project.add_maintainer(user)
+      end
+
+      it 'returns a report' do
+        get :license_scanning_reports, params: params, format: :json
+
+        expect(response).to have_gitlab_http_status(:ok)
+      end
+    end
   end
 
   describe 'GET #metrics_reports' do
