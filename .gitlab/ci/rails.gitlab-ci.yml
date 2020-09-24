@@ -23,6 +23,7 @@
     when: always
     paths:
       - coverage/
+      - deprecations/
       - knapsack/
       - rspec_flaky/
       - rspec_profiling/
