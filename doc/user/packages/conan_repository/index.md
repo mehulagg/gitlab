@@ -12,6 +12,11 @@ info: To determine the technical writer assigned to the Stage/Group associated w
 Publish Conan packages in your project’s Package Registry. Then install the
 packages whenever you need to use them as a dependency.
 
+To publish Conan packages to the Package Registry, add the
+Package Registry as a remote and authenticate with it.
+
+Then you can run `conan` commands and publish your package to the Package Registry.
+
 ## Build a Conan package
 
 This section explains how to install Conan and build a package for your C/C++ project.
@@ -84,7 +89,7 @@ For more details on creating and managing Conan packages, see the [Conan docs](h
 
 ## Add the Package Registry as a Conan remote
 
-You can add the GitLab Package Registry as a Conan remote for your project or instance.
+To run `conan` commands, you must add the Package Registry as a Conan remote for your project or instance.
 
 ### Add a remote for your project
 
@@ -151,24 +156,21 @@ Example recipe names:
 | `gitlab-org/gitlab-ce`             | `my-package/1.0.0@gitlab-org+gitlab-ce/stable`  | Yes       |
 | `gitlab-org/gitlab-ce`             | `my-package/1.0.0@foo/stable`                   | No        |
 
-NOTE: **Note:**
 [Project remotes](#add-a-remote-for-your-project) have a more flexible naming convention.
 
 ## Authenticate to the Package Registry
 
-You need a personal access token or deploy token.
+To authenticate to the Package Registry, you need either a personal access token or deploy token.
 
-For authentication:
-
-- You can generate a [personal access token](../../../user/profile/personal_access_tokens.md) with the scope set to `api`.
-- You can generate a [deploy token](./../../project/deploy_tokens/index.md) with the scope set to `read_package_registry`, `write_package_registry`, or both.
+- If you use a [personal access token](../../../user/profile/personal_access_tokens.md), set the scope to `api`.
+- If you use a [deploy token](./../../project/deploy_tokens/index.md), set the scope to `read_package_registry`, `write_package_registry`, or both.
 
 NOTE: **Note:**
 The personal access token is never stored locally. Conan uses JSON Web Tokens (JWT), so when you run this command, Conan uses your token to request an expirable token from GitLab. The JWT expires on a regular basis, so you may need to re-enter your personal access token sometimes.
 
 ### Set a Conan user for the GitLab remote
 
-You can associate your token with the GitLab remote, so that you don't have to explicitly
+Associate your token with the GitLab remote, so that you don't have to explicitly
 add a token to every Conan command.
 
 Prerequisites:
@@ -184,7 +186,7 @@ conan user <gitlab_username or deploy_token_username> -r gitlab -p <personal_acc
 
 Now when you run commands with `--remote=gitlab`, your username and password are automatically included in the requests.
 
-Alternatively, you can explicitly include your credentials in any given command. For example:
+Alternately, you can explicitly include your credentials in any given command. For example:
 
 ```shell
 CONAN_LOGIN_USERNAME=<gitlab_username or deploy_token_username> CONAN_PASSWORD=<personal_access_token or deploy_token> conan upload Hello/0.1@mycompany/beta --all --remote=gitlab
@@ -216,10 +218,13 @@ Publish a Conan package to the Package Registry, so that anyone who can access t
 
 Prerequisites:
 
+To publish a Conan package, you need:
+
+- The Package Registry [set as a remote](#add-the-package-registry-as-a-conan-remote).
+- [Authentication](#authenticate-to-the-package-registry) set up with the Package Registry.
 - A local [Conan package](https://docs.conan.io/en/latest/creating_packages/getting_started.html). 
   - For an instance remote, the package must meet the [naming convention](#package-recipe-naming-convention-for-instance-remotes).
 - A project ID, which is on the project's homepage.
-- A personal access token with the scope set to `api`.
 
 To publish the package, use the `conan upload` command:
 
@@ -311,22 +316,16 @@ There are two ways to remove a Conan package from the GitLab Package Registry.
 
 To search by full or partial package name, or by exact recipe, run the `conan search` command.
 
-- To search for all packages for the GitLab instance:
+- To search for all packages with a specific package name:
 
   ```shell
   conan search Hello --all --remote=gitlab
   ```
 
-- To search for a partial name, like all packages named `Hello`:
+- To search for a partial name, like all packages starting with `He`:
 
   ```shell
   conan search He* --all --remote=gitlab
-  ```
-
-- To search for all packages in a project:
-
-  ```shell
-  conan search Hello/0.1@mycompany/beta --all --remote=gitlab
   ```
 
 The scope of your search includes all projects you have permission to access. This includes your private projects as well as all public projects.
