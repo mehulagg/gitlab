@@ -10,6 +10,11 @@ export default {
       required: false,
       default: '',
     },
+    persist: {
+      type: Boolean,
+      required: false,
+      default: true,
+    }
   },
   watch: {
     value(newVal) {
@@ -29,6 +34,9 @@ export default {
       return localStorage.getItem(this.storageKey);
     },
     saveValue(val) {
+      debugger
+      if (!this.persist) return;
+
       localStorage.setItem(this.storageKey, val);
     },
   },

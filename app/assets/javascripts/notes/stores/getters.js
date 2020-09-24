@@ -27,6 +27,10 @@ export const isNotesFetched = state => state.isNotesFetched;
 
 export const sortDirection = state => state.discussionSortOrder;
 
+export const persistSortOrder = state => state.persistSortOrder;
+
+export const timelineEnabled = state => state.isTimelineEnabled;
+
 export const isLoading = state => state.isLoading;
 
 export const getNotesDataByProp = state => prop => state.notesData[prop];

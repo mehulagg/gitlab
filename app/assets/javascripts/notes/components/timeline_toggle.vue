@@ -1,15 +1,18 @@
 <script>
-  import { GlButton, GlTooltipDirective } from '@gitlab/ui';
-  import { mapActions, mapGetters } from 'vuex';
-  import { __ } from '~/locale';
+  import {GlButton, GlTooltipDirective} from '@gitlab/ui';
+  import {mapActions, mapGetters} from 'vuex';
+  import {__} from '~/locale';
+  import {COMMENTS_ONLY_FILTER_VALUE, DESC} from '../constants';
+  import notesEventHub from '../event_hub';
 
-  const timelineEnabledTooltip = __('Back to normal view');
+  const timelineEnabledTooltip = __('Turn timeline view off');
   const timelineDisabledTooltip = __('Unthread comments into a timeline view');
 
   export default {
-    data(){
+    data() {
       return {
         enabled: false,
+        initialSort: null,
       }
     },
     components: {
@@ -19,35 +22,25 @@
       GlTooltip: GlTooltipDirective
     },
     computed: {
-      ...mapGetters(['sortDirection', 'noteableType']),
+      ...mapGetters(['timelineEnabled', 'sortDirection']),
       tooltip() {
-        return this.enabled ? timelineEnabledTooltip : timelineDisabledTooltip;
+        return this.timelineEnabled ? timelineEnabledTooltip : timelineDisabledTooltip;
       },
-/*      selectedOption() {
-        return SORT_OPTIONS.find(({ key }) => this.sortDirection === key);
-      },
-      dropdownText() {
-        return this.selectedOption.text;
-      },
-      storageKey() {
-        return `sort_direction_${this.noteableType.toLowerCase()}`;
-      },*/
     },
     methods: {
-/*      ...mapActions(['setDiscussionSortDirection']),
-      fetchSortedDiscussions(direction) {
-        if (this.isDropdownItemActive(direction)) {
-          return;
+      ...mapActions(['setTimelineView', 'setDiscussionSortDirection']),
+      setSort() {
+        if (this.timelineEnabled && this.sortDirection !== DESC) {
+          this.setDiscussionSortDirection({direction: DESC, persist: false});
         }
-
-        this.setDiscussionSortDirection(direction);
-        this.track('change_discussion_sort_direction', { property: direction });
       },
-      isDropdownItemActive(sortDir) {
-        return sortDir === this.sortDirection;
-      },*/
-      toggleTimeline(){
-        this.enabled = !this.enabled;
+      setFilter() {
+        notesEventHub.$emit('dropdownSelect', COMMENTS_ONLY_FILTER_VALUE, false);
+      },
+      toggleTimeline() {
+        this.setTimelineView(true);
+        this.setSort();
+        this.setFilter();
       }
     },
   };
@@ -55,5 +48,6 @@
 
 <template>
   <gl-button icon="comments" size="small"
-             v-gl-tooltip :title="tooltip" @click="toggleTimeline" class="gl-mr-3" :class="{'gl-bg-gray-10!': enabled}"/>
+             v-gl-tooltip :title="tooltip" @click="toggleTimeline" class="gl-mr-3"
+             :class="{'gl-bg-gray-10!': enabled}"/>
 </template>
