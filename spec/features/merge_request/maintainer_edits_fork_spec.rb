@@ -27,7 +27,7 @@ RSpec.describe 'a maintainer edits files on a source-branch of an MR from a fork
     click_link 'Changes'
     wait_for_requests
 
-    page.witin(first('.js-file-title')) do
+    page.within(first('.js-file-title')) do
       find('.js-diff-more-actions').click
       find('.js-edit-blob').click
     end
