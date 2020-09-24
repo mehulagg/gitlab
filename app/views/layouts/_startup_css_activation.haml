@@ -5,6 +5,8 @@
     document.querySelectorAll('link[media="print"]').forEach(linkTag => {
       linkTag.setAttribute('data-startupcss', 'loading');
       const startupLinkLoadedEvent = new CustomEvent('CSSStartupLinkLoaded');
-      linkTag.addEventListener('load',function(){this.media='all';this.setAttribute('data-startupcss', 'loaded');document.dispatchEvent(startupLinkLoadedEvent);},{once: true});
+      const onLoad = () => { linkTag.media='all'; linkTag.setAttribute('data-startupcss', 'loaded'); document.dispatchEvent(startupLinkLoadedEvent); };
+      linkTag.addEventListener('load',onLoad,{once: true});
+      window.addEventListener('DOMContentLoaded',() => { linkTag.dispatchEvent(new Event('load')) },{once: true});
     })
 - return unless use_startup_css?
