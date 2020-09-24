@@ -6841,6 +6841,11 @@ type Group {
     assigneeUsername: String
 
     """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
+
+    """
     Username of the author of the issue
     """
     authorUsername: String
@@ -12327,6 +12332,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
+
+    """
     Username of the author of the issue
     """
     authorUsername: String
@@ -12422,6 +12432,11 @@ type Project {
     assigneeUsername: String
 
     """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
+
+    """
     Username of the author of the issue
     """
     authorUsername: String
@@ -12505,6 +12520,11 @@ type Project {
     Username of a user assigned to the issue
     """
     assigneeUsername: String
+
+    """
+    Usernames of users assigned to the issue
+    """
+    assigneeUsernames: [String!]
 
     """
     Username of the author of the issue
