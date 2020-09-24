@@ -33,3 +33,10 @@ export const waitForMutation = (store, expectedMutationType) =>
       }
     });
   });
+
+export const extendeddWrapper = wrapper =>
+  Object.defineProperty(wrapper, 'findByTestId', {
+    value(id) {
+      return this.find(`[data-testid="${id}"]`);
+    },
+  });
