@@ -11168,6 +11168,9 @@ CREATE TABLE dast_scanner_profiles (
     spider_timeout smallint,
     target_timeout smallint,
     name text NOT NULL,
+    active_scan boolean DEFAULT false NOT NULL,
+    ajax_spider boolean DEFAULT false NOT NULL,
+    show_debug_messages boolean DEFAULT false NOT NULL,
     CONSTRAINT check_568568fabf CHECK ((char_length(name) <= 255))
 );
 
