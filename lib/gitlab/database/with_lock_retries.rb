@@ -95,7 +95,7 @@ module Gitlab
           run_block_with_transaction
         rescue ActiveRecord::LockWaitTimeout
           if retry_with_lock_timeout?
-            disable_idle_in_transaction_timeout
+            disable_idle_in_transaction_timeout if ActiveRecord::Base.connection.transaction_open?
             wait_until_next_retry
             reset_db_settings
 
