@@ -165,6 +165,23 @@ job. The work is skipped because the same work would be
 done by the job that was scheduled first; by the time the second
 job executed, the first job would do nothing.
 
+#### Strategies
+
+GitLab currently supports two deduplication strategies:
+
+- until_executing
+- until_executed
+
+More [deduplication
+strategies have been
+suggested](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/195). If
+you are implementing a worker that could benefit from a different
+strategy, please comment in the issue.
+
+##### Until Executing
+
+This strategy takes a lock when a job is added to the queue, and removes that lock before the job starts.
+
 For example, `AuthorizedProjectsWorker` takes a user ID. When the
 worker runs, it recalculates a user's authorizations. GitLab schedules
 this job each time an action potentially changes a user's
@@ -172,6 +189,39 @@ authorizations. If the same user is added to two projects at the
 same time, the second job can be skipped if the first job hasn't
 begun, because when the first job runs, it creates the
 authorizations for both projects.
+
+```ruby
+module AuthorizedProjectUpdate
+  class UserRefreshOverUserRangeWorker
+    include ApplicationWorker
+
+    deduplicate :until_executing
+    idempotent!
+
+    # ...
+  end
+end
+```
+
+##### Until Executed
+
+This strategy takes a lock when a job is added to the queue, and removes that lock after the job finishes.
+It can be used when we need to prevent jobs to be running simultaneously multiple times.
+
+```ruby
+module AuthorizedProjectUpdate
+  class UserRefreshOverUserRangeWorker
+    include ApplicationWorker
+
+    deduplicate :until_executed
+    idempotent!
+
+    # ...
+  end
+end
+```
+
+#### Scheduling jobs in the future
 
 GitLab doesn't skip jobs scheduled in the future, as we assume that
 the state will have changed by the time the job is scheduled to
@@ -191,11 +241,7 @@ module AuthorizedProjectUpdate
 end
 ```
 
-This strategy is called `until_executing`. More [deduplication
-strategies have been
-suggested](https://gitlab.com/gitlab-com/gl-infra/scalability/-/issues/195). If
-you are implementing a worker that could benefit from a different
-strategy, please comment in the issue.
+#### Troubleshooting
 
 If the automatic deduplication were to cause issues in certain
 queues. This can be temporarily disabled by enabling a feature flag
