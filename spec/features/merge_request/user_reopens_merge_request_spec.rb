@@ -19,6 +19,9 @@ RSpec.describe 'User reopens a merge requests', :js do
 
     click_button('Reopen merge request', match: :first)
 
+    # Click the button twice as the dropdown switches the main button
+    click_button('Reopen merge request', match: :first)
+
     page.within('.status-box') do
       expect(page).to have_content('Open')
     end
