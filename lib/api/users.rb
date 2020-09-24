@@ -360,7 +360,6 @@ module API
       get ':id/gpg_keys' do
         user = User.find_by(id: params[:id])
         not_found!('User') unless user
-        unauthorized! unless can?(current_user, :read_user, user)
 
         present paginate(user.gpg_keys), with: Entities::GpgKey
       end
