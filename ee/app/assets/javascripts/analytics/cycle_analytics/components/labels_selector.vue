@@ -137,7 +137,7 @@ export default {
             class="d-inline-block dropdown-label-box"
           >
           </span>
-          <slot slot="button-content" name="button-content">
+          <template #button-content>
             <gl-icon v-if="icon" class="dropdown-icon" :name="icon" :size="iconSize" />
             <span class="gl-new-dropdown-button-text">{{ labelTitle(selectedLabel) }}</span>
             <gl-icon v-if="renderCaret" class="dropdown-chevron" name="chevron-down" />
