@@ -6,8 +6,7 @@ RSpec.shared_examples 'search results filtered by confidential' do
 
     context 'when Feature search_filter_by_confidential enabled' do
       it 'returns confidential and not confidential results', :aggregate_failures do
-        expect(results.objects('issues')).to include confidential_result
-        expect(results.objects('issues')).to include opened_result
+        expect(results.objects('issues')).to contain_exactly(confidential_result, opened_result, closed_result)
       end
     end
 
@@ -17,8 +16,7 @@ RSpec.shared_examples 'search results filtered by confidential' do
       end
 
       it 'returns confidential and not confidential results', :aggregate_failures do
-        expect(results.objects('issues')).to include confidential_result
-        expect(results.objects('issues')).to include opened_result
+        expect(results.objects('issues')).to contain_exactly(confidential_result, opened_result, closed_result)
       end
     end
   end
@@ -28,8 +26,7 @@ RSpec.shared_examples 'search results filtered by confidential' do
 
     context 'when Feature search_filter_by_confidential enabled' do
       it 'returns only confidential results', :aggregate_failures do
-        expect(results.objects('issues')).to include confidential_result
-        expect(results.objects('issues')).not_to include opened_result
+        expect(results.objects('issues')).to contain_exactly(confidential_result)
       end
     end
 
@@ -39,8 +36,7 @@ RSpec.shared_examples 'search results filtered by confidential' do
       end
 
       it 'returns confidential and not confidential results', :aggregate_failures do
-        expect(results.objects('issues')).to include confidential_result
-        expect(results.objects('issues')).to include opened_result
+        expect(results.objects('issues')).to contain_exactly(confidential_result, opened_result, closed_result)
       end
     end
   end
@@ -50,8 +46,7 @@ RSpec.shared_examples 'search results filtered by confidential' do
 
     context 'when Feature search_filter_by_confidential enabled' do
       it 'returns not confidential results', :aggregate_failures do
-        expect(results.objects('issues')).not_to include confidential_result
-        expect(results.objects('issues')).to include opened_result
+        expect(results.objects('issues')).to contain_exactly(opened_result, closed_result)
       end
     end
 
@@ -61,8 +56,7 @@ RSpec.shared_examples 'search results filtered by confidential' do
       end
 
       it 'returns confidential and not confidential results', :aggregate_failures do
-        expect(results.objects('issues')).to include confidential_result
-        expect(results.objects('issues')).to include opened_result
+        expect(results.objects('issues')).to contain_exactly(confidential_result, opened_result, closed_result)
       end
     end
   end
@@ -72,8 +66,7 @@ RSpec.shared_examples 'search results filtered by confidential' do
 
     context 'when Feature search_filter_by_confidential enabled' do
       it 'returns confidential and not confidential results', :aggregate_failures do
-        expect(results.objects('issues')).to include confidential_result
-        expect(results.objects('issues')).to include opened_result
+        expect(results.objects('issues')).to contain_exactly(confidential_result, opened_result, closed_result)
       end
     end
 
@@ -83,8 +76,7 @@ RSpec.shared_examples 'search results filtered by confidential' do
       end
 
       it 'returns confidential and not confidential results', :aggregate_failures do
-        expect(results.objects('issues')).to include confidential_result
-        expect(results.objects('issues')).to include opened_result
+        expect(results.objects('issues')).to contain_exactly(confidential_result, opened_result, closed_result)
       end
     end
   end
