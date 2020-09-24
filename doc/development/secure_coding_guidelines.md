@@ -420,7 +420,7 @@ In order to prevent OS command injections, user supplied data should not be used
 ### Ruby
 Consider using `system(“command”,”arg0”, “arg1”, ...)` whenever you can, this prevents an attacker from concatenating commands.
 
-For more examples on how to use shell commands securely, you can consult our page [Guidelines for shells commands in the GitLab codebase](/shell_commands.html) which contains various examples on how to securely call OS commands.
+For more examples on how to use shell commands securely, you can consult our page [Guidelines for shells commands in the GitLab codebase](shell_commands.md) which contains various examples on how to securely call OS commands.
 
 ### Go
 
