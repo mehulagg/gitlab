@@ -232,19 +232,19 @@ RSpec.describe Ci::Build do
     it { expect(license_scanning_report.licenses.count).to eq(0) }
 
     context 'when loading the data' do
-      it 'checks the feature flag once' do
-        create(:ee_ci_job_artifact, job: job, project: job.project)
+      subject { job.collect_license_scanning_reports!(license_scanning_report) }
 
-        control_count = ActiveRecord::QueryRecorder.new do
-          job.reload.collect_license_scanning_reports!(license_scanning_report)
-        end.count
+      before do
+        allow(project).to receive(:feature_available?).with(:license_scanning).and_return(true)
 
         create(:ee_ci_job_artifact, :license_scan, :v2_1, job: job, project: job.project)
         create(:ee_ci_job_artifact, :license_management, job: job, project: job.project)
+      end
 
-        expect do
-          job.reload.collect_license_scanning_reports!(license_scanning_report)
-        end.not_to exceed_query_limit(control_count)
+      it 'checks the feature flag once' do
+        subject
+
+        expect(project).to have_received(:feature_available?).with(:license_scanning).once
       end
     end
 
