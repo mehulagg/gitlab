@@ -4056,7 +4056,9 @@ release-cli create --name "Release $CI_COMMIT_SHA" --description "Created using 
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/33014) in GitLab 13.4.
 
 `secrets` indicates the [CI Secrets](../secrets/index.md) this job needs. It should be a hash,
-and the keys should be the names of the environment variables the job needs to access the secrets.
+and the keys should be the names of the environment variables that will be made available to the job.
+The value of each secret will be saved in a temporary file and the path to this file will be stored
+in these environment variables.
 
 #### `secrets:vault` **(PREMIUM)**
 
