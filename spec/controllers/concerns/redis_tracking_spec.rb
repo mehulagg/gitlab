@@ -11,7 +11,7 @@ RSpec.describe RedisTracking do
     include RedisTracking
 
     skip_before_action :authenticate_user!, only: :show
-    track_redis_hll_event :index, :show, name: 'i_analytics_dev_ops_score', feature: :g_compliance_dashboard_feature
+    track_redis_hll_event :index, :show, name: 'i_analytics_dev_ops_score', feature: :g_compliance_dashboard_feature, feature_default_enabled: true
 
     def index
       render html: 'index'
@@ -36,21 +36,9 @@ RSpec.describe RedisTracking do
     end
   end
 
-  context 'with usage ping disabled' do
-    it 'does not track the event' do
-      stub_feature_flags(feature => true)
-      allow(Gitlab::CurrentSettings).to receive(:usage_ping_enabled?).and_return(false)
-
-      expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event)
-
-      get :index
-    end
-  end
-
-  context 'with feature enabled and usage ping enabled' do
+  context 'with feature enabled' do
     before do
       stub_feature_flags(feature => true)
-      allow(Gitlab::CurrentSettings).to receive(:usage_ping_enabled?).and_return(true)
     end
 
     context 'when user is logged in' do
@@ -58,6 +46,14 @@ RSpec.describe RedisTracking do
         sign_in(user)
 
         expect(Gitlab::UsageDataCounters::HLLRedisCounter).to receive(:track_event)
+
+        get :index
+      end
+
+      it 'passes default_enabled flag' do
+        sign_in(user)
+
+        expect(controller).to receive(:metric_feature_enabled?).with(feature.to_sym, true)
 
         get :index
       end

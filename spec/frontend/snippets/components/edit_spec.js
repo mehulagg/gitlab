@@ -102,6 +102,13 @@ describe('Snippet Edit app', () => {
         markdownDocsPath: 'http://docs.foo.bar',
         ...props,
       },
+      data() {
+        return {
+          snippet: {
+            visibilityLevel: SNIPPET_VISIBILITY_PRIVATE,
+          },
+        };
+      },
     });
   }
 
@@ -141,17 +148,17 @@ describe('Snippet Edit app', () => {
 
   // Ideally we wouldn't call this method directly, but we don't have a way to trigger
   // apollo responses yet.
-  const loadSnippet = (...edges) => {
-    if (edges.length) {
+  const loadSnippet = (...nodes) => {
+    if (nodes.length) {
       wrapper.setData({
-        snippet: edges[0],
+        snippet: nodes[0],
       });
     }
 
     wrapper.vm.onSnippetFetch({
       data: {
         snippets: {
-          edges,
+          nodes,
         },
       },
     });

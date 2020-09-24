@@ -5,6 +5,8 @@ require 'spec_helper'
 RSpec.describe Gitlab::CodeOwners::File do
   include FakeBlobHelpers
 
+  # 'project' is required for the #fake_blob helper
+  #
   let(:project) { build(:project) }
   let(:file_content) do
     File.read(Rails.root.join('ee', 'spec', 'fixtures', 'codeowners_example'))
@@ -14,50 +16,29 @@ RSpec.describe Gitlab::CodeOwners::File do
 
   subject(:file) { described_class.new(blob) }
 
-  before do
-    stub_feature_flags(sectional_codeowners: false)
-  end
-
   describe '#parsed_data' do
     def owner_line(pattern)
-      file.parsed_data[pattern].owner_line
+      file.parsed_data["codeowners"][pattern].owner_line
     end
 
-    it 'parses all the required lines' do
-      expected_patterns = [
-        '/**/*', '/**/#file_with_pound.rb', '/**/*.rb', '/**/CODEOWNERS', '/**/LICENSE', '/docs/**/*',
-        '/docs/*', '/config/**/*', '/**/lib/**/*', '/**/path with spaces/**/*'
-      ]
+    context "when CODEOWNERS file contains no sections" do
+      it 'parses all the required lines' do
+        expected_patterns = [
+          '/**/*', '/**/#file_with_pound.rb', '/**/*.rb', '/**/CODEOWNERS', '/**/LICENSE', '/docs/**/*',
+          '/docs/*', '/config/**/*', '/**/lib/**/*', '/**/path with spaces/**/*'
+        ]
 
-      expect(file.parsed_data.keys)
-        .to contain_exactly(*expected_patterns)
-    end
-
-    it 'allows usernames and emails' do
-      expect(owner_line('/**/LICENSE')).to include('legal', 'janedoe@gitlab.com')
-    end
-
-    context "when CODEOWNERS file contains multiple sections" do
-      let(:file_content) do
-        File.read(Rails.root.join("ee", "spec", "fixtures", "sectional_codeowners_example"))
+        expect(file.parsed_data["codeowners"].keys)
+          .to contain_exactly(*expected_patterns)
       end
 
-      let(:patterns) { ["[Documentation]", "[Database]"] }
-      let(:paths) { ["/**/[Documentation]", "/**/[Database]"] }
-
-      it "skips section headers when parsing" do
-        expect(file.parsed_data.keys).not_to include(*paths)
-        expect(file.parsed_data.values.any? { |e| patterns.include?(e.pattern) }).to be_falsey
-        expect(file.parsed_data.values.any? { |e| e.owner_line.blank? }).to be_falsey
+      it 'allows usernames and emails' do
+        expect(owner_line('/**/LICENSE')).to include('legal', 'janedoe@gitlab.com')
       end
     end
 
-    context "when feature flag `:sectional_codeowners` is enabled" do
+    context "when handling a sectional codeowners file" do
       using RSpec::Parameterized::TableSyntax
-
-      before do
-        stub_feature_flags(sectional_codeowners: true)
-      end
 
       shared_examples_for "creates expected parsed sectional results" do
         it "is a hash sorted by sections without duplicates" do
@@ -105,12 +86,6 @@ RSpec.describe Gitlab::CodeOwners::File do
             expect(extracted_owners).to contain_exactly(*owners)
           end
         end
-      end
-
-      it "passes the call to #get_parsed_sectional_data" do
-        expect(file).to receive(:get_parsed_sectional_data)
-
-        file.parsed_data
       end
 
       it "populates a hash with a single default section" do
@@ -316,40 +291,16 @@ RSpec.describe Gitlab::CodeOwners::File do
       end
     end
 
-    context "when feature flag `:sectional_codeowners` is enabled" do
-      before do
-        stub_feature_flags(sectional_codeowners: true)
-      end
-
-      context "when CODEOWNERS file contains no sections" do
-        it_behaves_like "returns expected matches"
-      end
-
-      context "when CODEOWNERS file contains multiple sections" do
-        let(:file_content) do
-          File.read(Rails.root.join("ee", "spec", "fixtures", "sectional_codeowners_example"))
-        end
-
-        it_behaves_like "returns expected matches"
-      end
+    context "when CODEOWNERS file contains no sections" do
+      it_behaves_like "returns expected matches"
     end
 
-    context "when feature flag `:sectional_codeowners` is disabled" do
-      before do
-        stub_feature_flags(sectional_codeowners: false)
+    context "when CODEOWNERS file contains multiple sections" do
+      let(:file_content) do
+        File.read(Rails.root.join("ee", "spec", "fixtures", "sectional_codeowners_example"))
       end
 
-      context "when CODEOWNERS file contains no sections" do
-        it_behaves_like "returns expected matches"
-      end
-
-      context "when CODEOWNERS file contains multiple sections" do
-        let(:file_content) do
-          File.read(Rails.root.join("ee", "spec", "fixtures", "sectional_codeowners_example"))
-        end
-
-        it_behaves_like "returns expected matches"
-      end
+      it_behaves_like "returns expected matches"
     end
   end
 end

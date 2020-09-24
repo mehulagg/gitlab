@@ -2,14 +2,14 @@ import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
 import { GlEmptyState, GlLoadingIcon } from '@gitlab/ui';
 import Api from 'ee/api';
-import store from 'ee/feature_flags/store';
+import { createStore } from 'ee/feature_flags/store';
+import FeatureFlagsTab from 'ee/feature_flags/components/feature_flags_tab.vue';
 import FeatureFlagsComponent from 'ee/feature_flags/components/feature_flags.vue';
 import FeatureFlagsTable from 'ee/feature_flags/components/feature_flags_table.vue';
 import UserListsTable from 'ee/feature_flags/components/user_lists_table.vue';
 import ConfigureFeatureFlagsModal from 'ee/feature_flags/components/configure_feature_flags_modal.vue';
 import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from 'ee/feature_flags/constants';
 import { TEST_HOST } from 'spec/test_constants';
-import NavigationTabs from '~/vue_shared/components/navigation_tabs.vue';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import axios from '~/lib/utils/axios_utils';
 import { getRequestData, userList } from '../mock_data';
@@ -18,8 +18,6 @@ describe('Feature flags', () => {
   const mockData = {
     endpoint: `${TEST_HOST}/endpoint.json`,
     csrfToken: 'testToken',
-    errorStateSvgPath: '/assets/illustrations/feature_flag.svg',
-    featureFlagsHelpPagePath: '/help/feature-flags',
     featureFlagsClientLibrariesHelpPagePath: '/help/feature-flags#unleash-clients',
     featureFlagsClientExampleHelpPagePath: '/help/feature-flags#client-example',
     unleashApiUrl: `${TEST_HOST}/api/unleash`,
@@ -33,12 +31,20 @@ describe('Feature flags', () => {
 
   let wrapper;
   let mock;
+  let store;
 
   const factory = (propsData = mockData, fn = shallowMount) => {
+    store = createStore();
     wrapper = fn(FeatureFlagsComponent, {
+      store,
       propsData,
       provide: {
         projectName: 'fakeProjectName',
+        errorStateSvgPath: '/assets/illustrations/feature_flag.svg',
+        featureFlagsHelpPagePath: '/help/feature-flags',
+      },
+      stubs: {
+        FeatureFlagsTab,
       },
     });
   };
@@ -49,7 +55,6 @@ describe('Feature flags', () => {
 
   beforeEach(() => {
     mock = new MockAdapter(axios);
-    jest.spyOn(store, 'dispatch');
     jest.spyOn(Api, 'fetchFeatureFlagUserLists').mockResolvedValue({
       data: [userList],
       headers: {
@@ -66,6 +71,7 @@ describe('Feature flags', () => {
   afterEach(() => {
     mock.restore();
     wrapper.destroy();
+    wrapper = null;
   });
 
   describe('without permissions', () => {
@@ -127,32 +133,30 @@ describe('Feature flags', () => {
     describe('without feature flags', () => {
       let emptyState;
 
-      beforeEach(done => {
-        mock
-          .onGet(mockData.endpoint, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } })
-          .replyOnce(
-            200,
-            {
-              feature_flags: [],
-              count: {
-                all: 0,
-                enabled: 0,
-                disabled: 0,
-              },
+      beforeEach(async () => {
+        mock.onGet(mockData.endpoint, { params: { scope: FEATURE_FLAG_SCOPE, page: '1' } }).reply(
+          200,
+          {
+            feature_flags: [],
+            count: {
+              all: 0,
+              enabled: 0,
+              disabled: 0,
             },
-            {},
-          );
+          },
+          {},
+        );
 
         factory();
+        await wrapper.vm.$nextTick();
 
-        setImmediate(() => {
-          emptyState = wrapper.find(GlEmptyState);
-          done();
-        });
+        emptyState = wrapper.find(GlEmptyState);
       });
 
-      it('should render the empty state', () => {
-        expect(wrapper.find(GlEmptyState).exists()).toBe(true);
+      it('should render the empty state', async () => {
+        await axios.waitForAll();
+        emptyState = wrapper.find(GlEmptyState);
+        expect(emptyState.exists()).toBe(true);
       });
 
       it('renders configure button', () => {
@@ -189,6 +193,7 @@ describe('Feature flags', () => {
           });
 
         factory();
+        jest.spyOn(store, 'dispatch');
         setImmediate(() => {
           done();
         });
@@ -246,7 +251,7 @@ describe('Feature flags', () => {
 
         it('should make an API request when using tabs', () => {
           jest.spyOn(wrapper.vm, 'updateFeatureFlagOptions');
-          wrapper.find(NavigationTabs).vm.$emit('onChangeTab', USER_LIST_SCOPE);
+          wrapper.find('[data-testid="user-lists-tab"]').vm.$emit('changeTab');
 
           expect(wrapper.vm.updateFeatureFlagOptions).toHaveBeenCalledWith({
             scope: USER_LIST_SCOPE,
@@ -265,7 +270,7 @@ describe('Feature flags', () => {
         });
       });
       beforeEach(() => {
-        wrapper.find(NavigationTabs).vm.$emit('onChangeTab', USER_LIST_SCOPE);
+        wrapper.find('[data-testid="user-lists-tab"]').vm.$emit('changeTab');
         return wrapper.vm.$nextTick();
       });
 

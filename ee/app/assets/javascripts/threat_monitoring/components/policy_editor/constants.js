@@ -3,6 +3,8 @@ export const EditorModeYAML = 'yaml';
 
 export const RuleTypeNetwork = 'network';
 
+export const RuleActionTypeAllow = 'allow';
+
 export const RuleDirectionInbound = 'ingress';
 export const RuleDirectionOutbound = 'egress';
 
@@ -29,3 +31,5 @@ export const PortMatchModeAny = 'any';
 export const PortMatchModePortProtocol = 'port/protocol';
 
 export const DisabledByLabel = 'network-policy.gitlab.com/disabled_by';
+
+export const CiliumNetworkPolicyKind = 'CiliumNetworkPolicy';

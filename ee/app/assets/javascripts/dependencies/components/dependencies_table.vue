@@ -1,6 +1,12 @@
 <script>
 import { cloneDeep } from 'lodash';
-import { GlBadge, GlIcon, GlButton, GlSkeletonLoading, GlTable } from '@gitlab/ui';
+import {
+  GlBadge,
+  GlIcon,
+  GlButton,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+  GlTable,
+} from '@gitlab/ui';
 import { s__ } from '~/locale';
 import DependencyLicenseLinks from './dependency_license_links.vue';
 import DependencyVulnerabilities from './dependency_vulnerabilities.vue';

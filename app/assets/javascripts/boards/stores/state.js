@@ -10,7 +10,7 @@ export default () => ({
   sidebarType: '',
   boardLists: [],
   issuesByListId: {},
-  isLoadingIssues: false,
+  issues: {},
   filterParams: {},
   error: undefined,
   // TODO: remove after ce/ee split of board_content.vue

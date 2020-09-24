@@ -7,6 +7,10 @@ RSpec.describe Security::StoreScansService do
 
   subject { Security::StoreScansService.new(build).execute }
 
+  before do
+    allow(Security::StoreFindingsMetadataService).to receive(:execute)
+  end
+
   context 'build has security reports' do
     before do
       create(:ee_ci_job_artifact, :dast, job: build)
@@ -22,6 +26,12 @@ RSpec.describe Security::StoreScansService do
       expect(scans.sast.count).to be(1)
       expect(scans.dast.count).to be(1)
     end
+
+    it 'calls the StoreFindingsMetadataService' do
+      subject
+
+      expect(Security::StoreFindingsMetadataService).to have_received(:execute).twice
+    end
   end
 
   context 'scan already exists' do
@@ -34,6 +44,12 @@ RSpec.describe Security::StoreScansService do
       subject
 
       expect(Security::Scan.where(build: build).count).to be(1)
+    end
+
+    it 'calls the StoreFindingsMetadataService' do
+      subject
+
+      expect(Security::StoreFindingsMetadataService).to have_received(:execute).once
     end
   end
 end

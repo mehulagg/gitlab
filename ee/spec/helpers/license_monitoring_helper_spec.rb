@@ -15,7 +15,9 @@ RSpec.describe LicenseMonitoringHelper do
     subject { helper.show_active_user_count_threshold_banner? }
 
     shared_examples 'banner hidden when below the threshold' do
-      let(:active_user_count) { 1 }
+      before do
+        allow(license).to receive(:active_user_count_threshold_reached?).and_return(false)
+      end
 
       it { is_expected.to be_falsey }
     end
@@ -52,7 +54,8 @@ RSpec.describe LicenseMonitoringHelper do
 
         context 'is trial' do
           before do
-            allow(License.current).to receive(:trial?).and_return(true)
+            allow(license).to receive(:trial?).and_return(true)
+            allow(License).to receive(:current).and_return(license)
           end
 
           it { is_expected.to be_falsey }
@@ -61,8 +64,9 @@ RSpec.describe LicenseMonitoringHelper do
 
       context 'when current active user count greater than total user count' do
         before do
-          allow(helper).to receive(:total_user_count).and_return(license_seats_limit)
-          allow(helper).to receive(:current_active_users_count).and_return(license_seats_limit + 1)
+          allow(license).to receive(:restricted_user_count).and_return(license_seats_limit)
+          allow(license).to receive(:current_active_users_count).and_return(license_seats_limit + 1)
+          allow(License).to receive(:current).and_return(license)
         end
 
         it { is_expected.to be_falsey }
@@ -72,11 +76,13 @@ RSpec.describe LicenseMonitoringHelper do
         before do
           allow(helper).to receive(:current_user).and_return(admin)
           allow(helper).to receive(:admin_section?).and_return(true)
-          allow(helper).to receive(:current_active_users_count).and_return(active_user_count)
         end
 
         context 'when above the threshold' do
-          let(:active_user_count) { license_seats_limit - 1 }
+          before do
+            allow(license).to receive(:active_user_count_threshold_reached?).and_return(license_seats_limit + 1)
+            allow(License).to receive(:current).and_return(license)
+          end
 
           it { is_expected.to be_truthy }
         end

@@ -27,6 +27,11 @@ module Types
             authorize: :read_project,
             resolve: -> (agent, args, context) { Gitlab::Graphql::Loaders::BatchModelLoader.new(Project, agent.project_id).find }
 
+      field :tokens, Types::Clusters::AgentTokenType.connection_type,
+            description: 'Tokens associated with the cluster agent',
+            null: true,
+            resolver: ::Resolvers::Clusters::AgentTokensResolver
+
       field :updated_at,
             Types::TimeType,
             null: true,

@@ -94,6 +94,26 @@ RSpec.describe Resolvers::BoardGroupings::EpicsResolver do
 
         resolve_board_epics(group_board, { issue_filters: { label_name: 'foo', not: { label_name: %w(foo bar) } } })
       end
+
+      it 'raises an exception if both epic_id and epic_wildcard_id are present' do
+        expect do
+          resolve_board_epics(group_board, { issue_filters: { epic_id: epic1.to_global_id, epic_wildcard_id: 'NONE' } })
+        end.to raise_error(Gitlab::Graphql::Errors::ArgumentError)
+      end
+
+      it 'accepts epic global id' do
+        result = resolve_board_epics(
+          group_board, { issue_filters: { epic_id: epic1.to_global_id } })
+
+        expect(result).to match_array([epic1])
+      end
+
+      it 'accepts epic wildcard id' do
+        result = resolve_board_epics(
+          group_board, { issue_filters: { epic_wildcard_id: 'NONE' } })
+
+        expect(result).to match_array([])
+      end
     end
   end
 

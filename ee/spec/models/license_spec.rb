@@ -317,11 +317,6 @@ RSpec.describe License do
           .to include(:multiple_issue_assignees, :deploy_board, :file_locks)
       end
 
-      it 'returns features for early adopter plan' do
-        expect(described_class.features_for_plan('premium'))
-          .to include(:deploy_board, :file_locks)
-      end
-
       it 'returns empty array if no features for given plan' do
         expect(described_class.features_for_plan('bronze')).to eq([])
       end
@@ -767,6 +762,25 @@ RSpec.describe License do
     end
   end
 
+  describe '#ultimate?' do
+    using RSpec::Parameterized::TableSyntax
+
+    let(:license) { build(:license, plan: plan) }
+
+    subject { license.ultimate? }
+
+    where(:plan, :expected) do
+      nil | false
+      described_class::STARTER_PLAN | false
+      described_class::PREMIUM_PLAN | false
+      described_class::ULTIMATE_PLAN | true
+    end
+
+    with_them do
+      it { is_expected.to eq(expected) }
+    end
+  end
+
   describe 'Trial Licenses' do
     before do
       ApplicationSetting.create_from_defaults
@@ -827,26 +841,6 @@ RSpec.describe License do
           expect(described_class.eligible_for_trial?).to be_falsey
         end
       end
-    end
-  end
-
-  describe '#promo_feature_available?' do
-    subject { described_class.promo_feature_available?(:container_scanning) }
-
-    context 'with promo_container_scanning disabled' do
-      before do
-        stub_feature_flags(promo_container_scanning: false)
-      end
-
-      it { is_expected.to be_falsey }
-    end
-
-    context 'with promo_container_scanning enabled' do
-      before do
-        stub_feature_flags(promo_container_scanning: true)
-      end
-
-      it { is_expected.to be_truthy }
     end
   end
 
@@ -967,6 +961,60 @@ RSpec.describe License do
   describe '#auto_renew' do
     it 'is false' do
       expect(license.auto_renew).to be false
+    end
+  end
+
+  describe '#active_user_count_threshold' do
+    subject { license.active_user_count_threshold }
+
+    it 'returns nil for license with unlimited user count' do
+      allow(license).to receive(:restricted_user_count).and_return(nil)
+
+      expect(subject).to be_nil
+    end
+
+    context 'for license with users' do
+      using RSpec::Parameterized::TableSyntax
+
+      where(:restricted_user_count, :active_user_count, :percentage, :threshold_value) do
+        3    | 2    | false | 1
+        20   | 18   | false | 2
+        90   | 80   | true  | 10
+        300  | 275  | true  | 8
+        1200 | 1100 | true  | 5
+      end
+
+      with_them do
+        before do
+          allow(license).to receive(:restricted_user_count).and_return(restricted_user_count)
+          allow(license).to receive(:current_active_users_count).and_return(active_user_count)
+        end
+
+        it { is_expected.not_to be_nil }
+        it { is_expected.to include(value: threshold_value, percentage: percentage) }
+      end
+    end
+  end
+
+  describe '#active_user_count_threshold_reached?' do
+    using RSpec::Parameterized::TableSyntax
+
+    subject { license.active_user_count_threshold_reached? }
+
+    where(:restricted_user_count, :current_active_users_count, :result) do
+      10   | 9   | true
+      nil  | 9   | false
+      10   | 15  | false
+      100  | 95  | true
+    end
+
+    with_them do
+      before do
+        allow(license).to receive(:current_active_users_count).and_return(current_active_users_count)
+        allow(license).to receive(:restricted_user_count).and_return(restricted_user_count)
+      end
+
+      it { is_expected.to eq(result) }
     end
   end
 end

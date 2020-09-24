@@ -1,6 +1,8 @@
 - if ::Feature.enabled?(:whats_new_dropdown)
   - if ::Feature.enabled?(:whats_new_drawer)
-    #whats-new-trigger
+    %li
+      %button.js-whats-new-trigger{ type: 'button' }
+        = _("See what's new at GitLab")
   - else
     %li
       = link_to _("See what's new at GitLab"), "#{promo_url}/releases/gitlab-com/", target: '_blank', rel: 'noopener noreferrer', data: { track_event: 'click_whats_new', track_property: 'question_menu' }

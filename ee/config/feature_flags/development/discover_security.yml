@@ -1,0 +1,7 @@
+---
+name: discover_security
+introduced_by_url: https://gitlab.com/gitlab-org/gitlab/-/merge_requests/21658
+rollout_issue_url: https://gitlab.com/gitlab-org/growth/team-tasks/-/issues/54
+group: group::conversion
+type: development
+default_enabled: false

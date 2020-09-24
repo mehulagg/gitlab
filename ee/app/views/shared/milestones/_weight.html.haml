@@ -1,6 +1,6 @@
 - milestone = local_assigns.fetch(:milestone)
 
-- return unless milestone.supports_weight?
+- return unless milestone.weight_available?
 
 - total_weight = milestone.issues_visible_to_user(current_user).sum(:weight) # rubocop: disable CodeReuse/ActiveRecord
 .block.weight

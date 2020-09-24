@@ -1,7 +1,7 @@
 <script>
 import {
   GlLink,
-  GlSkeletonLoading,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlDeprecatedBadge as GlBadge,
   GlIcon,
   GlFriendlyWrap,

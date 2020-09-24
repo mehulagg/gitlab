@@ -3,7 +3,7 @@
 require 'securerandom'
 
 module QA
-  RSpec.describe 'Release', :docker do
+  RSpec.describe 'Release' do
     describe 'Multi-project pipelines' do
       let(:upstream_project_name) { "upstream-project-#{SecureRandom.hex(8)}" }
       let(:downstream_project_name) { "downstream-project-#{SecureRandom.hex(8)}" }
@@ -90,7 +90,7 @@ module QA
           expect(show).to have_passed
           expect(show).to have_no_job("downstream_job")
 
-          show.click_linked_job(downstream_project_name)
+          show.expand_child_pipeline
 
           expect(show).to have_job("downstream_job")
         end

@@ -10,7 +10,6 @@ RSpec.describe 'User creates feature flag', :js do
 
   before do
     project.add_developer(user)
-    stub_licensed_features(feature_flags: true)
     stub_feature_flags(feature_flag_permissions: false)
     sign_in(user)
   end
@@ -130,7 +129,7 @@ RSpec.describe 'User creates feature flag', :js do
 
         within_scope_row(2) do
           within_environment_spec do
-            find('.js-env-input').set("review/*")
+            find('.js-env-search > input').set("review/*")
             find('.js-create-button').click
           end
         end
@@ -164,7 +163,7 @@ RSpec.describe 'User creates feature flag', :js do
 
         within_scope_row(2) do
           within_environment_spec do
-            find('.js-env-input').set('prod')
+            find('.js-env-search > input').set('prod')
             click_button 'production'
           end
         end

@@ -13,36 +13,6 @@ RSpec.describe ::SystemNotes::IssuablesService do
 
   let(:service) { described_class.new(noteable: noteable, project: project, author: author) }
 
-  describe '#change_weight_note' do
-    context 'when weight changed' do
-      let(:noteable) { create(:issue, project: project, title: 'Lorem ipsum', weight: 4) }
-
-      subject { service.change_weight_note }
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'weight' }
-      end
-
-      it 'sets the note text' do
-        expect(subject.note).to eq "changed weight to **4**"
-      end
-    end
-
-    context 'when weight removed' do
-      let(:noteable) { create(:issue, project: project, title: 'Lorem ipsum', weight: nil) }
-
-      subject { service.change_weight_note }
-
-      it_behaves_like 'a system note' do
-        let(:action) { 'weight' }
-      end
-
-      it 'sets the note text' do
-        expect(subject.note).to eq 'removed the weight'
-      end
-    end
-  end
-
   describe '#change_health_status_note' do
     context 'when health_status changed' do
       let(:noteable) { create(:issue, project: project, title: 'Lorem ipsum', health_status: 'at_risk') }

@@ -13,7 +13,6 @@ RSpec.describe 'User updates feature flag', :js do
   end
 
   before do
-    stub_licensed_features(feature_flags: true)
     stub_feature_flags(
       feature_flag_permissions: false,
       feature_flags_legacy_read_only_override: false
@@ -137,7 +136,7 @@ RSpec.describe 'User updates feature flag', :js do
         before do
           within_scope_row(3) do
             within_environment_spec do
-              find('.js-env-input').set('production')
+              find('.js-env-search > input').set('production')
               find('.js-create-button').click
             end
           end

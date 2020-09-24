@@ -164,9 +164,38 @@ RSpec.describe 'gitlab:db namespace rake task' do
     end
   end
 
-  def run_rake_task(task_name)
+  describe 'reindex' do
+    context 'when no index_name is given' do
+      it 'raises an error' do
+        expect do
+          run_rake_task('gitlab:db:reindex', '')
+        end.to raise_error(ArgumentError, /must give the index name/)
+      end
+    end
+
+    context 'with index name given' do
+      let(:index) { double('index') }
+      let(:reindex) { double('reindex') }
+
+      it 'calls the index rebuilder with the proper arguments' do
+        expect(Gitlab::Database::Reindexing::Index).to receive(:find_with_schema).with('public.foo_idx').and_return(index)
+        expect(Gitlab::Database::Reindexing::ConcurrentReindex).to receive(:new).with(index, any_args).and_return(reindex)
+        expect(reindex).to receive(:perform)
+
+        run_rake_task('gitlab:db:reindex', '[public.foo_idx]')
+      end
+
+      it 'raises an error if the index does not exist' do
+        expect(Gitlab::Database::Reindexing::Index).to receive(:find_with_schema).with('public.absent_index').and_return(nil)
+
+        expect { run_rake_task('gitlab:db:reindex', '[public.absent_index]') }.to raise_error(ArgumentError, /index does not exist/)
+      end
+    end
+  end
+
+  def run_rake_task(task_name, arguments = '')
     Rake::Task[task_name].reenable
-    Rake.application.invoke_task task_name
+    Rake.application.invoke_task("#{task_name}#{arguments}")
   end
 
   def expect_multiple_executions_of_task(test_task_name, task_to_invoke, count: 2)

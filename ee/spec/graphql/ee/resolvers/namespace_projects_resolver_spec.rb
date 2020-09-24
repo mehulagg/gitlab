@@ -38,7 +38,9 @@ RSpec.describe Resolvers::NamespaceProjectsResolver do
   def resolve_projects(has_vulnerabilities)
     args = {
       include_subgroups: false,
-      has_vulnerabilities: has_vulnerabilities
+      has_vulnerabilities: has_vulnerabilities,
+      sort: :similarity,
+      search: nil
     }
 
     resolve(described_class, obj: group, args: args, ctx: { current_user: current_user })

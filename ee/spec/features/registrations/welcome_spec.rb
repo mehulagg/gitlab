@@ -23,7 +23,7 @@ RSpec.describe 'Welcome screen', :js do
     end
 
     it 'shows the welcome page without a progress bar' do
-      expect(page).to have_content('Welcome to GitLab.com')
+      expect(page).to have_content('Welcome to GitLab')
       expect(page).not_to have_content('Your profile')
     end
 

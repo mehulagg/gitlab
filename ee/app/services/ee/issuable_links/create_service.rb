@@ -16,7 +16,9 @@ module EE
 
         super
 
-        Epics::UpdateDatesService.new(affected_epics).execute unless affected_epics.blank?
+        if !params[:skip_epic_dates_update] && affected_epics.present?
+          Epics::UpdateDatesService.new(affected_epics).execute
+        end
       end
 
       def affected_epics(_issues)

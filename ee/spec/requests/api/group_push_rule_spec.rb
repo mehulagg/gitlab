@@ -77,19 +77,19 @@ RSpec.describe API::GroupPushRule, 'GroupPushRule', api: true do
 
           expect(json_response).to eq(
             {
-             "author_email_regex" => attributes[:author_email_regex],
-             "branch_name_regex" => nil,
-             "commit_committer_check" => true,
-             "commit_message_negative_regex" => attributes[:commit_message_negative_regex],
-             "commit_message_regex" => attributes[:commit_message_regex],
-             "created_at" => group.reload.push_rule.created_at.iso8601(3),
-             "deny_delete_tag" => false,
-             "file_name_regex" => nil,
-             "id" => group.push_rule.id,
-             "max_file_size" => 100,
-             "member_check" => false,
-             "prevent_secrets" => true,
-             "reject_unsigned_commits" => true
+              "author_email_regex" => attributes[:author_email_regex],
+              "branch_name_regex" => nil,
+              "commit_committer_check" => true,
+              "commit_message_negative_regex" => attributes[:commit_message_negative_regex],
+              "commit_message_regex" => attributes[:commit_message_regex],
+              "created_at" => group.reload.push_rule.created_at.iso8601(3),
+              "deny_delete_tag" => false,
+              "file_name_regex" => nil,
+              "id" => group.push_rule.id,
+              "max_file_size" => 100,
+              "member_check" => false,
+              "prevent_secrets" => true,
+              "reject_unsigned_commits" => true
             }
           )
         end
@@ -292,8 +292,8 @@ RSpec.describe API::GroupPushRule, 'GroupPushRule', api: true do
 
         it 'updates attributes as expected' do
           expect { subject }.to change { group.reload.push_rule.author_email_regex }
-                               .from(attributes[:author_email_regex])
-                               .to(attributes_for_update[:author_email_regex])
+                                  .from(attributes[:author_email_regex])
+                                  .to(attributes_for_update[:author_email_regex])
         end
 
         context 'when push rule does not exist for group' do
@@ -364,6 +364,48 @@ RSpec.describe API::GroupPushRule, 'GroupPushRule', api: true do
           end
         end
       end
+    end
+  end
+
+  describe 'DELETE /groups/:id/push_rule' do
+    let_it_be(:push_rule) { create(:push_rule, **attributes) }
+    let_it_be(:group) { create(:group, push_rule: push_rule) }
+
+    context 'authorized user' do
+      context 'when licensed' do
+        include_context 'licensed features available'
+
+        context 'with group push rule' do
+          it do
+            delete api("/groups/#{group.id}/push_rule", admin)
+
+            expect(response).to have_gitlab_http_status(:no_content)
+            expect(group.reload.push_rule).to be nil
+          end
+        end
+
+        context 'when push rule does not exist' do
+          it 'returns not found' do
+            no_push_rule_group = create(:group)
+
+            delete api("/groups/#{no_push_rule_group.id}/push_rule", admin)
+
+            expect(response).to have_gitlab_http_status(:not_found)
+          end
+        end
+      end
+
+      context 'when unlicensed' do
+        subject { delete api("/groups/#{group.id}/push_rule", admin) }
+
+        it_behaves_like 'not found when feature is unavailable'
+      end
+    end
+
+    context 'permissions' do
+      subject { delete api("/groups/#{group.id}/push_rule", user) }
+
+      it_behaves_like 'allow access to api based on role'
     end
   end
 end

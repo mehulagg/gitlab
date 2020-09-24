@@ -300,7 +300,6 @@ describe('SetApprovalModal', () => {
         expect(actions.allowLicense).toHaveBeenCalledWith(
           expect.any(Object),
           store.state.licenseManagement.currentLicenseInModal,
-          undefined,
         );
       });
     });
@@ -313,7 +312,6 @@ describe('SetApprovalModal', () => {
         expect(actions.denyLicense).toHaveBeenCalledWith(
           expect.any(Object),
           store.state.licenseManagement.currentLicenseInModal,
-          undefined,
         );
       });
     });

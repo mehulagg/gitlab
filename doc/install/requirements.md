@@ -12,7 +12,7 @@ as the hardware requirements that are needed to install and use GitLab.
 ### Supported Linux distributions
 
 - Ubuntu (16.04/18.04/20.04)
-- Debian (8/9/10)
+- Debian (9/10)
 - CentOS (6/7/8)
 - openSUSE (Leap 15.1/Enterprise Server 12.2)
 - Red Hat Enterprise Linux (please use the CentOS packages and instructions)
@@ -61,8 +61,8 @@ From GitLab 13.1:
 
 ### Node.js versions
 
-Beginning in GitLab 12.9, we only support node.js 10.13.0 or higher, and we have dropped
-support for node.js 8. (node.js 6 support was dropped in GitLab 11.8)
+Beginning in GitLab 12.9, we only support Node.js 10.13.0 or higher, and we have dropped
+support for Node.js 8. (Node.js 6 support was dropped in GitLab 11.8)
 
 We recommend Node 12.x, as it's faster.
 
@@ -140,21 +140,17 @@ We highly recommend users to use the minimum PostgreSQL versions specified below
 GitLab version | Minimum PostgreSQL version
 -|-
 10.0 | 9.6
-12.10 | 11
 13.0 | 11
 
-You must also ensure the `pg_trgm` and `btree_gist` extensions are loaded into every
-GitLab database. These extensions [can be enabled](https://www.postgresql.org/docs/11/sql-createextension.html) using a PostgreSQL super user.
-
-On some systems you may need to install an additional package (for example,
-`postgresql-contrib`) for this extension to become available.
+You must also ensure the `pg_trgm` and `btree_gist` extensions are [loaded into every
+GitLab database](postgresql_extensions.html).
 
 NOTE: **Note:**
 Support for [PostgreSQL 9.6 and 10 has been removed in GitLab 13.0](https://about.gitlab.com/releases/2020/05/22/gitlab-13-0-released/#postgresql-11-is-now-the-minimum-required-version-to-install-gitlab) so that GitLab can benefit from PostgreSQL 11 improvements, such as partitioning. For the schedule of transitioning to PostgreSQL 12, see [the related epic](https://gitlab.com/groups/gitlab-org/-/epics/2184).
 
 #### Additional requirements for GitLab Geo
 
-If you're using [GitLab Geo](../administration/geo/replication/index.md):
+If you're using [GitLab Geo](../administration/geo/index.md):
 
 - We strongly recommend running Omnibus-managed instances as they are actively
   developed and tested. We aim to be compatible with most external (not managed
@@ -186,7 +182,7 @@ optimal settings for your infrastructure.
 ### Puma threads
 
 The recommended number of threads is dependent on several factors, including total memory, and use
-of [legacy Rugged code](../development/gitaly.md#legacy-rugged-code).
+of [legacy Rugged code](../administration/gitaly/index.md#direct-access-to-git-in-gitlab).
 
 - If the operating system has a maximum 2 GB of memory, the recommended number of threads is `1`.
   A higher value will result in excess swapping, and decrease performance.

@@ -3,11 +3,12 @@
 module Security
   module CiConfiguration
     class SastBuildActions
-      def initialize(auto_devops_enabled, params, existing_gitlab_ci_content, default_sast_values)
+      def initialize(auto_devops_enabled, params, existing_gitlab_ci_content)
         @auto_devops_enabled = auto_devops_enabled
-        @params = params
+        @variables = variables(params)
         @existing_gitlab_ci_content = existing_gitlab_ci_content || {}
-        @default_sast_values = default_sast_values
+        @default_sast_values = default_sast_values(params)
+        @default_values_overwritten = false
       end
 
       def generate
@@ -15,10 +16,29 @@ module Security
 
         update_existing_content!
 
-        [{ action: action, file_path: '.gitlab-ci.yml', content: prepare_existing_content }]
+        [{ action: action, file_path: '.gitlab-ci.yml', content: prepare_existing_content, default_values_overwritten: @default_values_overwritten }]
       end
 
       private
+
+      def variables(params)
+        # This early return is necessary for supporting REST API.
+        # Will be removed during the implementation of
+        # https://gitlab.com/gitlab-org/gitlab/-/issues/246737
+        return params unless params['global'].present?
+
+        collect_values(params, 'value')
+      end
+
+      def default_sast_values(params)
+        collect_values(params, 'defaultValue')
+      end
+
+      def collect_values(config, key)
+        global_variables = config['global']&.collect {|k| [k['field'], k[key]]}.to_h
+        pipeline_variables = config['pipeline']&.collect {|k| [k['field'], k[key]]}.to_h
+        global_variables.merge!(pipeline_variables)
+      end
 
       def update_existing_content!
         @existing_gitlab_ci_content['stages'] = set_stages
@@ -49,15 +69,16 @@ module Security
       end
 
       def sast_stage
-        @params['stage'].presence ? @params['stage'] : 'test'
+        @variables['stage'].presence ? @variables['stage'] : 'test'
       end
 
       def set_variables(variables, hash_to_update = {})
         hash_to_update['variables'] ||= {}
 
         variables.each do |key|
-          if @params[key].present? && @params[key].to_s != @default_sast_values[key].to_s
-            hash_to_update['variables'][key] = @params[key]
+          if @variables[key].present? && @variables[key].to_s != @default_sast_values[key].to_s
+            hash_to_update['variables'][key] = @variables[key]
+            @default_values_overwritten = true
           else
             hash_to_update['variables'].delete(key)
           end

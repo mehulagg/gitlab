@@ -11,6 +11,8 @@ module Ci
 
     default_value_for :data_store, :redis
 
+    after_create { metrics.increment_trace_operation(operation: :chunked) }
+
     CHUNK_SIZE = 128.kilobytes
     WRITE_LOCK_RETRY = 10
     WRITE_LOCK_SLEEP = 0.01.seconds
@@ -25,6 +27,8 @@ module Ci
       database: 2,
       fog: 3
     }
+
+    scope :live, -> { redis }
 
     class << self
       def all_stores
@@ -108,6 +112,24 @@ module Ci
       Ci::BuildTraceChunkFlushWorker.perform_async(id)
     end
 
+    def persisted?
+      !redis?
+    end
+
+    def live?
+      redis?
+    end
+
+    ##
+    # Build trace chunk is final (the last one that we do not expect to ever
+    # become full) when a runner submitted a build pending state and there is
+    # no chunk with higher index in the database.
+    #
+    def final?
+      build.pending_state.present? &&
+        build.trace_chunks.maximum(:chunk_index).to_i == chunk_index
+    end
+
     private
 
     def get_data
@@ -120,8 +142,9 @@ module Ci
 
       current_data = data
       old_store_class = current_store
+      current_size = current_data&.bytesize.to_i
 
-      unless current_data&.bytesize.to_i == CHUNK_SIZE
+      unless current_size == CHUNK_SIZE || final?
         raise FailedToPersistDataError, 'Data is not fulfilled in a bucket'
       end
 
@@ -161,6 +184,8 @@ module Ci
       end
 
       current_store.append_data(self, value, offset).then do |stored|
+        metrics.increment_trace_operation(operation: :appended)
+
         raise ArgumentError, 'Trace appended incorrectly' if stored != new_size
       end
 
@@ -168,14 +193,6 @@ module Ci
       @size = new_size
 
       save! if changed?
-    end
-
-    def persisted?
-      !redis?
-    end
-
-    def live?
-      redis?
     end
 
     def full?
@@ -191,6 +208,10 @@ module Ci
        { ttl: WRITE_LOCK_TTL,
          retries: WRITE_LOCK_RETRY,
          sleep_sec: WRITE_LOCK_SLEEP }]
+    end
+
+    def metrics
+      @metrics ||= ::Gitlab::Ci::Trace::Metrics.new
     end
   end
 end

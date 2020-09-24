@@ -2,7 +2,7 @@
 
 module Resolvers
   class IssuesResolver < BaseResolver
-    prepend IssueResolverFields
+    prepend IssueResolverArguments
 
     argument :state, Types::IssuableStateEnum,
               required: false,
@@ -34,7 +34,9 @@ module Resolvers
 
     def preloads
       {
-        alert_management_alert: [:alert_management_alert]
+        alert_management_alert: [:alert_management_alert],
+        labels: [:labels],
+        assignees: [:assignees]
       }
     end
 

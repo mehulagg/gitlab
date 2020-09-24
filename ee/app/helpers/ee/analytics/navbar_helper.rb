@@ -18,6 +18,7 @@ module EE
       override :group_analytics_navbar_links
       def group_analytics_navbar_links(group, current_user)
         super + [
+          group_repository_analytics_navbar_link(group, current_user),
           contribution_analytics_navbar_link(group, current_user),
           group_insights_navbar_link(group, current_user),
           issues_analytics_navbar_link(group, current_user),
@@ -46,7 +47,7 @@ module EE
 
         navbar_sub_item(
           title: _('Merge Request'),
-          path: 'projects/analytics/merge_requests_analytics#show',
+          path: 'projects/analytics/merge_request_analytics#show',
           link: project_analytics_merge_request_analytics_path(project)
         )
       end
@@ -56,8 +57,8 @@ module EE
         return unless group_sidebar_link?(:merge_request_analytics)
 
         navbar_sub_item(
-          title: _('Merge Requests'),
-          path: 'groups/analytics/merge_requests_analytics#show',
+          title: _('Merge Request'),
+          path: 'groups/analytics/merge_request_analytics#show',
           link: group_analytics_merge_request_analytics_path(group)
         )
       end
@@ -111,6 +112,17 @@ module EE
           title: _('Issue'),
           path: 'issues_analytics#show',
           link: group_issues_analytics_path(group)
+        )
+      end
+
+      def group_repository_analytics_navbar_link(group, current_user)
+        return unless ::Gitlab::Analytics.group_coverage_reports_enabled?
+        return unless group_sidebar_link?(:repository_analytics)
+
+        navbar_sub_item(
+          title: _('Repositories'),
+          path: 'groups/analytics/repository_analytics#show',
+          link: group_analytics_repository_analytics_path(group)
         )
       end
 

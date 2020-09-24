@@ -22,14 +22,19 @@ Using the GitLab project Kubernetes integration, you can:
 - Detect and [monitor Kubernetes](#monitoring-your-kubernetes-cluster).
 - Use it with [Auto DevOps](#auto-devops).
 - Use [Web terminals](#web-terminals).
-- Use [Deploy Boards](#deploy-boards-premium). **(PREMIUM)**
-- Use [Canary Deployments](#canary-deployments-premium). **(PREMIUM)**
+- Use [Deploy Boards](#deploy-boards). **(PREMIUM)**
+- Use [Canary Deployments](#canary-deployments). **(PREMIUM)**
 - View [Logs](#viewing-pod-logs).
 - Run serverless workloads on [Kubernetes with Knative](serverless/index.md).
 
 Besides integration at the project level, Kubernetes clusters can also be
 integrated at the [group level](../../group/clusters/index.md) or
 [GitLab instance level](../../instance/clusters/index.md).
+
+To view your project level Kubernetes clusters, navigate to **Operations > Kubernetes**
+from your project. On this page, you can [add a new cluster](#adding-and-removing-clusters)
+and view information about your existing clusters, such as nodes count and rough estimates
+of memory and CPU usage.
 
 ## Setting up
 
@@ -46,11 +51,11 @@ version. The range of supported versions is based on the evaluation of:
 
 Currently, GitLab supports the following Kubernetes versions:
 
+- 1.17
 - 1.16
 - 1.15
 - 1.14
 - 1.13 (deprecated, support ends on November 22, 2020)
-- 1.12 (deprecated, support ends on September 22, 2020)
 
 NOTE: **Note:**
 Some GitLab features may support versions outside the range provided here.

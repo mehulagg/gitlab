@@ -51,12 +51,17 @@ Using the consolidated object storage configuration has a number of advantages:
 - It enables the use of [encrypted S3 buckets](#encrypted-s3-buckets).
 - It [uploads files to S3 with proper `Content-MD5` headers](https://gitlab.com/gitlab-org/gitlab-workhorse/-/issues/222).
 
-NOTE: **Note:**
-Only AWS S3-compatible providers and Google are
-supported at the moment since [direct upload
-mode](../development/uploads.md#direct-upload) must be used. Background
-upload is not supported in this mode. We recommend direct upload mode because
-it does not require a shared folder, and [this setting may become the default](https://gitlab.com/gitlab-org/gitlab/-/issues/27331).
+Because [direct upload mode](../development/uploads.md#direct-upload)
+must be enabled, only the following providers can be used:
+
+- [Amazon S3-compatible providers](#s3-compatible-connection-settings)
+- [Google Cloud Storage](#google-cloud-storage-gcs)
+- [Azure Blob storage](#azure-blob-storage)
+
+Background upload is not supported with the consolidated object storage
+configuration. We recommend enabling direct upload mode because it does
+not require a shared folder, and [this setting may become the
+default](https://gitlab.com/gitlab-org/gitlab/-/issues/27331).
 
 NOTE: **Note:**
 Consolidated object storage configuration cannot be used for
@@ -113,7 +118,7 @@ See the section on [ETag mismatch errors](#etag-mismatch) for more details.
    AWS access key and secret access key/value pairs. For example:
 
    ```ruby
-   gitlab_rails['object_store_connection'] = {
+   gitlab_rails['object_store']['connection'] = {
      'provider' => 'AWS',
      'region' => '<eu-central-1>',
      'use_iam_profile' => true
@@ -288,7 +293,7 @@ to learn more.
 |---------|-------------|---------|
 | `provider` | Provider name | `AzureRM` |
 | `azure_storage_account_name` | Name of the Azure Blob Storage account used to access the storage | `azuretest` |
-| `azure_storage_access_key` | Storage account access key used to access the container. This is typically a secret, 512-bit encryption key encoded in base64. | `"czV2OHkvQj9FKEgrTWJRZVRoV21ZcTN0Nnc5eiRDJkYpSkBOY1JmVWpYbjJy\nNHU3eCFBJUQqRy1LYVBkU2dWaw==\n"` |
+| `azure_storage_access_key` | Storage account access key used to access the container. This is typically a secret, 512-bit encryption key encoded in base64. | `czV2OHkvQj9FKEgrTWJRZVRoV21ZcTN0Nnc5eiRDJkYpSkBOY1JmVWpYbjJy\nNHU3eCFBJUQqRy1LYVBkU2dWaw==\n` |
 | `azure_storage_domain` | Domain name used to contact the Azure Blob Storage API (optional). Defaults to `blob.core.windows.net`. Set this if you are using Azure China, Azure Germany, Azure US Government, or some other custom Azure domain. | `blob.core.windows.net` |
 
 ##### Azure example (consolidated form)
@@ -364,7 +369,7 @@ Here are the valid connection parameters for Rackspace Cloud, provided by
 | `rackspace_username` | The username of the Rackspace account with access to the container | `joe.smith` |
 | `rackspace_api_key` | The API key of the Rackspace account with access to the container | `ABC123DEF456ABC123DEF456ABC123DE` |
 | `rackspace_region` | The Rackspace storage region to use, a three letter code from the [list of service access endpoints](https://developer.rackspace.com/docs/cloud-files/v1/general-api-info/service-access/) | `iad` |
-| `rackspace_temp_url_key` | The private key you have set in the Rackspace API for temporary URLs. Read more [here](https://developer.rackspace.com/docs/cloud-files/v1/use-cases/public-access-to-your-cloud-files-account/#tempurl) | `ABC123DEF456ABC123DEF456ABC123DE` |
+| `rackspace_temp_url_key` | The private key you have set in the Rackspace API for [temporary URLs](https://developer.rackspace.com/docs/cloud-files/v1/use-cases/public-access-to-your-cloud-files-account/#tempurl). | `ABC123DEF456ABC123DEF456ABC123DE` |
 
 NOTE: **Note:**
 Regardless of whether the container has public access enabled or disabled, Fog will
@@ -500,15 +505,15 @@ supported by consolidated configuration form, refer to the following guides:
 | [Backups](../raketasks/backup_restore.md#uploading-backups-to-a-remote-cloud-storage)|No|
 | [Job artifacts](job_artifacts.md#using-object-storage) and [incremental logging](job_logs.md#new-incremental-logging-architecture) | Yes |
 | [LFS objects](lfs/index.md#storing-lfs-objects-in-remote-object-storage) | Yes |
-| [Uploads](uploads.md#using-object-storage-core-only) | Yes |
+| [Uploads](uploads.md#using-object-storage) | Yes |
 | [Container Registry](packages/container_registry.md#use-object-storage) (optional feature) | No |
 | [Merge request diffs](merge_request_diffs.md#using-object-storage) | Yes |
 | [Mattermost](https://docs.mattermost.com/administration/config-settings.html#file-storage)| No |
 | [Packages](packages/index.md#using-object-storage) (optional feature) **(PREMIUM ONLY)** | Yes |
 | [Dependency Proxy](packages/dependency_proxy.md#using-object-storage) (optional feature) **(PREMIUM ONLY)** | Yes |
 | [Pseudonymizer](pseudonymizer.md#configuration) (optional feature) **(ULTIMATE ONLY)** | No |
-| [Autoscale Runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
-| [Terraform state files](terraform_state.md#using-object-storage-core-only) | Yes |
+| [Autoscale runner caching](https://docs.gitlab.com/runner/configuration/autoscale.html#distributed-runners-caching) (optional for improved performance) | No |
+| [Terraform state files](terraform_state.md#using-object-storage) | Yes |
 
 ### Other alternatives to filesystem storage
 

@@ -188,18 +188,36 @@ describe('actions', () => {
   });
 
   describe('fetchProjects', () => {
-    it('calls project list endpoint', () => {
+    const testListEndpoint = ({ page }) => {
       store.state.projectEndpoints.list = mockListEndpoint;
-      mockAxios.onGet(mockListEndpoint).replyOnce(200);
+      mockAxios
+        .onGet(mockListEndpoint, {
+          params: {
+            page,
+          },
+        })
+        .replyOnce(200, { projects: mockProjects }, mockHeaders);
 
       return testAction(
         actions.fetchProjects,
-        null,
+        page,
         store.state,
-        [],
-        [{ type: 'requestProjects' }, { type: 'receiveProjectsSuccess' }],
+        [
+          {
+            type: 'RECEIVE_PROJECTS_SUCCESS',
+            payload: {
+              headers: mockHeaders,
+              projects: mockProjects,
+            },
+          },
+        ],
+        [{ type: 'requestProjects' }],
       );
-    });
+    };
+
+    it('calls project list endpoint', () => testListEndpoint({ page: null }));
+
+    it('calls paginated project list endpoint', () => testListEndpoint({ page: 2 }));
 
     it('handles response errors', () => {
       store.state.projectEndpoints.list = mockListEndpoint;
@@ -222,23 +240,6 @@ describe('actions', () => {
         null,
         store.state,
         [{ type: types.REQUEST_PROJECTS }],
-        [],
-      );
-    });
-  });
-
-  describe('receiveProjectsSuccess', () => {
-    it('sets projects from data on success', () => {
-      return testAction(
-        actions.receiveProjectsSuccess,
-        { projects: mockProjects },
-        store.state,
-        [
-          {
-            type: types.RECEIVE_PROJECTS_SUCCESS,
-            payload: mockProjects,
-          },
-        ],
         [],
       );
     });
@@ -512,6 +513,31 @@ describe('actions', () => {
           },
         ],
         [],
+      );
+    });
+  });
+
+  describe('paginateDashboard', () => {
+    it('fetches a new page of projects', () => {
+      const newPage = 2;
+
+      return testAction(
+        actions.paginateDashboard,
+        newPage,
+        store.state,
+        [],
+        [
+          {
+            type: 'stopProjectsPolling',
+          },
+          {
+            type: 'clearProjectsEtagPoll',
+          },
+          {
+            type: 'fetchProjects',
+            payload: newPage,
+          },
+        ],
       );
     });
   });

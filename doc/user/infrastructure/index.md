@@ -82,6 +82,10 @@ local machine, this is a simple way to get started:
        -backend-config="retry_wait_min=5"
    ```
 
+   NOTE: **Note:**
+   The name of your state can contain only uppercase and lowercase letters,
+   decimal digits, hyphens and underscores.
+
 You can now run `terraform plan` and `terraform apply` as you normally would.
 
 ## Get started using GitLab CI
@@ -376,16 +380,17 @@ can configure this manually as follows:
 ### Example `.gitlab-ci.yaml` file
 
 ```yaml
-image: registry.gitlab.com/gitlab-org/terraform-images/stable:latest
+default:
+  image: registry.gitlab.com/gitlab-org/terraform-images/stable:latest
+
+  cache:
+    key: example-production
+    paths:
+      - ${TF_ROOT}/.terraform
 
 variables:
   TF_ROOT: ${CI_PROJECT_DIR}/environments/example/production
   TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/example-production
-
-cache:
-  key: example-production
-  paths:
-    - ${TF_ROOT}/.terraform
 
 before_script:
   - cd ${TF_ROOT}
@@ -436,15 +441,16 @@ apply:
 Starting with 13.2, you can display multiple reports on the Merge Request page. The reports will also display the `artifacts: name:`. See example below for a suggested setup.
 
 ```yaml
-image:
-  name: registry.gitlab.com/gitlab-org/gitlab-build-images:terraform
-  entrypoint:
-    - '/usr/bin/env'
-    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+default:
+  image:
+    name: registry.gitlab.com/gitlab-org/gitlab-build-images:terraform
+    entrypoint:
+      - '/usr/bin/env'
+      - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
-cache:
-  paths:
-    - .terraform
+  cache:
+    paths:
+      - .terraform
 
 stages:
   - build

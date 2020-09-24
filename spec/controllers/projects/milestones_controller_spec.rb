@@ -17,7 +17,9 @@ RSpec.describe Projects::MilestonesController do
     controller.instance_variable_set(:@project, project)
   end
 
-  it_behaves_like 'milestone tabs'
+  it_behaves_like 'milestone tabs' do
+    let(:request_params) { { namespace_id: project.namespace, project_id: project, id: milestone.iid } }
+  end
 
   describe "#show" do
     render_views
@@ -135,10 +137,6 @@ RSpec.describe Projects::MilestonesController do
   end
 
   describe "#destroy" do
-    before do
-      stub_feature_flags(track_resource_milestone_change_events: false)
-    end
-
     it "removes milestone" do
       expect(issue.milestone_id).to eq(milestone.id)
 
@@ -153,10 +151,6 @@ RSpec.describe Projects::MilestonesController do
 
       merge_request.reload
       expect(merge_request.milestone_id).to eq(nil)
-
-      # Check system note left for milestone removal
-      last_note = project.issues.find(issue.id).notes[-1].note
-      expect(last_note).to eq('removed milestone')
     end
   end
 

@@ -163,9 +163,8 @@ module EE
       private
 
       def project_has_subscriptions?
-        return false unless ::Feature.enabled?(:ci_project_subscriptions, project)
-
-        project.downstream_projects.any?
+        project.beta_feature_available?(:ci_project_subscriptions) &&
+          project.downstream_projects.any?
       end
 
       def merge_train_ref?

@@ -14,7 +14,7 @@ import {
   secondRequest,
   zoomMeetingUrl,
 } from '../mock_data';
-import IncidentTabs from '~/issue_show/components/incident_tabs.vue';
+import IncidentTabs from '~/issue_show/components/incidents/incident_tabs.vue';
 import DescriptionComponent from '~/issue_show/components/description.vue';
 import PinnedLinks from '~/issue_show/components/pinned_links.vue';
 
@@ -36,9 +36,18 @@ describe('Issuable output', () => {
 
   const findStickyHeader = () => wrapper.find('[data-testid="issue-sticky-header"]');
 
-  const mountComponent = (props = {}) => {
+  const mountComponent = (props = {}, options = {}) => {
     wrapper = mount(IssuableApp, {
       propsData: { ...appProps, ...props },
+      provide: {
+        fullPath: 'gitlab-org/incidents',
+        iid: '19',
+      },
+      stubs: {
+        HighlightBar: true,
+        IncidentTabs: true,
+      },
+      ...options,
     });
   };
 
@@ -69,6 +78,8 @@ describe('Issuable output', () => {
       });
 
     mountComponent();
+
+    jest.advanceTimersByTime(2);
   });
 
   afterEach(() => {
@@ -575,10 +586,23 @@ describe('Issuable output', () => {
 
     describe('when using incident tabs description wrapper', () => {
       beforeEach(() => {
-        mountComponent({
-          descriptionComponent: IncidentTabs,
-          showTitleBorder: false,
-        });
+        mountComponent(
+          {
+            descriptionComponent: IncidentTabs,
+            showTitleBorder: false,
+          },
+          {
+            mocks: {
+              $apollo: {
+                queries: {
+                  alert: {
+                    loading: false,
+                  },
+                },
+              },
+            },
+          },
+        );
       });
 
       it('renders the description component', () => {

@@ -229,7 +229,7 @@ export default {
       return this.enabledReports.sast;
     },
     hasSecretScanningReports() {
-      return this.enabledReports.secretScanning;
+      return this.enabledReports.secretDetection;
     },
     isMRActive() {
       return this.mrState !== mrStates.merged && this.mrState !== mrStates.closed;

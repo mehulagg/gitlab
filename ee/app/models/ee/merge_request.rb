@@ -14,11 +14,26 @@ module EE
       include Elastic::ApplicationVersionedSearch
       include DeprecatedApprovalsBeforeMerge
       include UsageStatistics
+      include IterationEventable
 
       has_many :approvers, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
       has_many :approver_users, through: :approvers, source: :user
       has_many :approver_groups, as: :target, dependent: :delete_all # rubocop:disable Cop/ActiveRecordDependent
-      has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request
+      has_many :approval_rules, class_name: 'ApprovalMergeRequestRule', inverse_of: :merge_request do
+        def applicable_to_branch(branch)
+          ActiveRecord::Associations::Preloader.new.preload(
+            self,
+            [:users, :groups, approval_project_rule: [:users, :groups, :protected_branches]]
+          )
+
+          self.select do |rule|
+            next true unless rule.approval_project_rule.present?
+            next true if rule.overridden?
+
+            rule.approval_project_rule.applies_to_branch?(branch)
+          end
+        end
+      end
       has_one :merge_train, inverse_of: :merge_request, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
 
       has_many :blocks_as_blocker,
@@ -103,7 +118,7 @@ module EE
     end
 
     override :mergeable?
-    def mergeable?(skip_ci_check: false)
+    def mergeable?(skip_ci_check: false, skip_discussions_check: false)
       return false unless approved?
       return false if has_denied_policies?
       return false if merge_blocked_by_other_mrs?
@@ -164,7 +179,8 @@ module EE
         dast: report_type_enabled?(:dast),
         dependency_scanning: report_type_enabled?(:dependency_scanning),
         license_scanning: report_type_enabled?(:license_scanning),
-        coverage_fuzzing: report_type_enabled?(:coverage_fuzzing)
+        coverage_fuzzing: report_type_enabled?(:coverage_fuzzing),
+        secret_detection: report_type_enabled?(:secret_detection)
       }
     end
 

@@ -42,7 +42,7 @@ RSpec.describe Ci::Minutes::EmailNotificationService do
 
     context 'with a personal namespace' do
       before do
-        namespace.update(owner_id: user.id)
+        namespace.update!(owner_id: user.id)
       end
 
       it_behaves_like 'namespace with available CI minutes' do

@@ -68,7 +68,6 @@ module EE
 
       def group_push_rule_available?
         return false unless project.group
-        return false unless ::Feature.enabled?(:group_push_rules, project.group.root_ancestor)
 
         !!project.group.predefined_push_rule
       end

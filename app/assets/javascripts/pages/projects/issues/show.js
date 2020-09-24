@@ -1,3 +1,4 @@
+import loadAwardsHandler from '~/awards_handler';
 import initIssuableSidebar from '~/init_issuable_sidebar';
 import Issue from '~/issue';
 import ShortcutsIssuable from '~/behaviors/shortcuts/shortcuts_issuable';
@@ -17,19 +18,13 @@ export default function() {
 
   if (issueType === 'incident') {
     initIncidentApp(issuableData);
-  } else {
+  } else if (issueType === 'issue') {
     initIssueApp(issuableData);
   }
 
   initIssuableHeaderWarning(store);
   initSentryErrorStackTraceApp();
   initRelatedMergeRequestsApp();
-
-  // This will be removed when we remove the `design_management_moved` feature flag
-  // See https://gitlab.com/gitlab-org/gitlab/-/issues/223197
-  import(/* webpackChunkName: 'design_management' */ '~/design_management_legacy')
-    .then(module => module.default())
-    .catch(() => {});
 
   import(/* webpackChunkName: 'design_management' */ '~/design_management')
     .then(module => module.default())
@@ -43,4 +38,6 @@ export default function() {
   } else {
     initIssuableSidebar();
   }
+
+  loadAwardsHandler();
 }

@@ -106,6 +106,13 @@ The following metrics are available:
 | `successful_login_captcha_total`                               | Gauge     |                   11.0 | Counter of successful CAPTCHA attempts during login                                                 |                                                     |
 | `auto_devops_pipelines_completed_total`                        | Counter   |                   12.7 | Counter of completed Auto DevOps pipelines, labeled by status                                       |                                                     |
 | `gitlab_metrics_dashboard_processing_time_ms`                  | Summary   |                  12.10 | Metrics dashboard processing time in milliseconds | service, stages |
+| `action_cable_active_connections`                              | Gauge     |                   13.4 | Number of ActionCable WS clients currently connected | `server_mode` |
+| `action_cable_pool_min_size`                                   | Gauge     |                   13.4 | Minimum number of worker threads in ActionCable thread pool | `server_mode` |
+| `action_cable_pool_max_size`                                   | Gauge     |                   13.4 | Maximum number of worker threads in ActionCable thread pool | `server_mode` |
+| `action_cable_pool_current_size`                               | Gauge     |                   13.4 | Current number of worker threads in ActionCable thread pool | `server_mode` |
+| `action_cable_pool_largest_size`                               | Gauge     |                   13.4 | Largest number of worker threads observed so far in ActionCable thread pool | `server_mode` |
+| `action_cable_pool_pending_tasks`                              | Gauge     |                   13.4 | Number of tasks waiting to be executed in ActionCable thread pool | `server_mode` |
+| `action_cable_pool_tasks_total`                                | Gauge     |                   13.4 | Total number of tasks executed in ActionCable thread pool | `server_mode` |
 
 ## Metrics controlled by a feature flag
 
@@ -185,6 +192,21 @@ configuration option in `gitlab.yml`. These metrics are served from the
 | `geo_terraform_states_registry`                | Gauge   | 13.3  | Number of terraform states in the registry | `url` |
 | `global_search_bulk_cron_queue_size`           | Gauge   | 12.10 | Number of database records waiting to be synchronized to Elasticsearch | |
 | `global_search_awaiting_indexing_queue_size`   | Gauge   | 13.2  | Number of database updates waiting to be synchronized to Elasticsearch while indexing is paused | |
+| `geo_merge_request_diffs`                      | Gauge   | 13.4  | Number of merge request diffs on primary | `url` |
+| `geo_merge_request_diffs_checksummed`          | Gauge   | 13.4  | Number of merge request diffs checksummed on primary | `url` |
+| `geo_merge_request_diffs_checksum_failed`      | Gauge   | 13.4  | Number of merge request diffs failed to calculate the checksum on primary | `url` |
+| `geo_merge_request_diffs_synced`               | Gauge   | 13.4  | Number of syncable merge request diffs synced on secondary | `url` |
+| `geo_merge_request_diffs_failed`               | Gauge   | 13.4  | Number of syncable merge request diffs failed to sync on secondary | `url` |
+| `geo_merge_request_diffs_registry`             | Gauge   | 13.4  | Number of merge request diffs in the registry | `url` |
+| `geo_snippet_repositories`                     | Gauge   | 13.4  | Number of snippets on primary | `url` |
+| `geo_snippet_repositories_checksummed`         | Gauge   | 13.4  | Number of snippets checksummed on primary | `url` |
+| `geo_snippet_repositories_checksum_failed`     | Gauge   | 13.4  | Number of snippets failed to calculate the checksum on primary | `url` |
+| `geo_snippet_repositories_synced`              | Gauge   | 13.4  | Number of syncable snippets synced on secondary | `url` |
+| `geo_snippet_repositories_failed`              | Gauge   | 13.4  | Number of syncable snippets failed on secondary | `url` |
+| `geo_snippet_repositories_registry`            | Gauge   | 13.4  | Number of syncable snippets in the registry | `url` |
+| `limited_capacity_worker_running_jobs`         | Gauge   | 13.5  | Number of running jobs | `worker` |
+| `limited_capacity_worker_max_running_jobs`     | Gauge   | 13.5  | Maximum number of running jobs | `worker` |
+| `limited_capacity_worker_remaining_work_count` | Gauge   | 13.5  | Number of jobs waiting to be enqueued | `worker` |
 
 ## Database load balancing metrics **(PREMIUM ONLY)**
 

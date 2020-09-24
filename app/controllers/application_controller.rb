@@ -484,7 +484,7 @@ class ApplicationController < ActionController::Base
 
   def set_page_title_header
     # Per https://tools.ietf.org/html/rfc5987, headers need to be ISO-8859-1, not UTF-8
-    response.headers['Page-Title'] = URI.escape(page_title('GitLab'))
+    response.headers['Page-Title'] = Addressable::URI.encode_component(page_title('GitLab'))
   end
 
   def set_current_admin(&block)
@@ -551,13 +551,9 @@ class ApplicationController < ActionController::Base
     "#{self.class.name}##{action_name}"
   end
 
-  # A user requires a role and have the setup_for_company attribute set when they are part of the experimental signup
-  # flow (executed by the Growth team). Users are redirected to the welcome page when their role is required and the
-  # experiment is enabled for the current user.
   def required_signup_info
     return unless current_user
     return unless current_user.role_required?
-    return unless experiment_enabled?(:signup_flow)
 
     store_location_for :user, request.fullpath
 

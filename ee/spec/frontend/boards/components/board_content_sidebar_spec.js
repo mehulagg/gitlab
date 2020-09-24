@@ -1,7 +1,9 @@
-import { shallowMount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils';
 import { GlDrawer } from '@gitlab/ui';
 import waitForPromises from 'helpers/wait_for_promises';
 import BoardContentSidebar from 'ee_component/boards/components/board_content_sidebar.vue';
+import IssuableAssignees from '~/sidebar/components/assignees/issuable_assignees.vue';
+import IssuableTitle from '~/boards/components/issuable_title.vue';
 import { createStore } from '~/boards/stores';
 import { ISSUABLE } from '~/boards/constants';
 
@@ -10,7 +12,10 @@ describe('ee/BoardContentSidebar', () => {
   let store;
 
   const createComponent = () => {
-    wrapper = shallowMount(BoardContentSidebar, {
+    wrapper = mount(BoardContentSidebar, {
+      provide: {
+        rootPath: '',
+      },
       store,
     });
   };
@@ -18,13 +23,15 @@ describe('ee/BoardContentSidebar', () => {
   beforeEach(() => {
     store = createStore();
     store.state.sidebarType = ISSUABLE;
-    store.state.activeId = 1;
+    store.state.issues = { '1': { title: 'One', referencePath: 'path', assignees: [] } };
+    store.state.activeId = '1';
 
     createComponent();
   });
 
   afterEach(() => {
     wrapper.destroy();
+    wrapper = null;
   });
 
   it('confirms we render GlDrawer', () => {
@@ -33,6 +40,14 @@ describe('ee/BoardContentSidebar', () => {
 
   it('applies an open attribute', () => {
     expect(wrapper.find(GlDrawer).props('open')).toBe(true);
+  });
+
+  it('finds IssuableTitle', () => {
+    expect(wrapper.find(IssuableTitle).text()).toContain('One');
+  });
+
+  it('renders IssuableAssignees', () => {
+    expect(wrapper.find(IssuableAssignees).exists()).toBe(true);
   });
 
   describe('when we emit close', () => {

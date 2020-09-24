@@ -58,6 +58,8 @@ class User < ApplicationRecord
   devise :lockable, :recoverable, :rememberable, :trackable,
          :validatable, :omniauthable, :confirmable, :registerable
 
+  include AdminChangedPasswordNotifier
+
   # This module adds async behaviour to Devise emails
   # and should be added after Devise modules are initialized.
   include AsyncDeviseEmail
@@ -68,8 +70,6 @@ class User < ApplicationRecord
                     "administrator if you think this is an error."
 
   MINIMUM_INACTIVE_DAYS = 180
-
-  ignore_column :bio, remove_with: '13.4', remove_after: '2020-09-22'
 
   # Override Devise::Models::Trackable#update_tracked_fields!
   # to limit database writes to at most once every hour
@@ -111,13 +111,14 @@ class User < ApplicationRecord
   has_many :personal_access_tokens, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_many :identities, dependent: :destroy, autosave: true # rubocop:disable Cop/ActiveRecordDependent
   has_many :u2f_registrations, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
+  has_many :webauthn_registrations
   has_many :chat_names, dependent: :destroy # rubocop:disable Cop/ActiveRecordDependent
   has_one :user_synced_attributes_metadata, autosave: true
   has_one :aws_role, class_name: 'Aws::Role'
 
   # Groups
   has_many :members
-  has_many :group_members, -> { where(requested_at: nil) }, source: 'GroupMember'
+  has_many :group_members, -> { where(requested_at: nil).where("access_level >= ?", Gitlab::Access::GUEST) }, source: 'GroupMember'
   has_many :groups, through: :group_members
   has_many :owned_groups, -> { where(members: { access_level: Gitlab::Access::OWNER }) }, through: :group_members, source: :group
   has_many :maintainers_groups, -> { where(members: { access_level: Gitlab::Access::MAINTAINER }) }, through: :group_members, source: :group
@@ -276,6 +277,7 @@ class User < ApplicationRecord
             :view_diffs_file_by_file, :view_diffs_file_by_file=,
             :tab_width, :tab_width=,
             :sourcegraph_enabled, :sourcegraph_enabled=,
+            :gitpod_enabled, :gitpod_enabled=,
             :setup_for_company, :setup_for_company=,
             :render_whitespace_in_code, :render_whitespace_in_code=,
             :experience_level, :experience_level=,
@@ -284,6 +286,7 @@ class User < ApplicationRecord
   delegate :path, to: :namespace, allow_nil: true, prefix: true
   delegate :job_title, :job_title=, to: :user_detail, allow_nil: true
   delegate :bio, :bio=, :bio_html, to: :user_detail, allow_nil: true
+  delegate :webauthn_xid, :webauthn_xid=, to: :user_detail, allow_nil: true
 
   accepts_nested_attributes_for :user_preference, update_only: true
   accepts_nested_attributes_for :user_detail, update_only: true
@@ -432,14 +435,21 @@ class User < ApplicationRecord
         FROM u2f_registrations AS u2f
         WHERE u2f.user_id = users.id
       ) OR users.otp_required_for_login = ?
+      OR
+      EXISTS (
+        SELECT *
+        FROM webauthn_registrations AS webauthn
+        WHERE webauthn.user_id = users.id
+      )
     SQL
 
     where(with_u2f_registrations, true)
   end
 
   def self.without_two_factor
-    joins("LEFT OUTER JOIN u2f_registrations AS u2f ON u2f.user_id = users.id")
-      .where("u2f.id IS NULL AND users.otp_required_for_login = ?", false)
+    joins("LEFT OUTER JOIN u2f_registrations AS u2f ON u2f.user_id = users.id
+           LEFT OUTER JOIN webauthn_registrations AS webauthn ON webauthn.user_id = users.id")
+      .where("u2f.id IS NULL AND webauthn.id IS NULL AND users.otp_required_for_login = ?", false)
   end
 
   #
@@ -752,11 +762,12 @@ class User < ApplicationRecord
         otp_backup_codes:            nil
       )
       self.u2f_registrations.destroy_all # rubocop: disable Cop/DestroyAll
+      self.webauthn_registrations.destroy_all # rubocop: disable Cop/DestroyAll
     end
   end
 
   def two_factor_enabled?
-    two_factor_otp_enabled? || two_factor_u2f_enabled?
+    two_factor_otp_enabled? || two_factor_webauthn_u2f_enabled?
   end
 
   def two_factor_otp_enabled?
@@ -769,6 +780,16 @@ class User < ApplicationRecord
     else
       u2f_registrations.exists?
     end
+  end
+
+  def two_factor_webauthn_u2f_enabled?
+    two_factor_u2f_enabled? || two_factor_webauthn_enabled?
+  end
+
+  def two_factor_webauthn_enabled?
+    return false unless Feature.enabled?(:webauthn)
+
+    (webauthn_registrations.loaded? && webauthn_registrations.any?) || (!webauthn_registrations.loaded? && webauthn_registrations.exists?)
   end
 
   def namespace_move_dir_allowed
@@ -1461,6 +1482,11 @@ class User < ApplicationRecord
     end
   end
 
+  def notification_settings_for_groups(groups)
+    ids = groups.is_a?(ActiveRecord::Relation) ? groups.select(:id) : groups.map(&:id)
+    notification_settings.for_groups.where(source_id: ids)
+  end
+
   # Lazy load global notification setting
   # Initializes User setting with Participating level if setting not persisted
   def global_notification_setting
@@ -1688,9 +1714,6 @@ class User < ApplicationRecord
     [last_activity, last_sign_in].compact.max
   end
 
-  # Below is used for the signup_flow experiment. Should be removed
-  # when experiment finishes.
-  # See https://gitlab.com/gitlab-org/growth/engineering/issues/64
   REQUIRES_ROLE_VALUE = 99
 
   def role_required?
@@ -1700,7 +1723,6 @@ class User < ApplicationRecord
   def set_role_required!
     update_column(:role, REQUIRES_ROLE_VALUE)
   end
-  # End of signup_flow experiment methods
 
   def dismissed_callout?(feature_name:, ignore_dismissal_earlier_than: nil)
     callouts = self.callouts.with_feature_name(feature_name)

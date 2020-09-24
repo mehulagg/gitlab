@@ -20,6 +20,7 @@ module Geo
         Geo::DesignRegistry,
         Geo::JobArtifactRegistry,
         Geo::LfsObjectRegistry,
+        Geo::MergeRequestDiffRegistry,
         Geo::PackageFileRegistry,
         Geo::ProjectRegistry,
         Geo::TerraformStateRegistry,

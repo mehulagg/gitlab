@@ -1,0 +1,5 @@
+---
+title: Allowlist GitLab-owned bots for SpamActionService
+merge_request: 42905
+author:
+type: changed

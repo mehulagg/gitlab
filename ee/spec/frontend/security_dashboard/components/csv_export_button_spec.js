@@ -2,24 +2,26 @@ import { shallowMount } from '@vue/test-utils';
 import { GlLoadingIcon, GlIcon } from '@gitlab/ui';
 import MockAdapter from 'axios-mock-adapter';
 import { TEST_HOST } from 'helpers/test_constants';
+import { useFakeDate } from 'helpers/fake_date';
 import CsvExportButton, {
   STORAGE_KEY,
 } from 'ee/security_dashboard/components/csv_export_button.vue';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import statusCodes from '~/lib/utils/http_status';
 import axios from '~/lib/utils/axios_utils';
+import downloader from '~/lib/utils/downloader';
+import { formatDate } from '~/lib/utils/datetime_utility';
 
 jest.mock('~/flash');
-jest.mock('~/lib/utils/datetime_utility', () => ({
-  formatDate: () => '2020-04-12-10T14_32_35',
-}));
+jest.mock('~/lib/utils/downloader');
+useFakeDate();
 
+const mockReportDate = formatDate(new Date(), 'isoDateTime');
 const vulnerabilitiesExportEndpoint = `${TEST_HOST}/vulnerability_findings.csv`;
 
 describe('Csv Button Export', () => {
   let mock;
   let wrapper;
-  let spy;
 
   const issueUrl = 'https://gitlab.com/gitlab-org/gitlab/issues/197111';
   const findPopoverExternalLink = () => wrapper.find({ ref: 'popoverExternalLink' });
@@ -39,21 +41,12 @@ describe('Csv Button Export', () => {
     });
   };
 
-  const setupMocksAndSpy = (statusLink, downloadLink, downloadAnchor, status = 'finished') => {
+  const mockCsvExportRequest = (download, status = 'finished') => {
     mock
       .onPost(vulnerabilitiesExportEndpoint)
-      .reply(statusCodes.ACCEPTED, { _links: { self: statusLink } });
-    mock.onGet(statusLink).reply(() => {
-      // We need to mock it at this stage because vue internally uses
-      // document.createElement to mount the elements.
-      spy = jest.spyOn(document, 'createElement').mockImplementationOnce(() => {
-        // eslint-disable-next-line no-param-reassign
-        downloadAnchor.click = jest.fn();
-        return downloadAnchor;
-      });
+      .reply(statusCodes.ACCEPTED, { _links: { self: 'status/url' } });
 
-      return [statusCodes.OK, { _links: { download: downloadLink }, status }];
-    });
+    mock.onGet('status/url').reply(statusCodes.OK, { _links: { download }, status });
   };
 
   afterEach(() => {
@@ -75,62 +68,53 @@ describe('Csv Button Export', () => {
       );
     });
 
-    it('is a link that initiates the download and polls until the file is ready, and then opens the download in a new tab.', () => {
-      const downloadAnchor = document.createElement('a');
-      const statusLink = '/poll/until/complete';
-      const downloadLink = '/link/to/download';
-
-      setupMocksAndSpy(statusLink, downloadLink, downloadAnchor);
+    it('will start the download when clicked', async () => {
+      const url = 'download/url';
+      mockCsvExportRequest(url);
 
       findCsvExportButton().vm.$emit('click');
+      await axios.waitForAll();
 
-      return axios.waitForAll().then(() => {
-        expect(spy).toHaveBeenCalledWith('a');
-        expect(downloadAnchor.href).toContain(downloadLink);
-        expect(downloadAnchor.getAttribute('download')).toBe(
-          `csv-export-2020-04-12-10T14_32_35.csv`,
-        );
-        expect(downloadAnchor.click).toHaveBeenCalled();
+      expect(mock.history.post).toHaveLength(1); // POST is the create report endpoint.
+      expect(mock.history.get).toHaveLength(1); // GET is the poll endpoint.
+      expect(downloader).toHaveBeenCalledTimes(1);
+      expect(downloader).toHaveBeenCalledWith({
+        fileName: `csv-export-${mockReportDate}.csv`,
+        url,
       });
     });
 
-    it(`shows the flash error when the export job status is 'failed'`, () => {
-      setupMocksAndSpy(
-        '/poll/until/complete',
-        '/link/to/download',
-        document.createElement('a'),
-        'failed',
-      );
+    it('shows the flash error when the export job status is failed', async () => {
+      mockCsvExportRequest('', 'failed');
 
       findCsvExportButton().vm.$emit('click');
+      await axios.waitForAll();
 
-      return axios.waitForAll().then(() => {
-        expect(spy).not.toHaveBeenCalled();
-        expect(createFlash).toHaveBeenCalledWith('There was an error while generating the report.');
-      });
+      expect(downloader).not.toHaveBeenCalled();
+      expect(createFlash).toHaveBeenCalledWith('There was an error while generating the report.');
     });
 
-    it('shows the flash error when backend fails to generate the export', () => {
+    it('shows the flash error when backend fails to generate the export', async () => {
       mock.onPost(vulnerabilitiesExportEndpoint).reply(statusCodes.NOT_FOUND, {});
 
       findCsvExportButton().vm.$emit('click');
+      await axios.waitForAll();
 
-      return axios.waitForAll().then(() => {
-        expect(createFlash).toHaveBeenCalledWith('There was an error while generating the report.');
-      });
+      expect(createFlash).toHaveBeenCalledWith('There was an error while generating the report.');
     });
 
-    it('displays the export icon when not loading and the loading icon when loading', () => {
-      expect(findCsvExportButton().props('icon')).toBe('export');
-      expect(findCsvExportButton().props('loading')).toBe(false);
-
-      wrapper.setData({
-        isPreparingCsvExport: true,
+    it('displays the export icon when not loading and the loading icon when loading', async () => {
+      expect(findCsvExportButton().props()).toMatchObject({
+        icon: 'export',
+        loading: false,
       });
 
-      return wrapper.vm.$nextTick(() => {
-        expect(findCsvExportButton().props('icon')).toBeFalsy();
-        expect(findCsvExportButton().props('loading')).toBe(true);
+      wrapper.setData({ isPreparingCsvExport: true });
+      await wrapper.vm.$nextTick();
+
+      expect(findCsvExportButton().props()).toMatchObject({
+        icon: '',
+        loading: true,
       });
     });
 
@@ -138,13 +122,13 @@ describe('Csv Button Export', () => {
       expect(findPopover().attributes('show')).toBeTruthy();
     });
 
-    it('closes the popover when the button is clicked', () => {
+    it('closes the popover when the button is clicked', async () => {
       const button = findPopoverButton();
       expect(button.text().trim()).toBe('Got it!');
       button.vm.$emit('click');
-      return wrapper.vm.$nextTick(() => {
-        expect(findPopover().attributes('show')).toBeFalsy();
-      });
+      await wrapper.vm.$nextTick();
+
+      expect(findPopover().attributes('show')).toBeUndefined();
     });
   });
 

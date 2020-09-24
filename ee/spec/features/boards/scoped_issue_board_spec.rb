@@ -4,6 +4,7 @@ require 'spec_helper'
 
 RSpec.describe 'Scoped issue boards', :js do
   include FilteredSearchHelpers
+  include MobileHelpers
 
   let(:user) { create(:user) }
   let(:group) { create(:group, :public) }
@@ -34,8 +35,14 @@ RSpec.describe 'Scoped issue boards', :js do
 
       login_as(user)
 
+      # ensure there is enough vertical space for create/edit board modal
+      resize_window(1920, 1080)
       visit project_boards_path(project)
       wait_for_requests
+    end
+
+    after do
+      restore_window_size
     end
 
     context 'new board' do

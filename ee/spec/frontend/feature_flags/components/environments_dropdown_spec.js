@@ -1,14 +1,16 @@
 import MockAdapter from 'axios-mock-adapter';
 import { shallowMount } from '@vue/test-utils';
-import { GlLoadingIcon, GlDeprecatedButton } from '@gitlab/ui';
+import { GlLoadingIcon, GlDeprecatedButton, GlSearchBoxByType } from '@gitlab/ui';
 import EnvironmentsDropdown from 'ee/feature_flags/components/environments_dropdown.vue';
 import { TEST_HOST } from 'spec/test_constants';
+import waitForPromises from 'helpers/wait_for_promises';
 import axios from '~/lib/utils/axios_utils';
+import httpStatusCodes from '~/lib/utils/http_status';
 
 describe('Feature flags > Environments dropdown ', () => {
   let wrapper;
   let mock;
-
+  const results = ['production', 'staging'];
   const factory = props => {
     wrapper = shallowMount(EnvironmentsDropdown, {
       propsData: {
@@ -17,6 +19,9 @@ describe('Feature flags > Environments dropdown ', () => {
       },
     });
   };
+
+  const findEnvironmentSearchInput = () => wrapper.find(GlSearchBoxByType);
+  const findDropdownMenu = () => wrapper.find('.dropdown-menu');
 
   afterEach(() => {
     wrapper.destroy();
@@ -30,98 +35,111 @@ describe('Feature flags > Environments dropdown ', () => {
   describe('without value', () => {
     it('renders the placeholder', () => {
       factory();
-
-      expect(wrapper.find('input').attributes('placeholder')).toEqual('Search an environment spec');
+      expect(findEnvironmentSearchInput().vm.$attrs.placeholder).toBe('Search an environment spec');
     });
   });
 
   describe('with value', () => {
     it('sets filter to equal the value', () => {
       factory({ value: 'production' });
+      expect(findEnvironmentSearchInput().props('value')).toBe('production');
+    });
+  });
 
-      expect(wrapper.vm.filter).toEqual('production');
+  describe('on focus', () => {
+    it('sets results with the received data', async () => {
+      mock.onGet(`${TEST_HOST}/environments.json'`).replyOnce(httpStatusCodes.OK, results);
+      factory();
+      findEnvironmentSearchInput().vm.$emit('focus');
+      await waitForPromises();
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('.dropdown-content > ul').exists()).toBe(true);
+      expect(wrapper.findAll('.dropdown-content > ul > li').exists()).toBe(true);
+    });
+  });
+
+  describe('on keyup', () => {
+    it('sets results with the received data', async () => {
+      mock.onGet(`${TEST_HOST}/environments.json'`).replyOnce(httpStatusCodes.OK, results);
+      factory();
+      findEnvironmentSearchInput().vm.$emit('keyup');
+      await waitForPromises();
+      await wrapper.vm.$nextTick();
+      expect(wrapper.find('.dropdown-content > ul').exists()).toBe(true);
+      expect(wrapper.findAll('.dropdown-content > ul > li').exists()).toBe(true);
     });
   });
 
   describe('on input change', () => {
-    const results = ['production', 'staging'];
     describe('on success', () => {
-      beforeEach(() => {
-        mock.onGet(`${TEST_HOST}/environments.json'`).replyOnce(200, results);
-
+      beforeEach(async () => {
+        mock.onGet(`${TEST_HOST}/environments.json'`).replyOnce(httpStatusCodes.OK, results);
         factory();
-
-        wrapper.find('input').setValue('production');
+        findEnvironmentSearchInput().vm.$emit('focus');
+        findEnvironmentSearchInput().vm.$emit('input', 'production');
+        await waitForPromises();
+        await wrapper.vm.$nextTick();
       });
 
       it('sets filter value', () => {
-        expect(wrapper.vm.filter).toEqual('production');
+        expect(findEnvironmentSearchInput().props('value')).toBe('production');
       });
 
       describe('with received data', () => {
-        beforeEach(done => setImmediate(() => done()));
         it('sets is loading to false', () => {
-          expect(wrapper.vm.isLoading).toEqual(false);
-
-          expect(wrapper.find(GlLoadingIcon).exists()).toEqual(false);
+          expect(wrapper.vm.isLoading).toBe(false);
+          expect(wrapper.find(GlLoadingIcon).exists()).toBe(false);
         });
 
-        it('sets results with the received data', () => {
-          expect(wrapper.vm.results).toEqual(results);
+        it('shows the suggestions', () => {
+          expect(findDropdownMenu().exists()).toBe(true);
         });
 
-        it('sets showSuggestions to true', () => {
-          expect(wrapper.vm.showSuggestions).toEqual(true);
-        });
-
-        it('emits event when a suggestion is clicked', () => {
+        it('emits event when a suggestion is clicked', async () => {
           const button = wrapper
             .findAll(GlDeprecatedButton)
             .filter(b => b.text() === 'production')
             .at(0);
           button.vm.$emit('click');
-
-          return wrapper.vm.$nextTick().then(() => {
-            expect(wrapper.emitted('selectEnvironment')).toEqual([['production']]);
-          });
+          await wrapper.vm.$nextTick();
+          expect(wrapper.emitted('selectEnvironment')).toEqual([['production']]);
         });
       });
+
       describe('on click clear button', () => {
-        beforeEach(() => {
+        beforeEach(async () => {
           wrapper.find(GlDeprecatedButton).vm.$emit('click');
+          await wrapper.vm.$nextTick();
         });
 
         it('resets filter value', () => {
-          expect(wrapper.vm.filter).toEqual('');
+          expect(findEnvironmentSearchInput().props('value')).toBe('');
         });
 
         it('closes list of suggestions', () => {
-          expect(wrapper.vm.showSuggestions).toEqual(false);
+          expect(wrapper.vm.showSuggestions).toBe(false);
         });
       });
     });
   });
 
   describe('on click create button', () => {
-    beforeEach(done => {
-      mock.onGet(`${TEST_HOST}/environments.json'`).replyOnce(200, []);
-
+    beforeEach(async () => {
+      mock.onGet(`${TEST_HOST}/environments.json'`).replyOnce(httpStatusCodes.OK, []);
       factory();
-
-      wrapper.find('input').setValue('production');
-
-      setImmediate(() => done());
+      findEnvironmentSearchInput().vm.$emit('focus');
+      findEnvironmentSearchInput().vm.$emit('input', 'production');
+      await waitForPromises();
+      await wrapper.vm.$nextTick();
     });
 
-    it('emits create event', () => {
+    it('emits create event', async () => {
       wrapper
         .findAll(GlDeprecatedButton)
-        .at(1)
+        .at(0)
         .vm.$emit('click');
-
-      return wrapper.vm.$nextTick().then(() => {
-        expect(wrapper.emitted('createClicked')).toEqual([['production']]);
-      });
+      await wrapper.vm.$nextTick();
+      expect(wrapper.emitted('createClicked')).toEqual([['production']]);
     });
   });
 });

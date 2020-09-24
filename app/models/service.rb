@@ -7,13 +7,11 @@ class Service < ApplicationRecord
   include Importable
   include ProjectServicesLoggable
   include DataFields
-  include IgnorableColumns
-
-  ignore_columns %i[default], remove_with: '13.5', remove_after: '2020-10-22'
+  include FromUnion
 
   SERVICE_NAMES = %w[
     alerts asana assembla bamboo bugzilla buildkite campfire confluence custom_issue_tracker discord
-    drone_ci emails_on_push external_wiki flowdock hangouts_chat hipchat irker jira
+    drone_ci emails_on_push ewm external_wiki flowdock hangouts_chat hipchat irker jira
     mattermost mattermost_slash_commands microsoft_teams packagist pipelines_email
     pivotaltracker prometheus pushover redmine slack slack_slash_commands teamcity unify_circuit webex_teams youtrack
   ].freeze
@@ -46,6 +44,7 @@ class Service < ApplicationRecord
   after_commit :cache_project_has_external_wiki
 
   belongs_to :project, inverse_of: :services
+  belongs_to :group, inverse_of: :services
   has_one :service_hook
 
   validates :project_id, presence: true, unless: -> { template? || instance? || group_id }
@@ -226,7 +225,8 @@ class Service < ApplicationRecord
 
     service.template = false
     service.instance = false
-    service.inherit_from_id = integration.id if integration.instance?
+    service.group = nil
+    service.inherit_from_id = integration.id if integration.instance? || integration.group
     service.project_id = project_id
     service.active = false if service.invalid?
     service
@@ -236,9 +236,24 @@ class Service < ApplicationRecord
     exists?(instance: true, type: type)
   end
 
-  def self.instance_for(type)
-    find_by(instance: true, type: type)
+  def self.default_integration(type, scope)
+    closest_group_integration(type, scope) || instance_level_integration(type)
   end
+
+  def self.closest_group_integration(type, scope)
+    group_ids = scope.ancestors.select(:id)
+    array = group_ids.to_sql.present? ? "array(#{group_ids.to_sql})" : 'ARRAY[]'
+
+    where(type: type, group_id: group_ids)
+      .order(Arel.sql("array_position(#{array}::bigint[], services.group_id)"))
+      .first
+  end
+  private_class_method :closest_group_integration
+
+  def self.instance_level_integration(type)
+    find_by(type: type, instance: true)
+  end
+  private_class_method :instance_level_integration
 
   def activated?
     active
@@ -294,7 +309,7 @@ class Service < ApplicationRecord
   end
 
   def to_service_hash
-    as_json(methods: :type, except: %w[id template instance project_id])
+    as_json(methods: :type, except: %w[id template instance project_id group_id])
   end
 
   def to_data_fields_hash

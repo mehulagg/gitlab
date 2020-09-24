@@ -193,16 +193,20 @@ table {
       }
     }
 
+    .detected {
+      width: 9%;
+    }
+
     .status {
       width: 8%;
     }
 
     .severity {
-      width: 9%;
+      width: 10%;
     }
 
     .identifier {
-      width: 12%;
+      width: 16%;
     }
 
     .scanner {

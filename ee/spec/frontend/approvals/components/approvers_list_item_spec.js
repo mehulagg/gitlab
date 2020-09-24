@@ -1,5 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
-import { GlDeprecatedButton } from '@gitlab/ui';
+import { GlButton } from '@gitlab/ui';
 import { TYPE_USER, TYPE_GROUP, TYPE_HIDDEN_GROUPS } from 'ee/approvals/constants';
 import ApproversListItem from 'ee/approvals/components/approvers_list_item.vue';
 import HiddenGroupsItem from 'ee/approvals/components/hidden_groups_item.vue';
@@ -47,7 +47,7 @@ describe('Approvals ApproversListItem', () => {
     });
 
     it('when remove clicked, emits remove', () => {
-      const button = wrapper.find(GlDeprecatedButton);
+      const button = wrapper.find(GlButton);
       button.vm.$emit('click');
 
       return wrapper.vm.$nextTick().then(() => {

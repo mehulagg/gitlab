@@ -32,6 +32,7 @@ RSpec.describe Issues::MoveService do
     end
 
     context 'resource weight events' do
+      let(:old_issue) { create(:issue, project: old_project, author: user, weight: 5) }
       let!(:event1) { create(:resource_weight_event, issue: old_issue, weight: 1) }
       let!(:event2) { create(:resource_weight_event, issue: old_issue, weight: 42) }
       let!(:event3) { create(:resource_weight_event, issue: old_issue, weight: 5) }

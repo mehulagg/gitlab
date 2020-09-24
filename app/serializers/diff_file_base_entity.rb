@@ -12,23 +12,43 @@ class DiffFileBaseEntity < Grape::Entity
   expose :submodule?, as: :submodule
 
   expose :submodule_link do |diff_file, options|
-    memoized_submodule_links(diff_file, options).first
+    memoized_submodule_links(diff_file, options)&.web
   end
 
   expose :submodule_tree_url do |diff_file|
-    memoized_submodule_links(diff_file, options).last
+    memoized_submodule_links(diff_file, options)&.tree
+  end
+
+  expose :submodule_compare do |diff_file|
+    url = memoized_submodule_links(diff_file, options)&.compare
+
+    next unless url
+
+    {
+      url: url,
+      old_sha: diff_file.old_blob&.id,
+      new_sha: diff_file.blob&.id
+    }
   end
 
   expose :edit_path, if: -> (_, options) { options[:merge_request] } do |diff_file|
     merge_request = options[:merge_request]
 
-    next unless merge_request.merged? || merge_request.source_branch_exists?
+    next unless has_edit_path?(merge_request)
 
     target_project, target_branch = edit_project_branch_options(merge_request)
 
     options = merge_request.persisted? && merge_request.source_branch_exists? && !merge_request.merged? ? { from_merge_request_iid: merge_request.iid } : {}
 
     project_edit_blob_path(target_project, tree_join(target_branch, diff_file.new_path), options)
+  end
+
+  expose :ide_edit_path, if: -> (_, options) { options[:merge_request] } do |diff_file|
+    merge_request = options[:merge_request]
+
+    next unless has_edit_path?(merge_request)
+
+    gitlab_ide_merge_request_path(merge_request)
   end
 
   expose :old_path_html do |diff_file|
@@ -96,11 +116,9 @@ class DiffFileBaseEntity < Grape::Entity
 
   def memoized_submodule_links(diff_file, options)
     strong_memoize(:submodule_links) do
-      if diff_file.submodule?
-        options[:submodule_links].for(diff_file.blob, diff_file.content_sha)
-      else
-        []
-      end
+      next unless diff_file.submodule?
+
+      options[:submodule_links].for(diff_file.blob, diff_file.content_sha, diff_file)
     end
   end
 
@@ -114,5 +132,9 @@ class DiffFileBaseEntity < Grape::Entity
     else
       [merge_request.target_project, merge_request.target_branch]
     end
+  end
+
+  def has_edit_path?(merge_request)
+    merge_request.merged? || merge_request.source_branch_exists?
   end
 end

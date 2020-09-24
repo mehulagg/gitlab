@@ -2,7 +2,7 @@
 
 require 'spec_helper'
 
-RSpec.describe Analytics::TasksByTypeController do
+RSpec.describe Groups::Analytics::TasksByTypeController do
   let_it_be(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:label) { create(:group_label, group: group) }

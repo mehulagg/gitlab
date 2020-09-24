@@ -49,7 +49,8 @@ module Gitlab
                                      #{config.root}/app/models/members
                                      #{config.root}/app/models/project_services
                                      #{config.root}/app/graphql/resolvers/concerns
-                                     #{config.root}/app/graphql/mutations/concerns])
+                                     #{config.root}/app/graphql/mutations/concerns
+                                     #{config.root}/app/graphql/types/concerns])
 
     config.generators.templates.push("#{config.root}/generator_templates")
 
@@ -151,12 +152,18 @@ module Gitlab
     config.active_record.schema_format = :sql
 
     # Configure webpack
+    config.webpack = ActiveSupport::OrderedOptions.new
     config.webpack.config_file = "config/webpack.config.js"
     config.webpack.output_dir  = "public/assets/webpack"
     config.webpack.public_path = "assets/webpack"
+    config.webpack.manifest_filename = "manifest.json"
 
     # Webpack dev server configuration is handled in initializers/static_files.rb
+    config.webpack.dev_server = ActiveSupport::OrderedOptions.new
     config.webpack.dev_server.enabled = false
+    config.webpack.dev_server.host = 'localhost'
+    config.webpack.dev_server.port = 3808
+    config.webpack.dev_server.https = false
 
     config.action_mailer.delivery_job = "ActionMailer::MailDeliveryJob"
 
@@ -190,6 +197,8 @@ module Gitlab
     config.assets.precompile << "errors.css"
     config.assets.precompile << "jira_connect.js"
 
+    config.assets.precompile << "themes/*.css"
+
     config.assets.precompile << "highlight/themes/*.css"
 
     # Import gitlab-svgs directly from vendored directory
@@ -206,6 +215,13 @@ module Gitlab
     # Import css for xterm
     config.assets.paths << "#{config.root}/node_modules/xterm/src/"
     config.assets.precompile << "xterm.css"
+
+    # Add EE assets
+    if Gitlab.ee?
+      %w[images javascripts stylesheets].each do |path|
+        config.assets.paths << "#{config.root}/ee/app/assets/#{path}"
+      end
+    end
 
     # Import path for EE specific SCSS entry point
     # In CE it will import a noop file, in EE a functioning file

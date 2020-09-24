@@ -1,5 +1,6 @@
 import getters from '~/boards/stores/getters';
 import { inactiveId } from '~/boards/constants';
+import { mockIssue, mockIssue2, mockIssues, mockIssuesByListId, issues } from '../mock_data';
 
 describe('Boards - Getters', () => {
   describe('getLabelToggleState', () => {
@@ -89,6 +90,44 @@ describe('Boards - Getters', () => {
           expect(getters.isSwimlanesOn(state)).toBe(false);
         });
       });
+    });
+  });
+
+  describe('getIssueById', () => {
+    const state = { issues: { '1': 'issue' } };
+
+    it.each`
+      id     | expected
+      ${'1'} | ${'issue'}
+      ${''}  | ${{}}
+    `('returns $expected when $id is passed to state', ({ id, expected }) => {
+      expect(getters.getIssueById(state)(id)).toEqual(expected);
+    });
+  });
+
+  describe('getActiveIssue', () => {
+    it.each`
+      id     | expected
+      ${'1'} | ${'issue'}
+      ${''}  | ${{}}
+    `('returns $expected when $id is passed to state', ({ id, expected }) => {
+      const state = { issues: { '1': 'issue' }, activeId: id };
+
+      expect(getters.getActiveIssue(state)).toEqual(expected);
+    });
+  });
+
+  describe('getIssues', () => {
+    const boardsState = {
+      issuesByListId: mockIssuesByListId,
+      issues,
+    };
+    it('returns issues for a given listId', () => {
+      const getIssueById = issueId => [mockIssue, mockIssue2].find(({ id }) => id === issueId);
+
+      expect(getters.getIssues(boardsState, { getIssueById })('gid://gitlab/List/2')).toEqual(
+        mockIssues,
+      );
     });
   });
 });

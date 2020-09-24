@@ -6,9 +6,10 @@ export const I18N = {
   unassigned: s__('IncidentManagement|Unassigned'),
   createIncidentBtnLabel: s__('IncidentManagement|Create incident'),
   unPublished: s__('IncidentManagement|Unpublished'),
-  searchPlaceholder: __('Search results…'),
+  searchPlaceholder: __('Search or filter results…'),
   emptyState: {
     title: s__('IncidentManagement|Display your incidents in a dedicated view'),
+    emptyClosedTabTitle: s__('IncidentManagement|There are no closed incidents'),
     description: s__(
       'IncidentManagement|All alerts promoted to incidents will automatically be displayed within the list. You can also create a new incident using the button below.',
     ),
@@ -33,5 +34,4 @@ export const INCIDENT_STATUS_TABS = [
   },
 ];
 
-export const INCIDENT_SEARCH_DELAY = 300;
 export const DEFAULT_PAGE_SIZE = 20;

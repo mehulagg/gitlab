@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 class OmniauthCallbacksController < Devise::OmniauthCallbacksController
-  include AuthenticatesWithTwoFactor
-  include Authenticates2FAForAdminMode
+  include AuthenticatesWithTwoFactorForAdminMode
   include Devise::Controllers::Rememberable
   include AuthHelper
   include InitializesCurrentUserMode
@@ -81,6 +80,10 @@ class OmniauthCallbacksController < Devise::OmniauthCallbacksController
     else
       fail_salesforce_login
     end
+  end
+
+  def atlassian_oauth2
+    omniauth_flow(Gitlab::Auth::Atlassian)
   end
 
   private

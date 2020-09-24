@@ -31,6 +31,10 @@ export default {
       type: String,
       required: true,
     },
+    labelsWebUrl: {
+      type: String,
+      required: true,
+    },
     enableScopedLabels: {
       type: Boolean,
       required: false,
@@ -110,13 +114,15 @@ export default {
       <board-labels-select
         :context="board"
         :labels-path="labelsPath"
+        :labels-web-url="labelsWebUrl"
         :can-edit="canAdminBoard"
+        :show-create="canAdminBoard"
         :enable-scoped-labels="enableScopedLabels"
+        variant="standalone"
         ability-name="issue"
         @onLabelClick="handleLabelClick"
+        >{{ __('Any label') }}</board-labels-select
       >
-        {{ __('Any label') }}
-      </board-labels-select>
 
       <assignee-select
         :board="board"

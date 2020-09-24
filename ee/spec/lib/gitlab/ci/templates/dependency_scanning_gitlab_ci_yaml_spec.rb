@@ -33,16 +33,6 @@ RSpec.describe 'Dependency-Scanning.gitlab-ci.yml' do
         allow(License).to receive(:current).and_return(license)
       end
 
-      context 'when DS_DISABLE_DIND=false' do
-        before do
-          create(:ci_variable, project: project, key: 'DS_DISABLE_DIND', value: 'false')
-        end
-
-        it 'includes orchestrator job' do
-          expect(build_names).to match_array(%w[dependency_scanning])
-        end
-      end
-
       context 'when DEPENDENCY_SCANNING_DISABLED=1' do
         before do
           create(:ci_variable, project: project, key: 'DEPENDENCY_SCANNING_DISABLED', value: '1')

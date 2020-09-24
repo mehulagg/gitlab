@@ -58,6 +58,7 @@ module QA
       module Main
         autoload :Banner, 'qa/ee/page/main/banner'
         autoload :Menu, 'qa/ee/page/main/menu'
+        autoload :SignUp, 'qa/ee/page/main/sign_up'
       end
 
       module Admin
@@ -165,6 +166,10 @@ module QA
         module PathLocks
           autoload :Index, 'qa/ee/page/project/path_locks/index'
         end
+
+        module Packages
+          autoload :Index, 'qa/ee/page/project/packages/index'
+        end
       end
 
       module MergeRequest
@@ -196,6 +201,7 @@ module QA
       autoload :Epic, 'qa/ee/resource/epic'
       autoload :GroupLabel, 'qa/ee/resource/group_label'
       autoload :GroupIteration, 'qa/ee/resource/group_iteration'
+      autoload :ImportRepoWithCICD, 'qa/ee/resource/import_repo_with_ci_cd'
 
       module Board
         autoload :BaseBoard, 'qa/ee/resource/board/base_board'

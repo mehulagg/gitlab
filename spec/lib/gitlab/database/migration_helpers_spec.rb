@@ -903,15 +903,22 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
   describe '#change_column_type_concurrently' do
     it 'changes the column type' do
       expect(model).to receive(:rename_column_concurrently)
-        .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: nil)
+        .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: nil, batch_column_name: :id)
 
       model.change_column_type_concurrently('users', 'username', :text)
+    end
+
+    it 'passed the batch column name' do
+      expect(model).to receive(:rename_column_concurrently)
+        .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: nil, batch_column_name: :user_id)
+
+      model.change_column_type_concurrently('users', 'username', :text, batch_column_name: :user_id)
     end
 
     context 'with type cast' do
       it 'changes the column type with casting the value to the new type' do
         expect(model).to receive(:rename_column_concurrently)
-          .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: 'JSON')
+          .with('users', 'username', 'username_for_type_change', type: :text, type_cast_function: 'JSON', batch_column_name: :id)
 
         model.change_column_type_concurrently('users', 'username', :text, type_cast_function: 'JSON')
       end
@@ -2326,6 +2333,58 @@ RSpec.describe Gitlab::Database::MigrationHelpers do
                      .with(:test_table, constraint_name)
 
         model.check_not_null_constraint_exists?(:test_table, :name, constraint_name: constraint_name)
+      end
+    end
+  end
+
+  describe '#create_extension' do
+    subject { model.create_extension(extension) }
+
+    let(:extension) { :btree_gist }
+
+    it 'executes CREATE EXTENSION statement' do
+      expect(model).to receive(:execute).with(/CREATE EXTENSION IF NOT EXISTS #{extension}/)
+
+      subject
+    end
+
+    context 'without proper permissions' do
+      before do
+        allow(model).to receive(:execute).with(/CREATE EXTENSION IF NOT EXISTS #{extension}/).and_raise(ActiveRecord::StatementInvalid, 'InsufficientPrivilege: permission denied')
+      end
+
+      it 'raises the exception' do
+        expect { subject }.to raise_error(ActiveRecord::StatementInvalid, /InsufficientPrivilege/)
+      end
+
+      it 'prints an error message' do
+        expect { subject }.to output(/user is not allowed/).to_stderr.and raise_error
+      end
+    end
+  end
+
+  describe '#drop_extension' do
+    subject { model.drop_extension(extension) }
+
+    let(:extension) { 'btree_gist' }
+
+    it 'executes CREATE EXTENSION statement' do
+      expect(model).to receive(:execute).with(/DROP EXTENSION IF EXISTS #{extension}/)
+
+      subject
+    end
+
+    context 'without proper permissions' do
+      before do
+        allow(model).to receive(:execute).with(/DROP EXTENSION IF EXISTS #{extension}/).and_raise(ActiveRecord::StatementInvalid, 'InsufficientPrivilege: permission denied')
+      end
+
+      it 'raises the exception' do
+        expect { subject }.to raise_error(ActiveRecord::StatementInvalid, /InsufficientPrivilege/)
+      end
+
+      it 'prints an error message' do
+        expect { subject }.to output(/user is not allowed/).to_stderr.and raise_error
       end
     end
   end

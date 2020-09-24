@@ -194,7 +194,8 @@ module API
       mount ::API::NugetPackages
       mount ::API::PypiPackages
       mount ::API::ComposerPackages
-      mount ::API::ConanPackages
+      mount ::API::ConanProjectPackages
+      mount ::API::ConanInstancePackages
       mount ::API::MavenPackages
       mount ::API::NpmPackages
       mount ::API::GenericPackages
@@ -215,6 +216,7 @@ module API
       mount ::API::ProjectStatistics
       mount ::API::ProjectTemplates
       mount ::API::Terraform::State
+      mount ::API::Terraform::StateVersion
       mount ::API::ProtectedBranches
       mount ::API::ProtectedTags
       mount ::API::Releases
@@ -235,6 +237,7 @@ module API
       mount ::API::Templates
       mount ::API::Todos
       mount ::API::Triggers
+      mount ::API::UsageData
       mount ::API::UserCounts
       mount ::API::Users
       mount ::API::Variables

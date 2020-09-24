@@ -228,4 +228,42 @@ RSpec.describe Gitlab::Ci::Reports::Security::Finding do
       end
     end
   end
+
+  describe '#valid?' do
+    let(:scanner) { build(:ci_reports_security_scanner) }
+    let(:identifiers) { [build(:ci_reports_security_identifier)] }
+    let(:location) { build(:ci_reports_security_locations_sast) }
+
+    let(:finding) do
+      build(:ci_reports_security_finding,
+            scanner: scanner,
+            identifiers: identifiers,
+            location: location,
+            compare_key: '')
+    end
+
+    subject { finding.valid? }
+
+    context 'when the scanner is missing' do
+      let(:scanner) { nil }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when there is no identifier' do
+      let(:identifiers) { [] }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when the location is missing' do
+      let(:location) { nil }
+
+      it { is_expected.to be_falsey }
+    end
+
+    context 'when all required attributes present' do
+      it { is_expected.to be_truthy }
+    end
+  end
 end

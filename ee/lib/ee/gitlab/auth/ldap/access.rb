@@ -43,12 +43,12 @@ module EE
             keys = ldap_user.ssh_keys - user.keys.ldap.pluck(:key)
 
             keys.each do |key|
-              ::Rails.logger.info "#{self.class.name}: adding LDAP SSH key #{key.inspect} to #{user.name} (#{user.id})"
+              ::Gitlab::AppLogger.info "#{self.class.name}: adding LDAP SSH key #{key.inspect} to #{user.name} (#{user.id})"
               new_key = ::LDAPKey.new(title: "LDAP - #{ldap_config.sync_ssh_keys}", key: key)
               new_key.user = user
 
               unless new_key.save
-                ::Rails.logger.error "#{self.class.name}: failed to add LDAP SSH key #{key.inspect} to #{user.name} (#{user.id})\n"\
+                ::Gitlab::AppLogger.error "#{self.class.name}: failed to add LDAP SSH key #{key.inspect} to #{user.name} (#{user.id})\n"\
                   "error messages: #{new_key.errors.messages}"
               end
             end
@@ -61,10 +61,10 @@ module EE
             keys = user.keys.ldap.where.not(key: ldap_user.ssh_keys)
 
             keys.each do |deleted_key|
-              ::Rails.logger.info "#{self.class.name}: removing LDAP SSH key #{deleted_key.key} from #{user.name} (#{user.id})"
+              ::Gitlab::AppLogger.info "#{self.class.name}: removing LDAP SSH key #{deleted_key.key} from #{user.name} (#{user.id})"
 
               unless deleted_key.destroy
-                ::Rails.logger.error "#{self.class.name}: failed to remove LDAP SSH key #{key.inspect} from #{user.name} (#{user.id})"
+                ::Gitlab::AppLogger.error "#{self.class.name}: failed to remove LDAP SSH key #{key.inspect} from #{user.name} (#{user.id})"
               end
             end
           end
@@ -83,7 +83,7 @@ module EE
             kerberos_identity ||= ::Identity.new(provider: :kerberos, user: user)
             kerberos_identity.extern_uid = ldap_user.kerberos_principal
             unless kerberos_identity.save
-              ::Rails.logger.error "#{self.class.name}: failed to add Kerberos principal #{ldap_user.kerberos_principal} to #{user.name} (#{user.id})\n"\
+              ::Gitlab::AppLogger.error "#{self.class.name}: failed to add Kerberos principal #{ldap_user.kerberos_principal} to #{user.name} (#{user.id})\n"\
                 "error messages: #{kerberos_identity.errors.messages}"
             end
           end
@@ -109,7 +109,7 @@ module EE
             return if ldap_user.dn.empty? || ldap_user.dn == ldap_identity.extern_uid
 
             unless ldap_identity.update(extern_uid: ldap_user.dn)
-              ::Rails.logger.error "Could not update DN for #{user.name} (#{user.id})\n"\
+              ::Gitlab::AppLogger.error "Could not update DN for #{user.name} (#{user.id})\n"\
                                  "error messages: #{user.ldap_identity.errors.messages}"
             end
           end

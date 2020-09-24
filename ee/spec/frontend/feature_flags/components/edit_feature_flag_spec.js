@@ -162,7 +162,6 @@ describe('Edit feature flag form', () => {
 
       expect(spy).toHaveBeenCalledWith('_category_', 'click_button', {
         label: 'feature_flag_toggle',
-        context: 'feature_flag_activity',
       });
     });
   });

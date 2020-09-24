@@ -5,7 +5,8 @@ module EE
     class VulnerabilitiesService < ::SystemNotes::BaseService
       # Called when state is changed for 'vulnerability'
       def change_vulnerability_state
-        body = "changed vulnerability status to #{noteable.state}"
+        type = noteable.detected? ? 'reverted' : 'changed'
+        body = "#{type} vulnerability status to #{noteable.state}"
 
         create_note(NoteSummary.new(noteable, project, author, body, action: "vulnerability_#{noteable.state}"))
       end

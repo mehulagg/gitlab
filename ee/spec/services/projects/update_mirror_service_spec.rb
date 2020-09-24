@@ -75,26 +75,13 @@ RSpec.describe Projects::UpdateMirrorService do
     end
 
     context "when given URLs containing escaped elements" do
-      using RSpec::Parameterized::TableSyntax
+      it_behaves_like "URLs containing escaped elements return expected status" do
+        let(:result) { service.execute }
 
-      where(:url, :result_status) do
-        "https://user:0a%23@test.example.com/project.git"                               | :success
-        "https://git.example.com:1%2F%2F@source.developers.google.com/project.git"      | :success
-        CGI.escape("git://localhost:1234/some-path?some-query=some-val\#@example.com/") | :error
-        CGI.escape(CGI.escape("https://user:0a%23@test.example.com/project.git"))       | :error
-      end
-
-      with_them do
         before do
           allow(project).to receive(:import_url).and_return(url)
 
           stub_fetch_mirror(project)
-        end
-
-        it "returns expected status" do
-          result = service.execute
-
-          expect(result[:status]).to eq(result_status)
         end
       end
     end
@@ -228,7 +215,7 @@ RSpec.describe Projects::UpdateMirrorService do
             let(:protected_branch_name) { "#{branch_prefix}existing-branch" }
 
             before do
-              project.update(only_mirror_protected_branches: true)
+              project.update!(only_mirror_protected_branches: true)
             end
 
             it 'creates a new protected branch' do
@@ -321,7 +308,7 @@ RSpec.describe Projects::UpdateMirrorService do
         let(:pull_mirror_branch_prefix) { 'upstream/' }
 
         before do
-          project.update(pull_mirror_branch_prefix: pull_mirror_branch_prefix)
+          project.update!(pull_mirror_branch_prefix: pull_mirror_branch_prefix)
         end
 
         it "doesn't create unprefixed branches" do

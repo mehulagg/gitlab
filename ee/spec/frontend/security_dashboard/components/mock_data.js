@@ -1,6 +1,7 @@
 export const generateVulnerabilities = () => [
   {
     id: 'id_0',
+    detectedAt: '2020-07-29T15:36:54Z',
     identifiers: [
       {
         externalType: 'cve',
@@ -15,6 +16,7 @@ export const generateVulnerabilities = () => [
     severity: 'critical',
     state: 'dismissed',
     reportType: 'SAST',
+    resolvedOnDefaultBranch: true,
     location: {
       image:
         'registry.gitlab.com/groulot/container-scanning-test/master:5f21de6956aee99ddb68ae49498662d9872f50ff',
@@ -28,6 +30,7 @@ export const generateVulnerabilities = () => [
   },
   {
     id: 'id_1',
+    detectedAt: '2020-07-22T19:31:24Z',
     identifiers: [
       {
         externalType: 'gemnasium',
@@ -51,6 +54,7 @@ export const generateVulnerabilities = () => [
   },
   {
     id: 'id_2',
+    detectedAt: '2020-08-22T20:00:12Z',
     identifiers: [],
     title: 'Vulnerability 2',
     severity: 'high',

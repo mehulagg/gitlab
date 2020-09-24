@@ -35,6 +35,7 @@ RSpec.describe Project do
     it { is_expected.to have_many(:vulnerability_exports) }
     it { is_expected.to have_many(:vulnerability_scanners) }
     it { is_expected.to have_many(:dast_site_profiles) }
+    it { is_expected.to have_many(:dast_site_tokens) }
     it { is_expected.to have_many(:dast_sites) }
     it { is_expected.to have_many(:audit_events).dependent(false) }
     it { is_expected.to have_many(:protected_environments) }
@@ -49,6 +50,65 @@ RSpec.describe Project do
 
     it { is_expected.to have_one(:github_service) }
     it { is_expected.to have_many(:project_aliases) }
+    it { is_expected.to have_many(:approval_rules) }
+
+    describe 'approval_rules association' do
+      let_it_be(:rule, reload: true) { create(:approval_project_rule) }
+      let(:project) { rule.project }
+      let(:branch) { 'stable' }
+
+      describe '#applicable_to_branch' do
+        subject { project.approval_rules.applicable_to_branch(branch) }
+
+        context 'when there are no associated protected branches' do
+          it { is_expected.to eq([rule]) }
+        end
+
+        context 'when there are associated protected branches' do
+          before do
+            rule.update!(protected_branches: protected_branches)
+          end
+
+          context 'and branch matches' do
+            let(:protected_branches) { [create(:protected_branch, name: branch)] }
+
+            it { is_expected.to eq([rule]) }
+          end
+
+          context 'but branch does not match anything' do
+            let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+
+            it { is_expected.to be_empty }
+          end
+        end
+      end
+
+      describe '#inapplicable_to_branch' do
+        subject { project.approval_rules.inapplicable_to_branch(branch) }
+
+        context 'when there are no associated protected branches' do
+          it { is_expected.to be_empty }
+        end
+
+        context 'when there are associated protected branches' do
+          before do
+            rule.update!(protected_branches: protected_branches)
+          end
+
+          context 'and branch does not match anything' do
+            let(:protected_branches) { [create(:protected_branch, name: branch.reverse)] }
+
+            it { is_expected.to eq([rule]) }
+          end
+
+          context 'but branch matches' do
+            let(:protected_branches) { [create(:protected_branch, name: branch)] }
+
+            it { is_expected.to be_empty }
+          end
+        end
+      end
+    end
   end
 
   context 'scopes' do
@@ -270,11 +330,11 @@ RSpec.describe Project do
   describe 'setting up a mirror' do
     context 'when new project' do
       it 'creates import_state and sets next_execution_timestamp to now' do
-        project = build(:project, :mirror)
+        project = build(:project, :mirror, creator: create(:user))
 
         Timecop.freeze do
           expect do
-            project.save
+            project.save!
           end.to change { ProjectImportState.count }.by(1)
 
           expect(project.import_state.next_execution_timestamp).to be_like_time(Time.current)
@@ -809,17 +869,6 @@ RSpec.describe Project do
                   is_expected.to eq(false)
                 end
               end
-
-              context 'with promo feature flag' do
-                let(:allowed_on_global_license) { true }
-
-                before do
-                  project.clear_memoization(:licensed_feature_available)
-                  stub_feature_flags("promo_#{feature}" => true)
-                end
-
-                it { is_expected.to be_truthy }
-              end
             end
           end
 
@@ -1099,13 +1148,16 @@ RSpec.describe Project do
     let(:project) { create(:project) }
     let!(:approval_rules) { create_list(:approval_project_rule, 2, project: project) }
     let!(:any_approver_rule) { create(:approval_project_rule, rule_type: :any_approver, project: project) }
+    let(:branch) { nil }
+
+    subject { project.visible_user_defined_rules(branch: branch) }
 
     before do
       stub_licensed_features(multiple_approval_rules: true)
     end
 
     it 'returns all approval rules' do
-      expect(project.visible_user_defined_rules).to eq([any_approver_rule, *approval_rules])
+      expect(subject).to eq([any_approver_rule, *approval_rules])
     end
 
     context 'when multiple approval rules is not available' do
@@ -1114,7 +1166,19 @@ RSpec.describe Project do
       end
 
       it 'returns the first approval rule' do
-        expect(project.visible_user_defined_rules).to eq([any_approver_rule])
+        expect(subject).to eq([any_approver_rule])
+      end
+    end
+
+    context 'when branch is provided' do
+      let(:branch) { 'master' }
+
+      it 'caches the rules' do
+        expect(project).to receive(:user_defined_rules).and_call_original
+        subject
+
+        expect(project).not_to receive(:user_defined_rules)
+        subject
       end
     end
   end
@@ -2518,6 +2582,14 @@ RSpec.describe Project do
         expect(project.jira_import?).to be false
         expect { project.remove_import_data }.not_to change { ProjectImportData.count }
       end
+    end
+  end
+
+  describe '#mark_primary_write_location' do
+    it 'marks the location with project ID' do
+      expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:mark_primary_write_location).with(:project, project.id)
+
+      project.mark_primary_write_location
     end
   end
 end

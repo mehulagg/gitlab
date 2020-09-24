@@ -13,6 +13,7 @@ RSpec.describe 'projects/ci/lints/show' do
     before do
       assign(:project, project)
       assign(:result, result)
+      stub_feature_flags(ci_lint_vue: false)
     end
 
     context 'when builds attrbiutes contain HTML nodes' do
@@ -66,6 +67,7 @@ RSpec.describe 'projects/ci/lints/show' do
     before do
       assign(:project, project)
       assign(:result, result)
+      stub_feature_flags(ci_lint_vue: false)
     end
 
     it 'shows the correct values' do
@@ -87,7 +89,7 @@ RSpec.describe 'projects/ci/lints/show' do
       it 'shows warning messages' do
         render
 
-        expect(rendered).to have_content('Warning:')
+        expect(rendered).to have_content('2 warning(s) found:')
         expect(rendered).to have_content('Warning 1')
         expect(rendered).to have_content('Warning 2')
       end
@@ -103,6 +105,7 @@ RSpec.describe 'projects/ci/lints/show' do
 
       assign(:project, project)
       assign(:result, result)
+      stub_feature_flags(ci_lint_vue: false)
     end
 
     it 'shows error message' do
@@ -116,7 +119,7 @@ RSpec.describe 'projects/ci/lints/show' do
     it 'shows warning messages' do
       render
 
-      expect(rendered).to have_content('Warning:')
+      expect(rendered).to have_content('2 warning(s) found:')
       expect(rendered).to have_content('Warning 1')
       expect(rendered).to have_content('Warning 2')
     end

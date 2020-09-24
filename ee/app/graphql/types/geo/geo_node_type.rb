@@ -26,7 +26,12 @@ module Types
             null: true,
             resolver: ::Resolvers::Geo::PackageFileRegistriesResolver,
             description: 'Package file registries of the GeoNode',
-            feature_flag: :geo_self_service_framework
+            feature_flag: :geo_package_file_replication
+      field :terraform_state_registries, ::Types::Geo::TerraformStateRegistryType.connection_type,
+            null: true,
+            resolver: ::Resolvers::Geo::TerraformStateRegistriesResolver,
+            description: 'Find terraform state registries on this Geo node',
+            feature_flag: :geo_terraform_state_replication
     end
   end
 end

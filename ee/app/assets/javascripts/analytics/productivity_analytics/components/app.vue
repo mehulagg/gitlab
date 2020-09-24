@@ -3,11 +3,12 @@ import { mapState, mapActions, mapGetters } from 'vuex';
 import {
   GlEmptyState,
   GlLoadingIcon,
-  GlDeprecatedDropdown,
-  GlDeprecatedDropdownItem,
-  GlDeprecatedButton,
+  GlDropdown,
+  GlDropdownItem,
+  GlButton,
   GlTooltipDirective,
   GlIcon,
+  GlAlert,
 } from '@gitlab/ui';
 import dateFormat from 'dateformat';
 import { GlColumnChart } from '@gitlab/ui/dist/charts';
@@ -24,11 +25,12 @@ export default {
   components: {
     GlEmptyState,
     GlLoadingIcon,
-    GlDeprecatedDropdown,
-    GlDeprecatedDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     GlColumnChart,
-    GlDeprecatedButton,
+    GlButton,
     GlIcon,
+    GlAlert,
     MetricChart,
     Scatterplot,
     MergeRequestTable,
@@ -182,14 +184,14 @@ export default {
     <template v-if="showAppContent">
       <div class="d-flex justify-content-between">
         <h4>{{ s__('ProductivityAnalytics|Merge Requests') }}</h4>
-        <gl-deprecated-button
+        <gl-button
           v-if="isFilteringByDaysToMerge"
           ref="clearChartFiltersBtn"
           class="btn-link float-right"
           type="button"
           variant="default"
           @click="resetMainChartSelection()"
-          >{{ __('Clear chart filters') }}</gl-deprecated-button
+          >{{ __('Clear chart filters') }}</gl-button
         >
       </div>
       <metric-chart
@@ -300,12 +302,12 @@ export default {
             >
               <strong class="mr-2">{{ __('Sort by') }}</strong>
               <div class="d-flex">
-                <gl-deprecated-dropdown
+                <gl-dropdown
                   class="mr-2 flex-grow"
                   toggle-class="dropdown-menu-toggle"
                   :text="sortFieldDropdownLabel"
                 >
-                  <gl-deprecated-dropdown-item
+                  <gl-dropdown-item
                     v-for="metric in tableSortOptions"
                     :key="metric.key"
                     active-class="is-active"
@@ -322,15 +324,11 @@ export default {
                       />
                       {{ metric.label }}
                     </span>
-                  </gl-deprecated-dropdown-item>
-                </gl-deprecated-dropdown>
-                <gl-deprecated-button
-                  v-gl-tooltip.hover
-                  :title="sortTooltipTitle"
-                  @click="toggleSortOrder"
-                >
+                  </gl-dropdown-item>
+                </gl-dropdown>
+                <gl-button v-gl-tooltip.hover :title="sortTooltipTitle" @click="toggleSortOrder">
                   <gl-icon :name="sortIcon" />
-                </gl-deprecated-button>
+                </gl-button>
               </div>
             </div>
           </div>
@@ -348,9 +346,9 @@ export default {
             @columnMetricChange="setColumnMetric"
             @pageChange="setPage"
           />
-          <div v-if="showMergeRequestTableNoData" class="js-no-data bs-callout bs-callout-info">
+          <gl-alert v-if="showMergeRequestTableNoData" variant="info" :dismissable="false">
             {{ __('There is no data available. Please change your selection.') }}
-          </div>
+          </gl-alert>
         </div>
       </template>
     </template>

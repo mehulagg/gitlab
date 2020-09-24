@@ -20,6 +20,7 @@ const Api = {
   projectPath: '/api/:version/projects/:id',
   forkedProjectsPath: '/api/:version/projects/:id/forks',
   projectLabelsPath: '/:namespace_path/:project_path/-/labels',
+  projectFileSchemaPath: '/:namespace_path/:project_path/-/schema/:ref/:filename',
   projectUsersPath: '/api/:version/projects/:id/users',
   projectMergeRequestsPath: '/api/:version/projects/:id/merge_requests',
   projectMergeRequestPath: '/api/:version/projects/:id/merge_requests/:mrid',
@@ -63,6 +64,7 @@ const Api = {
   issuePath: '/api/:version/projects/:id/issues/:issue_iid',
   tagsPath: '/api/:version/projects/:id/repository/tags',
   freezePeriodsPath: '/api/:version/projects/:id/freeze_periods',
+  usageDataIncrementUniqueUsersPath: '/api/:version/usage_data/increment_unique_users',
 
   group(groupId, callback = () => {}) {
     const url = Api.buildUrl(Api.groupPath).replace(':id', groupId);
@@ -683,6 +685,19 @@ const Api = {
     const url = Api.buildUrl(this.freezePeriodsPath).replace(':id', encodeURIComponent(id));
 
     return axios.post(url, freezePeriod);
+  },
+
+  trackRedisHllUserEvent(event) {
+    if (!gon.features?.usageDataApi) {
+      return null;
+    }
+
+    const url = Api.buildUrl(this.usageDataIncrementUniqueUsersPath);
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    return axios.post(url, { event }, { headers });
   },
 
   buildUrl(url) {

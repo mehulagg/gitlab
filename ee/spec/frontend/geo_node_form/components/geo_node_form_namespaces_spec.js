@@ -1,8 +1,7 @@
 import Vuex from 'vuex';
 import { createLocalVue, shallowMount } from '@vue/test-utils';
-import { GlIcon, GlSearchBoxByType, GlDeprecatedDropdown } from '@gitlab/ui';
+import { GlIcon, GlSearchBoxByType, GlDropdown } from '@gitlab/ui';
 import GeoNodeFormNamespaces from 'ee/geo_node_form/components/geo_node_form_namespaces.vue';
-import store from 'ee/geo_node_form/store';
 import { MOCK_SYNC_NAMESPACES } from '../mock_data';
 
 const localVue = createLocalVue();
@@ -23,16 +22,21 @@ describe('GeoNodeFormNamespaces', () => {
     isSelected: jest.fn(),
   };
 
-  const createComponent = (props = {}) => {
+  const createComponent = (props = {}, initialState) => {
+    const fakeStore = new Vuex.Store({
+      state: {
+        synchronizationNamespaces: [],
+        ...initialState,
+      },
+      actions: actionSpies,
+    });
+
     wrapper = shallowMount(GeoNodeFormNamespaces, {
       localVue,
-      store,
+      store: fakeStore,
       propsData: {
         ...defaultProps,
         ...props,
-      },
-      methods: {
-        ...actionSpies,
       },
     });
   };
@@ -41,9 +45,9 @@ describe('GeoNodeFormNamespaces', () => {
     wrapper.destroy();
   });
 
-  const findGlDropdown = () => wrapper.find(GlDeprecatedDropdown);
+  const findGlDropdown = () => wrapper.find(GlDropdown);
   const findGlDropdownSearch = () => findGlDropdown().find(GlSearchBoxByType);
-  const findDropdownItems = () => findGlDropdown().findAll('li');
+  const findDropdownItems = () => findGlDropdown().findAll('button');
   const findDropdownItemsText = () => findDropdownItems().wrappers.map(w => w.text());
   const findGlIcons = () => wrapper.findAll(GlIcon);
 
@@ -73,18 +77,20 @@ describe('GeoNodeFormNamespaces', () => {
         });
 
         it('calls fetchSyncNamespaces when input event is fired from GlSearchBoxByType', () => {
-          expect(actionSpies.fetchSyncNamespaces).toHaveBeenCalledWith(namespaceSearch);
+          expect(actionSpies.fetchSyncNamespaces).toHaveBeenCalledWith(
+            expect.any(Object),
+            namespaceSearch,
+          );
         });
       });
     });
 
     describe('findDropdownItems', () => {
       beforeEach(() => {
-        delete actionSpies.isSelected;
-        createComponent({
-          selectedNamespaces: [[MOCK_SYNC_NAMESPACES[0].id]],
-        });
-        wrapper.vm.$store.state.synchronizationNamespaces = MOCK_SYNC_NAMESPACES;
+        createComponent(
+          { selectedNamespaces: [[MOCK_SYNC_NAMESPACES[0].id]] },
+          { synchronizationNamespaces: MOCK_SYNC_NAMESPACES },
+        );
       });
 
       it('renders an instance for each namespace', () => {
@@ -92,7 +98,7 @@ describe('GeoNodeFormNamespaces', () => {
       });
 
       it('hides GlIcon if namespace not in selectedNamespaces', () => {
-        expect(findGlIcons().wrappers.every(w => w.classes('invisible'))).toBe(true);
+        expect(findGlIcons().wrappers.every(w => w.classes('gl-visibility-hidden'))).toBe(true);
       });
     });
   });
@@ -100,10 +106,10 @@ describe('GeoNodeFormNamespaces', () => {
   describe('methods', () => {
     describe('toggleNamespace', () => {
       beforeEach(() => {
-        delete actionSpies.toggleNamespace;
-        createComponent({
-          selectedNamespaces: [MOCK_SYNC_NAMESPACES[0].id],
-        });
+        createComponent(
+          { selectedNamespaces: [MOCK_SYNC_NAMESPACES[0].id] },
+          { synchronizationNamespaces: MOCK_SYNC_NAMESPACES },
+        );
       });
 
       describe('when namespace is in selectedNamespaces', () => {
@@ -123,10 +129,10 @@ describe('GeoNodeFormNamespaces', () => {
 
     describe('isSelected', () => {
       beforeEach(() => {
-        delete actionSpies.isSelected;
-        createComponent({
-          selectedNamespaces: [MOCK_SYNC_NAMESPACES[0].id],
-        });
+        createComponent(
+          { selectedNamespaces: [MOCK_SYNC_NAMESPACES[0].id] },
+          { synchronizationNamespaces: MOCK_SYNC_NAMESPACES },
+        );
       });
 
       describe('when namespace is in selectedNamespaces', () => {
@@ -188,8 +194,7 @@ describe('GeoNodeFormNamespaces', () => {
       describe('noSyncNamespaces', () => {
         describe('when synchronizationNamespaces.length > 0', () => {
           beforeEach(() => {
-            createComponent();
-            wrapper.vm.$store.state.synchronizationNamespaces = MOCK_SYNC_NAMESPACES;
+            createComponent({}, { synchronizationNamespaces: MOCK_SYNC_NAMESPACES });
           });
 
           it('returns `false`', () => {
@@ -201,7 +206,6 @@ describe('GeoNodeFormNamespaces', () => {
       describe('when synchronizationNamespaces.length === 0', () => {
         beforeEach(() => {
           createComponent();
-          wrapper.vm.$store.state.synchronizationNamespaces = [];
         });
 
         it('returns `true`', () => {

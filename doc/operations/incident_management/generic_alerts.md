@@ -43,6 +43,7 @@ You can customize the payload by sending the following parameters. All fields ot
 | `title` | String | The title of the incident. Required. |
 | `description` | String | A high-level summary of the problem. |
 | `start_time` | DateTime | The time of the incident. If none is provided, a timestamp of the issue will be used. |
+| `end_time` | DateTime | For existing alerts only. When provided, the alert is resolved and the associated incident is closed. |
 | `service` | String | The affected service. |
 | `monitoring_tool` | String |  The name of the associated monitoring tool. |
 | `hosts` | String or Array | One or more hosts, as to where this incident occurred. |
@@ -117,9 +118,9 @@ In GitLab versions 13.2 and greater, GitLab groups alerts based on their payload
 When an incoming alert contains the same payload as another alert (excluding the
 `start_time` and `hosts` attributes), GitLab groups these alerts together and
 displays a counter on the
-[Alert Management List](incidents.md)
+[Alert Management List](./incidents.md)
 and details pages.
 
 If the existing alert is already `resolved`, then a new alert will be created instead.
 
-![Alert Management List](img/alert_list_v13_1.png)
+![Alert Management List](./img/alert_list_v13_1.png)

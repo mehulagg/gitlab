@@ -8,7 +8,6 @@ import {
   GlAvatar,
   GlTooltipDirective,
   GlButton,
-  GlSearchBoxByType,
   GlIcon,
   GlPagination,
   GlTabs,
@@ -16,14 +15,25 @@ import {
   GlBadge,
   GlEmptyState,
 } from '@gitlab/ui';
-import { debounce } from 'lodash';
+import Api from '~/api';
 import TimeAgoTooltip from '~/vue_shared/components/time_ago_tooltip.vue';
+import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
+import AuthorToken from '~/vue_shared/components/filtered_search_bar/tokens/author_token.vue';
 import { convertToSnakeCase } from '~/lib/utils/text_utility';
-import { s__ } from '~/locale';
-import { mergeUrlParams, joinPaths, visitUrl } from '~/lib/utils/url_utility';
+import { s__, __ } from '~/locale';
+import { urlParamsToObject } from '~/lib/utils/common_utils';
+import {
+  visitUrl,
+  mergeUrlParams,
+  joinPaths,
+  updateHistory,
+  setUrlParams,
+} from '~/lib/utils/url_utility';
 import getIncidents from '../graphql/queries/get_incidents.query.graphql';
 import getIncidentsCountByStatus from '../graphql/queries/get_count_by_status.query.graphql';
-import { I18N, DEFAULT_PAGE_SIZE, INCIDENT_SEARCH_DELAY, INCIDENT_STATUS_TABS } from '../constants';
+import SeverityToken from '~/sidebar/components/severity/severity.vue';
+import { INCIDENT_SEVERITY } from '~/sidebar/components/severity/constants';
+import { I18N, DEFAULT_PAGE_SIZE, INCIDENT_STATUS_TABS } from '../constants';
 
 const TH_TEST_ID = { 'data-testid': 'incident-management-created-at-sort' };
 const tdClass =
@@ -44,6 +54,12 @@ export default {
   i18n: I18N,
   statusTabs: INCIDENT_STATUS_TABS,
   fields: [
+    {
+      key: 'severity',
+      label: s__('IncidentManagement|Severity'),
+      thClass: `gl-pointer-events-none`,
+      tdClass,
+    },
     {
       key: 'title',
       label: s__('IncidentManagement|Incident'),
@@ -74,7 +90,6 @@ export default {
     GlAvatar,
     GlButton,
     TimeAgoTooltip,
-    GlSearchBoxByType,
     GlIcon,
     GlPagination,
     GlTabs,
@@ -82,6 +97,8 @@ export default {
     PublishedCell: () => import('ee_component/incidents/components/published_cell.vue'),
     GlBadge,
     GlEmptyState,
+    SeverityToken,
+    FilteredSearchBar,
   },
   directives: {
     GlTooltip: GlTooltipDirective,
@@ -94,6 +111,9 @@ export default {
     'issuePath',
     'publishedAvailable',
     'emptyListSvgPath',
+    'textQuery',
+    'authorUsernamesQuery',
+    'assigneeUsernamesQuery',
   ],
   apollo: {
     incidents: {
@@ -109,6 +129,8 @@ export default {
           lastPageSize: this.pagination.lastPageSize,
           prevPageCursor: this.pagination.prevPageCursor,
           nextPageCursor: this.pagination.nextPageCursor,
+          authorUsername: this.authorUsername,
+          assigneeUsernames: this.assigneeUsernames,
         };
       },
       update({ project: { issues: { nodes = [], pageInfo = {} } = {} } = {} }) {
@@ -126,6 +148,8 @@ export default {
       variables() {
         return {
           searchTerm: this.searchTerm,
+          authorUsername: this.authorUsername,
+          assigneeUsernames: this.assigneeUsernames,
           projectPath: this.projectPath,
           issueTypes: ['INCIDENT'],
         };
@@ -140,7 +164,7 @@ export default {
       errored: false,
       isErrorAlertDismissed: false,
       redirecting: false,
-      searchTerm: '',
+      searchTerm: this.textQuery,
       pagination: initialPaginationState,
       incidents: {},
       sort: 'created_desc',
@@ -148,6 +172,9 @@ export default {
       sortDesc: true,
       statusFilter: '',
       filteredByStatus: '',
+      authorUsername: this.authorUsernamesQuery,
+      assigneeUsernames: this.assigneeUsernamesQuery,
+      filterParams: {},
     };
   },
   computed: {
@@ -208,14 +235,82 @@ export default {
     isEmpty() {
       return !this.incidents.list?.length;
     },
+    showList() {
+      return !this.isEmpty || this.errored || this.loading;
+    },
+    activeClosedTabHasNoIncidents() {
+      const { all, closed } = this.incidentsCount || {};
+      const isClosedTabActive = this.statusFilter === this.$options.statusTabs[1].filters;
+
+      return isClosedTabActive && all && !closed;
+    },
+    emptyStateData() {
+      const {
+        emptyState: { title, emptyClosedTabTitle, description },
+        createIncidentBtnLabel,
+      } = this.$options.i18n;
+
+      if (this.activeClosedTabHasNoIncidents) {
+        return { title: emptyClosedTabTitle };
+      }
+      return {
+        title,
+        description,
+        btnLink: this.newIncidentPath,
+        btnText: createIncidentBtnLabel,
+      };
+    },
+    filteredSearchTokens() {
+      return [
+        {
+          type: 'author_username',
+          icon: 'user',
+          title: __('Author'),
+          unique: true,
+          symbol: '@',
+          token: AuthorToken,
+          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          fetchPath: this.projectPath,
+          fetchAuthors: Api.projectUsers.bind(Api),
+        },
+        {
+          type: 'assignee_username',
+          icon: 'user',
+          title: __('Assignees'),
+          unique: true,
+          symbol: '@',
+          token: AuthorToken,
+          operators: [{ value: '=', description: __('is'), default: 'true' }],
+          fetchPath: this.projectPath,
+          fetchAuthors: Api.projectUsers.bind(Api),
+        },
+      ];
+    },
+    filteredSearchValue() {
+      const value = [];
+
+      if (this.authorUsername) {
+        value.push({
+          type: 'author_username',
+          value: { data: this.authorUsername },
+        });
+      }
+
+      if (this.assigneeUsernames) {
+        value.push({
+          type: 'assignee_username',
+          value: { data: this.assigneeUsernames },
+        });
+      }
+
+      if (this.searchTerm) {
+        value.push(this.searchTerm);
+      }
+
+      return value;
+    },
   },
   methods: {
-    onInputChange: debounce(function debounceSearch(input) {
-      const trimmedInput = input.trim();
-      if (trimmedInput !== this.searchTerm) {
-        this.searchTerm = trimmedInput;
-      }
-    }, INCIDENT_SEARCH_DELAY),
     filterIncidentsByStatus(tabIndex) {
       const { filters, status } = this.$options.statusTabs[tabIndex];
       this.statusFilter = filters;
@@ -255,6 +350,64 @@ export default {
 
       this.sort = `${sortingColumn}_${sortingDirection}`;
     },
+    getSeverity(severity) {
+      return INCIDENT_SEVERITY[severity];
+    },
+    handleFilterIncidents(filters) {
+      const filterParams = { authorUsername: '', assigneeUsername: '', search: '' };
+
+      filters.forEach(filter => {
+        if (typeof filter === 'object') {
+          switch (filter.type) {
+            case 'author_username':
+              filterParams.authorUsername = filter.value.data;
+              break;
+            case 'assignee_username':
+              filterParams.assigneeUsername = filter.value.data;
+              break;
+            case 'filtered-search-term':
+              if (filter.value.data !== '') filterParams.search = filter.value.data;
+              break;
+            default:
+              break;
+          }
+        }
+      });
+
+      this.filterParams = filterParams;
+      this.updateUrl();
+      this.searchTerm = filterParams?.search;
+      this.authorUsername = filterParams?.authorUsername;
+      this.assigneeUsernames = filterParams?.assigneeUsername;
+    },
+    updateUrl() {
+      const queryParams = urlParamsToObject(window.location.search);
+      const { authorUsername, assigneeUsername, search } = this.filterParams || {};
+
+      if (authorUsername) {
+        queryParams.author_username = authorUsername;
+      } else {
+        delete queryParams.author_username;
+      }
+
+      if (assigneeUsername) {
+        queryParams.assignee_username = assigneeUsername;
+      } else {
+        delete queryParams.assignee_username;
+      }
+
+      if (search) {
+        queryParams.search = search;
+      } else {
+        delete queryParams.search;
+      }
+
+      updateHistory({
+        url: setUrlParams(queryParams, window.location.href, true),
+        title: document.title,
+        replace: true,
+      });
+    },
   },
 };
 </script>
@@ -279,7 +432,7 @@ export default {
       </gl-tabs>
 
       <gl-button
-        v-if="!isEmpty"
+        v-if="!isEmpty || activeClosedTabHasNoIncidents"
         class="gl-my-3 gl-mr-5 create-incident-button"
         data-testid="createIncidentBtn"
         data-qa-selector="create_incident_button"
@@ -294,12 +447,16 @@ export default {
       </gl-button>
     </div>
 
-    <div class="gl-bg-gray-10 gl-p-5 gl-border-b-solid gl-border-b-1 gl-border-gray-100">
-      <gl-search-box-by-type
-        :value="searchTerm"
-        class="gl-bg-white"
-        :placeholder="$options.i18n.searchPlaceholder"
-        @input="onInputChange"
+    <div class="filtered-search-wrapper">
+      <filtered-search-bar
+        :namespace="projectPath"
+        :search-input-placeholder="$options.i18n.searchPlaceholder"
+        :tokens="filteredSearchTokens"
+        :initial-filter-value="filteredSearchValue"
+        initial-sortby="created_desc"
+        recent-searches-storage-key="incidents"
+        class="row-content-block"
+        @onFilter="handleFilterIncidents"
       />
     </div>
 
@@ -307,6 +464,7 @@ export default {
       {{ s__('IncidentManagement|Incidents') }}
     </h4>
     <gl-table
+      v-if="showList"
       :items="incidents.list || []"
       :fields="availableFields"
       :show-empty="true"
@@ -322,6 +480,10 @@ export default {
       @row-clicked="navigateToIncidentDetails"
       @sort-changed="fetchSortedData"
     >
+      <template #cell(severity)="{ item }">
+        <severity-token :severity="getSeverity(item.severity)" />
+      </template>
+
       <template #cell(title)="{ item }">
         <div :class="{ 'gl-display-flex gl-align-items-center': item.state === 'closed' }">
           <div class="gl-max-w-full text-truncate" :title="item.title">{{ item.title }}</div>
@@ -379,20 +541,19 @@ export default {
         <gl-loading-icon size="lg" color="dark" class="mt-3" />
       </template>
 
-      <template #empty>
-        <gl-empty-state
-          v-if="!errored"
-          :title="$options.i18n.emptyState.title"
-          :svg-path="emptyListSvgPath"
-          :description="$options.i18n.emptyState.description"
-          :primary-button-link="newIncidentPath"
-          :primary-button-text="$options.i18n.createIncidentBtnLabel"
-        />
-        <span v-else>
-          {{ $options.i18n.noIncidents }}
-        </span>
+      <template v-if="errored" #empty>
+        {{ $options.i18n.noIncidents }}
       </template>
     </gl-table>
+
+    <gl-empty-state
+      v-else
+      :title="emptyStateData.title"
+      :svg-path="emptyListSvgPath"
+      :description="emptyStateData.description"
+      :primary-button-link="emptyStateData.btnLink"
+      :primary-button-text="emptyStateData.btnText"
+    />
 
     <gl-pagination
       v-if="showPaginationControls"

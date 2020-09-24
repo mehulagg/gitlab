@@ -382,10 +382,10 @@ if previously enabled manually.
 Gitaly makes the following assumptions:
 
 - Your `gitaly1.internal` Gitaly server can be reached at `gitaly1.internal:8075` from your Gitaly
-  clients, and that Gitaly server can read and write to `/mnt/gitlab/default` and
+  clients, and that Gitaly server can read, write, and set permissions on `/mnt/gitlab/default` and
   `/mnt/gitlab/storage1`.
 - Your `gitaly2.internal` Gitaly server can be reached at `gitaly2.internal:8075` from your Gitaly
-  clients, and that Gitaly server can read and write to `/mnt/gitlab/storage2`.
+  clients, and that Gitaly server can read, write, and set permissions on `/mnt/gitlab/storage2`.
 - Your `gitaly1.internal` and `gitaly2.internal` Gitaly servers can reach each other.
 
 You can't define Gitaly servers with some as a local Gitaly server
@@ -988,9 +988,12 @@ When GitLab calls a function that has a "Rugged patch", it performs two checks:
 - Is the feature flag for this patch set in the database? If so, the feature flag setting controls
   GitLab's use of "Rugged patch" code.
 - If the feature flag is not set, GitLab tries accessing the filesystem underneath the
-  Gitaly server directly. If it can, it will use the "Rugged patch".
+  Gitaly server directly. If it can, it will use the "Rugged patch":
+  - If using Unicorn.
+  - If using Puma and [thread count](../../install/requirements.md#puma-threads) is set
+    to `1`.
 
-The result of both of these checks is cached.
+The result of these checks is cached.
 
 To see if GitLab can access the repository filesystem directly, we use the following heuristic:
 
@@ -1017,6 +1020,9 @@ The second facet presents the only real solution. For this, we developed
 [Gitaly Cluster](praefect.md).
 
 ## Troubleshooting Gitaly
+
+Check [Gitaly timeouts](../../user/admin_area/settings/gitaly_timeouts.md) when troubleshooting
+Gitaly.
 
 ### Checking versions when using standalone Gitaly servers
 
@@ -1238,13 +1244,6 @@ To remove the proxy setting, run the following commands (depending on which vari
 unset http_proxy
 unset https_proxy
 ```
-
-### Gitaly not listening on new address after reconfiguring
-
-When updating the `gitaly['listen_addr']` or `gitaly['prometheus_listen_addr']`
-values, Gitaly may continue to listen on the old address after a `sudo gitlab-ctl reconfigure`.
-
-When this occurs, performing a `sudo gitlab-ctl restart` will resolve the issue. This will no longer be necessary after [this issue](https://gitlab.com/gitlab-org/gitaly/-/issues/2521) is resolved.
 
 ### Permission denied errors appearing in Gitaly logs when accessing repositories from a standalone Gitaly server
 

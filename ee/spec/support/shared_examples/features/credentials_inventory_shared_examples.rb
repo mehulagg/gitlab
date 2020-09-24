@@ -24,6 +24,10 @@ RSpec.shared_examples_for 'credentials inventory personal access tokens' do |gro
       expect(first_row.text).to include('2019-12-10')
       expect(first_row.text).to include('Never')
       expect(first_row.text).not_to include('2020-06-22')
+
+      unless group_managed_account
+        expect(first_row).to have_selector('a.btn', text: 'Revoke')
+      end
     end
   end
 
@@ -67,6 +71,10 @@ RSpec.shared_examples_for 'credentials inventory personal access tokens' do |gro
 
     it 'shows the details with a revoked date', :aggregate_failures do
       expect(first_row.text).to include('2020-06-22')
+
+      unless group_managed_account
+        expect(first_row).not_to have_selector('a.btn', text: 'Revoke')
+      end
     end
   end
 end

@@ -30,4 +30,17 @@ class GroupWiki < Wiki
   def disk_path(*args, &block)
     storage.disk_path + '.wiki'
   end
+
+  override :after_wiki_activity
+  def after_wiki_activity
+    # TODO: Check if we need to update any columns for Geo replication,
+    # like we do in ProjectWiki#after_wiki_activity
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/208147
+  end
+
+  override :after_post_receive
+  def after_post_receive
+    # TODO: Update group wiki storage
+    # https://gitlab.com/gitlab-org/gitlab/-/issues/230465
+  end
 end

@@ -66,6 +66,31 @@ RSpec.describe MergeRequests::BuildService do
           expect(merge_request.description).to eq(description)
         end
       end
+
+      context 'when MR is set to close an issue' do
+        let(:issue) { create(:issue, project: project) }
+
+        let(:service) do
+          described_class.new(
+            project,
+            user,
+            description: description,
+            source_branch: source_branch,
+            target_branch: target_branch,
+            source_project: source_project,
+            target_project: target_project,
+            issue_iid: issue.iid
+          )
+        end
+
+        before do
+          project.add_guest(user)
+        end
+
+        it 'appends closing reference once' do
+          expect(merge_request.description).to eq(template + "\n\nCloses ##{issue.iid}")
+        end
+      end
     end
   end
 end

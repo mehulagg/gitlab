@@ -21,5 +21,7 @@ module Security
       secret_detection: 5,
       coverage_fuzzing: 6
     }
+
+    delegate :project, to: :build
   end
 end

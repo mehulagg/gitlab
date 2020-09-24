@@ -1,4 +1,4 @@
-import { sortBy } from 'lodash';
+import { sortBy, pick } from 'lodash';
 import Cookies from 'js-cookie';
 import axios from '~/lib/utils/axios_utils';
 import boardsStore from '~/boards/stores/boards_store';
@@ -6,21 +6,73 @@ import { __ } from '~/locale';
 import { parseBoolean } from '~/lib/utils/common_utils';
 import actionsCE from '~/boards/stores/actions';
 import { BoardType, ListType } from '~/boards/constants';
+import { EpicFilterType } from '../constants';
 import boardsStoreEE from './boards_store_ee';
 import * as types from './mutation_types';
+import { fullEpicId } from '../boards_util';
+import { formatListIssues, fullBoardId } from '~/boards/boards_util';
 
 import createDefaultClient from '~/lib/graphql';
-import groupEpicsSwimlanesQuery from '../queries/group_epics_swimlanes.query.graphql';
+import epicsSwimlanesQuery from '../queries/epics_swimlanes.query.graphql';
+import listsIssuesQuery from '~/boards/queries/lists_issues.query.graphql';
 
 const notImplemented = () => {
   /* eslint-disable-next-line @gitlab/require-i18n-strings */
   throw new Error('Not implemented!');
 };
 
-const gqlClient = createDefaultClient();
+export const gqlClient = createDefaultClient();
+
+const fetchAndFormatListIssues = (state, extraVariables) => {
+  const { endpoints, boardType, filterParams } = state;
+  const { fullPath, boardId } = endpoints;
+
+  const variables = {
+    ...extraVariables,
+    fullPath,
+    boardId: fullBoardId(boardId),
+    filters: { ...filterParams },
+    isGroup: boardType === BoardType.group,
+    isProject: boardType === BoardType.project,
+  };
+
+  return gqlClient
+    .query({
+      query: listsIssuesQuery,
+      context: {
+        isSingleRequest: true,
+      },
+      variables,
+    })
+    .then(({ data }) => {
+      const { lists } = data[boardType]?.board;
+      return formatListIssues(lists);
+    });
+};
 
 export default {
   ...actionsCE,
+
+  setFilters: ({ commit }, filters) => {
+    const filterParams = pick(filters, [
+      'assigneeUsername',
+      'authorUsername',
+      'epicId',
+      'labelName',
+      'milestoneTitle',
+      'releaseTag',
+      'search',
+      'weight',
+    ]);
+
+    if (filterParams.epicId === EpicFilterType.any || filterParams.epicId === EpicFilterType.none) {
+      filterParams.epicWildcardId = filterParams.epicId.toUpperCase();
+      filterParams.epicId = undefined;
+    } else if (filterParams.epicId) {
+      filterParams.epicId = fullEpicId(filterParams.epicId);
+    }
+    commit(types.SET_FILTERS, filterParams);
+  },
 
   fetchEpicsSwimlanes({ state, commit }, withLists = true) {
     const { endpoints, boardType, filterParams } = state;
@@ -37,7 +89,7 @@ export default {
 
     return gqlClient
       .query({
-        query: groupEpicsSwimlanesQuery,
+        query: epicsSwimlanesQuery,
         variables,
       })
       .then(({ data }) => {
@@ -114,6 +166,39 @@ export default {
 
   togglePromotionState: () => {
     notImplemented();
+  },
+
+  fetchIssuesForList: ({ state, commit }, listId, noEpicIssues = false) => {
+    const { filterParams } = state;
+
+    const variables = {
+      id: listId,
+      filters: noEpicIssues
+        ? { ...filterParams, epicWildcardId: EpicFilterType.none }
+        : filterParams,
+    };
+
+    return fetchAndFormatListIssues(state, variables)
+      .then(listIssues => {
+        commit(types.RECEIVE_ISSUES_FOR_LIST_SUCCESS, { listIssues, listId });
+      })
+      .catch(() => commit(types.RECEIVE_ISSUES_FOR_LIST_FAILURE, listId));
+  },
+
+  fetchIssuesForEpic: ({ state, commit }, epicId) => {
+    commit(types.REQUEST_ISSUES_FOR_EPIC, epicId);
+
+    const { filterParams } = state;
+
+    const variables = {
+      filters: { ...filterParams, epicId },
+    };
+
+    return fetchAndFormatListIssues(state, variables)
+      .then(listIssues => {
+        commit(types.RECEIVE_ISSUES_FOR_EPIC_SUCCESS, { ...listIssues, epicId });
+      })
+      .catch(() => commit(types.RECEIVE_ISSUES_FOR_EPIC_FAILURE, epicId));
   },
 
   toggleEpicSwimlanes: ({ state, commit, dispatch }) => {

@@ -101,8 +101,7 @@
               = s_('IDE|Live Preview')
             %span.form-text.text-muted
               = s_('IDE|Allow live previews of JavaScript projects in the Web IDE using CodeSandbox Live Preview.')
-      .gl-display-flex.gl-justify-content-end
-        = f.submit _('Save changes'), class: "btn btn-success"
+      = f.submit _('Save changes'), class: "btn btn-success"
 
 - if Feature.enabled?(:maintenance_mode)
   %section.settings.no-animate#js-maintenance-mode-toggle{ class: ('expanded' if expanded_by_default?) }
@@ -117,6 +116,7 @@
       #js-maintenance-mode-settings
 
 = render_if_exists 'admin/application_settings/elasticsearch_form'
+= render 'admin/application_settings/gitpod'
 = render 'admin/application_settings/plantuml'
 = render 'admin/application_settings/sourcegraph'
 = render_if_exists 'admin/application_settings/slack'

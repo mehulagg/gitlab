@@ -27,7 +27,7 @@ RSpec.describe Projects::ImportExport::ExportService do
 
       context 'group-level custom project templates' do
         before do
-          group.update(custom_project_templates_group_id: subgroup.id)
+          group.update!(custom_project_templates_group_id: subgroup.id)
         end
 
         it 'succeeds' do

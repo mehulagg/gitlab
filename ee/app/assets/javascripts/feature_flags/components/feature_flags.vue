@@ -1,20 +1,13 @@
 <script>
 import { createNamespacedHelpers } from 'vuex';
 import { isEmpty } from 'lodash';
-import {
-  GlAlert,
-  GlButton,
-  GlEmptyState,
-  GlLoadingIcon,
-  GlModalDirective,
-  GlLink,
-} from '@gitlab/ui';
+import { GlButton, GlModalDirective, GlTabs } from '@gitlab/ui';
 import { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE } from '../constants';
+import FeatureFlagsTab from './feature_flags_tab.vue';
 import FeatureFlagsTable from './feature_flags_table.vue';
 import UserListsTable from './user_lists_table.vue';
 import store from '../store';
-import { __, s__ } from '~/locale';
-import NavigationTabs from '~/vue_shared/components/navigation_tabs.vue';
+import { s__ } from '~/locale';
 import TablePagination from '~/vue_shared/components/pagination/table_pagination.vue';
 import {
   getParameterByName,
@@ -26,18 +19,17 @@ import ConfigureFeatureFlagsModal from './configure_feature_flags_modal.vue';
 
 const { mapState, mapActions } = createNamespacedHelpers('index');
 
+const SCOPES = { FEATURE_FLAG_SCOPE, USER_LIST_SCOPE };
+
 export default {
   store,
   components: {
     FeatureFlagsTable,
     UserListsTable,
-    NavigationTabs,
     TablePagination,
-    GlAlert,
     GlButton,
-    GlEmptyState,
-    GlLoadingIcon,
-    GlLink,
+    GlTabs,
+    FeatureFlagsTab,
     ConfigureFeatureFlagsModal,
   },
   directives: {
@@ -53,14 +45,6 @@ export default {
       required: true,
     },
     csrfToken: {
-      type: String,
-      required: true,
-    },
-    errorStateSvgPath: {
-      type: String,
-      required: true,
-    },
-    featureFlagsHelpPagePath: {
       type: String,
       required: true,
     },
@@ -101,15 +85,13 @@ export default {
     },
   },
   data() {
+    const scope = getParameterByName('scope') || SCOPES.FEATURE_FLAG_SCOPE;
     return {
-      scope: getParameterByName('scope') || this.$options.scopes.featureFlags,
+      scope,
       page: getParameterByName('page') || '1',
       isUserListAlertDismissed: false,
+      selectedTab: Object.values(SCOPES).indexOf(scope),
     };
-  },
-  scopes: {
-    [FEATURE_FLAG_SCOPE]: FEATURE_FLAG_SCOPE,
-    [USER_LIST_SCOPE]: USER_LIST_SCOPE,
   },
   computed: {
     ...mapState([
@@ -125,6 +107,9 @@ export default {
       'isRotating',
       'hasRotateError',
     ]),
+    topAreaBaseClasses() {
+      return ['gl-display-flex', 'gl-flex-direction-column'];
+    },
     canUserRotateToken() {
       return this.rotateInstanceIdPath !== '';
     },
@@ -145,29 +130,17 @@ export default {
     shouldRenderErrorState() {
       return this.hasError && !this.isLoading;
     },
-    tabs() {
-      const { scopes } = this.$options;
-
-      return [
-        {
-          name: __('Feature Flags'),
-          scope: scopes[FEATURE_FLAG_SCOPE],
-          count: this.count[FEATURE_FLAG_SCOPE],
-          isActive: this.scope === scopes[FEATURE_FLAG_SCOPE],
-        },
-        {
-          name: __('Lists'),
-          scope: scopes[USER_LIST_SCOPE],
-          count: this.count[USER_LIST_SCOPE],
-          isActive: this.scope === scopes[USER_LIST_SCOPE],
-        },
-      ];
+    shouldRenderFeatureFlags() {
+      return this.shouldRenderTable(SCOPES.FEATURE_FLAG_SCOPE);
+    },
+    shouldRenderUserLists() {
+      return this.shouldRenderTable(SCOPES.USER_LIST_SCOPE);
     },
     hasNewPath() {
       return !isEmpty(this.newFeatureFlagPath);
     },
     emptyStateTitle() {
-      return s__(`FeatureFlags|Get started with feature flags`);
+      return s__('FeatureFlags|Get started with feature flags');
     },
   },
   created() {
@@ -200,6 +173,12 @@ export default {
         page: '1',
       });
     },
+    onFeatureFlagsTab() {
+      this.onChangeTab(SCOPES.FEATURE_FLAG_SCOPE);
+    },
+    onUserListsTab() {
+      this.onChangeTab(SCOPES.USER_LIST_SCOPE);
+    },
     onChangePage(page) {
       this.updateFeatureFlagOptions({
         scope: this.scope,
@@ -217,7 +196,7 @@ export default {
 
       historyPushState(buildUrlWithCurrentLocation(`?${queryString}`));
       this.setFeatureFlagsOptions(parameters);
-      if (this.scope === this.$options.scopes.featureFlags) {
+      if (this.scope === SCOPES.FEATURE_FLAG_SCOPE) {
         this.fetchFeatureFlags();
       } else {
         this.fetchUserLists();
@@ -241,7 +220,6 @@ export default {
   <div>
     <configure-feature-flags-modal
       v-if="canUserConfigure"
-      :help-path="featureFlagsHelpPagePath"
       :help-client-libraries-path="featureFlagsClientLibrariesHelpPagePath"
       :help-client-example-path="featureFlagsClientExampleHelpPagePath"
       :api-url="unleashApiUrl"
@@ -252,9 +230,8 @@ export default {
       modal-id="configure-feature-flags"
       @token="rotateInstanceId()"
     />
-    <div class="top-area">
-      <navigation-tabs :tabs="tabs" scope="featureflags" @onChangeTab="onChangeTab" />
-      <div class="nav-controls">
+    <div :class="topAreaBaseClasses">
+      <div class="gl-display-flex gl-flex-direction-column gl-display-md-none!">
         <gl-button
           v-if="canUserConfigure"
           v-gl-modal="'configure-feature-flags'"
@@ -262,7 +239,7 @@ export default {
           category="secondary"
           data-qa-selector="configure_feature_flags_button"
           data-testid="ff-configure-button"
-          class="gl-mr-3"
+          class="gl-mb-3"
         >
           {{ s__('FeatureFlags|Configure') }}
         </gl-button>
@@ -272,10 +249,10 @@ export default {
           :href="newUserListPath"
           variant="success"
           category="secondary"
-          class="gl-mr-3"
+          class="gl-mb-3"
           data-testid="ff-new-list-button"
         >
-          {{ s__('FeatureFlags|New list') }}
+          {{ s__('FeatureFlags|New user list') }}
         </gl-button>
 
         <gl-button
@@ -287,62 +264,87 @@ export default {
           {{ s__('FeatureFlags|New feature flag') }}
         </gl-button>
       </div>
+      <gl-tabs v-model="selectedTab" class="gl-align-items-center gl-w-full">
+        <feature-flags-tab
+          :title="s__('FeatureFlags|Feature Flags')"
+          :count="count.featureFlags"
+          :alerts="alerts"
+          :is-loading="isLoading"
+          :loading-label="s__('FeatureFlags|Loading feature flags')"
+          :error-state="shouldRenderErrorState"
+          :error-title="s__(`FeatureFlags|There was an error fetching the feature flags.`)"
+          :empty-state="shouldShowEmptyState"
+          :empty-title="emptyStateTitle"
+          data-testid="feature-flags-tab"
+          @dismissAlert="clearAlert"
+          @changeTab="onFeatureFlagsTab"
+        >
+          <feature-flags-table
+            v-if="shouldRenderFeatureFlags"
+            :csrf-token="csrfToken"
+            :feature-flags="featureFlags"
+            @toggle-flag="toggleFeatureFlag"
+          />
+        </feature-flags-tab>
+        <feature-flags-tab
+          :title="s__('FeatureFlags|User Lists')"
+          :count="count.userLists"
+          :alerts="alerts"
+          :is-loading="isLoading"
+          :loading-label="s__('FeatureFlags|Loading user lists')"
+          :error-state="shouldRenderErrorState"
+          :error-title="s__(`FeatureFlags|There was an error fetching the user lists.`)"
+          :empty-state="shouldShowEmptyState"
+          :empty-title="emptyStateTitle"
+          data-testid="user-lists-tab"
+          @dismissAlert="clearAlert"
+          @changeTab="onUserListsTab"
+        >
+          <user-lists-table
+            v-if="shouldRenderUserLists"
+            :user-lists="userLists"
+            @delete="deleteUserList"
+          />
+        </feature-flags-tab>
+        <template #tabs-end>
+          <div
+            class="gl-display-none gl-display-md-flex gl-align-items-center gl-flex-fill-1 gl-justify-content-end"
+          >
+            <gl-button
+              v-if="canUserConfigure"
+              v-gl-modal="'configure-feature-flags'"
+              variant="info"
+              category="secondary"
+              data-qa-selector="configure_feature_flags_button"
+              data-testid="ff-configure-button"
+              class="gl-mb-0 gl-mr-4"
+            >
+              {{ s__('FeatureFlags|Configure') }}
+            </gl-button>
+
+            <gl-button
+              v-if="newUserListPath"
+              :href="newUserListPath"
+              variant="success"
+              category="secondary"
+              class="gl-mb-0 gl-mr-4"
+              data-testid="ff-new-list-button"
+            >
+              {{ s__('FeatureFlags|New user list') }}
+            </gl-button>
+
+            <gl-button
+              v-if="hasNewPath"
+              :href="newFeatureFlagPath"
+              variant="success"
+              data-testid="ff-new-button"
+            >
+              {{ s__('FeatureFlags|New feature flag') }}
+            </gl-button>
+          </div>
+        </template>
+      </gl-tabs>
     </div>
-    <gl-alert
-      v-for="(message, index) in alerts"
-      :key="index"
-      data-testid="serverErrors"
-      variant="danger"
-      @dismiss="clearAlert(index)"
-    >
-      {{ message }}
-    </gl-alert>
-
-    <gl-loading-icon
-      v-if="isLoading"
-      :label="s__('FeatureFlags|Loading feature flags')"
-      size="md"
-      class="js-loading-state prepend-top-20"
-    />
-
-    <gl-empty-state
-      v-else-if="shouldRenderErrorState"
-      :title="s__(`FeatureFlags|There was an error fetching the feature flags.`)"
-      :description="s__(`FeatureFlags|Try again in a few moments or contact your support team.`)"
-      :svg-path="errorStateSvgPath"
-    />
-
-    <gl-empty-state
-      v-else-if="shouldShowEmptyState"
-      class="js-feature-flags-empty-state"
-      :title="emptyStateTitle"
-      :svg-path="errorStateSvgPath"
-    >
-      <template #description>
-        {{
-          s__(
-            'FeatureFlags|Feature flags allow you to configure your code into different flavors by dynamically toggling certain functionality.',
-          )
-        }}
-        <gl-link :href="featureFlagsHelpPagePath" target="_blank" rel="noopener noreferrer">
-          {{ s__('FeatureFlags|More information') }}
-        </gl-link>
-      </template>
-    </gl-empty-state>
-
-    <feature-flags-table
-      v-else-if="shouldRenderTable($options.scopes.featureFlags)"
-      :csrf-token="csrfToken"
-      :feature-flags="featureFlags"
-      @toggle-flag="toggleFeatureFlag"
-    />
-
-    <user-lists-table
-      v-else-if="shouldRenderTable($options.scopes.userLists)"
-      :user-lists="userLists"
-      @delete="deleteUserList"
-    />
-
     <table-pagination
       v-if="shouldRenderPagination"
       :change="onChangePage"

@@ -912,7 +912,7 @@ RSpec.describe API::MergeRequests do
         let(:parent_group) { create(:group) }
 
         before do
-          group.update(parent_id: parent_group.id)
+          group.update!(parent_id: parent_group.id)
           merge_request_merged.reload
         end
 
@@ -1027,7 +1027,7 @@ RSpec.describe API::MergeRequests do
       let(:non_member) { create(:user) }
 
       before do
-        merge_request.update(author: non_member)
+        merge_request.update!(author: non_member)
       end
 
       it 'exposes first_contribution as true' do
@@ -1084,8 +1084,8 @@ RSpec.describe API::MergeRequests do
       let(:merge_request) { create(:merge_request, :simple, author: user, source_project: project, source_branch: 'markdown', title: "Test") }
 
       before do
-        merge_request.update(head_pipeline: create(:ci_pipeline))
-        merge_request.project.project_feature.update(builds_access_level: 10)
+        merge_request.update!(head_pipeline: create(:ci_pipeline))
+        merge_request.project.project_feature.update!(builds_access_level: 10)
       end
 
       context 'when user can read the pipeline' do
@@ -1140,7 +1140,7 @@ RSpec.describe API::MergeRequests do
 
     context 'when a merge request has more than the changes limit' do
       it "returns a string indicating that more changes were made" do
-        stub_const('Commit::DIFF_HARD_LIMIT_FILES', 5)
+        allow(Commit).to receive(:diff_hard_limit_files).and_return(5)
 
         merge_request_overflow = create(:merge_request, :simple,
                                         author: user,
@@ -1691,7 +1691,7 @@ RSpec.describe API::MergeRequests do
       end
 
       it 'returns 403 when target project has disabled merge requests' do
-        project.project_feature.update(merge_requests_access_level: 0)
+        project.project_feature.update!(merge_requests_access_level: 0)
 
         post api("/projects/#{forked_project.id}/merge_requests", user2),
              params: {
@@ -2146,7 +2146,7 @@ RSpec.describe API::MergeRequests do
       let(:source_branch) { merge_request.source_branch }
 
       before do
-        merge_request.update(merge_params: { 'force_remove_source_branch' => true })
+        merge_request.update!(merge_params: { 'force_remove_source_branch' => true })
       end
 
       it 'removes the source branch' do
@@ -2173,7 +2173,7 @@ RSpec.describe API::MergeRequests do
       let(:merge_request) { create(:merge_request, :rebased, source_project: project, squash: true) }
 
       before do
-        project.update(merge_requests_ff_only_enabled: true)
+        project.update!(merge_requests_ff_only_enabled: true)
       end
 
       it "records the squash commit SHA and returns it in the response" do
@@ -2263,7 +2263,7 @@ RSpec.describe API::MergeRequests do
   describe "PUT /projects/:id/merge_requests/:merge_request_iid" do
     context 'updates force_remove_source_branch properly' do
       it 'sets to false' do
-        merge_request.update(merge_params: { 'force_remove_source_branch' => true } )
+        merge_request.update!(merge_params: { 'force_remove_source_branch' => true } )
 
         expect(merge_request.force_remove_source_branch?).to be_truthy
 
@@ -2275,7 +2275,7 @@ RSpec.describe API::MergeRequests do
       end
 
       it 'sets to true' do
-        merge_request.update(merge_params: { 'force_remove_source_branch' => false } )
+        merge_request.update!(merge_params: { 'force_remove_source_branch' => false } )
 
         expect(merge_request.force_remove_source_branch?).to be_falsey
 
@@ -2354,10 +2354,44 @@ RSpec.describe API::MergeRequests do
       expect(json_response['squash']).to be_truthy
     end
 
-    it "returns merge_request with renamed target_branch" do
+    it "updates target_branch and returns merge_request" do
       put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user), params: { target_branch: "wiki" }
       expect(response).to have_gitlab_http_status(:ok)
       expect(json_response['target_branch']).to eq('wiki')
+    end
+
+    context "forked projects" do
+      let_it_be(:user2) { create(:user) }
+      let(:project) { create(:project, :public, :repository) }
+      let!(:forked_project) { fork_project(project, user2, repository: true) }
+      let(:merge_request) do
+        create(:merge_request,
+               source_project: forked_project,
+               target_project: project,
+               source_branch: "fixes")
+      end
+
+      shared_examples "update of allow_collaboration and allow_maintainer_to_push" do |request_value, expected_value|
+        %w[allow_collaboration allow_maintainer_to_push].each do |attr|
+          it "attempts to update #{attr} to #{request_value} and returns #{expected_value} for `allow_collaboration`" do
+            put api("/projects/#{project.id}/merge_requests/#{merge_request.iid}", user2), params: { attr => request_value }
+
+            expect(response).to have_gitlab_http_status(:ok)
+            expect(json_response["allow_collaboration"]).to eq(expected_value)
+            expect(json_response["allow_maintainer_to_push"]).to eq(expected_value)
+          end
+        end
+      end
+
+      context "when source project is public (i.e. MergeRequest#collaborative_push_possible? == true)" do
+        it_behaves_like "update of allow_collaboration and allow_maintainer_to_push", true, true
+      end
+
+      context "when source project is private (i.e. MergeRequest#collaborative_push_possible? == false)" do
+        let(:project) { create(:project, :private, :repository) }
+
+        it_behaves_like "update of allow_collaboration and allow_maintainer_to_push", true, false
+      end
     end
 
     it "returns merge_request that removes the source branch" do
@@ -2760,7 +2794,7 @@ RSpec.describe API::MergeRequests do
     merge_request
     merge_request.created_at += 1.hour
     merge_request.updated_at += 30.minutes
-    merge_request.save
+    merge_request.save!
     merge_request
   end
 
@@ -2768,7 +2802,7 @@ RSpec.describe API::MergeRequests do
     merge_request_closed
     merge_request_closed.created_at -= 1.hour
     merge_request_closed.updated_at -= 30.minutes
-    merge_request_closed.save
+    merge_request_closed.save!
     merge_request_closed
   end
 end

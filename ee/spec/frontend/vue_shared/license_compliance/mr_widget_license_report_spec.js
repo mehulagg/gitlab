@@ -347,26 +347,17 @@ describe('License Report MR Widget', () => {
     };
     mountComponent({ actions });
 
-    expect(actions.setAPISettings).toHaveBeenCalledWith(
-      expect.any(Object),
-      {
-        apiUrlManageLicenses: apiUrl,
-        licensesApiPath: defaultProps.licensesApiPath,
-        approvalsApiPath: defaultProps.approvalsApiPath,
-        canManageLicenses: true,
-      },
-      undefined,
-    );
+    expect(actions.setAPISettings).toHaveBeenCalledWith(expect.any(Object), {
+      apiUrlManageLicenses: apiUrl,
+      licensesApiPath: defaultProps.licensesApiPath,
+      approvalsApiPath: defaultProps.approvalsApiPath,
+      canManageLicenses: true,
+    });
 
-    expect(actions.fetchParsedLicenseReport).toHaveBeenCalledWith(
-      expect.any(Object),
-      undefined,
-      undefined,
-    );
+    expect(actions.fetchParsedLicenseReport).toHaveBeenCalledWith(expect.any(Object), undefined);
 
     expect(actions.fetchLicenseCheckApprovalRule).toHaveBeenCalledWith(
       expect.any(Object),
-      undefined,
       undefined,
     );
   });

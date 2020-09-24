@@ -4,6 +4,7 @@ import FirstClassProjectSecurityDashboard from 'ee/security_dashboard/components
 import Filters from 'ee/security_dashboard/components/first_class_vulnerability_filters.vue';
 import SecurityDashboardLayout from 'ee/security_dashboard/components/security_dashboard_layout.vue';
 import ProjectVulnerabilitiesApp from 'ee/security_dashboard/components/project_vulnerabilities.vue';
+import VulnerabilityCountList from 'ee/security_dashboard/components/vulnerability_count_list.vue';
 import ReportsNotConfigured from 'ee/security_dashboard/components/empty_states/reports_not_configured.vue';
 import CsvExportButton from 'ee/security_dashboard/components/csv_export_button.vue';
 
@@ -27,6 +28,7 @@ describe('First class Project Security Dashboard component', () => {
 
   const findFilters = () => wrapper.find(Filters);
   const findVulnerabilities = () => wrapper.find(ProjectVulnerabilitiesApp);
+  const findVulnerabilityCountList = () => wrapper.find(VulnerabilityCountList);
   const findUnconfiguredState = () => wrapper.find(ReportsNotConfigured);
   const findCsvExportButton = () => wrapper.find(CsvExportButton);
 
@@ -49,15 +51,28 @@ describe('First class Project Security Dashboard component', () => {
 
   describe('on render when there are vulnerabilities', () => {
     beforeEach(() => {
-      createComponent({ props: { hasVulnerabilities: true } });
+      createComponent({
+        props: { hasVulnerabilities: true },
+        data: () => ({ filters }),
+      });
     });
 
     it('should render the vulnerabilities', () => {
       expect(findVulnerabilities().exists()).toBe(true);
     });
 
-    it('should pass down the "projectFullPath" prop to the vulnerabilities', () => {
-      expect(findVulnerabilities().props('projectFullPath')).toBe(props.projectFullPath);
+    it('should pass down the properties correctly to the vulnerabilities', () => {
+      expect(findVulnerabilities().props()).toEqual({
+        projectFullPath: props.projectFullPath,
+        filters,
+      });
+    });
+
+    it('should pass down the properties correctly to the vulnerability count list', () => {
+      expect(findVulnerabilityCountList().props()).toEqual({
+        projectFullPath: props.projectFullPath,
+        filters,
+      });
     });
 
     it('should render the filters component', () => {

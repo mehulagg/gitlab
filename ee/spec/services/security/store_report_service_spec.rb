@@ -181,19 +181,13 @@ RSpec.describe Security::StoreReportService, '#execute' do
       end
     end
 
-    context 'when the finding does not include a scanner' do
-      let(:bad_pipeline) { create(:ci_pipeline, project: project) }
-      let(:bad_build) { create(:ci_build, pipeline: bad_pipeline) }
-      let!(:bad_artifact) { create(:ee_ci_job_artifact, :sast_with_missing_scanner, job: bad_build) }
-      let(:bad_report) { bad_pipeline.security_reports.get_report(report_type.to_s, bad_artifact) }
-      let(:report_type) { :sast }
-
+    context 'when the finding is not valid' do
       before do
-        project.add_developer(user)
-        allow(bad_pipeline).to receive(:user).and_return(user)
+        allow(Gitlab::AppLogger).to receive(:warn)
+        allow_next_instance_of(::Gitlab::Ci::Reports::Security::Finding) do |finding|
+          allow(finding).to receive(:valid?).and_return(false)
+        end
       end
-
-      subject { described_class.new(bad_pipeline, bad_report).execute }
 
       it 'does not create a new finding' do
         expect { subject }.not_to change { Vulnerabilities::Finding.count }
@@ -202,28 +196,11 @@ RSpec.describe Security::StoreReportService, '#execute' do
       it 'does not raise an error' do
         expect { subject }.not_to raise_error
       end
-    end
 
-    context 'when the finding does not include a primary identifier' do
-      let(:bad_project) { bad_artifact.project }
-      let(:bad_pipeline) { bad_artifact.job.pipeline }
-      let!(:bad_artifact) { create(:ee_ci_job_artifact, :sast_with_missing_identifiers) }
-      let(:bad_report) { bad_pipeline.security_reports.get_report(report_type.to_s, bad_artifact) }
-      let(:report_type) { :sast }
+      it 'puts a warning log' do
+        subject
 
-      before do
-        bad_project.add_developer(user)
-        allow(bad_pipeline).to receive(:user).and_return(user)
-      end
-
-      subject { described_class.new(bad_pipeline, bad_report).execute }
-
-      it 'does not create a new finding' do
-        expect { subject }.not_to change { Vulnerabilities::Finding.count }
-      end
-
-      it 'does not raise an error' do
-        expect { subject }.not_to raise_error
+        expect(Gitlab::AppLogger).to have_received(:warn).exactly(new_report.findings.length).times
       end
     end
   end

@@ -17,16 +17,11 @@ RSpec.describe SearchController do
       end
 
       context 'i_search_advanced' do
-        let(:target_id) { 'i_search_advanced' }
-        let(:request_params) { { scope: 'projects', search: 'term' } }
+        it_behaves_like 'tracking unique hll events', :search_track_unique_users do
+          subject { get :show, params: { scope: 'projects', search: 'term' }, format: format }
 
-        it_behaves_like 'tracking unique hll events', :show
-
-        it 'does not track if feature flag is disabled' do
-          stub_feature_flags(search_track_unique_users: false)
-          expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event).with(instance_of(String), target_id)
-
-          get :show, params: request_params, format: :html
+          let(:target_id) { 'i_search_advanced' }
+          let(:expected_type) { instance_of(String) }
         end
       end
 
@@ -42,13 +37,10 @@ RSpec.describe SearchController do
             stub_ee_application_setting(elasticsearch_search: true, elasticsearch_indexing: true)
           end
 
-          it_behaves_like 'tracking unique hll events', :show
+          it_behaves_like 'tracking unique hll events', :search_track_unique_users do
+            subject { get :show, params: request_params, format: format }
 
-          it 'does not track if feature flag is disabled' do
-            stub_feature_flags(search_track_unique_users: false)
-            expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event).with(instance_of(String), target_id)
-
-            get :show, params: request_params, format: :html
+            let(:expected_type) { instance_of(String) }
           end
         end
 
@@ -62,13 +54,10 @@ RSpec.describe SearchController do
               stub_licensed_features(elastic_search: true)
             end
 
-            it_behaves_like 'tracking unique hll events', :show
+            it_behaves_like 'tracking unique hll events', :search_track_unique_users do
+              subject { get :show, params: request_params, format: format }
 
-            it 'does not track if feature flag is disabled' do
-              stub_feature_flags(search_track_unique_users: false)
-              expect(Gitlab::UsageDataCounters::HLLRedisCounter).not_to receive(:track_event).with(instance_of(String), target_id)
-
-              get :show, params: request_params, format: :html
+              let(:expected_type) { instance_of(String) }
             end
           end
 

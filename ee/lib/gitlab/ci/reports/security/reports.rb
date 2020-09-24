@@ -7,7 +7,7 @@ module Gitlab
         class Reports
           attr_reader :reports, :pipeline
 
-          delegate :empty?, to: :reports
+          delegate :each, :empty?, to: :reports
 
           def initialize(pipeline)
             @reports = {}

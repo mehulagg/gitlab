@@ -20,7 +20,7 @@ module Projects
       private
 
       def scanned_resources
-        pipeline = project.ci_pipelines.find(pipeline_id)
+        pipeline = project.all_pipelines.find(pipeline_id)
         @scanned_resources = pipeline&.security_reports&.reports&.fetch('dast', nil)&.scanned_resources
 
         return if @scanned_resources

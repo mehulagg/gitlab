@@ -25,7 +25,6 @@ describe('CodeReviewAnalyticsApp component', () => {
 
   let setPage;
   let fetchMergeRequests;
-  let setEndpoints;
 
   const pageInfo = {
     page: 1,
@@ -59,9 +58,6 @@ describe('CodeReviewAnalyticsApp component', () => {
             ...createFiltersState(),
             ...initialState.filters,
           },
-          actions: {
-            setEndpoints,
-          },
         },
       },
     });
@@ -88,7 +84,6 @@ describe('CodeReviewAnalyticsApp component', () => {
   beforeEach(() => {
     setPage = jest.fn();
     fetchMergeRequests = jest.fn();
-    setEndpoints = jest.fn();
   });
 
   afterEach(() => {
@@ -116,10 +111,6 @@ describe('CodeReviewAnalyticsApp component', () => {
       it("calls the filterManager's setup method", () => {
         expect(mockFilterManagerSetup).toHaveBeenCalled();
       });
-
-      it('does not call setEndpoints action', () => {
-        expect(setEndpoints).not.toHaveBeenCalled();
-      });
     });
 
     describe('when "codeReviewAnalyticsHasNewSearch" is enabled', () => {
@@ -135,10 +126,6 @@ describe('CodeReviewAnalyticsApp component', () => {
 
         it("does not call the filterManager's setup method", () => {
           expect(mockFilterManagerSetup).not.toHaveBeenCalled();
-        });
-
-        it('calls setEndpoints action', () => {
-          expect(setEndpoints).toHaveBeenCalled();
         });
       });
     });
@@ -241,7 +228,7 @@ describe('CodeReviewAnalyticsApp component', () => {
     });
 
     it('should call the setPage action', () => {
-      expect(setPage).toHaveBeenCalledWith(expect.anything(), 2, undefined);
+      expect(setPage).toHaveBeenCalledWith(expect.anything(), 2);
     });
 
     it('should call fetchMergeRequests action', () => {

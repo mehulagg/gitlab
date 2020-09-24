@@ -110,11 +110,7 @@ describe('TypeOfWorkCharts', () => {
     });
 
     it('calls the setTasksByTypeFilters method', () => {
-      expect(actionSpies.setTasksByTypeFilters).toHaveBeenCalledWith(
-        expect.any(Object),
-        payload,
-        undefined,
-      );
+      expect(actionSpies.setTasksByTypeFilters).toHaveBeenCalledWith(expect.any(Object), payload);
     });
   });
 

@@ -1,6 +1,5 @@
 <script>
-/* eslint-disable vue/no-v-html */
-import { GlDeprecatedButton, GlButton } from '@gitlab/ui';
+import { GlButton, GlSafeHtmlDirective as SafeHtml } from '@gitlab/ui';
 import EventItem from 'ee/vue_shared/security_reports/components/event_item.vue';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
 import { __, s__ } from '~/locale';
@@ -9,10 +8,13 @@ import HistoryCommentEditor from './history_comment_editor.vue';
 
 export default {
   components: {
-    GlDeprecatedButton,
     GlButton,
     EventItem,
     HistoryCommentEditor,
+  },
+
+  directives: {
+    SafeHtml,
   },
 
   props: {
@@ -154,7 +156,7 @@ export default {
     icon-class="timeline-icon m-0"
     class="m-3"
   >
-    <div class="md" v-html="comment.note_html"></div>
+    <div v-safe-html="comment.note_html" class="md"></div>
 
     <template #right-content>
       <gl-button
@@ -177,8 +179,13 @@ export default {
   </event-item>
 
   <div v-else class="discussion-reply-holder">
-    <gl-deprecated-button ref="addCommentButton" class="btn-text-field" @click="showCommentInput">
+    <button
+      ref="addCommentButton"
+      class="btn btn-text-field"
+      type="button"
+      @click="showCommentInput"
+    >
       {{ s__('vulnerability|Add a comment') }}
-    </gl-deprecated-button>
+    </button>
   </div>
 </template>

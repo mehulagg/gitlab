@@ -3,8 +3,6 @@
 module Dashboard
   module Environments
     class ListService
-      MAX_NUM_PROJECTS = 7
-
       def initialize(user)
         @user = user
       end
@@ -21,7 +19,7 @@ module Dashboard
       def load_projects(user)
         projects = ::Dashboard::Projects::ListService
           .new(user, feature: :operations_dashboard)
-          .execute(user.ops_dashboard_projects, limit: MAX_NUM_PROJECTS)
+          .execute(user.ops_dashboard_projects)
 
         ActiveRecord::Associations::Preloader.new.preload(projects, [
           :route,

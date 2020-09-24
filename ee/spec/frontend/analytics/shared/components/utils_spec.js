@@ -3,8 +3,6 @@ import {
   buildProjectFromDataset,
   buildCycleAnalyticsInitialData,
   filterBySearchTerm,
-  prepareTokens,
-  processFilters,
 } from 'ee/analytics/shared/utils';
 
 const groupDataset = {
@@ -78,17 +76,13 @@ describe('buildProjectFromDataset', () => {
 
 describe('buildCycleAnalyticsInitialData', () => {
   it.each`
-    field                  | value
-    ${'group'}             | ${null}
-    ${'createdBefore'}     | ${null}
-    ${'createdAfter'}      | ${null}
-    ${'selectedProjects'}  | ${[]}
-    ${'selectedAuthor'}    | ${null}
-    ${'selectedMilestone'} | ${null}
-    ${'selectedLabels'}    | ${[]}
-    ${'selectedAssignees'} | ${[]}
-    ${'labelsPath'}        | ${''}
-    ${'milestonesPath'}    | ${''}
+    field                 | value
+    ${'group'}            | ${null}
+    ${'createdBefore'}    | ${null}
+    ${'createdAfter'}     | ${null}
+    ${'selectedProjects'} | ${[]}
+    ${'labelsPath'}       | ${''}
+    ${'milestonesPath'}   | ${''}
   `('will set a default value for "$field" if is not present', ({ field, value }) => {
     expect(buildCycleAnalyticsInitialData()).toMatchObject({
       [field]: value,
@@ -140,62 +134,6 @@ describe('buildCycleAnalyticsInitialData', () => {
     });
   });
 
-  describe('selectedAssignees', () => {
-    it('will be set given an array of assignees', () => {
-      const selectedAssignees = ['krillin', 'chiao-tzu'];
-      expect(
-        buildCycleAnalyticsInitialData({ assignees: JSON.stringify(selectedAssignees) }),
-      ).toMatchObject({
-        selectedAssignees,
-      });
-    });
-
-    it.each`
-      field                  | value
-      ${'selectedAssignees'} | ${null}
-      ${'selectedAssignees'} | ${[]}
-      ${'selectedAssignees'} | ${''}
-    `('will be an empty array if given a value of `$value`', ({ value, field }) => {
-      expect(buildCycleAnalyticsInitialData({ projects: value })).toMatchObject({
-        [field]: [],
-      });
-    });
-  });
-
-  describe('selectedLabels', () => {
-    it('will be set given an array of labels', () => {
-      const selectedLabels = ['krillin', 'chiao-tzu'];
-      expect(
-        buildCycleAnalyticsInitialData({ labels: JSON.stringify(selectedLabels) }),
-      ).toMatchObject({ selectedLabels });
-    });
-
-    it.each`
-      field               | value
-      ${'selectedLabels'} | ${null}
-      ${'selectedLabels'} | ${[]}
-      ${'selectedLabels'} | ${''}
-    `('will be an empty array if given a value of `$value`', ({ value, field }) => {
-      expect(buildCycleAnalyticsInitialData({ projects: value })).toMatchObject({
-        [field]: [],
-      });
-    });
-  });
-
-  describe.each`
-    field          | key                    | value
-    ${'milestone'} | ${'selectedMilestone'} | ${'cell-saga'}
-    ${'author'}    | ${'selectedAuthor'}    | ${'cell'}
-  `('$field', ({ field, value, key }) => {
-    it(`will set ${key} field with the given value`, () => {
-      expect(buildCycleAnalyticsInitialData({ [field]: value })).toMatchObject({ [key]: value });
-    });
-
-    it(`will set ${key} to null if omitted`, () => {
-      expect(buildCycleAnalyticsInitialData()).toMatchObject({ [key]: null });
-    });
-  });
-
   describe.each`
     field              | value
     ${'createdBefore'} | ${'2019-12-31'}
@@ -232,53 +170,6 @@ describe('buildCycleAnalyticsInitialData', () => {
 
     it('with a key, filters by the provided key', () => {
       expect(filterBySearchTerm(data, 'ne', 'title')).toEqual([data[0]]);
-    });
-  });
-});
-
-describe('prepareTokens', () => {
-  describe('with empty data', () => {
-    it('returns an empty array', () => {
-      expect(prepareTokens()).toEqual([]);
-      expect(prepareTokens({})).toEqual([]);
-      expect(prepareTokens({ milestone: null, author: null, assignees: [], labels: [] })).toEqual(
-        [],
-      );
-    });
-  });
-
-  it.each`
-    token          | value                     | result
-    ${'milestone'} | ${'v1.0'}                 | ${[{ type: 'milestone', value: { data: 'v1.0' } }]}
-    ${'author'}    | ${'mr.popo'}              | ${[{ type: 'author', value: { data: 'mr.popo' } }]}
-    ${'labels'}    | ${['z-fighters']}         | ${[{ type: 'labels', value: { data: 'z-fighters' } }]}
-    ${'assignees'} | ${['krillin', 'piccolo']} | ${[{ type: 'assignees', value: { data: 'krillin' } }, { type: 'assignees', value: { data: 'piccolo' } }]}
-  `('with $token=$value sets the $token key', ({ token, value, result }) => {
-    const res = prepareTokens({ [token]: value });
-    expect(res).toEqual(result);
-  });
-});
-
-describe('processFilters', () => {
-  it('processes multiple filter values', () => {
-    const result = processFilters([
-      { type: 'milestone', value: { data: 'my-milestone', operator: '=' } },
-      { type: 'labels', value: { data: 'my-label', operator: '=' } },
-    ]);
-
-    expect(result).toStrictEqual({
-      labels: [{ value: 'my-label', operator: '=' }],
-      milestone: [{ value: 'my-milestone', operator: '=' }],
-    });
-  });
-
-  it('does not remove wrapping double quotes from the data', () => {
-    const result = processFilters([
-      { type: 'milestone', value: { data: '"milestone with spaces"', operator: '=' } },
-    ]);
-
-    expect(result).toStrictEqual({
-      milestone: [{ value: '"milestone with spaces"', operator: '=' }],
     });
   });
 });

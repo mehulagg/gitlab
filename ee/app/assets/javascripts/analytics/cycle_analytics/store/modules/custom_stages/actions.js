@@ -71,7 +71,11 @@ export const createStage = ({ dispatch, rootGetters }, data) => {
   dispatch('clearFormErrors');
   dispatch('setSavingCustomStage');
 
-  return Api.cycleAnalyticsCreateStage(currentGroupPath, currentValueStreamId, data)
+  return Api.cycleAnalyticsCreateStage({
+    groupId: currentGroupPath,
+    valueStreamId: currentValueStreamId,
+    data,
+  })
     .then(response => {
       const { status, data: responseData } = response;
       return dispatch('receiveCreateStageSuccess', { status, data: responseData });

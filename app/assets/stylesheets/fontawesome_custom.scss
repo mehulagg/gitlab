@@ -84,17 +84,8 @@
   color: $white;
 }
 
-.fa-question-circle::before {
-  content: '\f059';
-}
-
 .fa-chevron-down::before {
   content: '\f078';
-}
-
-.fa-remove::before,
-.fa-times::before {
-  content: '\f00d';
 }
 
 .fa-caret-down::before {
@@ -134,10 +125,6 @@
   content: '\f100';
 }
 
-.fa-arrow-left::before {
-  content: '\f060';
-}
-
 .fa-trash-o::before {
   content: '\f014';
 }
@@ -166,10 +153,6 @@
   content: '\f0c6';
 }
 
-.fa-arrow-up::before {
-  content: '\f062';
-}
-
 .fa-bug::before {
   content: '\f188';
 }
@@ -184,10 +167,6 @@
 
 .fa-bell::before {
   content: '\f0f3';
-}
-
-.fa-arrow-down::before {
-  content: '\f063';
 }
 
 .fa-bitbucket-square::before {
@@ -242,10 +221,6 @@
   content: '\f04b';
 }
 
-.fa-arrow-right::before {
-  content: '\f061';
-}
-
 .fa-search-plus::before {
   content: '\f00e';
 }
@@ -280,6 +255,38 @@
 
 .fa-unlink::before {
   content: '\f127';
+}
+
+.fa-file-pdf-o::before {
+  content: '\f1c1';
+}
+
+.fa-file-word-o::before {
+  content: '\f1c2';
+}
+
+.fa-file-excel-o::before {
+  content: '\f1c3';
+}
+
+.fa-file-powerpoint-o::before {
+  content: '\f1c4';
+}
+
+.fa-file-image-o::before {
+  content: '\f1c5';
+}
+
+.fa-file-archive-o::before {
+  content: '\f1c6';
+}
+
+.fa-file-audio-o::before {
+  content: '\f1c7';
+}
+
+.fa-file-video-o::before {
+  content: '\f1c8';
 }
 
 .sr-only {

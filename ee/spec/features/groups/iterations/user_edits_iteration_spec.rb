@@ -46,6 +46,7 @@ RSpec.describe 'User views iteration' do
 
           aggregate_failures do
             expect(page).to have_content(updated_title)
+            expect(page).to have_content(updated_desc)
             expect(page).to have_content(updated_start_date.strftime('%b %-d, %Y'))
             expect(page).to have_content(updated_due_date.strftime('%b %-d, %Y'))
             expect(page).to have_current_path(group_iteration_path(group, iteration))

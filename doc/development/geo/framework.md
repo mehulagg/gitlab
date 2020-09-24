@@ -235,11 +235,10 @@ For example, to add support for files referenced by a `Widget` model with a
 `ee/lib/gitlab/geo.rb`:
 
    ```ruby
-   def self.replicator_classes
-     classes = [::Geo::PackageFileReplicator,
-                ::Geo::WidgetReplicator]
-
-     classes.select(&:enabled?)
+   REPLICATOR_CLASSES = [
+      ::Geo::PackageFileReplicator,
+      ::Geo::WidgetReplicator
+   ]
    end
    ```
 
@@ -314,10 +313,6 @@ For example, to add support for files referenced by a `Widget` model with a
      belongs_to :widget, class_name: 'Widget'
    end
    ```
-
-   The method `has_create_events?` should return `true` in most of the cases.
-   However, if the entity you add doesn't have the create event, don't add the
-   method at all.
 
 1. Update `REGISTRY_CLASSES` in `ee/app/workers/geo/secondary/registry_consistency_worker.rb`.
 
@@ -416,18 +411,26 @@ for verification state to the widgets table:
    # frozen_string_literal: true
 
    class AddVerificationFailureLimitToWidgets < ActiveRecord::Migration[6.0]
+     include Gitlab::Database::MigrationHelpers
+
      DOWNTIME = false
 
      disable_ddl_transaction!
 
-     def change
-       add_text_limit :widgets, :verification_failure, 255
+     CONSTRAINT_NAME = 'widget_verification_failure_text_limit'
+
+     def up
+       add_text_limit :widget, :verification_failure, 255, constraint_name: CONSTRAINT_NAME
+     end
+
+     def down
+       remove_check_constraint(:widget, CONSTRAINT_NAME)
      end
    end
    ```
 
 1. Add a partial index on `verification_failure` and `verification_checksum` to ensure
-   re-verification can be performed efficiently. Add a migration in `ee/db/geo/migrate/`:
+   re-verification can be performed efficiently:
 
    ```ruby
    # frozen_string_literal: true
@@ -453,9 +456,9 @@ for verification state to the widgets table:
 
 ##### Option 2: Create a separate `widget_states` table with verification state fields
 
-1. Add a migration in `ee/db/geo/migrate/` to create a `widget_states` table and add a
-   partial index on `verification_failure` and `verification_checksum` to ensure
-   re-verification can be performed efficiently. Order the columns according to [our guidelines](../ordering_table_columns.md):
+1. Create a `widget_states` table and add a partial index on `verification_failure` and
+   `verification_checksum` to ensure re-verification can be performed efficiently. Order
+   the columns according to [our guidelines](../ordering_table_columns.md):
 
    ```ruby
    # frozen_string_literal: true
@@ -526,7 +529,7 @@ Metrics are gathered by `Geo::MetricsUpdateWorker`, persisted in
    `GET /geo_nodes/status` example response in
    `doc/api/geo_nodes.md`.
 1. Add the same fields to `GET /geo_nodes/status` example response in
-   `doc/api/geo_nodes.md`.
+   `ee/spec/fixtures/api/schemas/public_api/v4/geo_node_status.json`.
 1. Add fields `geo_widgets`, `geo_widgets_checksummed`,
    `geo_widgets_checksum_failed`, `geo_widgets_synced`,
    `geo_widgets_failed`, and `geo_widgets_registry` to
@@ -566,7 +569,7 @@ the Admin Area UI, and Prometheus!
          null: true,
          resolver: ::Resolvers::Geo::WidgetRegistriesResolver,
          description: 'Find widget registries on this Geo node',
-         feature_flag: :geo_self_service_framework
+         feature_flag: :geo_widget_replication
    ```
 
 1. Add the new `widget_registries` field name to the `expected_fields` array in

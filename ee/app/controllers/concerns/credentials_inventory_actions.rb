@@ -14,6 +14,14 @@ module CredentialsInventoryActions
     end
   end
 
+  def revoke
+    personal_access_token = PersonalAccessTokensFinder.new({ user: users, impersonation: false }, current_user).find(params[:id])
+    service = PersonalAccessTokens::RevokeService.new(current_user, token: personal_access_token).execute
+    service.success? ? flash[:notice] = service.message : flash[:alert] = service.message
+
+    redirect_to credentials_inventory_path(page: params[:page])
+  end
+
   private
 
   def filter_credentials

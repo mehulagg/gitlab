@@ -5,9 +5,9 @@ class Admin::CredentialsController < Admin::ApplicationController
   include CredentialsInventoryActions
   include Analytics::UniqueVisitsHelper
 
-  helper_method :credentials_inventory_path, :user_detail_path
+  helper_method :credentials_inventory_path, :user_detail_path, :personal_access_token_revoke_path, :revoke_button_available?
 
-  before_action :check_license_credentials_inventory_available!, only: [:index]
+  before_action :check_license_credentials_inventory_available!, only: [:index, :revoke]
 
   track_unique_visits :index, target_id: 'i_compliance_credential_inventory'
 
@@ -25,6 +25,16 @@ class Admin::CredentialsController < Admin::ApplicationController
   override :user_detail_path
   def user_detail_path(user)
     admin_user_path(user)
+  end
+
+  override :personal_access_token_revoke_path
+  def personal_access_token_revoke_path(token)
+    revoke_admin_credential_path(token)
+  end
+
+  override :revoke_button_available?
+  def revoke_button_available?
+    true
   end
 
   override :users

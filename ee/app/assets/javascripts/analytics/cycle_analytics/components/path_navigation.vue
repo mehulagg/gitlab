@@ -1,5 +1,5 @@
 <script>
-import { GlPath, GlSkeletonLoading } from '@gitlab/ui';
+import { GlPath, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { PATH_BACKGROUND_COLOR } from '../constants';
 
 export default {

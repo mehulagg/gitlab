@@ -202,7 +202,7 @@ export default {
     <template v-if="vulnerability.links && vulnerability.links.length">
       <h3>{{ __('Links') }}</h3>
       <ul>
-        <li v-for="link in vulnerability.links" :key="link.url">
+        <li v-for="(link, index) in vulnerability.links" :key="`${index}:${link.url}`">
           <gl-link
             :href="link.url"
             data-testid="link"
@@ -219,7 +219,10 @@ export default {
     <template v-if="vulnerability.identifiers && vulnerability.identifiers.length">
       <h3>{{ __('Identifiers') }}</h3>
       <ul>
-        <li v-for="identifier in vulnerability.identifiers" :key="identifier.url">
+        <li
+          v-for="(identifier, index) in vulnerability.identifiers"
+          :key="`${index}:${identifier.url}`"
+        >
           <gl-link :href="identifier.url" data-testid="identifier" target="_blank">
             {{ identifier.name }}
           </gl-link>
@@ -231,8 +234,8 @@ export default {
       <h3>{{ s__('Vulnerability|Request') }}</h3>
       <ul>
         <detail-item
-          v-for="{ label, isCode, content } in requestData"
-          :key="label"
+          v-for="({ label, isCode, content }, index) in requestData"
+          :key="`${index}:${label}`"
           :sprintf-message="label"
         >
           <code-block v-if="isCode" class="mt-1" :code="content" max-height="225px" />
@@ -247,8 +250,8 @@ export default {
       <h3>{{ s__('Vulnerability|Response') }}</h3>
       <ul>
         <detail-item
-          v-for="{ label, isCode, content } in responseData"
-          :key="label"
+          v-for="({ label, isCode, content }, index) in responseData"
+          :key="`${index}:${label}`"
           :sprintf-message="label"
         >
           <code-block v-if="isCode" class="mt-1" :code="content" max-height="225px" />

@@ -179,22 +179,6 @@ FactoryBot.define do
       end
     end
 
-    trait :sast_with_missing_identifiers do
-      file_type { :sast }
-      file_format { :raw }
-
-      after(:build) do |artifact, _|
-        file = fixture_file_upload(
-          Rails.root.join('ee/spec/fixtures/security_reports/master/gl-sast-report.json'), 'application/json')
-        data = Gitlab::Json.parse(file.tempfile.read)['vulnerabilities'].each { |v| v.delete('identifiers') }.to_json
-        output = Tempfile.new("gl-sast-missing-identifiers")
-        output.write(data)
-        artifact.file = fixture_file_upload(output.path, 'application/json')
-        output.close
-        output.unlink
-      end
-    end
-
     trait :license_management do
       to_create { |instance| instance.save!(validate: false) }
 

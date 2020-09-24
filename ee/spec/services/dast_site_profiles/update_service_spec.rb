@@ -8,7 +8,7 @@ RSpec.describe DastSiteProfiles::UpdateService do
   let(:dast_site_profile) { create(:dast_site_profile) }
 
   let(:new_profile_name) { SecureRandom.hex }
-  let(:new_target_url) { FFaker::Internet.uri(:https) }
+  let(:new_target_url) { generate(:url) }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)

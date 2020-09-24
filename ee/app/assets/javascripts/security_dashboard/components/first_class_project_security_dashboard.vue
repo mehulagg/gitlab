@@ -61,7 +61,7 @@ export default {
             <h4 class="flex-grow mt-0 mb-0">{{ __('Vulnerabilities') }}</h4>
             <csv-export-button :vulnerabilities-export-endpoint="vulnerabilitiesExportEndpoint" />
           </div>
-          <vulnerabilities-count-list :project-full-path="projectFullPath" />
+          <vulnerabilities-count-list :project-full-path="projectFullPath" :filters="filters" />
         </template>
         <template #sticky>
           <filters @filterChange="handleFilterChange" />

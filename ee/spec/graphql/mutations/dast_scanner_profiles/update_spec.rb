@@ -41,14 +41,6 @@ RSpec.describe Mutations::DastScannerProfiles::Update do
         end
       end
 
-      context 'when dast scanner profile does not exist' do
-        let(:scanner_profile_id) { Gitlab::GlobalId.build(nil, model_name: 'DastScannerProfile', id: 'does_not_exist') }
-
-        it 'raises an exception' do
-          expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
-        end
-      end
-
       context 'when the user is not associated with the project' do
         it 'raises an exception' do
           expect { subject }.to raise_error(Gitlab::Graphql::Errors::ResourceNotAvailable)
@@ -75,6 +67,14 @@ RSpec.describe Mutations::DastScannerProfiles::Update do
             expect(dast_scanner_profile.name).to eq(new_profile_name)
             expect(dast_scanner_profile.target_timeout).to eq(new_target_timeout)
             expect(dast_scanner_profile.spider_timeout).to eq(new_spider_timeout)
+          end
+        end
+
+        context 'when dast scanner profile does not exist' do
+          let(:scanner_profile_id) { Gitlab::GlobalId.build(nil, model_name: 'DastScannerProfile', id: 'does_not_exist') }
+
+          it 'raises an exception' do
+            expect(subject[:errors]).to include('Scanner profile not found for given parameters')
           end
         end
 

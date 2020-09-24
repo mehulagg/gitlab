@@ -3,7 +3,7 @@ import { GlButton, GlFormSelect } from '@gitlab/ui';
 import { s__, n__ } from '~/locale';
 import toast from '~/vue_shared/plugins/global_toast';
 import { deprecatedCreateFlash as createFlash } from '~/flash';
-import dismissVulnerability from '../graphql/dismissVulnerability.graphql';
+import vulnerabilityDismiss from '../graphql/vulnerability_dismiss.mutation.graphql';
 
 const REASON_NONE = s__('SecurityReports|[No reason]');
 const REASON_WONT_FIX = s__("SecurityReports|Won't fix / Accept risk");
@@ -42,13 +42,6 @@ export default {
     },
   },
   methods: {
-    dismissalSuccessMessage() {
-      return n__(
-        '%d vulnerability dismissed',
-        '%d vulnerabilities dismissed',
-        this.selectedVulnerabilities.length,
-      );
-    },
     handleDismiss() {
       if (!this.canDismissVulnerability) return;
 
@@ -57,14 +50,21 @@ export default {
     dismissSelectedVulnerabilities() {
       const promises = this.selectedVulnerabilities.map(vulnerability =>
         this.$apollo.mutate({
-          mutation: dismissVulnerability,
+          mutation: vulnerabilityDismiss,
           variables: { id: vulnerability.id, comment: this.dismissalReason },
         }),
       );
 
       Promise.all(promises)
         .then(() => {
-          toast(this.dismissalSuccessMessage());
+          toast(
+            n__(
+              '%d vulnerability dismissed',
+              '%d vulnerabilities dismissed',
+              this.selectedVulnerabilities.length,
+            ),
+          );
+
           this.$emit('deselect-all-vulnerabilities');
         })
         .catch(() => {
@@ -72,9 +72,6 @@ export default {
             s__('SecurityReports|There was an error dismissing the vulnerabilities.'),
             'alert',
           );
-        })
-        .finally(() => {
-          this.$emit('refetch-vulnerabilities');
         });
     },
   },

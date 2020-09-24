@@ -42,6 +42,10 @@ module EE
       project_security_vulnerability_path(entity.project, entity, *args)
     end
 
+    def project_vulnerability_path(project, vulnerability, *args)
+      project_security_vulnerability_path(project, vulnerability, *args)
+    end
+
     def upgrade_plan_path(group)
       return profile_billings_path if group.blank?
 

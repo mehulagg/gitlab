@@ -29,4 +29,20 @@ describe('PolicyPreview component', () => {
   it('renders policy preview tabs', () => {
     expect(wrapper.find(GlTabs).element).toMatchSnapshot();
   });
+
+  describe('with initialTab', () => {
+    beforeEach(() => {
+      factory({
+        propsData: {
+          policyYaml: 'foo',
+          policyDescription: 'bar',
+          initialTab: 1,
+        },
+      });
+    });
+
+    it('selects initial tab', () => {
+      expect(wrapper.find(GlTabs).attributes().value).toEqual('1');
+    });
+  });
 });

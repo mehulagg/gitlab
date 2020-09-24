@@ -140,6 +140,11 @@ RSpec.describe SessionsController do
           expect(AuditEvent.last.details[:with]).to eq('standard')
         end
 
+        it 'creates an authentication event record' do
+          expect { post(:create, params: { user: user_params }) }.to change { AuthenticationEvent.count }.by(1)
+          expect(AuthenticationEvent.last.provider).to eq('standard')
+        end
+
         include_examples 'user login request with unique ip limit', 302 do
           def request
             post(:create, params: { user: user_params })
@@ -407,6 +412,11 @@ RSpec.describe SessionsController do
         expect { authenticate_2fa(login: user.username, otp_attempt: user.current_otp) }.to change { AuditEvent.count }.by(1)
         expect(AuditEvent.last.details[:with]).to eq("two-factor")
       end
+
+      it "creates an authentication event record" do
+        expect { authenticate_2fa(login: user.username, otp_attempt: user.current_otp) }.to change { AuthenticationEvent.count }.by(1)
+        expect(AuthenticationEvent.last.provider).to eq("two-factor")
+      end
     end
 
     context 'when using two-factor authentication via U2F device' do
@@ -414,6 +424,10 @@ RSpec.describe SessionsController do
 
       def authenticate_2fa_u2f(user_params)
         post(:create, params: { user: user_params }, session: { otp_user_id: user.id })
+      end
+
+      before do
+        stub_feature_flags(webauthn: false)
       end
 
       context 'remember_me field' do
@@ -443,6 +457,13 @@ RSpec.describe SessionsController do
         allow(U2fRegistration).to receive(:authenticate).and_return(true)
         expect { authenticate_2fa_u2f(login: user.username, device_response: "{}") }.to change { AuditEvent.count }.by(1)
         expect(AuditEvent.last.details[:with]).to eq("two-factor-via-u2f-device")
+      end
+
+      it "creates an authentication event record" do
+        allow(U2fRegistration).to receive(:authenticate).and_return(true)
+
+        expect { authenticate_2fa_u2f(login: user.username, device_response: "{}") }.to change { AuthenticationEvent.count }.by(1)
+        expect(AuthenticationEvent.last.provider).to eq("two-factor-via-u2f-device")
       end
     end
   end

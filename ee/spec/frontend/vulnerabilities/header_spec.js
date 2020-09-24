@@ -282,6 +282,7 @@ describe('Vulnerability Header', () => {
           user,
           isLoadingVulnerability: wrapper.vm.isLoadingVulnerability,
           isLoadingUser: wrapper.vm.isLoadingUser,
+          isStatusBolded: false,
         });
       });
     });

@@ -42,7 +42,7 @@ class GeoNodeStatus < ApplicationRecord
     }
   end
 
-  # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959/diffs#note_402656534
+  # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959#note_402656534
   def self.replicator_class_status_fields
     Gitlab::Geo::REPLICATOR_CLASSES.map do |replicable_class|
       status_fields_for(replicable_class).keys
@@ -95,7 +95,7 @@ class GeoNodeStatus < ApplicationRecord
     design_repositories_failed_count
   ) + replicator_class_status_fields).freeze
 
-  # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959/diffs#note_402656534
+  # Why are disabled classes included? See https://gitlab.com/gitlab-org/gitlab/-/merge_requests/38959#note_402656534
   def self.replicator_class_prometheus_metrics
     Gitlab::Geo::REPLICATOR_CLASSES.map do |replicable_class|
       status_fields_for(replicable_class)
@@ -483,7 +483,7 @@ class GeoNodeStatus < ApplicationRecord
     self.lfs_objects_synced_count = lfs_objects_finder.synced_count
     self.lfs_objects_failed_count = lfs_objects_finder.failed_count
     self.lfs_objects_registry_count = lfs_objects_finder.registry_count
-    self.lfs_objects_synced_missing_on_primary_count = lfs_objects_finder.count_synced_missing_on_primary
+    self.lfs_objects_synced_missing_on_primary_count = lfs_objects_finder.synced_missing_on_primary_count
   end
 
   def load_job_artifacts_data
@@ -493,7 +493,7 @@ class GeoNodeStatus < ApplicationRecord
     self.job_artifacts_synced_count = job_artifacts_finder.synced_count
     self.job_artifacts_failed_count = job_artifacts_finder.failed_count
     self.job_artifacts_registry_count = job_artifacts_finder.registry_count
-    self.job_artifacts_synced_missing_on_primary_count = job_artifacts_finder.count_synced_missing_on_primary
+    self.job_artifacts_synced_missing_on_primary_count = job_artifacts_finder.synced_missing_on_primary_count
   end
 
   def load_attachments_data
@@ -503,7 +503,7 @@ class GeoNodeStatus < ApplicationRecord
     self.attachments_synced_count = attachments_finder.synced_count
     self.attachments_failed_count = attachments_finder.failed_count
     self.attachments_registry_count = attachments_finder.registry_count
-    self.attachments_synced_missing_on_primary_count = attachments_finder.count_synced_missing_on_primary
+    self.attachments_synced_missing_on_primary_count = attachments_finder.synced_missing_on_primary_count
   end
 
   def load_container_registry_data
@@ -581,23 +581,23 @@ class GeoNodeStatus < ApplicationRecord
   end
 
   def attachments_finder
-    @attachments_finder ||= Geo::AttachmentRegistryFinder.new(current_node_id: geo_node.id)
+    @attachments_finder ||= Geo::AttachmentRegistryFinder.new
   end
 
   def lfs_objects_finder
-    @lfs_objects_finder ||= Geo::LfsObjectRegistryFinder.new(current_node_id: geo_node.id)
+    @lfs_objects_finder ||= Geo::LfsObjectRegistryFinder.new
   end
 
   def job_artifacts_finder
-    @job_artifacts_finder ||= Geo::JobArtifactRegistryFinder.new(current_node_id: geo_node.id)
+    @job_artifacts_finder ||= Geo::JobArtifactRegistryFinder.new
   end
 
   def container_registry_finder
-    @container_registry_finder ||= Geo::ContainerRepositoryRegistryFinder.new(current_node_id: geo_node.id)
+    @container_registry_finder ||= Geo::ContainerRepositoryRegistryFinder.new
   end
 
   def design_registry_finder
-    @design_registry_finder ||= Geo::DesignRegistryFinder.new(current_node_id: geo_node.id)
+    @design_registry_finder ||= Geo::DesignRegistryFinder.new
   end
 
   def repository_verification_finder

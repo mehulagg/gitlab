@@ -40,7 +40,7 @@
         %small.badge.badge-pill= limited_counter_with_delimiter(User.without_projects)
   .nav-controls
     = render_if_exists 'admin/users/admin_email_users'
-    = link_to s_('AdminUsers|New user'), new_admin_user_path, class: 'btn btn-success btn-search float-right'
+    = link_to s_('AdminUsers|New user'), new_admin_user_path, class: 'btn gl-button btn-success btn-search float-right'
 
 .filtered-search-block.row-content-block.border-top-0
   = form_tag admin_users_path, method: :get do
@@ -72,7 +72,8 @@
   .table-holder
     .thead-white.text-nowrap.gl-responsive-table-row.table-row-header{ role: 'row' }
       .table-section.section-40{ role: 'rowheader' }= _('Name')
-      .table-section.section-25{ role: 'rowheader' }= _('Created on')
+      .table-section.section-10{ role: 'rowheader' }= _('Projects')
+      .table-section.section-15{ role: 'rowheader' }= _('Created on')
       .table-section.section-15{ role: 'rowheader' }= _('Last activity')
 
     = render partial: 'admin/users/user', collection: @users

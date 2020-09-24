@@ -1,4 +1,5 @@
-import { mount } from '@vue/test-utils';
+import { mount, shallowMount } from '@vue/test-utils';
+import EnvironmentAlert from 'ee/environments/components/environment_alert.vue';
 import EnvironmentTable from '~/environments/components/environments_table.vue';
 import eventHub from '~/environments/event_hub';
 import { deployBoardMockData } from './mock_data';
@@ -6,21 +7,23 @@ import { deployBoardMockData } from './mock_data';
 describe('Environment table', () => {
   let wrapper;
 
-  const factory = (options = {}) => {
+  const factory = async (options = {}, m = mount) => {
     // This destroys any wrappers created before a nested call to factory reassigns it
     if (wrapper && wrapper.destroy) {
       wrapper.destroy();
     }
-    wrapper = mount(EnvironmentTable, {
+    wrapper = m(EnvironmentTable, {
       ...options,
     });
+    await wrapper.vm.$nextTick();
+    await jest.runOnlyPendingTimers();
   };
 
   afterEach(() => {
     wrapper.destroy();
   });
 
-  it('Should render a table', () => {
+  it('Should render a table', async () => {
     const mockItem = {
       name: 'review',
       folderName: 'review',
@@ -29,7 +32,7 @@ describe('Environment table', () => {
       environment_path: 'url',
     };
 
-    factory({
+    await factory({
       propsData: {
         environments: [mockItem],
         canReadEnvironment: true,
@@ -44,7 +47,7 @@ describe('Environment table', () => {
     expect(wrapper.classes()).toContain('ci-table');
   });
 
-  it('should render deploy board container when data is provided', () => {
+  it('should render deploy board container when data is provided', async () => {
     const mockItem = {
       name: 'review',
       size: 1,
@@ -58,7 +61,7 @@ describe('Environment table', () => {
       isEmptyDeployBoard: false,
     };
 
-    factory({
+    await factory({
       propsData: {
         environments: [mockItem],
         canCreateDeployment: false,
@@ -71,8 +74,8 @@ describe('Environment table', () => {
       },
     });
 
-    expect(wrapper.find('.js-deploy-board-row')).toBeDefined();
-    expect(wrapper.find('.deploy-board-icon')).not.toBeNull();
+    expect(wrapper.find('.js-deploy-board-row').exists()).toBe(true);
+    expect(wrapper.find('.deploy-board-icon').exists()).toBe(true);
   });
 
   it('should toggle deploy board visibility when arrow is clicked', done => {
@@ -112,7 +115,7 @@ describe('Environment table', () => {
     wrapper.find('.deploy-board-icon').trigger('click');
   });
 
-  it('should render canary callout', () => {
+  it('should render canary callout', async () => {
     const mockItem = {
       name: 'review',
       folderName: 'review',
@@ -122,7 +125,7 @@ describe('Environment table', () => {
       showCanaryCallout: true,
     };
 
-    factory({
+    await factory({
       propsData: {
         environments: [mockItem],
         canCreateDeployment: false,
@@ -135,6 +138,35 @@ describe('Environment table', () => {
       },
     });
 
-    expect(wrapper.find('.canary-deployment-callout')).not.toBeNull();
+    expect(wrapper.find('.canary-deployment-callout').exists()).toBe(true);
+  });
+
+  it('should render the alert if there is one', async () => {
+    const mockItem = {
+      name: 'review',
+      size: 1,
+      environment_path: 'url',
+      logs_path: 'url',
+      id: 1,
+      hasDeployBoard: false,
+      has_opened_alert: true,
+    };
+
+    await factory(
+      {
+        propsData: {
+          environments: [mockItem],
+          canReadEnvironment: true,
+          canaryDeploymentFeatureId: 'canary_deployment',
+          showCanaryDeploymentCallout: true,
+          userCalloutsPath: '/callouts',
+          lockPromotionSvgPath: '/assets/illustrations/lock-promotion.svg',
+          helpCanaryDeploymentsPath: 'help/canary-deployments',
+        },
+      },
+      shallowMount,
+    );
+
+    expect(wrapper.find(EnvironmentAlert).exists()).toBe(true);
   });
 });

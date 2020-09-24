@@ -25,12 +25,18 @@ RSpec.describe GitGarbageCollectWorker do
   end
 
   shared_examples 'it updates the project statistics' do
-    specify do
-      expect_any_instance_of(Projects::UpdateStatisticsService).to receive(:execute).and_call_original
-      expect(Projects::UpdateStatisticsService)
-        .to receive(:new)
-        .with(project, nil, statistics: [:repository_size, :lfs_objects_size])
-        .and_call_original
+    it 'updates the project statistics' do
+      expect_next_instance_of(Projects::UpdateStatisticsService, project, nil, statistics: [:repository_size, :lfs_objects_size]) do |service|
+        expect(service).to receive(:execute).and_call_original
+      end
+
+      subject.perform(*params)
+    end
+
+    it 'does nothing if the database is read-only' do
+      allow(Gitlab::Database).to receive(:read_only?) { true }
+
+      expect_any_instance_of(Projects::UpdateStatisticsService).not_to receive(:execute)
 
       subject.perform(*params)
     end
@@ -141,12 +147,24 @@ RSpec.describe GitGarbageCollectWorker do
             end
 
             it 'does nothing if the database is read-only' do
-              expect(Gitlab::Database).to receive(:read_only?) { true }
+              allow(Gitlab::Database).to receive(:read_only?) { true }
+
               expect_any_instance_of(Gitlab::Cleanup::OrphanLfsFileReferences).not_to receive(:run!)
 
               subject.perform(*params)
 
               expect(project.lfs_objects.reload).to include(lfs_object)
+            end
+
+            it 'catches and logs exceptions' do
+              expect_any_instance_of(Gitlab::Cleanup::OrphanLfsFileReferences)
+                .to receive(:run!)
+                .and_raise(/Failed/)
+
+              expect(Gitlab::GitLogger).to receive(:warn)
+              expect(Gitlab::ErrorTracking).to receive(:track_and_raise_for_dev_exception)
+
+              subject.perform(*params)
             end
           end
 

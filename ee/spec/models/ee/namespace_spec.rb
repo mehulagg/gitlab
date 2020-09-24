@@ -368,25 +368,6 @@ RSpec.describe Namespace do
       end
     end
 
-    context 'when the feature is temporarily available on the entire instance' do
-      let(:feature) { :ci_cd_projects }
-
-      before do
-        stub_application_setting_on_object(group, should_check_namespace_plan: true)
-        stub_feature_flags(promo_ci_cd_projects: true)
-      end
-
-      it 'returns true when the feature is available globally' do
-        stub_licensed_features(feature => true)
-
-        is_expected.to be_truthy
-      end
-
-      it 'returns `false` when the feature is not included in the global license' do
-        is_expected.to be_falsy
-      end
-    end
-
     context 'when feature is disabled by a feature flag' do
       it 'returns false' do
         stub_feature_flags(feature => false)

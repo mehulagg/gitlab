@@ -52,5 +52,17 @@ RSpec.describe Groups::Analytics::MergeRequestAnalyticsController do
 
       it { is_expected.to have_gitlab_http_status(:forbidden) }
     end
+
+    context 'when requesting HTML' do
+      render_views
+
+      before do
+        get :show, params: { group_id: group }, format: :html
+      end
+
+      it 'renders the side navigation with the correct submenu set as active' do
+        expect(response.body).to have_active_sub_navigation('Merge Request')
+      end
+    end
   end
 end

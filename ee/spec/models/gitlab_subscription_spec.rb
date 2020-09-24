@@ -9,7 +9,7 @@ RSpec.describe GitlabSubscription do
     stub_feature_flags(elasticsearch_index_only_paid_groups: false)
   end
 
-  %i[free_plan bronze_plan silver_plan gold_plan early_adopter_plan].each do |plan|
+  %i[free_plan bronze_plan silver_plan gold_plan].each do |plan|
     let_it_be(plan) { create(plan) }
   end
 
@@ -40,14 +40,12 @@ RSpec.describe GitlabSubscription do
     describe '.with_hosted_plan' do
       let!(:gold_subscription) { create(:gitlab_subscription, hosted_plan: gold_plan) }
       let!(:silver_subscription) { create(:gitlab_subscription, hosted_plan: silver_plan) }
-      let!(:early_adopter_subscription) { create(:gitlab_subscription, hosted_plan: early_adopter_plan) }
 
       let!(:trial_subscription) { create(:gitlab_subscription, hosted_plan: gold_plan, trial: true) }
 
       it 'scopes to the plan' do
         expect(described_class.with_hosted_plan('gold')).to contain_exactly(gold_subscription)
         expect(described_class.with_hosted_plan('silver')).to contain_exactly(silver_subscription)
-        expect(described_class.with_hosted_plan('early_adopter')).to contain_exactly(early_adopter_subscription)
         expect(described_class.with_hosted_plan('bronze')).to be_empty
       end
     end
@@ -161,17 +159,43 @@ RSpec.describe GitlabSubscription do
       include_examples 'always returns a total of 0'
     end
 
-    context 'with an early adopter plan' do
-      let(:subscription_attrs) { { hosted_plan: early_adopter_plan } }
-
-      include_examples 'always returns a total of 0'
-    end
-
     context 'with a paid plan' do
       let(:subscription_attrs) { { hosted_plan: bronze_plan } }
 
       it 'calculates the number of owed seats' do
         expect(gitlab_subscription.reload.calculate_seats_owed).to eq(5)
+      end
+    end
+  end
+
+  describe '#refresh_seat_attributes!' do
+    subject { create(:gitlab_subscription, seats: 3, max_seats_used: 2) }
+
+    before do
+      expect(subject).to receive(:calculate_seats_in_use).and_return(calculate_seats_in_use)
+    end
+
+    context 'when current seats in use is lower than recorded max_seats_used' do
+      let(:calculate_seats_in_use) { 1 }
+
+      it 'does not increase max_seats_used' do
+        expect do
+          subject.refresh_seat_attributes!
+        end.to change(subject, :seats_in_use).from(0).to(1)
+          .and not_change(subject, :max_seats_used)
+          .and not_change(subject, :seats_owed)
+      end
+    end
+
+    context 'when current seats in use is higher than seats and max_seats_used' do
+      let(:calculate_seats_in_use) { 4 }
+
+      it 'increases seats and max_seats_used' do
+        expect do
+          subject.refresh_seat_attributes!
+        end.to change(subject, :seats_in_use).from(0).to(4)
+          .and change(subject, :max_seats_used).from(2).to(4)
+          .and change(subject, :seats_owed).from(0).to(1)
       end
     end
   end
@@ -210,7 +234,6 @@ RSpec.describe GitlabSubscription do
       'bronze'        | 1 | true  | true
       'bronze'        | 1 | false | false
       'silver'        | 1 | true  | true
-      'early_adopter' | 1 | true  | false
     end
 
     with_them do
@@ -254,7 +277,9 @@ RSpec.describe GitlabSubscription do
 
   describe 'callbacks' do
     context 'after_commit :index_namespace' do
-      let(:gitlab_subscription) { build(:gitlab_subscription, plan) }
+      let_it_be(:namespace) { create(:namespace) }
+
+      let(:gitlab_subscription) { build(:gitlab_subscription, plan, namespace: namespace) }
       let(:dev_env_or_com) { true }
       let(:expiration_date) { Date.today + 10 }
       let(:plan) { :bronze }
@@ -271,7 +296,7 @@ RSpec.describe GitlabSubscription do
       end
 
       context 'when it is a trial' do
-        let(:gitlab_subscription) { build(:gitlab_subscription, :active_trial) }
+        let(:gitlab_subscription) { build(:gitlab_subscription, :active_trial, namespace: namespace) }
 
         it 'indexes the namespace' do
           expect(ElasticsearchIndexedNamespace).to receive(:safe_find_or_create_by!).with(namespace_id: gitlab_subscription.namespace_id)

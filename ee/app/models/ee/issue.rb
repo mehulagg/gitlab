@@ -111,7 +111,7 @@ module EE
 
     # override
     def weight
-      super if supports_weight?
+      super if weight_available?
     end
 
     # override
@@ -132,8 +132,13 @@ module EE
       changed_fields && (changed_fields & ELASTICSEARCH_PERMISSION_TRACKED_FIELDS).any?
     end
 
+    override :supports_weight?
     def supports_weight?
-      project&.feature_available?(:issue_weights)
+      !incident?
+    end
+
+    def supports_iterations?
+      !incident?
     end
 
     def can_assign_epic?(user)
@@ -206,7 +211,7 @@ module EE
     end
 
     def generic_alert_with_default_title?
-      title == ::Gitlab::Alerting::NotificationPayloadParser::DEFAULT_TITLE &&
+      title == ::Gitlab::AlertManagement::Payload::Generic::DEFAULT_TITLE &&
         project.alerts_service_activated? &&
         author == ::User.alert_bot
     end

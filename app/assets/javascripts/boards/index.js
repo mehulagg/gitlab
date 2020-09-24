@@ -11,7 +11,7 @@ import toggleLabels from 'ee_else_ce/boards/toggle_labels';
 import toggleEpicsSwimlanes from 'ee_else_ce/boards/toggle_epics_swimlanes';
 import {
   setPromotionState,
-  setWeigthFetchingState,
+  setWeightFetchingState,
   setEpicFetchingState,
   getMilestoneTitle,
   getBoardsModalData,
@@ -82,6 +82,12 @@ export default () => {
       BoardAddIssuesModal,
       BoardSettingsSidebar: () => import('~/boards/components/board_settings_sidebar.vue'),
     },
+    provide: {
+      boardId: $boardApp.dataset.boardId,
+      groupId: Number($boardApp.dataset.groupId) || null,
+      rootPath: $boardApp.dataset.rootPath,
+      canUpdate: $boardApp.dataset.canUpdate,
+    },
     store,
     apolloProvider,
     data() {
@@ -91,10 +97,7 @@ export default () => {
         boardsEndpoint: $boardApp.dataset.boardsEndpoint,
         recentBoardsEndpoint: $boardApp.dataset.recentBoardsEndpoint,
         listsEndpoint: $boardApp.dataset.listsEndpoint,
-        boardId: $boardApp.dataset.boardId,
         disabled: parseBoolean($boardApp.dataset.disabled),
-        issueLinkBase: $boardApp.dataset.issueLinkBase,
-        rootPath: $boardApp.dataset.rootPath,
         bulkUpdatePath: $boardApp.dataset.bulkUpdatePath,
         detailIssue: boardsStore.detail,
         parent: $boardApp.dataset.parent,
@@ -112,7 +115,7 @@ export default () => {
         recentBoardsEndpoint: this.recentBoardsEndpoint,
         listsEndpoint: this.listsEndpoint,
         bulkUpdatePath: this.bulkUpdatePath,
-        boardId: this.boardId,
+        boardId: $boardApp.dataset.boardId,
         fullPath: $boardApp.dataset.fullPath,
       };
       this.setInitialBoardData({
@@ -161,7 +164,7 @@ export default () => {
       }
     },
     methods: {
-      ...mapActions(['setInitialBoardData', 'setFilters', 'fetchEpicsSwimlanes']),
+      ...mapActions(['setInitialBoardData', 'setFilters', 'fetchEpicsSwimlanes', 'resetIssues']),
       updateTokens() {
         this.filterManager.updateTokens();
       },
@@ -169,13 +172,14 @@ export default () => {
         this.setFilters(convertObjectPropsToCamelCase(urlParamsToObject(window.location.search)));
         if (gon.features.boardsWithSwimlanes && this.isShowingEpicsSwimlanes) {
           this.fetchEpicsSwimlanes(false);
+          this.resetIssues();
         }
       },
       updateDetailIssue(newIssue, multiSelect = false) {
         const { sidebarInfoEndpoint } = newIssue;
         if (sidebarInfoEndpoint && newIssue.subscribed === undefined) {
           newIssue.setFetchingState('subscriptions', true);
-          setWeigthFetchingState(newIssue, true);
+          setWeightFetchingState(newIssue, true);
           setEpicFetchingState(newIssue, true);
           boardsStore
             .getIssueInfo(sidebarInfoEndpoint)
@@ -193,7 +197,7 @@ export default () => {
               } = convertObjectPropsToCamelCase(data);
 
               newIssue.setFetchingState('subscriptions', false);
-              setWeigthFetchingState(newIssue, false);
+              setWeightFetchingState(newIssue, false);
               setEpicFetchingState(newIssue, false);
               newIssue.updateData({
                 humanTimeSpent: humanTotalTimeSpent,
@@ -208,7 +212,7 @@ export default () => {
             })
             .catch(() => {
               newIssue.setFetchingState('subscriptions', false);
-              setWeigthFetchingState(newIssue, false);
+              setWeightFetchingState(newIssue, false);
               Flash(__('An error occurred while fetching sidebar data'));
             });
         }

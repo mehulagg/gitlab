@@ -29,10 +29,14 @@ module Mutations
                required: true,
                description: 'The project full path the requirement is associated with'
 
+      argument :last_test_report_state, Types::RequirementsManagement::TestReportStateEnum,
+               required: false,
+               description: 'Creates a test report for the requirement with the given state'
+
       def ready?(**args)
-        if args.values_at(:title, :state).compact.blank?
+        if args.values_at(:title, :state, :last_test_report_state).compact.blank?
           raise Gitlab::Graphql::Errors::ArgumentError,
-            'title or state argument is required'
+            'title, state or last_test_report_state argument is required'
         end
 
         super

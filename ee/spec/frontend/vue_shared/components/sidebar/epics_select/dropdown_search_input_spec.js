@@ -1,6 +1,6 @@
 import { shallowMount } from '@vue/test-utils';
 
-import { GlDeprecatedButton, GlIcon } from '@gitlab/ui';
+import { GlButton, GlIcon } from '@gitlab/ui';
 import DropdownSearchInput from 'ee/vue_shared/components/sidebar/epics_select/dropdown_search_input.vue';
 
 const createComponent = () =>
@@ -96,16 +96,11 @@ describe('EpicsSelect', () => {
       });
 
       it('should render input clear button', () => {
-        const clearButtonEl = wrapper.find(GlDeprecatedButton);
+        const clearButtonEl = wrapper.find(GlButton);
 
         expect(clearButtonEl.exists()).toBe(true);
         expect(clearButtonEl.classes()).toEqual(
-          expect.arrayContaining([
-            'fa',
-            'fa-times',
-            'dropdown-input-clear',
-            'js-dropdown-input-clear',
-          ]),
+          expect.arrayContaining(['dropdown-input-clear', 'js-dropdown-input-clear']),
         );
       });
     });

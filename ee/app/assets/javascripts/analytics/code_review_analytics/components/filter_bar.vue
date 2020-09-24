@@ -1,14 +1,24 @@
 <script>
 import { mapState, mapActions } from 'vuex';
 import { __ } from '~/locale';
-import MilestoneToken from '../../shared/components/tokens/milestone_token.vue';
-import LabelToken from '../../shared/components/tokens/label_token.vue';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
-import { processFilters } from '../../shared/utils';
+import {
+  prepareTokens,
+  processFilters,
+  filterToQueryObject,
+} from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
+import MilestoneToken from '~/vue_shared/components/filtered_search_bar/tokens/milestone_token.vue';
+import LabelToken from '~/vue_shared/components/filtered_search_bar/tokens/label_token.vue';
+import UrlSync from '~/vue_shared/components/url_sync.vue';
+import {
+  DEFAULT_LABEL_NONE,
+  DEFAULT_LABEL_ANY,
+} from '~/vue_shared/components/filtered_search_bar/constants';
 
 export default {
   components: {
     FilteredSearchBar,
+    UrlSync,
   },
   props: {
     projectPath: {
@@ -16,15 +26,8 @@ export default {
       required: true,
     },
   },
-  data() {
-    return {
-      initialFilterValue: [],
-    };
-  },
   computed: {
     ...mapState('filters', {
-      milestonesLoading: state => state.milestones.isLoading,
-      labelsLoading: state => state.labels.isLoading,
       selectedMilestone: state => state.milestones.selected,
       selectedLabelList: state => state.labels.selectedList,
       milestonesData: state => state.milestones.data,
@@ -37,29 +40,36 @@ export default {
           title: __('Milestone'),
           type: 'milestone',
           token: MilestoneToken,
-          milestones: this.milestonesData,
+          initialMilestones: this.milestonesData,
           unique: true,
           symbol: '%',
-          isLoading: this.milestonesLoading,
-          fetchData: this.fetchMilestones,
+          fetchMilestones: this.fetchMilestones,
         },
         {
           icon: 'labels',
           title: __('Label'),
           type: 'labels',
           token: LabelToken,
-          labels: this.labelsData,
+          defaultLabels: [DEFAULT_LABEL_NONE, DEFAULT_LABEL_ANY],
+          initialLabels: this.labelsData,
           unique: false,
           symbol: '~',
-          isLoading: this.labelsLoading,
-          fetchData: this.fetchLabels,
+          fetchLabels: this.fetchLabels,
         },
       ];
     },
-  },
-  created() {
-    this.fetchMilestones();
-    this.fetchLabels();
+    query() {
+      return filterToQueryObject({
+        milestone_title: this.selectedMilestone,
+        label_name: this.selectedLabelList,
+      });
+    },
+    initialFilterValue() {
+      return prepareTokens({
+        milestone: this.selectedMilestone,
+        labels: this.selectedLabelList,
+      });
+    },
   },
   methods: {
     ...mapActions('filters', ['setFilters', 'fetchMilestones', 'fetchLabels']),
@@ -68,7 +78,7 @@ export default {
 
       this.setFilters({
         selectedMilestone: milestone ? milestone[0] : null,
-        selectedLabelList: labels,
+        selectedLabelList: labels || [],
       });
     },
   },
@@ -76,13 +86,16 @@ export default {
 </script>
 
 <template>
-  <filtered-search-bar
-    :namespace="projectPath"
-    recent-searches-storage-key="code-review-analytics"
-    :search-input-placeholder="__('Filter results')"
-    :tokens="tokens"
-    :initial-filter-value="initialFilterValue"
-    class="row-content-block"
-    @onFilter="handleFilter"
-  />
+  <div>
+    <filtered-search-bar
+      class="gl-flex-grow-1 row-content-block"
+      :namespace="projectPath"
+      recent-searches-storage-key="code-review-analytics"
+      :search-input-placeholder="__('Filter results')"
+      :tokens="tokens"
+      :initial-filter-value="initialFilterValue"
+      @onFilter="handleFilter"
+    />
+    <url-sync :query="query" />
+  </div>
 </template>

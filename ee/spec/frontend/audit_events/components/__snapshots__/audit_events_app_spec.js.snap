@@ -2,6 +2,16 @@
 
 exports[`AuditEventsApp when initialized matches the snapshot 1`] = `
 <div>
+  <header>
+    <div
+      class="gl-my-5 gl-display-flex gl-flex-direction-row gl-justify-content-end"
+    >
+      <audit-events-export-button-stub
+        exporthref="http://example.com/audit_log_reports.csv?created_after=2020-01-01&created_before=2020-02-02"
+      />
+    </div>
+  </header>
+   
   <div
     class="row-content-block second-block pb-0"
   >

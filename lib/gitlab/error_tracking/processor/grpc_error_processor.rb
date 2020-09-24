@@ -7,38 +7,34 @@ module Gitlab
         DEBUG_ERROR_STRING_REGEX = RE2('(.*) debug_error_string:(.*)')
 
         def process(value)
-          return value unless grpc_exception?(value)
-
-          process_message(value)
-          process_exception_values(value)
+          process_first_exception_value(value)
           process_custom_fingerprint(value)
 
           value
         end
 
-        def grpc_exception?(value)
-          value[:exception] && value[:message].start_with?('GRPC::')
-        end
-
-        def process_message(value)
-          message, debug_str = split_debug_error_string(value[:message])
-
-          return unless message
-
-          value[:message] = message
-          extra = value[:extra] || {}
-          extra[:grpc_debug_error_string] = debug_str if debug_str
-        end
-
-        def process_exception_values(value)
+        # Sentry can report multiple exceptions in an event. Sanitize
+        # only the first one since that's what is used for grouping.
+        def process_first_exception_value(value)
           exceptions = value.dig(:exception, :values)
 
           return unless exceptions.is_a?(Array)
 
-          exceptions.each do |entry|
-            message, _ = split_debug_error_string(entry[:value])
-            entry[:value] = message if message
-          end
+          entry = exceptions.first
+
+          return unless entry.is_a?(Hash)
+
+          exception_type = entry[:type]
+          raw_message = entry[:value]
+
+          return unless exception_type&.start_with?('GRPC::')
+          return unless raw_message.present?
+
+          message, debug_str = split_debug_error_string(raw_message)
+
+          entry[:value] = message if message
+          extra = value[:extra] || {}
+          extra[:grpc_debug_error_string] = debug_str if debug_str
         end
 
         def process_custom_fingerprint(value)

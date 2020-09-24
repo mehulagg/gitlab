@@ -1,5 +1,7 @@
-import { mount } from '@vue/test-utils';
+import Vuex from 'vuex';
+import { mount, shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlAlert, GlLoadingIcon, GlTable, GlIcon, GlAvatarsInline } from '@gitlab/ui';
+import store from 'ee/analytics/merge_request_analytics/store';
 import ThroughputTable from 'ee/analytics/merge_request_analytics/components/throughput_table.vue';
 import {
   THROUGHPUT_TABLE_STRINGS,
@@ -13,20 +15,33 @@ import {
   throughputTableHeaders,
 } from '../mock_data';
 
+const localVue = createLocalVue();
+localVue.use(Vuex);
+
+const defaultQueryVariables = {
+  assigneeUsername: null,
+  authorUsername: null,
+  milestoneTitle: null,
+  labels: null,
+};
+
+const defaultMocks = {
+  $apollo: {
+    queries: {
+      throughputTableData: {},
+    },
+  },
+};
+
 describe('ThroughputTable', () => {
   let wrapper;
 
-  const createComponent = ({ loading = false, data = {} } = {}) => {
-    const $apollo = {
-      queries: {
-        throughputTableData: {
-          loading,
-        },
-      },
-    };
-
-    wrapper = mount(ThroughputTable, {
-      mocks: { $apollo },
+  function createComponent(options = {}) {
+    const { mocks = defaultMocks, func = shallowMount } = options;
+    return func(ThroughputTable, {
+      localVue,
+      store,
+      mocks,
       provide: {
         fullPath,
       },
@@ -35,9 +50,7 @@ describe('ThroughputTable', () => {
         endDate,
       },
     });
-
-    wrapper.setData(data);
-  };
+  }
 
   const displaysComponent = (component, visible) => {
     expect(wrapper.find(component).exists()).toBe(visible);
@@ -71,7 +84,7 @@ describe('ThroughputTable', () => {
 
   describe('default state', () => {
     beforeEach(() => {
-      createComponent();
+      wrapper = createComponent();
     });
 
     it('displays an empty state message when there is no data', () => {
@@ -91,8 +104,16 @@ describe('ThroughputTable', () => {
   });
 
   describe('while loading', () => {
+    const apolloLoading = {
+      queries: {
+        throughputTableData: {
+          loading: true,
+        },
+      },
+    };
+
     beforeEach(() => {
-      createComponent({ loading: true });
+      wrapper = createComponent({ mocks: { ...defaultMocks, $apollo: apolloLoading } });
     });
 
     it('displays a loading icon', () => {
@@ -110,7 +131,8 @@ describe('ThroughputTable', () => {
 
   describe('with data', () => {
     beforeEach(() => {
-      createComponent({ data: { throughputTableData } });
+      wrapper = createComponent({ func: mount });
+      wrapper.setData({ throughputTableData });
     });
 
     it('displays the table', () => {
@@ -206,7 +228,7 @@ describe('ThroughputTable', () => {
           expect(icon.props('name')).toBe('comments');
         });
 
-        it('includes a pipeline icon and when available', async () => {
+        it('includes a pipeline icon when available', async () => {
           const iconName = 'status_canceled';
 
           additionalData({
@@ -225,6 +247,61 @@ describe('ThroughputTable', () => {
 
           expect(icon.find(GlIcon).exists()).toBe(true);
           expect(icon.props('name')).toBe(iconName);
+        });
+
+        describe('approval details', () => {
+          const iconName = 'approval';
+
+          it('does not display by default', async () => {
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+
+            expect(approved.exists()).toBe(false);
+          });
+
+          it('displays the singular when there is a single approval', async () => {
+            additionalData({
+              approvedBy: {
+                nodes: [
+                  {
+                    id: 1,
+                  },
+                ],
+              },
+            });
+
+            await wrapper.vm.$nextTick();
+
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+            const icon = approved.find(GlIcon);
+
+            expect(approved.text()).toBe('1 Approval');
+            expect(icon.exists()).toBe(true);
+            expect(icon.props('name')).toBe(iconName);
+          });
+
+          it('displays the plural when there are multiple approvals', async () => {
+            additionalData({
+              approvedBy: {
+                nodes: [
+                  {
+                    id: 1,
+                  },
+                  {
+                    id: 2,
+                  },
+                ],
+              },
+            });
+
+            await wrapper.vm.$nextTick();
+
+            const approved = findColSubItem(TEST_IDS.MERGE_REQUEST_DETAILS, TEST_IDS.APPROVED);
+            const icon = approved.find(GlIcon);
+
+            expect(approved.text()).toBe('2 Approvals');
+            expect(icon.exists()).toBe(true);
+            expect(icon.props('name')).toBe(iconName);
+          });
         });
       });
 
@@ -275,7 +352,8 @@ describe('ThroughputTable', () => {
 
   describe('with errors', () => {
     beforeEach(() => {
-      createComponent({ data: { hasError: true } });
+      wrapper = createComponent();
+      wrapper.setData({ hasError: true });
     });
 
     it('does not display the table', () => {
@@ -291,6 +369,42 @@ describe('ThroughputTable', () => {
 
       expect(alert.exists()).toBe(true);
       expect(alert.text()).toBe(THROUGHPUT_TABLE_STRINGS.ERROR_FETCHING_DATA);
+    });
+  });
+
+  describe('when fetching data', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('has initial variables set', () => {
+      expect(
+        wrapper.vm.$options.apollo.throughputTableData.variables.bind(wrapper.vm)(),
+      ).toMatchObject(defaultQueryVariables);
+    });
+
+    it('gets filter variables from store', async () => {
+      const operator = '=';
+      const assigneeUsername = 'foo';
+      const authorUsername = 'bar';
+      const milestoneTitle = 'baz';
+      const labels = ['quis', 'quux'];
+
+      wrapper.vm.$store.dispatch('filters/initialize', {
+        selectedAssignee: { value: assigneeUsername, operator },
+        selectedAuthor: { value: authorUsername, operator },
+        selectedMilestone: { value: milestoneTitle, operator },
+        selectedLabelList: [{ value: labels[0], operator }, { value: labels[1], operator }],
+      });
+      await wrapper.vm.$nextTick();
+      expect(
+        wrapper.vm.$options.apollo.throughputTableData.variables.bind(wrapper.vm)(),
+      ).toMatchObject({
+        assigneeUsername,
+        authorUsername,
+        milestoneTitle,
+        labels,
+      });
     });
   });
 });

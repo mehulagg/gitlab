@@ -130,14 +130,9 @@ export default {
             {{ downstreamTitle }}
           </span>
           <div class="gl-text-truncate">
-            <gl-link
-              v-if="childPipeline"
-              class="gl-text-blue-500!"
-              :href="pipeline.path"
-              data-testid="childPipelineLink"
+            <gl-link class="gl-text-blue-500!" :href="pipeline.path" data-testid="pipelineLink"
               >#{{ pipeline.id }}</gl-link
             >
-            <span v-else>#{{ pipeline.id }}</span>
           </div>
         </div>
       </div>
@@ -150,7 +145,7 @@ export default {
         :class="`js-pipeline-expand-${pipeline.id} ${expandButtonPosition}`"
         :icon="expandedIcon"
         data-testid="expandPipelineButton"
-        data-qa-selector="linked_pipeline_button"
+        data-qa-selector="expand_pipeline_button"
         @click="onClickLinkedPipeline"
       />
     </div>

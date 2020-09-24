@@ -6,7 +6,7 @@ RSpec.describe API::Epics do
   let_it_be(:user) { create(:user) }
   let(:group) { create(:group) }
   let(:project) { create(:project, :public, group: group) }
-  let_it_be(:label) { create(:label) }
+  let(:label) { create(:group_label, group: group) }
   let!(:epic) { create(:labeled_epic, group: group, labels: [label]) }
   let(:params) { nil }
 
@@ -610,20 +610,6 @@ RSpec.describe API::Epics do
         end
       end
 
-      context 'when confidential_epics flag is disabled' do
-        before do
-          stub_feature_flags(confidential_epics: false)
-
-          post api(url, user), params: params
-        end
-
-        it 'ignores confidential attribute' do
-          epic = Epic.last
-
-          expect(epic.confidential).to be_falsey
-        end
-      end
-
       it 'creates a new epic with labels param as array' do
         params[:labels] = ['label1', 'label2', 'foo, bar', '&,?']
 
@@ -721,19 +707,6 @@ RSpec.describe API::Epics do
             expect(result.due_date_fixed).to eq(nil)
             expect(result.due_date_is_fixed).to be_falsey
             expect(result.confidential).to be_truthy
-          end
-        end
-
-        context 'when confidential_epics flag is disabled' do
-          before do
-            stub_feature_flags(confidential_epics: false)
-            stub_licensed_features(epics: true)
-
-            put api(url, user), params: params
-          end
-
-          it 'does not include confidential attribute' do
-            expect(epic.reload.confidential).to be_falsey
           end
         end
 

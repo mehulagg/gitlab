@@ -25,8 +25,12 @@ module EE
         @subject.feature_available?(:group_merge_request_analytics)
       end
 
+      condition(:group_repository_analytics_available) do
+        @subject.feature_available?(:group_repository_analytics)
+      end
+
       condition(:group_activity_analytics_available) do
-        @subject.feature_available?(:group_activity_analytics) && ::Feature.enabled?(:group_activity_analytics, @subject, default_enabled: true)
+        @subject.feature_available?(:group_activity_analytics) && ::Feature.enabled?(:group_activity_analytics, @subject, type: :licensed, default_enabled: true)
       end
 
       condition(:can_owners_manage_ldap, scope: :global) do
@@ -92,7 +96,7 @@ module EE
       end
 
       condition(:push_rules_available) do
-        ::Feature.enabled?(:group_push_rules, @subject.root_ancestor) && @subject.feature_available?(:push_rules)
+        @subject.feature_available?(:push_rules)
       end
 
       condition(:over_storage_limit, scope: :subject) { @subject.over_storage_limit? }
@@ -130,6 +134,9 @@ module EE
 
       rule { has_access & group_activity_analytics_available }
         .enable :read_group_activity_analytics
+
+      rule { has_access & group_repository_analytics_available }
+        .enable :read_group_repository_analytics
 
       rule { reporter & group_merge_request_analytics_available }
         .enable :read_group_merge_request_analytics
@@ -238,8 +245,10 @@ module EE
         prevent :update_default_branch_protection
       end
 
+      # TODO: Switch to `feature_enabled?` when we enable the feature flag by default
+      # https://gitlab.com/gitlab-org/gitlab/-/issues/207888
       desc "Group has wiki disabled"
-      condition(:wiki_disabled, score: 32) { !feature_available?(:wiki) }
+      condition(:wiki_disabled, score: 32) { !@subject.beta_feature_available?(:group_wikis) }
 
       rule { wiki_disabled }.policy do
         prevent(*create_read_update_admin_destroy(:wiki))
@@ -295,21 +304,6 @@ module EE
       return ::GroupMember::NO_ACCESS if needs_new_sso_session?
 
       super
-    end
-
-    # TODO: Extract this into a helper shared with ProjectPolicy, once we implement group-level features.
-    # https://gitlab.com/gitlab-org/gitlab/-/issues/208412
-    def feature_available?(feature)
-      return false unless feature == :wiki
-
-      case subject.wiki_access_level
-      when ::ProjectFeature::DISABLED
-        false
-      when ::ProjectFeature::PRIVATE
-        admin? || access_level >= ::ProjectFeature.required_minimum_access_level(feature)
-      else
-        true
-      end
     end
 
     def ldap_lock_bypassable?

@@ -14,7 +14,8 @@ module EE
           current_user,
           params[:search],
           project: project,
-          repository_ref: repository_ref
+          repository_ref: repository_ref,
+          filters: { state: params[:state] }
         )
       end
 

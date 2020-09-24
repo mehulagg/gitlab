@@ -6,8 +6,8 @@ import {
   GlLoadingIcon,
   GlEmptyState,
   GlIcon,
-  GlNewDropdown,
-  GlNewDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
 } from '@gitlab/ui';
 import { formatDate } from '~/lib/utils/datetime_utility';
 import { __ } from '~/locale';
@@ -35,8 +35,8 @@ export default {
     GlLoadingIcon,
     GlEmptyState,
     GlIcon,
-    GlNewDropdown,
-    GlNewDropdownItem,
+    GlDropdown,
+    GlDropdownItem,
     IterationForm,
     IterationReportSummary,
     IterationReportTabs,
@@ -193,7 +193,7 @@ export default {
         <span class="gl-ml-4"
           >{{ formatDate(iteration.startDate) }} – {{ formatDate(iteration.dueDate) }}</span
         >
-        <gl-new-dropdown
+        <gl-dropdown
           v-if="canEditIteration"
           data-testid="actions-dropdown"
           variant="default"
@@ -205,10 +205,8 @@ export default {
           <template #button-content>
             <gl-icon name="ellipsis_v" /><span class="gl-sr-only">{{ __('Actions') }}</span>
           </template>
-          <gl-new-dropdown-item @click="loadEditPage">{{
-            __('Edit iteration')
-          }}</gl-new-dropdown-item>
-        </gl-new-dropdown>
+          <gl-dropdown-item @click="loadEditPage">{{ __('Edit iteration') }}</gl-dropdown-item>
+        </gl-dropdown>
       </div>
       <h3 ref="title" class="page-title">{{ iteration.title }}</h3>
       <div ref="description" v-html="iteration.descriptionHtml"></div>

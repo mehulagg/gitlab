@@ -54,6 +54,34 @@ RSpec.describe 'search/_results' do
           expect(rendered).to have_selector('[data-track-event=click_text]')
           expect(rendered).to have_selector('[data-track-property=search_result]')
         end
+
+        it 'renders the state filter drop down' do
+          render
+
+          expect(rendered).to have_selector('#js-search-filter-by-state')
+        end
+
+        context 'Feature search_filter_by_confidential' do
+          context 'when disabled' do
+            before do
+              stub_feature_flags(search_filter_by_confidential: false)
+            end
+
+            it 'does not render the confidential drop down' do
+              render
+
+              expect(rendered).not_to have_selector('#js-search-filter-by-confidential')
+            end
+          end
+
+          context 'when enabled' do
+            it 'renders the confidential drop down' do
+              render
+
+              expect(rendered).to have_selector('#js-search-filter-by-confidential')
+            end
+          end
+        end
       end
     end
   end

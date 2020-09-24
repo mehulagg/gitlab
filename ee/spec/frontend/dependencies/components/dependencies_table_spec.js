@@ -1,6 +1,11 @@
 import { nextTick } from 'vue';
 import { mount } from '@vue/test-utils';
-import { GlBadge, GlButton, GlLink, GlSkeletonLoading } from '@gitlab/ui';
+import {
+  GlBadge,
+  GlButton,
+  GlLink,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
+} from '@gitlab/ui';
 import stubChildren from 'helpers/stub_children';
 import DependenciesTable from 'ee/dependencies/components/dependencies_table.vue';
 import DependencyLicenseLinks from 'ee/dependencies/components/dependency_license_links.vue';

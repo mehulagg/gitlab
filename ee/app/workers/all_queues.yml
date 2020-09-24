@@ -635,6 +635,14 @@
   :weight: 2
   :idempotent:
   :tags: []
+- :name: merge_request_reset_approvals
+  :feature_category: :source_code_management
+  :has_external_dependencies:
+  :urgency: :high
+  :resource_boundary: :cpu
+  :weight: 1
+  :idempotent:
+  :tags: []
 - :name: new_epic
   :feature_category: :epics
   :has_external_dependencies:

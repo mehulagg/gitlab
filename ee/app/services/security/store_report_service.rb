@@ -42,7 +42,10 @@ module Security
     end
 
     def create_vulnerability_finding(finding)
-      return if finding.scanner.blank? || finding.primary_identifier.blank?
+      unless finding.valid?
+        put_warning_for(finding)
+        return
+      end
 
       vulnerability_params = finding.to_hash.except(:compare_key, :identifiers, :location, :scanner)
       vulnerability_finding = create_or_find_vulnerability_finding(finding, vulnerability_params)
@@ -171,6 +174,10 @@ module Security
           [identifier.fingerprint, identifier]
         end.to_h
       end
+    end
+
+    def put_warning_for(finding)
+      Gitlab::AppLogger.warn(message: "Invalid vulnerability finding record found", finding: finding.to_hash)
     end
   end
 end

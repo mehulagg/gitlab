@@ -155,7 +155,6 @@ export default {
           data-testid="feature-flag-status-toggle"
           data-track-event="click_button"
           data-track-label="feature_flag_toggle"
-          data-track-context="feature_flag_activity"
           class="gl-mr-4"
           @change="toggleActive"
         />

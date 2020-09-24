@@ -1,7 +1,9 @@
 <script>
+import { mapState } from 'vuex';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
 import { GlAlert } from '@gitlab/ui';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
+import { filterToQueryObject } from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import throughputChartQueryBuilder from '../graphql/throughput_chart_query_builder';
 import { THROUGHPUT_CHART_STRINGS } from '../constants';
 
@@ -35,8 +37,18 @@ export default {
         return throughputChartQueryBuilder(this.startDate, this.endDate);
       },
       variables() {
+        const options = filterToQueryObject({
+          sourceBranches: this.selectedSourceBranch,
+          targetBranches: this.selectedTargetBranch,
+          milestoneTitle: this.selectedMilestone,
+          authorUsername: this.selectedAuthor,
+          assigneeUsername: this.selectedAssignee,
+          labels: this.selectedLabelList,
+        });
+
         return {
           fullPath: this.fullPath,
+          ...options,
         };
       },
       error() {
@@ -48,6 +60,14 @@ export default {
     },
   },
   computed: {
+    ...mapState('filters', {
+      selectedSourceBranch: state => state.branches.source.selected,
+      selectedTargetBranch: state => state.branches.target.selected,
+      selectedMilestone: state => state.milestones.selected,
+      selectedAuthor: state => state.authors.selected,
+      selectedAssignee: state => state.assignees.selected,
+      selectedLabelList: state => state.labels.selectedList,
+    }),
     chartOptions() {
       return {
         xAxis: {

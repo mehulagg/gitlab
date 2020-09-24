@@ -2,6 +2,7 @@
 FactoryBot.define do
   factory :package, class: 'Packages::Package' do
     project
+    creator { project&.creator }
     name { 'my/company/app/my-app' }
     sequence(:version) { |n| "1.#{n}-SNAPSHOT" }
     package_type { :maven }
@@ -88,6 +89,12 @@ FactoryBot.define do
           create :composer_metadatum, package: package, target_sha: evaluator.sha, composer_json: evaluator.json
         end
       end
+    end
+
+    factory :golang_package do
+      sequence(:name) { |n| "golang.org/x/pkg-#{n}"}
+      sequence(:version) { |n| "v1.0.#{n}" }
+      package_type { :golang }
     end
 
     factory :conan_package do

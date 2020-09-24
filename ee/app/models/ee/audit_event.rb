@@ -28,8 +28,20 @@ module EE
       AuditEventPresenter.new(self)
     end
 
+    def target_type
+      super || details[:target_type]
+    end
+
+    def target_id
+      details[:target_id]
+    end
+
     def target_details
       super || details[:target_details]
+    end
+
+    def ip_address
+      super&.to_s || details[:ip_address]
     end
 
     def lazy_entity

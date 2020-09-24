@@ -105,7 +105,7 @@ RSpec.describe Ci::Build do
       expect(Gitlab::Database::LoadBalancing::Sticking).to receive(:stick)
         .with(:build, job.id)
 
-      job.update(status: :running)
+      job.update!(status: :running)
     end
   end
 
@@ -118,7 +118,7 @@ RSpec.describe Ci::Build do
       end
 
       before do
-        job.update(environment: 'staging')
+        job.update!(environment: 'staging')
         create(:environment, name: 'staging', project: job.project)
 
         variable =

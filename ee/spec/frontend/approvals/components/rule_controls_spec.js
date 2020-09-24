@@ -70,7 +70,6 @@ describe('EE Approvals RuleControls', () => {
         expect(store.modules.approvals.actions.requestEditRule).toHaveBeenCalledWith(
           expect.anything(),
           TEST_RULE,
-          undefined,
         );
       });
     });
@@ -95,7 +94,6 @@ describe('EE Approvals RuleControls', () => {
         expect(store.modules.approvals.actions.requestDeleteRule).toHaveBeenCalledWith(
           expect.anything(),
           TEST_RULE,
-          undefined,
         );
       });
     });

@@ -21,16 +21,27 @@ module Mutations
                required: true,
                description: 'ID of the site profile to be used for the scan.'
 
+      argument :dast_scanner_profile_id, ::Types::GlobalIDType[::DastScannerProfile],
+               required: false,
+               description: 'ID of the scanner profile to be used for the scan.'
+
       authorize :create_on_demand_dast_scan
 
-      def resolve(full_path:, dast_site_profile_id:)
+      def resolve(full_path:, dast_site_profile_id:, **args)
         project = authorized_find_project!(full_path: full_path)
 
         dast_site_profile = find_dast_site_profile(project: project, dast_site_profile_id: dast_site_profile_id)
         dast_site = dast_site_profile.dast_site
+        dast_scanner_profile = find_dast_scanner_profile(project: project, dast_scanner_profile_id: args[:dast_scanner_profile_id])
 
-        service = ::Ci::RunDastScanService.new(project, current_user)
-        result = service.execute(branch: project.default_branch, target_url: dast_site.url)
+        result = ::Ci::RunDastScanService.new(
+          project, current_user
+        ).execute(
+          branch: project.default_branch,
+          target_url: dast_site.url,
+          spider_timeout: dast_scanner_profile&.spider_timeout,
+          target_timeout: dast_scanner_profile&.target_timeout
+        )
 
         if result.success?
           success_response(project: project, pipeline: result.payload)
@@ -41,11 +52,20 @@ module Mutations
 
       private
 
+      # rubocop: disable CodeReuse/ActiveRecord
       def find_dast_site_profile(project:, dast_site_profile_id:)
+        DastSiteProfilesFinder.new(project_id: project.id, id: dast_site_profile_id.model_id)
+          .execute
+          .first!
+      end
+      # rubocop: enable CodeReuse/ActiveRecord
+
+      def find_dast_scanner_profile(project:, dast_scanner_profile_id:)
+        return unless dast_scanner_profile_id
+
         project
-          .dast_site_profiles
-          .with_dast_site
-          .find(dast_site_profile_id.model_id)
+          .dast_scanner_profiles
+          .find(dast_scanner_profile_id.model_id)
       end
 
       def success_response(project:, pipeline:)

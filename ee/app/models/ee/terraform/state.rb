@@ -15,7 +15,9 @@ module EE
 
       class_methods do
         def replicables_for_geo_node(node = ::Gitlab::Geo.current_node)
-          selective_sync_scope(node).merge(object_storage_scope(node))
+          selective_sync_scope(node)
+            .merge(object_storage_scope(node))
+            .versioning_not_enabled
         end
 
         private

@@ -2,12 +2,12 @@ import { createLocalVue, shallowMount } from '@vue/test-utils';
 import Vuex from 'vuex';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
-import * as utils from 'ee/analytics/shared/utils';
 import storeConfig from 'ee/analytics/cycle_analytics/store';
 import FilterBar from 'ee/analytics/cycle_analytics/components/filter_bar.vue';
 import initialFiltersState from 'ee/analytics/shared/store/modules/filters/state';
 import FilteredSearchBar from '~/vue_shared/components/filtered_search_bar/filtered_search_bar_root.vue';
 import UrlSync from '~/vue_shared/components/url_sync.vue';
+import * as utils from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 import { filterMilestones, filterLabels } from '../../shared/store/modules/filters/mock_data';
 import * as commonUtils from '~/lib/utils/common_utils';
 import * as urlUtils from '~/lib/utils/url_utility';
@@ -29,9 +29,13 @@ const initialFilterBarState = {
 
 const defaultParams = {
   milestone_title: null,
+  'not[milestone_title]': null,
   author_username: null,
+  'not[author_username]': null,
   assignee_username: null,
+  'not[assignee_username]': null,
   label_name: null,
+  'not[label_name]': null,
 };
 
 async function shouldMergeUrlParams(wrapper, result) {
@@ -164,26 +168,31 @@ describe('Filter bar', () => {
 
       expect(utils.processFilters).toHaveBeenCalledWith(filters);
 
-      expect(setFiltersMock).toHaveBeenCalledWith(
-        expect.anything(),
-        {
-          selectedLabelList: [selectedLabelList[0].title],
-          selectedMilestone: selectedMilestone[0].title,
-          selectedAssigneeList: [],
-          selectedAuthor: null,
-        },
-        undefined,
-      );
+      expect(setFiltersMock).toHaveBeenCalledWith(expect.anything(), {
+        selectedLabelList: [{ value: selectedLabelList[0].title, operator: '=' }],
+        selectedMilestone: { value: selectedMilestone[0].title, operator: '=' },
+        selectedAssigneeList: [],
+        selectedAuthor: null,
+      });
     });
   });
 
-  describe.each`
-    stateKey                  | payload                          | paramKey
-    ${'selectedMilestone'}    | ${'12.0'}                        | ${'milestone_title'}
-    ${'selectedAuthor'}       | ${'rootUser'}                    | ${'author_username'}
-    ${'selectedLabelList'}    | ${['Afternix', 'Brouceforge']}   | ${'label_name'}
-    ${'selectedAssigneeList'} | ${['rootUser', 'secondaryUser']} | ${'assignee_username'}
-  `('with a $stateKey updates the $paramKey url parameter', ({ stateKey, payload, paramKey }) => {
+  describe.each([
+    ['selectedMilestone', 'milestone_title', { value: '12.0', operator: '=' }, '12.0'],
+    ['selectedAuthor', 'author_username', { value: 'rootUser', operator: '=' }, 'rootUser'],
+    [
+      'selectedLabelList',
+      'label_name',
+      [{ value: 'Afternix', operator: '=' }, { value: 'Brouceforge', operator: '=' }],
+      ['Afternix', 'Brouceforge'],
+    ],
+    [
+      'selectedAssigneeList',
+      'assignee_username',
+      [{ value: 'rootUser', operator: '=' }, { value: 'secondaryUser', operator: '=' }],
+      ['rootUser', 'secondaryUser'],
+    ],
+  ])('with a %s updates the %s url parameter', (stateKey, paramKey, payload, result) => {
     beforeEach(() => {
       commonUtils.historyPushState = jest.fn();
       urlUtils.mergeUrlParams = jest.fn();
@@ -199,7 +208,7 @@ describe('Filter bar', () => {
     it(`sets the ${paramKey} url parameter`, () => {
       return shouldMergeUrlParams(wrapper, {
         ...defaultParams,
-        [paramKey]: payload,
+        [paramKey]: result,
       });
     });
   });

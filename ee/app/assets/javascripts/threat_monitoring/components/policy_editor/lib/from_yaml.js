@@ -112,7 +112,8 @@ function parseRule(item, direction) {
     https://docs.cilium.io/en/v1.8/policy/language
 */
 export default function fromYaml(manifest) {
-  const { metadata, spec } = safeLoad(manifest, { json: true });
+  const { description, metadata, spec } = safeLoad(manifest, { json: true });
+  const { name, resourceVersion } = metadata;
   const { endpointSelector = {}, ingress = [], egress = [] } = spec;
   const matchLabels = endpointSelector.matchLabels || {};
 
@@ -130,8 +131,9 @@ export default function fromYaml(manifest) {
     .filter(rule => Boolean(rule));
 
   return {
-    name: metadata.name,
-    description: spec.description,
+    name,
+    resourceVersion,
+    description,
     isEnabled: !Object.keys(matchLabels).includes(DisabledByLabel),
     endpointMatchMode: endpointLabels.length > 0 ? EndpointMatchModeLabel : EndpointMatchModeAny,
     endpointLabels: endpointLabels.join(' '),

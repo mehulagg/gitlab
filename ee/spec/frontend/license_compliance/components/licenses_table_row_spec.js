@@ -1,7 +1,7 @@
 import { shallowMount } from '@vue/test-utils';
 import {
   GlLink,
-  GlSkeletonLoading,
+  GlDeprecatedSkeletonLoading as GlSkeletonLoading,
   GlDeprecatedBadge as GlBadge,
   GlFriendlyWrap,
 } from '@gitlab/ui';

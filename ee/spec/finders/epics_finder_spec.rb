@@ -107,7 +107,7 @@ RSpec.describe EpicsFinder do
         end
 
         context 'by label' do
-          let_it_be(:label) { create(:label) }
+          let_it_be(:label) { create(:group_label, group: group) }
           let_it_be(:labeled_epic) { create(:labeled_epic, group: group, labels: [label]) }
 
           it 'returns all epics with given label' do
@@ -461,8 +461,8 @@ RSpec.describe EpicsFinder do
 
         context 'when using group cte for search' do
           context 'and two labels more search string are present' do
-            let_it_be(:label1) { create(:label) }
-            let_it_be(:label2) { create(:label) }
+            let_it_be(:label1) { create(:group_label, group: group) }
+            let_it_be(:label2) { create(:group_label, group: group) }
             let_it_be(:labeled_epic) { create(:labeled_epic, group: group, title: 'filtered epic', labels: [label1, label2]) }
 
             it 'returns correct epics' do
@@ -559,8 +559,8 @@ RSpec.describe EpicsFinder do
         end
 
         context 'with negated labels' do
-          let_it_be(:label) { create(:label) }
-          let_it_be(:label2) { create(:label) }
+          let_it_be(:label) { create(:group_label, group: group) }
+          let_it_be(:label2) { create(:group_label, group: group) }
           let_it_be(:negated_epic) { create(:labeled_epic, group: group, labels: [label]) }
           let_it_be(:negated_epic2) { create(:labeled_epic, group: group, labels: [label2]) }
           let_it_be(:params) { { not: { label_name: [label.title, label2.title].join(',') } } }
@@ -630,8 +630,8 @@ RSpec.describe EpicsFinder do
   end
 
   describe '#row_count' do
-    let_it_be(:label) { create(:label) }
-    let_it_be(:label2) { create(:label) }
+    let_it_be(:label) { create(:group_label, group: group) }
+    let_it_be(:label2) { create(:group_label, group: group) }
     let_it_be(:labeled_epic) { create(:labeled_epic, group: group, labels: [label]) }
     let_it_be(:labeled_epic2) { create(:labeled_epic, group: group, labels: [label, label2]) }
 

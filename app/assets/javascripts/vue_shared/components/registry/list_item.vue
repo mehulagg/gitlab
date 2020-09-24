@@ -65,11 +65,11 @@ export default {
         class="gl-display-flex gl-xs-flex-direction-column gl-justify-content-space-between gl-align-items-stretch gl-flex-fill-1"
       >
         <div
-          class="gl-display-flex gl-flex-direction-column gl-justify-content-space-between gl-xs-mb-3"
+          class="gl-display-flex gl-flex-direction-column gl-justify-content-space-between gl-xs-mb-3 gl-min-w-0 gl-flex-grow-1"
         >
           <div
             v-if="$slots['left-primary']"
-            class="gl-display-flex gl-align-items-center gl-text-body gl-font-weight-bold gl-min-h-6"
+            class="gl-display-flex gl-align-items-center gl-text-body gl-font-weight-bold gl-min-h-6 gl-min-w-0"
           >
             <slot name="left-primary"></slot>
             <gl-button
@@ -81,20 +81,26 @@ export default {
               @click="toggleDetails"
             />
           </div>
-          <div v-if="$slots['left-secondary']" class="gl-text-gray-500 gl-mt-1 gl-min-h-6">
+          <div
+            v-if="$slots['left-secondary']"
+            class="gl-display-flex gl-align-items-center gl-text-gray-500 gl-mt-1 gl-min-h-6 gl-min-w-0 gl-flex-fill-1"
+          >
             <slot name="left-secondary"></slot>
           </div>
         </div>
         <div
-          class="gl-display-flex gl-flex-direction-column gl-sm-align-items-flex-end gl-justify-content-space-between gl-text-gray-500"
+          class="gl-display-flex gl-flex-direction-column gl-sm-align-items-flex-end gl-justify-content-space-between gl-text-gray-500 gl-flex-shrink-0"
         >
           <div
             v-if="$slots['right-primary']"
-            class="gl-sm-text-body gl-sm-font-weight-bold gl-min-h-6"
+            class="gl-display-flex gl-align-items-center gl-sm-text-body gl-sm-font-weight-bold gl-min-h-6"
           >
             <slot name="right-primary"></slot>
           </div>
-          <div v-if="$slots['right-secondary']" class="gl-mt-1 gl-min-h-6">
+          <div
+            v-if="$slots['right-secondary']"
+            class="gl-display-flex gl-align-items-center gl-mt-1 gl-min-h-6"
+          >
             <slot name="right-secondary"></slot>
           </div>
         </div>

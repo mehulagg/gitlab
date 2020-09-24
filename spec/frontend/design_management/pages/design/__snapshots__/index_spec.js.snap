@@ -32,6 +32,8 @@ exports[`Design management design index page renders design index 1`] = `
   <div
     class="image-notes"
   >
+    <!---->
+     
     <h2
       class="gl-font-weight-bold gl-mt-0"
     >
@@ -57,14 +59,15 @@ exports[`Design management design index page renders design index 1`] = `
      
     <design-discussion-stub
       data-testid="unresolved-discussion"
-      designid="design-id"
+      designid="gid::/gitlab/Design/1"
       discussion="[object Object]"
       discussionwithopenform=""
       markdownpreviewpath="/project-path/preview_markdown?target_type=Issue"
-      noteableid="design-id"
+      noteableid="gid::/gitlab/Design/1"
     />
      
     <gl-button-stub
+      buttontextclasses=""
       category="primary"
       class="link-inherit-color gl-text-body gl-text-decoration-none gl-font-weight-bold gl-mb-4"
       data-testid="resolved-comments"
@@ -105,11 +108,11 @@ exports[`Design management design index page renders design index 1`] = `
     >
       <design-discussion-stub
         data-testid="resolved-discussion"
-        designid="design-id"
+        designid="gid::/gitlab/Design/1"
         discussion="[object Object]"
         discussionwithopenform=""
         markdownpreviewpath="/project-path/preview_markdown?target_type=Issue"
-        noteableid="design-id"
+        noteableid="gid::/gitlab/Design/1"
       />
     </gl-collapse-stub>
      
@@ -179,6 +182,8 @@ exports[`Design management design index page with error GlAlert is rendered in c
   <div
     class="image-notes"
   >
+    <!---->
+     
     <h2
       class="gl-font-weight-bold gl-mt-0"
     >

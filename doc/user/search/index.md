@@ -49,7 +49,7 @@ groups:
    - My-reaction
    - Confidential
    - Epic ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/195704) in GitLab 12.9),
-     including [child epic](../group/epics/index.md#multi-level-child-epics-ultimate)
+     including [child epic](../group/epics/index.md#multi-level-child-epics)
      ([introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/9029) in
      [GitLab Ultimate](https://about.gitlab.com/pricing/) 13.0)
    - Search for this text
@@ -161,6 +161,17 @@ You'll also find a shortcut on the search field on the top-right of the project'
 quickly access issues and merge requests created or assigned to you within that project:
 
 ![search per project - shortcut](img/project_search.png)
+
+### Autocomplete suggestions
+
+You can also type in this search bar to see autocomplete suggestions for:
+
+- Projects and groups
+- Various help pages (try and type **API help**)
+- Project feature pages (try and type **milestones**)
+- Various settings pages (try and type **user settings**)
+- Recently viewed issues (try and type some word from the title of a recently viewed issue)
+- Recently viewed merge requests (try and type some word from the title of a recently merge request)
 
 ## To-Do List
 

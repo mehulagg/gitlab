@@ -5,6 +5,7 @@ RSpec.shared_examples 'gets registries for' do |args|
   let(:registry_class_name) { args[:registry_class_name] }
   let(:registry_factory) { args[:registry_factory] }
   let(:registry_foreign_key_field_name) { args[:registry_foreign_key_field_name] }
+  let(:feature_flag) { Geo.const_get(registry_class_name, false).replicator_class.replication_enabled_feature_key }
   let(:registry_foreign_key) { registry_foreign_key_field_name.underscore }
   let(:field_name_sym) { field_name.underscore.to_sym }
 
@@ -109,7 +110,7 @@ RSpec.shared_examples 'gets registries for' do |args|
 
   context 'when the geo_self_service_framework feature is disabled' do
     before do
-      stub_feature_flags(geo_self_service_framework: false)
+      stub_feature_flags(feature_flag => false)
     end
 
     it 'errors when requesting registries' do

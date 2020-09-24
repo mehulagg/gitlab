@@ -1,6 +1,5 @@
 import { gray10 } from '@gitlab/ui/scss_to_js/scss_variables';
 import { __ } from '~/locale';
-import { capitalizeFirstCharacter } from '~/lib/utils/text_utility';
 
 export const PROJECTS_PER_PAGE = 50;
 
@@ -27,12 +26,9 @@ export const EMPTY_STAGE_TEXT = {
   staging: __(
     'The staging stage shows the time between merging the MR and deploying code to the production environment. The data will be automatically added once you deploy to production for the first time.',
   ),
-  production: __(
-    'The production stage shows the total time it takes between creating an issue and deploying the code to production. The data will be automatically added once you have completed the full idea to production cycle.',
-  ),
 };
 
-export const DEFAULT_STAGE_NAMES = [...Object.keys(EMPTY_STAGE_TEXT), 'total'];
+export const DEFAULT_STAGE_NAMES = [...Object.keys(EMPTY_STAGE_TEXT)];
 
 export const TASKS_BY_TYPE_SUBJECT_ISSUE = 'Issue';
 export const TASKS_BY_TYPE_SUBJECT_MERGE_REQUEST = 'MergeRequest';
@@ -58,25 +54,6 @@ export const STAGE_ACTIONS = {
   UPDATE: 'updateStage',
   ADD_STAGE: 'showAddStageForm',
 };
-
-export const STAGE_NAME = {
-  TOTAL: 'total',
-  PRODUCTION: 'production',
-  OVERVIEW: 'overview',
-};
-
-/**
- * An object containing capitalized stages names
- * i.e. { TOTAL: 'total' } => { TOTAL: 'Total' }
- */
-export const CAPITALIZED_STAGE_NAME = Object.keys(STAGE_NAME).reduce((acc, stage) => {
-  return {
-    ...acc,
-    [stage]: capitalizeFirstCharacter(STAGE_NAME[stage]),
-  };
-}, {});
-
-export const PATH_HOME_ICON = 'home';
 
 export const DEFAULT_VALUE_STREAM_ID = 'default';
 

@@ -8,23 +8,28 @@ import {
   GlFormGroup,
   GlIcon,
   GlLink,
-  GlNewDropdown as GlDropdown,
-  GlNewDropdownItem as GlDropdownItem,
+  GlDropdown,
+  GlDropdownItem,
   GlSkeletonLoader,
   GlSprintf,
   GlTooltipDirective,
 } from '@gitlab/ui';
-import dastSiteProfilesQuery from 'ee/dast_profiles/graphql/dast_site_profiles.query.graphql';
+import dastScannerProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_scanner_profiles.query.graphql';
+import dastSiteProfilesQuery from 'ee/security_configuration/dast_profiles/graphql/dast_site_profiles.query.graphql';
+import glFeatureFlagsMixin from '~/vue_shared/mixins/gl_feature_flags_mixin';
 import { s__ } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import dastOnDemandScanCreateMutation from '../graphql/dast_on_demand_scan_create.mutation.graphql';
-import { SCAN_TYPES } from '../constants';
 
 const ERROR_RUN_SCAN = 'ERROR_RUN_SCAN';
+const ERROR_FETCH_SCANNER_PROFILES = 'ERROR_FETCH_SCANNER_PROFILES';
 const ERROR_FETCH_SITE_PROFILES = 'ERROR_FETCH_SITE_PROFILES';
 
 const ERROR_MESSAGES = {
   [ERROR_RUN_SCAN]: s__('OnDemandScans|Could not run the scan. Please try again.'),
+  [ERROR_FETCH_SCANNER_PROFILES]: s__(
+    'OnDemandScans|Could not fetch scanner profiles. Please refresh the page, or try again later.',
+  ),
   [ERROR_FETCH_SITE_PROFILES]: s__(
     'OnDemandScans|Could not fetch site profiles. Please refresh the page, or try again later.',
   ),
@@ -53,7 +58,27 @@ export default {
   directives: {
     GlTooltip: GlTooltipDirective,
   },
+  mixins: [glFeatureFlagsMixin()],
   apollo: {
+    scannerProfiles: {
+      query: dastScannerProfilesQuery,
+      variables() {
+        return {
+          fullPath: this.projectPath,
+        };
+      },
+      update(data) {
+        const scannerProfilesEdges = data?.project?.scannerProfiles?.edges ?? [];
+        return scannerProfilesEdges.map(({ node }) => node);
+      },
+      error(e) {
+        Sentry.captureException(e);
+        this.showErrors(ERROR_FETCH_SCANNER_PROFILES);
+      },
+      skip() {
+        return !this.glFeatures.securityOnDemandScansScannerProfiles;
+      },
+    },
     siteProfiles: {
       query: dastSiteProfilesQuery,
       variables() {
@@ -84,21 +109,29 @@ export default {
       type: String,
       required: true,
     },
-    profilesLibraryPath: {
-      type: String,
-      required: true,
+  },
+  inject: {
+    scannerProfilesLibraryPath: {
+      default: '',
+    },
+    siteProfilesLibraryPath: {
+      default: '',
+    },
+    newScannerProfilePath: {
+      default: '',
     },
     newSiteProfilePath: {
-      type: String,
-      required: true,
+      default: '',
     },
   },
   data() {
     return {
+      scannerProfiles: [],
       siteProfiles: [],
       form: {
-        scanType: initField(SCAN_TYPES.PASSIVE),
-        branch: initField(this.defaultBranch),
+        ...(this.glFeatures.securityOnDemandScansScannerProfiles
+          ? { dastScannerProfileId: initField(null) }
+          : {}),
         dastSiteProfileId: initField(null),
       },
       loading: false,
@@ -112,10 +145,12 @@ export default {
       return ERROR_MESSAGES[this.errorType] || null;
     },
     isLoadingProfiles() {
-      return this.$apollo.queries.siteProfiles.loading;
+      return ['scanner', 'site'].some(
+        profileType => this.$apollo.queries[`${profileType}Profiles`].loading,
+      );
     },
     failedToLoadProfiles() {
-      return [ERROR_FETCH_SITE_PROFILES].includes(this.errorType);
+      return [ERROR_FETCH_SCANNER_PROFILES, ERROR_FETCH_SITE_PROFILES].includes(this.errorType);
     },
     formData() {
       return {
@@ -132,11 +167,23 @@ export default {
     isSubmitDisabled() {
       return this.formHasErrors || this.someFieldEmpty;
     },
+    selectedScannerProfile() {
+      const selectedScannerProfile = this.form.dastScannerProfileId.value;
+      return selectedScannerProfile === null
+        ? null
+        : this.scannerProfiles.find(({ id }) => id === selectedScannerProfile);
+    },
     selectedSiteProfile() {
       const selectedSiteProfileId = this.form.dastSiteProfileId.value;
       return selectedSiteProfileId === null
         ? null
         : this.siteProfiles.find(({ id }) => id === selectedSiteProfileId);
+    },
+    scannerProfileText() {
+      const { selectedScannerProfile } = this;
+      return selectedScannerProfile
+        ? selectedScannerProfile.profileName
+        : s__('OnDemandScans|Select one of the existing profiles');
     },
     siteProfileText() {
       const { selectedSiteProfile } = this;
@@ -146,6 +193,9 @@ export default {
     },
   },
   methods: {
+    setScannerProfile({ id }) {
+      this.form.dastScannerProfileId.value = id;
+    },
     setSiteProfile({ id }) {
       this.form.dastSiteProfileId.value = id;
     },
@@ -239,34 +289,131 @@ export default {
     <template v-else-if="!failedToLoadProfiles">
       <gl-card>
         <template #header>
-          <h3 class="gl-font-lg gl-display-inline">{{ s__('OnDemandScans|Scanner settings') }}</h3>
+          <div class="row">
+            <div class="col-7">
+              <h3 class="gl-font-lg gl-display-inline">
+                {{ s__('OnDemandScans|Scanner settings') }}
+              </h3>
+            </div>
+            <div v-if="glFeatures.securityOnDemandScansScannerProfiles" class="col-5 gl-text-right">
+              <gl-button
+                :href="scannerProfiles.length ? scannerProfilesLibraryPath : null"
+                :disabled="!scannerProfiles.length"
+                variant="success"
+                category="secondary"
+                size="small"
+                data-testid="manage-scanner-profiles-button"
+              >
+                {{ s__('OnDemandScans|Manage profiles') }}
+              </gl-button>
+            </div>
+          </div>
         </template>
 
-        <gl-form-group class="gl-mt-4">
-          <template #label>
-            {{ s__('OnDemandScans|Scan mode') }}
-            <gl-icon
-              v-gl-tooltip.hover
-              name="information-o"
-              class="gl-vertical-align-text-bottom gl-text-gray-600"
-              :title="s__('OnDemandScans|Only a passive scan can be performed on demand.')"
-            />
+        <template v-if="glFeatures.securityOnDemandScansScannerProfiles">
+          <gl-form-group v-if="scannerProfiles.length">
+            <template #label>
+              {{ s__('OnDemandScans|Use existing scanner profile') }}
+            </template>
+            <gl-dropdown
+              v-model="form.dastScannerProfileId.value"
+              :text="scannerProfileText"
+              class="mw-460"
+              data-testid="scanner-profiles-dropdown"
+            >
+              <gl-dropdown-item
+                v-for="scannerProfile in scannerProfiles"
+                :key="scannerProfile.id"
+                :is-checked="form.dastScannerProfileId.value === scannerProfile.id"
+                is-check-item
+                @click="setScannerProfile(scannerProfile)"
+              >
+                {{ scannerProfile.profileName }}
+              </gl-dropdown-item>
+            </gl-dropdown>
+            <template v-if="selectedScannerProfile">
+              <hr />
+              <div data-testid="scanner-profile-summary">
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="row">
+                      <div class="col-md-3">{{ s__('DastProfiles|Scan mode') }}:</div>
+                      <div class="col-md-9">
+                        <strong>{{ s__('DastProfiles|Passive') }}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="row">
+                      <div class="col-md-3">{{ s__('DastProfiles|Spider timeout') }}:</div>
+                      <div class="col-md-9">
+                        <strong>
+                          {{ n__('%d minute', '%d minutes', selectedScannerProfile.spiderTimeout) }}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="row">
+                      <div class="col-md-3">{{ s__('DastProfiles|Target timeout') }}:</div>
+                      <div class="col-md-9">
+                        <strong>
+                          {{ n__('%d second', '%d seconds', selectedScannerProfile.targetTimeout) }}
+                        </strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </gl-form-group>
+          <template v-else>
+            <p class="gl-text-gray-700">
+              {{
+                s__(
+                  'OnDemandScans|No profile yet. In order to create a new scan, you need to have at least one completed scanner profile.',
+                )
+              }}
+            </p>
+            <gl-button
+              :href="newScannerProfilePath"
+              variant="success"
+              category="secondary"
+              data-testid="create-scanner-profile-link"
+            >
+              {{ s__('OnDemandScans|Create a new scanner profile') }}
+            </gl-button>
           </template>
-          {{ s__('OnDemandScans|Passive') }}
-        </gl-form-group>
+        </template>
+        <template v-else>
+          <gl-form-group class="gl-mt-4">
+            <template #label>
+              {{ s__('OnDemandScans|Scan mode') }}
+              <gl-icon
+                v-gl-tooltip.hover
+                name="information-o"
+                class="gl-vertical-align-text-bottom gl-text-gray-600"
+                :title="s__('OnDemandScans|Only a passive scan can be performed on demand.')"
+              />
+            </template>
+            {{ s__('OnDemandScans|Passive') }}
+          </gl-form-group>
 
-        <gl-form-group class="gl-mt-7 gl-mb-2">
-          <template #label>
-            {{ s__('OnDemandScans|Attached branch') }}
-            <gl-icon
-              v-gl-tooltip.hover
-              name="information-o"
-              class="gl-vertical-align-text-bottom gl-text-gray-600"
-              :title="s__('OnDemandScans|Attached branch is where the scan job runs.')"
-            />
-          </template>
-          {{ defaultBranch }}
-        </gl-form-group>
+          <gl-form-group class="gl-mt-7 gl-mb-2">
+            <template #label>
+              {{ s__('OnDemandScans|Attached branch') }}
+              <gl-icon
+                v-gl-tooltip.hover
+                name="information-o"
+                class="gl-vertical-align-text-bottom gl-text-gray-600"
+                :title="s__('OnDemandScans|Attached branch is where the scan job runs.')"
+              />
+            </template>
+            {{ defaultBranch }}
+          </gl-form-group>
+        </template>
       </gl-card>
 
       <gl-card>
@@ -277,7 +424,7 @@ export default {
             </div>
             <div class="col-5 gl-text-right">
               <gl-button
-                :href="siteProfiles.length ? profilesLibraryPath : null"
+                :href="siteProfiles.length ? siteProfilesLibraryPath : null"
                 :disabled="!siteProfiles.length"
                 variant="success"
                 category="secondary"

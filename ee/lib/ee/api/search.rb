@@ -9,7 +9,7 @@ module EE
         helpers do
           extend ::Gitlab::Utils::Override
 
-          ELASTICSEARCH_SCOPES = %w(wiki_blobs blobs commits).freeze
+          ELASTICSEARCH_SCOPES = %w(wiki_blobs blobs commits notes).freeze
 
           override :verify_search_scope!
           def verify_search_scope!(resource:)

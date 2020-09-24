@@ -19,7 +19,7 @@ module EE
             resolve: -> (project, _args, _ctx) do
               return DastScannerProfile.none unless ::Feature.enabled?(:security_on_demand_scans_feature_flag, project, default_enabled: true)
 
-              project.dast_scanner_profiles
+              DastScannerProfilesFinder.new(project_ids: [project.id]).execute
             end
 
         field :sast_ci_configuration, ::Types::CiConfiguration::Sast::Type, null: true,
@@ -41,9 +41,15 @@ module EE
               description: 'Vulnerability scanners reported on the project vulnerabilties',
               resolver: ::Resolvers::Vulnerabilities::ScannersResolver
 
+        field :vulnerabilities_count_by_day,
+              ::Types::VulnerabilitiesCountByDayType.connection_type,
+              null: true,
+              description: 'Number of vulnerabilities per day for the project',
+              resolver: ::Resolvers::VulnerabilitiesCountPerDayResolver
+
         field :vulnerability_severities_count, ::Types::VulnerabilitySeveritiesCountType, null: true,
-               description: 'Counts for each severity of vulnerability of the project',
-               resolve: -> (obj, *) { obj.vulnerability_statistic || Hash.new(0) }
+               description: 'Counts for each vulnerability severity in the project',
+               resolver: ::Resolvers::VulnerabilitySeveritiesCountResolver
 
         field :requirement, ::Types::RequirementsManagement::RequirementType, null: true,
               description: 'Find a single requirement. Available only when feature flag `requirements_management` is enabled.',
@@ -77,11 +83,34 @@ module EE
               description: 'Find iterations',
               resolver: ::Resolvers::IterationsResolver
 
+        field :dast_site_profile,
+              ::Types::DastSiteProfileType,
+              null: true,
+              resolve: -> (obj, args, _ctx) do
+                DastSiteProfilesFinder.new(project_id: obj.id, id: args[:id].model_id).execute.first
+              end,
+              description: 'DAST Site Profile associated with the project' do
+                argument :id, ::Types::GlobalIDType[::DastSiteProfile], required: true, description: 'ID of the site profile'
+              end
+
         field :dast_site_profiles,
               ::Types::DastSiteProfileType.connection_type,
               null: true,
               description: 'DAST Site Profiles associated with the project',
               resolve: -> (obj, _args, _ctx) { obj.dast_site_profiles.with_dast_site }
+
+        field :cluster_agent,
+              ::Types::Clusters::AgentType,
+              null: true,
+              description: 'Find a single cluster agent by name',
+              resolver: ::Resolvers::Clusters::AgentResolver.single
+
+        field :cluster_agents,
+              ::Types::Clusters::AgentType.connection_type,
+              extras: [:lookahead],
+              null: true,
+              description: 'Cluster agents associated with the project',
+              resolver: ::Resolvers::Clusters::AgentsResolver
 
         def self.requirements_available?(project, user)
           ::Feature.enabled?(:requirements_management, project, default_enabled: true) && Ability.allowed?(user, :read_requirement, project)

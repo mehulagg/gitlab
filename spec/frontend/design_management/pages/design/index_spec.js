@@ -22,10 +22,6 @@ import mockResponseNoDesigns from '../../mock_data/no_designs';
 import mockAllVersions from '../../mock_data/all_versions';
 
 jest.mock('~/flash');
-jest.mock('mousetrap', () => ({
-  bind: jest.fn(),
-  unbind: jest.fn(),
-}));
 
 const focusInput = jest.fn();
 
@@ -210,7 +206,7 @@ describe('Design management design index page', () => {
       },
     );
 
-    findDiscussionForm().vm.$emit('submitForm');
+    findDiscussionForm().vm.$emit('submit-form');
     expect(mutate).toHaveBeenCalledWith(createDiscussionMutationVariables);
 
     return wrapper.vm
@@ -235,7 +231,7 @@ describe('Design management design index page', () => {
       },
     );
 
-    findDiscussionForm().vm.$emit('cancelForm');
+    findDiscussionForm().vm.$emit('cancel-form');
 
     expect(wrapper.vm.comment).toBe('');
 

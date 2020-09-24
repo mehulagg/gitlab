@@ -16,8 +16,6 @@ module EE
                       merge_request.description.blank?
 
         merge_request.description = target_project.merge_requests_template
-
-        append_closes_description
       end
     end
   end

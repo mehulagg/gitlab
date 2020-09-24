@@ -94,6 +94,31 @@ RSpec.describe 'Related issues', :js do
           expect(items[0].text).to eq(issue_b.title)
           expect(find('.js-related-issues-header-issue-count')).to have_content('1')
         end
+
+        it 'hides the modal when issue is closed' do
+          # Workaround for modal not showing when issue is first added
+          visit project_issue_path(project, issue_a)
+          wait_for_requests
+
+          within('.new-note') do
+            button = find(:button, 'Close issue')
+            scroll_to(button)
+            button.click
+          end
+
+          click_button 'Yes, close issue'
+
+          wait_for_requests
+
+          find(:button, 'Yes, close issue', visible: false)
+
+          status_box = first('.status-box', visible: :all)
+          scroll_to(status_box)
+
+          within(status_box) do
+            expect(page).to have_content 'Closed'
+          end
+        end
       end
 
       context 'when adding "relates_to", "blocks", and "is_blocked_by" issues' do

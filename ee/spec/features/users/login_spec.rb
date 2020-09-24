@@ -208,6 +208,7 @@ RSpec.describe 'Login' do
       let(:user) { create(:user, :two_factor_via_u2f) }
 
       before do
+        stub_feature_flags(webauthn: false)
         mock_group_saml(uid: identity.extern_uid)
       end
 
@@ -220,6 +221,40 @@ RSpec.describe 'Login' do
         expect(page).to have_link('Sign in via 2FA code')
 
         fake_successful_u2f_authentication
+
+        expect(current_path).to eq root_path
+      end
+    end
+
+    context 'with WebAuthn two factor', :js do
+      let(:user) { create(:user, :two_factor_via_webauthn) }
+
+      before do
+        mock_group_saml(uid: identity.extern_uid)
+      end
+
+      it 'shows WebAuthn prompt after SAML' do
+        visit sso_group_saml_providers_path(group, token: group.saml_discovery_token)
+
+        click_link 'Sign in with Single Sign-On'
+
+        # Mock the webauthn procedure to neither reject or resolve, just do nothing
+        # Using the built-in credentials.get functionality would result in an SecurityError
+        # as these tests are executed using an IP-adress as effective domain
+        page.execute_script <<~JS
+          navigator.credentials.get = function() {
+            return new Promise((resolve) => {
+              window.gl.resolveWebauthn = resolve;
+            });
+          }
+        JS
+
+        click_link('Try again', href: false)
+
+        expect(page).to have_content('Trying to communicate with your device')
+        expect(page).to have_link('Sign in via 2FA code')
+
+        fake_successful_webauthn_authentication
 
         expect(current_path).to eq root_path
       end

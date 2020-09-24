@@ -1,7 +1,7 @@
 <script>
 import { isEmpty } from 'lodash';
 import { mapActions, mapState } from 'vuex';
-import { GlLink, GlDeprecatedButton, GlIcon } from '@gitlab/ui';
+import { GlLink, GlButton, GlIcon } from '@gitlab/ui';
 import { __, sprintf } from '~/locale';
 import timeagoMixin from '~/vue_shared/mixins/timeago';
 import TooltipOnTruncate from '~/vue_shared/components/tooltip_on_truncate.vue';
@@ -24,11 +24,16 @@ export default {
     StagesDropdown,
     JobsContainer,
     GlLink,
-    GlDeprecatedButton,
+    GlButton,
     TooltipOnTruncate,
   },
   mixins: [timeagoMixin],
   props: {
+    artifactHelpUrl: {
+      type: String,
+      required: false,
+      default: '',
+    },
     runnerHelpUrl: {
       type: String,
       required: false,
@@ -138,14 +143,13 @@ export default {
             >
           </div>
 
-          <gl-deprecated-button
+          <gl-button
             :aria-label="__('Toggle Sidebar')"
-            type="button"
-            class="btn btn-blank gutter-toggle float-right d-block d-md-none js-sidebar-build-toggle"
+            class="d-md-none gl-ml-2 js-sidebar-build-toggle"
+            category="tertiary"
+            icon="chevron-double-lg-right"
             @click="toggleSidebar"
-          >
-            <i aria-hidden="true" data-hidden="true" class="fa fa-angle-double-right"></i>
-          </gl-deprecated-button>
+          />
         </div>
 
         <div v-if="job.terminal_path || job.new_issue_path" class="block retry-link">
@@ -208,7 +212,7 @@ export default {
           </p>
         </div>
 
-        <artifacts-block v-if="hasArtifact" :artifact="job.artifact" />
+        <artifacts-block v-if="hasArtifact" :artifact="job.artifact" :help-url="artifactHelpUrl" />
         <trigger-block v-if="hasTriggers" :trigger="job.trigger" />
         <commit-block
           :is-last-block="hasStages"

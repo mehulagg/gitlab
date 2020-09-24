@@ -33,7 +33,7 @@ module QA
         issue.visit!
       end
 
-      it 'correctly applies simple and multiple colon scoped pairs labels', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/595' do
+      it 'correctly applies simple and multiple colon scoped pairs labels', testcase: 'https://gitlab.com/gitlab-org/quality/testcases/-/issues/595', quarantine: { issue: 'https://gitlab.com/gitlab-org/gitlab/-/issues/254960', type: :stale } do
         Page::Project::Issue::Show.perform do |show|
           show.select_labels_and_refresh([
             new_label_same_scope,

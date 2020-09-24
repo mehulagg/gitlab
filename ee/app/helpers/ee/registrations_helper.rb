@@ -40,6 +40,31 @@ module EE
       end
     end
 
+    def show_signup_flow_progress_bar?
+      return true if in_subscription_flow?
+      return false if in_invitation_flow? || in_oauth_flow? || in_trial_flow?
+
+      onboarding_issues_experiment_enabled?
+    end
+
+    def welcome_submit_button_text
+      continue = _('Continue')
+      get_started = _('Get started!')
+
+      return continue if in_subscription_flow? || in_trial_flow?
+      return get_started if in_invitation_flow? || in_oauth_flow?
+
+      onboarding_issues_experiment_enabled? ? continue : get_started
+    end
+
+    def onboarding_issues_experiment_enabled?
+      experiment_enabled?(:onboarding_issues)
+    end
+
+    def skip_setup_for_company?
+      current_user.members.any?
+    end
+
     private
 
     def redirect_path

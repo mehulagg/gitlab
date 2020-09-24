@@ -1,3 +1,5 @@
+import { s__ } from '~/locale';
+
 export const INVALID_CURRENT_ENVIRONMENT_NAME = '–';
 
 export const PREDEFINED_NETWORK_POLICIES = [
@@ -30,3 +32,5 @@ spec:
     - port: 443`,
   },
 ];
+
+export const ALL_ENVIRONMENT_NAME = s__('ThreatMonitoring|All Environments');

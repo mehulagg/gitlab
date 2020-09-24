@@ -4,6 +4,7 @@ exports[`PolicyPreview component renders policy preview tabs 1`] = `
 <gl-tabs-stub
   contentclass="gl-pt-0"
   theme="indigo"
+  value="0"
 >
   <gl-tab-stub
     title=".yaml"

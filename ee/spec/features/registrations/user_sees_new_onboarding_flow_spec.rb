@@ -12,7 +12,7 @@ RSpec.describe 'User sees new onboarding flow', :js do
   end
 
   it 'shows the expected pages' do
-    expect(page).to have_content('Welcome to GitLab.com')
+    expect(page).to have_content('Welcome to GitLab')
     expect(page).to have_content('Your profile Your GitLab group Your first project')
     expect(page).to have_css('li.current', text: 'Your profile')
 

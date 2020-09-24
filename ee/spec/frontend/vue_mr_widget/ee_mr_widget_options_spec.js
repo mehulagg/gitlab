@@ -110,6 +110,7 @@ describe('ee merge request widget options', () => {
         mock.onGet(VULNERABILITY_FEEDBACK_ENDPOINT).reply(200, []);
 
         vm = mountComponent(Component, { mrData: gl.mrWidgetData });
+        vm.loading = false;
 
         expect(
           findSecurityWidget()
@@ -810,13 +811,13 @@ describe('ee merge request widget options', () => {
   });
 
   describe('Secret Scanning', () => {
-    const SECRET_SCANNING_ENDPOINT = 'secret_scanning';
+    const SECRET_SCANNING_ENDPOINT = 'secret_detection_report';
 
     beforeEach(() => {
       gl.mrWidgetData = {
         ...mockData,
         enabled_reports: {
-          secret_scanning: true,
+          secret_detection: true,
           // The below property needs to exist until
           // secret scanning is implemented in backend
           // Or for some other reason I'm yet to find
@@ -958,7 +959,7 @@ describe('ee merge request widget options', () => {
       vm.mr.state = 'readyToMerge';
 
       vm.$nextTick(() => {
-        const tooltip = vm.$el.querySelector('.fa-question-circle');
+        const tooltip = vm.$el.querySelector('[data-testid="question-o-icon"]');
 
         expect(vm.$el.textContent).toContain('Deletes source branch');
         expect(tooltip.getAttribute('data-original-title')).toBe(
@@ -1070,7 +1071,7 @@ describe('ee merge request widget options', () => {
         sast: false,
         container_scanning: false,
         dependency_scanning: false,
-        secret_scanning: false,
+        secret_detection: false,
       },
     ];
 

@@ -235,6 +235,7 @@ control over how the Pages daemon runs and serves content in your environment.
 | `pages_path` | The directory on disk where pages are stored, defaults to `GITLAB-RAILS/shared/pages`.
 | `pages_nginx[]` | |
 | `enable` | Include a virtual host `server{}` block for Pages inside NGINX. Needed for NGINX to proxy traffic back to the Pages daemon. Set to `false` if the Pages daemon should directly receive all requests, for example, when using [custom domains](index.md#custom-domains).
+| `FF_ENABLE_REDIRECTS` | Feature flag to enable redirects. See the [redirects documentation](../../user/project/pages/redirects.md#enable-or-disable-redirects) for more info. |
 
 ---
 
@@ -424,6 +425,10 @@ Authority (CA) in the system certificate store.
 
 For Omnibus, this is fixed by [installing a custom CA in Omnibus GitLab](https://docs.gitlab.com/omnibus/settings/ssl.html#install-custom-public-certificates).
 
+## Enable redirects
+
+In GitLab Pages, you can [enable the redirects feature](../../user/project/pages/redirects.md#enable-or-disable-redirects) to configure rules to forward one URL to another using HTTP redirects.
+
 ## Activate verbose logging for daemon
 
 Verbose logging was [introduced](https://gitlab.com/gitlab-org/omnibus-gitlab/-/merge_requests/2533) in
@@ -588,8 +593,9 @@ database encryption. Proceed with caution.
 1. On the **GitLab server**, make the following changes to `/etc/gitlab/gitlab.rb`:
 
    ```ruby
-   gitlab_pages['enable'] = false
    pages_external_url "http://<pages_server_URL>"
+   gitlab_pages['enable'] = false
+   gitlab_rails['pages_enabled']=false
    gitlab_rails['pages_path'] = "/mnt/pages"
    ```
 

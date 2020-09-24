@@ -6,7 +6,7 @@ RSpec.describe GitlabSchema.types['DastScannerProfile'] do
   let_it_be(:dast_scanner_profile) { create(:dast_scanner_profile) }
   let_it_be(:project) { dast_scanner_profile.project }
   let_it_be(:user) { create(:user) }
-  let_it_be(:fields) { %i[id globalId profileName spiderTimeout targetTimeout] }
+  let_it_be(:fields) { %i[id globalId profileName spiderTimeout targetTimeout editPath] }
 
   let(:response) do
     GitlabSchema.execute(

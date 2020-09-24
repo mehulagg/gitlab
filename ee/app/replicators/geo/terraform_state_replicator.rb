@@ -8,6 +8,18 @@ module Geo
       model_record.file
     end
 
+    def handle_after_create_commit
+      return if model_record.versioning_enabled?
+
+      super
+    end
+
+    def handle_after_destroy
+      return if model_record.versioning_enabled?
+
+      super
+    end
+
     def self.model
       ::Terraform::State
     end

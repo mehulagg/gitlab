@@ -22,20 +22,14 @@ RSpec.describe FeatureFlagsHelper do
   describe '#feature_flag_issues_links_endpoint' do
     subject { helper.feature_flag_issues_links_endpoint(project, feature_flag, user) }
 
-    it 'returns an empty string when the feature flag is disabled' do
-      stub_feature_flags(feature_flags_issue_links: false)
-
-      is_expected.to be_empty
-    end
-
     it 'returns an empty string when the user is not allowed' do
-      allow(helper).to receive(:can?).with(user, :read_issue_link, project).and_return(false)
+      allow(helper).to receive(:can?).with(user, :admin_feature_flags_issue_links, project).and_return(false)
 
       is_expected.to be_empty
     end
 
     it 'returns the issue endpoint when the user is allowed' do
-      allow(helper).to receive(:can?).with(user, :read_issue_link, project).and_return(true)
+      allow(helper).to receive(:can?).with(user, :admin_feature_flags_issue_links, project).and_return(true)
 
       is_expected.to eq("/#{project.full_path}/-/feature_flags/#{feature_flag.iid}/issues")
     end

@@ -59,6 +59,10 @@ module QA
         self.username, self.password = default_credentials
       end
 
+      def use_default_identity
+        configure_identity('GitLab QA', 'root@gitlab.com')
+      end
+
       def clone(opts = '')
         clone_result = run("git clone #{opts} #{uri} ./", max_attempts: 3)
         return clone_result.response unless clone_result.success?
@@ -118,8 +122,16 @@ module QA
         run(%Q{git config user.signingkey #{@gpg_key_id} && git config gpg.program $(command -v gpg) && git commit -S -m "#{message}"}).to_s
       end
 
-      def push_changes(branch = 'master')
-        run("git push #{uri} #{branch}", max_attempts: 3).to_s
+      def current_branch
+        run("git rev-parse --abbrev-ref HEAD").to_s
+      end
+
+      def push_changes(branch = 'master', push_options: nil)
+        cmd = ['git push']
+        cmd << push_options_hash_to_string(push_options)
+        cmd << uri
+        cmd << branch
+        run(cmd.compact.join(' '), max_attempts: 3).to_s
       end
 
       def push_all_branches
@@ -287,6 +299,23 @@ module QA
 
       def tmp_home_dir
         @tmp_home_dir ||= File.join(Dir.tmpdir, "qa-netrc-credentials", $$.to_s)
+      end
+
+      def push_options_hash_to_string(opts)
+        return if opts.nil?
+
+        prefix = "-o merge_request"
+        opts.each_with_object([]) do |(key, value), options|
+          if value.is_a?(Array)
+            value.each do |item|
+              options << "#{prefix}.#{key}=\"#{item}\""
+            end
+          elsif value == true
+            options << "#{prefix}.#{key}"
+          else
+            options << "#{prefix}.#{key}=\"#{value}\""
+          end
+        end.join(' ')
       end
 
       def netrc_file_path

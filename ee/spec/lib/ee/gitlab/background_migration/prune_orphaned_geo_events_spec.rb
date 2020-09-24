@@ -6,8 +6,8 @@ RSpec.describe Gitlab::BackgroundMigration::PruneOrphanedGeoEvents, geo: false, 
   let(:event_table_name) { 'geo_repository_updated_events' }
   let(:geo_event_log) { table(:geo_event_log) }
   let(:geo_updated_events) { table(event_table_name) }
-  let(:namespace) { table(:namespaces).create(name: 'foo', path: 'foo') }
-  let(:project) { table(:projects).create(name: 'bar', path: 'path/to/bar', namespace_id: namespace.id) }
+  let(:namespace) { table(:namespaces).create!(name: 'foo', path: 'foo') }
+  let(:project) { table(:projects).create!(name: 'bar', path: 'path/to/bar', namespace_id: namespace.id) }
 
   subject(:background_migration) { described_class.new }
 

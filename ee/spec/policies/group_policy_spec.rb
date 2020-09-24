@@ -194,6 +194,26 @@ RSpec.describe GroupPolicy do
     it { is_expected.not_to be_allowed(:read_group_activity_analytics) }
   end
 
+  context 'when group repository analytics is available' do
+    let(:current_user) { guest }
+
+    before do
+      stub_licensed_features(group_repository_analytics: true)
+    end
+
+    it { is_expected.to be_allowed(:read_group_repository_analytics) }
+  end
+
+  context 'when group repository analytics is not available' do
+    let(:current_user) { guest }
+
+    before do
+      stub_licensed_features(group_repository_analytics: false)
+    end
+
+    it { is_expected.not_to be_allowed(:read_group_repository_analytics) }
+  end
+
   context 'when timelogs report feature is enabled' do
     before do
       stub_licensed_features(group_timelogs: true)
@@ -1045,20 +1065,37 @@ RSpec.describe GroupPolicy do
   end
 
   it_behaves_like 'model with wiki policies' do
-    let_it_be(:container) { create(:group) }
+    include WikiHelpers
+
+    let_it_be(:container) { create(:group_with_plan, plan: :bronze_plan) }
     let_it_be(:user) { owner }
 
+    # We don't have feature toggles on groups yet, so we currently simulate
+    # this by toggling the feature flag instead.
     def set_access_level(access_level)
-      allow(container).to receive(:wiki_access_level).and_return(access_level)
+      case access_level
+      when ProjectFeature::ENABLED
+        stub_feature_flags(group_wikis: true)
+      when ProjectFeature::DISABLED
+        stub_feature_flags(group_wikis: false)
+      when ProjectFeature::PRIVATE
+        skip('Access level private is not supported yet for group wikis, see https://gitlab.com/gitlab-org/gitlab/-/issues/208412')
+      end
     end
 
-    before do
-      stub_feature_flags(group_wiki: true)
-    end
-
-    context 'when the feature flag is disabled' do
+    context 'when the feature flag is disabled on this group' do
       before do
-        stub_feature_flags(group_wiki: false)
+        stub_feature_flags(group_wikis: create(:group))
+      end
+
+      it 'does not include the wiki permissions' do
+        expect_disallowed(*wiki_permissions[:all])
+      end
+    end
+
+    context 'when the feature is not licensed on this group' do
+      before do
+        allow(container).to receive(:feature_available?).with(:group_wikis).and_return(false)
       end
 
       it 'does not include the wiki permissions' do

@@ -4,7 +4,7 @@ module IssuesHelper
   def issue_css_classes(issue)
     classes = ["issue"]
     classes << "closed" if issue.closed?
-    classes << "today" if issue.today?
+    classes << "today" if issue.new?
     classes << "user-can-drag" if @sort == 'relative_position'
     classes.join(' ')
   end
@@ -136,6 +136,21 @@ module IssuesHelper
     return false unless issue.from_service_desk?
 
     issue.moved_from.project.service_desk_enabled? && !issue.project.service_desk_enabled?
+  end
+
+  def use_startup_call?
+    request.query_parameters.empty? && @sort == 'created_date'
+  end
+
+  def startup_call_params
+    {
+      state: 'opened',
+      with_labels_details: 'true',
+      page: 1,
+      per_page: 20,
+      order_by: 'created_at',
+      sort: 'desc'
+    }
   end
 end
 

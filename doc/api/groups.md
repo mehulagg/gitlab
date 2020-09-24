@@ -696,7 +696,7 @@ This is similar to creating a [New group](#new-group). You'll need the `parent_i
 
 ```shell
 curl --request POST --header "PRIVATE-TOKEN: <your_access_token>" --header "Content-Type: application/json" \
-  --data '{"path": "<subgroup_path>", "name": "<subgroup_name>", "parent_id": <parent_group_id> } \
+  --data '{"path": "<subgroup_path>", "name": "<subgroup_name>", "parent_id": <parent_group_id> }' \
   "https://gitlab.example.com/api/v4/groups/"
 ```
 
@@ -847,7 +847,7 @@ Only available to group owners and administrators.
 This endpoint either:
 
 - Removes group, and queues a background job to delete all projects in the group as well.
-- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium or Silver](https://about.gitlab.com/pricing/) or higher tiers, marks a group for deletion. The deletion will happen 7 days later by default, but this can be changed in the [instance settings](../user/admin_area/settings/visibility_and_access_controls.md#default-deletion-delay-premium-only).
+- Since [GitLab 12.8](https://gitlab.com/gitlab-org/gitlab/-/issues/33257), on [Premium or Silver](https://about.gitlab.com/pricing/) or higher tiers, marks a group for deletion. The deletion will happen 7 days later by default, but this can be changed in the [instance settings](../user/admin_area/settings/visibility_and_access_controls.md#default-deletion-delay).
 
 ```plaintext
 DELETE /groups/:id
@@ -1016,7 +1016,7 @@ DELETE /groups/:id/hooks/:hook_id
 
 ## Group Audit Events **(STARTER)**
 
-Group audit events can be accessed via the [Group Audit Events API](audit_events.md#group-audit-events-starter)
+Group audit events can be accessed via the [Group Audit Events API](audit_events.md#group-audit-events)
 
 ## Sync group with LDAP **(STARTER)**
 
@@ -1170,9 +1170,13 @@ DELETE /groups/:id/share/:group_id
 
 ## Push Rules **(STARTER)**
 
+> Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 13.4.
+
 ### Get group push rules **(STARTER)**
 
-Get the [push rules](../user/group/index.md#group-push-rules-starter) of a group.
+Get the [push rules](../user/group/index.md#group-push-rules) of a group.
+
+Only available to group owners and administrators.
 
 ```plaintext
 GET /groups/:id/push_rule
@@ -1213,7 +1217,9 @@ the `commit_committer_check` and `reject_unsigned_commits` parameters:
 
 ### Add group push rule **(STARTER)**
 
-Adds [push rules](../user/group/index.md#group-push-rules-starter) to the specified group.
+Adds [push rules](../user/group/index.md#group-push-rules) to the specified group.
+
+Only available to group owners and administrators.
 
 ```plaintext
 POST /groups/:id/push_rule
@@ -1260,6 +1266,8 @@ Response:
 
 Edit push rules for a specified group.
 
+Only available to group owners and administrators.
+
 ```plaintext
 PUT /groups/:id/push_rule
 ```
@@ -1300,3 +1308,17 @@ Response:
     "max_file_size": 100
 }
 ```
+
+### Delete group push rule **(STARTER)**
+
+Deletes the [push rules](../user/group/index.md#group-push-rules) of a group.
+
+Only available to group owners and administrators.
+
+```plaintext
+DELETE /groups/:id/push_rule
+```
+
+| Attribute | Type | Required | Description |
+| --------- | ---- | -------- | ----------- |
+| `id` | integer/string | yes | The ID or [URL-encoded path of the group](README.md#namespaced-path-encoding) |

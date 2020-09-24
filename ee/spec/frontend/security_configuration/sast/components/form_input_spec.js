@@ -77,7 +77,7 @@ describe('FormInput component', () => {
   });
 
   describe('custom value message', () => {
-    describe('given the value equals the custom value', () => {
+    describe('given the value equals the default value', () => {
       beforeEach(() => {
         createComponent({
           props: testProps,
@@ -89,7 +89,7 @@ describe('FormInput component', () => {
       });
     });
 
-    describe('given the value differs from the custom value', () => {
+    describe('given the value differs from the default value', () => {
       beforeEach(() => {
         createComponent({
           props: {
@@ -110,6 +110,17 @@ describe('FormInput component', () => {
 
         it('emits an input event with the default value', () => {
           expect(wrapper.emitted('input')).toEqual([[testProps.defaultValue]]);
+        });
+      });
+
+      describe('disabling the input', () => {
+        beforeEach(() => {
+          wrapper.setProps({ disabled: true });
+          return wrapper.vm.$nextTick();
+        });
+
+        it('does not display the custom value message', () => {
+          expect(findRestoreDefaultLink().exists()).toBe(false);
         });
       });
     });

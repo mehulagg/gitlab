@@ -3,8 +3,7 @@
 module API
   class GroupPushRule < Grape::API::Instance
     before { authenticate! }
-    before { authorize_admin_group }
-    before { check_feature_availability! }
+    before { check_group_push_rule_access! }
     before { authorize_change_param(user_group, :commit_committer_check, :reject_unsigned_commits) }
 
     params do
@@ -13,8 +12,8 @@ module API
 
     resource :groups do
       helpers do
-        def check_feature_availability!
-          not_found! unless user_group.feature_available?(:push_rules)
+        def check_group_push_rule_access!
+          not_found! unless can?(current_user, :change_push_rules, user_group)
         end
 
         params :push_rule_params do
@@ -81,6 +80,16 @@ module API
         else
           render_validation_error!(push_rule)
         end
+      end
+
+      desc 'Deletes group push rule' do
+        detail 'This feature was introduced in GitLab 13.4.'
+      end
+      delete ":id/push_rule" do
+        push_rule = user_group.push_rule
+        not_found! unless push_rule
+
+        destroy_conditionally!(push_rule)
       end
     end
   end

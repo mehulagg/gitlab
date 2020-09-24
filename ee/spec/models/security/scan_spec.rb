@@ -14,5 +14,9 @@ RSpec.describe Security::Scan do
     it { is_expected.to validate_presence_of(:scan_type) }
   end
 
+  describe '#project' do
+    it { is_expected.to delegate_method(:project).to(:build) }
+  end
+
   it_behaves_like 'having unique enum values'
 end

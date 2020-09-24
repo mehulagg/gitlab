@@ -1,5 +1,0 @@
----
-title: Add global_id field to DastScannerProfiles::Create
-merge_request: 40225
-author:
-type: added

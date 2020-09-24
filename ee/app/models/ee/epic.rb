@@ -12,6 +12,7 @@ module EE
       include Referable
       include Awardable
       include LabelEventable
+      include StateEventable
       include UsageStatistics
       include FromUnion
       include EpicTreeSorting
@@ -122,6 +123,10 @@ module EE
       before_save :set_fixed_start_date, if: :start_date_is_fixed?
       before_save :set_fixed_due_date, if: :due_date_is_fixed?
 
+      def root_epic_tree_node?
+        parent_id.nil?
+      end
+
       private
 
       def set_fixed_start_date
@@ -169,7 +174,7 @@ module EE
             \/-\/epics
             \/(?<epic>\d+)
             (?<path>
-              (\/[a-z0-9_=-]+)*
+              (\/[a-z0-9_=-]+)*\/*
             )?
             (?<query>
               \?[a-z0-9_=-]+

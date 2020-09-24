@@ -29,7 +29,7 @@ const CONTAINER_SCANNING_DIFF_ENDPOINT = 'container_scanning.json';
 const DEPENDENCY_SCANNING_DIFF_ENDPOINT = 'dependency_scanning.json';
 const DAST_DIFF_ENDPOINT = 'dast.json';
 const SAST_DIFF_ENDPOINT = 'sast.json';
-const SECRET_SCANNING_DIFF_ENDPOINT = 'secret_scanning.json';
+const SECRET_SCANNING_DIFF_ENDPOINT = 'secret_detection.json';
 const COVERAGE_FUZZING_DIFF_ENDPOINT = 'coverage_fuzzing.json';
 
 describe('Grouped security reports app', () => {
@@ -103,7 +103,7 @@ describe('Grouped security reports app', () => {
         dast: true,
         containerScanning: true,
         dependencyScanning: true,
-        secretScanning: true,
+        secretDetection: true,
         coverageFuzzing: true,
       },
     };
@@ -515,7 +515,7 @@ describe('Grouped security reports app', () => {
       createWrapper({
         ...props,
         enabledReports: {
-          secretScanning: isEnabled,
+          secretDetection: isEnabled,
         },
       });
 

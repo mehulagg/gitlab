@@ -8,7 +8,7 @@ class Admin::ElasticsearchController < Admin::ApplicationController
       ::Elastic::IndexProjectsService.new.execute
 
       notice = _('Elasticsearch indexing started')
-      queue_link = helpers.link_to(_('(check progress)'), sidekiq_path + '/queues/elastic_full_index')
+      queue_link = helpers.link_to(_('(check progress)'), sidekiq_path + '/queues/elastic_commit_indexer')
       flash[:notice] = "#{notice} #{queue_link}".html_safe
     else
       flash[:warning] = _('Please create an index before enabling indexing')

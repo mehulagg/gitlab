@@ -6,7 +6,7 @@ RSpec.describe 'Creating a DAST Site Profile' do
   include GraphqlHelpers
 
   let(:profile_name) { FFaker::Company.catch_phrase }
-  let(:target_url) { FFaker::Internet.uri(:https) }
+  let(:target_url) { generate(:url) }
   let(:dast_site_profile) { DastSiteProfile.find_by(project: project, name: profile_name) }
 
   let(:mutation_name) { :dast_site_profile_create }

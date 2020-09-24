@@ -1,9 +1,8 @@
 ---
 stage: Create
 group: Source Code
-info: "To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers"
+info: To determine the technical writer assigned to the Stage/Group associated with this page, see https://about.gitlab.com/handbook/engineering/ux/technical-writing/#designated-technical-writers
 type: reference, howto
-last_updated: 2020-08-10
 ---
 
 # File Locking **(CORE)**
@@ -28,7 +27,7 @@ GitLab supports two different modes of file locking:
 - [Exclusive file locks](#exclusive-file-locks) for binary files: done **through
   the command line** with Git LFS and `.gitattributes`, it prevents locked
   files from being modified on any branch. **(CORE)**
-- [Default branch locks](#default-branch-file-and-directory-locks-premium): done
+- [Default branch locks](#default-branch-file-and-directory-locks): done
   **through the GitLab UI**, it prevents locked files and directories being
   modified on the default branch. **(PREMIUM)**
 
@@ -99,7 +98,8 @@ created or updated with the following content:
 *.png filter=lfs diff=lfs merge=lfs -text lockable
 ```
 
-You can also register a file type as lockable without using LFS (to be able, for example, to lock/unlock a file you need a in a remote server that
+You can also register a file type as lockable without using LFS (to be able, for example,
+to lock/unlock a file you need in a remote server that
 implements the LFS File Locking API). To do that you can edit the
 `.gitattributes` file manually:
 
@@ -107,45 +107,50 @@ implements the LFS File Locking API). To do that you can edit the
 *.pdf lockable
 ```
 
+The `.gitattributes` file is key to the process and **must**
+be pushed to the remote repository for the changes to take effect.
+
 After a file type has been registered as lockable, Git LFS will make
 them read-only on the file system automatically. This means you will
-need to **lock the file before editing it**.
+need to **lock the file** before [editing it](#edit-lockable-files).
 
 ### Lock files
 
-To lock a file with Exclusive File Locking, open a terminal window in your
-repo and:
+By locking a file, you verify that no one else is editing it, and
+prevent anyone else from editing the file until you’re done. On the other
+hand, when you unlock a file, you communicate that you've finished editing
+and allow other people to edit it.
 
-1. To edit a file, request the lock. This verifies that no one else is editing
-   the file, and prevents anyone else from editing the file until you're done.
+To lock or unlock a file with Exclusive File Locking, open a terminal window
+in your repository directory and run the commands as described below.
 
-   ```shell
-   git lfs lock path/to/file.png
-   ```
+To **lock** a file:
 
-1. When you're done, return the lock. This communicates that you finished
-   editing the file, and allows other people to edit the file.
+```shell
+git lfs lock path/to/file.png
+```
 
-   ```shell
-   git lfs unlock path/to/file.png
-   ```
+To **unlock** a file:
 
-   You can also unlock by file ID:
+```shell
+git lfs unlock path/to/file.png
+```
 
-   ```shell
-   git lfs unlock --id=123
-   ```
+You can also unlock by file ID (given by LFS when you [view locked files](#view-exclusively-locked-files)):
 
-   If for some reason you need to unlock a file that was not locked by
-   yourself, you can use the `--force` flag as long as you have **Maintainer**
-   permissions to the project:
+```shell
+git lfs unlock --id=123
+```
 
-   ```shell
-   git lfs unlock --id=123 --force
-   ```
+If for some reason you need to unlock a file that was not locked by
+yourself, you can use the `--force` flag as long as you have **Maintainer**
+permissions to the project:
+
+```shell
+git lfs unlock --id=123 --force
+```
 
 You can normally push files to GitLab whether they're locked or unlocked.
-Remind that the `.gitattributes` file must also be pushed to the remote repo.
 
 NOTE: **Note:**
 Although multi-branch file locks can be created and managed through the Git LFS
@@ -160,6 +165,9 @@ repo and run:
 git lfs locks
 ```
 
+The output lists the locked files followed by the user who locked each of them
+and the files' IDs.
+
 On the repository file tree, GitLab will display an LFS badge for files
 tracked by Git LFS plus a padlock icon on exclusively-locked files:
 
@@ -171,9 +179,19 @@ NOTE: **Note:**
 When you rename an exclusively-locked file, the lock is lost. You'll have to
 lock it again to keep it locked.
 
-<!-- TODO: workflow suggestion - don't unlock until the change is in the default
-branch. Maybe this can be a follow up on practical workflows.
- -->
+### Edit lockable files
+
+Once the file is [configured as lockable](#configure-exclusive-file-locks), it is set to read-only.
+Therefore, you need to lock it before editing it.
+
+Suggested workflow for shared projects:
+
+1. Lock the file.
+1. Edit the file.
+1. Commit your changes.
+1. Push to the repo.
+1. Get your changes reviewed, approved, and merged.
+1. Unlock the file.
 
 ## Default branch file and directory locks **(PREMIUM)**
 

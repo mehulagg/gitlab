@@ -102,7 +102,7 @@ module EE
       'rules_path': expose_path(api_v4_projects_approval_settings_rules_path(id: project.id)),
       'allow_multi_rule': project.multiple_approval_rules_available?.to_s,
       'eligible_approvers_docs_path': help_page_path('user/project/merge_requests/merge_request_approvals', anchor: 'eligible-approvers'),
-      'security_approvals_help_page_path': help_page_path('user/application_security/index.md', anchor: 'security-approvals-in-merge-requests-ultimate'),
+      'security_approvals_help_page_path': help_page_path('user/application_security/index.md', anchor: 'security-approvals-in-merge-requests'),
       'security_configuration_path': project_security_configuration_path(project),
       'vulnerability_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-security-approvals-within-a-project'),
       'license_check_help_page_path': help_page_path('user/application_security/index', anchor: 'enabling-license-approvals-within-a-project') } }
@@ -165,10 +165,12 @@ module EE
         projects/dast_site_profiles#new
         projects/dast_site_profiles#edit
         projects/dast_scanner_profiles#new
+        projects/dast_scanner_profiles#edit
         projects/dependencies#index
         projects/licenses#index
         projects/threat_monitoring#show
         projects/threat_monitoring#new
+        projects/threat_monitoring#edit
       ]
     end
 
@@ -185,6 +187,7 @@ module EE
         projects/dast_site_profiles#new
         projects/dast_site_profiles#edit
         projects/dast_scanner_profiles#new
+        projects/dast_scanner_profiles#edit
       ]
     end
 
@@ -229,7 +232,7 @@ module EE
           not_enabled_scanners_help_path: help_page_path('user/application_security/index', anchor: 'quick-start'),
           no_pipeline_run_scanners_help_path: new_project_pipeline_path(project),
           security_dashboard_help_path: help_page_path('user/application_security/security_dashboard/index')
-        }
+        }.merge!(security_dashboard_pipeline_data(project))
       end
     end
 
@@ -261,11 +264,8 @@ module EE
     end
 
     def show_discover_project_security?(project)
-      security_feature_available_at = DateTime.new(2019, 11, 1)
-
       !!current_user &&
         ::Gitlab.com? &&
-        current_user.created_at > security_feature_available_at &&
         !project.feature_available?(:security_dashboard) &&
         can?(current_user, :admin_namespace, project.root_ancestor) &&
         current_user.ab_feature_enabled?(:discover_security)
@@ -326,6 +326,19 @@ module EE
         strongClose: '</strong>'.html_safe,
         codeOpen: '<code>'.html_safe,
         codeClose: '</code>'.html_safe
+      }
+    end
+
+    def security_dashboard_pipeline_data(project)
+      pipeline = project.latest_pipeline_with_security_reports
+      return {} unless pipeline
+
+      {
+        pipeline: {
+          id: pipeline.id,
+          path: pipeline_path(pipeline),
+          created_at: pipeline.created_at.to_s(:iso8601)
+        }
       }
     end
   end

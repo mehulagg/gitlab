@@ -10,8 +10,10 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   include IssuableCollections
   include RecordUserLastActivity
   include SourcegraphDecorator
+  include DiffHelper
 
   skip_before_action :merge_request, only: [:index, :bulk_update]
+  before_action :apply_diff_view_cookie!, only: [:show]
   before_action :whitelist_query_limiting, only: [:assign_related_issues, :update]
   before_action :authorize_update_issuable!, only: [:close, :edit, :update, :remove_wip, :sort]
   before_action :authorize_read_actual_head_pipeline!, only: [
@@ -39,6 +41,7 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     push_frontend_feature_flag(:merge_request_widget_graphql, @project)
     push_frontend_feature_flag(:unified_diff_lines, @project)
     push_frontend_feature_flag(:highlight_current_diff_row, @project)
+    push_frontend_feature_flag(:default_merge_ref_for_diffs, @project)
   end
 
   before_action do
@@ -46,6 +49,8 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   end
 
   around_action :allow_gitaly_ref_name_caching, only: [:index, :show, :discussions]
+
+  after_action :log_merge_request_show, only: [:show]
 
   feature_category :source_code_management,
                    unless: -> (action) { action.ends_with?("_reports") }
@@ -426,7 +431,13 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     Gitlab::QueryLimiting.whitelist('https://gitlab.com/gitlab-org/gitlab-foss/issues/42438')
   end
 
-  def reports_response(report_comparison)
+  def reports_response(report_comparison, pipeline = nil)
+    if pipeline&.active?
+      ::Gitlab::PollingInterval.set_header(response, interval: 3000)
+
+      render json: '', status: :no_content && return
+    end
+
     case report_comparison[:status]
     when :parsing
       ::Gitlab::PollingInterval.set_header(response, interval: 3000)
@@ -441,6 +452,12 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
     end
   end
 
+  def log_merge_request_show
+    return unless current_user && @merge_request
+
+    ::Gitlab::Search::RecentMergeRequests.new(user: current_user).log_view(@merge_request)
+  end
+
   def authorize_read_actual_head_pipeline!
     return render_404 unless can?(current_user, :read_build, merge_request.actual_head_pipeline)
   end
@@ -448,6 +465,10 @@ class Projects::MergeRequestsController < Projects::MergeRequests::ApplicationCo
   def endpoint_metadata_url(project, merge_request)
     params = request.query_parameters
     params[:view] = cookies[:diff_view] if params[:view].blank? && cookies[:diff_view].present?
+
+    if Feature.enabled?(:default_merge_ref_for_diffs, project)
+      params = params.merge(diff_head: true)
+    end
 
     diffs_metadata_project_json_merge_request_path(project, merge_request, 'json', params)
   end

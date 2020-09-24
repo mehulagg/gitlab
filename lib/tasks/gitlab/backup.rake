@@ -107,7 +107,7 @@ namespace :gitlab do
           puts "GITLAB_BACKUP_MAX_CONCURRENCY and GITLAB_BACKUP_MAX_STORAGE_CONCURRENCY must have a value of at least 1".color(:red)
           exit 1
         else
-          Backup::Repository.new(progress).dump(
+          Backup::Repositories.new(progress).dump(
             max_concurrency: max_concurrency,
             max_storage_concurrency: max_storage_concurrency
           )
@@ -117,7 +117,7 @@ namespace :gitlab do
 
       task restore: :gitlab_environment do
         puts_time "Restoring repositories ...".color(:blue)
-        Backup::Repository.new(progress).restore
+        Backup::Repositories.new(progress).restore
         puts_time "done".color(:green)
       end
     end
@@ -136,7 +136,21 @@ namespace :gitlab do
 
       task restore: :gitlab_environment do
         puts_time "Restoring database ... ".color(:blue)
-        Backup::Database.new(progress).restore
+        errors = Backup::Database.new(progress).restore
+
+        if errors.present?
+          warning = <<~MSG
+            There were errors in restoring the schema. This may cause
+            issues if this results in missing indexes, constraints, or
+            columns. Please record the errors above and contact GitLab
+            Support if you have questions:
+            https://about.gitlab.com/support/
+          MSG
+
+          warn warning.color(:red)
+          ask_to_continue
+        end
+
         puts_time "done".color(:green)
       end
     end

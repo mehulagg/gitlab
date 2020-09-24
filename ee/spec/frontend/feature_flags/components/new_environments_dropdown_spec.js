@@ -1,8 +1,9 @@
 import { shallowMount } from '@vue/test-utils';
 import MockAdapter from 'axios-mock-adapter';
-import { GlLoadingIcon, GlSearchBoxByType, GlNewDropdownItem } from '@gitlab/ui';
+import { GlLoadingIcon, GlSearchBoxByType, GlDropdownItem } from '@gitlab/ui';
 import NewEnvironmentsDropdown from 'ee/feature_flags/components/new_environments_dropdown.vue';
 import axios from '~/lib/utils/axios_utils';
+import httpStatusCodes from '~/lib/utils/http_status';
 
 const TEST_HOST = '/test';
 const TEST_SEARCH = 'production';
@@ -29,14 +30,15 @@ describe('New Environments Dropdown', () => {
       axiosMock.onGet(TEST_HOST).reply(() => {
         expect(wrapper.find(GlLoadingIcon).exists()).toBe(true);
       });
-      wrapper.find(GlSearchBoxByType).vm.$emit('input', TEST_SEARCH);
+      wrapper.find(GlSearchBoxByType).vm.$emit('focus');
       return axios.waitForAll();
     });
+
     it('should not show any dropdown items', () => {
       axiosMock.onGet(TEST_HOST).reply(() => {
-        expect(wrapper.findAll(GlNewDropdownItem)).toHaveLength(0);
+        expect(wrapper.findAll(GlDropdownItem)).toHaveLength(0);
       });
-      wrapper.find(GlSearchBoxByType).vm.$emit('input', TEST_SEARCH);
+      wrapper.find(GlSearchBoxByType).vm.$emit('focus');
       return axios.waitForAll();
     });
   });
@@ -45,12 +47,13 @@ describe('New Environments Dropdown', () => {
     let item;
     beforeEach(() => {
       axiosMock.onGet(TEST_HOST).reply(200, []);
+      wrapper.find(GlSearchBoxByType).vm.$emit('focus');
       wrapper.find(GlSearchBoxByType).vm.$emit('input', TEST_SEARCH);
       return axios
         .waitForAll()
         .then(() => wrapper.vm.$nextTick())
         .then(() => {
-          item = wrapper.find(GlNewDropdownItem);
+          item = wrapper.find(GlDropdownItem);
         });
     });
 
@@ -71,23 +74,28 @@ describe('New Environments Dropdown', () => {
   describe('with results', () => {
     let items;
     beforeEach(() => {
-      axiosMock.onGet(TEST_HOST).reply(200, ['prod', 'production']);
+      axiosMock.onGet(TEST_HOST).reply(httpStatusCodes.OK, ['prod', 'production']);
+      wrapper.find(GlSearchBoxByType).vm.$emit('focus');
       wrapper.find(GlSearchBoxByType).vm.$emit('input', 'prod');
       return axios.waitForAll().then(() => {
-        items = wrapper.findAll(GlNewDropdownItem);
+        items = wrapper.findAll(GlDropdownItem);
       });
     });
+
     it('should display one item per result', () => {
       expect(items).toHaveLength(2);
     });
+
     it('should emit an add if an item is clicked', () => {
       items.at(0).vm.$emit('click');
       expect(wrapper.emitted('add')).toEqual([['prod']]);
     });
+
     it('should not display a create label', () => {
       items = items.filter(i => i.text().startsWith('Create'));
       expect(items).toHaveLength(0);
     });
+
     it('should not display a message about no results', () => {
       expect(wrapper.find({ ref: 'noResults' }).exists()).toBe(false);
     });

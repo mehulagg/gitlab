@@ -319,9 +319,9 @@ Plan.default.actual_limits.update!(ci_instance_level_variables: 30)
 > [Introduced](https://gitlab.com/gitlab-org/gitlab/-/merge_requests/37226) in GitLab 13.3.
 
 Job artifacts defined with [`artifacts:reports`](../ci/pipelines/job_artifacts.md#artifactsreports)
-that are uploaded by the Runner are rejected if the file size exceeds the maximum
+that are uploaded by the runner are rejected if the file size exceeds the maximum
 file size limit. The limit is determined by comparing the project's
-[maximum artifact size setting](../user/admin_area/settings/continuous_integration.md#maximum-artifacts-size-core-only)
+[maximum artifact size setting](../user/admin_area/settings/continuous_integration.md#maximum-artifacts-size)
 with the instance limit for the given artifact type, and choosing the smaller value.
 
 Limits are set in megabytes, so the smallest possible value that can be defined is `1 MB`.
@@ -424,6 +424,12 @@ panel_groups:
       label: Legend Label
 ```
 
+## Environment Dashboard limits **(PREMIUM)**
+
+> [Introduced](https://gitlab.com/gitlab-org/gitlab/-/issues/33895) in GitLab 13.4.
+
+See [Environment Dashboard](../ci/environments/environments_dashboard.md#adding-a-project-to-the-dashboard) for the maximum number of displayed projects.
+
 ## Environment data on Deploy Boards
 
 [Deploy Boards](../user/project/deploy_boards.md) load information from Kubernetes about
@@ -434,7 +440,7 @@ Kubernetes won't be shown.
 
 Reports that go over the 20 MB limit won't be loaded. Affected reports:
 
-- [Merge Request security reports](../user/project/merge_requests/testing_and_reports_in_merge_requests.md#security-reports-ultimate)
+- [Merge Request security reports](../user/project/merge_requests/testing_and_reports_in_merge_requests.md#security-reports)
 - [CI/CD parameter `artifacts:expose_as`](../ci/yaml/README.md#artifactsexpose_as)
 - [Unit test reports](../ci/unit_test_reports.md)
 

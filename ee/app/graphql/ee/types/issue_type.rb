@@ -15,7 +15,7 @@ module EE
 
         field :weight, GraphQL::INT_TYPE, null: true,
               description: 'Weight of the issue',
-              resolve: -> (obj, _args, _ctx) { obj.supports_weight? ? obj.weight : nil }
+              resolve: -> (obj, _args, _ctx) { obj.weight_available? ? obj.weight : nil }
 
         field :blocked, GraphQL::BOOLEAN_TYPE, null: false,
               description: 'Indicates the issue is blocked',

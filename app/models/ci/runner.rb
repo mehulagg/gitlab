@@ -10,7 +10,7 @@ module Ci
     include TokenAuthenticatable
     include IgnorableColumns
 
-    add_authentication_token_field :token, encrypted: -> { Feature.enabled?(:ci_runners_tokens_optional_encryption) ? :optional : :required }
+    add_authentication_token_field :token, encrypted: -> { Feature.enabled?(:ci_runners_tokens_optional_encryption, default_enabled: true) ? :optional : :required }
 
     enum access_level: {
       not_protected: 0,
@@ -52,7 +52,7 @@ module Ci
     has_many :runner_namespaces, inverse_of: :runner
     has_many :groups, through: :runner_namespaces
 
-    has_one :last_build, ->() { order('id DESC') }, class_name: 'Ci::Build'
+    has_one :last_build, -> { order('id DESC') }, class_name: 'Ci::Build'
 
     before_save :ensure_token
 

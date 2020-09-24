@@ -4,7 +4,7 @@ module Types
   module Geo
     class RegistryStateEnum < BaseEnum
       graphql_name 'RegistryState'
-      description 'State of a Geo registry.'
+      description 'State of a Geo registry'
 
       value 'PENDING', value: :pending, description: 'Registry waiting to be synced'
       value 'STARTED', value: :started, description: 'Registry currently syncing'

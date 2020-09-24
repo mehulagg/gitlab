@@ -55,7 +55,6 @@ describe('IssuesLaneList', () => {
         list,
         issues: mockIssues,
         disabled: false,
-        rootPath: '/',
       },
     });
   };

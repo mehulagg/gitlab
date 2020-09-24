@@ -1,4 +1,4 @@
-import { GlPath, GlSkeletonLoading } from '@gitlab/ui';
+import { GlPath, GlDeprecatedSkeletonLoading as GlSkeletonLoading } from '@gitlab/ui';
 import { mount } from '@vue/test-utils';
 import Component from 'ee/analytics/cycle_analytics/components/path_navigation.vue';
 import { transformedStagePathData, issueStage } from '../mock_data';

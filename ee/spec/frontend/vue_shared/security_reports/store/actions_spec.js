@@ -1781,7 +1781,7 @@ describe('security reports actions', () => {
         mock
           .onGet('vulnerabilities_feedback', {
             params: {
-              category: 'secret_scanning',
+              category: 'secret_detection',
             },
           })
           .reply(200, secretScanningFeedbacks);

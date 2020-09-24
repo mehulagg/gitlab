@@ -6,18 +6,24 @@
           = brand_header_logo
         .sidebar-context-title
           = _('Security')
-      %ul.sidebar-top-level-items
-        = nav_link(path: %w[dashboard#show]) do
-          = link_to security_root_path, class: 'shortcuts-project rspec-project-link' do
-            .nav-icon-container
-              = sprite_icon('dashboard')
-            %span.nav-item-name
-              = _('Security Dashboard')
-        = nav_link(path: %w[dashboard#settings]) do
-          = link_to security_settings_dashboard_path, class: 'shortcuts-project rspec-project-link' do
-            .nav-icon-container
-              = sprite_icon('settings')
-            %span.nav-item-name
-              = _('Settings')
+    %ul.sidebar-top-level-items
+      = nav_link(path: %w[dashboard#show]) do
+        = link_to security_root_path, class: 'shortcuts-project rspec-project-link' do
+          .nav-icon-container
+            = sprite_icon('dashboard')
+          %span.nav-item-name
+            = _('Security Dashboard')
+      = nav_link(path: %w[vulnerabilities#index]) do
+        = link_to security_vulnerabilities_path, class: 'shortcuts-project rspec-project-link' do
+          .nav-icon-container
+            = sprite_icon('list-bulleted')
+          %span.nav-item-name
+            = _('Vulnerability Report')
+      = nav_link(path: %w[dashboard#settings]) do
+        = link_to security_settings_dashboard_path, class: 'shortcuts-project rspec-project-link' do
+          .nav-icon-container
+            = sprite_icon('settings')
+          %span.nav-item-name
+            = _('Settings')
 
     = render 'shared/sidebar_toggle_button'

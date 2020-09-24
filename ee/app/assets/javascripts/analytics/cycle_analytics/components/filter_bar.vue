@@ -10,7 +10,11 @@ import {
   DEFAULT_LABEL_NONE,
   DEFAULT_LABEL_ANY,
 } from '~/vue_shared/components/filtered_search_bar/constants';
-import { prepareTokens, processFilters } from '../../shared/utils';
+import {
+  prepareTokens,
+  processFilters,
+  filterToQueryObject,
+} from '~/vue_shared/components/filtered_search_bar/filtered_search_utils';
 
 export default {
   name: 'FilterBar',
@@ -75,6 +79,7 @@ export default {
           title: __('Assignees'),
           type: 'assignees',
           token: AuthorToken,
+          defaultAuthors: [],
           initialAuthors: this.assigneesData,
           unique: false,
           operators: [{ value: '=', description: 'is', default: 'true' }],
@@ -83,17 +88,12 @@ export default {
       ];
     },
     query() {
-      const selectedLabelList = this.selectedLabelList?.length ? this.selectedLabelList : null;
-      const selectedAssigneeList = this.selectedAssigneeList?.length
-        ? this.selectedAssigneeList
-        : null;
-
-      return {
+      return filterToQueryObject({
         milestone_title: this.selectedMilestone,
         author_username: this.selectedAuthor,
-        label_name: selectedLabelList,
-        assignee_username: selectedAssigneeList,
-      };
+        label_name: this.selectedLabelList,
+        assignee_username: this.selectedAssigneeList,
+      });
     },
   },
   methods: {
@@ -105,22 +105,21 @@ export default {
       'fetchAssignees',
     ]),
     initialFilterValue() {
-      const {
-        selectedMilestone: milestone = null,
-        selectedAuthor: author = null,
-        selectedAssigneeList: assignees = [],
-        selectedLabelList: labels = [],
-      } = this;
-      return prepareTokens({ milestone, author, assignees, labels });
+      return prepareTokens({
+        milestone: this.selectedMilestone,
+        author: this.selectedAuthor,
+        assignees: this.selectedAssigneeList,
+        labels: this.selectedLabelList,
+      });
     },
     handleFilter(filters) {
       const { labels, milestone, author, assignees } = processFilters(filters);
 
       this.setFilters({
-        selectedAuthor: author ? author[0].value : null,
-        selectedMilestone: milestone ? milestone[0].value : null,
-        selectedAssigneeList: assignees ? assignees.map(a => a.value) : [],
-        selectedLabelList: labels ? labels.map(l => l.value) : [],
+        selectedAuthor: author ? author[0] : null,
+        selectedMilestone: milestone ? milestone[0] : null,
+        selectedAssigneeList: assignees || [],
+        selectedLabelList: labels || [],
       });
     },
   },

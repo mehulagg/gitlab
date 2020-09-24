@@ -44,7 +44,10 @@ module Gitlab
       #   "+      # Test change",
       #   "-      # Old change" ]
       def changed_lines(changed_file)
-        git.diff_for_file(changed_file).patch.split("\n").select { |line| %r{^[+-]}.match?(line) }
+        diff = git.diff_for_file(changed_file)
+        return [] unless diff
+
+        diff.patch.split("\n").select { |line| %r{^[+-]}.match?(line) }
       end
 
       def all_ee_changes
@@ -192,6 +195,7 @@ module Gitlab
         # Files that don't fit into any category are marked with :none
         %r{\A(ee/)?changelogs/} => :none,
         %r{\Alocale/gitlab\.pot\z} => :none,
+        %r{\Adata/whats_new/} => :none,
 
         # Fallbacks in case the above patterns miss anything
         %r{\.rb\z} => :backend,
@@ -206,18 +210,14 @@ module Gitlab
         usernames.map { |u| Gitlab::Danger::Teammate.new('username' => u) }
       end
 
-      def missing_database_labels(current_mr_labels)
-        labels = if has_database_scoped_labels?(current_mr_labels)
-                   ['database']
-                 else
-                   ['database', 'database::review pending']
-                 end
-
-        labels - current_mr_labels
-      end
-
       def sanitize_mr_title(title)
         title.gsub(DRAFT_REGEX, '').gsub(/`/, '\\\`')
+      end
+
+      def draft_mr?
+        return false unless gitlab_helper
+
+        DRAFT_REGEX.match?(gitlab_helper.mr_json['title'])
       end
 
       def security_mr?
@@ -258,8 +258,6 @@ module Gitlab
       def changed_files(regex)
         all_changed_files.grep(regex)
       end
-
-      private
 
       def has_database_scoped_labels?(current_mr_labels)
         current_mr_labels.any? { |label| label.start_with?('database::') }

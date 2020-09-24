@@ -13,7 +13,6 @@ RSpec.describe 'User sees feature flag list', :js do
   end
 
   before do
-    stub_licensed_features(feature_flags: true)
     sign_in(user)
   end
 

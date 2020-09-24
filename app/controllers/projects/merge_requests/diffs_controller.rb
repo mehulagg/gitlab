@@ -4,7 +4,6 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
   include DiffHelper
   include RendersNotes
 
-  before_action :apply_diff_view_cookie!
   before_action :commit
   before_action :define_diff_vars
   before_action :define_diff_comment_vars, except: [:diffs_batch, :diffs_metadata]
@@ -65,7 +64,7 @@ class Projects::MergeRequests::DiffsController < Projects::MergeRequests::Applic
       render: ->(partial, locals) { view_to_html_string(partial, locals) }
     }
 
-    options = additional_attributes.merge(diff_view: diff_view)
+    options = additional_attributes.merge(diff_view: Feature.enabled?(:unified_diff_lines, @merge_request.project) ? "inline" : diff_view)
 
     if @merge_request.project.context_commits_enabled?
       options[:context_commits] = @merge_request.recent_context_commits

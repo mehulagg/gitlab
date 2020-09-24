@@ -18,7 +18,6 @@ import {
   prepareTimeMetricsData,
 } from 'ee/analytics/cycle_analytics/utils';
 import { toYmd } from 'ee/analytics/shared/utils';
-import { CAPITALIZED_STAGE_NAME, PATH_HOME_ICON } from 'ee/analytics/cycle_analytics/constants';
 import { getDatesInRange } from '~/lib/utils/datetime_utility';
 import { slugify } from '~/lib/utils/text_utility';
 import {
@@ -36,7 +35,6 @@ import {
   rawTasksByTypeData,
   allowedStages,
   stageMediansWithNumericIds,
-  totalStage,
   pathNavIssueMetric,
   timeMetricsData,
 } from './mock_data';
@@ -315,7 +313,7 @@ describe('Cycle analytics utils', () => {
   });
 
   describe('transformStagesForPathNavigation', () => {
-    const stages = [...allowedStages, totalStage];
+    const stages = allowedStages;
     const response = transformStagesForPathNavigation({
       stages,
       medians: stageMediansWithNumericIds,
@@ -338,22 +336,6 @@ describe('Cycle analytics utils', () => {
         const issue = response.filter(stage => stage.name === 'Issue')[0];
 
         expect(issue.metric).toEqual(pathNavIssueMetric);
-      });
-
-      describe(`${CAPITALIZED_STAGE_NAME.OVERVIEW} stage specific changes`, () => {
-        const overview = response.filter(stage => stage.name === CAPITALIZED_STAGE_NAME.TOTAL)[0];
-
-        it(`renames '${CAPITALIZED_STAGE_NAME.TOTAL}' stage title to '${CAPITALIZED_STAGE_NAME.OVERVIEW}'`, () => {
-          expect(overview.title).toEqual(CAPITALIZED_STAGE_NAME.OVERVIEW);
-        });
-
-        it('includes the correct icon', () => {
-          expect(overview.icon).toEqual(PATH_HOME_ICON);
-        });
-
-        it(`moves the stage to the front`, () => {
-          expect(response[0]).toEqual(overview);
-        });
       });
     });
   });

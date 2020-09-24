@@ -18,13 +18,21 @@ export default {
       type: String,
       required: true,
     },
+    initialTab: {
+      type: Number,
+      required: false,
+      default: 0,
+    },
+  },
+  data() {
+    return { selectedTab: this.initialTab };
   },
   safeHtmlConfig: { ALLOWED_TAGS: ['strong', 'br'] },
 };
 </script>
 
 <template>
-  <gl-tabs content-class="gl-pt-0">
+  <gl-tabs v-model="selectedTab" content-class="gl-pt-0">
     <gl-tab :title="s__('NetworkPolicies|.yaml')">
       <pre class="gl-bg-white gl-rounded-top-left-none gl-rounded-top-right-none">{{
         policyYaml

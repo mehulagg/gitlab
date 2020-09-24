@@ -15,10 +15,6 @@ RSpec.describe IssuablesHelper do
     context 'for an epic' do
       let_it_be(:epic) { create(:epic, author: user, description: 'epic text', confidential: true) }
 
-      before do
-        stub_feature_flags(confidential_epics: true)
-      end
-
       it 'returns the correct data' do
         @group = epic.group
 

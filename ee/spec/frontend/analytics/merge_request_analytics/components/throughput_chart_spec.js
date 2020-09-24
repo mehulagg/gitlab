@@ -1,31 +1,46 @@
-import { shallowMount } from '@vue/test-utils';
+import Vuex from 'vuex';
+import { shallowMount, createLocalVue } from '@vue/test-utils';
 import { GlAlert } from '@gitlab/ui';
 import { GlAreaChart } from '@gitlab/ui/dist/charts';
+import store from 'ee/analytics/merge_request_analytics/store';
 import ThroughputChart from 'ee/analytics/merge_request_analytics/components/throughput_chart.vue';
 import { THROUGHPUT_CHART_STRINGS } from 'ee/analytics/merge_request_analytics/constants';
 import ChartSkeletonLoader from '~/vue_shared/components/resizable_chart/skeleton_loader.vue';
 import { throughputChartData, startDate, endDate, fullPath } from '../mock_data';
 
+const localVue = createLocalVue();
+localVue.use(Vuex);
+
+const defaultQueryVariables = {
+  assigneeUsername: null,
+  authorUsername: null,
+  milestoneTitle: null,
+  labels: null,
+};
+
+const defaultMocks = {
+  $apollo: {
+    queries: {
+      throughputChartData: {},
+    },
+  },
+};
+
 describe('ThroughputChart', () => {
   let wrapper;
 
-  const displaysComponent = (component, visible) => {
+  function displaysComponent(component, visible) {
     const element = wrapper.find(component);
 
     expect(element.exists()).toBe(visible);
-  };
+  }
 
-  const createComponent = ({ loading = false, data = {} } = {}) => {
-    const $apollo = {
-      queries: {
-        throughputChartData: {
-          loading,
-        },
-      },
-    };
-
-    wrapper = shallowMount(ThroughputChart, {
-      mocks: { $apollo },
+  function createComponent(options = {}) {
+    const { mocks = defaultMocks } = options;
+    return shallowMount(ThroughputChart, {
+      localVue,
+      store,
+      mocks,
       provide: {
         fullPath,
       },
@@ -34,9 +49,7 @@ describe('ThroughputChart', () => {
         endDate,
       },
     });
-
-    wrapper.setData(data);
-  };
+  }
 
   afterEach(() => {
     wrapper.destroy();
@@ -45,7 +58,7 @@ describe('ThroughputChart', () => {
 
   describe('default state', () => {
     beforeEach(() => {
-      createComponent();
+      wrapper = createComponent();
     });
 
     it('displays the chart title', () => {
@@ -77,8 +90,16 @@ describe('ThroughputChart', () => {
   });
 
   describe('while loading', () => {
+    const apolloLoading = {
+      queries: {
+        throughputChartData: {
+          loading: true,
+        },
+      },
+    };
+
     beforeEach(() => {
-      createComponent({ loading: true });
+      wrapper = createComponent({ mocks: { ...defaultMocks, $apollo: apolloLoading } });
     });
 
     it('displays a skeleton loader', () => {
@@ -96,7 +117,8 @@ describe('ThroughputChart', () => {
 
   describe('with data', () => {
     beforeEach(() => {
-      createComponent({ data: { throughputChartData } });
+      wrapper = createComponent();
+      wrapper.setData({ throughputChartData });
     });
 
     it('displays the chart', () => {
@@ -114,7 +136,8 @@ describe('ThroughputChart', () => {
 
   describe('with errors', () => {
     beforeEach(() => {
-      createComponent({ data: { hasError: true } });
+      wrapper = createComponent();
+      wrapper.setData({ hasError: true });
     });
 
     it('does not display the chart', () => {
@@ -130,6 +153,42 @@ describe('ThroughputChart', () => {
 
       expect(alert.exists()).toBe(true);
       expect(alert.text()).toBe(THROUGHPUT_CHART_STRINGS.ERROR_FETCHING_DATA);
+    });
+  });
+
+  describe('when fetching data', () => {
+    beforeEach(() => {
+      wrapper = createComponent();
+    });
+
+    it('has initial variables set', () => {
+      expect(
+        wrapper.vm.$options.apollo.throughputChartData.variables.bind(wrapper.vm)(),
+      ).toMatchObject(defaultQueryVariables);
+    });
+
+    it('gets filter variables from store', async () => {
+      const operator = '=';
+      const assigneeUsername = 'foo';
+      const authorUsername = 'bar';
+      const milestoneTitle = 'baz';
+      const labels = ['quis', 'quux'];
+
+      wrapper.vm.$store.dispatch('filters/initialize', {
+        selectedAssignee: { value: assigneeUsername, operator },
+        selectedAuthor: { value: authorUsername, operator },
+        selectedMilestone: { value: milestoneTitle, operator },
+        selectedLabelList: [{ value: labels[0], operator }, { value: labels[1], operator }],
+      });
+      await wrapper.vm.$nextTick();
+      expect(
+        wrapper.vm.$options.apollo.throughputChartData.variables.bind(wrapper.vm)(),
+      ).toMatchObject({
+        assigneeUsername,
+        authorUsername,
+        milestoneTitle,
+        labels,
+      });
     });
   });
 });

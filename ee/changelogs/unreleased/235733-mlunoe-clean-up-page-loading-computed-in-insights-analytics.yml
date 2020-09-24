@@ -1,6 +1,0 @@
----
-title: Fix issue where the select page dropdown would be disabled on the Insights
-  Analytics page when no charts were loaded.
-merge_request: 40096
-author:
-type: fixed

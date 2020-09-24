@@ -103,6 +103,11 @@ describe('PolicyRuleBuilder component', () => {
     expect(event[0]).toEqual([RuleTypeEntity]);
   });
 
+  it('emits remove upon remove-button click', () => {
+    wrapper.find("[data-testid='remove-rule']").trigger('click');
+    expect(wrapper.emitted().remove.length).toEqual(1);
+  });
+
   it('renders only endpoint rule component', () => {
     expect(findRuleEndpoint().exists()).toBe(true);
     expect(findRuleEntity().exists()).toBe(false);

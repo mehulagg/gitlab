@@ -38,7 +38,7 @@ RSpec.describe API::Vulnerabilities do
           get_vulnerabilities
 
           expect(response).to have_gitlab_http_status(:ok)
-          expect(json_response.map { |v| v['id'] }).to contain_exactly(project.vulnerabilities.second.id)
+          expect(json_response.map { |v| v['id'] }).to contain_exactly(project.vulnerabilities.order_severity_desc.second.id)
         end
       end
 
@@ -373,6 +373,94 @@ RSpec.describe API::Vulnerabilities do
       it { expect { confirm_vulnerability }.to be_denied_for(:reporter).of(project) }
       it { expect { confirm_vulnerability }.to be_denied_for(:guest).of(project) }
       it { expect { confirm_vulnerability }.to be_denied_for(:anonymous) }
+    end
+  end
+
+  describe 'POST /vulnerabilities:id/revert' do
+    before do
+      create_list(:vulnerabilities_occurrence, 2, vulnerability: vulnerability, project: vulnerability.project)
+    end
+
+    let_it_be(:project) { create(:project) }
+    let_it_be(:vulnerability) { create(:vulnerability, :dismissed, project: project) }
+
+    let(:vulnerability_id) { vulnerability.id }
+
+    subject(:revert_vulnerability_to_detected) { post api("/vulnerabilities/#{vulnerability_id}/revert", user) }
+
+    context 'with an authorized user with proper permissions' do
+      before do
+        project.add_developer(user)
+      end
+
+      it 'reverts a vulnerability and its associated findings to detected state' do
+        Timecop.freeze do
+          revert_vulnerability_to_detected
+
+          expect(response).to have_gitlab_http_status(:created)
+          expect(response).to match_response_schema('public_api/v4/vulnerability', dir: 'ee')
+
+          expect(vulnerability.reload).to(
+            have_attributes(state: 'detected', dismissed_by: nil, dismissed_at: nil))
+          expect(vulnerability.findings).to all not_have_vulnerability_dismissal_feedback
+        end
+      end
+
+      it_behaves_like 'responds with "not found" for an unknown vulnerability ID'
+
+      context 'when there is a revert error' do
+        before do
+          Grape::Endpoint.before_each do |endpoint|
+            allow(endpoint).to receive(:find_vulnerability!).and_wrap_original do |method, *args|
+              vulnerability = method.call(*args)
+
+              errors = ActiveModel::Errors.new(vulnerability)
+              errors.add(:base, 'something went wrong')
+
+              allow(vulnerability).to receive(:valid?).and_return(false)
+              allow(vulnerability).to receive(:errors).and_return(errors)
+
+              vulnerability
+            end
+          end
+        end
+
+        after do
+          # resetting according to the https://github.com/ruby-grape/grape#stubbing-helpers
+          Grape::Endpoint.before_each nil
+        end
+
+        it 'responds with error' do
+          revert_vulnerability_to_detected
+
+          expect(response).to have_gitlab_http_status(:bad_request)
+          expect(json_response['message']).to eq('base' => ['something went wrong'])
+        end
+      end
+
+      context 'if a vulnerability is already in detected state' do
+        let(:vulnerability) { create(:vulnerability, :detected, project: project) }
+
+        it 'responds with 304 Not Modified' do
+          revert_vulnerability_to_detected
+
+          expect(response).to have_gitlab_http_status(:not_modified)
+        end
+      end
+
+      it_behaves_like 'forbids access to vulnerability API endpoint in case of disabled features'
+    end
+
+    describe 'permissions' do
+      it { expect { revert_vulnerability_to_detected }.to be_allowed_for(:admin) }
+      it { expect { revert_vulnerability_to_detected }.to be_allowed_for(:owner).of(project) }
+      it { expect { revert_vulnerability_to_detected }.to be_allowed_for(:maintainer).of(project) }
+      it { expect { revert_vulnerability_to_detected }.to be_allowed_for(:developer).of(project) }
+
+      it { expect { revert_vulnerability_to_detected }.to be_denied_for(:auditor) }
+      it { expect { revert_vulnerability_to_detected }.to be_denied_for(:reporter).of(project) }
+      it { expect { revert_vulnerability_to_detected }.to be_denied_for(:guest).of(project) }
+      it { expect { revert_vulnerability_to_detected }.to be_denied_for(:anonymous) }
     end
   end
 end

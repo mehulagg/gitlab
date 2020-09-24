@@ -49,7 +49,7 @@ describe('EE Approvals RuleForm', () => {
   let actions;
 
   const createComponent = (props = {}, options = {}) => {
-    wrapper = shallowMount(localVue.extend(RuleForm), {
+    wrapper = shallowMount(RuleForm, {
       propsData: props,
       store: new Vuex.Store(store),
       localVue,
@@ -176,7 +176,7 @@ describe('EE Approvals RuleForm', () => {
 
           wrapper.vm.submit();
 
-          expect(actions.postRule).toHaveBeenCalledWith(expect.anything(), expected, undefined);
+          expect(actions.postRule).toHaveBeenCalledWith(expect.anything(), expected);
         });
       });
     });
@@ -279,7 +279,7 @@ describe('EE Approvals RuleForm', () => {
         it('on submit, posts rule', () => {
           wrapper.vm.submit();
 
-          expect(actions.postRule).toHaveBeenCalledWith(expect.anything(), expected, undefined);
+          expect(actions.postRule).toHaveBeenCalledWith(expect.anything(), expected);
         });
 
         it('when submitted with a duplicate name, shows the "taken name" validation', async () => {
@@ -358,7 +358,7 @@ describe('EE Approvals RuleForm', () => {
         it('on submit, puts rule', () => {
           wrapper.vm.submit();
 
-          expect(actions.putRule).toHaveBeenCalledWith(expect.anything(), expected, undefined);
+          expect(actions.putRule).toHaveBeenCalledWith(expect.anything(), expected);
         });
 
         it('when submitted with a duplicate name, shows the "taken name" validation', async () => {
@@ -402,11 +402,9 @@ describe('EE Approvals RuleForm', () => {
         });
 
         it('puts fallback rule', () => {
-          expect(actions.putFallbackRule).toHaveBeenCalledWith(
-            expect.anything(),
-            { approvalsRequired: TEST_APPROVALS_REQUIRED },
-            undefined,
-          );
+          expect(actions.putFallbackRule).toHaveBeenCalledWith(expect.anything(), {
+            approvalsRequired: TEST_APPROVALS_REQUIRED,
+          });
         });
 
         it('does not show any validation errors', () => {
@@ -495,7 +493,6 @@ describe('EE Approvals RuleForm', () => {
           expect.objectContaining({
             removeHiddenGroups: false,
           }),
-          undefined,
         );
       });
 
@@ -512,7 +509,6 @@ describe('EE Approvals RuleForm', () => {
             expect.objectContaining({
               removeHiddenGroups: true,
             }),
-            undefined,
           );
         });
       });
@@ -662,7 +658,6 @@ describe('EE Approvals RuleForm', () => {
               approvalsRequired: TEST_APPROVALS_REQUIRED,
               users: TEST_APPROVERS.map(x => x.id),
             }),
-            undefined,
           );
         });
       });
@@ -675,11 +670,9 @@ describe('EE Approvals RuleForm', () => {
         });
 
         it('puts fallback rule', () => {
-          expect(actions.putFallbackRule).toHaveBeenCalledWith(
-            expect.anything(),
-            { approvalsRequired: TEST_APPROVALS_REQUIRED },
-            undefined,
-          );
+          expect(actions.putFallbackRule).toHaveBeenCalledWith(expect.anything(), {
+            approvalsRequired: TEST_APPROVALS_REQUIRED,
+          });
         });
       });
     });
@@ -708,19 +701,13 @@ describe('EE Approvals RuleForm', () => {
         });
 
         it('deletes rule', () => {
-          expect(actions.deleteRule).toHaveBeenCalledWith(
-            expect.anything(),
-            TEST_RULE.id,
-            undefined,
-          );
+          expect(actions.deleteRule).toHaveBeenCalledWith(expect.anything(), TEST_RULE.id);
         });
 
         it('puts fallback rule', () => {
-          expect(actions.putFallbackRule).toHaveBeenCalledWith(
-            expect.anything(),
-            { approvalsRequired: TEST_APPROVALS_REQUIRED },
-            undefined,
-          );
+          expect(actions.putFallbackRule).toHaveBeenCalledWith(expect.anything(), {
+            approvalsRequired: TEST_APPROVALS_REQUIRED,
+          });
         });
       });
 
@@ -742,7 +729,6 @@ describe('EE Approvals RuleForm', () => {
               approvalsRequired: TEST_APPROVALS_REQUIRED,
               users: TEST_APPROVERS.map(x => x.id),
             }),
-            undefined,
           );
         });
       });

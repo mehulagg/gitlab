@@ -192,7 +192,7 @@ RSpec.describe Groups::EpicsController do
         end
 
         context 'using label_name filter' do
-          let(:label) { create(:label) }
+          let(:label) { create(:group_label, group: group) }
           let!(:labeled_epic) { create(:labeled_epic, group: group, labels: [label]) }
 
           it 'returns all epics with given label' do
@@ -310,20 +310,6 @@ RSpec.describe Groups::EpicsController do
 
           expect(response).to have_gitlab_http_status(:ok)
           expect(response).to match_response_schema('entities/epic', dir: 'ee')
-        end
-
-        context 'when confidential_epics flag is disabled' do
-          before do
-            stub_feature_flags(confidential_epics: false)
-          end
-
-          it 'does not include confidential attribute' do
-            group.add_developer(user)
-            show_epic(:json)
-
-            expect(response).to have_gitlab_http_status(:ok)
-            expect(json_response).not_to include("confidential")
-          end
         end
 
         context 'with unauthorized user' do

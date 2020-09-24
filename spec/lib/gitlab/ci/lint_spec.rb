@@ -42,7 +42,7 @@ RSpec.describe Gitlab::Ci::Lint do
         expect(build_job[:stage]).to eq('build')
         expect(build_job[:before_script]).to eq(['before_build'])
         expect(build_job[:script]).to eq(['echo'])
-        expect(build_job.fetch(:after_script)).to be_nil
+        expect(build_job.fetch(:after_script)).to eq([])
         expect(build_job[:tag_list]).to eq([])
         expect(build_job[:environment]).to eq('staging')
         expect(build_job[:when]).to eq('manual')
@@ -51,7 +51,7 @@ RSpec.describe Gitlab::Ci::Lint do
         rspec_job = subject.jobs.last
         expect(rspec_job[:name]).to eq('rspec')
         expect(rspec_job[:stage]).to eq('test')
-        expect(rspec_job.fetch(:before_script)).to be_nil
+        expect(rspec_job.fetch(:before_script)).to eq([])
         expect(rspec_job[:script]).to eq(['rspec'])
         expect(rspec_job[:after_script]).to eq(['after_rspec'])
         expect(rspec_job[:tag_list]).to eq(['docker'])
@@ -89,6 +89,31 @@ RSpec.describe Gitlab::Ci::Lint do
         it 'returns a result with warnings' do
           expect(subject).to be_valid
           expect(subject.warnings).to include(/rspec may allow multiple pipelines to run/)
+        end
+      end
+
+      context 'when content has more warnings than max limit' do
+        # content will result in 2 warnings
+        let(:content) do
+          <<~YAML
+          rspec:
+            script: rspec
+            rules:
+              - when: always
+          rspec2:
+            script: rspec
+            rules:
+              - when: always
+          YAML
+        end
+
+        before do
+          stub_const('Gitlab::Ci::Warnings::MAX_LIMIT', 1)
+        end
+
+        it 'returns a result with warnings' do
+          expect(subject).to be_valid
+          expect(subject.warnings.size).to eq(1)
         end
       end
 

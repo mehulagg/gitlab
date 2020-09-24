@@ -6,6 +6,7 @@ module Elastic
   # This class should only be used with sidekiq workers which extend Elastic::IndexingControl module
   class IndexingControlService
     LIMIT = 1000
+    PROJECT_CONTEXT_KEY = "#{Labkit::Context::LOG_KEY}.project"
 
     def initialize(klass)
       raise ArgumentError, "passed class must extend Elastic::IndexingControl" unless klass.include?(Elastic::IndexingControl)
@@ -82,7 +83,8 @@ module Elastic
     def serialize(args, context)
       {
         args: args,
-        context: context
+        # Only include part of the context that would not prevent deduplication
+        context: context.slice(PROJECT_CONTEXT_KEY)
       }.to_json
     end
 
