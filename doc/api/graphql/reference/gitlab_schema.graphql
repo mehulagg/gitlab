@@ -3143,6 +3143,19 @@ Represents a DAST scanner profile
 """
 type DastScannerProfile {
   """
+  Indicates if an Active Scan will run. True to run an Active Scan in addtion to
+  an Passive Scan, and false to run only a Passive Scan.
+  """
+  activeScan: Boolean!
+
+  """
+  Indicates if the AJAX spider should be used to crawl the target site. True to
+  run the AJAX spider in addition to the traditional spider, and false to run
+  only the traditional spider.
+  """
+  ajaxSpider: Boolean!
+
+  """
   Relative web path to the edit page of a scanner profile
   """
   editPath: String
@@ -3161,6 +3174,11 @@ type DastScannerProfile {
   Name of the DAST scanner profile
   """
   profileName: String
+
+  """
+  Indicates if debug messages should be included in DAST console output. True to include the debug messages.
+  """
+  showDebugMessages: Boolean!
 
   """
   The maximum number of minutes allowed for the spider to traverse the site
