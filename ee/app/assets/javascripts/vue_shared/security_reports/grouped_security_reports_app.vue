@@ -228,7 +228,9 @@ export default {
        * For https://gitlab.com/gitlab-org/gitlab/-/issues/210343 change to:
        * return this.enabledReports.coverageFuzzing;
        */
-      return gl?.mrWidgetData?.coverage_fuzzing_comparison_path && this.enabledReports.coverageFuzzing
+      return (
+        gl?.mrWidgetData?.coverage_fuzzing_comparison_path && this.enabledReports.coverageFuzzing
+      );
     },
     hasSastReports() {
       return this.enabledReports.sast;
