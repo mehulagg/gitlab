@@ -131,14 +131,13 @@ export default {
   <gl-dropdown class="gl-w-full" toggle-class="overflow-hidden" :right="right">
     <template #button-content>
       <slot name="label-dropdown-button">
-        <span v-if="selectedLabel">
+        <span v-if="selectedLabel" class="gl-new-dropdown-button-text">
           <span
             :style="{ backgroundColor: selectedLabel.color }"
             class="d-inline-block dropdown-label-box"
           >
           </span>
           <template #button-content>
-            <gl-icon v-if="icon" class="dropdown-icon" :name="icon" :size="iconSize" />
             <span class="gl-new-dropdown-button-text">{{ labelTitle(selectedLabel) }}</span>
             <gl-icon v-if="renderCaret" class="dropdown-chevron" name="chevron-down" />
           </slot>
