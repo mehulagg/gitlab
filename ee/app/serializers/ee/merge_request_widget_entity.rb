@@ -31,10 +31,6 @@ module EE
         end
       end
 
-      expose :enabled_reports do |merge_request|
-        merge_request.enabled_reports
-      end
-
       expose :license_scanning, if: -> (mr, _) { head_pipeline_downloadable_path_for_report_type(:license_scanning) } do
         expose :managed_licenses_path do |merge_request|
           expose_path(api_v4_projects_managed_licenses_path(id: merge_request.target_project.id))

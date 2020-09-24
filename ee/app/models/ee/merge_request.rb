@@ -172,16 +172,15 @@ module EE
       actual_head_pipeline.license_scanning_report.violates?(project.software_license_policies)
     end
 
+    override :enabled_reports
     def enabled_reports
-      {
-        sast: report_type_enabled?(:sast),
+      super.merge({
         container_scanning: report_type_enabled?(:container_scanning),
         dast: report_type_enabled?(:dast),
         dependency_scanning: report_type_enabled?(:dependency_scanning),
         license_scanning: report_type_enabled?(:license_scanning),
-        coverage_fuzzing: report_type_enabled?(:coverage_fuzzing),
-        secret_detection: report_type_enabled?(:secret_detection)
-      }
+        coverage_fuzzing: report_type_enabled?(:coverage_fuzzing)
+      })
     end
 
     def has_dependency_scanning_reports?
@@ -273,6 +272,7 @@ module EE
       end
     end
 
+    # TODO: this is interesting. Pipelines have a security_scans property?
     def missing_security_scan_types
       return [] unless actual_head_pipeline && base_pipeline
 
@@ -289,10 +289,6 @@ module EE
 
     def missing_report_error(report_type)
       { status: :error, status_reason: "This merge request does not have #{report_type} reports" }
-    end
-
-    def report_type_enabled?(report_type)
-      !!actual_head_pipeline&.batch_lookup_report_artifact_for_file_type(report_type)
     end
   end
 end

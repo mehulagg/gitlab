@@ -1690,6 +1690,13 @@ class MergeRequest < ApplicationRecord
     Feature.enabled?(:merge_request_reviewers, project)
   end
 
+  def enabled_reports
+    {
+      sast: report_type_enabled?(:sast),
+      secret_detection: report_type_enabled?(:secret_detection)
+    }
+  end
+
   private
 
   def with_rebase_lock
@@ -1732,6 +1739,10 @@ class MergeRequest < ApplicationRecord
 
     key = Gitlab::Routing.url_helpers.cached_widget_project_json_merge_request_path(project, self, format: :json)
     Gitlab::EtagCaching::Store.new.touch(key)
+  end
+
+  def report_type_enabled?(report_type)
+    !!actual_head_pipeline&.batch_lookup_report_artifact_for_file_type(report_type)
   end
 end
 

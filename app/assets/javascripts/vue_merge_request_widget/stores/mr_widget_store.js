@@ -1,5 +1,6 @@
 import { format } from 'timeago.js';
 import getStateKey from 'ee_else_ce/vue_merge_request_widget/stores/get_state_key';
+import { convertObjectPropsToCamelCase } from '~/lib/utils/common_utils';
 import { stateKey } from './state_maps';
 import { formatDate } from '../../lib/utils/datetime_utility';
 import { MTWPS_MERGE_STRATEGY, MT_MERGE_STRATEGY, MWPS_MERGE_STRATEGY } from '../constants';
@@ -152,6 +153,10 @@ export default class MergeRequestStore {
     this.canCreateIssue = currentUser.can_create_issue || false;
     this.canCherryPickInCurrentMR = currentUser.can_cherry_pick_on_current_merge_request || false;
     this.canRevertInCurrentMR = currentUser.can_revert_on_current_merge_request || false;
+
+    if (data.enabled_reports) {
+      this.enabledReports = convertObjectPropsToCamelCase(data.enabled_reports);
+    }
 
     this.setState();
   }

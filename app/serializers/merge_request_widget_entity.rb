@@ -124,6 +124,10 @@ class MergeRequestWidgetEntity < Grape::Entity
     end
   end
 
+  expose :enabled_reports do |merge_request|
+    merge_request.enabled_reports
+  end
+
   private
 
   delegate :current_user, to: :request

@@ -4,6 +4,7 @@ import MRWidgetStore from 'ee_else_ce/vue_merge_request_widget/stores/mr_widget_
 import MRWidgetService from 'ee_else_ce/vue_merge_request_widget/services/mr_widget_service';
 import MrWidgetApprovals from 'ee_else_ce/vue_merge_request_widget/components/approvals/approvals.vue';
 import stateMaps from 'ee_else_ce/vue_merge_request_widget/stores/state_maps';
+import GroupedSecurityReportsApp from 'ee_else_ce/vue_shared/security_reports/grouped_security_reports_app.vue';
 import { sprintf, s__, __ } from '~/locale';
 import Project from '~/pages/projects/project';
 import SmartInterval from '~/smart_interval';
@@ -82,6 +83,7 @@ export default {
     SourceBranchRemovalStatus,
     GroupedCodequalityReportsApp,
     GroupedTestReportsApp,
+    GroupedSecurityReportsApp,
     TerraformPlan,
     GroupedAccessibilityReportsApp,
     MrWidgetApprovals,
@@ -176,6 +178,14 @@ export default {
     showMergePipelineForkWarning() {
       return Boolean(
         this.mr.mergePipelinesEnabled && this.mr.sourceProjectId !== this.mr.targetProjectId,
+      );
+    },
+    // TODO remove from EE?
+    shouldRenderSecurityReport() {
+      const { enabledReports } = this.mr;
+      return (
+        enabledReports &&
+        this.$options.securityReportTypes.some(reportType => enabledReports[reportType])
       );
     },
     mergeError() {
@@ -418,6 +428,7 @@ export default {
       this.mr.isDismissedSuggestPipeline = true;
     },
   },
+  securityReportTypes: ['sast', 'secretDetection'],
 };
 </script>
 <template>
@@ -453,6 +464,11 @@ export default {
         :head-blob-path="mr.headBlobPath"
         :base-blob-path="mr.baseBlobPath"
         :codequality-help-path="mr.codequalityHelpPath"
+      />
+
+      <grouped-security-reports-app
+        v-if="shouldRenderSecurityReport"
+        :enabled-reports="mr.enabledReports"
       />
 
       <grouped-test-reports-app

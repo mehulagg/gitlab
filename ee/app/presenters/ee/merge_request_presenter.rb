@@ -48,6 +48,7 @@ module EE
       expose_mr_approval_path? ? APPROVALS_WIDGET_FULL_TYPE : super
     end
 
+    # TODO: this is interesting
     def missing_security_scan_types
       merge_request.missing_security_scan_types if expose_missing_security_scan_types?
     end
