@@ -19,6 +19,7 @@ module EE
         field :epics, ::Types::EpicType.connection_type, null: true,
               description: 'Find epics',
               max_page_size: 2000,
+              extras: [:lookahead],
               resolver: ::Resolvers::EpicsResolver
 
         field :iterations, ::Types::IterationType.connection_type, null: true,
