@@ -1,6 +1,7 @@
 - @can_bulk_update = can?(current_user, :admin_issue, @project)
 
 - page_title _("Issues")
+= stylesheet_link_tag 'page_bundles/issues_list'
 - new_issue_email = @project.new_issuable_address(current_user, 'issue')
 
 = content_for :meta_tags do
