@@ -66,7 +66,7 @@ module Projects
       end
 
       if template_file
-        data[:sample_data] = params.delete(:sample_data).presence
+        data[:sample_data] = params.delete(:sample_data) if params.key?(:sample_data)
         params[:import_type] = 'gitlab_project'
       end
 
