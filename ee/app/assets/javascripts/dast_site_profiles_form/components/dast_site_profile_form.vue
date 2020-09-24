@@ -21,6 +21,8 @@ import dastSiteTokenCreateMutation from '../graphql/dast_site_token_create.mutat
 import dastSiteValidationQuery from '../graphql/dast_site_validation.query.graphql';
 import { DAST_SITE_VALIDATION_STATUS } from '../constants';
 
+const { PENDING, INPROGRESS, PASSED, FAILED } = DAST_SITE_VALIDATION_STATUS;
+
 const initField = value => ({
   value,
   state: null,
@@ -76,7 +78,7 @@ export default {
       showAlert: false,
       token: null,
       tokenId: null,
-      currentSiteValidationStatus: DAST_SITE_VALIDATION_STATUS.PENDING,
+      validationStatus: PENDING,
       validateSite: false,
       errorMessage: '',
       errors: [],
@@ -124,18 +126,39 @@ export default {
     },
     isSubmitDisabled() {
       return (
-        (this.validateSite && !this.validationStatusMatches('PASSED')) ||
+        (this.validateSite && !this.validationStatusMatches(PASSED)) ||
         this.formHasErrors ||
         this.someFieldEmpty ||
-        this.validationStatusMatches('INPROGRESS')
+        this.validationStatusMatches(INPROGRESS)
       );
     },
     showValidationSection() {
       return (
         this.validateSite &&
         !this.isValidatingSite &&
-        !['INPROGRESS', 'PASSED'].some(this.validationStatusMatches)
+        ![INPROGRESS, PASSED].some(this.validationStatusMatches)
       );
+    },
+    validationSectionDescription() {
+      const descriptions = {
+        [PENDING]: { text: s__('DastProfiles|Site must be validated to run an active scan.') },
+        [INPROGRESS]: {
+          text: s__('DastProfiles|Validation in progress'),
+          cssClass: 'gl-text-green-500',
+        },
+        [PASSED]: {
+          text: s__(
+            'DastProfiles|Validation succeeded. Both active and passive scans can be run against the target site.',
+          ),
+          cssClass: 'gl-text-green-500',
+        },
+        [FAILED]: {
+          text: s__('DastProfiles|Validation failed. Please try again.'),
+          cssClass: 'gl-text-red-500',
+        },
+      };
+
+      return descriptions[this.validationStatus] || null;
     },
   },
   watch: {
@@ -143,8 +166,8 @@ export default {
       this.tokenId = null;
       this.token = null;
 
-      if (!validate || this.validationStatusMatches('FAILED')) {
-        this.currentSiteValidationStatus = DAST_SITE_VALIDATION_STATUS.PENDING;
+      if (!validate || this.validationStatusMatches(FAILED)) {
+        this.validationStatus = PENDING;
       } else {
         try {
           this.isValidatingSite = true;
@@ -168,7 +191,7 @@ export default {
       if (this.glFeatures.securityOnDemandScansSiteValidation) {
         await this.fetchValidationStatus();
 
-        if (['PASSED', 'INPROGRESS'].some(this.validationStatusMatches)) {
+        if ([PASSED, INPROGRESS].some(this.validationStatusMatches)) {
           this.validateSite = true;
         }
       }
@@ -176,7 +199,7 @@ export default {
   },
   methods: {
     validationStatusMatches(status) {
-      return this.currentSiteValidationStatus === DAST_SITE_VALIDATION_STATUS[status];
+      return this.validationStatus === status;
     },
     validateTargetUrl() {
       if (!isAbsolute(this.form.targetUrl.value)) {
@@ -206,7 +229,7 @@ export default {
             targetUrl: this.form.targetUrl.value,
           },
         });
-        this.currentSiteValidationStatus = status;
+        this.validationStatus = status;
       } catch (exception) {
         this.showErrors({
           message: this.i18n.siteValidation.validationStatusFetchError,
@@ -361,24 +384,8 @@ export default {
     <template v-if="glFeatures.securityOnDemandScansSiteValidation">
       <gl-form-group :label="s__('DastProfiles|Validate target site')">
         <template #description>
-          <p v-if="validationStatusMatches('INPROGRESS')" class="gl-text-green-500 gl-mt-3">
-            {{ s__('DastProfiles|Validation in progress') }}
-          </p>
-          <p
-            v-if="validationStatusMatches('FAILED') && !validateSite"
-            class="gl-text-red-500 gl-mt-3"
-          >
-            {{ s__('DastProfiles|Validation failed. Please try again.') }}
-          </p>
-          <p v-if="validationStatusMatches('PENDING')" class="gl-mt-3">
-            {{ s__('DastProfiles|Site must be validated to run an active scan.') }}
-          </p>
-          <p v-if="validationStatusMatches('PASSED')" class="gl-text-green-500 gl-mt-3">
-            {{
-              s__(
-                'DastProfiles|Validation succeeded. Both active and passive scans can be run against the target site.',
-              )
-            }}
+          <p class="gl-mt-3" :class="validationSectionDescription.cssClass">
+            {{ validationSectionDescription.text }}
           </p>
         </template>
         <gl-toggle
