@@ -345,7 +345,6 @@ function mergeTwoFiles(target, source) {
     highlighted_diff_lines: missingInline ? source.highlighted_diff_lines : originalInline,
     parallel_diff_lines: missingParallel ? source.parallel_diff_lines : originalParallel,
     renderIt: source.renderIt,
-    collapsed: source.collapsed,
   };
 }
 
