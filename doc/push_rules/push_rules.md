@@ -97,7 +97,7 @@ The following options are available.
 | Restrict by commit message (negative match)| **Starter** 11.1 | Only commit messages that do not match this regular expression are allowed to be pushed. Leave empty to allow any commit message. Uses multiline mode, which can be disabled using `(?-m)`. |
 | Restrict by branch name | **Starter** 9.3 | Only branch names that match this regular expression are allowed to be pushed. Leave empty to allow any branch name. |
 | Restrict by commit author's email | **Starter** 7.10 | Only commit author's email that match this regular expression are allowed to be pushed. Leave empty to allow any email. |
-| Prohibited file names | **Starter** 7.10 | Any committed filenames that match this regular expression and do not already exist in the repository are not allowed to be pushed. Leave empty to allow any filenames.  See [common examples](#prohibited-file-names). |
+| Prohibited file names | **Starter** 7.10 | Any committed filenames that match this regular expression and do not already exist in the repository are not allowed to be pushed. Leave empty to allow any filenames. See [common examples](#prohibited-file-names). |
 | Maximum file size | **Starter** 7.12 | Pushes that contain added or updated files that exceed this file size (in MB) are rejected. Set to 0 to allow files of any size. Files tracked by Git LFS are exempted. |
 
 TIP: **Tip:**
@@ -182,12 +182,12 @@ bash_history
 
 > Introduced in [GitLab Starter](https://about.gitlab.com/pricing/) 7.10.
 
-Each file name contained in a git push is compared to the regular expression in this field.  Filenames in git consist of both the file's name and any directory that may precede it.  A singular regular expression can contain multiple independent matches used as exclusions. File names can be broadly matched to any location in the repository, or restricted to specific locations.  Filenames can also be partial matches used to exclude file types by extension.
+Each file name contained in a git push is compared to the regular expression in this field. Filenames in git consist of both the file's name and any directory that may precede it. A singular regular expression can contain multiple independent matches used as exclusions. File names can be broadly matched to any location in the repository, or restricted to specific locations. Filenames can also be partial matches used to exclude file types by extension.
 
 Note: **Note:**
-These examples make use of regex string boundary characters which match the beginning of a string `^`, and the end `$`.  They also include instances where either the directory path or the filename can include `.` or `/`.  Both of these special regex characters have to be escaped with a backslash `\` to be used as normal characters in a match condition.
+These examples make use of regex string boundary characters which match the beginning of a string `^`, and the end `$`. They also include instances where either the directory path or the filename can include `.` or `/`. Both of these special regex characters have to be escaped with a backslash `\` to be used as normal characters in a match condition.
 
-Example: prevent pushing any .exe files to any location in the repository.  This is an example of a partial match, which can match any filename that contains `.exe` at the end.
+Example: prevent pushing any .exe files to any location in the repository. This is an example of a partial match, which can match any filename that contains `.exe` at the end.
 
 ```
 \.exe$ 
@@ -205,13 +205,13 @@ Example: prevent a specific configuration file in a known directory from being p
 ^directory-name\/config\.yml$
 ```
 
-Example: prevent the specific file named `install.exe` from being pushed to any location in the repository.  Note that the parenthesized expression `(^|\/)` will match either a file following a directory separator or a file in the repository root.
+Example: prevent the specific file named `install.exe` from being pushed to any location in the repository. Note that the parenthesized expression `(^|\/)` will match either a file following a directory separator or a file in the repository root.
 
 ```
 (^|\/)install\.exe$
 ```
 
-Example: combining all of the above in a single expression.  Note that all of the preceding expressions rely on the end of string character `$`, so we can move that part of each expression to the end of the grouped collection of match conditions where it will be appended to all matches.
+Example: combining all of the above in a single expression. Note that all of the preceding expressions rely on the end of string character `$`, so we can move that part of each expression to the end of the grouped collection of match conditions where it will be appended to all matches.
 
 ```
 (\.exe|^config\.yml|^directory-name\/config\.yml|(^|\/)install\.exe)$
