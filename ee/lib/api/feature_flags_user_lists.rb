@@ -19,19 +19,19 @@ module API
       resource :feature_flags_user_lists do
         desc 'Get all feature flags user lists of a project' do
           detail 'This feature was introduced in GitLab 12.10'
-          success EE::API::Entities::FeatureFlag::UserList
+          success ::API::Entities::FeatureFlag::UserList
         end
         params do
           use :pagination
         end
         get do
           present paginate(user_project.operations_feature_flags_user_lists),
-            with: EE::API::Entities::FeatureFlag::UserList
+            with: ::API::Entities::FeatureFlag::UserList
         end
 
         desc 'Create a feature flags user list for a project' do
           detail 'This feature was introduced in GitLab 12.10'
-          success EE::API::Entities::FeatureFlag::UserList
+          success ::API::Entities::FeatureFlag::UserList
         end
         params do
           requires :name, type: String, desc: 'The name of the list'
@@ -41,7 +41,7 @@ module API
           list = user_project.operations_feature_flags_user_lists.create(declared_params)
 
           if list.save
-            present list, with: EE::API::Entities::FeatureFlag::UserList
+            present list, with: ::API::Entities::FeatureFlag::UserList
           else
             render_api_error!(list.errors.full_messages, :bad_request)
           end
@@ -54,16 +54,16 @@ module API
       resource 'feature_flags_user_lists/:iid' do
         desc 'Get a single feature flag user list belonging to a project' do
           detail 'This feature was introduced in GitLab 12.10'
-          success EE::API::Entities::FeatureFlag::UserList
+          success ::API::Entities::FeatureFlag::UserList
         end
         get do
           present user_project.operations_feature_flags_user_lists.find_by_iid!(params[:iid]),
-            with: EE::API::Entities::FeatureFlag::UserList
+            with: ::API::Entities::FeatureFlag::UserList
         end
 
         desc 'Update a feature flag user list' do
           detail 'This feature was introduced in GitLab 12.10'
-          success EE::API::Entities::FeatureFlag::UserList
+          success ::API::Entities::FeatureFlag::UserList
         end
         params do
           optional :name, type: String, desc: 'The name of the list'
@@ -73,7 +73,7 @@ module API
           list = user_project.operations_feature_flags_user_lists.find_by_iid!(params[:iid])
 
           if list.update(declared_params(include_missing: false))
-            present list, with: EE::API::Entities::FeatureFlag::UserList
+            present list, with: ::API::Entities::FeatureFlag::UserList
           else
             render_api_error!(list.errors.full_messages, :bad_request)
           end
