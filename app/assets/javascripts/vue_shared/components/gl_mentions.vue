@@ -76,11 +76,12 @@ const autoCompleteMap = {
       return this.members;
     },
     menuItemTemplate({ original }) {
-      const noAvatarClasses = `gl-avatar gl-avatar-s24 gl-rounded-small
+      const commonClasses = 'gl-avatar gl-avatar-s24 gl-flex-shrink-0';
+      const noAvatarClasses = `${commonClasses} gl-rounded-small
         gl-display-flex gl-align-items-center gl-justify-content-center`;
 
       const avatar = original.avatar_url
-        ? `<img class="gl-avatar gl-avatar-s24 gl-avatar-circle" src="${original.avatar_url}" alt="" />`
+        ? `<img class="${commonClasses} gl-avatar-circle" src="${original.avatar_url}" alt="" />`
         : `<div class="${noAvatarClasses}" aria-hidden="true">
             ${original.username.charAt(0).toUpperCase()}</div>`;
 
