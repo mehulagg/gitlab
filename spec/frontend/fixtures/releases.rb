@@ -3,6 +3,7 @@
 require 'spec_helper'
 
 RSpec.describe 'Releases (JavaScript fixtures)' do
+  include ApiHelpers
   include JavaScriptFixturesHelpers
 
   let_it_be(:admin) { create(:admin) }
@@ -68,21 +69,38 @@ RSpec.describe 'Releases (JavaScript fixtures)' do
            link_type: :runbook)
   end
 
-  before(:all) do
-    clean_frontend_fixtures('api/releases/')
-  end
-
   after(:all) do
     remove_repository(project)
   end
 
   describe API::Releases, '(JavaScript fixtures)', type: :request do
-    include ApiHelpers
+    before(:all) do
+      clean_frontend_fixtures('api/releases/')
+    end
 
     it 'api/releases/release.json' do
       get api("/projects/#{project.id}/releases/#{release.tag}", admin)
 
       expect(response).to be_successful
+    end
+  end
+
+  graphql_query_path = 'releases/queries/all_releases.query.graphql'
+
+  describe "~/#{graphql_query_path} (JavaScript fixtures)", type: :request do
+    include GraphqlHelpers
+
+    before(:all) do
+      clean_frontend_fixtures('graphql/releases/')
+    end
+
+    it "graphql/#{graphql_query_path}.json" do
+      full_path = File.join(File.dirname(__FILE__), '../../../app/assets/javascripts', graphql_query_path)
+      query = File.read(full_path)
+
+      post_graphql(query, current_user: admin, variables: { fullPath: project.full_path })
+
+      expect_graphql_errors_to_be_empty
     end
   end
 end
