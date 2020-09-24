@@ -87,8 +87,21 @@ module Clusters
         {
           "gitlabUrl" => gitlab_url,
           "runnerToken" => ensure_runner.token,
-          "runners" => { "privileged" => privileged },
+          "runners" => {
+            "privileged" => privileged,
+            "env" => env
+          },
           "preEntrypointScript" => pre_entrypoint_script
+        }
+      end
+
+      def env
+        return {} unless privileged
+
+        # See https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#tls-disabled
+        {
+          'DOCKER_HOST' => 'tcp://localhost:2375',
+          'DOCKER_TLS_CERTDIR' =>  ''
         }
       end
 
