@@ -4,6 +4,8 @@ module QA
   module Page
     module Component
       module Select2
+        include Support::WaitForRequests
+
         def select_item(item_text)
           find('.select2-result-label', text: item_text, match: :prefer_exact).click
         end
@@ -43,6 +45,8 @@ module QA
         end
 
         def wait_for_search_to_complete
+          wait_for_requests
+
           has_css?('.select2-active', wait: 1)
           has_no_css?('.select2-active', wait: 30)
         end
