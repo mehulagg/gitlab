@@ -12,6 +12,9 @@ RSpec.describe Mutations::DastScannerProfiles::Update do
   let_it_be(:new_profile_name) { SecureRandom.hex }
   let_it_be(:new_target_timeout) { dast_scanner_profile.target_timeout + 1 }
   let_it_be(:new_spider_timeout) { dast_scanner_profile.spider_timeout + 1 }
+  let_it_be(:new_scan_type) { 'PASSIVE' }
+  let_it_be(:new_ajax_spider) { !dast_scanner_profile.ajax_spider }
+  let_it_be(:new_show_debug_messages) { !dast_scanner_profile.show_debug_messages }
 
   subject(:mutation) { described_class.new(object: nil, context: { current_user: user }, field: nil) }
 
@@ -26,7 +29,10 @@ RSpec.describe Mutations::DastScannerProfiles::Update do
         id: scanner_profile_id,
         profile_name: new_profile_name,
         target_timeout: new_target_timeout,
-        spider_timeout: new_spider_timeout
+        spider_timeout: new_spider_timeout,
+        scan_type: new_scan_type,
+        ajax_spider: new_ajax_spider,
+        show_debug_messages: new_show_debug_messages
       )
     end
 

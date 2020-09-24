@@ -1,0 +1,6 @@
+---
+title: Allow DAST on demand scan users to turn off and on the debug messages, the
+  ajax spider and set the scan type
+merge_request: 43240
+author:
+type: added

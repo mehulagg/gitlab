@@ -52,7 +52,7 @@ RSpec.describe Mutations::DastScannerProfiles::Create do
         result = double('result', success?: false, errors: [])
 
         expect(DastScannerProfiles::CreateService).to receive(:new).and_return(service)
-        expect(service).to receive(:execute).with(name: profile_name, spider_timeout: nil, target_timeout: nil).and_return(result)
+        expect(service).to receive(:execute).with(name: profile_name, spider_timeout: nil, target_timeout: nil, scan_type: nil, show_debug_messages: false, ajax_spider: false).and_return(result)
 
         subject
       end
