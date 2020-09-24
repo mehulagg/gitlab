@@ -7,7 +7,11 @@ RSpec.shared_examples 'resource mentions migration' do |migration_class, resourc
     resource_class = "#{Gitlab::BackgroundMigration::UserMentions::Models}::#{resource_class_name}".constantize
 
     expect do
-      subject.perform(resource_class_name, join, conditions, false, resource_class.minimum(:id), resource_class.maximum(:id))
+      min = resource_class.minimum(:id)
+      max = resource_class.maximum(:id)
+      without_gitlab_reference do
+        subject.perform(resource_class_name, join, conditions, false, min, max)
+      end
     end.to change { user_mentions.count }.by(1)
 
     user_mention = user_mentions.last
