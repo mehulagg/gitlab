@@ -143,7 +143,8 @@ export default {
             <gl-icon v-if="renderCaret" class="dropdown-chevron" name="chevron-down" />
           </slot>
         </span>
-        <span v-else>{{ __('Select a label') }}</span>
+        <span v-else class="gl-new-dropdown-button-text">{{ __('Select a label') }}</span>
+        <gl-icon class="dropdown-chevron" name="chevron-down" />
       </slot>
     </template>
     <template>
