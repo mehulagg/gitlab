@@ -45,6 +45,9 @@ export default {
         <div role="rowheader" class="table-section section-20">
           {{ __('Name') }}
         </div>
+        <div role="rowheader" class="table-section section-10">
+          {{ __('Filename') }}
+        </div>
         <div role="rowheader" class="table-section section-10 text-center">
           {{ __('Status') }}
         </div>
@@ -75,6 +78,17 @@ export default {
               data-testid="caseName"
               :symbols="$options.wrapSymbols"
               :text="testCase.name"
+            />
+          </div>
+        </div>
+
+        <div class="table-section section-10 section-wrap">
+          <div role="rowheader" class="table-mobile-header">{{ __('Filename') }}</div>
+          <div class="table-mobile-content pr-md-1 gl-overflow-wrap-break">
+            <gl-friendly-wrap
+              data-testid="fileName"
+              :symbols="$options.wrapSymbols"
+              :text="testCase.file"
             />
           </div>
         </div>
