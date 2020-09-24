@@ -1378,7 +1378,7 @@ Here are a few key facts that you must consider before upgrading PostgreSQL:
   configured replication method (currently `pg_basebackup` is the only available option). It might take some
   time for replica to catch up with the leader, depending on the size of your database.
 
-- An overview of the upgrade procedure is outlined in [Patoni's documentation](https://github.com/zalando/patroni/blob/master/docs/existing_data.rst#major-upgrade-of-postgresql-version).
+- An overview of the upgrade procedure is outlined in [Patoni's documentation](https://patroni.readthedocs.io/en/latest/existing_data.html#major-upgrade-of-postgresql-version).
   You can still use `gitlab-ctl pg-upgrade` which implements this procedure with a few adjustments.
 
 Considering these, you should carefully plan your PostgreSQL upgrade:
@@ -1394,13 +1394,19 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    does not work or you believe it did not detect the role correctly, you can use the `--leader` or `--replica`
    arguments to manually override it.
 
-1. Stop Patroni on **only the replicas**.
+1. Stop Patroni **only on replicas**.
 
    ```shell
    sudo gitlab-ctl stop patroni
    ```
 
-1. Upgrade PostgreSQL on the leader and make sure that the upgrade is completed successfully:
+1. Enable the maintenance mode on the **application node**:
+
+  ```shell
+  sudo gitlab-ctl deploy-page up
+  ```
+
+1. Upgrade PostgreSQL on **the leader node** and make sure that the upgrade is completed successfully:
 
    ```shell
    sudo gitlab-ctl pg-upgrade -V 12
@@ -1416,22 +1422,17 @@ Considering these, you should carefully plan your PostgreSQL upgrade:
    gitlab-ctl patroni members
    ```
 
-1. Upgrade PostgreSQL on all replicas (you can do this in parallel on all of them):
+1. You can now disable the maintenance mode on the **application node**:
+
+  ```shell
+  sudo gitlab-ctl deploy-page down
+  ```
+
+1. Upgrade PostgreSQL **on replicas** (you can do this in parallel on all of them):
 
    ```shell
    sudo gitlab-ctl pg-upgrade -V 12
    ```
-
-Generally, database locale, collation, and encoding are detected from the existing database, but
-this does not work for Patroni **replicas**. If you're using other than the default `C.UTF-8`,
-you will need to use environment variables:
-
-```shell
-export LC_CTYPE='...'
-export LC_COLLATE='...'
-export SERVER_ENCODING='...'
-sudo -E gitlab-ctl pg-upgrade -V 12
-```
 
 CAUTION: **Warning:**
 Reverting PostgreSQL upgrade with `gitlab-ctl revert-pg-upgrade` has the same considerations as
