@@ -1,0 +1,5 @@
+---
+title: Replace <gl-deprecated-button> in alert_widget_form.vue
+merge_request: 43299
+author:
+type: other
