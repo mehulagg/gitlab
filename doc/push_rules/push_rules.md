@@ -186,7 +186,7 @@ Each file name contained in a Git push is compared to the regular expression in 
 
 The following examples make use of regex string boundary characters which match the beginning of a string (`^`), and the end (`$`). They also include instances where either the directory path or the filename can include `.` or `/`. Both of these special regex characters have to be escaped with a backslash `\` to be used as normal characters in a match condition.
 
-Example: prevent pushing any .exe files to any location in the repository. This is an example of a partial match, which can match any filename that contains `.exe` at the end.
+Example: prevent pushing any `.exe` files to any location in the repository. This is an example of a partial match, which can match any filename that contains `.exe` at the end:
 
 ```plaintext
 \.exe$ 
