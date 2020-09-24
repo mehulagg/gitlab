@@ -1,12 +1,13 @@
 <script>
 /* eslint-disable @gitlab/vue-require-i18n-strings */
 import $ from 'jquery';
-import { GlIcon } from '@gitlab/ui';
+import { GlIcon, GlDropdown } from '@gitlab/ui';
 import IssuableTemplateSelectors from '../../../templates/issuable_template_selectors';
 
 export default {
   components: {
     GlIcon,
+    GlDropdown
   },
   props: {
     formState: {
@@ -50,7 +51,7 @@ export default {
 
 <template>
   <div class="dropdown js-issuable-selector-wrap" data-issuable-type="issue">
-    <button
+    <gl-dropdown
       ref="toggle"
       :data-namespace-path="projectNamespace"
       :data-project-path="projectPath"
@@ -59,11 +60,10 @@ export default {
       type="button"
       data-field-name="issuable_template"
       data-selected="null"
-      data-toggle="dropdown"
     >
       <span class="dropdown-toggle-text">{{ __('Choose a template') }}</span>
       <i aria-hidden="true" class="fa fa-chevron-down"> </i>
-    </button>
+    </gl-dropdown>
     <div class="dropdown-menu dropdown-select">
       <div class="dropdown-title gl-display-flex gl-justify-content-center">
         <span class="gl-ml-auto">Choose a template</span>
