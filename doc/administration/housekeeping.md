@@ -31,3 +31,5 @@ the `pushes_since_gc` value is 200 a `git gc` will be run.
 You can find this option under your project's **Settings > General > Advanced**.
 
 ![Housekeeping settings](img/housekeeping_settings.png)
+
+Manual housekeeping is also available from the [Rails console](raketasks/check.md#dangling-commits).
