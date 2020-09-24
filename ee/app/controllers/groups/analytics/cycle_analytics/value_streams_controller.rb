@@ -11,7 +11,9 @@ class Groups::Analytics::CycleAnalytics::ValueStreamsController < Groups::Analyt
   end
 
   def index
-    render json: Analytics::CycleAnalytics::GroupValueStreamSerializer.new.represent(value_streams)
+    render json: {}, status: :not_found
+
+    # render json: Analytics::CycleAnalytics::GroupValueStreamSerializer.new.represent(value_streams)
   end
 
   def create

@@ -79,6 +79,9 @@ function mockRequiredRoutes(mockAdapter) {
     .onGet(mockData.endpoints.durationData)
     .reply(httpStatusCodes.OK, mockData.customizableStagesAndEvents.stages);
   mockAdapter.onGet(mockData.endpoints.stageMedian).reply(httpStatusCodes.OK, { value: null });
+  mockAdapter
+    .onGet(mockData.endpoints.valueStreamData)
+    .reply(httpStatusCodes.OK, mockData.valueStreams);
 }
 
 async function shouldMergeUrlParams(wrapper, result) {
@@ -565,6 +568,19 @@ describe('Cycle Analytics component', () => {
       await waitForPromises();
       expect(findFlashError().innerText.trim()).toEqual(msg);
     };
+
+    it('will display an error if the fetchValueStreams request fails', async () => {
+      expect(await findFlashError()).toBeNull();
+
+      mock
+        .onGet(mockData.endpoints.valueStreamData)
+        .reply(httpStatusCodes.NOT_FOUND, { response: { status: httpStatusCodes.NOT_FOUND } });
+      wrapper = await createComponent();
+
+      console.log('wrapper', wrapper.html());
+
+      await findError('There was an error fetching value stream analytics stages.');
+    });
 
     it('will display an error if the fetchGroupStagesAndEvents request fails', async () => {
       expect(await findFlashError()).toBeNull();
