@@ -428,7 +428,7 @@ Go has built-in protections that usually prevent an attacker from successfully i
 
 Consdier the following example:
 
-```
+```go
 package main
 
 import (
@@ -447,7 +447,7 @@ Will echo `"1; cat /etc/passwd"`
 
 **Do not** use `sh` as this will bypass internal protections:
 
-```
+```go
 out, _ = exec.Command("sh", "-c", "echo 1 | cat /etc/passwd").Output()
 ```
 
