@@ -76,13 +76,12 @@ export default {
       isValidatingSite: false,
       loading: false,
       showAlert: false,
-      token: null,
       tokenId: null,
+      token: null,
       validationStatus: PENDING,
       validateSite: false,
       errorMessage: '',
       errors: [],
-      disableIsValidSiteInput: false,
     };
   },
   computed: {
