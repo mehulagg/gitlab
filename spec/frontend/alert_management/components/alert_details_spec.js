@@ -138,7 +138,7 @@ describe('AlertDetails', () => {
       });
     });
 
-    describe('environmen URL fields', () => {
+    describe('environment URL fields', () => {
       it('should show the environment URL when available', () => {
         const environment = 'Production';
         const environmentUrl = 'fake/url';
