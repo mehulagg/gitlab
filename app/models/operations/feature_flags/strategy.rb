@@ -6,11 +6,15 @@ module Operations
       STRATEGY_DEFAULT = 'default'
       STRATEGY_GITLABUSERLIST = 'gitlabUserList'
       STRATEGY_GRADUALROLLOUTUSERID = 'gradualRolloutUserId'
+      STRATEGY_GRADUALROLLOUTSESSIONID = 'gradualRolloutSessionId'
+      STRATEGY_GRADUALROLLOUTRANDOM = 'gradualRolloutRandom'
       STRATEGY_USERWITHID = 'userWithId'
       STRATEGIES = {
         STRATEGY_DEFAULT => [].freeze,
         STRATEGY_GITLABUSERLIST => [].freeze,
         STRATEGY_GRADUALROLLOUTUSERID => %w[groupId percentage].freeze,
+        STRATEGY_GRADUALROLLOUTSESSIONID => %w[groupId percentage].freeze,
+        STRATEGY_GRADUALROLLOUTRANDOM => %w[percentage].freeze,
         STRATEGY_USERWITHID => ['userIds'].freeze
       }.freeze
       USERID_MAX_LENGTH = 256
@@ -66,20 +70,25 @@ module Operations
       def validate_parameters_values
         case name
         when STRATEGY_GRADUALROLLOUTUSERID
-          gradual_rollout_user_id_parameters_validation
+          gradual_rollout_parameters_validation
+        when STRATEGY_GRADUALROLLOUTSESSIONID
+          gradual_rollout_parameters_validation
+        when STRATEGY_GRADUALROLLOUTRANDOM
+          gradual_rollout_parameters_validation(skip_group_id_validation: true)
         when STRATEGY_USERWITHID
           FeatureFlagUserXidsValidator.validate_user_xids(self, :parameters, parameters['userIds'], 'userIds')
         end
       end
 
-      def gradual_rollout_user_id_parameters_validation
+      def gradual_rollout_parameters_validation(skip_group_id_validation = false)
         percentage = parameters['percentage']
-        group_id = parameters['groupId']
-
         unless percentage.is_a?(String) && percentage.match(/\A[1-9]?[0-9]\z|\A100\z/)
           parameters_error('percentage must be a string between 0 and 100 inclusive')
         end
 
+        return if skip_group_id_validation
+
+        group_id = parameters['groupId']
         unless group_id.is_a?(String) && group_id.match(/\A[a-z]{1,32}\z/)
           parameters_error('groupId parameter is invalid')
         end

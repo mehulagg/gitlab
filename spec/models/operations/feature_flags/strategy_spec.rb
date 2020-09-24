@@ -8,7 +8,7 @@ RSpec.describe Operations::FeatureFlags::Strategy do
   describe 'validations' do
     it do
       is_expected.to validate_inclusion_of(:name)
-        .in_array(%w[default gradualRolloutUserId userWithId gitlabUserList])
+        .in_array(%w[default gradualRolloutUserId gradualRolloutSessionId userWithId gitlabUserList])
         .with_message('strategy name is invalid')
     end
 
@@ -29,89 +29,91 @@ RSpec.describe Operations::FeatureFlags::Strategy do
         end
       end
 
-      context 'when the strategy name is gradualRolloutUserId' do
-        where(:invalid_parameters) do
-          [nil, {}, { percentage: '40', groupId: 'mygroup', userIds: '4' }, { percentage: '40' },
-           { percentage: '40', groupId: 'mygroup', extra: nil }, { groupId: 'mygroup' }]
-        end
-        with_them do
-          it 'must have valid parameters for the strategy' do
+      %w[gradualRolloutUserId gradualRolloutSessionId].each do |strategy_name|
+        context "when the strategy name is #{strategy_name}" do
+          where(:invalid_parameters) do
+            [nil, {}, { percentage: '40', groupId: 'mygroup', userIds: '4' }, { percentage: '40' },
+             { percentage: '40', groupId: 'mygroup', extra: nil }, { groupId: 'mygroup' }]
+          end
+          with_them do
+            it 'must have valid parameters for the strategy' do
+              feature_flag = create(:operations_feature_flag, project: project)
+              strategy = described_class.create(feature_flag: feature_flag,
+                                                name: 'gradualRolloutUserId', parameters: invalid_parameters)
+
+              expect(strategy.errors[:parameters]).to eq(['parameters are invalid'])
+            end
+          end
+
+          it 'allows the parameters in any order' do
             feature_flag = create(:operations_feature_flag, project: project)
             strategy = described_class.create(feature_flag: feature_flag,
-                                              name: 'gradualRolloutUserId', parameters: invalid_parameters)
+                                              name: 'gradualRolloutUserId',
+                                              parameters: { percentage: '10', groupId: 'mygroup' })
 
-            expect(strategy.errors[:parameters]).to eq(['parameters are invalid'])
+            expect(strategy.errors[:parameters]).to be_empty
           end
-        end
 
-        it 'allows the parameters in any order' do
-          feature_flag = create(:operations_feature_flag, project: project)
-          strategy = described_class.create(feature_flag: feature_flag,
-                                            name: 'gradualRolloutUserId',
-                                            parameters: { percentage: '10', groupId: 'mygroup' })
+          describe 'percentage' do
+            where(:invalid_value) do
+              [50, 40.0, { key: "value" }, "garbage", "00", "01", "101", "-1", "-10", "0100",
+               "1000", "10.0", "5%", "25%", "100hi", "e100", "30m", " ", "\r\n", "\n", "\t",
+               "\n10", "20\n", "\n100", "100\n", "\n  ", nil]
+            end
+            with_them do
+              it 'must be a string value between 0 and 100 inclusive and without a percentage sign' do
+                feature_flag = create(:operations_feature_flag, project: project)
+                strategy = described_class.create(feature_flag: feature_flag,
+                                                  name: 'gradualRolloutUserId',
+                                                  parameters: { groupId: 'mygroup', percentage: invalid_value })
 
-          expect(strategy.errors[:parameters]).to be_empty
-        end
+                expect(strategy.errors[:parameters]).to eq(['percentage must be a string between 0 and 100 inclusive'])
+              end
+            end
 
-        describe 'percentage' do
-          where(:invalid_value) do
-            [50, 40.0, { key: "value" }, "garbage", "00", "01", "101", "-1", "-10", "0100",
-             "1000", "10.0", "5%", "25%", "100hi", "e100", "30m", " ", "\r\n", "\n", "\t",
-             "\n10", "20\n", "\n100", "100\n", "\n  ", nil]
-          end
-          with_them do
-            it 'must be a string value between 0 and 100 inclusive and without a percentage sign' do
-              feature_flag = create(:operations_feature_flag, project: project)
-              strategy = described_class.create(feature_flag: feature_flag,
-                                                name: 'gradualRolloutUserId',
-                                                parameters: { groupId: 'mygroup', percentage: invalid_value })
+            where(:valid_value) do
+              %w[0 1 10 38 100 93]
+            end
+            with_them do
+              it 'must be a string value between 0 and 100 inclusive and without a percentage sign' do
+                feature_flag = create(:operations_feature_flag, project: project)
+                strategy = described_class.create(feature_flag: feature_flag,
+                                                  name: 'gradualRolloutUserId',
+                                                  parameters: { groupId: 'mygroup', percentage: valid_value })
 
-              expect(strategy.errors[:parameters]).to eq(['percentage must be a string between 0 and 100 inclusive'])
+                expect(strategy.errors[:parameters]).to eq([])
+              end
             end
           end
 
-          where(:valid_value) do
-            %w[0 1 10 38 100 93]
-          end
-          with_them do
-            it 'must be a string value between 0 and 100 inclusive and without a percentage sign' do
-              feature_flag = create(:operations_feature_flag, project: project)
-              strategy = described_class.create(feature_flag: feature_flag,
-                                                name: 'gradualRolloutUserId',
-                                                parameters: { groupId: 'mygroup', percentage: valid_value })
-
-              expect(strategy.errors[:parameters]).to eq([])
+          describe 'groupId' do
+            where(:invalid_value) do
+              [nil, 4, 50.0, {}, 'spaces bad', 'bad$', '%bad', '<bad', 'bad>', '!bad',
+               '.bad', 'Bad', 'bad1', "", " ", "b" * 33, "ba_d", "ba\nd"]
             end
-          end
-        end
+            with_them do
+              it 'must be a string value of up to 32 lowercase characters' do
+                feature_flag = create(:operations_feature_flag, project: project)
+                strategy = described_class.create(feature_flag: feature_flag,
+                                                  name: 'gradualRolloutUserId',
+                                                  parameters: { groupId: invalid_value, percentage: '40' })
 
-        describe 'groupId' do
-          where(:invalid_value) do
-            [nil, 4, 50.0, {}, 'spaces bad', 'bad$', '%bad', '<bad', 'bad>', '!bad',
-             '.bad', 'Bad', 'bad1', "", " ", "b" * 33, "ba_d", "ba\nd"]
-          end
-          with_them do
-            it 'must be a string value of up to 32 lowercase characters' do
-              feature_flag = create(:operations_feature_flag, project: project)
-              strategy = described_class.create(feature_flag: feature_flag,
-                                                name: 'gradualRolloutUserId',
-                                                parameters: { groupId: invalid_value, percentage: '40' })
-
-              expect(strategy.errors[:parameters]).to eq(['groupId parameter is invalid'])
+                expect(strategy.errors[:parameters]).to eq(['groupId parameter is invalid'])
+              end
             end
-          end
 
-          where(:valid_value) do
-            ["somegroup", "anothergroup", "okay", "g", "a" * 32]
-          end
-          with_them do
-            it 'must be a string value of up to 32 lowercase characters' do
-              feature_flag = create(:operations_feature_flag, project: project)
-              strategy = described_class.create(feature_flag: feature_flag,
-                                                name: 'gradualRolloutUserId',
-                                                parameters: { groupId: valid_value, percentage: '40' })
+            where(:valid_value) do
+              ["somegroup", "anothergroup", "okay", "g", "a" * 32]
+            end
+            with_them do
+              it 'must be a string value of up to 32 lowercase characters' do
+                feature_flag = create(:operations_feature_flag, project: project)
+                strategy = described_class.create(feature_flag: feature_flag,
+                                                  name: 'gradualRolloutUserId',
+                                                  parameters: { groupId: valid_value, percentage: '40' })
 
-              expect(strategy.errors[:parameters]).to eq([])
+                expect(strategy.errors[:parameters]).to eq([])
+              end
             end
           end
         end
@@ -313,6 +315,28 @@ RSpec.describe Operations::FeatureFlags::Strategy do
           feature_flag = create(:operations_feature_flag, project: project)
           strategy = described_class.create(feature_flag: feature_flag,
                                             name: 'gradualRolloutUserId',
+                                            parameters: { groupId: 'default', percentage: '10' })
+
+          expect(strategy.errors[:user_list]).to be_empty
+        end
+      end
+
+      context 'when name is gradualRolloutSessionId' do
+        it 'is invalid when associated with a user list' do
+          feature_flag = create(:operations_feature_flag, project: project)
+          user_list = create(:operations_feature_flag_user_list, project: project)
+          strategy = described_class.create(feature_flag: feature_flag,
+                                            name: 'gradualRolloutSessionId',
+                                            user_list: user_list,
+                                            parameters: { groupId: 'default', percentage: '10' })
+
+          expect(strategy.errors[:user_list]).to eq(['must be blank'])
+        end
+
+        it 'is valid without a user list' do
+          feature_flag = create(:operations_feature_flag, project: project)
+          strategy = described_class.create(feature_flag: feature_flag,
+                                            name: 'gradualRolloutSessionId',
                                             parameters: { groupId: 'default', percentage: '10' })
 
           expect(strategy.errors[:user_list]).to be_empty
