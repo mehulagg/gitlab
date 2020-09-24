@@ -420,7 +420,7 @@ In order to prevent OS command injections, user supplied data should not be used
 ### Ruby
 Consider using `system(“command”,”arg0”, “arg1”, ...)` whenever you can, this prevents an attacker from concatenating commands.
 
-For more examples on how to use shell commands securely, you can consult our page [Guidelines for shells commands in the GitLab codebase](https://docs.gitlab.com/ee/development/shell_commands.html) which contains various examples on how to securely call OS commands.
+For more examples on how to use shell commands securely, you can consult our page [Guidelines for shells commands in the GitLab codebase](/shell_commands.html) which contains various examples on how to securely call OS commands.
 
 ### Go
 
@@ -428,7 +428,7 @@ Go has built-in protections that usually prevent an attacker from successfully i
 
 Consdier the following example:
 
-```go
+```golang
 package main
 
 import (
@@ -447,7 +447,7 @@ Will echo `"1; cat /etc/passwd"`
 
 **Do not** use `sh` as this will bypass internal protections:
 
-```go
+```golang
 out, _ = exec.Command("sh", "-c", "echo 1 | cat /etc/passwd").Output()
 ```
 
