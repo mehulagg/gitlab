@@ -10,6 +10,9 @@ RSpec.describe DastScannerProfiles::UpdateService do
   let_it_be(:new_profile_name) { SecureRandom.hex }
   let_it_be(:new_target_timeout) { dast_scanner_profile.target_timeout + 1 }
   let_it_be(:new_spider_timeout) { dast_scanner_profile.spider_timeout + 1 }
+  let_it_be(:new_active_scan) { !dast_scanner_profile.active_scan }
+  let_it_be(:new_ajax_spider) { !dast_scanner_profile.ajax_spider }
+  let_it_be(:new_show_debug_messages) { !dast_scanner_profile.show_debug_messages }
 
   before do
     stub_licensed_features(security_on_demand_scans: true)
@@ -21,7 +24,10 @@ RSpec.describe DastScannerProfiles::UpdateService do
         id: dast_scanner_profile_id,
         profile_name: new_profile_name,
         target_timeout: new_target_timeout,
-        spider_timeout: new_spider_timeout
+        spider_timeout: new_spider_timeout,
+        active_scan: new_active_scan,
+        ajax_spider: new_ajax_spider,
+        show_debug_messages: new_show_debug_messages
       )
     end
 
@@ -56,6 +62,9 @@ RSpec.describe DastScannerProfiles::UpdateService do
           expect(updated_dast_scanner_profile.name).to eq(new_profile_name)
           expect(updated_dast_scanner_profile.target_timeout).to eq(new_target_timeout)
           expect(updated_dast_scanner_profile.spider_timeout).to eq(new_spider_timeout)
+          expect(updated_dast_scanner_profile.active_scan).to eq(new_active_scan)
+          expect(updated_dast_scanner_profile.ajax_spider).to eq(new_ajax_spider)
+          expect(updated_dast_scanner_profile.show_debug_messages).to eq(new_show_debug_messages)
         end
       end
 
