@@ -151,8 +151,6 @@ MergeRequest.hideCloseButton = function() {
   const closeDropdownItem = el.querySelector('li.close-item');
   if (closeDropdownItem) {
     closeDropdownItem.classList.add('hidden');
-    // Selects the next dropdown item
-    el.querySelector('li.report-item').click();
   } else {
     // No dropdown just hide the Close button
     el.querySelector('.btn-close').classList.add('hidden');

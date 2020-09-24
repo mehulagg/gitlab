@@ -24,7 +24,7 @@
 
   %ul#issuable-close-menu.js-issuable-close-menu.dropdown-menu{ data: { dropdown: true } }
     - if is_merge_request
-      %li.droplab-item-selected{ data: { text: mr_draft_text, url: toggle_draft_issuable_path(issuable), button_class: "#{button_class} btn-close", toggle_class: "#{toggle_class} btn-close-color" } }
+      %li.draft-item.droplab-item-selected{ data: { text: mr_draft_text, url: toggle_draft_issuable_path(issuable), button_class: "#{button_class} btn-close", toggle_class: "#{toggle_class} btn-close-color" } }
         %button.btn.btn-transparent
           = icon('check', class: 'icon')
           .description

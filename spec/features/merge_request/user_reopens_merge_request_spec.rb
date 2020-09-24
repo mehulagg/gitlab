@@ -15,6 +15,8 @@ RSpec.describe 'User reopens a merge requests', :js do
   end
 
   it 'reopens a merge request' do
+    find('.js-issuable-close-dropdown .dropdown-toggle').click
+
     click_button('Reopen merge request', match: :first)
 
     page.within('.status-box') do

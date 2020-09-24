@@ -15345,6 +15345,12 @@ msgstr ""
 msgid "Mark as done"
 msgstr ""
 
+msgid "Mark as draft"
+msgstr ""
+
+msgid "Mark as ready"
+msgstr ""
+
 msgid "Mark as resolved"
 msgstr ""
 

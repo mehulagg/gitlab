@@ -180,10 +180,8 @@ describe('MergeRequest', () => {
       });
 
       it('hides the close button', () => {
-        const closeButton = test.el.querySelector('.btn-close');
         const smallCloseItem = test.el.querySelector('.js-close-item');
 
-        expect(closeButton).toHaveClass('hidden');
         expect(smallCloseItem).toHaveClass('hidden');
       });
     });
