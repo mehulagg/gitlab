@@ -70,4 +70,4 @@ Yes. See [Docker Registry for a **secondary** node](docker_registry.md).
 
 ## Can I login to a secondary node?
 
-Yes, but secondary nodes receives all authentication data (like user accounts and logins) from the primary instance. This means you will be re-directed to the primary for authentication and routed back afterwards.
+Yes, but secondary nodes receive all authentication data (like user accounts and logins) from the primary instance. This means you will be re-directed to the primary for authentication and routed back afterwards.
