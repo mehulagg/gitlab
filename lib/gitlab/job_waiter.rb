@@ -21,9 +21,14 @@ module Gitlab
 
     STARTED_METRIC = :gitlab_job_waiter_started_total
     TIMEOUTS_METRIC = :gitlab_job_waiter_timeouts_total
+    FALLBACK_TIMEOUT = 10.minutes.to_i
 
     def self.notify(key, jid)
-      Gitlab::Redis::SharedState.with { |redis| redis.lpush(key, jid) }
+      Gitlab::Redis::SharedState.with do |redis|
+        redis.lpush(key, jid)
+        # We cannot count on 'wait' ever being called for this key so we should set an expiry.
+        redis.expire(key, FALLBACK_TIMEOUT)
+      end
     end
 
     def self.key?(key)
@@ -54,7 +59,7 @@ module Gitlab
       Gitlab::Redis::SharedState.with do |redis|
         # Fallback key expiry: allow a long grace period to reduce the chance of
         # a job pushing to an expired key and recreating it
-        redis.expire(key, [timeout * 2, 10.minutes.to_i].max)
+        redis.expire(key, [timeout * 2, FALLBACK_TIMEOUT].max)
 
         while jobs_remaining > 0
           # Redis will not take fractional seconds. Prefer waiting too long over
