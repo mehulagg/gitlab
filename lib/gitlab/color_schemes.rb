@@ -54,6 +54,13 @@ module Gitlab
       SCHEMES.each(&block)
     end
 
+    # Map through each Scheme
+    #
+    # Yields the transformed array of scheme's
+    def self.map(&block)
+      SCHEMES.map(&block)
+    end
+
     # Get the Scheme for the specified user, or the default
     #
     # user - User record

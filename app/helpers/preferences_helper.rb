@@ -74,10 +74,7 @@ module PreferencesHelper
   end
 
   def language_choices
-    options_for_select(
-      Gitlab::I18n.selectable_locales.map(&:reverse).sort,
-      current_user.preferred_language
-    )
+    Gitlab::I18n.selectable_locales.map(&:reverse).sort
   end
 
   def integration_views
