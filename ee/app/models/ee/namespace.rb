@@ -156,6 +156,10 @@ module EE
       available_features[feature]
     end
 
+    def feature_available_non_trial?(feature)
+      feature_available?(feature.to_sym) && !trial_active?
+    end
+
     override :actual_plan
     def actual_plan
       strong_memoize(:actual_plan) do

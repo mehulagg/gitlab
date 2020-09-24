@@ -305,13 +305,11 @@ RSpec.describe Namespace do
     end
   end
 
-  describe '#feature_available?' do
+  shared_examples 'feature available' do
     let(:hosted_plan) { create(:bronze_plan) }
     let(:group) { create(:group) }
     let(:licensed_feature) { :epics }
     let(:feature) { licensed_feature }
-
-    subject { group.feature_available?(feature) }
 
     before do
       create(:gitlab_subscription, namespace: group, hosted_plan: hosted_plan)
@@ -382,6 +380,32 @@ RSpec.describe Namespace do
 
         is_expected.to eq(true)
       end
+    end
+  end
+
+  describe '#feature_available?' do
+    subject { group.feature_available?(feature) }
+
+    it_behaves_like 'feature available'
+  end
+
+  describe '#feature_available_non_trial?' do
+    subject { group.feature_available_non_trial?(feature) }
+
+    it_behaves_like 'feature available'
+
+    context 'when the group has an active trial' do
+      let(:hosted_plan) { create(:bronze_plan) }
+      let(:group) { create(:group) }
+      let(:feature) { :resource_access_token }
+
+      before do
+        create(:gitlab_subscription, :active_trial, namespace: group, hosted_plan: hosted_plan)
+        stub_licensed_features(feature => true)
+        stub_ee_application_setting(should_check_namespace_plan: true)
+      end
+
+      it { is_expected.to be_falsey }
     end
   end
 

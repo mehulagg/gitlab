@@ -35,6 +35,7 @@ class License < ApplicationRecord
     push_rules
     repository_mirrors
     repository_size_limit
+    resource_access_token
     seat_link
     send_emails_from_admin_area
     scoped_issue_board
