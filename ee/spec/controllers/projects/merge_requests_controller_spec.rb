@@ -745,6 +745,7 @@ RSpec.describe Projects::MergeRequestsController do
     subject { get :license_scanning_reports, params: params, format: :json }
 
     before do
+      stub_licensed_features(license_scanning: true)
       allow_any_instance_of(::MergeRequest).to receive(:compare_reports)
         .with(::Ci::CompareLicenseScanningReportsService, viewer).and_return(comparison_status)
     end
@@ -806,10 +807,6 @@ RSpec.describe Projects::MergeRequestsController do
       let(:comparison_status) { { status: :parsed, data: { new_licenses: [], existing_licenses: [], removed_licenses: [] } } }
       let(:viewer) { create(:user) }
 
-      before do
-        stub_licensed_features(license_scanning: true)
-      end
-
       it 'returns a report' do
         subject
 
@@ -823,7 +820,6 @@ RSpec.describe Projects::MergeRequestsController do
       let(:viewer) { create(:user) }
 
       before do
-        stub_licensed_features(license_scanning: true)
         project.add_reporter(viewer)
       end
 
@@ -843,7 +839,6 @@ RSpec.describe Projects::MergeRequestsController do
       let(:viewer) { create(:user) }
 
       before do
-        stub_licensed_features(license_scanning: true)
         upstream.add_maintainer(viewer)
         project.add_maintainer(user)
       end
