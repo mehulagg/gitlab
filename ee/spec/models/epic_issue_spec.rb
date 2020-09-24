@@ -29,8 +29,12 @@ RSpec.describe EpicIssue do
   context "relative positioning" do
     it_behaves_like "a class that supports relative positioning" do
       let_it_be(:epic) { create(:epic) }
-      let(:factory) { :epic_issue }
-      let(:default_params) { { epic: epic } }
+      let(:factory) { :epic_tree_node }
+      let(:default_params) { { parent: epic, group: epic.group } }
+
+      def as_item(item)
+        item.epic_tree_node_identity
+      end
     end
 
     context 'with a mixed tree level' do

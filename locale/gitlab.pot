@@ -77,6 +77,11 @@ msgstr ""
 msgid "\"el\" parameter is required for createInstance()"
 msgstr ""
 
+msgid "%d Approval"
+msgid_plural "%d Approvals"
+msgstr[0] ""
+msgstr[1] ""
+
 msgid "%d Scanned URL"
 msgid_plural "%d Scanned URLs"
 msgstr[0] ""
@@ -1006,6 +1011,11 @@ msgstr[1] ""
 
 msgid "1 Day"
 msgid_plural "%d Days"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "1 Issue"
+msgid_plural "%d Issues"
 msgstr[0] ""
 msgstr[1] ""
 
@@ -3002,6 +3012,9 @@ msgid "An unexpected error occurred while stopping the Web Terminal."
 msgstr ""
 
 msgid "An unknown error occurred while loading this graph."
+msgstr ""
+
+msgid "An unknown error occurred."
 msgstr ""
 
 msgid "Analytics"
@@ -10963,6 +10976,9 @@ msgstr ""
 msgid "FeatureFlags|Loading feature flags"
 msgstr ""
 
+msgid "FeatureFlags|Loading user lists"
+msgstr ""
+
 msgid "FeatureFlags|More information"
 msgstr ""
 
@@ -10981,7 +10997,7 @@ msgstr ""
 msgid "FeatureFlags|New feature flag"
 msgstr ""
 
-msgid "FeatureFlags|New list"
+msgid "FeatureFlags|New user list"
 msgstr ""
 
 msgid "FeatureFlags|Percent of users"
@@ -11020,6 +11036,9 @@ msgstr ""
 msgid "FeatureFlags|There was an error fetching the feature flags."
 msgstr ""
 
+msgid "FeatureFlags|There was an error fetching the user lists."
+msgstr ""
+
 msgid "FeatureFlags|There was an error retrieving user lists"
 msgstr ""
 
@@ -11033,6 +11052,9 @@ msgid "FeatureFlags|User IDs"
 msgstr ""
 
 msgid "FeatureFlags|User List"
+msgstr ""
+
+msgid "FeatureFlags|User Lists"
 msgstr ""
 
 msgid "FeatureFlag|List"
@@ -15111,9 +15133,6 @@ msgstr ""
 msgid "List your Bitbucket Server repositories"
 msgstr ""
 
-msgid "Lists"
-msgstr ""
-
 msgid "Live preview"
 msgstr ""
 
@@ -17997,9 +18016,6 @@ msgid "Package type must be NuGet"
 msgstr ""
 
 msgid "Package type must be PyPi"
-msgstr ""
-
-msgid "Package was removed"
 msgstr ""
 
 msgid "PackageRegistry|%{name} version %{version} was created %{datetime}"
@@ -28473,6 +28489,9 @@ msgid "Warning:"
 msgstr ""
 
 msgid "Warning: Displaying this diagram might cause performance issues on this page."
+msgstr ""
+
+msgid "We are currently unable to fetch data for the pipeline header."
 msgstr ""
 
 msgid "We are currently unable to fetch data for this graph."

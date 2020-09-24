@@ -15,7 +15,7 @@ RSpec.describe Groups::Analytics::RepositoryAnalyticsController do
     stub_licensed_features(feature_name => true)
   end
 
-  describe 'GET show' do
+  describe 'GET show', :snowplow do
     subject { get :show, params: { group_id: group } }
 
     before do
@@ -23,6 +23,17 @@ RSpec.describe Groups::Analytics::RepositoryAnalyticsController do
     end
 
     specify { is_expected.to have_gitlab_http_status(:success) }
+
+    it 'tracks a pageview event in snowplow' do
+      subject
+
+      expect_snowplow_event(
+        category: 'Groups::Analytics::RepositoryAnalyticsController',
+        action: 'show',
+        label: 'group_id',
+        value: group.id
+      )
+    end
 
     context 'when license is missing' do
       before do

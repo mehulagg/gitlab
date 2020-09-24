@@ -16,6 +16,8 @@ export default () =>
     provide() {
       return {
         projectName: this.dataset.projectName,
+        featureFlagsHelpPagePath: this.dataset.featureFlagsHelpPagePath,
+        errorStateSvgPath: this.dataset.errorStateSvgPath,
       };
     },
     render(createElement) {
@@ -23,8 +25,6 @@ export default () =>
         props: {
           endpoint: this.dataset.endpoint,
           projectId: this.dataset.projectId,
-          errorStateSvgPath: this.dataset.errorStateSvgPath,
-          featureFlagsHelpPagePath: this.dataset.featureFlagsHelpPagePath,
           featureFlagsClientLibrariesHelpPagePath: this.dataset
             .featureFlagsClientLibrariesHelpPagePath,
           featureFlagsClientExampleHelpPagePath: this.dataset.featureFlagsClientExampleHelpPagePath,
