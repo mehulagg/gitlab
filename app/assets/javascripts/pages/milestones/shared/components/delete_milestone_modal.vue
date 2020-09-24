@@ -3,7 +3,7 @@ import { GlSafeHtmlDirective as SafeHtml, GlModal } from '@gitlab/ui';
 import axios from '~/lib/utils/axios_utils';
 
 import { deprecatedCreateFlash as Flash } from '~/flash';
-import { n__, s__, sprintf } from '~/locale';
+import { __, n__, s__, sprintf } from '~/locale';
 import { redirectTo } from '~/lib/utils/url_utility';
 import eventHub from '../event_hub';
 
@@ -115,11 +115,11 @@ Once deleted, it cannot be undone or recovered.`),
     },
   },
   primaryProps: {
-    text: s__('Delete milestone'),
+    text: s__('Milestones|Delete milestone'),
     attributes: [{ variant: 'danger' }, { category: 'primary' }],
   },
   cancelProps: {
-    text: s__('Cancel'),
+    text: __('Cancel'),
   },
 };
 </script>

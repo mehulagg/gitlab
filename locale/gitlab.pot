@@ -8,8 +8,6 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gitlab 1.0.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-09-18 11:00+1200\n"
-"PO-Revision-Date: 2020-09-18 11:00+1200\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -8294,9 +8292,6 @@ msgstr ""
 msgid "Delete list"
 msgstr ""
 
-msgid "Delete milestone"
-msgstr ""
-
 msgid "Delete pipeline"
 msgstr ""
 
@@ -16348,6 +16343,9 @@ msgid "Milestones|Close Milestone"
 msgstr ""
 
 msgid "Milestones|Completed Issues (closed)"
+msgstr ""
+
+msgid "Milestones|Delete milestone"
 msgstr ""
 
 msgid "Milestones|Delete milestone %{milestoneTitle}?"
